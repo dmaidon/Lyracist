@@ -44,6 +44,8 @@
                 <ui:NavigationViewItem Content="Karaoke" Icon="{ui:SymbolIcon MusicNote224}" TargetPageType="{x:Type pages:KaraokePage}" />
                 <ui:NavigationViewItem Content="Rotation" Icon="{ui:SymbolIcon People24}" TargetPageType="{x:Type pages:RotationPage}" />
                 <ui:NavigationViewItem Content="Lyrics" Icon="{ui:SymbolIcon DocumentText24}" TargetPageType="{x:Type pages:LyricsPage}" />
+                <ui:NavigationViewItem Content="Playlists" Icon="{ui:SymbolIcon MusicNote2Play20}" TargetPageType="{x:Type pages:PlaylistsPage}" />
+                <ui:NavigationViewItem Content="Requests" Icon="{ui:SymbolIcon MailInboxArrowDown20}" TargetPageType="{x:Type pages:RequestsPage}" />
                 <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}" TargetPageType="{x:Type pages:SettingsPage}" />
                 <ui:NavigationViewItem Content="Help" Icon="{ui:SymbolIcon QuestionCircle24}" TargetPageType="{x:Type pages:HelpPage}" />
                 <ui:NavigationViewItem Content="About" Icon="{ui:SymbolIcon Info24}" TargetPageType="{x:Type pages:AboutPage}" />

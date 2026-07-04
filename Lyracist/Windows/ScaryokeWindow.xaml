@@ -1,0 +1,84 @@
+<Window x:Class="Lyracist.Windows.ScaryokeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Scaryoke Wheel" Height="700" Width="560"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="{StaticResource BackstageBlackoutBrush}"
+        Foreground="{StaticResource UITextPrimaryBrush}"
+        Topmost="True"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterScreen"
+        MouseLeftButtonDown="OnDragMove">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title + close -->
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="🎃 SCARYOKE WHEEL 🎃"
+                       FontSize="30" FontWeight="ExtraBold"
+                       Foreground="{StaticResource LyricGlowBrush}"
+                       HorizontalAlignment="Center"/>
+            <Button Style="{StaticResource OverlayWindowCloseButtonStyle}"
+                    Content="&#xE8BB;"
+                    Click="OnHide"
+                    ToolTip="Close"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"/>
+        </Grid>
+
+        <!-- Wheel -->
+        <Viewbox Grid.Row="1" Stretch="Uniform">
+            <Grid Width="460" Height="480">
+                <Canvas x:Name="WheelCanvas"
+                        Width="420" Height="420"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        RenderTransformOrigin="0.5,0.5">
+                    <Canvas.RenderTransform>
+                        <RotateTransform x:Name="WheelRotate" Angle="0"/>
+                    </Canvas.RenderTransform>
+                </Canvas>
+
+                <!-- Hub -->
+                <Ellipse Width="56" Height="56"
+                         HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                         Margin="0,0,0,182"
+                         Fill="#1E133A" Stroke="{StaticResource LyricGlowBrush}" StrokeThickness="3"/>
+
+                <!-- Pointer -->
+                <Polygon Points="212,26 248,26 230,64"
+                         Fill="{StaticResource LyricGlowBrush}"
+                         Stroke="White" StrokeThickness="2"
+                         HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            </Grid>
+        </Viewbox>
+
+        <!-- Result -->
+        <Border Grid.Row="2" Margin="0,14,0,14" Padding="16,10"
+                Background="#1E133A" BorderBrush="#FF8E53" BorderThickness="1.5" CornerRadius="10">
+            <TextBlock Text="{Binding ResultText}"
+                       FontSize="16" FontWeight="SemiBold"
+                       Foreground="White"
+                       TextAlignment="Center" TextWrapping="Wrap"/>
+        </Border>
+
+        <!-- Spin -->
+        <Button x:Name="SpinButton"
+                Grid.Row="3"
+                Content="🎲 SPIN!"
+                FontSize="22" FontWeight="ExtraBold"
+                Padding="0,12"
+                Background="{StaticResource LyricGlowBrush}"
+                Foreground="White"
+                BorderThickness="0"
+                Cursor="Hand"
+                Click="OnSpinClick"/>
+    </Grid>
+</Window>

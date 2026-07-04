@@ -103,6 +103,7 @@
                         <TextBlock Text="Lyrics Player Projector Display Screen" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
                         <ComboBox ItemsSource="{Binding Screens}"
                                   SelectedItem="{Binding LyricsScreen}"
+                                  Margin="0,0,0,16"
                                   HorizontalAlignment="Stretch">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -110,6 +111,78 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
+
+                        <CheckBox Content="Mirror Lyrics Screen (rear-projection)"
+                                  IsChecked="{Binding IsLyricsMirrored, Mode=TwoWay}"
+                                  Margin="0,0,0,16" />
+
+                        <ui:Button Content="Restore Previous Layout"
+                                   Icon="{ui:SymbolIcon ArrowReset24}"
+                                   Command="{Binding RestoreLayoutCommand}"
+                                   Appearance="Secondary"
+                                   HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Expander>
+
+                <!-- 3b. Special Occasion Music Editor -->
+                <Expander Header="Special Occasion Music" Margin="0,0,0,16" Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="Categories" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ListBox ItemsSource="{Binding OccasionCategories}"
+                                 SelectedItem="{Binding SelectedOccasionCategory}"
+                                 DisplayMemberPath="Label"
+                                 MaxHeight="160" Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ui:TextBox Grid.Column="0" Text="{Binding NewOccasionCategoryName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="New category name..." Margin="0,0,8,0"/>
+                            <ui:Button Grid.Column="1" Content="Add" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddOccasionCategoryCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,8,0"/>
+                            <ui:Button Grid.Column="2" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveOccasionCategoryCommand}" Appearance="Danger" ToolTip="Remove selected category (and its items)"/>
+                        </Grid>
+                        <CheckBox Content="Add as subcategory of the selected category" IsChecked="{Binding AddAsSubcategory}" Margin="0,0,0,16"/>
+
+                        <Separator Margin="0,0,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}"/>
+
+                        <TextBlock Text="Music Items in Selected Category" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ListBox ItemsSource="{Binding OccasionItems}"
+                                 SelectedItem="{Binding SelectedOccasionItem}"
+                                 DisplayMemberPath="Name"
+                                 MaxHeight="140" Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ui:TextBox Grid.Column="0" Text="{Binding NewOccasionItemName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Item name (defaults to file name)..." Margin="0,0,8,0"/>
+                            <ui:Button Grid.Column="1" Content="Add File..." Icon="{ui:SymbolIcon MusicNote224}" Command="{Binding AddOccasionItemCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,8,0"/>
+                            <ui:Button Grid.Column="2" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveOccasionItemCommand}" Appearance="Danger" ToolTip="Remove selected item"/>
+                        </Grid>
+
+                        <TextBlock Text="Per-Occasion Audio (selected item)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="52"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Bass" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="0" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding OccasionItemBass}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding OccasionItemBass, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Treble" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="1" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding OccasionItemTreble}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding OccasionItemTreble, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Gain" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="2" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding OccasionItemGain}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding OccasionItemGain, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ui:Button Content="Save Audio Settings" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveOccasionItemAudioCommand}" Appearance="Secondary" HorizontalAlignment="Stretch"/>
                     </StackPanel>
                 </Expander>
 

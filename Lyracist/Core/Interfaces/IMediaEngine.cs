@@ -12,6 +12,12 @@ public interface IMediaEngine
     void Seek(double position);
     event Action<ImageSource>? FrameReady;
 
+    /// <summary>Fires when a karaoke track transitions from stopped/paused into playing.</summary>
+    event Action? Started;
+
+    /// <summary>Fires whenever Stop() is called (song finished or was cut short).</summary>
+    event Action? Stopped;
+
     double Volume { get; set; }
     double Speed { get; set; }
     int Pitch { get; set; }

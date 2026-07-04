@@ -1,31 +1,123 @@
+using System;
+using System.Collections.ObjectModel;
 using System.Windows.Media;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Lyracist.Services.Display;
 
 namespace Lyracist.ViewModels;
 
+public sealed record MonitorOption(int Index, string Label);
+
 public partial class LyricsWindowViewModel : ObservableObject
 {
+    private readonly IDisplayService _display;
+
     [ObservableProperty]
     private ImageSource? _frame;
 
     [ObservableProperty]
-    private string _fallbackText = "Lyrics Loading...";
+    private string _fallbackText = "Lyracist — Ready";
 
     [ObservableProperty]
     private bool _isFallbackVisible = true;
 
+    [ObservableProperty]
+    private bool _isMirrored;
+
+    [ObservableProperty]
+    private string _overlayText = string.Empty;
+
+    [ObservableProperty]
+    private bool _isOverlayVisible;
+
+    private DispatcherTimer? _overlayTimer;
+
+    public ObservableCollection<MonitorOption> Monitors { get; } = new();
+
+    public LyricsWindowViewModel(IDisplayService display)
+    {
+        _display = display;
+        _isMirrored = display.GetPreferences().IsLyricsMirrored;
+    }
+
+    /// <summary>
+    /// Persists the mirror flag whenever it changes, whether set via the
+    /// context menu checkbox, the M key, or DisplayService.SetLyricsMirror.
+    /// </summary>
+    partial void OnIsMirroredChanged(bool value)
+    {
+        _display.SetLyricsMirror(value);
+    }
+
+    /// <summary>
+    /// Pushes a rendered CDG or MP4 frame to the display. A null frame drops
+    /// the window back into fallback text mode.
+    /// </summary>
     public void UpdateFrame(ImageSource? newFrame)
     {
         if (newFrame == null)
         {
-            IsFallbackVisible = true;
-            Frame = null;
-            FallbackText = "No Lyrics Available";
+            ShowFallback("No Lyrics Available");
         }
         else
         {
             Frame = newFrame;
             IsFallbackVisible = false;
         }
+    }
+
+    /// <summary>
+    /// Clears the frame display and shows the given text instead.
+    /// </summary>
+    public void ShowFallback(string text)
+    {
+        Frame = null;
+        FallbackText = text;
+        IsFallbackVisible = true;
+    }
+
+    /// <summary>
+    /// Flashes an attention banner over whatever is playing (used by Scaryoke
+    /// and special-occasion effects), auto-hiding after the given duration.
+    /// </summary>
+    public void ShowOverlay(string text, int seconds = 8)
+    {
+        OverlayText = text;
+        IsOverlayVisible = true;
+
+        _overlayTimer?.Stop();
+        _overlayTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(Math.Max(1, seconds)) };
+        _overlayTimer.Tick += (_, _) =>
+        {
+            IsOverlayVisible = false;
+            _overlayTimer?.Stop();
+        };
+        _overlayTimer.Start();
+    }
+
+    [RelayCommand]
+    public void RefreshMonitors()
+    {
+        Monitors.Clear();
+        foreach (var screen in _display.GetScreens())
+        {
+            string primary = screen.IsPrimary ? " (Primary)" : "";
+            string label = $"Monitor {screen.Index + 1}{primary} — {screen.Bounds.Width:0}×{screen.Bounds.Height:0}";
+            Monitors.Add(new MonitorOption(screen.Index, label));
+        }
+    }
+
+    [RelayCommand]
+    private void AssignToMonitor(MonitorOption option)
+    {
+        _display.MoveLyricsToScreen(option.Index);
+    }
+
+    [RelayCommand]
+    public void ToggleMirror()
+    {
+        IsMirrored = !IsMirrored;
     }
 }

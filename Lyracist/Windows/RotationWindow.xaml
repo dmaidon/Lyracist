@@ -14,7 +14,44 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
 
-    <Grid Margin="60">
+    <Grid>
+        <!-- Window chrome overlay: fades in when the mouse is over the window. -->
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="12"
+                    Panel.ZIndex="10">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Opacity" Value="0" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                            <Setter Property="Opacity" Value="1" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <Button Click="OnToggleFullscreen" ToolTip="Maximize / Restore" Margin="0,0,8,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource OverlayWindowButtonStyle}">
+                        <Setter Property="Content" Value="&#xE922;" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                                <Setter Property="Content" Value="&#xE923;" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Button Style="{StaticResource OverlayWindowCloseButtonStyle}"
+                    Content="&#xE8BB;"
+                    Click="OnHide"
+                    ToolTip="Close Rotation Screen" />
+        </StackPanel>
+
+        <Grid Margin="60">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -110,6 +147,7 @@
                     </ItemsControl>
                 </StackPanel>
             </Border>
+        </Grid>
         </Grid>
     </Grid>
 </Window>

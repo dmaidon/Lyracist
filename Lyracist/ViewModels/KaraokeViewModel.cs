@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Lyracist.Core.Interfaces;
 using Lyracist.Services.Display;
 using Lyracist.Models;
@@ -15,8 +16,16 @@ public partial class KaraokeViewModel : BaseViewModel
     private readonly IMediaEngine _mediaEngine;
     private readonly IDisplayService _displayService;
     private readonly ILibraryService _libraryService;
+    private readonly IShowFlowService _showFlow;
+    private readonly IOccasionService _occasions;
 
     public RotationViewModel Rotation { get; }
+
+    /// <summary>Nested Special Occasion menu (categories > subcategories > playable items).</summary>
+    public ObservableCollection<OccasionNode> OccasionMenu { get; } = new();
+
+    [ObservableProperty]
+    private bool _isScaryokeMode;
 
     [ObservableProperty]
     private string _currentSongName = "No Song Loaded";
@@ -149,18 +158,26 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     public KaraokeViewModel(
-        IMediaEngine mediaEngine, 
+        IMediaEngine mediaEngine,
         IDisplayService displayService,
         ILibraryService libraryService,
+        IShowFlowService showFlow,
+        IOccasionService occasions,
         RotationViewModel rotationViewModel)
     {
         _mediaEngine = mediaEngine;
         _displayService = displayService;
         _libraryService = libraryService;
+        _showFlow = showFlow;
+        _occasions = occasions;
         Rotation = rotationViewModel;
-        
+
         _mediaEngine.FrameReady += OnFrameReady;
         _libraryService.LibraryUpdated += OnLibraryUpdated;
+
+        RebuildOccasionMenu();
+        _occasions.OccasionsChanged += (_, _) =>
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(RebuildOccasionMenu);
 
         // Hook rotation updates to sync Now/Next banners
         Rotation.Rotation.CollectionChanged += (s, e) => UpdateNowNext();
@@ -361,6 +378,37 @@ public partial class KaraokeViewModel : BaseViewModel
     private void ShowLyrics()
     {
         _displayService.ShowLyricsWindow();
+    }
+
+    private void RebuildOccasionMenu()
+    {
+        OccasionMenu.Clear();
+        foreach (var node in _occasions.GetMenuTree())
+        {
+            OccasionMenu.Add(node);
+        }
+    }
+
+    [RelayCommand]
+    private void PlayOccasion(OccasionNode? node)
+    {
+        // Category headers open their submenu; only playable items fire.
+        if (node is not { IsItem: true }) return;
+        _showFlow.PlayOccasion(node.Name, node.FilePath, node.Bass, node.Treble, node.Gain);
+    }
+
+    [RelayCommand]
+    private void StopOccasion()
+    {
+        _showFlow.StopOccasion();
+    }
+
+    [RelayCommand]
+    private void OpenScaryokeWheel()
+    {
+        var wheel = App.AppHost.Services.GetRequiredService<Windows.ScaryokeWindow>();
+        wheel.Show();
+        wheel.Activate();
     }
 
     [RelayCommand]

@@ -1,0 +1,163 @@
+using Microsoft.Extensions.DependencyInjection;
+using Lyracist.Core.Interfaces;
+using Lyracist.Media.Audio;
+using Lyracist.Services.Display;
+
+namespace Lyracist.Services.Media;
+
+/// <summary>
+/// Wires the Opening, Fill-In, and End-of-Rotation background music players
+/// to the karaoke MediaEngine and singer rotation lifecycle: Opening music
+/// stops for good once the first singer starts, Fill-In music pauses/resumes
+/// between every singer, and End-of-Rotation music takes over once the
+/// rotation queue empties out for the night (handing back to Fill-In if a
+/// latecomer signs up and the queue fills again).
+/// </summary>
+public class ShowFlowService : IShowFlowService
+{
+    private readonly BackgroundMusicPlayer _opening;
+    private readonly BackgroundMusicPlayer _fillIn;
+    private readonly BackgroundMusicPlayer _endRotation;
+    private readonly BackgroundMusicPlayer _occasion;
+    private readonly IPlaylistService _playlists;
+    private readonly IDisplayService _display;
+
+    public bool IsOpeningPlaying => _opening.IsPlaying;
+    public bool IsFillInPlaying => _fillIn.IsPlaying;
+    public bool IsFillInDucked => _fillIn.IsDucked;
+    public bool IsEndRotationPlaying => _endRotation.IsPlaying;
+    public bool IsOccasionPlaying => _occasion.IsPlaying;
+
+    public ShowFlowService(
+        [FromKeyedServices("Opening")] BackgroundMusicPlayer opening,
+        [FromKeyedServices("FillIn")] BackgroundMusicPlayer fillIn,
+        [FromKeyedServices("EndRotation")] BackgroundMusicPlayer endRotation,
+        [FromKeyedServices("Occasion")] BackgroundMusicPlayer occasion,
+        IPlaylistService playlists,
+        IMediaEngine mediaEngine,
+        IDisplayService displayService)
+    {
+        _opening = opening;
+        _fillIn = fillIn;
+        _endRotation = endRotation;
+        _occasion = occasion;
+        _playlists = playlists;
+        _display = displayService;
+
+        RefreshPlaylists();
+
+        // Occasion tracks play once; when one finishes naturally, drop the
+        // banner and hand the room back to fill-in music.
+        _occasion.PlaybackFinished += (_, _) =>
+        {
+            _display.SetRotationAnnouncement(string.Empty, false);
+            _fillIn.Resume();
+        };
+
+        // A singer's song starting means the opening set is over for the
+        // night, and any fill-in or occasion track playing in the gap needs
+        // to duck out.
+        mediaEngine.Started += () =>
+        {
+            _opening.Stop();
+            _fillIn.Pause();
+            if (_occasion.IsPlaying)
+            {
+                _occasion.Stop();
+                _display.SetRotationAnnouncement(string.Empty, false);
+            }
+        };
+
+        // The singer's song ending re-opens the gap for fill-in music.
+        mediaEngine.Stopped += () => _fillIn.Resume();
+
+        // The rotation queue running dry means the night's singers are done:
+        // stop the between-singer fill-in music and send the room off with
+        // the end-of-rotation playlist.
+        displayService.RotationCompleted += () =>
+        {
+            _fillIn.Stop();
+            _endRotation.Play();
+        };
+
+        // A latecomer joining an empty queue means the show isn't actually
+        // over -- cut the send-off music and go back to normal fill-in.
+        displayService.RotationResumed += () =>
+        {
+            _endRotation.Stop();
+            _fillIn.Resume();
+        };
+    }
+
+    public void RefreshPlaylists()
+    {
+        var opening = _playlists.GetOpeningPlaylist();
+        _opening.LoadPlaylist(opening.ConvertAll(t => t.AudioPath));
+
+        var fillIn = _playlists.GetFillInPlaylist();
+        _fillIn.LoadPlaylist(fillIn.ConvertAll(t => t.AudioPath));
+
+        var endRotation = _playlists.GetEndRotationPlaylist();
+        _endRotation.LoadPlaylist(endRotation.ConvertAll(t => t.AudioPath));
+    }
+
+    public void StartOpeningMusic() => _opening.Play();
+    public void StopOpeningMusic() => _opening.Stop();
+
+    public void PlayFillIn() => _fillIn.Play();
+    public void StopFillIn() => _fillIn.Stop();
+
+    public void DuckFillIn() => _fillIn.Duck();
+    public void UnduckFillIn() => _fillIn.Unduck();
+
+    public void StartEndRotationMusic() => _endRotation.Play();
+    public void StopEndRotationMusic() => _endRotation.Stop();
+
+    public void PlayOccasion(string occasionName, string filePath, double bassDb, double trebleDb, double preampDb)
+    {
+        if (string.IsNullOrWhiteSpace(filePath)) return;
+
+        _occasion.Stop();
+        _fillIn.Pause();
+
+        _occasion.BassDb = bassDb;
+        _occasion.TrebleDb = trebleDb;
+        _occasion.PreampDb = preampDb;
+        _occasion.LoadPlaylist(new[] { filePath });
+        _occasion.Play();
+
+        _display.SetRotationAnnouncement($"🎉 {occasionName}!", true);
+    }
+
+    public void StopOccasion()
+    {
+        _occasion.Stop();
+        _display.SetRotationAnnouncement(string.Empty, false);
+        _fillIn.Resume();
+    }
+
+    public void SetOpeningVolume(double volume) => _opening.Volume = volume;
+    public void SetFillInVolume(double volume) => _fillIn.Volume = volume;
+    public void SetEndRotationVolume(double volume) => _endRotation.Volume = volume;
+
+    public void SetOpeningTone(double bassDb, double trebleDb, double preampDb)
+    {
+        _opening.BassDb = bassDb;
+        _opening.TrebleDb = trebleDb;
+        _opening.PreampDb = preampDb;
+    }
+
+    public void SetFillInTone(double bassDb, double trebleDb, double preampDb)
+    {
+        _fillIn.BassDb = bassDb;
+        _fillIn.TrebleDb = trebleDb;
+        _fillIn.PreampDb = preampDb;
+    }
+
+    public void SetEndRotationTone(double bassDb, double trebleDb, double preampDb)
+    {
+        _endRotation.BassDb = bassDb;
+        _endRotation.TrebleDb = trebleDb;
+        _endRotation.PreampDb = preampDb;
+    }
+}

@@ -47,4 +47,48 @@
     <SolidColorBrush x:Key="AppBorderBrush" Color="{StaticResource AppBorder}" />
     <SolidColorBrush x:Key="AppTextPrimaryBrush" Color="{StaticResource AppTextPrimary}" />
     <SolidColorBrush x:Key="AppTextSecondaryBrush" Color="{StaticResource AppTextSecondary}" />
+
+    <!-- Overlay chrome buttons (maximize/close) for the borderless
+         projector windows (RotationWindow/LyricsWindow). -->
+    <Style x:Key="OverlayWindowButtonStyle" TargetType="Button">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{StaticResource UITextPrimaryBrush}" />
+        <Setter Property="Background" Value="#66000000" />
+        <Setter Property="Cursor" Value="Arrow" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#AA000000" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="OverlayWindowCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource OverlayWindowButtonStyle}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#CCE81123" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

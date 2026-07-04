@@ -8,27 +8,144 @@
         Foreground="{StaticResource UITextPrimaryBrush}"
         Topmost="True"
         ShowInTaskbar="False"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        MouseDoubleClick="OnMouseDoubleClick"
+        ContextMenuOpening="OnContextMenuOpening">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
 
-    <Grid>
-        <!-- Frame Display -->
-        <Image Source="{Binding Frame}"
-               Stretch="Uniform"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center" />
+    <Window.ContextMenu>
+        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+            <MenuItem Header="Assign to Monitor" ItemsSource="{Binding Monitors}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="Header" Value="{Binding Label}" />
+                        <Setter Property="Command" Value="{Binding DataContext.AssignToMonitorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <Setter Property="CommandParameter" Value="{Binding}" />
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
+            <MenuItem Header="Mirror Display"
+                      IsCheckable="True"
+                      IsChecked="{Binding IsMirrored}"
+                      InputGestureText="M" />
+            <Separator />
+            <MenuItem Header="Toggle Fullscreen" Click="OnToggleFullscreen" InputGestureText="F11" />
+            <MenuItem Header="Hide Lyrics Screen" Click="OnHide" InputGestureText="Esc" />
+        </ContextMenu>
+    </Window.ContextMenu>
 
-        <!-- Fallback Text -->
-        <TextBlock Text="{Binding FallbackText}"
-                   FontSize="48"
-                   FontFamily="Montserrat"
-                   FontWeight="Bold"
-                   Foreground="{StaticResource LyricGlowBrush}"
+    <Grid>
+        <!-- Mirror flips the entire content (frame and fallback text) horizontally
+             for rear-projection setups where the projector re-inverts the image. -->
+        <Grid RenderTransformOrigin="0.5,0.5">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMirrored}" Value="True">
+                            <Setter Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="-1" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <!-- CDG / MP4 Frame Display -->
+            <Image Source="{Binding Frame}"
+                   Stretch="Uniform"
+                   RenderOptions.BitmapScalingMode="Fant"
                    HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Visibility="{Binding IsFallbackVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Visible}" />
+                   VerticalAlignment="Center" />
+
+            <!-- Fallback Text Mode -->
+            <TextBlock Text="{Binding FallbackText}"
+                       FontSize="48"
+                       FontFamily="Montserrat"
+                       FontWeight="Bold"
+                       Foreground="{StaticResource LyricGlowBrush}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       Margin="60,0"
+                       Visibility="{Binding IsFallbackVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Visible}" />
+
+            <!-- Attention Overlay (Scaryoke results, shout-outs): pulses while visible -->
+            <Border HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Margin="40,40,40,0"
+                    Background="#DD1E0533"
+                    BorderBrush="{StaticResource LyricGlowBrush}"
+                    BorderThickness="2.5"
+                    CornerRadius="18"
+                    Padding="32,16"
+                    Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <Trigger Property="IsVisible" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="1.0" To="0.55" Duration="0:0:0.6" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="{Binding OverlayText}"
+                           FontSize="40"
+                           FontFamily="Montserrat"
+                           FontWeight="ExtraBold"
+                           Foreground="{StaticResource LyricGlowBrush}"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap" />
+            </Border>
+        </Grid>
+
+        <!-- Window chrome overlay: fades in when the mouse is over the window,
+             stays outside the mirrored grid so the buttons never flip. -->
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="12"
+                    Panel.ZIndex="10">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Opacity" Value="0" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                            <Setter Property="Opacity" Value="1" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <Button Click="OnToggleFullscreen" ToolTip="Maximize / Restore" Margin="0,0,8,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource OverlayWindowButtonStyle}">
+                        <Setter Property="Content" Value="&#xE922;" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                                <Setter Property="Content" Value="&#xE923;" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Button Style="{StaticResource OverlayWindowCloseButtonStyle}"
+                    Content="&#xE8BB;"
+                    Click="OnHide"
+                    ToolTip="Close Lyrics Screen" />
+        </StackPanel>
     </Grid>
 </Window>

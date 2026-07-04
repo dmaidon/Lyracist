@@ -22,6 +22,8 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     private bool _isMp4Mode;
 
     public event Action<ImageSource>? FrameReady;
+    public event Action? Started;
+    public event Action? Stopped;
 
     public double Volume
     {
@@ -126,6 +128,8 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
             _lastTickTime = DateTime.UtcNow;
             _timer?.Start();
         }
+
+        Started?.Invoke();
     }
 
     public void Pause()
@@ -142,6 +146,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
 
     public void Stop()
     {
+        bool wasPlaying = _isPlaying;
         _isPlaying = false;
         _position = 0;
 
@@ -151,6 +156,11 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         {
             _timer?.Stop();
             _scheduler.Reset();
+        }
+
+        if (wasPlaying)
+        {
+            Stopped?.Invoke();
         }
     }
 

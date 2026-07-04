@@ -107,76 +107,78 @@ This is ready to paste directly into TODO.md.
 - [x] Add optional banners (special occasion, etc.)
 
 #### 7. LyricsWindow
-- [ ] Add CDG frame display
-- [ ] Add MP4 frame display
-- [ ] Add fallback text mode
-- [ ] Add monitor assignment
-- [ ] Add mirror toggle
+- [x] Add CDG frame display
+- [x] Add MP4 frame display
+- [x] Add fallback text mode
+- [x] Add monitor assignment
+- [x] Add mirror toggle
 
 #### 8. DisplayService
-- [ ] Detect monitors
-- [ ] Assign windows
-- [ ] Restore assignments
-- [ ] Move windows
-- [ ] Mirror lyrics
-- [ ] Save monitor preferences
+- [x] Detect monitors
+- [x] Assign windows
+- [x] Restore assignments
+- [x] Move windows
+- [x] Mirror lyrics
+- [x] Save monitor preferences
 
 ---
 
 ### STAGE 3 — Show Flow & Automation (KJ Workflow Core)
 
 #### 9. Opening Music Playlist
-- [ ] Add playlist editor
-- [ ] Add playlist playback
-- [ ] Add auto‑start before show
-- [ ] Add crossfade
-- [ ] Add FFmpeg filters
-- [ ] Add persistence
+- [x] Add playlist editor
+- [x] Add playlist playback
+- [x] Add auto‑start before show
+- [x] Add crossfade
+- [x] Add FFmpeg filters (LibVLC native equalizer)
+- [x] Add persistence
 
 #### 10. Fill‑In Music Playlist
-- [ ] Add playlist editor
-- [ ] Add auto‑pause when singer starts
-- [ ] Add auto‑resume when singer finishes
-- [ ] Add crossfade
-- [ ] Add ducking
-- [ ] Add FFmpeg filters
-- [ ] Add persistence
+- [x] Add playlist editor
+- [x] Add auto‑pause when singer starts
+- [x] Add auto‑resume when singer finishes
+- [x] Add crossfade
+- [x] Add separate volume control
+- [x] Add ducking
+- [x] Add FFmpeg filters (LibVLC native equalizer)
+- [x] Add persistence
 
 #### 11. End‑of‑Rotation Music
-- [ ] Add playlist editor
-- [ ] Add “rotation complete” hook
-- [ ] Add playback logic
-- [ ] Add resume‑fill‑in logic
-- [ ] Add persistence
+- [x] Add playlist editor
+- [x] Add “rotation complete” hook
+- [x] Add playback logic
+- [x] Add resume‑fill‑in logic
+- [x] Add persistence
+- [x] Add FFmpeg filters (LibVLC native equalizer)
 
 #### 12. Music Requests
-- [ ] Add request queue
-- [ ] Add request approval
-- [ ] Add request playback
-- [ ] Add request history
-- [ ] Add mobile portal request support
+- [x] Add request queue
+- [x] Add request approval
+- [x] Add request playback
+- [x] Add request history
+- [x] Add mobile portal request support
 
 #### 13. Special Occasion Music (Dropdown + Nested Menus)
-- [ ] Add “Special Occasion ▼” dropdown
-- [ ] Add nested Holiday submenu
-- [ ] Add customizable categories
-- [ ] Add customizable items
-- [ ] Add per‑occasion audio settings
-- [ ] Add ducking/crossfade logic
-- [ ] Add resume‑fill‑in logic
-- [ ] Add RotationWindow banner
-- [ ] Add mobile portal request support
-- [ ] Add persistence
+- [x] Add “Special Occasion ▼” dropdown
+- [x] Add nested Holiday submenu
+- [x] Add customizable categories
+- [x] Add customizable items
+- [x] Add per‑occasion audio settings
+- [x] Add ducking/crossfade logic
+- [x] Add resume‑fill‑in logic
+- [x] Add RotationWindow banner
+- [ ] Add mobile portal request support (occasion browsing lands with the Stage 6 portal pages)
+- [x] Add persistence
 
 #### 13b. Scaryoke Selection Wheel (Party Mode)
-- [ ] Add Scaryoke mode toggle on control panel
-- [ ] Add interactive spinning wheel UI component (genres/challenges)
-- [ ] Add as a popup window on main screen
-- [ ] Add spin command with deceleration and sound hooks
-- [ ] Add random genre selector matching song database categories
-- [ ] Add forced song assignment logic for selected performer
-- [ ] Add special visual effect overlay on main lyrics display
-- [ ] Categories: Gender Bender, Elvis, Country, Rock & Roll, Pop, 80s Music, 70s Music, 60s Oldies, Sad Songs, Romantic Duet, DJ's Choice, Motown
+- [x] Add Scaryoke mode toggle on control panel
+- [x] Add interactive spinning wheel UI component (genres/challenges)
+- [x] Add as a popup window on main screen
+- [x] Add spin command with deceleration and sound hooks
+- [x] Add random genre selector matching song database categories
+- [x] Add forced song assignment logic for selected performer
+- [x] Add special visual effect overlay on main lyrics display
+- [x] Categories: Gender Bender, Elvis, Country, Rock & Roll, Pop, 80s Music, 70s Music, 60s Oldies, Singer's Choice, Spin Again, DJ's Choice, Motown
 
 ---
 

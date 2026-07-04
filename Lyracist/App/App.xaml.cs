@@ -1,10 +1,12 @@
 using System;
 using System.Windows;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
+using Lyracist.Media.Audio;
 using Lyracist.Media.Video;
 using Lyracist.Services.Media;
 using Lyracist.Services.Media.Cdg;
@@ -59,6 +61,14 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<ILibraryService, LibraryService>();
                 services.AddSingleton<ITabletLyricsServer, TabletLyricsServer>();
                 services.AddSingleton<ILyricsController, LyricsController>();
+                services.AddSingleton<IPlaylistService, PlaylistService>();
+                services.AddSingleton<IRequestService, Services.Requests.RequestService>();
+                services.AddSingleton<IOccasionService, Services.Occasions.OccasionService>();
+                services.AddKeyedSingleton<BackgroundMusicPlayer>("Opening");
+                services.AddKeyedSingleton<BackgroundMusicPlayer>("FillIn");
+                services.AddKeyedSingleton<BackgroundMusicPlayer>("EndRotation");
+                services.AddKeyedSingleton("Occasion", (_, _) => new BackgroundMusicPlayer { Loop = false });
+                services.AddSingleton<IShowFlowService, ShowFlowService>();
 
                 // ViewModels
                 services.AddSingleton<SplashViewModel>();
@@ -68,6 +78,9 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<LyricsViewModel>();
                 services.AddSingleton<LyricsWindowViewModel>();
                 services.AddSingleton<SettingsViewModel>();
+                services.AddSingleton<PlaylistsViewModel>();
+                services.AddSingleton<RequestsViewModel>();
+                services.AddSingleton<ScaryokeViewModel>();
                 services.AddSingleton<HelpViewModel>();
                 services.AddSingleton<AboutViewModel>();
 
@@ -76,12 +89,15 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<MainWindow>();
                 services.AddSingleton<RotationWindow>();
                 services.AddSingleton<LyricsWindow>();
+                services.AddSingleton<ScaryokeWindow>();
 
                 // Pages
                 services.AddSingleton<KaraokePage>();
                 services.AddSingleton<RotationPage>();
                 services.AddSingleton<LyricsPage>();
                 services.AddSingleton<SettingsPage>();
+                services.AddSingleton<PlaylistsPage>();
+                services.AddSingleton<RequestsPage>();
                 services.AddSingleton<HelpPage>();
                 services.AddSingleton<AboutPage>();
             })
@@ -91,6 +107,18 @@ public partial class App : System.Windows.Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         await Host!.StartAsync();
+
+        // Apply any pending EF Core migrations so a fresh install gets a
+        // fully-formed schema instead of an empty 0-byte SQLite file.
+        try
+        {
+            using var db = new Lyracist.Data.LyracistDbContext();
+            db.Database.Migrate();
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "Database migration");
+        }
 
         // Resolve and show the SplashWindow immediately
         var splash = Host.Services.GetRequiredService<SplashWindow>();
