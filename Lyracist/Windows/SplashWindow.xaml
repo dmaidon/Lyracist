@@ -1,0 +1,72 @@
+<Window x:Class="Lyracist.Windows.SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="{StaticResource UIBackgroundBrush}"
+        Foreground="{StaticResource UITextPrimaryBrush}"
+        AllowsTransparency="True"
+        Opacity="0"
+        Width="600"
+        Height="350"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False"
+        Topmost="True">
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0" To="1"
+                                     Duration="0:0:1.2"
+                                     FillBehavior="HoldEnd" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <Border BorderBrush="{StaticResource UIBorderBrush}" BorderThickness="1.5" CornerRadius="16" Background="{StaticResource UIBackgroundBrush}">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Branded Logo -->
+            <Image Grid.Row="0" Width="140" Height="140"
+                   Source="/Assets/LyracistLogo.png"
+                   Stretch="Uniform"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center" />
+
+            <!-- App Title -->
+            <TextBlock Grid.Row="1"
+                       Text="Lyracist"
+                       FontSize="36"
+                       FontWeight="ExtraBold"
+                       HorizontalAlignment="Center"
+                       Margin="0,12,0,0" />
+
+            <!-- Subtitle -->
+            <TextBlock Grid.Row="2"
+                       Text="PAROLE Software"
+                       FontSize="15"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource UITextSecondaryBrush}"
+                       HorizontalAlignment="Center"
+                       Margin="0,4,0,0" />
+
+            <!-- Loading Status Progress -->
+            <TextBlock Grid.Row="3"
+                       Text="{Binding Status}"
+                       FontSize="13"
+                       Foreground="{StaticResource UITextSecondaryBrush}"
+                       HorizontalAlignment="Center"
+                       Margin="0,20,0,0" />
+        </Grid>
+    </Border>
+</Window>

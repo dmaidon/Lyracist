@@ -1,0 +1,148 @@
+<Page x:Class="Lyracist.Views.Pages.LyricsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:helpers="clr-namespace:Lyracist.Core.Helpers"
+      Title="Lyrics"
+      Background="{DynamicResource AppBackgroundBrush}"
+      Foreground="{DynamicResource AppTextPrimaryBrush}">
+
+    <Page.Resources>
+        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#fc4a1a" Offset="0.0"/>
+            <GradientStop Color="#f7b733" Offset="1.0"/>
+        </LinearGradientBrush>
+    </Page.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
+            <StackPanel>
+                <TextBlock Text="Lyrics Live Center" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="Monitor secondary projection screens and tablet broadcast controllers." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Workspace -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Live Preview (Left Column) -->
+            <Border Grid.Column="0"
+                    Margin="0,0,12,0"
+                    Background="{DynamicResource AppSurfaceBrush}"
+                    BorderBrush="{DynamicResource AppBorderBrush}"
+                    BorderThickness="1.5"
+                    CornerRadius="12"
+                    Padding="16">
+                <Grid>
+                    <!-- Background indicator to represent monitor status -->
+                    <TextBlock Text="Waiting for active track playback..." 
+                               FontSize="16" 
+                               Foreground="{DynamicResource AppTextSecondaryBrush}" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"
+                               Visibility="{Binding FramePreview, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Visible}"/>
+                    
+                    <Image Source="{Binding FramePreview}"
+                           Stretch="Uniform"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Controls + Stats (Right Column) -->
+            <ScrollViewer Grid.Column="1" Margin="12,0,0,0" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+
+                    <!-- Current Line Card -->
+                    <ui:Card Padding="16" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Current Line" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                            <TextBlock Text="{Binding CurrentLine}"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource UIAccentBrush}"
+                                       Margin="0,6,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </ui:Card>
+
+                    <!-- Next Line Card -->
+                    <ui:Card Padding="16" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Next Line" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                            <TextBlock Text="{Binding NextLine}"
+                                       FontSize="14"
+                                       FontWeight="Medium"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                       Margin="0,6,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </ui:Card>
+
+                    <!-- Playback Status Position Card -->
+                    <ui:Card Padding="16" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Playback Synchronization Status" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                            <TextBlock Text="{Binding Position}"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                       Margin="0,6,0,0" />
+                        </StackPanel>
+                    </ui:Card>
+
+                    <Separator Margin="0,4,0,16" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+
+                    <!-- Quick Sync Controls -->
+                    <ui:Button Content="Refresh Preview Canvas"
+                               Icon="{ui:SymbolIcon ArrowClockwise24}"
+                               Command="{Binding RefreshPreviewCommand}"
+                               HorizontalAlignment="Stretch"
+                               Appearance="Secondary"
+                               Margin="0,0,0,12" />
+
+                    <ui:Button Content="Toggle Tablet Broadcast"
+                               Icon="{ui:SymbolIcon Tablet24}"
+                               Command="{Binding ToggleTabletSyncCommand}"
+                               HorizontalAlignment="Stretch"
+                               Appearance="Primary"
+                               Background="{StaticResource UIAccentBrush}"
+                               Margin="0,0,0,12" />
+
+                    <ui:Button Content="Toggle Lyrics Monitor Sync"
+                               Icon="{ui:SymbolIcon ProjectionScreen24}"
+                               Command="{Binding ToggleLyricsWindowSyncCommand}"
+                               HorizontalAlignment="Stretch"
+                               Appearance="Primary"
+                               Background="{StaticResource UIAccentBrush}"
+                               Margin="0,0,0,12" />
+
+                    <ui:Button Content="Force-Send to Tablet"
+                               Icon="{ui:SymbolIcon Send24}"
+                               Command="{Binding SendFrameToTabletCommand}"
+                               HorizontalAlignment="Stretch"
+                               Appearance="Secondary"
+                               Margin="0,0,0,12" />
+
+                    <ui:Button Content="Force-Send to Monitor"
+                               Icon="{ui:SymbolIcon ArrowUpRight24}"
+                               Command="{Binding SendFrameToLyricsWindowCommand}"
+                               HorizontalAlignment="Stretch"
+                               Appearance="Secondary" />
+
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Page>

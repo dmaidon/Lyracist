@@ -1,0 +1,152 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at center, #2c2c2c 0%, #121212 100%);
+    font-family: 'Outfit', sans-serif;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#container {
+    width: 100%;
+    max-width: 800px;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+/* Glassmorphism Card styling */
+.glass-card {
+    background: rgba(44, 44, 44, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 48px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 64, 129, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Header bar */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.logo-symbol {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF4081, #FF79A8);
+    box-shadow: 0 0 15px rgba(255, 64, 129, 0.4);
+}
+
+.status-badge {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 6px 12px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #B0BEC5;
+    transition: all 0.3s ease;
+}
+
+.status-badge.connected {
+    color: #00E676;
+    background: rgba(0, 230, 118, 0.1);
+    border-color: rgba(0, 230, 118, 0.3);
+    box-shadow: 0 0 10px rgba(0, 230, 118, 0.1);
+}
+
+/* Title */
+#title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #FFFFFF;
+    margin-bottom: 48px;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+}
+
+/* Lyrics */
+.lyrics-box {
+    margin-bottom: 48px;
+}
+
+#currentLine {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 56px;
+    font-weight: 800;
+    color: #FF4081;
+    text-shadow: 0 0 25px rgba(255, 64, 129, 0.3);
+    margin-bottom: 24px;
+    line-height: 1.2;
+    transition: color 0.3s ease;
+}
+
+#nextLine {
+    font-size: 28px;
+    font-weight: 400;
+    color: #B0BEC5;
+    line-height: 1.4;
+    transition: color 0.3s ease;
+}
+
+/* Footer position */
+.footer-bar {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 24px;
+}
+
+.position-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #B0BEC5;
+    margin-bottom: 6px;
+}
+
+#position {
+    font-size: 28px;
+    font-weight: 700;
+    color: #CCCCCC;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Responsive adjustments */
+@media (max-width: 800px) {
+    .glass-card {
+        padding: 32px;
+    }
+    #currentLine {
+        font-size: 40px;
+    }
+    #nextLine {
+        font-size: 22px;
+    }
+    #title {
+        font-size: 20px;
+    }
+}

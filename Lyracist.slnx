@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Lyracist/Lyracist.csproj" />
+  <Project Path="Lyracist.Data/Lyracist.Data.csproj" />
+</Solution>

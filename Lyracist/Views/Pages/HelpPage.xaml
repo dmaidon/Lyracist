@@ -1,0 +1,84 @@
+<Page x:Class="Lyracist.Views.Pages.HelpPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      Title="Help"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+
+    <Page.Resources>
+        <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#11998e" Offset="0.0"/>
+            <GradientStop Color="#38ef7d" Offset="1.0"/>
+        </LinearGradientBrush>
+    </Page.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
+            <StackPanel>
+                <TextBlock Text="Help &amp; Support" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="Learn how to configure displays, scan media folders, and manage singers." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Scrollable Help Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="800" HorizontalAlignment="Left" Margin="0,0,16,0">
+
+                <!-- 1. Playback Guides -->
+                <TextBlock Text="1. Karaoke Playback" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                <ui:CardControl Margin="0,0,0,20">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Text="Loading and Controlling Media" FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="Use the 'Playback Controls' tab. You can click 'Load Song...' to open standard files, or browse the 'Search Library' tab to select matching tracks. Controls support Play, Pause, and Stop buttons, and a draggable Seek Slider to change playback positions." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:SymbolIcon Symbol="PlayCircle24" FontSize="28" Foreground="{DynamicResource SystemFillColorSuccessBrush}"/>
+                </ui:CardControl>
+
+                <!-- 2. Library Scanning Guides -->
+                <TextBlock Text="2. Media Library Scanning" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
+                <ui:CardControl Margin="0,0,0,20">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Text="Folder Indexing and CDG/MP3 Matching" FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="Go to the 'Search Library' tab and click 'Scan Folder...'. Select a directory containing your audio files. The engine automatically indexes MP3 files and matches them with sibling CDG graphics files sharing the same name. Orphans (CDG files without MP3s) are skipped, and matched pairs are marked with a green 'CDG' badge." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:SymbolIcon Symbol="Folder24" FontSize="28" Foreground="{DynamicResource SystemFillColorAttentionBrush}"/>
+                </ui:CardControl>
+
+                <!-- 3. Screen Projection Guides -->
+                <TextBlock Text="3. Dual-Screen Lyrics &amp; Rotation Projection" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
+                <ui:CardControl Margin="0,0,0,20">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Text="Setting up Secondary Monitors" FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="Click the 'Open Window' buttons on the Dashboard. The application queries system monitors using native Win32 APIs and automatically moves the lyrics or singer rotation window to your secondary display. If no secondary display is detected, the windows default full-screen on the primary display for previewing." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:SymbolIcon Symbol="WindowAd24" FontSize="28" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
+                </ui:CardControl>
+
+                <!-- 4. Singer Management Guides -->
+                <TextBlock Text="4. Singer Rotation" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
+                <ui:CardControl Margin="0,0,0,20">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Text="Queue Ordering and Transpositions" FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="Open the 'Rotation' page via navigation tabs. Type a singer's name, key transposition semitones (e.g. +2, -1, 0), and optional request notes, then click 'Add to Rotation'. Use the Up/Down buttons to prioritize singers in the queue or click 'Remove' to delete them when their song finishes." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:SymbolIcon Symbol="People24" FontSize="28" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                </ui:CardControl>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

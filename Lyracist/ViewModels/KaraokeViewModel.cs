@@ -1,0 +1,383 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Lyracist.Core.Interfaces;
+using Lyracist.Services.Display;
+using Lyracist.Models;
+
+namespace Lyracist.ViewModels;
+
+public partial class KaraokeViewModel : BaseViewModel
+{
+    private readonly IMediaEngine _mediaEngine;
+    private readonly IDisplayService _displayService;
+    private readonly ILibraryService _libraryService;
+
+    public RotationViewModel Rotation { get; }
+
+    [ObservableProperty]
+    private string _currentSongName = "No Song Loaded";
+
+    [ObservableProperty]
+    private bool _isPlaying;
+
+    [ObservableProperty]
+    private double _seekPosition;
+
+    [ObservableProperty]
+    private string _selectedSongPath = string.Empty;
+
+    [ObservableProperty]
+    private ImageSource? _currentFrame;
+
+    [ObservableProperty]
+    private string _searchQuery = string.Empty;
+
+    [ObservableProperty]
+    private ObservableCollection<KaraokeSong> _filteredSongs = new();
+
+    [ObservableProperty]
+    private bool _isPreviewExpanded;
+
+    // Added properties for Singer Assignment & Rotation binding
+    [ObservableProperty]
+    private KaraokeSong? _selectedSong;
+
+    [ObservableProperty]
+    private string _newSingerName = string.Empty;
+
+    [ObservableProperty]
+    private string _newSingerNotes = string.Empty;
+
+    [ObservableProperty]
+    private string _newSingerKey = "0";
+
+    // Added properties for Now/Next prominent display banners
+    [ObservableProperty]
+    private string _nowSingingName = "None";
+
+    [ObservableProperty]
+    private string _nowSingingSong = "No Song";
+
+    [ObservableProperty]
+    private string _nextUpName = "None";
+
+    [ObservableProperty]
+    private string _nextUpSong = "No Song";
+
+    // Added properties for Audio defaults sliders
+    [ObservableProperty]
+    private double _treble = 0.0;
+
+    [ObservableProperty]
+    private double _mid = 0.0;
+
+    [ObservableProperty]
+    private double _bass = 0.0;
+
+    [ObservableProperty]
+    private double _compressor = 0.0;
+
+    [ObservableProperty]
+    private double _limiter = 0.0;
+
+    // Added properties for Multi-Monitor display lists
+    public ObservableCollection<ScreenInfo> AvailableScreens { get; } = new();
+
+    [ObservableProperty]
+    private int _selectedLyricsScreenIndex = 0;
+
+    [ObservableProperty]
+    private int _selectedRotationScreenIndex = 0;
+
+    [ObservableProperty]
+    private string _rotationBannerText = "Welcome to Karaoke Night!";
+
+    [ObservableProperty]
+    private bool _showRotationBanner;
+
+    partial void OnRotationBannerTextChanged(string value)
+    {
+        _displayService.SetRotationAnnouncement(value, ShowRotationBanner);
+    }
+
+    partial void OnShowRotationBannerChanged(bool value)
+    {
+        _displayService.SetRotationAnnouncement(RotationBannerText, value);
+    }
+
+    public double Volume
+    {
+        get => _mediaEngine.Volume;
+        set
+        {
+            if (Math.Abs(_mediaEngine.Volume - value) > 0.01)
+            {
+                _mediaEngine.Volume = value;
+                OnPropertyChanged(nameof(Volume));
+            }
+        }
+    }
+
+    public double Speed
+    {
+        get => _mediaEngine.Speed;
+        set
+        {
+            if (Math.Abs(_mediaEngine.Speed - value) > 0.01)
+            {
+                _mediaEngine.Speed = value;
+                OnPropertyChanged(nameof(Speed));
+            }
+        }
+    }
+
+    public int Pitch
+    {
+        get => _mediaEngine.Pitch;
+        set
+        {
+            if (_mediaEngine.Pitch != value)
+            {
+                _mediaEngine.Pitch = value;
+                OnPropertyChanged(nameof(Pitch));
+            }
+        }
+    }
+
+    public KaraokeViewModel(
+        IMediaEngine mediaEngine, 
+        IDisplayService displayService,
+        ILibraryService libraryService,
+        RotationViewModel rotationViewModel)
+    {
+        _mediaEngine = mediaEngine;
+        _displayService = displayService;
+        _libraryService = libraryService;
+        Rotation = rotationViewModel;
+        
+        _mediaEngine.FrameReady += OnFrameReady;
+        _libraryService.LibraryUpdated += OnLibraryUpdated;
+
+        // Hook rotation updates to sync Now/Next banners
+        Rotation.Rotation.CollectionChanged += (s, e) => UpdateNowNext();
+
+        // Apply starting defaults
+        _mediaEngine.Volume = 100.0;
+        _mediaEngine.Speed = 1.0;
+        _mediaEngine.Pitch = 0;
+
+        // Fetch available monitors for display targeting
+        foreach (var screen in _displayService.GetScreens())
+        {
+            AvailableScreens.Add(screen);
+        }
+
+        RefreshFilteredList();
+        UpdateNowNext();
+    }
+
+    private void OnFrameReady(ImageSource frame)
+    {
+        CurrentFrame = frame;
+    }
+
+    private void OnLibraryUpdated(object? sender, EventArgs e)
+    {
+        RefreshFilteredList();
+    }
+
+    partial void OnSearchQueryChanged(string value)
+    {
+        RefreshFilteredList();
+    }
+
+    private void RefreshFilteredList()
+    {
+        FilteredSongs.Clear();
+        var results = _libraryService.Search(SearchQuery);
+        foreach (var song in results)
+        {
+            FilteredSongs.Add(song);
+        }
+    }
+
+    private void UpdateNowNext()
+    {
+        if (Rotation.Rotation.Count > 0)
+        {
+            var now = Rotation.Rotation[0];
+            NowSingingName = now.Name;
+            NowSingingSong = string.IsNullOrEmpty(now.SongTitle) ? "No Song" : $"{now.Artist} - {now.SongTitle}";
+        }
+        else
+        {
+            NowSingingName = "None";
+            NowSingingSong = "No Song";
+        }
+
+        if (Rotation.Rotation.Count > 1)
+        {
+            var next = Rotation.Rotation[1];
+            NextUpName = next.Name;
+            NextUpSong = string.IsNullOrEmpty(next.SongTitle) ? "No Song" : $"{next.Artist} - {next.SongTitle}";
+        }
+        else
+        {
+            NextUpName = "None";
+            NextUpSong = "No Song";
+        }
+    }
+
+    partial void OnSelectedLyricsScreenIndexChanged(int value)
+    {
+        if (value >= 0 && value < AvailableScreens.Count)
+        {
+            _displayService.MoveLyricsToScreen(value);
+        }
+    }
+
+    partial void OnSelectedRotationScreenIndexChanged(int value)
+    {
+        if (value >= 0 && value < AvailableScreens.Count)
+        {
+            _displayService.MoveRotationToScreen(value);
+        }
+    }
+
+    [RelayCommand]
+    private void Play()
+    {
+        _mediaEngine.Play();
+        IsPlaying = true;
+    }
+
+    [RelayCommand]
+    private void Pause()
+    {
+        _mediaEngine.Pause();
+        IsPlaying = false;
+    }
+
+    [RelayCommand]
+    private void Stop()
+    {
+        _mediaEngine.Stop();
+        IsPlaying = false;
+        SeekPosition = 0;
+    }
+
+    [RelayCommand]
+    private void LoadSong()
+    {
+        var openFileDialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Audio & Video files (*.mp3;*.wav;*.cdg;*.mp4)|*.mp3;*.wav;*.cdg;*.mp4|All files (*.*)|*.*"
+        };
+        
+        if (openFileDialog.ShowDialog() == true)
+        {
+            SelectedSongPath = openFileDialog.FileName;
+            CurrentSongName = System.IO.Path.GetFileName(openFileDialog.FileName);
+            _mediaEngine.LoadSong(SelectedSongPath);
+            
+            // Sync slider states to the view
+            OnPropertyChanged(nameof(Volume));
+            OnPropertyChanged(nameof(Speed));
+            OnPropertyChanged(nameof(Pitch));
+        }
+    }
+
+    [RelayCommand]
+    private void ScanFolder()
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Select Music Library Folder"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            var folderPath = dialog.FolderName;
+            _libraryService.ScanDirectory(folderPath);
+        }
+    }
+
+    [RelayCommand]
+    private void PlaySong(KaraokeSong song)
+    {
+        if (song == null) return;
+
+        SelectedSongPath = song.AudioPath;
+        CurrentSongName = $"{song.Artist} - {song.Title}";
+
+        _mediaEngine.LoadSong(song.AudioPath);
+        _mediaEngine.Play();
+        IsPlaying = true;
+        
+        // Sync states to the view
+        OnPropertyChanged(nameof(Volume));
+        OnPropertyChanged(nameof(Speed));
+        OnPropertyChanged(nameof(Pitch));
+    }
+
+    [RelayCommand]
+    private void AddToRotation()
+    {
+        if (string.IsNullOrWhiteSpace(NewSingerName) || SelectedSong == null)
+            return;
+
+        Rotation.AddSinger(NewSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes);
+
+        // Reset inputs
+        NewSingerName = string.Empty;
+        NewSingerNotes = string.Empty;
+        NewSingerKey = "0";
+    }
+
+    [RelayCommand]
+    private void ResetAudio()
+    {
+        Volume = 100.0;
+        Speed = 1.0;
+        Pitch = 0;
+        Treble = 0.0;
+        Mid = 0.0;
+        Bass = 0.0;
+        Compressor = 0.0;
+        Limiter = 0.0;
+    }
+
+    [RelayCommand]
+    private void ShowRotation()
+    {
+        _displayService.ShowRotationWindow();
+    }
+
+    [RelayCommand]
+    private void ShowLyrics()
+    {
+        _displayService.ShowLyricsWindow();
+    }
+
+    [RelayCommand]
+    private void TogglePreviewExpand()
+    {
+        IsPreviewExpanded = !IsPreviewExpanded;
+    }
+
+    [RelayCommand]
+    private void PitchUp()
+    {
+        Pitch = Math.Min(Pitch + 1, 6);
+    }
+
+    [RelayCommand]
+    private void PitchDown()
+    {
+        Pitch = Math.Max(Pitch - 1, -6);
+    }
+}

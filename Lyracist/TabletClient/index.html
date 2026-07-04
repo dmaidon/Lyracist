@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lyracist Tablet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+</head>
+<body>
+
+    <div id="container">
+        <div class="glass-card">
+            <!-- Header bar with logo symbol/status -->
+            <div class="header-bar">
+                <div class="logo-symbol"></div>
+                <div class="status-badge" id="statusBadge">Connecting...</div>
+            </div>
+
+            <!-- Title -->
+            <div id="title">Select a Song to Begin</div>
+
+            <!-- Lyric Lines -->
+            <div class="lyrics-box">
+                <div id="currentLine">🎵 Waiting for Active Track 🎵</div>
+                <div id="nextLine">Lyrics will stream here in real time.</div>
+            </div>
+
+            <!-- Progress/Position Footer -->
+            <div class="footer-bar">
+                <div class="position-label">Playback Position</div>
+                <div id="position">0:00</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

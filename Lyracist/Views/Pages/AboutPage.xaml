@@ -1,0 +1,233 @@
+<Page x:Class="Lyracist.Views.Pages.AboutPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      Title="About"
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Themes/LyracistTheme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            
+            <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#4e54c8" Offset="0.0" />
+                <GradientStop Color="#8f94fb" Offset="1.0" />
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="LogoPlaceholderBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#1AFFFFFF" Offset="0.0" />
+                <GradientStop Color="#0DFFFFFF" Offset="1.0" />
+            </LinearGradientBrush>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
+            <StackPanel>
+                <TextBlock Text="About Lyracist" FontSize="28" FontWeight="Bold" Foreground="White" />
+                <TextBlock Text="Application information, specifications, and development credits." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Main Body -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Logo Placeholder Card (Left Column) -->
+            <Border Grid.Column="0" Margin="0,0,12,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1.5" CornerRadius="12" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="24">
+                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                        <!-- Premium Logo Container -->
+                        <Border Width="180" Height="180" CornerRadius="90" BorderBrush="#3AFFFFFF" BorderThickness="2" Background="{StaticResource LogoPlaceholderBrush}" Margin="0,0,0,20" ClipToBounds="True">
+                            <Grid>
+                                <!-- Loaded Logo Image -->
+                                <Image Source="/Assets/LyracistLogo.png" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Ellipse Margin="2" Stroke="#15FFFFFF" StrokeThickness="1" />
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="Karaoke Lyracist" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBlock Text="{Binding Company}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+
+                        <!-- Lyracist System Info Card -->
+                        <Border Margin="0,24,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Info24" FontSize="28" Foreground="{DynamicResource SystemFillColorAttentionBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Lyracist Foundation v1.0" FontSize="14" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Running on .NET 10.0 with WPF UI (Fluent)." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- App Spec Card (Right Column) -->
+            <Border Grid.Column="1" Margin="12,0,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="24">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel VerticalAlignment="Top">
+                        <TextBlock Text="{Binding AppName}" FontSize="32" FontWeight="ExtraBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="{Binding Version}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource SystemFillColorAttentionBrush}" Margin="0,4,0,16" />
+
+                        <TextBlock Text="{Binding Description}" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,24" LineHeight="20" />
+
+                        <Separator Margin="0,0,0,20" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+
+                        <!-- Technical specs list -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Company" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="{Binding Company}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Developer" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="{Binding Author}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Platform Target" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="{Binding FrameworkVersion}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="UI Presentation" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="WPF UI (Fluent v4.3.0)" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        </Grid>
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="MVVM Architecture" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="Community Toolkit MVVM v8.4" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        </Grid>
+
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Host Bootstrapper" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="Microsoft.Extensions.Hosting" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        </Grid>
+
+                        <Separator Margin="0,8,0,16" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+
+                        <!-- Credits and Acknowledgments -->
+                        <TextBlock Text="Credits &amp; Open Source Acknowledgments" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12" />
+                        
+                        <StackPanel Margin="0,0,0,16">
+                            <!-- WPF UI -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Window24" Foreground="{DynamicResource UIAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12">
+                                    <Bold>WPF UI (lepo.co)</Bold> - Modern Fluent designs, layouts, and window styling.
+                                </TextBlock>
+                            </Grid>
+
+                            <!-- MVVM Toolkit -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="DeveloperBoard24" Foreground="{DynamicResource UIAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12">
+                                    <Bold>Community Toolkit MVVM</Bold> - Command and property code-generation utilities.
+                                </TextBlock>
+                            </Grid>
+
+                            <!-- LibVLC / VideoLAN -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Video24" Foreground="{DynamicResource UIAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12">
+                                    <Bold>LibVLC / VideoLAN</Bold> - Audio and video playback backend via LibVLCSharp.
+                                </TextBlock>
+                            </Grid>
+
+                            <!-- FFmpeg & FFprobe -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Record24" Foreground="{DynamicResource UIAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12">
+                                    <Bold>FFmpeg &amp; FFprobe</Bold> - Media format conversions, thumbnail poster generation, and audio filter pipeline engines.
+                                </TextBlock>
+                            </Grid>
+
+                            <!-- SQLite / EF Core -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Database24" Foreground="{DynamicResource UIAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12">
+                                    <Bold>Entity Framework Core &amp; SQLite</Bold> - Relational database migrations, singer rotation storage, and FTS5 search.
+                                </TextBlock>
+                            </Grid>
+
+                            <!-- CDG Reference Repos -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Code24" Foreground="{DynamicResource UIAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12">
+                                    <Bold>CDG Specs &amp; Decoding Reference</Bold> - Acknowledgment to gozzar/karaoke, spektor56/KaraokePlayer, and nopperl/karaoke-cdg repositories.
+                                </TextBlock>
+                            </Grid>
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding Copyright}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>
