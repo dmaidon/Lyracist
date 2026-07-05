@@ -91,6 +91,11 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <!-- Disable scrollbars on the Frame level to prevent page-level stretching -->
+    <Style TargetType="Frame">
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    </Style>
 
     <!-- Make all ScrollBars wider and easier to see/click -->
     <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}">
