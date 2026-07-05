@@ -1013,6 +1013,17 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task LoadAndPlaySelectedPerformer()
+    {
+        if (Rotation.SelectedSinger == null) return;
+
+        _displayService.ShowRotationWindow();
+        _displayService.HighlightSinger(Rotation.SelectedSinger);
+
+        await PlayPerformerRequest(Rotation.SelectedSinger);
+    }
+
+    [RelayCommand]
     private void OpenExternalLinkInBrowser(Singer singer)
     {
         if (singer == null || string.IsNullOrWhiteSpace(singer.ExternalLink)) return;

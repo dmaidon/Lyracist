@@ -557,7 +557,7 @@
                 </Border>
 
                 <!-- Queue Sing Button -->
-                <ui:Button Grid.Row="3" Content="Load &amp; Play Selected Performer" Icon="{ui:SymbolIcon Play24}" Command="{Binding Rotation.MarkAsSingingCommand}" Appearance="Primary" HorizontalAlignment="Stretch" Padding="12" Margin="0,12,0,0" Background="{StaticResource UIAccentBrush}" />
+                <ui:Button Grid.Row="3" Content="Load &amp; Play Selected Performer" Icon="{ui:SymbolIcon Play24}" Command="{Binding LoadAndPlaySelectedPerformerCommand}" Appearance="Primary" HorizontalAlignment="Stretch" Padding="12" Margin="0,12,0,0" Background="{StaticResource UIAccentBrush}" />
             </Grid>
 
             <!-- Right Column: Live Lyrics Preview, Audio Controls & Displays -->
