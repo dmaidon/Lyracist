@@ -357,10 +357,10 @@
                     <!-- Queue Service Filters -->
                     <WrapPanel Margin="0,6,0,0" Orientation="Horizontal">
                         <CheckBox Content="Local" IsChecked="{Binding ShowLocalFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11"/>
-                        <CheckBox Content="Party Tyme" IsChecked="{Binding ShowPartyTymeFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11"/>
-                        <CheckBox Content="Spotify" IsChecked="{Binding ShowSpotifyFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11"/>
-                        <CheckBox Content="YouTube" IsChecked="{Binding ShowYouTubeFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11"/>
-                        <CheckBox Content="Amazon" IsChecked="{Binding ShowAmazonFilter, Mode=TwoWay}" Margin="0,0,0,0" FontSize="11"/>
+                        <CheckBox Content="Party Tyme" IsChecked="{Binding ShowPartyTymeFilter, Mode=TwoWay}" IsEnabled="{Binding IsPartyTymeConnected}" Margin="0,0,10,0" FontSize="11"/>
+                        <CheckBox Content="Spotify" IsChecked="{Binding ShowSpotifyFilter, Mode=TwoWay}" IsEnabled="{Binding IsSpotifyAvailable}" Margin="0,0,10,0" FontSize="11"/>
+                        <CheckBox Content="YouTube" IsChecked="{Binding ShowYouTubeFilter, Mode=TwoWay}" IsEnabled="{Binding IsYouTubeAvailable}" Margin="0,0,10,0" FontSize="11"/>
+                        <CheckBox Content="Amazon" IsChecked="{Binding ShowAmazonFilter, Mode=TwoWay}" IsEnabled="{Binding IsAmazonAvailable}" Margin="0,0,0,0" FontSize="11"/>
                     </WrapPanel>
                 </StackPanel>
 

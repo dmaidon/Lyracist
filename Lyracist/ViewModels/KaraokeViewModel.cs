@@ -93,16 +93,25 @@ public partial class KaraokeViewModel : BaseViewModel
     private bool _showLocalFilter = true;
 
     [ObservableProperty]
-    private bool _showPartyTymeFilter = true;
+    private bool _showPartyTymeFilter = false;
 
     [ObservableProperty]
-    private bool _showSpotifyFilter = true;
+    private bool _showSpotifyFilter = false;
 
     [ObservableProperty]
     private bool _showYouTubeFilter = true;
 
     [ObservableProperty]
-    private bool _showAmazonFilter = true;
+    private bool _showAmazonFilter = false;
+
+    [ObservableProperty]
+    private bool _isSpotifyAvailable = false;
+
+    [ObservableProperty]
+    private bool _isYouTubeAvailable = true;
+
+    [ObservableProperty]
+    private bool _isAmazonAvailable = false;
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
