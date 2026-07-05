@@ -102,6 +102,37 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private double _occasionItemGain;
 
+    // ─── Service Logins & API Keys ──────────────────────────────────────────
+
+    [ObservableProperty]
+    private string _youTubeApiKey = AppSettings.YouTubeApiKey;
+
+    [ObservableProperty]
+    private string _spotifyClientId = AppSettings.SpotifyClientId;
+
+    [ObservableProperty]
+    private string _spotifyClientSecret = AppSettings.SpotifyClientSecret;
+
+    [ObservableProperty]
+    private string _amazonAccessKey = AppSettings.AmazonAccessKey;
+
+    [ObservableProperty]
+    private string _amazonSecretKey = AppSettings.AmazonSecretKey;
+
+    [ObservableProperty]
+    private string _partyTymeClientId = AppSettings.PartyTymeClientId;
+
+    [ObservableProperty]
+    private string _partyTymeClientSecret = AppSettings.PartyTymeClientSecret;
+
+    partial void OnYouTubeApiKeyChanged(string value) => AppSettings.YouTubeApiKey = value;
+    partial void OnSpotifyClientIdChanged(string value) => AppSettings.SpotifyClientId = value;
+    partial void OnSpotifyClientSecretChanged(string value) => AppSettings.SpotifyClientSecret = value;
+    partial void OnAmazonAccessKeyChanged(string value) => AppSettings.AmazonAccessKey = value;
+    partial void OnAmazonSecretKeyChanged(string value) => AppSettings.AmazonSecretKey = value;
+    partial void OnPartyTymeClientIdChanged(string value) => AppSettings.PartyTymeClientId = value;
+    partial void OnPartyTymeClientSecretChanged(string value) => AppSettings.PartyTymeClientSecret = value;
+
     // ─── Music Library ─────────────────────────────────────────────────
 
     public ObservableCollection<string> LibraryDirectories { get; } = new();

@@ -5,6 +5,7 @@ using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Services.Display;
 using Lyracist.Services.Integration;
@@ -383,6 +384,20 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         RefreshFilteredList();
     }
+
+    public void OnNavigatedTo()
+    {
+        // Refresh credentials and availability from settings
+        PartyTymeClientId = AppSettings.PartyTymeClientId;
+        PartyTymeClientSecret = AppSettings.PartyTymeClientSecret;
+        IsSpotifyAvailable = !string.IsNullOrWhiteSpace(AppSettings.SpotifyClientId);
+        IsAmazonAvailable = !string.IsNullOrWhiteSpace(AppSettings.AmazonAccessKey);
+
+        LoadSingerNames();
+    }
+
+    partial void OnPartyTymeClientIdChanged(string value) => AppSettings.PartyTymeClientId = value;
+    partial void OnPartyTymeClientSecretChanged(string value) => AppSettings.PartyTymeClientSecret = value;
 
     partial void OnSearchQueryChanged(string value)
     {

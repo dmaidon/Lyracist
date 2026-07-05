@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Lyracist.Core.Helpers;
 using Lyracist.Models;
 
 namespace Lyracist.Services.Integration
@@ -29,6 +31,75 @@ namespace Lyracist.Services.Integration
 
         public async Task<IEnumerable<ExternalTrack>> SearchAsync(string query, string service = "All")
         {
+            // If YouTube is queried and a YouTube API Key is supplied, perform a real YouTube search
+            if ((service.Equals("YouTube", StringComparison.OrdinalIgnoreCase) || service.Equals("All", StringComparison.OrdinalIgnoreCase)) 
+                && !string.IsNullOrWhiteSpace(AppSettings.YouTubeApiKey) && !string.IsNullOrWhiteSpace(query))
+            {
+                try
+                {
+                    using var client = new System.Net.Http.HttpClient();
+                    string url = $"https://www.googleapis.com/youtube/v3/search?part=snippet&q={Uri.EscapeDataString(query + " karaoke")}&type=video&maxResults=10&key={AppSettings.YouTubeApiKey}";
+                    var response = await client.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        using var doc = JsonDocument.Parse(json);
+                        var list = new List<ExternalTrack>();
+                        if (doc.RootElement.TryGetProperty("items", out var items))
+                        {
+                            foreach (var item in items.EnumerateArray())
+                            {
+                                if (item.TryGetProperty("id", out var idObj) && idObj.TryGetProperty("videoId", out var vIdProp))
+                                {
+                                    string videoId = vIdProp.GetString() ?? "";
+                                    string fullTitle = item.GetProperty("snippet").GetProperty("title").GetString() ?? "";
+                                    string channel = item.GetProperty("snippet").GetProperty("channelTitle").GetString() ?? "";
+                                    
+                                    // Basic parsing to split "Artist - Title"
+                                    string artist = channel;
+                                    string title = fullTitle;
+                                    int dashIdx = fullTitle.IndexOf(" - ");
+                                    if (dashIdx > 0)
+                                    {
+                                        artist = fullTitle.Substring(0, dashIdx).Trim();
+                                        title = fullTitle.Substring(dashIdx + 3).Trim();
+                                    }
+                                    
+                                    title = System.Net.WebUtility.HtmlDecode(title);
+                                    artist = System.Net.WebUtility.HtmlDecode(artist);
+
+                                    list.Add(new ExternalTrack
+                                    {
+                                        Title = title,
+                                        Artist = artist,
+                                        Url = $"https://www.youtube.com/watch?v={videoId}",
+                                        Source = "YouTube"
+                                    });
+                                }
+                            }
+                        }
+                        
+                        // If we only wanted YouTube results, we can return these directly
+                        if (service.Equals("YouTube", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return list;
+                        }
+                        
+                        // Otherwise, if service == "All", we prepend them to the rest of the mock results
+                        var finalResults = new List<ExternalTrack>(list);
+                        var mockRest = _mockDatabase.Where(t => !t.Source.Equals("YouTube", StringComparison.OrdinalIgnoreCase)
+                                                               && (t.Title.Contains(query, StringComparison.OrdinalIgnoreCase) 
+                                                                   || t.Artist.Contains(query, StringComparison.OrdinalIgnoreCase)));
+                        finalResults.AddRange(mockRest);
+                        return finalResults;
+                    }
+                }
+                catch 
+                {
+                    // Fallback to mock search on network error
+                }
+            }
+
             await Task.Delay(300); // Simulate network query latency
 
             var results = _mockDatabase.AsEnumerable();

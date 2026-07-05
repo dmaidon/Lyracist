@@ -51,6 +51,48 @@ public static class AppSettings
         set { _data.ShowSplashOnStartup = value; Save(); }
     }
 
+    public static string YouTubeApiKey
+    {
+        get => _data.YouTubeApiKey;
+        set { _data.YouTubeApiKey = value; Save(); }
+    }
+
+    public static string SpotifyClientId
+    {
+        get => _data.SpotifyClientId;
+        set { _data.SpotifyClientId = value; Save(); }
+    }
+
+    public static string SpotifyClientSecret
+    {
+        get => _data.SpotifyClientSecret;
+        set { _data.SpotifyClientSecret = value; Save(); }
+    }
+
+    public static string AmazonAccessKey
+    {
+        get => _data.AmazonAccessKey;
+        set { _data.AmazonAccessKey = value; Save(); }
+    }
+
+    public static string AmazonSecretKey
+    {
+        get => _data.AmazonSecretKey;
+        set { _data.AmazonSecretKey = value; Save(); }
+    }
+
+    public static string PartyTymeClientId
+    {
+        get => _data.PartyTymeClientId;
+        set { _data.PartyTymeClientId = value; Save(); }
+    }
+
+    public static string PartyTymeClientSecret
+    {
+        get => _data.PartyTymeClientSecret;
+        set { _data.PartyTymeClientSecret = value; Save(); }
+    }
+
     public static int OpeningVolume
     {
         get => _data.OpeningVolume;
@@ -132,6 +174,14 @@ public static class AppSettings
     private sealed class SettingsData
     {
         public bool ShowSplashOnStartup { get; set; } = true;
+
+        public string YouTubeApiKey { get; set; } = string.Empty;
+        public string SpotifyClientId { get; set; } = string.Empty;
+        public string SpotifyClientSecret { get; set; } = string.Empty;
+        public string AmazonAccessKey { get; set; } = string.Empty;
+        public string AmazonSecretKey { get; set; } = string.Empty;
+        public string PartyTymeClientId { get; set; } = string.Empty;
+        public string PartyTymeClientSecret { get; set; } = string.Empty;
 
         // Channel volumes (0–100)
         public int OpeningVolume { get; set; } = 80;
