@@ -71,10 +71,10 @@
                             <ListBox ItemsSource="{Binding FilteredSongs}" SelectedItem="{Binding SelectedSong, Mode=TwoWay}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                                        <Border Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Page}}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
                                             <Border.ContextMenu>
                                                 <ContextMenu>
-                                                    <MenuItem Header="Edit Audio Defaults..." Command="{Binding DataContext.EditSongSettingsCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
+                                                    <MenuItem Header="Edit Audio Defaults..." Command="{Binding Path=PlacementTarget.Tag.EditSongSettingsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}"/>
                                                 </ContextMenu>
                                             </Border.ContextMenu>
                                             <Grid>
@@ -410,12 +410,12 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                                <Border Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Page}}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
                                     <Border.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="Edit Singer Audio Defaults..." Command="{Binding DataContext.EditSingerSettingsCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
-                                            <MenuItem Header="Play Performer's Request" Command="{Binding DataContext.PlayPerformerRequestCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
-                                            <MenuItem Header="Open External Link in Browser" Command="{Binding DataContext.OpenExternalLinkInBrowserCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}">
+                                            <MenuItem Header="Edit Singer Audio Defaults..." Command="{Binding Path=PlacementTarget.Tag.EditSingerSettingsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}"/>
+                                            <MenuItem Header="Play Performer's Request" Command="{Binding Path=PlacementTarget.Tag.PlayPerformerRequestCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}"/>
+                                            <MenuItem Header="Open External Link in Browser" Command="{Binding Path=PlacementTarget.Tag.OpenExternalLinkInBrowserCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}">
                                                 <MenuItem.Style>
                                                     <Style TargetType="MenuItem">
                                                         <Style.Triggers>

@@ -91,4 +91,10 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- Make all ScrollBars wider and easier to see/click -->
+    <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+    </Style>
 </ResourceDictionary>

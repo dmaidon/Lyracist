@@ -138,13 +138,13 @@ public partial class App : System.Windows.Application
 
             // Simulate loading updates
             splash.UpdateStatus("Initializing services...");
-            await Task.Delay(600);
+            await Task.Delay(50);
 
             splash.UpdateStatus("Loading UI components...");
-            await Task.Delay(600);
+            await Task.Delay(50);
 
             splash.UpdateStatus("Starting Lyracist...");
-            await Task.Delay(600);
+            await Task.Delay(50);
         }
 
         // Start the tablet lyrics server in the background
