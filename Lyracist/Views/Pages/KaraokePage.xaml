@@ -532,11 +532,12 @@
                     </Style>
                 </Border.Style>
 
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="Transparent" BorderThickness="0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
                     <!-- Clickable Preview Screen -->
                     <Grid Grid.Row="0">
@@ -780,6 +781,7 @@
                         </Border>
                     </StackPanel>
                 </Grid>
+                </ScrollViewer>
             </Border>
         </Grid>
     </Grid>
