@@ -56,9 +56,145 @@ namespace Lyracist.Data.Services
             return (artist, title);
         }
 
-        // ==========================================
-        // MP4 KARAOKE DETECTION
-        // ==========================================
+        public static (string Artist, string Title, string KaraokeType, bool IsKaraoke) ParseStoreDownload(string filePath, FFprobeResult probe)
+        {
+            string filename = Path.GetFileNameWithoutExtension(filePath);
+            string artist = "Unknown Artist";
+            string title = filename.Trim();
+            string karaokeType = "";
+            bool isKaraoke = false;
+            string catalogCode = "";
+            string ext = Path.GetExtension(filePath).ToLowerInvariant();
+
+            // 1. Tag checks from FFprobe
+            if (!string.IsNullOrEmpty(probe.ArtistTag))
+            {
+                artist = probe.ArtistTag.Trim();
+            }
+            if (!string.IsNullOrEmpty(probe.TitleTag))
+            {
+                title = probe.TitleTag.Trim();
+            }
+            
+            if (probe.GenreTag.Contains("Karaoke", StringComparison.OrdinalIgnoreCase) ||
+                probe.CommentTag.Contains("Karaoke", StringComparison.OrdinalIgnoreCase) ||
+                probe.CommentTag.Contains("Sunfly", StringComparison.OrdinalIgnoreCase) ||
+                probe.CommentTag.Contains("Karaoke Version", StringComparison.OrdinalIgnoreCase))
+            {
+                isKaraoke = true;
+            }
+
+            string pathLower = filePath.ToLowerInvariant();
+            if (pathLower.Contains("karaoke") ||
+                pathLower.Contains("instrumental") ||
+                pathLower.Contains("sing-along") ||
+                pathLower.Contains("backing track"))
+            {
+                isKaraoke = true;
+            }
+
+            // 2. Sunfly Pattern Matching
+            var sfRegex = new Regex(@"^(SF\s*\d+)\s*[-_]?\s*(\d+)\s*-\s*(.+)$", RegexOptions.IgnoreCase);
+            var sfMatch = sfRegex.Match(filename);
+            if (sfMatch.Success)
+            {
+                string catNum = sfMatch.Groups[1].Value.Replace(" ", "").ToUpperInvariant();
+                string trackNum = sfMatch.Groups[2].Value;
+                catalogCode = $"{catNum}-{trackNum}";
+                isKaraoke = true;
+
+                string remaining = sfMatch.Groups[3].Value.Trim();
+                var parts = remaining.Split(new[] { " - " }, StringSplitOptions.None);
+                if (parts.Length >= 2)
+                {
+                    artist = parts[0].Trim();
+                    title = string.Join(" - ", parts.Skip(1)).Trim();
+                }
+                else
+                {
+                    title = remaining;
+                }
+            }
+            else if (pathLower.Contains("sunfly"))
+            {
+                isKaraoke = true;
+                catalogCode = "SF";
+            }
+
+            // 3. Karaoke Version Pattern Matching
+            bool isKv = false;
+            string cleaned = filename;
+            
+            if (filename.Contains("Karaoke Version", StringComparison.OrdinalIgnoreCase))
+            {
+                isKv = true;
+                isKaraoke = true;
+                cleaned = Regex.Replace(cleaned, @"\s*[-_(\[]\s*Karaoke Version\s*[\)\]]?", "", RegexOptions.IgnoreCase);
+            }
+
+            var kvCodeRegex = new Regex(@"^KV\s*(\d+)\s*-\s*(.+)$", RegexOptions.IgnoreCase);
+            var kvMatch = kvCodeRegex.Match(cleaned);
+            if (kvMatch.Success)
+            {
+                isKv = true;
+                isKaraoke = true;
+                catalogCode = "KV-" + kvMatch.Groups[1].Value;
+                cleaned = kvMatch.Groups[2].Value;
+            }
+
+            if (isKv)
+            {
+                var parts = cleaned.Split(new[] { " - " }, StringSplitOptions.None);
+                if (parts.Length >= 2)
+                {
+                    artist = parts[0].Trim();
+                    title = string.Join(" - ", parts.Skip(1)).Trim();
+                }
+                else
+                {
+                    title = cleaned.Trim();
+                }
+            }
+            else if (pathLower.Contains("karaoke version") || pathLower.Contains("karaoke-version"))
+            {
+                isKaraoke = true;
+                if (string.IsNullOrEmpty(catalogCode))
+                {
+                    catalogCode = "KV";
+                }
+            }
+
+            // 4. Default ParseFilename fallback
+            if (artist == "Unknown Artist" || title == filename)
+            {
+                var fallback = ParseFilename(filePath);
+                if (artist == "Unknown Artist" && fallback.Artist != "Unknown Artist")
+                {
+                    artist = fallback.Artist;
+                }
+                if (title == filename && fallback.Title != filename)
+                {
+                    title = fallback.Title;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(catalogCode))
+            {
+                title = $"{title} [{catalogCode}]";
+            }
+
+            if (isKaraoke)
+            {
+                if (ext == ".zip")
+                    karaokeType = "ZIPCDG";
+                else if (ext == ".mp4")
+                    karaokeType = "MP4";
+                else
+                    karaokeType = "MP3G";
+            }
+
+            return (artist, title, karaokeType, isKaraoke);
+        }
 
         private bool IsMp4Karaoke(string filePath)
         {
@@ -169,19 +305,21 @@ namespace Lyracist.Data.Services
 
                     if (ext == ".mp3")
                     {
+                        var probe = await FFprobeRunner.ProbeFile(file);
+                        var parsed = ParseStoreDownload(file, probe);
+                        
                         string cdgPath = Path.ChangeExtension(file, ".cdg");
                         bool hasCdg = cdgFileSet.Contains(cdgPath);
-
-                        var (artist, title) = ParseFilename(file);
-                        var probe = await FFprobeRunner.ProbeFile(file);
+                        bool isKaraoke = parsed.IsKaraoke || hasCdg;
+                        string kType = hasCdg ? "MP3G" : parsed.KaraokeType;
 
                         song = new Song
                         {
-                            Title = title,
-                            Artist = artist,
+                            Title = parsed.Title,
+                            Artist = parsed.Artist,
                             FilePath = file,
-                            IsKaraoke = hasCdg,
-                            KaraokeType = hasCdg ? "MP3G" : "",
+                            IsKaraoke = isKaraoke,
+                            KaraokeType = isKaraoke ? (string.IsNullOrEmpty(kType) ? "MP3G" : kType) : "",
                             Duration = probe.Duration,
                             KeyDefault = 0,
                             TempoDefault = 1.0,
@@ -190,14 +328,14 @@ namespace Lyracist.Data.Services
                     }
                     else if (ext == ".mp4")
                     {
-                        bool isKaraoke = IsMp4Karaoke(file);
-                        var (artist, title) = ParseFilename(file);
                         var probe = await FFprobeRunner.ProbeFile(file);
+                        var parsed = ParseStoreDownload(file, probe);
+                        bool isKaraoke = parsed.IsKaraoke || IsMp4Karaoke(file);
 
                         song = new Song
                         {
-                            Title = title,
-                            Artist = artist,
+                            Title = parsed.Title,
+                            Artist = parsed.Artist,
                             FilePath = file,
                             IsKaraoke = isKaraoke,
                             KaraokeType = isKaraoke ? "MP4" : "",
@@ -212,8 +350,8 @@ namespace Lyracist.Data.Services
                         var (isKaraoke, audioEntryName) = CheckZipKaraoke(file);
                         if (isKaraoke)
                         {
-                            var (artist, title) = ParseFilename(file);
                             double duration = 0;
+                            var zipProbe = new FFprobeResult();
 
                             string tempPath = string.Empty;
                             try
@@ -225,8 +363,8 @@ namespace Lyracist.Data.Services
                                     tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntryName));
                                     entry.ExtractToFile(tempPath);
 
-                                    var probe = await FFprobeRunner.ProbeFile(tempPath);
-                                    duration = probe.Duration;
+                                    zipProbe = await FFprobeRunner.ProbeFile(tempPath);
+                                    duration = zipProbe.Duration;
                                 }
                             }
                             catch (Exception ex)
@@ -241,10 +379,12 @@ namespace Lyracist.Data.Services
                                 }
                             }
 
+                            var parsed = ParseStoreDownload(file, zipProbe);
+
                             song = new Song
                             {
-                                Title = title,
-                                Artist = artist,
+                                Title = parsed.Title,
+                                Artist = parsed.Artist,
                                 FilePath = file,
                                 IsKaraoke = true,
                                 KaraokeType = "ZIPCDG",
