@@ -268,15 +268,15 @@ This is ready to paste directly into TODO.md.
 ### STAGE 7 — Polish, Branding & Packaging
 
 #### 23. SettingsPage
-- [ ] Add monitor assignment
-- [ ] Add display mode selection
-- [ ] Add lyrics screen selection
-- [ ] Add rotation screen selection
-- [ ] Add audio defaults
-- [ ] Add special occasion editor
-- [ ] Add playlist editors
-- [ ] Add service settings
-- [ ] Add On/Off for Splash screen
+- [x] Add monitor assignment
+- [x] Add display mode selection
+- [x] Add lyrics screen selection
+- [x] Add rotation screen selection
+- [x] Add audio defaults
+- [x] Add special occasion editor
+- [x] Add playlist editors
+- [x] Add service settings
+- [x] Add On/Off for Splash screen
 
 #### 24. Branding
 - [ ] Add logo
