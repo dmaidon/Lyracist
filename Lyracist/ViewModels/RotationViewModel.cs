@@ -35,10 +35,10 @@ public partial class RotationViewModel : BaseViewModel
         _display = display;
 
         // Seed default singer rotation values with song information
-        Rotation.Add(new Singer { Name = "Alice", Key = "+1", Notes = "Sings soprano, prefers classic pop", SongTitle = "Sweet Caroline", Artist = "Neil Diamond" });
-        Rotation.Add(new Singer { Name = "Bob", Key = "-2", Notes = "Prefers baritone classic rock", SongTitle = "Hotel California", Artist = "Eagles" });
-        Rotation.Add(new Singer { Name = "Charlie", Key = "0", Notes = "First time singing today", SongTitle = "Billie Jean", Artist = "Michael Jackson" });
-
+        Rotation.Add(new Singer { Name = "Alice Johnson", Key = "+1", Notes = "Sings soprano, prefers classic pop", SongTitle = "Sweet Caroline", Artist = "Neil Diamond" });
+        Rotation.Add(new Singer { Name = "Bob Caruthers", Key = "-2", Notes = "Prefers baritone classic rock", SongTitle = "Hotel California", Artist = "Eagles" });
+        Rotation.Add(new Singer { Name = "Charlie Brown", Key = "0", Notes = "First time singing today", SongTitle = "Billie Jean", Artist = "Michael Jackson" });
+        Rotation.Add(new Singer { Name = "Diana Smith", Key = "+2", Notes = "Sings alto, loves jazz standards", SongTitle = "Fly Me to the Moon", Artist = "Frank Sinatra" });
         LoadSingerNames();
     }
 
@@ -202,10 +202,10 @@ public partial class RotationViewModel : BaseViewModel
                         var dbSong = context.Songs.FirstOrDefault(s => s.Title == title && s.Artist == artist);
                         if (dbSong == null && !string.IsNullOrEmpty(title))
                         {
-                            dbSong = new Lyracist.Data.Models.Song 
-                            { 
-                                Title = title, 
-                                Artist = artist, 
+                            dbSong = new Lyracist.Data.Models.Song
+                            {
+                                Title = title,
+                                Artist = artist,
                                 IsKaraoke = true,
                                 FilePath = "External"
                             };
