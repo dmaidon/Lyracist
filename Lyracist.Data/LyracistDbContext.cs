@@ -34,7 +34,7 @@ namespace Lyracist.Data
                 string dataDir = System.IO.Path.Combine(baseDir, "Data");
                 System.IO.Directory.CreateDirectory(dataDir);
                 string dbPath = System.IO.Path.Combine(dataDir, "lyracist.db");
-                optionsBuilder.UseSqlite($"Data Source={dbPath}");
+                optionsBuilder.UseSqlite($"Data Source={dbPath};Journal Mode=WAL;Synchronous=Normal;Cache=Shared");
             }
         }
 

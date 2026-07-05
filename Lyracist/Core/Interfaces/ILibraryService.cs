@@ -11,6 +11,7 @@ public interface ILibraryService
     int GetSongCount();
     IEnumerable<KaraokeSong> Search(string query);
     IEnumerable<KaraokeSong> GetAllSongs();
+    IEnumerable<KaraokeSong> GetBackgroundMusicSongs();
     event EventHandler? LibraryUpdated;
 
     Lyracist.Data.Models.SongAudioSettings GetAudioSettings(string audioPath);

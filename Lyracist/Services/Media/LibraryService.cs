@@ -68,7 +68,7 @@ public class LibraryService : ILibraryService
             
             if (string.IsNullOrWhiteSpace(query))
             {
-                return context.Songs.ToList().Select(MapToKaraokeSong);
+                return context.Songs.AsNoTracking().ToList().Select(MapToKaraokeSong);
             }
 
             var searchService = new SearchService(context);
@@ -88,11 +88,29 @@ public class LibraryService : ILibraryService
         try
         {
             using var context = new LyracistDbContext();
-            return context.Songs.ToList().Select(MapToKaraokeSong);
+            return context.Songs.AsNoTracking().ToList().Select(MapToKaraokeSong);
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to get all library songs: {ex.Message}");
+            return Enumerable.Empty<KaraokeSong>();
+        }
+    }
+
+    public IEnumerable<KaraokeSong> GetBackgroundMusicSongs()
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+            return context.Songs
+                .AsNoTracking()
+                .Where(s => !s.IsKaraoke)
+                .ToList()
+                .Select(MapToKaraokeSong);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to get background music songs: {ex.Message}");
             return Enumerable.Empty<KaraokeSong>();
         }
     }

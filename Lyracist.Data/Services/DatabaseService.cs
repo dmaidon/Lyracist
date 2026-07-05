@@ -79,6 +79,7 @@ namespace Lyracist.Data.Services
         public async Task<List<RotationEntry>> GetRotation()
         {
             return await _context.RotationEntries
+                .AsNoTracking()
                 .Include(r => r.Singer)
                 .Include(r => r.Song)
                 .OrderBy(r => r.Position)

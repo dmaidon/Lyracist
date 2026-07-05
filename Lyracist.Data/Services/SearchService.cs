@@ -93,6 +93,7 @@ namespace Lyracist.Data.Services
             // Execute full-text query using SQLite's MATCH operator
             return await _context.Songs
                 .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0})", ftsQuery)
+                .AsNoTracking()
                 .Include(s => s.AudioSettings)
                 .ToListAsync();
         }

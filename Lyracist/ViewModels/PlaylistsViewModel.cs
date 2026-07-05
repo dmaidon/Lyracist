@@ -121,7 +121,7 @@ public partial class PlaylistsViewModel : BaseViewModel
                 var opening = _playlistService.GetOpeningPlaylist().ToList();
                 var fillIn = _playlistService.GetFillInPlaylist().ToList();
                 var endRot = _playlistService.GetEndRotationPlaylist().ToList();
-                var songs = _libraryService.GetAllSongs().Where(s => !s.IsKaraoke).ToList();
+                var songs = _libraryService.GetBackgroundMusicSongs().ToList();
 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
