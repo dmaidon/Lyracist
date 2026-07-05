@@ -78,6 +78,30 @@
                     <ui:SymbolIcon Symbol="People24" FontSize="28" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                 </ui:CardControl>
 
+                <!-- 5. Background Music Playlists -->
+                <TextBlock Text="5. Background Music Playlists" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
+                <ui:CardControl Margin="0,0,0,20">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Text="Managing Background Audio Tracks" FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="First, populate your library by going to the 'Settings' tab, locating the 'Music Library' group, and clicking 'Add Folder...' followed by 'Rescan All Directories'. Once indexed, navigate to the 'Playlists' page. Select a song from the leftmost 'Music Library' column and click the 'Add' button under your chosen background playlist (Opening, Fill-In, or End of Rotation). Adjust volumes and tone parameters on the 'Settings' page under 'Background Music Channels'." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:SymbolIcon Symbol="MusicNote2Play20" FontSize="28" Foreground="{DynamicResource SystemFillColorSuccessBrush}"/>
+                </ui:CardControl>
+
+                <!-- 6. Performer Web Portal -->
+                <TextBlock Text="6. Singer Mobile Portal &amp; Tablet Server" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
+                <ui:CardControl Margin="0,0,0,20">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Text="Starting Broadcast &amp; SignalR Real-Time Sync" FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="To start the performer server, navigate to the 'Settings' tab, locate the 'Self-Hosted Tablet Server' section, and click 'Start Broadcast'. Ensure your computer and your performers' devices are connected to the same local WiFi router (LAN). Performers can connect by scanning the mDNS address or visiting http://[Your-KJ-Computer-IP]:5005 in their browser. They can search catalog songs, submit request transpositions and notes, and view the live singer queue synced in real-time." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:SymbolIcon Symbol="MailInboxArrowDown20" FontSize="28" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
+                </ui:CardControl>
+
             </StackPanel>
         </ScrollViewer>
     </Grid>
