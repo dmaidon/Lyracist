@@ -247,14 +247,14 @@ This is ready to paste directly into TODO.md.
 ### STAGE 6 — Singer Interaction (Travel Router Workflow)
 
 #### 21. Singer Mobile Portal
-- [ ] Add /join page
-- [ ] Add /addsong page
-- [ ] Add /rotation page
-- [ ] Add /status page
-- [ ] Add /requests page
-- [ ] Add responsive layout
-- [ ] Add offline mode
-- [ ] Add static IP or mDNS discovery
+- [x] Add /join page
+- [x] Add /addsong page
+- [x] Add /rotation page
+- [x] Add /status page
+- [x] Add /requests page
+- [x] Add responsive layout
+- [x] Add offline mode
+- [x] Add static IP or mDNS discovery
 
 #### 22. SignalR Sync
 - [ ] Add rotation sync
