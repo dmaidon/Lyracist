@@ -26,95 +26,52 @@
             </StackPanel>
         </Border>
 
-        <!-- Scrollable Help Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel MaxWidth="800" HorizontalAlignment="Left" Margin="0,0,16,0">
+        <!-- Split-Screen Help Layout -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                <!-- 1. Playback Guides -->
-                <TextBlock Text="1. Karaoke Playback" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                <ui:CardControl Margin="0,0,0,20">
-                    <ui:CardControl.Header>
-                        <StackPanel>
-                            <TextBlock Text="Loading and Controlling Media" FontSize="14" FontWeight="SemiBold"/>
-                            <TextBlock Text="Use the 'Playback Controls' tab. You can click 'Load Song...' to open standard files, or browse the 'Search Library' tab to select matching tracks. Controls support Play, Pause, and Stop buttons, and a draggable Seek Slider to change playback positions." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </ui:CardControl.Header>
-                    <ui:SymbolIcon Symbol="PlayCircle24" FontSize="28" Foreground="{DynamicResource SystemFillColorSuccessBrush}"/>
-                </ui:CardControl>
+            <!-- Left side: Topics List -->
+            <Border Grid.Column="0" Background="{DynamicResource AppSurfaceBrush}" CornerRadius="12" Padding="12" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                <ListBox ItemsSource="{Binding HelpTopics}"
+                         SelectedItem="{Binding SelectedTopic}"
+                         BorderThickness="0" Background="Transparent"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Grid.Column="0" Symbol="{Binding Icon}" FontSize="18" Margin="4,0,12,0" Foreground="{Binding AccentColor}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="13" VerticalAlignment="Center" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
 
-                <!-- 2. Library Scanning Guides -->
-                <TextBlock Text="2. Media Library Scanning" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
-                <ui:CardControl Margin="0,0,0,20">
-                    <ui:CardControl.Header>
-                        <StackPanel>
-                            <TextBlock Text="Folder Indexing and CDG/MP3 Matching" FontSize="14" FontWeight="SemiBold"/>
-                            <TextBlock Text="Go to the 'Search Library' tab and click 'Scan Folder...'. Select a directory containing your audio files. The engine automatically indexes MP3 files and matches them with sibling CDG graphics files sharing the same name. Orphans (CDG files without MP3s) are skipped, and matched pairs are marked with a green 'CDG' badge." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </ui:CardControl.Header>
-                    <ui:SymbolIcon Symbol="Folder24" FontSize="28" Foreground="{DynamicResource SystemFillColorAttentionBrush}"/>
-                </ui:CardControl>
-
-                <!-- 3. Screen Projection Guides -->
-                <TextBlock Text="3. Dual-Screen Lyrics &amp; Rotation Projection" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
-                <ui:CardControl Margin="0,0,0,20">
-                    <ui:CardControl.Header>
-                        <StackPanel>
-                            <TextBlock Text="Setting up Secondary Monitors" FontSize="14" FontWeight="SemiBold"/>
-                            <TextBlock Text="Click the 'Open Window' buttons on the Dashboard. The application queries system monitors using native Win32 APIs and automatically moves the lyrics or singer rotation window to your secondary display. If no secondary display is detected, the windows default full-screen on the primary display for previewing." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </ui:CardControl.Header>
-                    <ui:SymbolIcon Symbol="WindowAd24" FontSize="28" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
-                </ui:CardControl>
-
-                <!-- 4. Singer Management Guides -->
-                <TextBlock Text="4. Singer Rotation" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
-                <ui:CardControl Margin="0,0,0,20">
-                    <ui:CardControl.Header>
-                        <StackPanel>
-                            <TextBlock Text="Queue Ordering and Transpositions" FontSize="14" FontWeight="SemiBold"/>
-                            <TextBlock Text="Open the 'Rotation' page via navigation tabs. Type a singer's name, key transposition semitones (e.g. +2, -1, 0), and optional request notes, then click 'Add to Rotation'. Use the Up/Down buttons to prioritize singers in the queue or click 'Remove' to delete them when their song finishes." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </ui:CardControl.Header>
-                    <ui:SymbolIcon Symbol="People24" FontSize="28" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                </ui:CardControl>
-
-                <!-- 5. Background Music Playlists -->
-                <TextBlock Text="5. Background Music Playlists" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
-                <ui:CardControl Margin="0,0,0,20">
-                    <ui:CardControl.Header>
-                        <StackPanel>
-                            <TextBlock Text="Managing Background Audio Tracks" FontSize="14" FontWeight="SemiBold"/>
-                            <TextBlock Text="First, populate your library by going to the 'Settings' tab, locating the 'Music Library' group, and clicking 'Add Folder...' followed by 'Rescan All Directories'. Once indexed, navigate to the 'Playlists' page. Select a song from the leftmost 'Music Library' column and click the 'Add' button under your chosen background playlist (Opening, Fill-In, or End of Rotation). Adjust volumes and tone parameters on the 'Settings' page under 'Background Music Channels'." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </ui:CardControl.Header>
-                    <ui:SymbolIcon Symbol="MusicNote2Play20" FontSize="28" Foreground="{DynamicResource SystemFillColorSuccessBrush}"/>
-                </ui:CardControl>
-
-                <!-- 6. Performer Web Portal -->
-                <TextBlock Text="6. Singer Mobile Portal &amp; Tablet Server" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
-                <ui:CardControl Margin="0,0,0,20">
-                    <ui:CardControl.Header>
-                        <StackPanel>
-                            <TextBlock Text="Starting Broadcast &amp; SignalR Real-Time Sync" FontSize="14" FontWeight="SemiBold"/>
-                            <TextBlock Text="To start the performer server, navigate to the 'Settings' tab, locate the 'Self-Hosted Tablet Server' section, and click 'Start Broadcast'. Ensure your computer and your performers' devices are connected to the same local WiFi router (LAN). Performers can connect by scanning the mDNS address or visiting http://[Your-KJ-Computer-IP]:5005 in their browser. They can search catalog songs, submit request transpositions and notes, and view the live singer queue synced in real-time." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </ui:CardControl.Header>
-                    <ui:SymbolIcon Symbol="MailInboxArrowDown20" FontSize="28" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
-                </ui:CardControl>
-
-                <!-- 7. Database Maintenance -->
-                <TextBlock Text="7. Database Backup &amp; Restore" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
-                <ui:CardControl Margin="0,0,0,20">
-                    <ui:CardControl.Header>
-                        <StackPanel>
-                            <TextBlock Text="Backing Up and Restoring Show Data" FontSize="14" FontWeight="SemiBold"/>
-                            <TextBlock Text="Navigate to the 'Settings' page, locate the 'Music Library' group box, and find the 'Database Maintenance' panel. Click 'Backup DB' to save your settings, playlists, performer records, and song logs as a clean, compacted SQLite file. To restore, click 'Restore DB' and select a valid backup database file. Overwriting your database will prompt the application to shut down safely to complete the restore." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </ui:CardControl.Header>
-                    <ui:SymbolIcon Symbol="History24" FontSize="28" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                </ui:CardControl>
-
-            </StackPanel>
-        </ScrollViewer>
+            <!-- Right side: Detail Panel -->
+            <Border Grid.Column="2" Background="{DynamicResource AppSurfaceBrush}" CornerRadius="12" Padding="24" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel DataContext="{Binding SelectedTopic}">
+                        <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="Bold" Margin="0,0,0,16"/>
+                        <ui:CardControl Margin="0,0,0,20" Padding="20">
+                            <ui:CardControl.Header>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding DescriptionHeader}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                    <TextBlock Text="{Binding DescriptionContent}" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" LineHeight="18"/>
+                                </StackPanel>
+                            </ui:CardControl.Header>
+                            <ui:SymbolIcon Symbol="{Binding Icon}" FontSize="36" Foreground="{Binding AccentColor}"/>
+                        </ui:CardControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
     </Grid>
 </Page>

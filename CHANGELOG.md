@@ -7,6 +7,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.7.5.85] - 2026-07-05
 
 ### Added
+- **Split-Pane Help View**: Redesigned the Help Page to feature a clean left-side navigation index and a right-side dynamic detail panel to avoid scroll fatigue and provide a polished user experience.
 - **Database Backup & Restore**: Live database backups (via SQLite-native `VACUUM INTO` command) and connection-closed database restorations (overwriting target, deleting temporary WAL/SHM files, and restarting application safely).
 - **Display "None" Option**: Support for selecting *None (Do not show)* in monitor dropdowns (Settings and main projection panels). Selecting this option immediately closes or hides the target projection window (Lyrics or Rotation).
 - **Test Mode Setting**: Settings toggle to instantly seed default performer queue (Alice, Bob, Charlie, Diana) to check audio and projection setup, or clear the queue when done.
