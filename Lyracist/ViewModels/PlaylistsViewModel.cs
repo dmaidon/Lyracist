@@ -81,6 +81,16 @@ public partial class PlaylistsViewModel : BaseViewModel
     [ObservableProperty]
     private bool _isEndRotationPlaying;
 
+    private System.Collections.Generic.List<KaraokeSong> _allLibrarySongs = new();
+
+    [ObservableProperty]
+    private string _searchQuery = string.Empty;
+
+    partial void OnSearchQueryChanged(string value)
+    {
+        FilterLibrarySongs();
+    }
+
     public PlaylistsViewModel(IPlaylistService playlistService, IShowFlowService showFlow, ILibraryService libraryService)
     {
         _playlistService = playlistService;
@@ -122,13 +132,30 @@ public partial class PlaylistsViewModel : BaseViewModel
             EndRotationTracks.Add(track);
         }
 
+        _allLibrarySongs = _libraryService.GetAllSongs().ToList();
+        FilterLibrarySongs();
+
+        _showFlow.RefreshPlaylists();
+    }
+
+    private void FilterLibrarySongs()
+    {
         LibrarySongs.Clear();
-        foreach (var song in _libraryService.GetAllSongs())
+        var query = SearchQuery?.Trim();
+
+        System.Collections.Generic.IEnumerable<KaraokeSong> filtered = _allLibrarySongs;
+        if (!string.IsNullOrEmpty(query))
+        {
+            filtered = _allLibrarySongs.Where(s =>
+                (s.Title != null && s.Title.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                (s.Artist != null && s.Artist.Contains(query, StringComparison.OrdinalIgnoreCase))
+            );
+        }
+
+        foreach (var song in filtered)
         {
             LibrarySongs.Add(song);
         }
-
-        _showFlow.RefreshPlaylists();
     }
 
     [RelayCommand]

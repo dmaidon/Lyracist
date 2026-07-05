@@ -30,7 +30,11 @@ namespace Lyracist.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlite("Data Source=lyracist.db");
+                string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
+                string dataDir = System.IO.Path.Combine(baseDir, "Data");
+                System.IO.Directory.CreateDirectory(dataDir);
+                string dbPath = System.IO.Path.Combine(dataDir, "lyracist.db");
+                optionsBuilder.UseSqlite($"Data Source={dbPath}");
             }
         }
 

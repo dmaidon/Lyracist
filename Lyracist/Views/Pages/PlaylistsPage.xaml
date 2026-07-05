@@ -9,333 +9,346 @@
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#11998e" Offset="0.0"/>
-            <GradientStop Color="#38ef7d" Offset="1.0"/>
+            <GradientStop Color="#11998e" Offset="0.0" />
+            <GradientStop Color="#38ef7d" Offset="1.0" />
         </LinearGradientBrush>
     </Page.Resources>
 
     <Grid Margin="24">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <!-- Header -->
         <Border Grid.Row="0" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
             <StackPanel>
-                <TextBlock Text="Background Music Playlists" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                <TextBlock Text="Opening music before the show, fill-in music between singers, and a send-off playlist once the queue empties." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0"/>
+                <TextBlock Text="Background Music Playlists" FontSize="28" FontWeight="Bold" Foreground="White" />
+                <TextBlock Text="Opening music before the show, fill-in music between singers, and a send-off playlist once the queue empties." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0" />
             </StackPanel>
         </Border>
 
         <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-        <Grid MinWidth="1180">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="260"/>
-                <ColumnDefinition Width="300"/>
-                <ColumnDefinition Width="300"/>
-                <ColumnDefinition Width="300"/>
-            </Grid.ColumnDefinitions>
+            <Grid MinWidth="1180">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="400" />
+                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="300" />
+                </Grid.ColumnDefinitions>
 
-            <!-- Music Library (Left Column) -->
-            <Border Grid.Column="0" Margin="0,0,12,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="16">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+                <!-- Music Library (Left Column) -->
+                <Border Grid.Column="0" Margin="0,0,12,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
-                        <TextBlock Text="Music Library" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <ui:Button Icon="{ui:SymbolIcon ArrowClockwise24}" Command="{Binding RefreshLibraryCommand}" Appearance="Secondary" Margin="12,0,0,0" ToolTip="Refresh"/>
-                    </StackPanel>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                            <TextBlock Text="Music Library" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <ui:Button Icon="{ui:SymbolIcon ArrowClockwise24}" Command="{Binding RefreshLibraryCommand}" Appearance="Secondary" Margin="12,0,0,0" ToolTip="Refresh" />
+                        </StackPanel>
 
-                    <ListBox Grid.Row="1" ItemsSource="{Binding LibrarySongs}" SelectedItem="{Binding SelectedLibrarySong}" Background="Transparent" BorderThickness="0">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,4">
-                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ui:TextBox Grid.Row="1"
+                                    PlaceholderText="Search library..."
+                                    Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                    Icon="{ui:SymbolIcon Search24}"
+                                    Margin="0,0,0,12" />
+
+                        <ListBox Grid.Row="2"
+                                 ItemsSource="{Binding LibrarySongs}"
+                                 SelectedItem="{Binding SelectedLibrarySong}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,4">
+                                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+
+                <!-- Opening Playlist (Middle Column) -->
+                <Border Grid.Column="1" Margin="0,0,12,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Opening Playlist" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12" />
+
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+                            <ui:Button Icon="{ui:SymbolIcon Add24}" Content="Add" Command="{Binding AddToOpeningCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" />
+                            <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding MoveOpeningUpCommand}" Margin="0,0,4,0" ToolTip="Move Up" />
+                            <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding MoveOpeningDownCommand}" Margin="0,0,4,0" ToolTip="Move Down" />
+                            <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveOpeningItemCommand}" Appearance="Danger" ToolTip="Remove" />
+                        </StackPanel>
+
+                        <ListBox Grid.Row="2" ItemsSource="{Binding OpeningTracks}" SelectedItem="{Binding SelectedOpeningTrack}" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,4">
+                                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <StackPanel Grid.Row="3">
+                            <TextBlock Text="Volume" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6" />
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="46" />
+                                </Grid.ColumnDefinitions>
+                                <Slider Minimum="0" Maximum="100" Value="{Binding OpeningVolume}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding OpeningVolume, StringFormat='{}{0:0}%'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <Expander Header="Tone (EQ)" Margin="0,0,0,12" FontSize="12">
+                                <StackPanel Margin="0,8,0,0">
+                                    <TextBlock Text="Bass" FontSize="11" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="46" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Minimum="-20" Maximum="20" Value="{Binding OpeningBass}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding OpeningBass, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <TextBlock Text="Treble" FontSize="11" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="46" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Minimum="-20" Maximum="20" Value="{Binding OpeningTreble}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding OpeningTreble, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <TextBlock Text="Gain (Preamp)" FontSize="11" Margin="0,0,0,4" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="46" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Minimum="-20" Maximum="20" Value="{Binding OpeningGain}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding OpeningGain, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
                                 </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
-            </Border>
+                            </Expander>
 
-            <!-- Opening Playlist (Middle Column) -->
-            <Border Grid.Column="1" Margin="0,0,12,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="16">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:Button Grid.Column="0" Content="Start Show" Icon="{ui:SymbolIcon Play24}" Command="{Binding StartOpeningMusicCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                                <ui:Button Grid.Column="1" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopOpeningMusicCommand}" Appearance="Secondary" Margin="4,0,0,0" HorizontalAlignment="Stretch" />
+                            </Grid>
 
-                    <TextBlock Grid.Row="0" Text="Opening Playlist" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
-
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
-                        <ui:Button Icon="{ui:SymbolIcon Add24}" Content="Add" Command="{Binding AddToOpeningCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0"/>
-                        <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding MoveOpeningUpCommand}" Margin="0,0,4,0" ToolTip="Move Up"/>
-                        <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding MoveOpeningDownCommand}" Margin="0,0,4,0" ToolTip="Move Down"/>
-                        <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveOpeningItemCommand}" Appearance="Danger" ToolTip="Remove"/>
-                    </StackPanel>
-
-                    <ListBox Grid.Row="2" ItemsSource="{Binding OpeningTracks}" SelectedItem="{Binding SelectedOpeningTrack}" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,4">
-                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-
-                    <StackPanel Grid.Row="3">
-                        <TextBlock Text="Volume" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="46"/>
-                            </Grid.ColumnDefinitions>
-                            <Slider Minimum="0" Maximum="100" Value="{Binding OpeningVolume}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="{Binding OpeningVolume, StringFormat='{}{0:0}%'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        </Grid>
-
-                        <Expander Header="Tone (EQ)" Margin="0,0,0,12" FontSize="12">
-                            <StackPanel Margin="0,8,0,0">
-                                <TextBlock Text="Bass" FontSize="11" Margin="0,0,0,4"/>
-                                <Grid Margin="0,0,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="46"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Slider Minimum="-20" Maximum="20" Value="{Binding OpeningBass}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding OpeningBass, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                                <TextBlock Text="Treble" FontSize="11" Margin="0,0,0,4"/>
-                                <Grid Margin="0,0,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="46"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Slider Minimum="-20" Maximum="20" Value="{Binding OpeningTreble}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding OpeningTreble, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                                <TextBlock Text="Gain (Preamp)" FontSize="11" Margin="0,0,0,4"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="46"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Slider Minimum="-20" Maximum="20" Value="{Binding OpeningGain}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding OpeningGain, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                            </StackPanel>
-                        </Expander>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <ui:Button Grid.Column="0" Content="Start Show" Icon="{ui:SymbolIcon Play24}" Command="{Binding StartOpeningMusicCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" HorizontalAlignment="Stretch"/>
-                            <ui:Button Grid.Column="1" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopOpeningMusicCommand}" Appearance="Secondary" Margin="4,0,0,0" HorizontalAlignment="Stretch"/>
-                        </Grid>
-
-                        <TextBlock Margin="0,8,0,0"
+                            <TextBlock Margin="0,8,0,0"
                                    Text="{Binding IsOpeningPlaying, StringFormat='Status: {0}'}"
-                                   FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                                   FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
-            <!-- Fill-In Playlist (Third Column) -->
-            <Border Grid.Column="2" Margin="0,0,12,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="16">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                <!-- Fill-In Playlist (Third Column) -->
+                <Border Grid.Column="2" Margin="0,0,12,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Fill-In Playlist" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                        <TextBlock Grid.Row="0" Text="Fill-In Playlist" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12" />
 
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
-                        <ui:Button Icon="{ui:SymbolIcon Add24}" Content="Add" Command="{Binding AddToFillInCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0"/>
-                        <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding MoveFillInUpCommand}" Margin="0,0,4,0" ToolTip="Move Up"/>
-                        <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding MoveFillInDownCommand}" Margin="0,0,4,0" ToolTip="Move Down"/>
-                        <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveFillInItemCommand}" Appearance="Danger" ToolTip="Remove"/>
-                    </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+                            <ui:Button Icon="{ui:SymbolIcon Add24}" Content="Add" Command="{Binding AddToFillInCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" />
+                            <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding MoveFillInUpCommand}" Margin="0,0,4,0" ToolTip="Move Up" />
+                            <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding MoveFillInDownCommand}" Margin="0,0,4,0" ToolTip="Move Down" />
+                            <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveFillInItemCommand}" Appearance="Danger" ToolTip="Remove" />
+                        </StackPanel>
 
-                    <ListBox Grid.Row="2" ItemsSource="{Binding FillInTracks}" SelectedItem="{Binding SelectedFillInTrack}" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,4">
-                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ListBox Grid.Row="2" ItemsSource="{Binding FillInTracks}" SelectedItem="{Binding SelectedFillInTrack}" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,4">
+                                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <StackPanel Grid.Row="3">
+                            <TextBlock Text="Volume" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6" />
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="46" />
+                                </Grid.ColumnDefinitions>
+                                <Slider Minimum="0" Maximum="100" Value="{Binding FillInVolume}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding FillInVolume, StringFormat='{}{0:0}%'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <Expander Header="Tone (EQ)" Margin="0,0,0,12" FontSize="12">
+                                <StackPanel Margin="0,8,0,0">
+                                    <TextBlock Text="Bass" FontSize="11" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="46" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Minimum="-20" Maximum="20" Value="{Binding FillInBass}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding FillInBass, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <TextBlock Text="Treble" FontSize="11" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="46" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Minimum="-20" Maximum="20" Value="{Binding FillInTreble}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding FillInTreble, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <TextBlock Text="Gain (Preamp)" FontSize="11" Margin="0,0,0,4" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="46" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Minimum="-20" Maximum="20" Value="{Binding FillInGain}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding FillInGain, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
                                 </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                            </Expander>
 
-                    <StackPanel Grid.Row="3">
-                        <TextBlock Text="Volume" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="46"/>
-                            </Grid.ColumnDefinitions>
-                            <Slider Minimum="0" Maximum="100" Value="{Binding FillInVolume}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="{Binding FillInVolume, StringFormat='{}{0:0}%'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        </Grid>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:Button Grid.Column="0" Content="Play" Icon="{ui:SymbolIcon Play24}" Command="{Binding PlayFillInCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                                <ui:Button Grid.Column="1" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopFillInCommand}" Appearance="Secondary" Margin="4,0,0,0" HorizontalAlignment="Stretch" />
+                            </Grid>
 
-                        <Expander Header="Tone (EQ)" Margin="0,0,0,12" FontSize="12">
-                            <StackPanel Margin="0,8,0,0">
-                                <TextBlock Text="Bass" FontSize="11" Margin="0,0,0,4"/>
-                                <Grid Margin="0,0,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="46"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Slider Minimum="-20" Maximum="20" Value="{Binding FillInBass}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding FillInBass, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                                <TextBlock Text="Treble" FontSize="11" Margin="0,0,0,4"/>
-                                <Grid Margin="0,0,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="46"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Slider Minimum="-20" Maximum="20" Value="{Binding FillInTreble}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding FillInTreble, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                                <TextBlock Text="Gain (Preamp)" FontSize="11" Margin="0,0,0,4"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="46"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Slider Minimum="-20" Maximum="20" Value="{Binding FillInGain}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding FillInGain, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                            </StackPanel>
-                        </Expander>
+                            <ui:Button Content="Duck for Announcement" Icon="{ui:SymbolIcon SpeakerMute24}" Command="{Binding ToggleDuckFillInCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
 
-                        <Grid Margin="0,0,0,8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <ui:Button Grid.Column="0" Content="Play" Icon="{ui:SymbolIcon Play24}" Command="{Binding PlayFillInCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" HorizontalAlignment="Stretch"/>
-                            <ui:Button Grid.Column="1" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopFillInCommand}" Appearance="Secondary" Margin="4,0,0,0" HorizontalAlignment="Stretch"/>
-                        </Grid>
-
-                        <ui:Button Content="Duck for Announcement" Icon="{ui:SymbolIcon SpeakerMute24}" Command="{Binding ToggleDuckFillInCommand}" Appearance="Secondary" HorizontalAlignment="Stretch"/>
-
-                        <TextBlock Margin="0,8,0,0"
+                            <TextBlock Margin="0,8,0,0"
                                    Text="{Binding IsFillInPlaying, StringFormat='Status: {0}'}"
-                                   FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        <TextBlock Text="{Binding IsFillInDucked, StringFormat='Ducked: {0}'}"
-                                   FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                                   FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                            <TextBlock Text="{Binding IsFillInDucked, StringFormat='Ducked: {0}'}"
+                                   FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
-            <!-- End-of-Rotation Playlist (Fourth Column) -->
-            <Border Grid.Column="3" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="16">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                <!-- End-of-Rotation Playlist (Fourth Column) -->
+                <Border Grid.Column="3" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="End-of-Rotation Playlist" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                        <TextBlock Grid.Row="0" Text="End-of-Rotation Playlist" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12" />
 
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
-                        <ui:Button Icon="{ui:SymbolIcon Add24}" Content="Add" Command="{Binding AddToEndRotationCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0"/>
-                        <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding MoveEndRotationUpCommand}" Margin="0,0,4,0" ToolTip="Move Up"/>
-                        <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding MoveEndRotationDownCommand}" Margin="0,0,4,0" ToolTip="Move Down"/>
-                        <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveEndRotationItemCommand}" Appearance="Danger" ToolTip="Remove"/>
-                    </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+                            <ui:Button Icon="{ui:SymbolIcon Add24}" Content="Add" Command="{Binding AddToEndRotationCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" />
+                            <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding MoveEndRotationUpCommand}" Margin="0,0,4,0" ToolTip="Move Up" />
+                            <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding MoveEndRotationDownCommand}" Margin="0,0,4,0" ToolTip="Move Down" />
+                            <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveEndRotationItemCommand}" Appearance="Danger" ToolTip="Remove" />
+                        </StackPanel>
 
-                    <ListBox Grid.Row="2" ItemsSource="{Binding EndRotationTracks}" SelectedItem="{Binding SelectedEndRotationTrack}" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,4">
-                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <ListBox Grid.Row="2" ItemsSource="{Binding EndRotationTracks}" SelectedItem="{Binding SelectedEndRotationTrack}" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,4">
+                                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <StackPanel Grid.Row="3">
+                            <TextBlock Text="Volume" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6" />
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="46" />
+                                </Grid.ColumnDefinitions>
+                                <Slider Minimum="0" Maximum="100" Value="{Binding EndRotationVolume}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding EndRotationVolume, StringFormat='{}{0:0}%'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <Expander Header="Tone (EQ)" Margin="0,0,0,12" FontSize="12">
+                                <StackPanel Margin="0,8,0,0">
+                                    <TextBlock Text="Bass" FontSize="11" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="46" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Minimum="-20" Maximum="20" Value="{Binding EndRotationBass}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding EndRotationBass, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <TextBlock Text="Treble" FontSize="11" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="46" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Minimum="-20" Maximum="20" Value="{Binding EndRotationTreble}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding EndRotationTreble, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <TextBlock Text="Gain (Preamp)" FontSize="11" Margin="0,0,0,4" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="46" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Minimum="-20" Maximum="20" Value="{Binding EndRotationGain}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding EndRotationGain, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
                                 </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                            </Expander>
 
-                    <StackPanel Grid.Row="3">
-                        <TextBlock Text="Volume" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="46"/>
-                            </Grid.ColumnDefinitions>
-                            <Slider Minimum="0" Maximum="100" Value="{Binding EndRotationVolume}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="{Binding EndRotationVolume, StringFormat='{}{0:0}%'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:Button Grid.Column="0" Content="Play" Icon="{ui:SymbolIcon Play24}" Command="{Binding StartEndRotationMusicCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                                <ui:Button Grid.Column="1" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopEndRotationMusicCommand}" Appearance="Secondary" Margin="4,0,0,0" HorizontalAlignment="Stretch" />
+                            </Grid>
 
-                        <Expander Header="Tone (EQ)" Margin="0,0,0,12" FontSize="12">
-                            <StackPanel Margin="0,8,0,0">
-                                <TextBlock Text="Bass" FontSize="11" Margin="0,0,0,4"/>
-                                <Grid Margin="0,0,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="46"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Slider Minimum="-20" Maximum="20" Value="{Binding EndRotationBass}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding EndRotationBass, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                                <TextBlock Text="Treble" FontSize="11" Margin="0,0,0,4"/>
-                                <Grid Margin="0,0,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="46"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Slider Minimum="-20" Maximum="20" Value="{Binding EndRotationTreble}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding EndRotationTreble, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                                <TextBlock Text="Gain (Preamp)" FontSize="11" Margin="0,0,0,4"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="46"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Slider Minimum="-20" Maximum="20" Value="{Binding EndRotationGain}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding EndRotationGain, StringFormat='{}{0:0}dB'}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                            </StackPanel>
-                        </Expander>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <ui:Button Grid.Column="0" Content="Play" Icon="{ui:SymbolIcon Play24}" Command="{Binding StartEndRotationMusicCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" HorizontalAlignment="Stretch"/>
-                            <ui:Button Grid.Column="1" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopEndRotationMusicCommand}" Appearance="Secondary" Margin="4,0,0,0" HorizontalAlignment="Stretch"/>
-                        </Grid>
-
-                        <TextBlock Margin="0,8,0,0"
+                            <TextBlock Margin="0,8,0,0"
                                    Text="{Binding IsEndRotationPlaying, StringFormat='Status: {0}'}"
-                                   FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                        <TextBlock Text="Plays automatically when the singer queue empties."
-                                   FontSize="11" FontStyle="Italic" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,4,0,0" TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-        </Grid>
+                                   FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                            <TextBlock Text="Plays automatically when the singer queue empties."
+                                   FontSize="11" FontStyle="Italic" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
         </ScrollViewer>
     </Grid>
 </Page>
