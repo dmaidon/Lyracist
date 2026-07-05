@@ -257,11 +257,11 @@ This is ready to paste directly into TODO.md.
 - [x] Add static IP or mDNS discovery
 
 #### 22. SignalR Sync
-- [ ] Add rotation sync
-- [ ] Add Now/Next sync
-- [ ] Add singer position sync
-- [ ] Add request sync
-- [ ] Add tablet sync smoothing
+- [x] Add rotation sync
+- [x] Add Now/Next sync
+- [x] Add singer position sync
+- [x] Add request sync
+- [x] Add tablet sync smoothing
 
 ---
 
