@@ -11,31 +11,31 @@
         <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#FF8E53" Offset="0.0"/>
-            <GradientStop Color="#FF4E50" Offset="1.0"/>
+            <GradientStop Color="#FF8E53" Offset="0.0" />
+            <GradientStop Color="#FF4E50" Offset="1.0" />
         </LinearGradientBrush>
     </Page.Resources>
 
     <Grid Margin="24">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <!-- Header -->
         <Border Grid.Row="0" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
             <StackPanel>
-                <TextBlock Text="Lyracist Karaoke Control" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                <TextBlock Text="Control your audio, CDG decoding, and singer queues here." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0"/>
+                <TextBlock Text="Lyracist Karaoke Control" FontSize="28" FontWeight="Bold" Foreground="White" />
+                <TextBlock Text="Control your audio, CDG decoding, and singer queues here." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0" />
             </StackPanel>
         </Border>
 
         <!-- Main Content -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2.8*"/>
-                <ColumnDefinition Width="3.2*"/>
-                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="2.8*" />
+                <ColumnDefinition Width="3.2*" />
+                <ColumnDefinition Width="4*" />
             </Grid.ColumnDefinitions>
 
             <!-- Left Column: Search & Assignment -->
@@ -50,19 +50,19 @@
                     </Style>
                 </Grid.Style>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <!-- Search Input Row -->
                 <Grid Grid.Row="0" Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ui:TextBox Grid.Column="0" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Search song or artist..." Icon="{ui:SymbolIcon Search24}" Margin="0,0,8,0"/>
-                    <ui:Button Grid.Column="1" Content="Scan..." Icon="{ui:SymbolIcon Folder24}" Command="{Binding ScanFolderCommand}" Appearance="Secondary"/>
+                    <ui:TextBox Grid.Column="0" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Search song or artist..." Icon="{ui:SymbolIcon Search24}" Margin="0,0,8,0" />
+                    <ui:Button Grid.Column="1" Content="Scan..." Icon="{ui:SymbolIcon Folder24}" Command="{Binding ScanFolderCommand}" Appearance="Secondary" />
                 </Grid>
 
                 <!-- Search Results list -->
@@ -92,7 +92,7 @@
                                                            Appearance="Primary"
                                                            Padding="6"
                                                            Margin="2"
-                                                           VerticalAlignment="Center"/>
+                                                           VerticalAlignment="Center" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -105,57 +105,57 @@
                             <Grid>
                                 <!-- Content when NOT authenticated -->
                                 <StackPanel Visibility="{Binding IsPartyTymeDisconnected, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Center" Margin="10,20">
-                                    <TextBlock Text="Party Tyme Subscription" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                                    <TextBlock Text="Commercial streaming integration. Enter credentials." FontSize="11" Foreground="#888888" HorizontalAlignment="Center" Margin="0,0,0,16"/>
-                                    
-                                    <TextBlock Text="Client ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                    <ui:TextBox Text="{Binding PartyTymeClientId, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter client ID..." Margin="0,0,0,12"/>
-                                    
-                                    <TextBlock Text="Client Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                    <ui:TextBox Text="{Binding PartyTymeClientSecret, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter client secret..." Margin="0,0,0,16"/>
-                                    
-                                    <ui:Button Content="Connect &amp; Authenticate" Icon="{ui:SymbolIcon Key24}" Command="{Binding ConnectPartyTymeCommand}" Appearance="Primary" HorizontalAlignment="Stretch" Background="{StaticResource UIAccentBrush}" Padding="10"/>
-                                    <TextBlock Text="{Binding PartyTymeConnectionStatus}" FontSize="11" Foreground="#FF8E53" Margin="0,12,0,0" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Party Tyme Subscription" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                    <TextBlock Text="Commercial streaming integration. Enter credentials." FontSize="11" Foreground="#888888" HorizontalAlignment="Center" Margin="0,0,0,16" />
+
+                                    <TextBlock Text="Client ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <ui:TextBox Text="{Binding PartyTymeClientId, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter client ID..." Margin="0,0,0,12" />
+
+                                    <TextBlock Text="Client Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <ui:TextBox Text="{Binding PartyTymeClientSecret, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter client secret..." Margin="0,0,0,16" />
+
+                                    <ui:Button Content="Connect &amp; Authenticate" Icon="{ui:SymbolIcon Key24}" Command="{Binding ConnectPartyTymeCommand}" Appearance="Primary" HorizontalAlignment="Stretch" Background="{StaticResource UIAccentBrush}" Padding="10" />
+                                    <TextBlock Text="{Binding PartyTymeConnectionStatus}" FontSize="11" Foreground="#FF8E53" Margin="0,12,0,0" HorizontalAlignment="Center" />
                                 </StackPanel>
 
                                 <!-- Content when authenticated -->
                                 <Grid Visibility="{Binding IsPartyTymeConnected, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    
+
                                     <ListBox Grid.Row="0" ItemsSource="{Binding PartyTymeResults}" SelectedItem="{Binding SelectedPartyTymeTrack, Mode=TwoWay}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
                                                 <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
-                                                        
+
                                                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
-                                                            <TextBlock Text="{Binding Artist}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                            <TextBlock Text="{Binding Artist}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
                                                         </StackPanel>
-                                                        
+
                                                         <!-- Badge indicating cache status -->
                                                         <Border Grid.Column="1" CornerRadius="4" Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}" Padding="6,2" VerticalAlignment="Center" Margin="6,0" Visibility="{Binding IsCached, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                            <TextBlock Text="CACHED" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorSuccessBrush}"/>
+                                                            <TextBlock Text="CACHED" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorSuccessBrush}" />
                                                         </Border>
-                                                        
+
                                                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                                            <ui:Button Icon="{ui:SymbolIcon CloudDownload24}" Command="{Binding DataContext.CachePartyTymeTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Cache Offline" Appearance="Secondary" Padding="6" Margin="0,0,4,0"/>
-                                                            <ui:Button Icon="{ui:SymbolIcon Play24}" Command="{Binding DataContext.PlayPartyTymeTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Stream Track" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Padding="6"/>
+                                                            <ui:Button Icon="{ui:SymbolIcon CloudDownload24}" Command="{Binding DataContext.CachePartyTymeTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Cache Offline" Appearance="Secondary" Padding="6" Margin="0,0,4,0" />
+                                                            <ui:Button Icon="{ui:SymbolIcon Play24}" Command="{Binding DataContext.PlayPartyTymeTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Stream Track" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Padding="6" />
                                                         </StackPanel>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
                                     </ListBox>
-                                    <TextBlock Grid.Row="1" Text="{Binding PartyTymeConnectionStatus}" FontSize="10" Foreground="#888888" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    <TextBlock Grid.Row="1" Text="{Binding PartyTymeConnectionStatus}" FontSize="10" Foreground="#888888" HorizontalAlignment="Center" Margin="0,4,0,0" />
                                 </Grid>
                             </Grid>
                         </Border>
@@ -164,38 +164,38 @@
                         <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="12" Margin="0,8,0,0">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
-                                
+
                                 <!-- Service Selector -->
                                 <Grid Grid.Row="0" Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Service:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" FontWeight="SemiBold"/>
-                                    <ComboBox Grid.Column="1" SelectedValue="{Binding SelectedExternalService, Mode=TwoWay}" SelectedValuePath="Content" FontSize="11" Height="28">
-                                        <ComboBoxItem Content="All"/>
-                                        <ComboBoxItem Content="Spotify"/>
-                                        <ComboBoxItem Content="YouTube"/>
-                                        <ComboBoxItem Content="Amazon"/>
+                                    <TextBlock Text="Service:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" FontWeight="SemiBold" />
+                                    <ComboBox Grid.Column="1" SelectedValue="{Binding SelectedExternalService, Mode=TwoWay}" SelectedValuePath="Content" FontSize="11" Height="35">
+                                        <ComboBoxItem Content="All" />
+                                        <ComboBoxItem Content="Spotify" />
+                                        <ComboBoxItem Content="YouTube" />
+                                        <ComboBoxItem Content="Amazon" />
                                     </ComboBox>
                                 </Grid>
 
                                 <!-- Direct URL input for Custom Links -->
                                 <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,0,0,8" Background="{DynamicResource ControlFillColorDefaultBrush}">
                                     <StackPanel>
-                                        <TextBlock Text="Paste Custom Music Link" FontSize="11" FontWeight="Bold" Foreground="White" Margin="0,0,0,6"/>
-                                        <ui:TextBox Text="{Binding CustomExternalUrl, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Paste Spotify, YouTube, or Amazon URL..." Margin="0,0,0,6" FontSize="11" Height="26"/>
+                                        <TextBlock Text="Paste Custom Music Link" FontSize="11" FontWeight="Bold" Foreground="White" Margin="0,0,0,6" />
+                                        <ui:TextBox Text="{Binding CustomExternalUrl, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Paste Spotify, YouTube, or Amazon URL..." Margin="0,0,0,6" FontSize="11" Height="35" />
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <ui:TextBox Grid.Column="0" Text="{Binding CustomExternalTitle, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Song Title (Optional)..." Margin="0,0,4,0" FontSize="11" Height="26"/>
-                                            <ui:TextBox Grid.Column="1" Text="{Binding CustomExternalArtist, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Artist Name (Optional)..." Margin="4,0,0,0" FontSize="11" Height="26"/>
+                                            <ui:TextBox Grid.Column="0" Text="{Binding CustomExternalTitle, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Song Title (Optional)..." Margin="0,0,4,0" FontSize="11" Height="35" />
+                                            <ui:TextBox Grid.Column="1" Text="{Binding CustomExternalArtist, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Artist Name (Optional)..." Margin="4,0,0,0" FontSize="11" Height="35" />
                                         </Grid>
                                     </StackPanel>
                                 </Border>
@@ -207,29 +207,29 @@
                                             <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
-                                                    
+
                                                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
-                                                        <TextBlock Text="{Binding Artist}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding Artist}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
                                                     </StackPanel>
-                                                    
+
                                                     <!-- Service Brand Badge -->
                                                     <Border Grid.Column="1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center" Margin="6,0">
                                                         <Border.Style>
                                                             <Style TargetType="Border">
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Source}" Value="Spotify">
-                                                                        <Setter Property="Background" Value="#331DB954"/>
+                                                                        <Setter Property="Background" Value="#331DB954" />
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Source}" Value="YouTube">
-                                                                        <Setter Property="Background" Value="#33FF0000"/>
+                                                                        <Setter Property="Background" Value="#33FF0000" />
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Source}" Value="Amazon">
-                                                                        <Setter Property="Background" Value="#3300A8E1"/>
+                                                                        <Setter Property="Background" Value="#3300A8E1" />
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
@@ -239,26 +239,41 @@
                                                                 <Style TargetType="TextBlock">
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding Source}" Value="Spotify">
-                                                                            <Setter Property="Text" Value="SPOTIFY"/>
-                                                                            <Setter Property="Foreground" Value="#1DB954"/>
+                                                                            <Setter Property="Text" Value="SPOTIFY" />
+                                                                            <Setter Property="Foreground" Value="#1DB954" />
                                                                         </DataTrigger>
                                                                         <DataTrigger Binding="{Binding Source}" Value="YouTube">
-                                                                            <Setter Property="Text" Value="YOUTUBE"/>
-                                                                            <Setter Property="Foreground" Value="#FF0000"/>
+                                                                            <Setter Property="Text" Value="YOUTUBE" />
+                                                                            <Setter Property="Foreground" Value="#FF0000" />
                                                                         </DataTrigger>
                                                                         <DataTrigger Binding="{Binding Source}" Value="Amazon">
-                                                                            <Setter Property="Text" Value="AMAZON"/>
-                                                                            <Setter Property="Foreground" Value="#00A8E1"/>
+                                                                            <Setter Property="Text" Value="AMAZON" />
+                                                                            <Setter Property="Foreground" Value="#00A8E1" />
                                                                         </DataTrigger>
                                                                     </Style.Triggers>
                                                                 </Style>
                                                             </TextBlock.Style>
                                                         </TextBlock>
                                                     </Border>
-                                                    
-                                                    <ui:Button Grid.Column="2" Icon="{ui:SymbolIcon Play24}" Command="{Binding DataContext.PlayExternalTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Open Link in Browser" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Padding="6" VerticalAlignment="Center"/>
-                                                </Grid>
-                                            </Border>
+
+                                                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                         <ui:Button Icon="{ui:SymbolIcon Add24}" 
+                                                                    Command="{Binding DataContext.AddExternalSongToRotationCommand, RelativeSource={RelativeSource AncestorType=Page}}" 
+                                                                    CommandParameter="{Binding}" 
+                                                                    ToolTip="Add Song to Singer Rotation" 
+                                                                    Appearance="Secondary" 
+                                                                    Margin="0,0,4,0" 
+                                                                    Padding="6" />
+                                                         <ui:Button Icon="{ui:SymbolIcon Play24}" 
+                                                                    Command="{Binding DataContext.PlayExternalTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                                                                    CommandParameter="{Binding}" 
+                                                                    ToolTip="Open Link in Browser" 
+                                                                    Appearance="Primary" 
+                                                                    Background="{StaticResource UIAccentBrush}" 
+                                                                    Padding="6" />
+                                                     </StackPanel>
+                                                 </Grid>
+                                             </Border>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
@@ -270,28 +285,28 @@
                 <!-- Singer Assignment Card -->
                 <Border Grid.Row="2" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="16" Margin="0,12,0,0">
                     <StackPanel>
-                        <TextBlock Text="Singer Assignment" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                        
-                        <TextBlock Text="Singer Name" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Singer Assignment" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12" />
+
+                        <TextBlock Text="Singer Name" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                         <ComboBox IsEditable="True"
                                   Text="{Binding NewSingerName, UpdateSourceTrigger=PropertyChanged}"
                                   ItemsSource="{Binding SingerNames}"
-                                  Margin="0,0,0,8"/>
+                                  Margin="0,0,0,8" />
 
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="Key Transposition" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="{Binding NewSingerKey, StringFormat='{}{0:+0;-0;0}'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorAttentionBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="0" Text="Key Transposition" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding NewSingerKey, StringFormat='{}{0:+0;-0;0}'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorAttentionBrush}" VerticalAlignment="Center" />
                         </Grid>
-                        <Slider Minimum="-6" Maximum="6" Value="{Binding NewSingerKey, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,0,0,8"/>
+                        <Slider Minimum="-6" Maximum="6" Value="{Binding NewSingerKey, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,0,0,8" />
 
-                        <TextBlock Text="Notes / Special Request" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
-                        <ui:TextBox Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. vocal range, notes..." Margin="0,0,0,12"/>
+                        <TextBlock Text="Notes / Special Request" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. vocal range, notes..." Margin="0,0,0,12" />
 
-                        <ui:Button Content="Add to Rotation" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddToRotationCommand}" Appearance="Primary" HorizontalAlignment="Stretch" Background="{StaticResource UIAccentBrush}"/>
+                        <ui:Button Content="Add to Rotation" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddToRotationCommand}" Appearance="Primary" HorizontalAlignment="Stretch" Background="{StaticResource UIAccentBrush}" />
                     </StackPanel>
                 </Border>
             </Grid>
@@ -308,10 +323,10 @@
                     </Style>
                 </Grid.Style>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <!-- Now / Next Prominent Banners -->
@@ -320,20 +335,20 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    
+
                     <Border Grid.Column="0" Margin="0,0,6,0" CornerRadius="8" Background="#1E133A" BorderBrush="#FF8E53" BorderThickness="1.5" Padding="12">
                         <StackPanel>
-                            <TextBlock Text="NOW SINGING" FontSize="11" FontWeight="Bold" Foreground="#FF8E53" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding NowSingingName}" FontSize="16" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{Binding NowSingingSong}" FontSize="11" Foreground="#CCCCCC" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="NOW SINGING" FontSize="11" FontWeight="Bold" Foreground="#FF8E53" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding NowSingingName}" FontSize="16" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding NowSingingSong}" FontSize="11" Foreground="#CCCCCC" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </Border>
 
                     <Border Grid.Column="1" Margin="6,0,0,0" CornerRadius="8" Background="#0C1D3A" BorderBrush="#0083B0" BorderThickness="1.5" Padding="12">
                         <StackPanel>
-                            <TextBlock Text="NEXT UP" FontSize="11" FontWeight="Bold" Foreground="#0083B0" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding NextUpName}" FontSize="16" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{Binding NextUpSong}" FontSize="11" Foreground="#CCCCCC" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="NEXT UP" FontSize="11" FontWeight="Bold" Foreground="#0083B0" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding NextUpName}" FontSize="16" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding NextUpSong}" FontSize="11" Foreground="#CCCCCC" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -342,25 +357,25 @@
                 <StackPanel Grid.Row="1" Margin="0,0,0,8">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Singer Queue" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        
+                        <TextBlock Grid.Column="0" Text="Singer Queue" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding Rotation.MoveUpCommand}" Margin="0,0,4,0" ToolTip="Move Up"/>
-                            <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding Rotation.MoveDownCommand}" Margin="0,0,4,0" ToolTip="Move Down"/>
-                            <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding Rotation.RemoveSingerCommand}" Appearance="Danger" Margin="0,0,4,0" ToolTip="Remove Selected"/>
-                            <ui:Button Icon="{ui:SymbolIcon Dismiss24}" Command="{Binding Rotation.ClearRotationCommand}" Appearance="Secondary" ToolTip="Clear Queue"/>
+                            <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding Rotation.MoveUpCommand}" Margin="0,0,4,0" ToolTip="Move Up" />
+                            <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding Rotation.MoveDownCommand}" Margin="0,0,4,0" ToolTip="Move Down" />
+                            <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding Rotation.RemoveSingerCommand}" Appearance="Danger" Margin="0,0,4,0" ToolTip="Remove Selected" />
+                            <ui:Button Icon="{ui:SymbolIcon Dismiss24}" Command="{Binding Rotation.ClearRotationCommand}" Appearance="Secondary" ToolTip="Clear Queue" />
                         </StackPanel>
                     </Grid>
                     <!-- Queue Service Filters -->
                     <WrapPanel Margin="0,6,0,0" Orientation="Horizontal">
-                        <CheckBox Content="Local" IsChecked="{Binding ShowLocalFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11"/>
-                        <CheckBox Content="Party Tyme" IsChecked="{Binding ShowPartyTymeFilter, Mode=TwoWay}" IsEnabled="{Binding IsPartyTymeConnected}" Margin="0,0,10,0" FontSize="11"/>
-                        <CheckBox Content="Spotify" IsChecked="{Binding ShowSpotifyFilter, Mode=TwoWay}" IsEnabled="{Binding IsSpotifyAvailable}" Margin="0,0,10,0" FontSize="11"/>
-                        <CheckBox Content="YouTube" IsChecked="{Binding ShowYouTubeFilter, Mode=TwoWay}" IsEnabled="{Binding IsYouTubeAvailable}" Margin="0,0,10,0" FontSize="11"/>
-                        <CheckBox Content="Amazon" IsChecked="{Binding ShowAmazonFilter, Mode=TwoWay}" IsEnabled="{Binding IsAmazonAvailable}" Margin="0,0,0,0" FontSize="11"/>
+                        <CheckBox Content="Local" IsChecked="{Binding ShowLocalFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11" />
+                        <CheckBox Content="Party Tyme" IsChecked="{Binding ShowPartyTymeFilter, Mode=TwoWay}" IsEnabled="{Binding IsPartyTymeConnected}" Margin="0,0,10,0" FontSize="11" />
+                        <CheckBox Content="Spotify" IsChecked="{Binding ShowSpotifyFilter, Mode=TwoWay}" IsEnabled="{Binding IsSpotifyAvailable}" Margin="0,0,10,0" FontSize="11" />
+                        <CheckBox Content="YouTube" IsChecked="{Binding ShowYouTubeFilter, Mode=TwoWay}" IsEnabled="{Binding IsYouTubeAvailable}" Margin="0,0,10,0" FontSize="11" />
+                        <CheckBox Content="Amazon" IsChecked="{Binding ShowAmazonFilter, Mode=TwoWay}" IsEnabled="{Binding IsAmazonAvailable}" Margin="0,0,0,0" FontSize="11" />
                     </WrapPanel>
                 </StackPanel>
 
@@ -369,42 +384,42 @@
                     <ListBox ItemsSource="{Binding Rotation.Rotation}" SelectedItem="{Binding Rotation.SelectedSinger}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                                <Setter Property="Visibility" Value="Visible"/>
+                                <Setter Property="Visibility" Value="Visible" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Source}" Value="Local"/>
-                                            <Condition Binding="{Binding DataContext.ShowLocalFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False"/>
+                                            <Condition Binding="{Binding Source}" Value="Local" />
+                                            <Condition Binding="{Binding DataContext.ShowLocalFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False" />
                                         </MultiDataTrigger.Conditions>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Visibility" Value="Collapsed" />
                                     </MultiDataTrigger>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Source}" Value="PartyTyme"/>
-                                            <Condition Binding="{Binding DataContext.ShowPartyTymeFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False"/>
+                                            <Condition Binding="{Binding Source}" Value="PartyTyme" />
+                                            <Condition Binding="{Binding DataContext.ShowPartyTymeFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False" />
                                         </MultiDataTrigger.Conditions>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Visibility" Value="Collapsed" />
                                     </MultiDataTrigger>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Source}" Value="Spotify"/>
-                                            <Condition Binding="{Binding DataContext.ShowSpotifyFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False"/>
+                                            <Condition Binding="{Binding Source}" Value="Spotify" />
+                                            <Condition Binding="{Binding DataContext.ShowSpotifyFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False" />
                                         </MultiDataTrigger.Conditions>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Visibility" Value="Collapsed" />
                                     </MultiDataTrigger>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Source}" Value="YouTube"/>
-                                            <Condition Binding="{Binding DataContext.ShowYouTubeFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False"/>
+                                            <Condition Binding="{Binding Source}" Value="YouTube" />
+                                            <Condition Binding="{Binding DataContext.ShowYouTubeFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False" />
                                         </MultiDataTrigger.Conditions>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Visibility" Value="Collapsed" />
                                     </MultiDataTrigger>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding Source}" Value="Amazon"/>
-                                            <Condition Binding="{Binding DataContext.ShowAmazonFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False"/>
+                                            <Condition Binding="{Binding Source}" Value="Amazon" />
+                                            <Condition Binding="{Binding DataContext.ShowAmazonFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False" />
                                         </MultiDataTrigger.Conditions>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Visibility" Value="Collapsed" />
                                     </MultiDataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -414,17 +429,17 @@
                                 <Border Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Page}}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
                                     <Border.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="Edit Singer Audio Defaults..." Command="{Binding Path=PlacementTarget.Tag.EditSingerSettingsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}"/>
-                                            <MenuItem Header="Play Performer's Request" Command="{Binding Path=PlacementTarget.Tag.PlayPerformerRequestCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}"/>
+                                            <MenuItem Header="Edit Singer Audio Defaults..." Command="{Binding Path=PlacementTarget.Tag.EditSingerSettingsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                            <MenuItem Header="Play Performer's Request" Command="{Binding Path=PlacementTarget.Tag.PlayPerformerRequestCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                                             <MenuItem Header="Open External Link in Browser" Command="{Binding Path=PlacementTarget.Tag.OpenExternalLinkInBrowserCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}">
                                                 <MenuItem.Style>
                                                     <Style TargetType="MenuItem">
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Source}" Value="Local">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Setter Property="Visibility" Value="Collapsed" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Source}" Value="PartyTyme">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Setter Property="Visibility" Value="Collapsed" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -434,16 +449,16 @@
                                     </Border.ContextMenu>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                            <TextBlock Text="{Binding SongTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Text="{Binding Notes}" FontSize="10" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Visibility="{Binding Notes, Converter={StaticResource NullToVisibilityConverter}}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{Binding SongTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Notes}" FontSize="10" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Visibility="{Binding Notes, Converter={StaticResource NullToVisibilityConverter}}" Margin="0,2,0,0" TextWrapping="Wrap" />
                                         </StackPanel>
 
                                         <!-- Badge for Service Provider (Local, Party Tyme, Spotify, YouTube, Amazon) -->
@@ -452,19 +467,19 @@
                                                 <Style TargetType="Border">
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Source}" Value="Local">
-                                                            <Setter Property="Background" Value="{DynamicResource SystemFillColorSuccessBackgroundBrush}"/>
+                                                            <Setter Property="Background" Value="{DynamicResource SystemFillColorSuccessBackgroundBrush}" />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Source}" Value="PartyTyme">
-                                                            <Setter Property="Background" Value="#33FF8E53"/>
+                                                            <Setter Property="Background" Value="#33FF8E53" />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Source}" Value="Spotify">
-                                                            <Setter Property="Background" Value="#331DB954"/>
+                                                            <Setter Property="Background" Value="#331DB954" />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Source}" Value="YouTube">
-                                                            <Setter Property="Background" Value="#33FF0000"/>
+                                                            <Setter Property="Background" Value="#33FF0000" />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Source}" Value="Amazon">
-                                                            <Setter Property="Background" Value="#3300A8E1"/>
+                                                            <Setter Property="Background" Value="#3300A8E1" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -474,24 +489,24 @@
                                                     <Style TargetType="TextBlock">
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Source}" Value="Local">
-                                                                <Setter Property="Text" Value="LOCAL"/>
-                                                                <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}"/>
+                                                                <Setter Property="Text" Value="LOCAL" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Source}" Value="PartyTyme">
-                                                                <Setter Property="Text" Value="PARTY TYME"/>
-                                                                <Setter Property="Foreground" Value="#FF8E53"/>
+                                                                <Setter Property="Text" Value="PARTY TYME" />
+                                                                <Setter Property="Foreground" Value="#FF8E53" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Source}" Value="Spotify">
-                                                                <Setter Property="Text" Value="SPOTIFY"/>
-                                                                <Setter Property="Foreground" Value="#1DB954"/>
+                                                                <Setter Property="Text" Value="SPOTIFY" />
+                                                                <Setter Property="Foreground" Value="#1DB954" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Source}" Value="YouTube">
-                                                                <Setter Property="Text" Value="YOUTUBE"/>
-                                                                <Setter Property="Foreground" Value="#FF0000"/>
+                                                                <Setter Property="Text" Value="YOUTUBE" />
+                                                                <Setter Property="Foreground" Value="#FF0000" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding Source}" Value="Amazon">
-                                                                <Setter Property="Text" Value="AMAZON"/>
-                                                                <Setter Property="Foreground" Value="#00A8E1"/>
+                                                                <Setter Property="Text" Value="AMAZON" />
+                                                                <Setter Property="Foreground" Value="#00A8E1" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -500,7 +515,7 @@
                                         </Border>
 
                                         <Border Grid.Column="2" CornerRadius="4" Background="{DynamicResource SystemFillColorCautionBackgroundBrush}" Padding="6,4" VerticalAlignment="Center" Margin="2,0,0,0">
-                                            <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
+                                            <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorCautionBrush}" />
                                         </Border>
                                     </Grid>
                                 </Border>
@@ -510,7 +525,7 @@
                 </Border>
 
                 <!-- Queue Sing Button -->
-                <ui:Button Grid.Row="3" Content="Load &amp; Play Selected Performer" Icon="{ui:SymbolIcon Play24}" Command="{Binding Rotation.MarkAsSingingCommand}" Appearance="Primary" HorizontalAlignment="Stretch" Padding="12" Margin="0,12,0,0" Background="{StaticResource UIAccentBrush}"/>
+                <ui:Button Grid.Row="3" Content="Load &amp; Play Selected Performer" Icon="{ui:SymbolIcon Play24}" Command="{Binding Rotation.MarkAsSingingCommand}" Appearance="Primary" HorizontalAlignment="Stretch" Padding="12" Margin="0,12,0,0" Background="{StaticResource UIAccentBrush}" />
             </Grid>
 
             <!-- Right Column: Live Lyrics Preview, Audio Controls & Displays -->
@@ -539,25 +554,25 @@
                     <!-- Clickable Preview Screen -->
                     <Grid Grid.Row="0">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        
-                        <TextBlock Grid.Row="0" Text="Lyrics Preview Monitor (Click to Toggle Theater Mode)" FontSize="14" FontWeight="SemiBold" Foreground="#888888" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                        
+
+                        <TextBlock Grid.Row="0" Text="Lyrics Preview Monitor (Click to Toggle Theater Mode)" FontSize="14" FontWeight="SemiBold" Foreground="#888888" HorizontalAlignment="Center" Margin="0,0,0,10" />
+
                         <Border Grid.Row="1" CornerRadius="6" Background="Black" ClipToBounds="True" BorderBrush="#333" BorderThickness="1">
-                            <ui:Button Command="{Binding TogglePreviewExpandCommand}" 
-                                       Padding="0" 
+                            <ui:Button Command="{Binding TogglePreviewExpandCommand}"
+                                       Padding="0"
                                        BorderThickness="0"
-                                       Background="Transparent" 
+                                       Background="Transparent"
                                        Cursor="Hand"
-                                       HorizontalAlignment="Stretch" 
-                                       VerticalAlignment="Stretch" 
-                                       HorizontalContentAlignment="Stretch" 
+                                       HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch"
+                                       HorizontalContentAlignment="Stretch"
                                        VerticalContentAlignment="Stretch">
                                 <Grid>
-                                    <Image Source="{Binding CurrentFrame}" Stretch="Uniform"/>
-                                    <TextBlock Text="No active media feed" Foreground="#444444" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding CurrentFrame, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Visible}"/>
+                                    <Image Source="{Binding CurrentFrame}" Stretch="Uniform" />
+                                    <TextBlock Text="No active media feed" Foreground="#444444" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding CurrentFrame, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Visible}" />
                                 </Grid>
                             </ui:Button>
                         </Border>
@@ -583,8 +598,8 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="Audio Controls" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                    <ui:Button Grid.Column="1" Content="Reset Audio" Icon="{ui:SymbolIcon ArrowReset24}" Command="{Binding ResetAudioCommand}" Appearance="Secondary"/>
+                                    <TextBlock Grid.Column="0" Text="Audio Controls" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <ui:Button Grid.Column="1" Content="Reset Audio" Icon="{ui:SymbolIcon ArrowReset24}" Command="{Binding ResetAudioCommand}" Appearance="Secondary" />
                                 </Grid>
 
                                 <!-- First Slider Row (Volume, Speed, Pitch) -->
@@ -596,32 +611,32 @@
                                         <ColumnDefinition Width="16" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    
+
                                     <!-- Volume -->
                                     <StackPanel Grid.Column="0">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Volume" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                                            <TextBlock Text="{Binding Volume, StringFormat='{}{0:0}%'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="Volume" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="{Binding Volume, StringFormat='{}{0:0}%'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
-                                        <Slider Minimum="0" Maximum="100" Value="{Binding Volume, Mode=TwoWay}"/>
+                                        <Slider Minimum="0" Maximum="100" Value="{Binding Volume, Mode=TwoWay}" />
                                     </StackPanel>
 
                                     <!-- Speed -->
                                     <StackPanel Grid.Column="2">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Speed" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                                            <TextBlock Text="{Binding Speed, StringFormat='{}{0:0.0}x'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="Speed" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="{Binding Speed, StringFormat='{}{0:0.0}x'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
-                                        <Slider Minimum="0.5" Maximum="2.0" Value="{Binding Speed, Mode=TwoWay}" TickFrequency="0.1" IsSnapToTickEnabled="True"/>
+                                        <Slider Minimum="0.5" Maximum="2.0" Value="{Binding Speed, Mode=TwoWay}" TickFrequency="0.1" IsSnapToTickEnabled="True" />
                                     </StackPanel>
 
                                     <!-- Pitch -->
                                     <StackPanel Grid.Column="4">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Pitch Transpose" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                                            <TextBlock Text="{Binding Pitch, StringFormat='{}{0:+0;-0;0}'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="Pitch Transpose" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="{Binding Pitch, StringFormat='{}{0:+0;-0;0}'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
-                                        <Slider Minimum="-6" Maximum="6" Value="{Binding Pitch, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                        <Slider Minimum="-6" Maximum="6" Value="{Binding Pitch, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" />
                                     </StackPanel>
                                 </Grid>
 
@@ -641,28 +656,28 @@
                                     <!-- Treble -->
                                     <StackPanel Grid.Column="0">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Treble (Highs)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                                            <TextBlock Text="{Binding Treble, StringFormat='{}{0:+0;-0;0} dB'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="Treble (Highs)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="{Binding Treble, StringFormat='{}{0:+0;-0;0} dB'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
-                                        <Slider Minimum="-10" Maximum="10" Value="{Binding Treble, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                        <Slider Minimum="-10" Maximum="10" Value="{Binding Treble, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" />
                                     </StackPanel>
 
                                     <!-- Mid -->
                                     <StackPanel Grid.Column="2">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Midrange" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                                            <TextBlock Text="{Binding Mid, StringFormat='{}{0:+0;-0;0} dB'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="Midrange" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="{Binding Mid, StringFormat='{}{0:+0;-0;0} dB'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
-                                        <Slider Minimum="-10" Maximum="10" Value="{Binding Mid, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                        <Slider Minimum="-10" Maximum="10" Value="{Binding Mid, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" />
                                     </StackPanel>
 
                                     <!-- Bass -->
                                     <StackPanel Grid.Column="4">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Bass (Lows)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                                            <TextBlock Text="{Binding Bass, StringFormat='{}{0:+0;-0;0} dB'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="Bass (Lows)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="{Binding Bass, StringFormat='{}{0:+0;-0;0} dB'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
-                                        <Slider Minimum="-10" Maximum="10" Value="{Binding Bass, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                        <Slider Minimum="-10" Maximum="10" Value="{Binding Bass, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" />
                                     </StackPanel>
                                 </Grid>
 
@@ -677,19 +692,19 @@
                                     <!-- Compressor -->
                                     <StackPanel Grid.Column="0">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Compressor Threshold" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                                            <TextBlock Text="{Binding Compressor, StringFormat='{}{0:0}%'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="Compressor Threshold" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="{Binding Compressor, StringFormat='{}{0:0}%'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
-                                        <Slider Minimum="0" Maximum="100" Value="{Binding Compressor, Mode=TwoWay}"/>
+                                        <Slider Minimum="0" Maximum="100" Value="{Binding Compressor, Mode=TwoWay}" />
                                     </StackPanel>
 
                                     <!-- Limiter -->
                                     <StackPanel Grid.Column="2">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Limiter Threshold" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                                            <TextBlock Text="{Binding Limiter, StringFormat='{}{0:0} dB'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="Limiter Threshold" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="{Binding Limiter, StringFormat='{}{0:0} dB'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
-                                        <Slider Minimum="-20" Maximum="0" Value="{Binding Limiter, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                        <Slider Minimum="-20" Maximum="0" Value="{Binding Limiter, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" />
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>
@@ -698,8 +713,8 @@
                         <!-- Display Projection & Multi-Monitor Controls -->
                         <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="16">
                             <StackPanel>
-                                <TextBlock Text="Display Projection &amp; Multi-Monitor Controls" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                
+                                <TextBlock Text="Display Projection &amp; Multi-Monitor Controls" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,12" />
+
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -709,35 +724,35 @@
 
                                     <!-- Lyrics Monitor -->
                                     <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Lyrics Projection Screen" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
-                                        <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedLyricsScreenIndex, Mode=TwoWay}" DisplayMemberPath="DeviceName" HorizontalAlignment="Stretch" Margin="0,0,0,8"/>
-                                        <ui:Button Content="Open Lyrics Window" Icon="{ui:SymbolIcon Window24}" Command="{Binding ShowLyricsCommand}" Appearance="Primary" HorizontalAlignment="Stretch"/>
+                                        <TextBlock Text="Lyrics Projection Screen" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedLyricsScreenIndex, Mode=TwoWay}" DisplayMemberPath="DeviceName" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
+                                        <ui:Button Content="Open Lyrics Window" Icon="{ui:SymbolIcon Window24}" Command="{Binding ShowLyricsCommand}" Appearance="Primary" HorizontalAlignment="Stretch" />
                                     </StackPanel>
 
                                     <!-- Rotation Monitor -->
                                     <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Rotation Queue Screen" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
-                                        <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedRotationScreenIndex, Mode=TwoWay}" DisplayMemberPath="DeviceName" HorizontalAlignment="Stretch" Margin="0,0,0,8"/>
-                                        <ui:Button Content="Open Rotation Window" Icon="{ui:SymbolIcon People24}" Command="{Binding ShowRotationCommand}" Appearance="Secondary" HorizontalAlignment="Stretch"/>
+                                        <TextBlock Text="Rotation Queue Screen" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedRotationScreenIndex, Mode=TwoWay}" DisplayMemberPath="DeviceName" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
+                                        <ui:Button Content="Open Rotation Window" Icon="{ui:SymbolIcon People24}" Command="{Binding ShowRotationCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
                                     </StackPanel>
                                 </Grid>
 
                                 <!-- Rotation Banner controls -->
                                 <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-                                <TextBlock Text="Rotation Screen Billboard Banner" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <TextBlock Text="Rotation Screen Billboard Banner" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="12" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <ui:TextBox Grid.Column="0" Text="{Binding RotationBannerText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter scroll announcement text..." Margin="0,0,0,0"/>
-                                    <CheckBox Grid.Column="2" Content="Show Banner" IsChecked="{Binding ShowRotationBanner, Mode=TwoWay}" VerticalAlignment="Center"/>
+                                    <ui:TextBox Grid.Column="0" Text="{Binding RotationBannerText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter scroll announcement text..." Margin="0,0,0,0" />
+                                    <CheckBox Grid.Column="2" Content="Show Banner" IsChecked="{Binding ShowRotationBanner, Mode=TwoWay}" VerticalAlignment="Center" />
                                 </Grid>
 
                                 <!-- Show Extras: Special Occasions + Scaryoke Party Mode -->
                                 <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-                                <TextBlock Text="Show Extras" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <TextBlock Text="Show Extras" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -752,27 +767,27 @@
                                                   ItemsSource="{Binding OccasionMenu}"
                                                   ItemContainerStyle="{DynamicResource OccasionMenuItemStyle}">
                                             <MenuItem.Header>
-                                                <TextBlock Text="🎉 Special Occasion ▼" FontWeight="SemiBold"/>
+                                                <TextBlock Text="🎉 Special Occasion ▼" FontWeight="SemiBold" />
                                             </MenuItem.Header>
                                             <MenuItem.Resources>
                                                 <!-- Keyed + self-referencing so it cascades down every
                                                      nested level of the data-bound menu tree without
                                                      applying to the top-level dropdown header itself. -->
                                                 <Style x:Key="OccasionMenuItemStyle" TargetType="MenuItem">
-                                                    <Setter Property="Header" Value="{Binding Name}"/>
-                                                    <Setter Property="ItemsSource" Value="{Binding Children}"/>
-                                                    <Setter Property="ItemContainerStyle" Value="{DynamicResource OccasionMenuItemStyle}"/>
-                                                    <Setter Property="Command" Value="{Binding DataContext.PlayOccasionCommand, RelativeSource={RelativeSource AncestorType=Page}}"/>
-                                                    <Setter Property="CommandParameter" Value="{Binding}"/>
+                                                    <Setter Property="Header" Value="{Binding Name}" />
+                                                    <Setter Property="ItemsSource" Value="{Binding Children}" />
+                                                    <Setter Property="ItemContainerStyle" Value="{DynamicResource OccasionMenuItemStyle}" />
+                                                    <Setter Property="Command" Value="{Binding DataContext.PlayOccasionCommand, RelativeSource={RelativeSource AncestorType=Page}}" />
+                                                    <Setter Property="CommandParameter" Value="{Binding}" />
                                                 </Style>
                                             </MenuItem.Resources>
                                         </MenuItem>
                                     </Menu>
 
-                                    <ui:Button Grid.Column="1" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopOccasionCommand}" Appearance="Secondary" ToolTip="Stop Occasion Music" Margin="6,0,0,0"/>
+                                    <ui:Button Grid.Column="1" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopOccasionCommand}" Appearance="Secondary" ToolTip="Stop Occasion Music" Margin="6,0,0,0" />
 
-                                    <ui:ToggleSwitch Grid.Column="3" Content="Scaryoke" IsChecked="{Binding IsScaryokeMode, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <ui:Button Grid.Column="4" Content="Spin!" Icon="{ui:SymbolIcon PlayingCards20}" Command="{Binding OpenScaryokeWheelCommand}" IsEnabled="{Binding IsScaryokeMode}" Appearance="Primary" Background="{StaticResource UIAccentBrush}"/>
+                                    <ui:ToggleSwitch Grid.Column="3" Content="Scaryoke" IsChecked="{Binding IsScaryokeMode, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                    <ui:Button Grid.Column="4" Content="Spin!" Icon="{ui:SymbolIcon PlayingCards20}" Command="{Binding OpenScaryokeWheelCommand}" IsEnabled="{Binding IsScaryokeMode}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" />
                                 </Grid>
                             </StackPanel>
                         </Border>

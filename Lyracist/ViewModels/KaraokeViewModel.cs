@@ -603,6 +603,29 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private void AddExternalSongToRotation(ExternalTrack track)
+    {
+        if (track == null) return;
+
+        if (!string.IsNullOrWhiteSpace(NewSingerName))
+        {
+            Rotation.AddSinger(NewSingerName, track.Title, track.Artist, NewSingerKey, NewSingerNotes, track.Source, track.Url);
+            NewSingerName = string.Empty;
+            NewSingerNotes = string.Empty;
+            NewSingerKey = "0";
+            LoadSingerNames();
+        }
+        else if (Rotation.SelectedSinger != null)
+        {
+            Rotation.AddSinger(Rotation.SelectedSinger.Name, track.Title, track.Artist, "0", string.Empty, track.Source, track.Url);
+        }
+        else
+        {
+            Rotation.AddSinger("Singer", track.Title, track.Artist, "0", string.Empty, track.Source, track.Url);
+        }
+    }
+
+    [RelayCommand]
     private void AddToRotation()
     {
         if (string.IsNullOrWhiteSpace(NewSingerName))
