@@ -40,8 +40,8 @@ Lyracist is a premium, modern Windows WPF Karaoke hosting application designed f
 - **Singer Preview Monitor**: Allows singers to scan a local QR code and follow the live scrolling lyrics directly from their phone or tablet.
 
 ### ❓ Split-Pane Help System
-- **Interactive Index Menu**: Left-pane sidebar allowing direct navigation between 7 essential help categories.
-- **Rich Detail Panel**: Right-pane scroll-contained viewer displaying clear instructions and Fluent icons, preventing excessive page scrolling.
+- **Interactive Index Menu**: Left-pane sidebar allowing direct navigation between 11 detailed help categories covering every user-facing page and setting.
+- **Rich Detail Panel**: Right-pane scroll-contained viewer displaying page guides, setting definitions, tone balancing parameters, decoders, and API settings, preventing excessive page scrolling.
 
 ---
 
