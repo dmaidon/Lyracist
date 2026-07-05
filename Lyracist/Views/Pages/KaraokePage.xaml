@@ -275,7 +275,10 @@
                         <TextBlock Text="Singer Assignment" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
                         
                         <TextBlock Text="Singer Name" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
-                        <ui:TextBox Text="{Binding NewSingerName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter performer's name..." Margin="0,0,0,8"/>
+                        <ComboBox IsEditable="True"
+                                  Text="{Binding NewSingerName, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding SingerNames}"
+                                  Margin="0,0,0,8"/>
 
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>

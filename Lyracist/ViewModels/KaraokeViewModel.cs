@@ -9,6 +9,7 @@ using Lyracist.Core.Interfaces;
 using Lyracist.Services.Display;
 using Lyracist.Services.Integration;
 using Lyracist.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Lyracist.ViewModels;
 
@@ -116,8 +117,61 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private KaraokeSong? _selectedSong;
 
+    public ObservableCollection<string> SingerNames { get; } = new();
+
+    public void LoadSingerNames()
+    {
+        try
+        {
+            using var context = new Lyracist.Data.LyracistDbContext();
+            var list = context.Singers.Select(s => s.Name).Distinct().ToList();
+            SingerNames.Clear();
+            foreach (var name in list)
+            {
+                SingerNames.Add(name);
+            }
+        }
+        catch { }
+    }
+
     [ObservableProperty]
     private string _newSingerName = string.Empty;
+
+    partial void OnNewSingerNameChanged(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            NewSingerNotes = string.Empty;
+            return;
+        }
+
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            try
+            {
+                using var context = new Lyracist.Data.LyracistDbContext();
+                var history = context.RotationEntries
+                    .Include(r => r.Singer)
+                    .Include(r => r.Song)
+                    .Where(r => r.Singer!.Name == value && r.Status == "Finished")
+                    .OrderByDescending(r => r.TimestampAdded)
+                    .Select(r => r.Song!.Title + " - " + r.Song.Artist)
+                    .Distinct()
+                    .Take(5)
+                    .ToList();
+
+                if (history.Count > 0)
+                {
+                    string historyText = "Previously: " + string.Join(", ", history);
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        NewSingerNotes = historyText;
+                    });
+                }
+            }
+            catch { }
+        });
+    }
 
     [ObservableProperty]
     private string _newSingerNotes = string.Empty;
@@ -287,6 +341,7 @@ public partial class KaraokeViewModel : BaseViewModel
 
         _mediaEngine.FrameReady += OnFrameReady;
         _libraryService.LibraryUpdated += OnLibraryUpdated;
+        LoadSingerNames();
 
         RebuildOccasionMenu();
         _occasions.OccasionsChanged += (_, _) =>
@@ -531,6 +586,8 @@ public partial class KaraokeViewModel : BaseViewModel
         CustomExternalUrl = string.Empty;
         CustomExternalTitle = string.Empty;
         CustomExternalArtist = string.Empty;
+
+        LoadSingerNames();
     }
 
     [RelayCommand]

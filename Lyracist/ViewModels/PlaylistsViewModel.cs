@@ -152,6 +152,8 @@ public partial class PlaylistsViewModel : BaseViewModel
             );
         }
 
+        filtered = filtered.OrderBy(s => s.Title);
+
         foreach (var song in filtered)
         {
             LibrarySongs.Add(song);
