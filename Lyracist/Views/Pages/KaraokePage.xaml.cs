@@ -14,4 +14,20 @@ public partial class KaraokePage : Page
         InitializeComponent();
         Loaded += (s, e) => ViewModel.OnNavigatedTo();
     }
+
+    private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (sender is ListBoxItem item)
+        {
+            if (item.IsSelected)
+            {
+                var listBox = ItemsControl.ItemsControlFromItemContainer(item) as System.Windows.Controls.ListBox;
+                if (listBox != null)
+                {
+                    listBox.SelectedItem = null;
+                    e.Handled = true;
+                }
+            }
+        }
+    }
 }
