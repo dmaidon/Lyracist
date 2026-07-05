@@ -392,7 +392,7 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             try
             {
-                var results = _libraryService.Search(query).ToList();
+                var results = _libraryService.Search(query).Where(s => s.IsKaraoke).ToList();
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     FilteredSongs.Clear();
@@ -553,6 +553,29 @@ public partial class KaraokeViewModel : BaseViewModel
         OnPropertyChanged(nameof(Bass));
         OnPropertyChanged(nameof(Compressor));
         OnPropertyChanged(nameof(Limiter));
+    }
+
+    [RelayCommand]
+    private void AddSongToRotation(KaraokeSong song)
+    {
+        if (song == null) return;
+
+        if (!string.IsNullOrWhiteSpace(NewSingerName))
+        {
+            Rotation.AddSinger(NewSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local");
+            NewSingerName = string.Empty;
+            NewSingerNotes = string.Empty;
+            NewSingerKey = "0";
+            LoadSingerNames();
+        }
+        else if (Rotation.SelectedSinger != null)
+        {
+            Rotation.AddSinger(Rotation.SelectedSinger.Name, song.Title, song.Artist, "0", string.Empty, "Local");
+        }
+        else
+        {
+            Rotation.AddSinger("Singer", song.Title, song.Artist, "0", string.Empty, "Local");
+        }
     }
 
     [RelayCommand]

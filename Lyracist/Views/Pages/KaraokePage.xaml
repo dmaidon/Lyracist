@@ -4,8 +4,9 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:helpers="clr-namespace:Lyracist.Core.Helpers"
       Title="Karaoke"
-      Foreground="{DynamicResource TextFillColorPrimaryBrush}">
-
+      Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+      ScrollViewer.VerticalScrollBarVisibility="Disabled"
+      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
     <Page.Resources>
         <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -67,39 +68,36 @@
                 <!-- Search Results list -->
                 <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
                     <TabItem Header="Local Library" FontSize="12">
-                        <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="6" Margin="0,8,0,0">
-                            <ListBox ItemsSource="{Binding FilteredSongs}" SelectedItem="{Binding SelectedSong, Mode=TwoWay}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Page}}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
-                                            <Border.ContextMenu>
-                                                <ContextMenu>
-                                                    <MenuItem Header="Edit Audio Defaults..." Command="{Binding Path=PlacementTarget.Tag.EditSongSettingsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}"/>
-                                                </ContextMenu>
-                                            </Border.ContextMenu>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
-                                                    <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
-                                                </StackPanel>
-
-                                                <!-- Badge for Karaoke File Format (e.g. CDG) -->
-                                                <Border Grid.Column="1" CornerRadius="4" Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}" Padding="6,2" VerticalAlignment="Center" Margin="6,0" Visibility="{Binding HasCdg, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <TextBlock Text="CDG" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorSuccessBrush}"/>
-                                                </Border>
-
-                                                <ui:Button Grid.Column="2" Icon="{ui:SymbolIcon Play24}" Command="{Binding DataContext.PlaySongCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Direct Play" Appearance="Primary" Padding="6" VerticalAlignment="Center"/>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                        <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="4" Margin="0,8,0,0">
+                            <DataGrid ItemsSource="{Binding FilteredSongs}"
+                                      SelectedItem="{Binding SelectedSong, Mode=TwoWay}"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Song" Binding="{Binding Title}" Width="*" />
+                                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="*" />
+                                    <DataGridTemplateColumn Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ui:Button Icon="{ui:SymbolIcon Add24}"
+                                                           Command="{Binding DataContext.AddSongToRotationCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                           CommandParameter="{Binding}"
+                                                           ToolTip="Add to Rotation"
+                                                           Appearance="Primary"
+                                                           Padding="6"
+                                                           Margin="2"
+                                                           VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </Border>
                     </TabItem>
                     <TabItem Header="Party Tyme Online" FontSize="12">
