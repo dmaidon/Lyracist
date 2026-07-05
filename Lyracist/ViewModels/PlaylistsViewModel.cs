@@ -132,7 +132,7 @@ public partial class PlaylistsViewModel : BaseViewModel
             EndRotationTracks.Add(track);
         }
 
-        _allLibrarySongs = _libraryService.GetAllSongs().ToList();
+        _allLibrarySongs = _libraryService.GetAllSongs().Where(s => !s.IsKaraoke).ToList();
         FilterLibrarySongs();
 
         _showFlow.RefreshPlaylists();

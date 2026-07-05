@@ -117,7 +117,8 @@ public class LibraryService : ILibraryService
             Title = song.Title,
             Artist = song.Artist,
             AudioPath = song.FilePath,
-            CdgPath = cdgPath
+            CdgPath = cdgPath,
+            IsKaraoke = song.IsKaraoke
         };
     }
 

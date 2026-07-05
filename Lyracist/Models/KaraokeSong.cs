@@ -7,4 +7,5 @@ public class KaraokeSong
     public string AudioPath { get; set; } = string.Empty;
     public string? CdgPath { get; set; }
     public bool HasCdg => !string.IsNullOrEmpty(CdgPath);
+    public bool IsKaraoke { get; set; }
 }
