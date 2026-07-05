@@ -105,6 +105,28 @@ public static class AppSettings
         set { _data.EndRotationTreble = Math.Clamp(value, -20, 20); Save(); }
     }
 
+    // ─── Library Scan Directories ──────────────────────────────────────────
+
+    public static IReadOnlyList<string> LibraryDirectories =>
+        _data.LibraryDirectories.AsReadOnly();
+
+    public static void AddLibraryDirectory(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+        if (!_data.LibraryDirectories.Contains(path, StringComparer.OrdinalIgnoreCase))
+        {
+            _data.LibraryDirectories.Add(path);
+            Save();
+        }
+    }
+
+    public static void RemoveLibraryDirectory(string path)
+    {
+        _data.LibraryDirectories.RemoveAll(d =>
+            string.Equals(d, path, StringComparison.OrdinalIgnoreCase));
+        Save();
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
@@ -123,5 +145,8 @@ public static class AppSettings
         public double FillInTreble { get; set; } = 0;
         public double EndRotationBass { get; set; } = 0;
         public double EndRotationTreble { get; set; } = 0;
+
+        // Library scan roots — persisted so the app can rescan on demand
+        public List<string> LibraryDirectories { get; set; } = new();
     }
 }

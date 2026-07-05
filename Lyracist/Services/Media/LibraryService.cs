@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Data;
 using Lyracist.Data.Models;
@@ -21,17 +22,16 @@ public class LibraryService : ILibraryService
         if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
             return;
 
-        // Run scanning in background to avoid blocking the WPF UI thread
+        // Persist so this directory survives app restarts and can be rescanned.
+        AppSettings.AddLibraryDirectory(path);
+
         Task.Run(async () =>
         {
             try
             {
                 using var context = new LyracistDbContext();
                 var scanningService = new ScanningService(context);
-                
                 await scanningService.ScanDirectories(new[] { path });
-
-                // Notify view models and subscribers that library is updated
                 LibraryUpdated?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
@@ -39,6 +39,25 @@ public class LibraryService : ILibraryService
                 System.Diagnostics.Debug.WriteLine($"Failed to scan library directory: {ex.Message}");
             }
         });
+    }
+
+    public void RescanAllDirectories()
+    {
+        foreach (var dir in AppSettings.LibraryDirectories)
+            ScanDirectory(dir);
+    }
+
+    public int GetSongCount()
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+            return context.Songs.Count();
+        }
+        catch
+        {
+            return 0;
+        }
     }
 
     public IEnumerable<KaraokeSong> Search(string query)

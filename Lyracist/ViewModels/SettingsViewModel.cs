@@ -22,6 +22,7 @@ public partial class SettingsViewModel : BaseViewModel
     private readonly IOccasionService _occasions;
     private readonly IShowFlowService _showFlow;
     private readonly INavigationService _navigation;
+    private readonly ILibraryService _library;
 
     // Theme
     [ObservableProperty]
@@ -101,6 +102,16 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private double _occasionItemGain;
 
+    // ─── Music Library ─────────────────────────────────────────────────
+
+    public ObservableCollection<string> LibraryDirectories { get; } = new();
+
+    [ObservableProperty]
+    private string? _selectedLibraryDirectory;
+
+    [ObservableProperty]
+    private string _libraryStatus = string.Empty;
+
     // ─── Splash Screen ─────────────────────────────────────────────────
 
     [ObservableProperty]
@@ -141,13 +152,17 @@ public partial class SettingsViewModel : BaseViewModel
                              ITabletLyricsServer tablet,
                              IOccasionService occasions,
                              IShowFlowService showFlow,
-                             INavigationService navigation)
+                             INavigationService navigation,
+                             ILibraryService library)
     {
         _display = display;
         _tablet = tablet;
         _occasions = occasions;
         _showFlow = showFlow;
         _navigation = navigation;
+        _library = library;
+
+        _library.LibraryUpdated += (_, _) => RefreshLibraryStatus();
 
         // Apply persisted channel settings to the show flow service on load
         _showFlow.SetOpeningVolume(OpeningVolume);
@@ -188,6 +203,8 @@ public partial class SettingsViewModel : BaseViewModel
         Mp4Backends = new List<string> { "LibVLC", "FFME" };
 
         RefreshOccasionCategories();
+        RefreshLibraryDirectories();
+        RefreshLibraryStatus();
     }
 
     private void RefreshOccasionCategories()
@@ -211,6 +228,53 @@ public partial class SettingsViewModel : BaseViewModel
         {
             OccasionItems.Add(item);
         }
+    }
+
+    private void RefreshLibraryDirectories()
+    {
+        LibraryDirectories.Clear();
+        foreach (var dir in Core.Helpers.AppSettings.LibraryDirectories)
+            LibraryDirectories.Add(dir);
+    }
+
+    private void RefreshLibraryStatus()
+    {
+        int count = _library.GetSongCount();
+        LibraryStatus = count == 0
+            ? "No songs scanned yet — add a folder and scan."
+            : $"{count:N0} songs in library.";
+    }
+
+    [RelayCommand]
+    private void AddLibraryDirectory()
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Select Music Library Folder to Scan"
+        };
+        if (dialog.ShowDialog() != true) return;
+
+        // ScanDirectory persists to AppSettings internally.
+        _library.ScanDirectory(dialog.FolderName);
+        RefreshLibraryDirectories();
+        LibraryStatus = "Scanning…";
+    }
+
+    [RelayCommand]
+    private void RemoveLibraryDirectory()
+    {
+        if (SelectedLibraryDirectory == null) return;
+        Core.Helpers.AppSettings.RemoveLibraryDirectory(SelectedLibraryDirectory);
+        SelectedLibraryDirectory = null;
+        RefreshLibraryDirectories();
+    }
+
+    [RelayCommand]
+    private void RescanLibrary()
+    {
+        if (LibraryDirectories.Count == 0) return;
+        LibraryStatus = "Scanning…";
+        _library.RescanAllDirectories();
     }
 
     partial void OnSelectedOccasionCategoryChanged(OccasionNode? value)

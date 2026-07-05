@@ -1,10 +1,20 @@
 using System.Reflection;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Lyracist.ViewModels;
 
-public class AboutViewModel : BaseViewModel
+public partial class AboutViewModel : BaseViewModel
 {
     private readonly Assembly _assembly = Assembly.GetExecutingAssembly();
+
+    [RelayCommand]
+    private void OpenAboutWindow()
+    {
+        var window = App.AppHost.Services.GetRequiredService<Windows.AboutWindow>();
+        window.Owner = System.Windows.Application.Current.MainWindow;
+        window.ShowDialog();
+    }
 
     public string AppName => _assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product ?? "Lyracist";
     

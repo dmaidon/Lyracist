@@ -75,6 +75,15 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
+
+                        <ui:Button Content="Open Standalone Dialog"
+                                   Icon="{ui:SymbolIcon Open24}"
+                                   Command="{Binding OpenAboutWindowCommand}"
+                                   Appearance="Primary"
+                                   Background="{DynamicResource UIAccentBrush}"
+                                   HorizontalAlignment="Stretch"
+                                   Margin="0,16,0,0"
+                                   Padding="10"/>
                     </StackPanel>
                 </Grid>
             </Border>

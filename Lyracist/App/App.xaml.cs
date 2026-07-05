@@ -99,6 +99,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<ScaryokeWindow>();
                 services.AddTransient<SongSettingsWindow>();
                 services.AddTransient<SingerSettingsWindow>();
+                services.AddTransient<AboutWindow>();
 
                 // Pages
                 services.AddSingleton<KaraokePage>();

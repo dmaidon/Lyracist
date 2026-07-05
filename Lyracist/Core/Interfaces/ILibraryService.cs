@@ -7,6 +7,8 @@ namespace Lyracist.Core.Interfaces;
 public interface ILibraryService
 {
     void ScanDirectory(string path);
+    void RescanAllDirectories();
+    int GetSongCount();
     IEnumerable<KaraokeSong> Search(string query);
     IEnumerable<KaraokeSong> GetAllSongs();
     event EventHandler? LibraryUpdated;

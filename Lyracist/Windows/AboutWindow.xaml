@@ -1,0 +1,144 @@
+<Window x:Class="Lyracist.Windows.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="About Lyracist" Height="680" Width="480"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="False"
+        Background="#0E0E12"
+        BorderBrush="#33333C"
+        BorderThickness="1.5"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        MouseLeftButtonDown="OnDragMove">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Themes/LyracistTheme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#4e54c8" Offset="0.0" />
+                <GradientStop Color="#8f94fb" Offset="1.0" />
+            </LinearGradientBrush>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Title/Header -->
+            <RowDefinition Height="*"/>    <!-- Scrollable content -->
+            <RowDefinition Height="Auto"/> <!-- Buttons -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" CornerRadius="10" Padding="16" Margin="0,0,0,20" Background="{StaticResource HeaderBackgroundBrush}">
+            <Grid>
+                <StackPanel>
+                    <TextBlock Text="Lyracist Info Panel" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Dedicated technical details and system configuration." FontSize="11" Foreground="#E0E0E0" Margin="0,2,0,0"/>
+                </StackPanel>
+                <Button Style="{StaticResource OverlayWindowCloseButtonStyle}"
+                        Content="&#xE8BB;"
+                        Click="Close_Click"
+                        ToolTip="Close"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Margin="0,-8,-8,0"
+                        Width="36" Height="28"/>
+            </Grid>
+        </Border>
+
+        <!-- Technical Specs & Credits -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
+            <StackPanel Margin="0,0,12,0">
+                <!-- App Logo Image -->
+                <Border Width="100" Height="100" CornerRadius="50" BorderBrush="#3AFFFFFF" BorderThickness="1.5" Margin="0,0,0,12" HorizontalAlignment="Center" ClipToBounds="True">
+                    <Grid>
+                        <Image Source="/Assets/LyracistLogo.png" Stretch="Uniform" />
+                        <Ellipse Stroke="#15FFFFFF" StrokeThickness="1" />
+                    </Grid>
+                </Border>
+                <TextBlock Text="Lyracist Karaoke system" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                <TextBlock Text="{Binding Company}" FontSize="12" Foreground="#888888" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+                <TextBlock Text="Application Specifications" FontSize="13" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,10"/>
+                
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Version" Foreground="#888888" />
+                    <TextBlock Grid.Column="1" Text="{Binding Version}" Foreground="White" FontWeight="SemiBold"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Developer" Foreground="#888888" />
+                    <TextBlock Grid.Column="1" Text="{Binding Author}" Foreground="White"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Platform Target" Foreground="#888888" />
+                    <TextBlock Grid.Column="1" Text="{Binding FrameworkVersion}" Foreground="White"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="UI Framework" Foreground="#888888" />
+                    <TextBlock Grid.Column="1" Text="WPF UI (Fluent v4.3)" Foreground="White"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Database Layer" Foreground="#888888" />
+                    <TextBlock Grid.Column="1" Text="EF Core + SQLite (FTS5)" Foreground="White"/>
+                </Grid>
+
+                <Separator Margin="0,12,0,16" Background="#252528"/>
+
+                <TextBlock Text="System Libraries &amp; Licenses" FontSize="13" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,10"/>
+                
+                <StackPanel Margin="0,0,0,10">
+                    <TextBlock Text="• LibVLC / LibVLCSharp" FontWeight="SemiBold" Foreground="{StaticResource LyricGlowBrush}"/>
+                    <TextBlock Text="Provides high-performance backend audio/video playing with native decoders." FontSize="11" Foreground="#888888" TextWrapping="Wrap" Margin="10,2,0,8"/>
+
+                    <TextBlock Text="• Community Toolkit MVVM" FontWeight="SemiBold" Foreground="{StaticResource LyricGlowBrush}"/>
+                    <TextBlock Text="Modern code generation for bindable observables and relay command dispatchers." FontSize="11" Foreground="#888888" TextWrapping="Wrap" Margin="10,2,0,8"/>
+
+                    <TextBlock Text="• FFmpeg &amp; FFprobe Engine" FontWeight="SemiBold" Foreground="{StaticResource LyricGlowBrush}"/>
+                    <TextBlock Text="Used for real-time MP3+G metadata tag extraction and audio filter pipelines." FontSize="11" Foreground="#888888" TextWrapping="Wrap" Margin="10,2,0,8"/>
+                </StackPanel>
+
+                <Separator Margin="0,8,0,16" Background="#252528"/>
+                <TextBlock Text="{Binding Copyright}" FontSize="11" Foreground="#666666" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Button -->
+        <ui:Button Grid.Row="2"
+                   Content="OK"
+                   Icon="{ui:SymbolIcon Checkmark24}"
+                   Click="Close_Click"
+                   Appearance="Primary"
+                   Background="{StaticResource UIAccentBrush}"
+                   HorizontalAlignment="Stretch"
+                   Padding="10"/>
+    </Grid>
+</Window>
