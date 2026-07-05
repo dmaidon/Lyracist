@@ -1,0 +1,115 @@
+<Window x:Class="Lyracist.Windows.SongSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="Edit Song Audio Defaults" Height="650" Width="480"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="False"
+        Background="#0E0E12"
+        BorderBrush="#33333C"
+        BorderThickness="1.5"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Title/Header -->
+            <RowDefinition Height="*"/>    <!-- Scrollable Sliders -->
+            <RowDefinition Height="Auto"/> <!-- Buttons -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Edit Song Audio Defaults" FontSize="20" FontWeight="Bold" Foreground="White"/>
+            <TextBlock Text="{Binding SongTitle}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource LyricGlowBrush}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+            <TextBlock Text="{Binding SongArtist}" FontSize="12" Foreground="#888888" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+            <Separator Margin="0,12,0,0" Background="#252528"/>
+        </StackPanel>
+
+        <!-- Sliders content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
+            <StackPanel Margin="0,0,12,0">
+                <!-- Gain/Volume -->
+                <Grid Margin="0,0,0,12">
+                    <TextBlock Text="Gain (Volume)" FontSize="12" FontWeight="SemiBold" Foreground="#AAAAAA"/>
+                    <TextBlock Text="{Binding Gain, StringFormat='{}{0:0}%'}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                </Grid>
+                <Slider Minimum="0" Maximum="100" Value="{Binding Gain, Mode=TwoWay}" Margin="0,0,0,18"/>
+
+                <!-- Transposition / Key -->
+                <Grid Margin="0,0,0,12">
+                    <TextBlock Text="Key Transposition" FontSize="12" FontWeight="SemiBold" Foreground="#AAAAAA"/>
+                    <TextBlock Text="{Binding Key, StringFormat='{}{0:+0;-0;0}'}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource LyricGlowBrush}" HorizontalAlignment="Right"/>
+                </Grid>
+                <Slider Minimum="-6" Maximum="6" Value="{Binding Key, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,0,0,18"/>
+
+                <!-- Speed / Tempo -->
+                <Grid Margin="0,0,0,12">
+                    <TextBlock Text="Tempo (Speed)" FontSize="12" FontWeight="SemiBold" Foreground="#AAAAAA"/>
+                    <TextBlock Text="{Binding Tempo, StringFormat='{}{0:0.0}x'}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                </Grid>
+                <Slider Minimum="0.5" Maximum="2.0" Value="{Binding Tempo, Mode=TwoWay}" TickFrequency="0.1" IsSnapToTickEnabled="True" Margin="0,0,0,18"/>
+
+                <!-- Separator -->
+                <Separator Margin="0,4,0,16" Background="#252528"/>
+
+                <!-- Treble -->
+                <Grid Margin="0,0,0,12">
+                    <TextBlock Text="Treble" FontSize="12" FontWeight="SemiBold" Foreground="#AAAAAA"/>
+                    <TextBlock Text="{Binding Treble, StringFormat='{}{0:+0;-0;0} dB'}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                </Grid>
+                <Slider Minimum="-10" Maximum="10" Value="{Binding Treble, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,0,0,18"/>
+
+                <!-- Midrange -->
+                <Grid Margin="0,0,0,12">
+                    <TextBlock Text="Midrange" FontSize="12" FontWeight="SemiBold" Foreground="#AAAAAA"/>
+                    <TextBlock Text="{Binding Mid, StringFormat='{}{0:+0;-0;0} dB'}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                </Grid>
+                <Slider Minimum="-10" Maximum="10" Value="{Binding Mid, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,0,0,18"/>
+
+                <!-- Bass -->
+                <Grid Margin="0,0,0,12">
+                    <TextBlock Text="Bass" FontSize="12" FontWeight="SemiBold" Foreground="#AAAAAA"/>
+                    <TextBlock Text="{Binding Bass, StringFormat='{}{0:+0;-0;0} dB'}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                </Grid>
+                <Slider Minimum="-10" Maximum="10" Value="{Binding Bass, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,0,0,18"/>
+
+                <!-- Separator -->
+                <Separator Margin="0,4,0,16" Background="#252528"/>
+
+                <!-- Compressor -->
+                <Grid Margin="0,0,0,12">
+                    <TextBlock Text="Compressor Threshold" FontSize="12" FontWeight="SemiBold" Foreground="#AAAAAA"/>
+                    <TextBlock Text="{Binding Compressor, StringFormat='{}{0:0}%'}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                </Grid>
+                <Slider Minimum="0" Maximum="100" Value="{Binding Compressor, Mode=TwoWay}" Margin="0,0,0,18"/>
+
+                <!-- Limiter -->
+                <Grid Margin="0,0,0,12">
+                    <TextBlock Text="Limiter Threshold" FontSize="12" FontWeight="SemiBold" Foreground="#AAAAAA"/>
+                    <TextBlock Text="{Binding Limiter, StringFormat='{}{0:0} dB'}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                </Grid>
+                <Slider Minimum="-20" Maximum="0" Value="{Binding Limiter, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,0,0,18"/>
+
+                <!-- Separator -->
+                <Separator Margin="0,4,0,16" Background="#252528"/>
+
+                <!-- Notes -->
+                <TextBlock Text="Notes / Comments" FontSize="12" FontWeight="SemiBold" Foreground="#AAAAAA" Margin="0,0,0,6"/>
+                <ui:TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter comments or settings info..." Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Buttons -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ui:Button Grid.Column="0" Content="Save Defaults" Icon="{ui:SymbolIcon Save24}" Click="Save_Click" Appearance="Primary" HorizontalAlignment="Stretch" Padding="10" Background="{StaticResource UIAccentBrush}"/>
+            <ui:Button Grid.Column="2" Content="Cancel" Icon="{ui:SymbolIcon Dismiss24}" Click="Cancel_Click" Appearance="Secondary" HorizontalAlignment="Stretch" Padding="10"/>
+        </Grid>
+    </Grid>
+</Window>

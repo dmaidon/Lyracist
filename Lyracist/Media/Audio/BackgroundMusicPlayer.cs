@@ -93,7 +93,7 @@ public class BackgroundMusicPlayer : IDisposable
 
     public BackgroundMusicPlayer()
     {
-        LibVLCSharp.Shared.Core.Initialize();
+        Lyracist.Core.Helpers.AppLogger.InitializeLibVlc();
 
         _libVLC = new LibVLC();
         _playerA = new MediaPlayer(_libVLC);

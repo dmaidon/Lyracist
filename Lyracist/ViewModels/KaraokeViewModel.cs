@@ -77,21 +77,70 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private string _nextUpSong = "No Song";
 
-    // Added properties for Audio defaults sliders
-    [ObservableProperty]
-    private double _treble = 0.0;
+    public double Treble
+    {
+        get => _mediaEngine.Treble;
+        set
+        {
+            if (Math.Abs(_mediaEngine.Treble - value) > 0.01)
+            {
+                _mediaEngine.Treble = value;
+                OnPropertyChanged(nameof(Treble));
+            }
+        }
+    }
 
-    [ObservableProperty]
-    private double _mid = 0.0;
+    public double Mid
+    {
+        get => _mediaEngine.Mid;
+        set
+        {
+            if (Math.Abs(_mediaEngine.Mid - value) > 0.01)
+            {
+                _mediaEngine.Mid = value;
+                OnPropertyChanged(nameof(Mid));
+            }
+        }
+    }
 
-    [ObservableProperty]
-    private double _bass = 0.0;
+    public double Bass
+    {
+        get => _mediaEngine.Bass;
+        set
+        {
+            if (Math.Abs(_mediaEngine.Bass - value) > 0.01)
+            {
+                _mediaEngine.Bass = value;
+                OnPropertyChanged(nameof(Bass));
+            }
+        }
+    }
 
-    [ObservableProperty]
-    private double _compressor = 0.0;
+    public double Compressor
+    {
+        get => _mediaEngine.Compressor;
+        set
+        {
+            if (Math.Abs(_mediaEngine.Compressor - value) > 0.01)
+            {
+                _mediaEngine.Compressor = value;
+                OnPropertyChanged(nameof(Compressor));
+            }
+        }
+    }
 
-    [ObservableProperty]
-    private double _limiter = 0.0;
+    public double Limiter
+    {
+        get => _mediaEngine.Limiter;
+        set
+        {
+            if (Math.Abs(_mediaEngine.Limiter - value) > 0.01)
+            {
+                _mediaEngine.Limiter = value;
+                OnPropertyChanged(nameof(Limiter));
+            }
+        }
+    }
 
     // Added properties for Multi-Monitor display lists
     public ObservableCollection<ScreenInfo> AvailableScreens { get; } = new();
@@ -224,6 +273,8 @@ public partial class KaraokeViewModel : BaseViewModel
 
     private void UpdateNowNext()
     {
+        string oldSinger = NowSingingName;
+
         if (Rotation.Rotation.Count > 0)
         {
             var now = Rotation.Rotation[0];
@@ -247,6 +298,24 @@ public partial class KaraokeViewModel : BaseViewModel
             NextUpName = "None";
             NextUpSong = "No Song";
         }
+
+        if (NowSingingName != oldSinger)
+        {
+            _mediaEngine.ActiveSingerName = NowSingingName;
+            NotifyAudioPropertiesChanged();
+        }
+    }
+
+    private void NotifyAudioPropertiesChanged()
+    {
+        OnPropertyChanged(nameof(Volume));
+        OnPropertyChanged(nameof(Speed));
+        OnPropertyChanged(nameof(Pitch));
+        OnPropertyChanged(nameof(Treble));
+        OnPropertyChanged(nameof(Mid));
+        OnPropertyChanged(nameof(Bass));
+        OnPropertyChanged(nameof(Compressor));
+        OnPropertyChanged(nameof(Limiter));
     }
 
     partial void OnSelectedLyricsScreenIndexChanged(int value)
@@ -305,6 +374,11 @@ public partial class KaraokeViewModel : BaseViewModel
             OnPropertyChanged(nameof(Volume));
             OnPropertyChanged(nameof(Speed));
             OnPropertyChanged(nameof(Pitch));
+            OnPropertyChanged(nameof(Treble));
+            OnPropertyChanged(nameof(Mid));
+            OnPropertyChanged(nameof(Bass));
+            OnPropertyChanged(nameof(Compressor));
+            OnPropertyChanged(nameof(Limiter));
         }
     }
 
@@ -339,6 +413,11 @@ public partial class KaraokeViewModel : BaseViewModel
         OnPropertyChanged(nameof(Volume));
         OnPropertyChanged(nameof(Speed));
         OnPropertyChanged(nameof(Pitch));
+        OnPropertyChanged(nameof(Treble));
+        OnPropertyChanged(nameof(Mid));
+        OnPropertyChanged(nameof(Bass));
+        OnPropertyChanged(nameof(Compressor));
+        OnPropertyChanged(nameof(Limiter));
     }
 
     [RelayCommand]
@@ -390,11 +469,14 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void PlayOccasion(OccasionNode? node)
+    private void PlayOccasion(object? parameter)
     {
-        // Category headers open their submenu; only playable items fire.
-        if (node is not { IsItem: true }) return;
-        _showFlow.PlayOccasion(node.Name, node.FilePath, node.Bass, node.Treble, node.Gain);
+        if (parameter is OccasionNode node)
+        {
+            // Category headers open their submenu; only playable items fire.
+            if (!node.IsItem) return;
+            _showFlow.PlayOccasion(node.Name, node.FilePath, node.Bass, node.Treble, node.Gain);
+        }
     }
 
     [RelayCommand]
@@ -427,5 +509,33 @@ public partial class KaraokeViewModel : BaseViewModel
     private void PitchDown()
     {
         Pitch = Math.Max(Pitch - 1, -6);
+    }
+
+    [RelayCommand]
+    private void EditSongSettings(KaraokeSong song)
+    {
+        if (song == null) return;
+        var window = App.AppHost.Services.GetRequiredService<Windows.SongSettingsWindow>();
+        window.ViewModel.Load(song);
+        window.Owner = System.Windows.Application.Current.MainWindow;
+        if (window.ShowDialog() == true)
+        {
+            _mediaEngine.UpdateAudioParameters();
+            NotifyAudioPropertiesChanged();
+        }
+    }
+
+    [RelayCommand]
+    private void EditSingerSettings(Singer singer)
+    {
+        if (singer == null) return;
+        var window = App.AppHost.Services.GetRequiredService<Windows.SingerSettingsWindow>();
+        window.ViewModel.Load(singer);
+        window.Owner = System.Windows.Application.Current.MainWindow;
+        if (window.ShowDialog() == true)
+        {
+            _mediaEngine.UpdateAudioParameters();
+            NotifyAudioPropertiesChanged();
+        }
     }
 }

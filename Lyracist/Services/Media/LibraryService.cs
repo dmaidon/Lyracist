@@ -8,6 +8,7 @@ using Lyracist.Data;
 using Lyracist.Data.Models;
 using Lyracist.Data.Services;
 using Lyracist.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Lyracist.Services.Media;
 
@@ -99,5 +100,159 @@ public class LibraryService : ILibraryService
             AudioPath = song.FilePath,
             CdgPath = cdgPath
         };
+    }
+
+    public SongAudioSettings GetAudioSettings(string audioPath)
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+            var dbSong = context.Songs
+                .Include(s => s.AudioSettings)
+                .FirstOrDefault(s => s.FilePath == audioPath);
+
+            if (dbSong == null)
+            {
+                return new SongAudioSettings();
+            }
+
+            if (dbSong.AudioSettings == null)
+            {
+                return new SongAudioSettings
+                {
+                    SongId = dbSong.SongId,
+                    Gain = 100.0,
+                    Tempo = 1.0,
+                    Key = 0
+                };
+            }
+
+            return dbSong.AudioSettings;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to get song audio settings: {ex.Message}");
+            return new SongAudioSettings();
+        }
+    }
+
+    public void SaveAudioSettings(string audioPath, SongAudioSettings settings)
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+            var dbSong = context.Songs
+                .Include(s => s.AudioSettings)
+                .FirstOrDefault(s => s.FilePath == audioPath);
+
+            if (dbSong == null) return;
+
+            if (dbSong.AudioSettings == null)
+            {
+                dbSong.AudioSettings = new SongAudioSettings
+                {
+                    SongId = dbSong.SongId
+                };
+                context.SongAudioSettings.Add(dbSong.AudioSettings);
+            }
+
+            dbSong.AudioSettings.Treble = settings.Treble;
+            dbSong.AudioSettings.Mid = settings.Mid;
+            dbSong.AudioSettings.Bass = settings.Bass;
+            dbSong.AudioSettings.Gain = settings.Gain;
+            dbSong.AudioSettings.Key = settings.Key;
+            dbSong.AudioSettings.Tempo = settings.Tempo;
+            dbSong.AudioSettings.Compressor = settings.Compressor;
+            dbSong.AudioSettings.Limiter = settings.Limiter;
+            dbSong.AudioSettings.Notes = settings.Notes ?? string.Empty;
+
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to save song audio settings: {ex.Message}");
+        }
+    }
+
+    public SingerAudioSettings GetSingerSettings(string singerName)
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+            var dbSinger = context.Singers
+                .Include(s => s.AudioSettings)
+                .FirstOrDefault(s => s.Name == singerName);
+
+            if (dbSinger == null)
+            {
+                return new SingerAudioSettings
+                {
+                    Gain = 100.0,
+                    Tempo = 1.0,
+                    Key = 0
+                };
+            }
+
+            if (dbSinger.AudioSettings == null)
+            {
+                return new SingerAudioSettings
+                {
+                    SingerId = dbSinger.SingerId,
+                    Gain = 100.0,
+                    Tempo = 1.0,
+                    Key = 0
+                };
+            }
+
+            return dbSinger.AudioSettings;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to get singer audio settings: {ex.Message}");
+            return new SingerAudioSettings();
+        }
+    }
+
+    public void SaveSingerSettings(string singerName, SingerAudioSettings settings)
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+            var dbSinger = context.Singers
+                .Include(s => s.AudioSettings)
+                .FirstOrDefault(s => s.Name == singerName);
+
+            if (dbSinger == null)
+            {
+                dbSinger = new Lyracist.Data.Models.Singer { Name = singerName };
+                context.Singers.Add(dbSinger);
+                context.SaveChanges(); // Generate SingerId
+            }
+
+            if (dbSinger.AudioSettings == null)
+            {
+                dbSinger.AudioSettings = new SingerAudioSettings
+                {
+                    SingerId = dbSinger.SingerId
+                };
+                context.SingerAudioSettings.Add(dbSinger.AudioSettings);
+            }
+
+            dbSinger.AudioSettings.Treble = settings.Treble;
+            dbSinger.AudioSettings.Mid = settings.Mid;
+            dbSinger.AudioSettings.Bass = settings.Bass;
+            dbSinger.AudioSettings.Gain = settings.Gain;
+            dbSinger.AudioSettings.Key = settings.Key;
+            dbSinger.AudioSettings.Tempo = settings.Tempo;
+            dbSinger.AudioSettings.Compressor = settings.Compressor;
+            dbSinger.AudioSettings.Limiter = settings.Limiter;
+            dbSinger.AudioSettings.Notes = settings.Notes ?? string.Empty;
+
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to save singer audio settings: {ex.Message}");
+        }
     }
 }

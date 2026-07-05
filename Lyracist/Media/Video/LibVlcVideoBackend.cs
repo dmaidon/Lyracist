@@ -25,6 +25,17 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
     private double _speed = 1.0;
     private int _pitchShift = 0;
 
+    private static readonly uint[] BassBands = { 0, 1, 2 };
+    private static readonly uint[] MidBands = { 3, 4, 5, 6 };
+    private static readonly uint[] TrebleBands = { 7, 8, 9 };
+
+    private readonly Equalizer _equalizer = new();
+    private double _treble = 0.0;
+    private double _mid = 0.0;
+    private double _bass = 0.0;
+    private double _compressor = 0.0;
+    private double _limiter = 0.0;
+
     public event EventHandler<VideoFrame>? FrameReady;
 
     public TimeSpan Position => _mediaPlayer != null ? TimeSpan.FromMilliseconds(_mediaPlayer.Time) : TimeSpan.Zero;
@@ -56,9 +67,54 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         set => _pitchShift = Math.Clamp(value, -6, 6); // Note: Native pitch transposition simulation
     }
 
+    public double Treble
+    {
+        get => _treble;
+        set
+        {
+            _treble = Math.Clamp(value, -20.0, 20.0);
+            foreach (uint band in TrebleBands) _equalizer.SetAmp((float)_treble, band);
+            _mediaPlayer?.SetEqualizer(_equalizer);
+        }
+    }
+
+    public double Mid
+    {
+        get => _mid;
+        set
+        {
+            _mid = Math.Clamp(value, -20.0, 20.0);
+            foreach (uint band in MidBands) _equalizer.SetAmp((float)_mid, band);
+            _mediaPlayer?.SetEqualizer(_equalizer);
+        }
+    }
+
+    public double Bass
+    {
+        get => _bass;
+        set
+        {
+            _bass = Math.Clamp(value, -20.0, 20.0);
+            foreach (uint band in BassBands) _equalizer.SetAmp((float)_bass, band);
+            _mediaPlayer?.SetEqualizer(_equalizer);
+        }
+    }
+
+    public double Compressor
+    {
+        get => _compressor;
+        set => _compressor = value;
+    }
+
+    public double Limiter
+    {
+        get => _limiter;
+        set => _limiter = value;
+    }
+
     public LibVlcVideoBackend()
     {
-        LibVLCSharp.Shared.Core.Initialize();
+        Lyracist.Core.Helpers.AppLogger.InitializeLibVlc();
 
         _libVLC = new LibVLC();
         _mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(_libVLC);
@@ -67,8 +123,9 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         _mediaPlayer.SetVideoFormatCallbacks(VideoFormatCallback, VideoCleanupCallback);
         _mediaPlayer.SetVideoCallbacks(LockCallback, UnlockCallback, DisplayCallback);
 
-        // Apply default volume
+        // Apply default volume and equalizer
         _mediaPlayer.Volume = (int)_volume;
+        _mediaPlayer.SetEqualizer(_equalizer);
     }
 
     public Task LoadAsync(string path)
@@ -83,9 +140,10 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
             var media = new LibVLCSharp.Shared.Media(_libVLC, new Uri(path));
             _mediaPlayer.Media = media;
 
-            // Re-apply rate and volume
+            // Re-apply rate, volume, and equalizer settings
             _mediaPlayer.Volume = (int)_volume;
             _mediaPlayer.SetRate((float)_speed);
+            _mediaPlayer.SetEqualizer(_equalizer);
         }
 
         return Task.CompletedTask;
@@ -201,6 +259,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
 
         _mediaPlayer?.Stop();
         _mediaPlayer?.Dispose();
+        _equalizer.Dispose();
         _libVLC?.Dispose();
 
         if (_pixelBuffer != IntPtr.Zero)

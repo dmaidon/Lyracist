@@ -52,6 +52,12 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
         set => _pitchShift = Math.Clamp(value, -6, 6);
     }
 
+    public double Treble { get; set; } = 0.0;
+    public double Mid { get; set; } = 0.0;
+    public double Bass { get; set; } = 0.0;
+    public double Compressor { get; set; } = 0.0;
+    public double Limiter { get; set; } = 0.0;
+
     public FfmeVideoBackend()
     {
         // FFME requires pointing to FFmpeg directory prior to initialization

@@ -29,6 +29,9 @@ public partial class App : System.Windows.Application
         _ = typeof(AppLogger);
         AppLogger.LogAppStart();
 
+        // Centralized LibVLC initialization
+        AppLogger.InitializeLibVlc();
+
         DispatcherUnhandledException += (_, e) =>
         {
             AppLogger.LogError(e.Exception, "DispatcherUnhandledException");
@@ -83,6 +86,8 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<ScaryokeViewModel>();
                 services.AddSingleton<HelpViewModel>();
                 services.AddSingleton<AboutViewModel>();
+                services.AddTransient<SongSettingsViewModel>();
+                services.AddTransient<SingerSettingsViewModel>();
 
                 // Windows
                 services.AddSingleton<SplashWindow>();
@@ -90,6 +95,8 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<RotationWindow>();
                 services.AddSingleton<LyricsWindow>();
                 services.AddSingleton<ScaryokeWindow>();
+                services.AddTransient<SongSettingsWindow>();
+                services.AddTransient<SingerSettingsWindow>();
 
                 // Pages
                 services.AddSingleton<KaraokePage>();

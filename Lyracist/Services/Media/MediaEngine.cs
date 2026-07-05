@@ -15,11 +15,14 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     private readonly ICDGDecoder _cdgDecoder;
     private readonly ICdgFrameScheduler _scheduler;
     private readonly IVideoBackend _video;
+    private readonly ILibraryService _libraryService;
     private DispatcherTimer? _timer;
     private double _position;
     private bool _isPlaying;
     private DateTime _lastTickTime;
     private bool _isMp4Mode;
+    private string _currentSongPath = string.Empty;
+    private string? _activeSingerName;
 
     public event Action<ImageSource>? FrameReady;
     public event Action? Started;
@@ -43,11 +46,55 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         set => _video.Pitch = value;
     }
 
-    public MediaEngine(ICDGDecoder cdgDecoder, ICdgFrameScheduler scheduler, IVideoBackend video)
+    public double Treble
+    {
+        get => _video.Treble;
+        set => _video.Treble = value;
+    }
+
+    public double Mid
+    {
+        get => _video.Mid;
+        set => _video.Mid = value;
+    }
+
+    public double Bass
+    {
+        get => _video.Bass;
+        set => _video.Bass = value;
+    }
+
+    public double Compressor
+    {
+        get => _video.Compressor;
+        set => _video.Compressor = value;
+    }
+
+    public double Limiter
+    {
+        get => _video.Limiter;
+        set => _video.Limiter = value;
+    }
+
+    public string? ActiveSingerName
+    {
+        get => _activeSingerName;
+        set
+        {
+            if (_activeSingerName != value)
+            {
+                _activeSingerName = value;
+                UpdateAudioParameters();
+            }
+        }
+    }
+
+    public MediaEngine(ICDGDecoder cdgDecoder, ICdgFrameScheduler scheduler, IVideoBackend video, ILibraryService libraryService)
     {
         _cdgDecoder = cdgDecoder;
         _scheduler = scheduler;
         _video = video;
+        _libraryService = libraryService;
 
         _video.FrameReady += OnVideoFrameReady;
         InitializePlaybackTimer();
@@ -92,7 +139,11 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
 
         if (string.IsNullOrEmpty(path)) return;
 
+        _currentSongPath = path;
         _isMp4Mode = path.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase);
+
+        // Apply dynamic settings merging (Song -> Singer -> Defaults)
+        UpdateAudioParameters();
 
         // Always load the file (mp4 or mp3 audio) in the unmanaged video player to play the audio track
         Task.Run(async () => await _video.LoadAsync(path));
@@ -171,5 +222,79 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         {
             _lastTickTime = DateTime.UtcNow;
         }
+    }
+
+    public void UpdateAudioParameters()
+    {
+        if (string.IsNullOrEmpty(_currentSongPath))
+        {
+            // Reset to global defaults
+            _video.Volume = 100.0;
+            _video.Speed = 1.0;
+            _video.Pitch = 0;
+            _video.Treble = 0.0;
+            _video.Mid = 0.0;
+            _video.Bass = 0.0;
+            _video.Compressor = 0.0;
+            _video.Limiter = 0.0;
+            return;
+        }
+
+        var songSettings = _libraryService.GetAudioSettings(_currentSongPath);
+        var singerSettings = !string.IsNullOrEmpty(ActiveSingerName) && ActiveSingerName != "None"
+            ? _libraryService.GetSingerSettings(ActiveSingerName)
+            : null;
+
+        // Base defaults
+        double mergedVolume = 100.0;
+        double mergedSpeed = 1.0;
+        int mergedPitch = 0;
+        double mergedTreble = 0.0;
+        double mergedMid = 0.0;
+        double mergedBass = 0.0;
+        double mergedCompressor = 0.0;
+        double mergedLimiter = 0.0;
+
+        // Apply Song settings first (if customized or record exists)
+        if (songSettings != null && songSettings.SongId > 0)
+        {
+            mergedVolume = songSettings.Gain;
+            mergedSpeed = songSettings.Tempo;
+            mergedPitch = songSettings.Key;
+            mergedTreble = songSettings.Treble;
+            mergedMid = songSettings.Mid;
+            mergedBass = songSettings.Bass;
+            mergedCompressor = songSettings.Compressor;
+            mergedLimiter = songSettings.Limiter;
+        }
+
+        // Apply Singer settings (merge/fallback)
+        if (singerSettings != null && singerSettings.SingerId > 0)
+        {
+            // Pitch offset sum (clamp to standard bounds -6 to +6)
+            mergedPitch = Math.Clamp(mergedPitch + singerSettings.Key, -6, 6);
+            // Speed factor multiplication (clamp to 0.5x to 2.0x)
+            mergedSpeed = Math.Clamp(mergedSpeed * singerSettings.Tempo, 0.5, 2.0);
+            // Volume attenuation multiplication
+            mergedVolume = Math.Clamp((mergedVolume / 100.0) * (singerSettings.Gain / 100.0) * 100.0, 0.0, 100.0);
+            // Equalization filters sum (clamp to -10dB to +10dB)
+            mergedTreble = Math.Clamp(mergedTreble + singerSettings.Treble, -10.0, 10.0);
+            mergedMid = Math.Clamp(mergedMid + singerSettings.Mid, -10.0, 10.0);
+            mergedBass = Math.Clamp(mergedBass + singerSettings.Bass, -10.0, 10.0);
+            // Compressor threshold: use strongest threshold (Max)
+            mergedCompressor = Math.Clamp(Math.Max(mergedCompressor, singerSettings.Compressor), 0.0, 100.0);
+            // Limiter threshold: use lowest (most restrictive) dB ceiling (Min)
+            mergedLimiter = Math.Clamp(Math.Min(mergedLimiter, singerSettings.Limiter), -20.0, 0.0);
+        }
+
+        // Apply merged results to the unmanaged player backend
+        _video.Volume = mergedVolume;
+        _video.Speed = mergedSpeed;
+        _video.Pitch = mergedPitch;
+        _video.Treble = mergedTreble;
+        _video.Mid = mergedMid;
+        _video.Bass = mergedBass;
+        _video.Compressor = mergedCompressor;
+        _video.Limiter = mergedLimiter;
     }
 }

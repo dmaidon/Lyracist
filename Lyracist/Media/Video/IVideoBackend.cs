@@ -18,4 +18,10 @@ public interface IVideoBackend
     double Volume { get; set; }
     double Speed { get; set; }
     int Pitch { get; set; }
+
+    double Treble { get; set; }
+    double Mid { get; set; }
+    double Bass { get; set; }
+    double Compressor { get; set; }
+    double Limiter { get; set; }
 }

@@ -10,4 +10,10 @@ public interface ILibraryService
     IEnumerable<KaraokeSong> Search(string query);
     IEnumerable<KaraokeSong> GetAllSongs();
     event EventHandler? LibraryUpdated;
+
+    Lyracist.Data.Models.SongAudioSettings GetAudioSettings(string audioPath);
+    void SaveAudioSettings(string audioPath, Lyracist.Data.Models.SongAudioSettings settings);
+
+    Lyracist.Data.Models.SingerAudioSettings GetSingerSettings(string singerName);
+    void SaveSingerSettings(string singerName, Lyracist.Data.Models.SingerAudioSettings settings);
 }

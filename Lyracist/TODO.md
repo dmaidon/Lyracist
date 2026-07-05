@@ -185,36 +185,36 @@ This is ready to paste directly into TODO.md.
 ### STAGE 4 — Audio Processing (Core Feature, Not Future)
 
 #### 14. Slider‑Only Audio Controls
-- [ ] Add treble slider
-- [ ] Add midrange slider
-- [ ] Add bass slider
-- [ ] Add gain slider
-- [ ] Add key slider
-- [ ] Add tempo slider
-- [ ] Add compressor slider
-- [ ] Add limiter slider
-- [ ] Add reset buttons
+- [x] Add treble slider
+- [x] Add midrange slider
+- [x] Add bass slider
+- [x] Add gain slider
+- [x] Add key slider
+- [x] Add tempo slider
+- [x] Add compressor slider
+- [x] Add limiter slider
+- [x] Add reset buttons
 
 #### 15. Per‑Song Audio Settings
-- [ ] Add SongAudioSettings table
-- [ ] Add song editor UI
-- [ ] Add slider panel
-- [ ] Add FFmpeg filter integration
-- [ ] Add auto‑apply on song load
-- [ ] Add persistence
+- [x] Add SongAudioSettings table
+- [x] Add song editor UI
+- [x] Add slider panel
+- [x] Add FFmpeg filter integration
+- [x] Add auto‑apply on song load
+- [x] Add persistence
 
 #### 16. Per‑Singer Audio Settings
-- [ ] Add SingerAudioSettings table
-- [ ] Add singer editor UI
-- [ ] Add slider panel
-- [ ] Add FFmpeg filter integration
-- [ ] Add auto‑apply on singer change
-- [ ] Add persistence
+- [x] Add SingerAudioSettings table
+- [x] Add singer editor UI
+- [x] Add slider panel
+- [x] Add FFmpeg filter integration
+- [x] Add auto‑apply on singer change
+- [x] Add persistence
 
 #### 17. Audio Priority Logic
-- [ ] Apply Song settings → Singer settings → Global defaults
-- [ ] Merge filters
-- [ ] Update MediaEngine in real time
+- [x] Apply Song settings → Singer settings → Global defaults
+- [x] Merge filters
+- [x] Update MediaEngine in real time
 
 ---
 
@@ -276,6 +276,7 @@ This is ready to paste directly into TODO.md.
 - [ ] Add special occasion editor
 - [ ] Add playlist editors
 - [ ] Add service settings
+- [ ] Add On/Off for Splash screen
 
 #### 24. Branding
 - [ ] Add logo
