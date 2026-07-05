@@ -279,10 +279,10 @@ This is ready to paste directly into TODO.md.
 - [x] Add On/Off for Splash screen
 
 #### 24. Branding
-- [ ] Add logo
-- [ ] Add app icon
-- [ ] Add AboutWindow
-- [ ] Add theme colors
+- [x] Add logo
+- [x] Add app icon
+- [x] Add AboutWindow
+- [x] Add theme colors
 
 #### 25. Packaging
 - [ ] Add MSIX packaging
