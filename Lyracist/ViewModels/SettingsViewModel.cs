@@ -23,10 +23,14 @@ public partial class SettingsViewModel : BaseViewModel
     private readonly IShowFlowService _showFlow;
     private readonly INavigationService _navigation;
     private readonly ILibraryService _library;
+    private readonly RotationViewModel _rotation;
 
     // Theme
     [ObservableProperty]
     private bool _isDarkMode = true;
+
+    [ObservableProperty]
+    private bool _isTestMode = AppSettings.IsTestMode;
 
     // Audio
     [ObservableProperty]
@@ -184,7 +188,8 @@ public partial class SettingsViewModel : BaseViewModel
                              IOccasionService occasions,
                              IShowFlowService showFlow,
                              INavigationService navigation,
-                             ILibraryService library)
+                             ILibraryService library,
+                             RotationViewModel rotation)
     {
         _display = display;
         _tablet = tablet;
@@ -192,6 +197,7 @@ public partial class SettingsViewModel : BaseViewModel
         _showFlow = showFlow;
         _navigation = navigation;
         _library = library;
+        _rotation = rotation;
 
         _library.LibraryUpdated += (_, _) => RefreshLibraryStatus();
 
@@ -449,6 +455,19 @@ public partial class SettingsViewModel : BaseViewModel
         var applicationTheme = value ? ApplicationTheme.Dark : ApplicationTheme.Light;
         ApplicationThemeManager.Apply(applicationTheme);
         Lyracist.Themes.LyracistThemeManager.Apply(value);
+    }
+
+    partial void OnIsTestModeChanged(bool value)
+    {
+        AppSettings.IsTestMode = value;
+        if (value)
+        {
+            _rotation.SeedSingers();
+        }
+        else
+        {
+            _rotation.ClearRotationQueue();
+        }
     }
 
     partial void OnRotationScreenChanged(ScreenInfo? value)

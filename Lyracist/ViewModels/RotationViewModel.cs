@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lyracist.Core.Helpers;
 using Lyracist.Models;
 using Lyracist.Services.Display;
 using Microsoft.EntityFrameworkCore;
@@ -34,12 +35,27 @@ public partial class RotationViewModel : BaseViewModel
     {
         _display = display;
 
-        // Seed default singer rotation values with song information
+        if (AppSettings.IsTestMode)
+        {
+            SeedSingers();
+        }
+        LoadSingerNames();
+    }
+
+    public void SeedSingers()
+    {
+        Rotation.Clear();
         Rotation.Add(new Singer { Name = "Alice Johnson", Key = "+1", Notes = "Sings soprano, prefers classic pop", SongTitle = "Sweet Caroline", Artist = "Neil Diamond" });
         Rotation.Add(new Singer { Name = "Bob Caruthers", Key = "-2", Notes = "Prefers baritone classic rock", SongTitle = "Hotel California", Artist = "Eagles" });
         Rotation.Add(new Singer { Name = "Charlie Brown", Key = "0", Notes = "First time singing today", SongTitle = "Billie Jean", Artist = "Michael Jackson" });
         Rotation.Add(new Singer { Name = "Diana Smith", Key = "+2", Notes = "Sings alto, loves jazz standards", SongTitle = "Fly Me to the Moon", Artist = "Frank Sinatra" });
-        LoadSingerNames();
+        _display.UpdateRotation(Rotation.ToList());
+    }
+
+    public void ClearRotationQueue()
+    {
+        Rotation.Clear();
+        _display.UpdateRotation(Rotation.ToList());
     }
 
     public void LoadSingerNames()

@@ -102,6 +102,9 @@
                                       Margin="0,0,0,8"/>
                             <CheckBox Content="Show splash screen on startup"
                                       IsChecked="{Binding ShowSplashOnStartup, Mode=TwoWay}"
+                                      Margin="0,0,0,8"/>
+                            <CheckBox Content="Test Mode (Seed default performers)"
+                                      IsChecked="{Binding IsTestMode, Mode=TwoWay}"
                                       Margin="0,0,0,16"/>
                             <Border Background="{DynamicResource AppSurfaceBrush}" CornerRadius="6" Padding="12">
                                 <Grid>

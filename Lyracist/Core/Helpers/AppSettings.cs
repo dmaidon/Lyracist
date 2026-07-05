@@ -51,6 +51,12 @@ public static class AppSettings
         set { _data.ShowSplashOnStartup = value; Save(); }
     }
 
+    public static bool IsTestMode
+    {
+        get => _data.IsTestMode;
+        set { _data.IsTestMode = value; Save(); }
+    }
+
     public static string YouTubeApiKey
     {
         get => _data.YouTubeApiKey;
@@ -174,6 +180,7 @@ public static class AppSettings
     private sealed class SettingsData
     {
         public bool ShowSplashOnStartup { get; set; } = true;
+        public bool IsTestMode { get; set; } = false;
 
         public string YouTubeApiKey { get; set; } = string.Empty;
         public string SpotifyClientId { get; set; } = string.Empty;
