@@ -229,10 +229,10 @@ This is ready to paste directly into TODO.md.
 - [x] Add rotation integration
 
 #### 19. Download‑Based Karaoke Stores
-- [ ] Add Sunfly download scanning
-- [ ] Add Karaoke Version scanning
-- [ ] Add metadata extraction
-- [ ] Add karaoke detection
+- [x] Add Sunfly download scanning
+- [x] Add Karaoke Version scanning
+- [x] Add metadata extraction
+- [x] Add karaoke detection
 
 #### 20. Music Services (Link‑Based)
 - [ ] Add Spotify link search
