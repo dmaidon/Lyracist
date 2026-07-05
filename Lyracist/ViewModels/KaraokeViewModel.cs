@@ -387,12 +387,23 @@ public partial class KaraokeViewModel : BaseViewModel
 
     private void RefreshFilteredList()
     {
-        FilteredSongs.Clear();
-        var results = _libraryService.Search(SearchQuery);
-        foreach (var song in results)
+        string query = SearchQuery;
+        System.Threading.Tasks.Task.Run(() =>
         {
-            FilteredSongs.Add(song);
-        }
+            try
+            {
+                var results = _libraryService.Search(query).ToList();
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    FilteredSongs.Clear();
+                    foreach (var song in results)
+                    {
+                        FilteredSongs.Add(song);
+                    }
+                });
+            }
+            catch { }
+        });
     }
 
     private void UpdateNowNext()

@@ -114,28 +114,40 @@ public partial class PlaylistsViewModel : BaseViewModel
 
     private void RefreshAll()
     {
-        OpeningTracks.Clear();
-        foreach (var track in _playlistService.GetOpeningPlaylist())
+        System.Threading.Tasks.Task.Run(() =>
         {
-            OpeningTracks.Add(track);
-        }
+            try
+            {
+                var opening = _playlistService.GetOpeningPlaylist().ToList();
+                var fillIn = _playlistService.GetFillInPlaylist().ToList();
+                var endRot = _playlistService.GetEndRotationPlaylist().ToList();
+                var songs = _libraryService.GetAllSongs().Where(s => !s.IsKaraoke).ToList();
 
-        FillInTracks.Clear();
-        foreach (var track in _playlistService.GetFillInPlaylist())
-        {
-            FillInTracks.Add(track);
-        }
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    OpeningTracks.Clear();
+                    foreach (var track in opening)
+                        OpeningTracks.Add(track);
 
-        EndRotationTracks.Clear();
-        foreach (var track in _playlistService.GetEndRotationPlaylist())
-        {
-            EndRotationTracks.Add(track);
-        }
+                    FillInTracks.Clear();
+                    foreach (var track in fillIn)
+                        FillInTracks.Add(track);
 
-        _allLibrarySongs = _libraryService.GetAllSongs().Where(s => !s.IsKaraoke).ToList();
-        FilterLibrarySongs();
+                    EndRotationTracks.Clear();
+                    foreach (var track in endRot)
+                        EndRotationTracks.Add(track);
 
-        _showFlow.RefreshPlaylists();
+                    _allLibrarySongs = songs;
+                    FilterLibrarySongs();
+
+                    _showFlow.RefreshPlaylists();
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error during RefreshAll background load: {ex.Message}");
+            }
+        });
     }
 
     private void FilterLibrarySongs()
