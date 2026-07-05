@@ -40,7 +40,9 @@
                            x:Name="RootNavigation"
                            PaneDisplayMode="Top"
                            IsBackButtonVisible="Collapsed"
-                           Margin="0">
+                           Margin="0"
+                           ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                           ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem Content="Karaoke" Icon="{ui:SymbolIcon MusicNote224}" TargetPageType="{x:Type pages:KaraokePage}" />
                 <ui:NavigationViewItem Content="Rotation" Icon="{ui:SymbolIcon People24}" TargetPageType="{x:Type pages:RotationPage}" />
