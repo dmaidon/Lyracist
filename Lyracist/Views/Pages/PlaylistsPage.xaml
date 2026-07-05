@@ -28,8 +28,8 @@
             </StackPanel>
         </Border>
 
-        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-            <Grid MinWidth="1180">
+        <ScrollViewer x:Name="PlaylistsScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+            <Grid MinWidth="1180" Height="{Binding ViewportHeight, ElementName=PlaylistsScrollViewer}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="400" />
                     <ColumnDefinition Width="300" />
