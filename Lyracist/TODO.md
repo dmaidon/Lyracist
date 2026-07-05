@@ -235,12 +235,12 @@ This is ready to paste directly into TODO.md.
 - [x] Add karaoke detection
 
 #### 20. Music Services (Link‑Based)
-- [ ] Add Spotify link search
-- [ ] Add YouTube link search
-- [ ] Add Amazon Music link search
-- [ ] Add “external music link” rotation entries
-- [ ] Add service icons
-- [ ] Add service filters
+- [x] Add Spotify link search
+- [x] Add YouTube link search
+- [x] Add Amazon Music link search
+- [x] Add “external music link” rotation entries
+- [x] Add service icons
+- [x] Add service filters
 
 ---
 
