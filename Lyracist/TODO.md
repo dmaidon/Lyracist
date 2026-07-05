@@ -221,12 +221,12 @@ This is ready to paste directly into TODO.md.
 ### STAGE 5 — Karaoke/Music Service Integration
 
 #### 18. Karaoke Services
-- [ ] Add Party Tyme API integration
-- [ ] Add authentication
-- [ ] Add catalog search
-- [ ] Add track playback
-- [ ] Add caching
-- [ ] Add rotation integration
+- [x] Add Party Tyme API integration
+- [x] Add authentication
+- [x] Add catalog search
+- [x] Add track playback
+- [x] Add caching
+- [x] Add rotation integration
 
 #### 19. Download‑Based Karaoke Stores
 - [ ] Add Sunfly download scanning
