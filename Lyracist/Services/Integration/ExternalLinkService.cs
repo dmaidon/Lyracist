@@ -61,7 +61,7 @@ namespace Lyracist.Services.Integration
                                     int dashIdx = fullTitle.IndexOf(" - ");
                                     if (dashIdx > 0)
                                     {
-                                        artist = fullTitle.Substring(0, dashIdx).Trim();
+                                        artist = fullTitle[..dashIdx].Trim();
                                         title = fullTitle.Substring(dashIdx + 3).Trim();
                                     }
 

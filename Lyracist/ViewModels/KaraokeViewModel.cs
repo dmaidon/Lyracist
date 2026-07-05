@@ -391,11 +391,23 @@ public partial class KaraokeViewModel : BaseViewModel
         _mediaEngine.Speed = 1.0;
         _mediaEngine.Pitch = 0;
 
-        // Fetch available monitors for display targeting
+        // Fetch available monitors for display targeting, prefixing with 'None'
+        AvailableScreens.Add(new ScreenInfo { Index = -1, DeviceName = "None (Do not show)" });
         foreach (var screen in _displayService.GetScreens())
         {
             AvailableScreens.Add(screen);
         }
+
+        var prefs = _displayService.GetPreferences();
+        var currentLyricsScreen = prefs.LyricsScreenIndex.HasValue
+            ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.LyricsScreenIndex.Value)
+            : AvailableScreens.FirstOrDefault(s => s.Index == -1);
+        _selectedLyricsScreenIndex = currentLyricsScreen != null ? AvailableScreens.IndexOf(currentLyricsScreen) : 0;
+
+        var currentRotationScreen = prefs.RotationScreenIndex.HasValue
+            ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.RotationScreenIndex.Value)
+            : AvailableScreens.FirstOrDefault(s => s.Index == -1);
+        _selectedRotationScreenIndex = currentRotationScreen != null ? AvailableScreens.IndexOf(currentRotationScreen) : 0;
 
         RefreshFilteredList();
         UpdateNowNext();
@@ -507,7 +519,8 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         if (value >= 0 && value < AvailableScreens.Count)
         {
-            _displayService.MoveLyricsToScreen(value);
+            var screen = AvailableScreens[value];
+            _displayService.MoveLyricsToScreen(screen.Index == -1 ? null : screen.Index);
         }
     }
 
@@ -515,7 +528,8 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         if (value >= 0 && value < AvailableScreens.Count)
         {
-            _displayService.MoveRotationToScreen(value);
+            var screen = AvailableScreens[value];
+            _displayService.MoveRotationToScreen(screen.Index == -1 ? null : screen.Index);
         }
     }
 

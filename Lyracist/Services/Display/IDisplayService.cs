@@ -16,8 +16,8 @@ public interface IDisplayService
     void ShowRotationWindow();
     void ShowLyricsWindow();
 
-    void MoveRotationToScreen(int screenIndex);
-    void MoveLyricsToScreen(int screenIndex);
+    void MoveRotationToScreen(int? screenIndex);
+    void MoveLyricsToScreen(int? screenIndex);
 
     void FullscreenRotation();
     void FullscreenLyrics();

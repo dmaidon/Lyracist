@@ -209,8 +209,10 @@ public partial class SettingsViewModel : BaseViewModel
         _showFlow.SetFillInTone(FillInBass, FillInTreble, 0);
         _showFlow.SetEndRotationTone(EndRotationBass, EndRotationTreble, 0);
 
-        // Load active screen list
-        Screens = _display.GetScreens().ToList();
+        // Load active screen list with a 'None' option first
+        var screens = new List<ScreenInfo> { new ScreenInfo { Index = -1, DeviceName = "None (Do not show)" } };
+        screens.AddRange(_display.GetScreens());
+        Screens = screens;
 
         // Reflect the last saved monitor assignments/mirror state without
         // triggering the OnChanged side effects below (which would move the
@@ -219,10 +221,10 @@ public partial class SettingsViewModel : BaseViewModel
         var prefs = _display.GetPreferences();
         _rotationScreen = prefs.RotationScreenIndex.HasValue
             ? Screens.FirstOrDefault(s => s.Index == prefs.RotationScreenIndex.Value)
-            : null;
+            : Screens.FirstOrDefault(s => s.Index == -1);
         _lyricsScreen = prefs.LyricsScreenIndex.HasValue
             ? Screens.FirstOrDefault(s => s.Index == prefs.LyricsScreenIndex.Value)
-            : null;
+            : Screens.FirstOrDefault(s => s.Index == -1);
         _isLyricsMirrored = prefs.IsLyricsMirrored;
 
         // Seed available devices
@@ -474,7 +476,7 @@ public partial class SettingsViewModel : BaseViewModel
     {
         if (value != null)
         {
-            _display.MoveRotationToScreen(value.Index);
+            _display.MoveRotationToScreen(value.Index == -1 ? null : value.Index);
         }
     }
 
@@ -482,7 +484,7 @@ public partial class SettingsViewModel : BaseViewModel
     {
         if (value != null)
         {
-            _display.MoveLyricsToScreen(value.Index);
+            _display.MoveLyricsToScreen(value.Index == -1 ? null : value.Index);
         }
     }
 

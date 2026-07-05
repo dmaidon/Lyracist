@@ -805,14 +805,14 @@
                                     <!-- Lyrics Monitor -->
                                     <StackPanel Grid.Column="0">
                                         <TextBlock Text="Lyrics Projection Screen" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
-                                        <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedLyricsScreenIndex, Mode=TwoWay}" DisplayMemberPath="DeviceName" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
+                                        <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedLyricsScreenIndex, Mode=TwoWay}" DisplayMemberPath="DisplayName" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
                                         <ui:Button Content="Open Lyrics Window" Icon="{ui:SymbolIcon Window24}" Command="{Binding ShowLyricsCommand}" Appearance="Primary" HorizontalAlignment="Stretch" />
                                     </StackPanel>
 
                                     <!-- Rotation Monitor -->
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="Rotation Queue Screen" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
-                                        <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedRotationScreenIndex, Mode=TwoWay}" DisplayMemberPath="DeviceName" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
+                                        <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedRotationScreenIndex, Mode=TwoWay}" DisplayMemberPath="DisplayName" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
                                         <ui:Button Content="Open Rotation Window" Icon="{ui:SymbolIcon People24}" Command="{Binding ShowRotationCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
                                     </StackPanel>
                                 </Grid>

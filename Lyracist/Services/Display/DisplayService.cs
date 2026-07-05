@@ -19,6 +19,7 @@ public class DisplayService : IDisplayService
     private bool _rotationHadSingers;
 
     public event Action? RotationCompleted;
+
     public event Action? RotationResumed;
 
     public DisplayService(IServiceProvider serviceProvider, IMediaEngine mediaEngine)
@@ -58,6 +59,10 @@ public class DisplayService : IDisplayService
 
     public void ShowRotationWindow()
     {
+        if (!_preferences.RotationScreenIndex.HasValue)
+        {
+            return;
+        }
         bool isNewWindow = _rotationWindow == null || !_rotationWindow.IsLoaded;
         if (isNewWindow)
         {
@@ -65,16 +70,26 @@ public class DisplayService : IDisplayService
         }
         _rotationWindow!.Show();
 
-        // Restore the last screen this window was assigned to, so the KJ
-        // doesn't have to reassign the projector every time the app starts.
-        if (isNewWindow && _preferences.RotationScreenIndex.HasValue)
+        if (isNewWindow)
         {
             MoveWindowToScreen(_rotationWindow, _preferences.RotationScreenIndex.Value);
         }
     }
 
+    public void HideRotationWindow()
+    {
+        if (_rotationWindow != null && _rotationWindow.IsLoaded)
+        {
+            _rotationWindow.Hide();
+        }
+    }
+
     public void ShowLyricsWindow()
     {
+        if (!_preferences.LyricsScreenIndex.HasValue)
+        {
+            return;
+        }
         bool isNewWindow = _lyricsWindow == null || !_lyricsWindow.IsLoaded;
         if (isNewWindow)
         {
@@ -85,33 +100,49 @@ public class DisplayService : IDisplayService
         if (isNewWindow)
         {
             var vm = _serviceProvider.GetService<LyricsWindowViewModel>();
-            if (vm != null)
-            {
-                vm.IsMirrored = _preferences.IsLyricsMirrored;
-            }
+            vm?.IsMirrored = _preferences.IsLyricsMirrored;
 
-            if (_preferences.LyricsScreenIndex.HasValue)
-            {
-                MoveWindowToScreen(_lyricsWindow, _preferences.LyricsScreenIndex.Value);
-            }
+            MoveWindowToScreen(_lyricsWindow, _preferences.LyricsScreenIndex.Value);
         }
     }
 
-    public void MoveRotationToScreen(int screenIndex)
+    public void HideLyricsWindow()
     {
-        ShowRotationWindow();
-        MoveWindowToScreen(_rotationWindow!, screenIndex);
+        if (_lyricsWindow != null && _lyricsWindow.IsLoaded)
+        {
+            _lyricsWindow.Hide();
+        }
+    }
 
-        _preferences.RotationScreenIndex = screenIndex;
+    public void MoveRotationToScreen(int? screenIndex)
+    {
+        if (screenIndex.HasValue && screenIndex.Value >= 0)
+        {
+            _preferences.RotationScreenIndex = screenIndex;
+            ShowRotationWindow();
+            MoveWindowToScreen(_rotationWindow!, screenIndex.Value);
+        }
+        else
+        {
+            _preferences.RotationScreenIndex = null;
+            HideRotationWindow();
+        }
         DisplayPreferencesStore.Save(_preferences);
     }
 
-    public void MoveLyricsToScreen(int screenIndex)
+    public void MoveLyricsToScreen(int? screenIndex)
     {
-        ShowLyricsWindow();
-        MoveWindowToScreen(_lyricsWindow!, screenIndex);
-
-        _preferences.LyricsScreenIndex = screenIndex;
+        if (screenIndex.HasValue && screenIndex.Value >= 0)
+        {
+            _preferences.LyricsScreenIndex = screenIndex;
+            ShowLyricsWindow();
+            MoveWindowToScreen(_lyricsWindow!, screenIndex.Value);
+        }
+        else
+        {
+            _preferences.LyricsScreenIndex = null;
+            HideLyricsWindow();
+        }
         DisplayPreferencesStore.Save(_preferences);
     }
 
@@ -121,10 +152,18 @@ public class DisplayService : IDisplayService
         {
             MoveRotationToScreen(_preferences.RotationScreenIndex.Value);
         }
+        else
+        {
+            HideRotationWindow();
+        }
 
         if (_preferences.LyricsScreenIndex.HasValue)
         {
             MoveLyricsToScreen(_preferences.LyricsScreenIndex.Value);
+        }
+        else
+        {
+            HideLyricsWindow();
         }
 
         SetLyricsMirror(_preferences.IsLyricsMirrored);
@@ -228,10 +267,7 @@ public class DisplayService : IDisplayService
     public void SetLyricsFallbackText(string text)
     {
         var vm = _serviceProvider.GetService<LyricsWindowViewModel>();
-        if (vm != null)
-        {
-            vm.ShowFallback(text);
-        }
+        vm?.ShowFallback(text);
     }
 
     public void ShowLyricsOverlay(string text, int seconds = 8)
