@@ -18,4 +18,10 @@ public partial class Singer : ObservableObject
 
     [ObservableProperty]
     private string _artist = string.Empty;
+
+    [ObservableProperty]
+    private string _externalLink = string.Empty;
+
+    [ObservableProperty]
+    private string _source = "Local"; // Local, PartyTyme, Spotify, YouTube, Amazon
 }

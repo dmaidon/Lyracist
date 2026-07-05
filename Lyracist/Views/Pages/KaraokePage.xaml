@@ -162,6 +162,111 @@
                             </Grid>
                         </Border>
                     </TabItem>
+                    <TabItem Header="Streaming Links" FontSize="12">
+                        <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="12" Margin="0,8,0,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <!-- Service Selector -->
+                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Service:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11" FontWeight="SemiBold"/>
+                                    <ComboBox Grid.Column="1" SelectedValue="{Binding SelectedExternalService, Mode=TwoWay}" SelectedValuePath="Content" FontSize="11" Height="28">
+                                        <ComboBoxItem Content="All"/>
+                                        <ComboBoxItem Content="Spotify"/>
+                                        <ComboBoxItem Content="YouTube"/>
+                                        <ComboBoxItem Content="Amazon"/>
+                                    </ComboBox>
+                                </Grid>
+
+                                <!-- Direct URL input for Custom Links -->
+                                <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,0,0,8" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                                    <StackPanel>
+                                        <TextBlock Text="Paste Custom Music Link" FontSize="11" FontWeight="Bold" Foreground="White" Margin="0,0,0,6"/>
+                                        <ui:TextBox Text="{Binding CustomExternalUrl, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Paste Spotify, YouTube, or Amazon URL..." Margin="0,0,0,6" FontSize="11" Height="26"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ui:TextBox Grid.Column="0" Text="{Binding CustomExternalTitle, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Song Title (Optional)..." Margin="0,0,4,0" FontSize="11" Height="26"/>
+                                            <ui:TextBox Grid.Column="1" Text="{Binding CustomExternalArtist, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Artist Name (Optional)..." Margin="4,0,0,0" FontSize="11" Height="26"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Search Results list of mocked backing tracks -->
+                                <ListBox Grid.Row="2" ItemsSource="{Binding ExternalResults}" SelectedItem="{Binding SelectedExternalTrack, Mode=TwoWay}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    
+                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding Artist}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
+                                                    
+                                                    <!-- Service Brand Badge -->
+                                                    <Border Grid.Column="1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center" Margin="6,0">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Source}" Value="Spotify">
+                                                                        <Setter Property="Background" Value="#331DB954"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Source}" Value="YouTube">
+                                                                        <Setter Property="Background" Value="#33FF0000"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Source}" Value="Amazon">
+                                                                        <Setter Property="Background" Value="#3300A8E1"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock FontSize="9" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Source}" Value="Spotify">
+                                                                            <Setter Property="Text" Value="SPOTIFY"/>
+                                                                            <Setter Property="Foreground" Value="#1DB954"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Source}" Value="YouTube">
+                                                                            <Setter Property="Text" Value="YOUTUBE"/>
+                                                                            <Setter Property="Foreground" Value="#FF0000"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Source}" Value="Amazon">
+                                                                            <Setter Property="Text" Value="AMAZON"/>
+                                                                            <Setter Property="Foreground" Value="#00A8E1"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Border>
+                                                    
+                                                    <ui:Button Grid.Column="2" Icon="{ui:SymbolIcon Play24}" Command="{Binding DataContext.PlayExternalTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Open Link in Browser" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Padding="6" VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </Border>
+                    </TabItem>
                 </TabControl>
 
                 <!-- Singer Assignment Card -->
@@ -233,24 +338,76 @@
                 </Grid>
 
                 <!-- Queue Title and Quick Controls -->
-                <Grid Grid.Row="1" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Singer Queue" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    
-                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding Rotation.MoveUpCommand}" Margin="0,0,4,0" ToolTip="Move Up"/>
-                        <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding Rotation.MoveDownCommand}" Margin="0,0,4,0" ToolTip="Move Down"/>
-                        <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding Rotation.RemoveSingerCommand}" Appearance="Danger" Margin="0,0,4,0" ToolTip="Remove Selected"/>
-                        <ui:Button Icon="{ui:SymbolIcon Dismiss24}" Command="{Binding Rotation.ClearRotationCommand}" Appearance="Secondary" ToolTip="Clear Queue"/>
-                    </StackPanel>
-                </Grid>
+                <StackPanel Grid.Row="1" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Singer Queue" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding Rotation.MoveUpCommand}" Margin="0,0,4,0" ToolTip="Move Up"/>
+                            <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding Rotation.MoveDownCommand}" Margin="0,0,4,0" ToolTip="Move Down"/>
+                            <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding Rotation.RemoveSingerCommand}" Appearance="Danger" Margin="0,0,4,0" ToolTip="Remove Selected"/>
+                            <ui:Button Icon="{ui:SymbolIcon Dismiss24}" Command="{Binding Rotation.ClearRotationCommand}" Appearance="Secondary" ToolTip="Clear Queue"/>
+                        </StackPanel>
+                    </Grid>
+                    <!-- Queue Service Filters -->
+                    <WrapPanel Margin="0,6,0,0" Orientation="Horizontal">
+                        <CheckBox Content="Local" IsChecked="{Binding ShowLocalFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11"/>
+                        <CheckBox Content="Party Tyme" IsChecked="{Binding ShowPartyTymeFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11"/>
+                        <CheckBox Content="Spotify" IsChecked="{Binding ShowSpotifyFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11"/>
+                        <CheckBox Content="YouTube" IsChecked="{Binding ShowYouTubeFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11"/>
+                        <CheckBox Content="Amazon" IsChecked="{Binding ShowAmazonFilter, Mode=TwoWay}" Margin="0,0,0,0" FontSize="11"/>
+                    </WrapPanel>
+                </StackPanel>
 
                 <!-- Queue ListBox -->
                 <Border Grid.Row="2" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="6">
                     <ListBox ItemsSource="{Binding Rotation.Rotation}" SelectedItem="{Binding Rotation.SelectedSinger}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Source}" Value="Local"/>
+                                            <Condition Binding="{Binding DataContext.ShowLocalFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Source}" Value="PartyTyme"/>
+                                            <Condition Binding="{Binding DataContext.ShowPartyTymeFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Source}" Value="Spotify"/>
+                                            <Condition Binding="{Binding DataContext.ShowSpotifyFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Source}" Value="YouTube"/>
+                                            <Condition Binding="{Binding DataContext.ShowYouTubeFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Source}" Value="Amazon"/>
+                                            <Condition Binding="{Binding DataContext.ShowAmazonFilter, RelativeSource={RelativeSource AncestorType=Page}}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
@@ -258,11 +415,26 @@
                                         <ContextMenu>
                                             <MenuItem Header="Edit Singer Audio Defaults..." Command="{Binding DataContext.EditSingerSettingsCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
                                             <MenuItem Header="Play Performer's Request" Command="{Binding DataContext.PlayPerformerRequestCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
+                                            <MenuItem Header="Open External Link in Browser" Command="{Binding DataContext.OpenExternalLinkInBrowserCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}">
+                                                <MenuItem.Style>
+                                                    <Style TargetType="MenuItem">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Source}" Value="Local">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Source}" Value="PartyTyme">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </MenuItem.Style>
+                                            </MenuItem>
                                         </ContextMenu>
                                     </Border.ContextMenu>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
@@ -273,7 +445,60 @@
                                             <TextBlock Text="{Binding Notes}" FontSize="10" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Visibility="{Binding Notes, Converter={StaticResource NullToVisibilityConverter}}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                                         </StackPanel>
 
-                                        <Border Grid.Column="1" CornerRadius="4" Background="{DynamicResource SystemFillColorCautionBackgroundBrush}" Padding="6,4" VerticalAlignment="Center" Margin="8,0,0,0">
+                                        <!-- Badge for Service Provider (Local, Party Tyme, Spotify, YouTube, Amazon) -->
+                                        <Border Grid.Column="1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center" Margin="6,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Source}" Value="Local">
+                                                            <Setter Property="Background" Value="{DynamicResource SystemFillColorSuccessBackgroundBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Source}" Value="PartyTyme">
+                                                            <Setter Property="Background" Value="#33FF8E53"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Source}" Value="Spotify">
+                                                            <Setter Property="Background" Value="#331DB954"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Source}" Value="YouTube">
+                                                            <Setter Property="Background" Value="#33FF0000"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Source}" Value="Amazon">
+                                                            <Setter Property="Background" Value="#3300A8E1"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock FontSize="9" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Source}" Value="Local">
+                                                                <Setter Property="Text" Value="LOCAL"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Source}" Value="PartyTyme">
+                                                                <Setter Property="Text" Value="PARTY TYME"/>
+                                                                <Setter Property="Foreground" Value="#FF8E53"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Source}" Value="Spotify">
+                                                                <Setter Property="Text" Value="SPOTIFY"/>
+                                                                <Setter Property="Foreground" Value="#1DB954"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Source}" Value="YouTube">
+                                                                <Setter Property="Text" Value="YOUTUBE"/>
+                                                                <Setter Property="Foreground" Value="#FF0000"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Source}" Value="Amazon">
+                                                                <Setter Property="Text" Value="AMAZON"/>
+                                                                <Setter Property="Foreground" Value="#00A8E1"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+
+                                        <Border Grid.Column="2" CornerRadius="4" Background="{DynamicResource SystemFillColorCautionBackgroundBrush}" Padding="6,4" VerticalAlignment="Center" Margin="2,0,0,0">
                                             <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
                                         </Border>
                                     </Grid>

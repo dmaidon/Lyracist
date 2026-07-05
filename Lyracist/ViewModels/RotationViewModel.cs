@@ -35,7 +35,7 @@ public partial class RotationViewModel : BaseViewModel
         Rotation.Add(new Singer { Name = "Charlie", Key = "0", Notes = "First time singing today", SongTitle = "Billie Jean", Artist = "Michael Jackson" });
     }
 
-    public void AddSinger(string name, string title, string artist, string key, string notes)
+    public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "")
     {
         Rotation.Add(new Singer
         {
@@ -43,7 +43,9 @@ public partial class RotationViewModel : BaseViewModel
             SongTitle = title,
             Artist = artist,
             Key = key,
-            Notes = notes
+            Notes = notes,
+            Source = source,
+            ExternalLink = externalLink
         });
 
         _display.UpdateRotation(Rotation.ToList());

@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Lyracist.Core.Interfaces;
 using Lyracist.Services.Display;
+using Lyracist.Services.Integration;
 using Lyracist.Models;
 
 namespace Lyracist.ViewModels;
@@ -19,6 +20,7 @@ public partial class KaraokeViewModel : BaseViewModel
     private readonly IShowFlowService _showFlow;
     private readonly IOccasionService _occasions;
     private readonly IPartyTymeService _partyTymeService;
+    private readonly ExternalLinkService _externalLinkService;
 
     public RotationViewModel Rotation { get; }
 
@@ -65,6 +67,41 @@ public partial class KaraokeViewModel : BaseViewModel
     private PartyTymeTrack? _selectedPartyTymeTrack;
 
     public ObservableCollection<PartyTymeTrack> PartyTymeResults { get; } = new();
+
+    [ObservableProperty]
+    private string _customExternalUrl = string.Empty;
+
+    [ObservableProperty]
+    private string _customExternalTitle = string.Empty;
+
+    [ObservableProperty]
+    private string _customExternalArtist = string.Empty;
+
+    [ObservableProperty]
+    private string _selectedExternalService = "All";
+
+    [ObservableProperty]
+    private ExternalTrack? _selectedExternalTrack;
+
+    [ObservableProperty]
+    private bool _isExternalLoading;
+
+    public ObservableCollection<ExternalTrack> ExternalResults { get; } = new();
+
+    [ObservableProperty]
+    private bool _showLocalFilter = true;
+
+    [ObservableProperty]
+    private bool _showPartyTymeFilter = true;
+
+    [ObservableProperty]
+    private bool _showSpotifyFilter = true;
+
+    [ObservableProperty]
+    private bool _showYouTubeFilter = true;
+
+    [ObservableProperty]
+    private bool _showAmazonFilter = true;
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -246,6 +283,7 @@ public partial class KaraokeViewModel : BaseViewModel
         _occasions = occasions;
         Rotation = rotationViewModel;
         _partyTymeService = partyTymeService;
+        _externalLinkService = new ExternalLinkService();
 
         _mediaEngine.FrameReady += OnFrameReady;
         _libraryService.LibraryUpdated += OnLibraryUpdated;
@@ -285,6 +323,11 @@ public partial class KaraokeViewModel : BaseViewModel
     partial void OnSearchQueryChanged(string value)
     {
         RefreshFilteredList();
+        if (IsPartyTymeConnected)
+        {
+            SearchPartyTymeCommand.Execute(null);
+        }
+        SearchExternalCommand.Execute(null);
     }
 
     private void RefreshFilteredList()
@@ -454,12 +497,27 @@ public partial class KaraokeViewModel : BaseViewModel
 
         if (SelectedSong != null)
         {
-            Rotation.AddSinger(NewSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes);
+            Rotation.AddSinger(NewSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local");
         }
         else if (SelectedPartyTymeTrack != null)
         {
             Rotation.AddSinger(NewSingerName, SelectedPartyTymeTrack.Title, SelectedPartyTymeTrack.Artist, NewSingerKey, 
-                $"[Party Tyme ID: {SelectedPartyTymeTrack.TrackId}] {NewSingerNotes}");
+                $"[Party Tyme ID: {SelectedPartyTymeTrack.TrackId}] {NewSingerNotes}", "PartyTyme");
+        }
+        else if (SelectedExternalTrack != null)
+        {
+            Rotation.AddSinger(NewSingerName, SelectedExternalTrack.Title, SelectedExternalTrack.Artist, NewSingerKey, 
+                NewSingerNotes, SelectedExternalTrack.Source, SelectedExternalTrack.Url);
+        }
+        else if (!string.IsNullOrWhiteSpace(CustomExternalUrl))
+        {
+            var parsed = _externalLinkService.ParseUrl(CustomExternalUrl);
+            if (parsed != null)
+            {
+                string title = string.IsNullOrWhiteSpace(CustomExternalTitle) ? parsed.Title : CustomExternalTitle;
+                string artist = string.IsNullOrWhiteSpace(CustomExternalArtist) ? parsed.Artist : CustomExternalArtist;
+                Rotation.AddSinger(NewSingerName, title, artist, NewSingerKey, NewSingerNotes, parsed.Source, CustomExternalUrl);
+            }
         }
         else
         {
@@ -470,6 +528,9 @@ public partial class KaraokeViewModel : BaseViewModel
         NewSingerName = string.Empty;
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";
+        CustomExternalUrl = string.Empty;
+        CustomExternalTitle = string.Empty;
+        CustomExternalArtist = string.Empty;
     }
 
     [RelayCommand]
@@ -677,6 +738,28 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         if (singer == null) return;
 
+        // Check if it's an external link
+        if (singer.Source == "Spotify" || singer.Source == "YouTube" || singer.Source == "Amazon")
+        {
+            IsPlaying = false;
+            CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [{singer.Source}]";
+            _mediaEngine.ActiveSingerName = singer.Name;
+            _mediaEngine.Stop();
+
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(singer.ExternalLink))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(singer.ExternalLink) { UseShellExecute = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to open external link: {ex.Message}", "Playback Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+            return;
+        }
+
         if (singer.Notes.Contains("[Party Tyme ID:"))
         {
             int startIdx = singer.Notes.IndexOf("[Party Tyme ID:") + 15;
@@ -722,6 +805,63 @@ public partial class KaraokeViewModel : BaseViewModel
                 "Song Not Found",
                 System.Windows.MessageBoxButton.OK,
                 System.Windows.MessageBoxImage.Warning);
+        }
+    }
+
+    [RelayCommand]
+    private async Task SearchExternal()
+    {
+        IsExternalLoading = true;
+        try
+        {
+            var results = await _externalLinkService.SearchAsync(SearchQuery, SelectedExternalService);
+            ExternalResults.Clear();
+            foreach (var track in results)
+            {
+                ExternalResults.Add(track);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"External search error: {ex.Message}");
+        }
+        finally
+        {
+            IsExternalLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private void PlayExternalTrack(ExternalTrack track)
+    {
+        if (track == null) return;
+        
+        IsPlaying = false;
+        CurrentSongName = $"{track.Artist} - {track.Title} [{track.Source}]";
+        _mediaEngine.Stop();
+
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(track.Url) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Failed to open link: {ex.Message}", "Browser Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
+    private void OpenExternalLinkInBrowser(Singer singer)
+    {
+        if (singer == null || string.IsNullOrWhiteSpace(singer.ExternalLink)) return;
+
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(singer.ExternalLink) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Failed to open link: {ex.Message}", "Browser Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
     }
 }
