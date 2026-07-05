@@ -1,0 +1,19 @@
+root = true
+
+[*.cs]
+# Disable specific noisy code quality, MVVM Toolkit, and design rules that clutter the Error List
+dotnet_diagnostic.MVVMTK0042.severity = none
+dotnet_diagnostic.CA1805.severity = none
+dotnet_diagnostic.CA1822.severity = none
+dotnet_diagnostic.SYSLIB1045.severity = none
+dotnet_diagnostic.CA1304.severity = none
+dotnet_diagnostic.CA1310.severity = none
+dotnet_diagnostic.CA1311.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA1862.severity = none
+dotnet_diagnostic.CA1869.severity = none
+dotnet_diagnostic.CA1001.severity = none
+dotnet_diagnostic.CA1050.severity = none
+dotnet_diagnostic.CA1716.severity = none
+dotnet_diagnostic.SYSLIB1054.severity = none
+dotnet_diagnostic.CA1866.severity = none
