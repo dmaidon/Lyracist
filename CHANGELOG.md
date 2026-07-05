@@ -7,21 +7,33 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.7.5.85] - 2026-07-05
 
 ### Added
-- **Display "None" Option**: Users can now select *None (Do not show)* in monitor dropdowns (Settings and the main panel). Selecting this closes/hides the target projection window immediately.
-- **Test Mode Setting**: Added a "Test Mode" checkbox under *Settings → Theme & Appearance*. When checked, it seeds the default performer queue (Alice, Bob, etc.) for quick testing. When unchecked, it clears the queue so the system is ready for the night.
-- **Diagnostic Configuration**: Added `.editorconfig` to the project root to silence noisy code analysis messages (e.g. `MVVMTK0042`, `CA1805`, `CA1822`, and string localization suggestions) from the Visual Studio Error List.
+- **Display "None" Option**: Support for selecting *None (Do not show)* in monitor dropdowns (Settings and main projection panels). Selecting this option immediately closes or hides the target projection window (Lyrics or Rotation).
+- **Test Mode Setting**: Settings toggle to instantly seed default performer queue (Alice, Bob, Charlie, Diana) to check audio and projection setup, or clear the queue when done.
+- **SignalR Real-Time Performer Sync**: Automated background sync of the active singer, next performer, and rotation queue updates to the mobile web server, with offline fallback polling.
+- **Performer Mobile Portal**: Responsive web portal on port `5005` featuring catalog search, request submissions, queue statuses, and occasion requests.
+- **Streaming Music Integrations**: Custom search and play support for Party Tyme (OAuth API, caching), YouTube (live API search and custom URL streaming links), Spotify, and Amazon Music.
+- **Persistent Credential Storage**: Settings page fields for API keys (YouTube, Spotify Client ID/Secret, Amazon, Party Tyme) backed by JSON persistence.
+- **Direct Streaming Queueing**: Direct queueing (+) button on YouTube/Party Tyme search results to add songs directly without manual copy-paste.
+- **Lyrics Preview Overlay**: Automatic visual overlay notification in the Lyrics Preview Monitor during browser-based performances (YouTube, Spotify, Amazon) along with a quick link to re-open the source URL.
+- **Custom BGM EQ Settings**: Persistent sliders for Opening, Fill-In, and End-of-Rotation background music volumes and tone properties (Bass/Treble), persisted to the local app settings.
+- **About and Branding Window**: Integrated custom `AboutWindow` and `AboutViewModel` to display license details and version info.
+- **Sunfly & Karaoke Version Metadata Scanning**: Scanner rules for parsing folder structures, extracting track numbers, and identifying karaoke backing tracks.
 
-### Changed
-- **Ambiguous ListBox Reference Fixed**: Fully qualified the type `System.Windows.Controls.ListBox` in `KaraokePage.xaml.cs` to resolve compiler warning/error `CS0104` caused by overlapping namespace references.
-- **Queue Deselection**: Clicking the active/highlighted current singer in the rotation queue now deselects them immediately. This allows KJs to easily correct accidental selection clicks.
-- **Redundant Package Cleanup**: Removed redundant reference to `Microsoft.Extensions.Hosting` inside `Lyracist.csproj` as the ASP.NET Core framework reference (`Microsoft.AspNetCore.App`) already provides these classes, resolving restore warning `NU1510`.
-- **Code Style Refactoring**: Ran `dotnet format` to resolve code styles, whitespace discrepancies, and unnecessary syntax constructs across 15 source files.
+### Fixed & Changed
+- **ListBox Ambiguity Fixed**: Fully qualified the type `System.Windows.Controls.ListBox` in `KaraokePage.xaml.cs` to resolve naming conflict warnings (`CS0104`) with Windows Forms.
+- **Queue Click-to-Deselect**: Re-clicking the active singer in the queue deselects them immediately to allow KJs to easily correct accidental selection clicks.
+- **Redundant Hosting Package Cleanup**: Removed direct dependency on `Microsoft.Extensions.Hosting` in `Lyracist.csproj` to fix compile warning `NU1510`, since it's already provided by the ASP.NET Core framework reference.
+- **SQLite Optimization & WAL Mode**: Configured SQLite to run in WAL journal mode, Normal synchronization, and shared cache. Made data loading asynchronous via background tasks (`Task.Run`) to keep page transitions and startup snappy.
+- **Auto-stop Background Music**: Exposed and wired up track start events to stop/fade opening or fill-in background music immediately when a karaoke track is started.
+- **UI Auto-Scaling**: Removed duplicate scroll containers, disabled parent NavigationView scrollbars, and expanded default ScrollBar dimensions to `16px` (and `22px` for main panels) for high visibility and reliable scaling on high-resolution screens.
+- **Automated Formatting**: Applied `dotnet format` to automatically fix spacing and style violations across 15 source files.
 
 ---
 
 ## [26.7.4.3] - 2026-07-04
 
 ### Added
-- **Singer History Database**: Created a database table to save singer name, song title, artist, key shift, and streaming links.
-- **Tablet Lyrics server on Port 5005**: Implemented local WebSocket/HTTP Hub server enabling mobile browser preview for performers.
-- **Scaryoke Mode**: Initial integration of a themed "Wheel of Doom" picker for randomized singer challenges.
+- **Base Control Panel & Windows**: Main presentation layer, standalone borderless projection windows, and multi-monitor movement logic.
+- **Singer History Database**: Created initial database schema for recording performer histories.
+- **Audio Processing Controls**: Initial implementation of 3-band EQ, Compressor, and Limiter.
+- **Occasions Library**: Special Occasions Category manager.
