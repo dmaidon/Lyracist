@@ -39,4 +39,7 @@ public interface IShowFlowService
     void SetOpeningTone(double bassDb, double trebleDb, double preampDb);
     void SetFillInTone(double bassDb, double trebleDb, double preampDb);
     void SetEndRotationTone(double bassDb, double trebleDb, double preampDb);
+
+    /// <summary>Stops opening/background music and pauses fill-in when a performance starts.</summary>
+    void OnKaraokeTrackStarted();
 }

@@ -57,16 +57,7 @@ public class ShowFlowService : IShowFlowService
         // A singer's song starting means the opening set is over for the
         // night, and any fill-in or occasion track playing in the gap needs
         // to duck out.
-        mediaEngine.Started += () =>
-        {
-            _opening.Stop();
-            _fillIn.Pause();
-            if (_occasion.IsPlaying)
-            {
-                _occasion.Stop();
-                _display.SetRotationAnnouncement(string.Empty, false);
-            }
-        };
+        mediaEngine.Started += OnKaraokeTrackStarted;
 
         // The singer's song ending re-opens the gap for fill-in music.
         mediaEngine.Stopped += () => _fillIn.Resume();
@@ -159,5 +150,16 @@ public class ShowFlowService : IShowFlowService
         _endRotation.BassDb = bassDb;
         _endRotation.TrebleDb = trebleDb;
         _endRotation.PreampDb = preampDb;
+    }
+
+    public void OnKaraokeTrackStarted()
+    {
+        _opening.Stop();
+        _fillIn.Pause();
+        if (_occasion.IsPlaying)
+        {
+            _occasion.Stop();
+            _display.SetRotationAnnouncement(string.Empty, false);
+        }
     }
 }

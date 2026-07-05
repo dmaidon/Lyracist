@@ -908,6 +908,9 @@ public partial class KaraokeViewModel : BaseViewModel
             _mediaEngine.ActiveSingerName = singer.Name;
             _mediaEngine.Stop();
 
+            // Stop background music as performance is launching externally
+            _showFlow.OnKaraokeTrackStarted();
+
             try
             {
                 if (!string.IsNullOrWhiteSpace(singer.ExternalLink))
@@ -1001,6 +1004,9 @@ public partial class KaraokeViewModel : BaseViewModel
         IsPlaying = false;
         CurrentSongName = $"{track.Artist} - {track.Title} [{track.Source}]";
         _mediaEngine.Stop();
+
+        // Stop background music as performance is launching externally
+        _showFlow.OnKaraokeTrackStarted();
 
         try
         {
