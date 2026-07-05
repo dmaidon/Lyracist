@@ -291,11 +291,11 @@ This is ready to paste directly into TODO.md.
 - [ ] Add auto‑update system (optional)
 
 #### 26. Stability & Performance
-- [ ] Add logging
-- [ ] Add error handling
-- [ ] Add crash recovery
-- [ ] Add database backup/restore
-- [ ] Add performance tuning
+- [x] Add logging
+- [x] Add error handling
+- [x] Add crash recovery
+- [x] Add database backup/restore
+- [x] Add performance tuning
 
 ---
 

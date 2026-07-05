@@ -336,10 +336,29 @@
                                        Command="{Binding RescanLibraryCommand}"
                                        Appearance="Secondary" HorizontalAlignment="Stretch"
                                        Margin="0,0,0,10"/>
-                            <TextBlock Text="{Binding LibraryStatus}"
-                                       FontSize="11" FontStyle="Italic"
-                                       Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                       TextWrapping="Wrap"/>
+                             <TextBlock Text="{Binding LibraryStatus}"
+                                        FontSize="11" FontStyle="Italic"
+                                        Foreground="{DynamicResource AppTextSecondaryBrush}"
+                                        TextWrapping="Wrap" Margin="0,0,0,8"/>
+                             <Separator Margin="0,8,0,8" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                             <TextBlock Text="Database Maintenance" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                             <Grid>
+                                 <Grid.ColumnDefinitions>
+                                     <ColumnDefinition Width="*"/>
+                                     <ColumnDefinition Width="8"/>
+                                     <ColumnDefinition Width="*"/>
+                                 </Grid.ColumnDefinitions>
+                                 <ui:Button Grid.Column="0" Content="Backup DB"
+                                            Icon="{ui:SymbolIcon Save24}"
+                                            Command="{Binding BackupDatabaseCommand}"
+                                            Appearance="Secondary"
+                                            HorizontalAlignment="Stretch"/>
+                                 <ui:Button Grid.Column="2" Content="Restore DB"
+                                            Icon="{ui:SymbolIcon History24}"
+                                            Command="{Binding RestoreDatabaseCommand}"
+                                            Appearance="Secondary"
+                                            HorizontalAlignment="Stretch"/>
+                             </Grid>
                         </StackPanel>
                     </GroupBox>
 

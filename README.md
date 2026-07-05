@@ -31,6 +31,10 @@ Lyracist is a premium, modern Windows WPF Karaoke hosting application designed f
   - **Spotify & Amazon Music** links
 - **Singer History DB**: Automatically saves matching song, artist, singer, and links for instant lookup in future sessions.
 
+### 💾 Database Maintenance & Stability
+- **Live Online Backups**: Instantly back up settings, singer logs, playlists, and performer queue to an external SQLite `.db` file using live `VACUUM INTO` operations.
+- **Graceful Restore**: Restore data from backup files; the application closes database connections safely and shuts down for reboot validation automatically.
+
 ### 📱 Tablet Lyrics Web Server
 - **Local Web Server**: Serves a mobile-friendly web page (defaulting to port `5005`) over the local network.
 - **Singer Preview Monitor**: Allows singers to scan a local QR code and follow the live scrolling lyrics directly from their phone or tablet.
@@ -58,3 +62,4 @@ Lyracist is a premium, modern Windows WPF Karaoke hosting application designed f
 2. In **Service Logins & API Keys**, enter credentials for YouTube, Spotify, or Party Tyme if using streaming search.
 3. In **Theme & Appearance**, toggle **Test Mode** on to test queue workflows.
 4. Set up monitor assignments under **Display & Projection Monitors** or the main control panel.
+5. Manage backups and database restorations in the **Database Maintenance** section under the **Music Library** group box.

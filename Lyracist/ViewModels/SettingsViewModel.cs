@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lyracist.Core.Helpers;
@@ -511,5 +513,106 @@ public partial class SettingsViewModel : BaseViewModel
     {
         await _tablet.StopAsync();
         TabletStatus = "Stopped";
+    }
+
+    [RelayCommand]
+    private void BackupDatabase()
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = "Backup Lyracist Database",
+            FileName = $"lyracist_backup_{DateTime.Now:yyyyMMdd_HHmmss}.db",
+            Filter = "SQLite Database (*.db)|*.db|All files (*.*)|*.*"
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        string selectedPath = dialog.FileName;
+
+        try
+        {
+            if (System.IO.File.Exists(selectedPath))
+            {
+                System.IO.File.Delete(selectedPath);
+            }
+
+            using var db = new Lyracist.Data.LyracistDbContext();
+#pragma warning disable EF1002
+            db.Database.ExecuteSqlRaw($"VACUUM INTO '{selectedPath.Replace("'", "''")}';");
+#pragma warning restore EF1002
+
+            System.Windows.MessageBox.Show(
+                $"Database backup created successfully at:{Environment.NewLine}{selectedPath}",
+                "Backup Successful",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "Database Backup");
+            System.Windows.MessageBox.Show(
+                $"Failed to backup database: {ex.Message}",
+                "Backup Error",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
+    private void RestoreDatabase()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Restore Lyracist Database from Backup",
+            Filter = "SQLite Database (*.db)|*.db|All files (*.*)|*.*"
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        string selectedPath = dialog.FileName;
+
+        var confirm = System.Windows.MessageBox.Show(
+            "Restoring the database will overwrite all current settings, performers, playlists, and history. " +
+            "The application will shutdown to complete the restore. Do you want to proceed?",
+            "Confirm Database Restore",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        try
+        {
+            using (var db = new Lyracist.Data.LyracistDbContext())
+            {
+                db.Database.CloseConnection();
+            }
+
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string dbPath = Path.Combine(baseDir, "Data", "lyracist.db");
+
+            System.IO.File.Copy(selectedPath, dbPath, overwrite: true);
+
+            string walPath = dbPath + "-wal";
+            string shmPath = dbPath + "-shm";
+            if (System.IO.File.Exists(walPath)) System.IO.File.Delete(walPath);
+            if (System.IO.File.Exists(shmPath)) System.IO.File.Delete(shmPath);
+
+            System.Windows.MessageBox.Show(
+                "Database restored successfully. The application will now close. Please restart Lyracist.",
+                "Restore Complete",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+
+            System.Windows.Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "Database Restore");
+            System.Windows.MessageBox.Show(
+                $"Failed to restore database: {ex.Message}",
+                "Restore Error",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
     }
 }

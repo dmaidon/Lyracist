@@ -102,6 +102,18 @@
                     <ui:SymbolIcon Symbol="MailInboxArrowDown20" FontSize="28" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
                 </ui:CardControl>
 
+                <!-- 7. Database Maintenance -->
+                <TextBlock Text="7. Database Backup &amp; Restore" FontSize="18" FontWeight="SemiBold" Margin="0,8,0,12"/>
+                <ui:CardControl Margin="0,0,0,20">
+                    <ui:CardControl.Header>
+                        <StackPanel>
+                            <TextBlock Text="Backing Up and Restoring Show Data" FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock Text="Navigate to the 'Settings' page, locate the 'Music Library' group box, and find the 'Database Maintenance' panel. Click 'Backup DB' to save your settings, playlists, performer records, and song logs as a clean, compacted SQLite file. To restore, click 'Restore DB' and select a valid backup database file. Overwriting your database will prompt the application to shut down safely to complete the restore." FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </ui:CardControl.Header>
+                    <ui:SymbolIcon Symbol="History24" FontSize="28" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                </ui:CardControl>
+
             </StackPanel>
         </ScrollViewer>
     </Grid>

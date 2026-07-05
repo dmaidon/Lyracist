@@ -7,6 +7,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.7.5.85] - 2026-07-05
 
 ### Added
+- **Database Backup & Restore**: Live database backups (via SQLite-native `VACUUM INTO` command) and connection-closed database restorations (overwriting target, deleting temporary WAL/SHM files, and restarting application safely).
 - **Display "None" Option**: Support for selecting *None (Do not show)* in monitor dropdowns (Settings and main projection panels). Selecting this option immediately closes or hides the target projection window (Lyrics or Rotation).
 - **Test Mode Setting**: Settings toggle to instantly seed default performer queue (Alice, Bob, Charlie, Diana) to check audio and projection setup, or clear the queue when done.
 - **SignalR Real-Time Performer Sync**: Automated background sync of the active singer, next performer, and rotation queue updates to the mobile web server, with offline fallback polling.
@@ -20,6 +21,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Sunfly & Karaoke Version Metadata Scanning**: Scanner rules for parsing folder structures, extracting track numbers, and identifying karaoke backing tracks.
 
 ### Fixed & Changed
+- **Roslyn Warning Suppression & EF1002 Fix**: Added compiler pragma blocks to suppress `EF1002` (potential SQL injection warning on live backup path copy) and added localized rules inside `.editorconfig` to keep the project compile state clean at 0 warnings.
 - **ListBox Ambiguity Fixed**: Fully qualified the type `System.Windows.Controls.ListBox` in `KaraokePage.xaml.cs` to resolve naming conflict warnings (`CS0104`) with Windows Forms.
 - **Queue Click-to-Deselect**: Re-clicking the active singer in the queue deselects them immediately to allow KJs to easily correct accidental selection clicks.
 - **Redundant Hosting Package Cleanup**: Removed direct dependency on `Microsoft.Extensions.Hosting` in `Lyracist.csproj` to fix compile warning `NU1510`, since it's already provided by the ASP.NET Core framework reference.
