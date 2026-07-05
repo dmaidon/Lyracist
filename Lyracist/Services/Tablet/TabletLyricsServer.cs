@@ -21,10 +21,23 @@ public class TabletLyricsServer : ITabletLyricsServer
     private CancellationTokenSource? _cts;
     private Task? _serverTask;
     private readonly IRequestService _requests;
+    private readonly RotationViewModel _rotation;
+    private readonly ILibraryService _library;
+    private readonly IOccasionService _occasions;
+    private readonly KaraokeViewModel _karaoke;
 
-    public TabletLyricsServer(IRequestService requests)
+    public TabletLyricsServer(
+        IRequestService requests,
+        RotationViewModel rotation,
+        ILibraryService library,
+        IOccasionService occasions,
+        KaraokeViewModel karaoke)
     {
         _requests = requests;
+        _rotation = rotation;
+        _library = library;
+        _occasions = occasions;
+        _karaoke = karaoke;
     }
 
     /// <summary>Payload for POST /api/requests from the singer mobile portal.</summary>
@@ -46,11 +59,19 @@ public class TabletLyricsServer : ITabletLyricsServer
             
             // Register SignalR services
             builder.Services.AddSignalR();
+            builder.Services.AddSingleton(_requests);
+            builder.Services.AddSingleton(_rotation);
+            builder.Services.AddSingleton(_library);
+            builder.Services.AddSingleton(_occasions);
+            builder.Services.AddSingleton(_karaoke);
             
             // Set minimum logging to warning to avoid flooding standard output/debug window
             builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
             _webApp = builder.Build();
+
+            _rotation.Rotation.CollectionChanged += OnRotationChanged;
+            _karaoke.PropertyChanged += OnKaraokePropertyChanged;
             
             // Map the lyrics hub endpoint
             _webApp.MapHub<LyricsHub>("/lyricsHub");
@@ -164,6 +185,9 @@ public class TabletLyricsServer : ITabletLyricsServer
 
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
+        _rotation.Rotation.CollectionChanged -= OnRotationChanged;
+        _karaoke.PropertyChanged -= OnKaraokePropertyChanged;
+
         if (_cts != null)
         {
             _cts.Cancel();
@@ -212,6 +236,7 @@ public class TabletLyricsServer : ITabletLyricsServer
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Lyracist Performer Portal</title>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
             <style>
                 :root {
                     --bg-color: #0b0b0e;
@@ -460,11 +485,46 @@ public class TabletLyricsServer : ITabletLyricsServer
                     showDashboard();
                 }
 
+                let connection = null;
+
                 function showDashboard() {
                     document.getElementById("join-screen").style.display = "none";
                     document.getElementById("dashboard-screen").style.display = "block";
                     document.getElementById("display-name").textContent = singerName;
                     
+                    if (typeof signalR !== 'undefined') {
+                        connection = new signalR.HubConnectionBuilder()
+                            .withUrl("/lyricsHub")
+                            .withAutomaticReconnect()
+                            .build();
+
+                        connection.on("QueueUpdated", (queue) => {
+                            renderQueue(queue);
+                        });
+
+                        connection.on("ActiveSingerUpdated", (active) => {
+                            document.getElementById("now-name").textContent = active.name;
+                            document.getElementById("now-song").textContent = active.song;
+                        });
+
+                        connection.on("NextSingerUpdated", (next) => {
+                            document.getElementById("next-name").textContent = next.name;
+                            document.getElementById("next-song").textContent = next.song;
+                        });
+
+                        connection.start().then(() => {
+                            console.log("SignalR connected!");
+                        }).catch(err => {
+                            console.error("SignalR failed, falling back to polling", err);
+                            startPolling();
+                        });
+                    } else {
+                        console.log("SignalR library not found, falling back to polling");
+                        startPolling();
+                    }
+                }
+
+                function startPolling() {
                     refreshQueue();
                     setInterval(refreshQueue, 5000);
                 }
@@ -704,6 +764,82 @@ public class TabletLyricsServer : ITabletLyricsServer
         </body>
         </html>
         """;
+
+    private void OnRotationChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        _ = BroadcastQueueAsync();
+    }
+
+    private void OnKaraokePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(KaraokeViewModel.NowSingingName) ||
+            e.PropertyName == nameof(KaraokeViewModel.NowSingingSong) ||
+            e.PropertyName == nameof(KaraokeViewModel.IsPlaying))
+        {
+            _ = BroadcastActiveSingerAsync();
+        }
+        else if (e.PropertyName == nameof(KaraokeViewModel.NextUpName) ||
+                 e.PropertyName == nameof(KaraokeViewModel.NextUpSong))
+        {
+            _ = BroadcastNextSingerAsync();
+        }
+    }
+
+    private async Task BroadcastQueueAsync()
+    {
+        if (_webApp == null) return;
+        try
+        {
+            var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
+            var queueList = _rotation.Rotation.Select(s => new {
+                name = s.Name,
+                songTitle = s.SongTitle,
+                artist = s.Artist,
+                key = s.Key,
+                source = s.Source
+            }).ToList();
+            await hubContext.Clients.All.SendAsync("QueueUpdated", queueList);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error broadcasting queue: {ex.Message}");
+        }
+    }
+
+    private async Task BroadcastActiveSingerAsync()
+    {
+        if (_webApp == null) return;
+        try
+        {
+            var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
+            await hubContext.Clients.All.SendAsync("ActiveSingerUpdated", new {
+                name = _karaoke.NowSingingName,
+                song = _karaoke.NowSingingSong,
+                isPlaying = _karaoke.IsPlaying
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error broadcasting active singer: {ex.Message}");
+        }
+    }
+
+    private async Task BroadcastNextSingerAsync()
+    {
+        if (_webApp == null) return;
+        try
+        {
+            var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
+            await hubContext.Clients.All.SendAsync("NextSingerUpdated", new {
+                name = _karaoke.NextUpName,
+                song = _karaoke.NextUpSong
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error broadcasting next singer: {ex.Message}");
+        }
+    }
 
     public async Task BroadcastLyricsAsync(LyricsMessage message)
     {
