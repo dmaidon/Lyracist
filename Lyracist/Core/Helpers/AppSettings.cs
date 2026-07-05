@@ -1,0 +1,127 @@
+using System;
+using System.IO;
+using System.Text.Json;
+
+namespace Lyracist.Core.Helpers;
+
+/// <summary>
+/// Lightweight key/value application settings backed by a JSON file
+/// at %AppData%\Lyracist\settings.json.
+/// </summary>
+public static class AppSettings
+{
+    private static readonly string _settingsDir =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Lyracist");
+
+    private static readonly string _settingsPath =
+        Path.Combine(_settingsDir, "settings.json");
+
+    private static SettingsData _data = Load();
+
+    private static SettingsData Load()
+    {
+        try
+        {
+            if (File.Exists(_settingsPath))
+            {
+                var json = File.ReadAllText(_settingsPath);
+                return JsonSerializer.Deserialize<SettingsData>(json) ?? new SettingsData();
+            }
+        }
+        catch { /* Use defaults on any parse error */ }
+        return new SettingsData();
+    }
+
+    private static void Save()
+    {
+        try
+        {
+            Directory.CreateDirectory(_settingsDir);
+            var json = JsonSerializer.Serialize(_data, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(_settingsPath, json);
+        }
+        catch { /* Best-effort; non-critical */ }
+    }
+
+    // ─── Settings Properties ───────────────────────────────────────────────
+
+    public static bool ShowSplashOnStartup
+    {
+        get => _data.ShowSplashOnStartup;
+        set { _data.ShowSplashOnStartup = value; Save(); }
+    }
+
+    public static int OpeningVolume
+    {
+        get => _data.OpeningVolume;
+        set { _data.OpeningVolume = Math.Clamp(value, 0, 100); Save(); }
+    }
+
+    public static int FillInVolume
+    {
+        get => _data.FillInVolume;
+        set { _data.FillInVolume = Math.Clamp(value, 0, 100); Save(); }
+    }
+
+    public static int EndRotationVolume
+    {
+        get => _data.EndRotationVolume;
+        set { _data.EndRotationVolume = Math.Clamp(value, 0, 100); Save(); }
+    }
+
+    public static double OpeningBass
+    {
+        get => _data.OpeningBass;
+        set { _data.OpeningBass = Math.Clamp(value, -20, 20); Save(); }
+    }
+
+    public static double OpeningTreble
+    {
+        get => _data.OpeningTreble;
+        set { _data.OpeningTreble = Math.Clamp(value, -20, 20); Save(); }
+    }
+
+    public static double FillInBass
+    {
+        get => _data.FillInBass;
+        set { _data.FillInBass = Math.Clamp(value, -20, 20); Save(); }
+    }
+
+    public static double FillInTreble
+    {
+        get => _data.FillInTreble;
+        set { _data.FillInTreble = Math.Clamp(value, -20, 20); Save(); }
+    }
+
+    public static double EndRotationBass
+    {
+        get => _data.EndRotationBass;
+        set { _data.EndRotationBass = Math.Clamp(value, -20, 20); Save(); }
+    }
+
+    public static double EndRotationTreble
+    {
+        get => _data.EndRotationTreble;
+        set { _data.EndRotationTreble = Math.Clamp(value, -20, 20); Save(); }
+    }
+
+    // ─── Data Model ────────────────────────────────────────────────────────
+
+    private sealed class SettingsData
+    {
+        public bool ShowSplashOnStartup { get; set; } = true;
+
+        // Channel volumes (0–100)
+        public int OpeningVolume { get; set; } = 80;
+        public int FillInVolume { get; set; } = 70;
+        public int EndRotationVolume { get; set; } = 80;
+
+        // Channel tone (–20 to +20 dB)
+        public double OpeningBass { get; set; } = 0;
+        public double OpeningTreble { get; set; } = 0;
+        public double FillInBass { get; set; } = 0;
+        public double FillInTreble { get; set; } = 0;
+        public double EndRotationBass { get; set; } = 0;
+        public double EndRotationTreble { get; set; } = 0;
+    }
+}

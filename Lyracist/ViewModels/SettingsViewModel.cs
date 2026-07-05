@@ -5,10 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.Services.Display;
 using Lyracist.Services.Tablet;
+using Wpf.Ui;
 using Wpf.Ui.Appearance;
 
 namespace Lyracist.ViewModels;
@@ -18,6 +20,8 @@ public partial class SettingsViewModel : BaseViewModel
     private readonly IDisplayService _display;
     private readonly ITabletLyricsServer _tablet;
     private readonly IOccasionService _occasions;
+    private readonly IShowFlowService _showFlow;
+    private readonly INavigationService _navigation;
 
     // Theme
     [ObservableProperty]
@@ -97,13 +101,61 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private double _occasionItemGain;
 
+    // ─── Splash Screen ─────────────────────────────────────────────────
+
+    [ObservableProperty]
+    private bool _showSplashOnStartup = AppSettings.ShowSplashOnStartup;
+
+    // ─── Background Music Channel Volumes (0–100) ──────────────────────
+
+    [ObservableProperty]
+    private int _openingVolume = AppSettings.OpeningVolume;
+
+    [ObservableProperty]
+    private int _fillInVolume = AppSettings.FillInVolume;
+
+    [ObservableProperty]
+    private int _endRotationVolume = AppSettings.EndRotationVolume;
+
+    // ─── Background Music Channel Tone (–20 to +20 dB) ────────────────
+
+    [ObservableProperty]
+    private double _openingBass = AppSettings.OpeningBass;
+
+    [ObservableProperty]
+    private double _openingTreble = AppSettings.OpeningTreble;
+
+    [ObservableProperty]
+    private double _fillInBass = AppSettings.FillInBass;
+
+    [ObservableProperty]
+    private double _fillInTreble = AppSettings.FillInTreble;
+
+    [ObservableProperty]
+    private double _endRotationBass = AppSettings.EndRotationBass;
+
+    [ObservableProperty]
+    private double _endRotationTreble = AppSettings.EndRotationTreble;
+
     public SettingsViewModel(IDisplayService display,
                              ITabletLyricsServer tablet,
-                             IOccasionService occasions)
+                             IOccasionService occasions,
+                             IShowFlowService showFlow,
+                             INavigationService navigation)
     {
         _display = display;
         _tablet = tablet;
         _occasions = occasions;
+        _showFlow = showFlow;
+        _navigation = navigation;
+
+        // Apply persisted channel settings to the show flow service on load
+        _showFlow.SetOpeningVolume(OpeningVolume);
+        _showFlow.SetFillInVolume(FillInVolume);
+        _showFlow.SetEndRotationVolume(EndRotationVolume);
+        _showFlow.SetOpeningTone(OpeningBass, OpeningTreble, 0);
+        _showFlow.SetFillInTone(FillInBass, FillInTreble, 0);
+        _showFlow.SetEndRotationTone(EndRotationBass, EndRotationTreble, 0);
 
         // Load active screen list
         Screens = _display.GetScreens().ToList();
@@ -230,6 +282,71 @@ public partial class SettingsViewModel : BaseViewModel
         if (SelectedOccasionItem == null) return;
         _occasions.UpdateItemAudio(SelectedOccasionItem.Id, OccasionItemBass, OccasionItemTreble, OccasionItemGain);
         RefreshOccasionItems();
+    }
+
+    partial void OnShowSplashOnStartupChanged(bool value)
+    {
+        AppSettings.ShowSplashOnStartup = value;
+    }
+
+    partial void OnOpeningVolumeChanged(int value)
+    {
+        AppSettings.OpeningVolume = value;
+        _showFlow.SetOpeningVolume(value);
+    }
+
+    partial void OnFillInVolumeChanged(int value)
+    {
+        AppSettings.FillInVolume = value;
+        _showFlow.SetFillInVolume(value);
+    }
+
+    partial void OnEndRotationVolumeChanged(int value)
+    {
+        AppSettings.EndRotationVolume = value;
+        _showFlow.SetEndRotationVolume(value);
+    }
+
+    partial void OnOpeningBassChanged(double value)
+    {
+        AppSettings.OpeningBass = value;
+        _showFlow.SetOpeningTone(value, OpeningTreble, 0);
+    }
+
+    partial void OnOpeningTrebleChanged(double value)
+    {
+        AppSettings.OpeningTreble = value;
+        _showFlow.SetOpeningTone(OpeningBass, value, 0);
+    }
+
+    partial void OnFillInBassChanged(double value)
+    {
+        AppSettings.FillInBass = value;
+        _showFlow.SetFillInTone(value, FillInTreble, 0);
+    }
+
+    partial void OnFillInTrebleChanged(double value)
+    {
+        AppSettings.FillInTreble = value;
+        _showFlow.SetFillInTone(FillInBass, value, 0);
+    }
+
+    partial void OnEndRotationBassChanged(double value)
+    {
+        AppSettings.EndRotationBass = value;
+        _showFlow.SetEndRotationTone(value, EndRotationTreble, 0);
+    }
+
+    partial void OnEndRotationTrebleChanged(double value)
+    {
+        AppSettings.EndRotationTreble = value;
+        _showFlow.SetEndRotationTone(EndRotationBass, value, 0);
+    }
+
+    [RelayCommand]
+    private void NavigateToPlaylists()
+    {
+        _navigation.Navigate(typeof(Views.Pages.PlaylistsPage));
     }
 
     partial void OnIsDarkModeChanged(bool value)

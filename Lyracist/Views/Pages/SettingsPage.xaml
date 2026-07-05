@@ -36,6 +36,10 @@
                     <StackPanel>
                         <CheckBox Content="Dark Application Theme Mode"
                                   IsChecked="{Binding IsDarkMode, Mode=TwoWay}"
+                                  Margin="0,0,0,8" />
+
+                        <CheckBox Content="Show splash screen on application startup"
+                                  IsChecked="{Binding ShowSplashOnStartup, Mode=TwoWay}"
                                   Margin="0,0,0,16" />
                         
                         <ui:Card Padding="16" Background="{DynamicResource AppSurfaceBrush}">
@@ -74,7 +78,7 @@
                         </Grid>
 
                         <TextBlock Text="Output Latency Delay (ms)" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
-                        <Grid>
+                        <Grid Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="50" />
@@ -82,6 +86,12 @@
                             <Slider Minimum="0" Maximum="200" Value="{Binding Latency}" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="1" Text="{Binding Latency, StringFormat='{}{0}ms'}" FontSize="13" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" />
                         </Grid>
+
+                        <ui:Button Content="Manage Playlists →"
+                                   Icon="{ui:SymbolIcon MusicNote124}"
+                                   Command="{Binding NavigateToPlaylistsCommand}"
+                                   Appearance="Secondary"
+                                   HorizontalAlignment="Stretch" />
                     </StackPanel>
                 </Expander>
 
@@ -183,6 +193,83 @@
                             <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding OccasionItemGain, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         </Grid>
                         <ui:Button Content="Save Audio Settings" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveOccasionItemAudioCommand}" Appearance="Secondary" HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                </Expander>
+
+                <!-- 3c. Background Music Channels -->
+                <Expander Header="Background Music Channels" Margin="0,0,0,16" Padding="16">
+                    <StackPanel>
+
+                        <!-- Opening Music -->
+                        <TextBlock Text="Opening Music" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="52"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Volume" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding OpeningVolume}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding OpeningVolume, StringFormat='{}{0}%'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Bass" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="1" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding OpeningBass}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding OpeningBass, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Treble" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="2" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding OpeningTreble}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding OpeningTreble, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Separator Margin="0,8,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}"/>
+
+                        <!-- Fill-In Music -->
+                        <TextBlock Text="Fill-In Music" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="52"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Volume" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding FillInVolume}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding FillInVolume, StringFormat='{}{0}%'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Bass" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="1" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding FillInBass}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding FillInBass, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Treble" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="2" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding FillInTreble}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding FillInTreble, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Separator Margin="0,8,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}"/>
+
+                        <!-- End-of-Rotation Music -->
+                        <TextBlock Text="End of Rotation Music" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="52"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Volume" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding EndRotationVolume}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding EndRotationVolume, StringFormat='{}{0}%'}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Bass" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="1" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding EndRotationBass}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding EndRotationBass, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Treble" FontSize="12" VerticalAlignment="Center"/>
+                            <Slider Grid.Row="2" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding EndRotationTreble}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding EndRotationTreble, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+
                     </StackPanel>
                 </Expander>
 

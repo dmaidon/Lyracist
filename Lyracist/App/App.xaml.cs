@@ -129,19 +129,22 @@ public partial class App : System.Windows.Application
             AppLogger.LogError(ex, "Database migration");
         }
 
-        // Resolve and show the SplashWindow immediately
+        // Resolve and show the SplashWindow if the setting is enabled
         var splash = Host.Services.GetRequiredService<SplashWindow>();
-        splash.Show();
+        if (AppSettings.ShowSplashOnStartup)
+        {
+            splash.Show();
 
-        // Simulate loading updates
-        splash.UpdateStatus("Initializing services...");
-        await Task.Delay(600);
+            // Simulate loading updates
+            splash.UpdateStatus("Initializing services...");
+            await Task.Delay(600);
 
-        splash.UpdateStatus("Loading UI components...");
-        await Task.Delay(600);
+            splash.UpdateStatus("Loading UI components...");
+            await Task.Delay(600);
 
-        splash.UpdateStatus("Starting Lyracist...");
-        await Task.Delay(600);
+            splash.UpdateStatus("Starting Lyracist...");
+            await Task.Delay(600);
+        }
 
         // Start the tablet lyrics server in the background
         var server = Host.Services.GetRequiredService<ITabletLyricsServer>();
@@ -154,7 +157,8 @@ public partial class App : System.Windows.Application
         mainWindow.Show();
 
         // Close splash window now that MainWindow is ready
-        splash.Close();
+        if (AppSettings.ShowSplashOnStartup)
+            splash.Close();
 
         base.OnStartup(e);
     }
