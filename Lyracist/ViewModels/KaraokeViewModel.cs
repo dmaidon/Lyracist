@@ -117,6 +117,15 @@ public partial class KaraokeViewModel : BaseViewModel
     private bool _isAmazonAvailable = false;
 
     [ObservableProperty]
+    private bool _isExternalPerformanceActive;
+
+    [ObservableProperty]
+    private string _externalPerformanceSource = string.Empty;
+
+    [ObservableProperty]
+    private string _externalPerformanceUrl = string.Empty;
+
+    [ObservableProperty]
     private string _searchQuery = string.Empty;
 
     [ObservableProperty]
@@ -544,6 +553,11 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             SelectedSongPath = openFileDialog.FileName;
             CurrentSongName = System.IO.Path.GetFileName(openFileDialog.FileName);
+            
+            IsExternalPerformanceActive = false;
+            ExternalPerformanceSource = string.Empty;
+            ExternalPerformanceUrl = string.Empty;
+
             _mediaEngine.LoadSong(SelectedSongPath);
             
             // Sync slider states to the view
@@ -580,6 +594,10 @@ public partial class KaraokeViewModel : BaseViewModel
 
         SelectedSongPath = song.AudioPath;
         CurrentSongName = $"{song.Artist} - {song.Title}";
+
+        IsExternalPerformanceActive = false;
+        ExternalPerformanceSource = string.Empty;
+        ExternalPerformanceUrl = string.Empty;
 
         _mediaEngine.LoadSong(song.AudioPath);
         _mediaEngine.Play();
@@ -862,6 +880,10 @@ public partial class KaraokeViewModel : BaseViewModel
         IsPlaying = false;
         CurrentSongName = $"{track.Artist} - {track.Title} [Party Tyme]";
 
+        IsExternalPerformanceActive = false;
+        ExternalPerformanceSource = string.Empty;
+        ExternalPerformanceUrl = string.Empty;
+
         string streamUrl = await _partyTymeService.GetStreamUrlAsync(track.TrackId);
         
         SelectedSongPath = streamUrl;
@@ -911,6 +933,10 @@ public partial class KaraokeViewModel : BaseViewModel
             // Stop background music as performance is launching externally
             _showFlow.OnKaraokeTrackStarted();
 
+            IsExternalPerformanceActive = true;
+            ExternalPerformanceSource = singer.Source;
+            ExternalPerformanceUrl = singer.ExternalLink;
+
             try
             {
                 if (!string.IsNullOrWhiteSpace(singer.ExternalLink))
@@ -937,6 +963,10 @@ public partial class KaraokeViewModel : BaseViewModel
                 CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [Party Tyme]";
                 _mediaEngine.ActiveSingerName = singer.Name;
 
+                IsExternalPerformanceActive = false;
+                ExternalPerformanceSource = string.Empty;
+                ExternalPerformanceUrl = string.Empty;
+
                 string streamUrl = await _partyTymeService.GetStreamUrlAsync(trackId);
                 
                 SelectedSongPath = streamUrl;
@@ -956,6 +986,10 @@ public partial class KaraokeViewModel : BaseViewModel
             CurrentSongName = $"{localMatch.Artist} - {localMatch.Title}";
             _mediaEngine.ActiveSingerName = singer.Name;
             
+            IsExternalPerformanceActive = false;
+            ExternalPerformanceSource = string.Empty;
+            ExternalPerformanceUrl = string.Empty;
+
             SelectedSongPath = localMatch.AudioPath;
             _mediaEngine.LoadSong(localMatch.AudioPath);
             _mediaEngine.Play();
@@ -1008,6 +1042,10 @@ public partial class KaraokeViewModel : BaseViewModel
         // Stop background music as performance is launching externally
         _showFlow.OnKaraokeTrackStarted();
 
+        IsExternalPerformanceActive = true;
+        ExternalPerformanceSource = track.Source;
+        ExternalPerformanceUrl = track.Url;
+
         try
         {
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(track.Url) { UseShellExecute = true });
@@ -1027,6 +1065,20 @@ public partial class KaraokeViewModel : BaseViewModel
         _displayService.HighlightSinger(Rotation.SelectedSinger);
 
         await PlayPerformerRequest(Rotation.SelectedSinger);
+    }
+
+    [RelayCommand]
+    private void ReopenExternalPerformanceLink()
+    {
+        if (string.IsNullOrWhiteSpace(ExternalPerformanceUrl)) return;
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(ExternalPerformanceUrl) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Failed to open link: {ex.Message}", "Browser Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
     }
 
     [RelayCommand]

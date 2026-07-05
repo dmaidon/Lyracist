@@ -604,7 +604,54 @@
                                        VerticalContentAlignment="Stretch">
                                 <Grid>
                                     <Image Source="{Binding CurrentFrame}" Stretch="Uniform" />
-                                    <TextBlock Text="No active media feed" Foreground="#444444" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding CurrentFrame, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Visible}" />
+                                    
+                                    <!-- No active media feed default message -->
+                                    <TextBlock Text="No active media feed" Foreground="#444444" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding CurrentFrame}" Value="{x:Null}" />
+                                                            <Condition Binding="{Binding IsExternalPerformanceActive}" Value="False" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
+                                    <!-- External Performance active message -->
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsExternalPerformanceActive}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        
+                                        <ui:SymbolIcon Symbol="VideoClip24" FontSize="32" Foreground="{StaticResource UIAccentBrush}" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                                        
+                                        <TextBlock Text="{Binding ExternalPerformanceSource, StringFormat='{}{0} Performance Active'}" 
+                                                   FontSize="15" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" />
+                                        
+                                        <TextBlock Text="Lyrics are displaying on your browser window." 
+                                                   FontSize="11" Foreground="#888888" HorizontalAlignment="Center" Margin="0,2,0,12" />
+                                                   
+                                        <ui:Button Content="Re-open Performance Link" 
+                                                   Icon="{ui:SymbolIcon Open24}"
+                                                   Command="{Binding ReopenExternalPerformanceLinkCommand}"
+                                                   Appearance="Secondary"
+                                                   HorizontalAlignment="Center"
+                                                   Padding="10,6"
+                                                   FontSize="11" />
+                                    </StackPanel>
                                 </Grid>
                             </ui:Button>
                         </Border>
