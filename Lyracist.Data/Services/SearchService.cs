@@ -65,10 +65,10 @@ namespace Lyracist.Data.Services
             // Execute an INSERT OR REPLACE raw SQL statement on the SongSearch virtual table
             await _context.Database.ExecuteSqlRawAsync(
                 "INSERT OR REPLACE INTO SongSearch (SongId, Title, Artist, NormalizedTitle, NormalizedArtist) VALUES ({0}, {1}, {2}, {3}, {4})",
-                song.SongId, 
-                song.Title ?? string.Empty, 
-                song.Artist ?? string.Empty, 
-                normalizedTitle, 
+                song.SongId,
+                song.Title ?? string.Empty,
+                song.Artist ?? string.Empty,
+                normalizedTitle,
                 normalizedArtist
             );
         }
@@ -106,7 +106,7 @@ namespace Lyracist.Data.Services
 
             // Remove special characters that have syntax meaning in SQLite FTS5 (e.g. *, :, AND, OR)
             string cleaned = Regex.Replace(query, @"[^\w\s]", " ");
-            
+
             // Split into words and append '*' to each word for prefix matching
             var words = cleaned.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
                                .Select(word => $"{word}*")

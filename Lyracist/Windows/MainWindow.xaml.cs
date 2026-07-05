@@ -15,7 +15,7 @@ public partial class MainWindow : FluentWindow
 {
     private readonly INavigationService _navigationService;
     private readonly IDisplayService _displayService;
-    
+
     // Injected ViewModels
     private readonly KaraokeViewModel _karaokeViewModel;
     private readonly RotationViewModel _rotationViewModel;
@@ -53,16 +53,16 @@ public partial class MainWindow : FluentWindow
         MoveLyricsToScreenCommand = new RelayCommand<int>(screenIndex => _displayService.MoveLyricsToScreen(screenIndex));
 
         InitializeComponent();
-        
+
         // Expose commands to the view bindings
         DataContext = this;
-        
+
         // Connect the WPF UI NavigationService to the NavigationView control
         _navigationService.SetNavigationControl(RootNavigation);
-        
+
         // Set the page provider service for dynamically loading pages via DI
         RootNavigation.SetPageProviderService(pageProvider);
-        
+
         Loaded += OnMainWindowLoaded;
     }
 

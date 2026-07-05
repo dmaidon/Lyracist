@@ -10,7 +10,7 @@ namespace Lyracist.Core.Interfaces
         string ApiKey { get; set; }
         string ClientId { get; set; }
         string ClientSecret { get; set; }
-        
+
         Task<bool> AuthenticateAsync(string clientId, string clientSecret);
         Task<IEnumerable<PartyTymeTrack>> SearchCatalogAsync(string query);
         Task<string> GetStreamUrlAsync(string trackId);

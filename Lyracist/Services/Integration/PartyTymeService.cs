@@ -44,9 +44,9 @@ namespace Lyracist.Services.Integration
         {
             ClientId = clientId;
             ClientSecret = clientSecret;
-            
+
             await Task.Delay(500); // Simulate API latency
-            
+
             if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
             {
                 _token = string.Empty;
@@ -72,7 +72,7 @@ namespace Lyracist.Services.Integration
             }
 
             var results = _mockTracks
-                .Where(t => t.Title.Contains(query, StringComparison.OrdinalIgnoreCase) || 
+                .Where(t => t.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                             t.Artist.Contains(query, StringComparison.OrdinalIgnoreCase))
                 .Select(t => UpdateCacheStatus(t))
                 .ToList();

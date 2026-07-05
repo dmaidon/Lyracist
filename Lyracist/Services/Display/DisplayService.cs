@@ -40,7 +40,7 @@ public class DisplayService : IDisplayService
     {
         var screens = System.Windows.Forms.Screen.AllScreens;
         var list = new List<ScreenInfo>();
-        
+
         for (int i = 0; i < screens.Length; i++)
         {
             var s = screens[i];
@@ -52,7 +52,7 @@ public class DisplayService : IDisplayService
                 Bounds = new Rect(s.Bounds.X, s.Bounds.Y, s.Bounds.Width, s.Bounds.Height)
             });
         }
-        
+
         return list;
     }
 

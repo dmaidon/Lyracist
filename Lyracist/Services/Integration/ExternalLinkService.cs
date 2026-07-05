@@ -32,7 +32,7 @@ namespace Lyracist.Services.Integration
         public async Task<IEnumerable<ExternalTrack>> SearchAsync(string query, string service = "All")
         {
             // If YouTube is queried and a YouTube API Key is supplied, perform a real YouTube search
-            if ((service.Equals("YouTube", StringComparison.OrdinalIgnoreCase) || service.Equals("All", StringComparison.OrdinalIgnoreCase)) 
+            if ((service.Equals("YouTube", StringComparison.OrdinalIgnoreCase) || service.Equals("All", StringComparison.OrdinalIgnoreCase))
                 && !string.IsNullOrWhiteSpace(AppSettings.YouTubeApiKey) && !string.IsNullOrWhiteSpace(query))
             {
                 try
@@ -54,7 +54,7 @@ namespace Lyracist.Services.Integration
                                     string videoId = vIdProp.GetString() ?? "";
                                     string fullTitle = item.GetProperty("snippet").GetProperty("title").GetString() ?? "";
                                     string channel = item.GetProperty("snippet").GetProperty("channelTitle").GetString() ?? "";
-                                    
+
                                     // Basic parsing to split "Artist - Title"
                                     string artist = channel;
                                     string title = fullTitle;
@@ -64,7 +64,7 @@ namespace Lyracist.Services.Integration
                                         artist = fullTitle.Substring(0, dashIdx).Trim();
                                         title = fullTitle.Substring(dashIdx + 3).Trim();
                                     }
-                                    
+
                                     title = System.Net.WebUtility.HtmlDecode(title);
                                     artist = System.Net.WebUtility.HtmlDecode(artist);
 
@@ -78,23 +78,23 @@ namespace Lyracist.Services.Integration
                                 }
                             }
                         }
-                        
+
                         // If we only wanted YouTube results, we can return these directly
                         if (service.Equals("YouTube", StringComparison.OrdinalIgnoreCase))
                         {
                             return list;
                         }
-                        
+
                         // Otherwise, if service == "All", we prepend them to the rest of the mock results
                         var finalResults = new List<ExternalTrack>(list);
                         var mockRest = _mockDatabase.Where(t => !t.Source.Equals("YouTube", StringComparison.OrdinalIgnoreCase)
-                                                               && (t.Title.Contains(query, StringComparison.OrdinalIgnoreCase) 
+                                                               && (t.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
                                                                    || t.Artist.Contains(query, StringComparison.OrdinalIgnoreCase)));
                         finalResults.AddRange(mockRest);
                         return finalResults;
                     }
                 }
-                catch 
+                catch
                 {
                     // Fallback to mock search on network error
                 }
@@ -111,7 +111,7 @@ namespace Lyracist.Services.Integration
 
             if (!string.IsNullOrWhiteSpace(query))
             {
-                results = results.Where(t => t.Title.Contains(query, StringComparison.OrdinalIgnoreCase) || 
+                results = results.Where(t => t.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                                              t.Artist.Contains(query, StringComparison.OrdinalIgnoreCase));
             }
 
@@ -130,7 +130,7 @@ namespace Lyracist.Services.Integration
             {
                 source = "Spotify";
                 title = "Spotify Requested Song";
-                
+
                 var match = Regex.Match(url, @"/track/([^/?]+)");
                 if (match.Success)
                 {

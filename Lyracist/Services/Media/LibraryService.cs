@@ -65,7 +65,7 @@ public class LibraryService : ILibraryService
         try
         {
             using var context = new LyracistDbContext();
-            
+
             if (string.IsNullOrWhiteSpace(query))
             {
                 return context.Songs.AsNoTracking().ToList().Select(MapToKaraokeSong);

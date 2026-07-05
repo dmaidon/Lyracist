@@ -75,7 +75,7 @@ namespace Lyracist.Data.Services
             {
                 title = probe.TitleTag.Trim();
             }
-            
+
             if (probe.GenreTag.Contains("Karaoke", StringComparison.OrdinalIgnoreCase) ||
                 probe.CommentTag.Contains("Karaoke", StringComparison.OrdinalIgnoreCase) ||
                 probe.CommentTag.Contains("Sunfly", StringComparison.OrdinalIgnoreCase) ||
@@ -124,7 +124,7 @@ namespace Lyracist.Data.Services
             // 3. Karaoke Version Pattern Matching
             bool isKv = false;
             string cleaned = filename;
-            
+
             if (filename.Contains("Karaoke Version", StringComparison.OrdinalIgnoreCase))
             {
                 isKv = true;
@@ -307,7 +307,7 @@ namespace Lyracist.Data.Services
                     {
                         var probe = await FFprobeRunner.ProbeFile(file);
                         var parsed = ParseStoreDownload(file, probe);
-                        
+
                         string cdgPath = Path.ChangeExtension(file, ".cdg");
                         bool hasCdg = cdgFileSet.Contains(cdgPath);
                         bool isKaraoke = parsed.IsKaraoke || hasCdg;

@@ -548,18 +548,18 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             Filter = "Audio & Video files (*.mp3;*.wav;*.cdg;*.mp4)|*.mp3;*.wav;*.cdg;*.mp4|All files (*.*)|*.*"
         };
-        
+
         if (openFileDialog.ShowDialog() == true)
         {
             SelectedSongPath = openFileDialog.FileName;
             CurrentSongName = System.IO.Path.GetFileName(openFileDialog.FileName);
-            
+
             IsExternalPerformanceActive = false;
             ExternalPerformanceSource = string.Empty;
             ExternalPerformanceUrl = string.Empty;
 
             _mediaEngine.LoadSong(SelectedSongPath);
-            
+
             // Sync slider states to the view
             OnPropertyChanged(nameof(Volume));
             OnPropertyChanged(nameof(Speed));
@@ -602,7 +602,7 @@ public partial class KaraokeViewModel : BaseViewModel
         _mediaEngine.LoadSong(song.AudioPath);
         _mediaEngine.Play();
         IsPlaying = true;
-        
+
         // Sync states to the view
         OnPropertyChanged(nameof(Volume));
         OnPropertyChanged(nameof(Speed));
@@ -679,12 +679,12 @@ public partial class KaraokeViewModel : BaseViewModel
         }
         else if (SelectedPartyTymeTrack != null)
         {
-            Rotation.AddSinger(NewSingerName, SelectedPartyTymeTrack.Title, SelectedPartyTymeTrack.Artist, NewSingerKey, 
+            Rotation.AddSinger(NewSingerName, SelectedPartyTymeTrack.Title, SelectedPartyTymeTrack.Artist, NewSingerKey,
                 $"[Party Tyme ID: {SelectedPartyTymeTrack.TrackId}] {NewSingerNotes}", "PartyTyme");
         }
         else if (SelectedExternalTrack != null)
         {
-            Rotation.AddSinger(NewSingerName, SelectedExternalTrack.Title, SelectedExternalTrack.Artist, NewSingerKey, 
+            Rotation.AddSinger(NewSingerName, SelectedExternalTrack.Title, SelectedExternalTrack.Artist, NewSingerKey,
                 NewSingerNotes, SelectedExternalTrack.Source, SelectedExternalTrack.Url);
         }
         else if (!string.IsNullOrWhiteSpace(CustomExternalUrl))
@@ -829,13 +829,13 @@ public partial class KaraokeViewModel : BaseViewModel
 
         PartyTymeConnectionStatus = "Authenticating...";
         IsPartyTymeLoading = true;
-        
+
         bool success = await _partyTymeService.AuthenticateAsync(PartyTymeClientId, PartyTymeClientSecret);
-        
+
         IsPartyTymeLoading = false;
         IsPartyTymeConnected = success;
         IsPartyTymeDisconnected = !success;
-        
+
         if (success)
         {
             PartyTymeConnectionStatus = "Connected successfully!";
@@ -885,12 +885,12 @@ public partial class KaraokeViewModel : BaseViewModel
         ExternalPerformanceUrl = string.Empty;
 
         string streamUrl = await _partyTymeService.GetStreamUrlAsync(track.TrackId);
-        
+
         SelectedSongPath = streamUrl;
         _mediaEngine.LoadSong(streamUrl);
         _mediaEngine.Play();
         IsPlaying = true;
-        
+
         NotifyAudioPropertiesChanged();
     }
 
@@ -901,11 +901,11 @@ public partial class KaraokeViewModel : BaseViewModel
 
         PartyTymeConnectionStatus = $"Caching '{track.Title}'...";
         IsPartyTymeLoading = true;
-        
+
         string cachedPath = await _partyTymeService.DownloadTrackAsync(track.TrackId, track.Title, track.Artist);
-        
+
         IsPartyTymeLoading = false;
-        
+
         if (!string.IsNullOrEmpty(cachedPath))
         {
             PartyTymeConnectionStatus = $"Cached '{track.Title}' successfully!";
@@ -958,7 +958,7 @@ public partial class KaraokeViewModel : BaseViewModel
             if (startIdx >= 15 && endIdx > startIdx)
             {
                 string trackId = singer.Notes.Substring(startIdx, endIdx - startIdx).Trim();
-                
+
                 IsPlaying = false;
                 CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [Party Tyme]";
                 _mediaEngine.ActiveSingerName = singer.Name;
@@ -968,12 +968,12 @@ public partial class KaraokeViewModel : BaseViewModel
                 ExternalPerformanceUrl = string.Empty;
 
                 string streamUrl = await _partyTymeService.GetStreamUrlAsync(trackId);
-                
+
                 SelectedSongPath = streamUrl;
                 _mediaEngine.LoadSong(streamUrl);
                 _mediaEngine.Play();
                 IsPlaying = true;
-                
+
                 NotifyAudioPropertiesChanged();
                 return;
             }
@@ -985,7 +985,7 @@ public partial class KaraokeViewModel : BaseViewModel
             IsPlaying = false;
             CurrentSongName = $"{localMatch.Artist} - {localMatch.Title}";
             _mediaEngine.ActiveSingerName = singer.Name;
-            
+
             IsExternalPerformanceActive = false;
             ExternalPerformanceSource = string.Empty;
             ExternalPerformanceUrl = string.Empty;
@@ -1034,7 +1034,7 @@ public partial class KaraokeViewModel : BaseViewModel
     private void PlayExternalTrack(ExternalTrack track)
     {
         if (track == null) return;
-        
+
         IsPlaying = false;
         CurrentSongName = $"{track.Artist} - {track.Title} [{track.Source}]";
         _mediaEngine.Stop();

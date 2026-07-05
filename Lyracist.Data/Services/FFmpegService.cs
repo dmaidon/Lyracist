@@ -23,7 +23,7 @@ namespace Lyracist.Data.Services
         {
             // First check the current base executing directory for bundled binaries
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            
+
             string localFFmpeg = Path.Combine(baseDir, "ffmpeg.exe");
             if (File.Exists(localFFmpeg))
             {

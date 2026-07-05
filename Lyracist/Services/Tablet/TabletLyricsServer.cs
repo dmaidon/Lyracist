@@ -53,10 +53,10 @@ public class TabletLyricsServer : ITabletLyricsServer
         try
         {
             var builder = WebApplication.CreateBuilder();
-            
+
             // Listen on port 5005 across all interfaces (allows tablet connection over LAN)
             builder.WebHost.UseUrls("http://*:5005");
-            
+
             // Register SignalR services
             builder.Services.AddSignalR();
             builder.Services.AddSingleton(_requests);
@@ -64,7 +64,7 @@ public class TabletLyricsServer : ITabletLyricsServer
             builder.Services.AddSingleton(_library);
             builder.Services.AddSingleton(_occasions);
             builder.Services.AddSingleton(_karaoke);
-            
+
             // Set minimum logging to warning to avoid flooding standard output/debug window
             builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
@@ -72,7 +72,7 @@ public class TabletLyricsServer : ITabletLyricsServer
 
             _rotation.Rotation.CollectionChanged += OnRotationChanged;
             _karaoke.PropertyChanged += OnKaraokePropertyChanged;
-            
+
             // Map the lyrics hub endpoint
             _webApp.MapHub<LyricsHub>("/lyricsHub");
 
@@ -108,7 +108,8 @@ public class TabletLyricsServer : ITabletLyricsServer
 
             _webApp.MapGet("/api/queue", (RotationViewModel rotation) =>
             {
-                var queueList = rotation.Rotation.Select(s => new {
+                var queueList = rotation.Rotation.Select(s => new
+                {
                     name = s.Name,
                     songTitle = s.SongTitle,
                     artist = s.Artist,
@@ -791,7 +792,8 @@ public class TabletLyricsServer : ITabletLyricsServer
         try
         {
             var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
-            var queueList = _rotation.Rotation.Select(s => new {
+            var queueList = _rotation.Rotation.Select(s => new
+            {
                 name = s.Name,
                 songTitle = s.SongTitle,
                 artist = s.Artist,
@@ -812,7 +814,8 @@ public class TabletLyricsServer : ITabletLyricsServer
         try
         {
             var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
-            await hubContext.Clients.All.SendAsync("ActiveSingerUpdated", new {
+            await hubContext.Clients.All.SendAsync("ActiveSingerUpdated", new
+            {
                 name = _karaoke.NowSingingName,
                 song = _karaoke.NowSingingSong,
                 isPlaying = _karaoke.IsPlaying
@@ -830,7 +833,8 @@ public class TabletLyricsServer : ITabletLyricsServer
         try
         {
             var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
-            await hubContext.Clients.All.SendAsync("NextSingerUpdated", new {
+            await hubContext.Clients.All.SendAsync("NextSingerUpdated", new
+            {
                 name = _karaoke.NextUpName,
                 song = _karaoke.NextUpSong
             });
