@@ -9,6 +9,7 @@ using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Services.Display;
 using Lyracist.Services.Integration;
+using Lyracist.Services.Database;
 using Lyracist.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -89,6 +90,7 @@ public partial class KaraokeViewModel : BaseViewModel
     private bool _isExternalLoading;
 
     public ObservableCollection<ExternalTrack> ExternalResults { get; } = new();
+    public ObservableCollection<SingerHistoryEntry> SingerHistoryResults { get; } = new();
 
     [ObservableProperty]
     private bool _showLocalFilter = true;
@@ -152,8 +154,23 @@ public partial class KaraokeViewModel : BaseViewModel
         if (string.IsNullOrWhiteSpace(value))
         {
             NewSingerNotes = string.Empty;
+            SingerHistoryResults.Clear();
             return;
         }
+
+        // Query the new SingerHistory table entries
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            var historyList = Lyracist.Services.Database.SingerHistoryService.GetHistory(value);
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                SingerHistoryResults.Clear();
+                foreach (var entry in historyList)
+                {
+                    SingerHistoryResults.Add(entry);
+                }
+            });
+        });
 
         System.Threading.Tasks.Task.Run(() =>
         {
@@ -623,6 +640,13 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             Rotation.AddSinger("Singer", track.Title, track.Artist, "0", string.Empty, track.Source, track.Url);
         }
+    }
+
+    [RelayCommand]
+    private void AddHistorySongToRotation(SingerHistoryEntry entry)
+    {
+        if (entry == null) return;
+        Rotation.AddSinger(NewSingerName, entry.SongTitle, entry.Artist, "0", string.Empty, entry.Source, entry.Link);
     }
 
     [RelayCommand]

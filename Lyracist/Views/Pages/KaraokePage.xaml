@@ -280,6 +280,38 @@
                             </Grid>
                         </Border>
                     </TabItem>
+                    
+                    <TabItem Header="Singer History" FontSize="12">
+                        <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="4" Margin="0,8,0,0">
+                            <DataGrid ItemsSource="{Binding SingerHistoryResults}"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Song" Binding="{Binding SongTitle}" Width="*" />
+                                    <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="*" />
+                                    <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="80" />
+                                    <DataGridTemplateColumn Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ui:Button Icon="{ui:SymbolIcon Add24}"
+                                                           Command="{Binding DataContext.AddHistorySongToRotationCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                           CommandParameter="{Binding}"
+                                                           ToolTip="Add Song to Rotation"
+                                                           Padding="6"
+                                                           VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </TabItem>
                 </TabControl>
 
                 <!-- Singer Assignment Card -->

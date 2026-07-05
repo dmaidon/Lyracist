@@ -125,6 +125,7 @@ public partial class App : System.Windows.Application
             using var db = new Lyracist.Data.LyracistDbContext();
             db.Database.Migrate();
             db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+            Lyracist.Services.Database.SingerHistoryService.EnsureTableCreated();
         }
         catch (Exception ex)
         {

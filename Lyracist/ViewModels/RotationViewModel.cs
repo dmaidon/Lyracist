@@ -95,6 +95,12 @@ public partial class RotationViewModel : BaseViewModel
 
     public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "")
     {
+        // Save to singer song history database
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            Lyracist.Services.Database.SingerHistoryService.SaveHistory(name, title, artist, source, externalLink);
+        });
+
         // First, check if singer already exists in active rotation:
         var existingSinger = Rotation.FirstOrDefault(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         if (existingSinger != null)
