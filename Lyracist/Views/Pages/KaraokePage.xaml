@@ -65,40 +65,104 @@
                 </Grid>
 
                 <!-- Search Results list -->
-                <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="6">
-                    <ListBox ItemsSource="{Binding FilteredSongs}" SelectedItem="{Binding SelectedSong, Mode=TwoWay}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
-                                    <Border.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Edit Audio Defaults..." Command="{Binding DataContext.EditSongSettingsCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
-                                        </ContextMenu>
-                                    </Border.ContextMenu>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
+                    <TabItem Header="Local Library" FontSize="12">
+                        <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="6" Margin="0,8,0,0">
+                            <ListBox ItemsSource="{Binding FilteredSongs}" SelectedItem="{Binding SelectedSong, Mode=TwoWay}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                                            <Border.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Edit Audio Defaults..." Command="{Binding DataContext.EditSongSettingsCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
+                                                </ContextMenu>
+                                            </Border.ContextMenu>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
 
-                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
-                                        </StackPanel>
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
 
-                                        <!-- Badge for Karaoke File Format (e.g. CDG) -->
-                                        <Border Grid.Column="1" CornerRadius="4" Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}" Padding="6,2" VerticalAlignment="Center" Margin="6,0" Visibility="{Binding HasCdg, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <TextBlock Text="CDG" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorSuccessBrush}"/>
+                                                <!-- Badge for Karaoke File Format (e.g. CDG) -->
+                                                <Border Grid.Column="1" CornerRadius="4" Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}" Padding="6,2" VerticalAlignment="Center" Margin="6,0" Visibility="{Binding HasCdg, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <TextBlock Text="CDG" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorSuccessBrush}"/>
+                                                </Border>
+
+                                                <ui:Button Grid.Column="2" Icon="{ui:SymbolIcon Play24}" Command="{Binding DataContext.PlaySongCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Direct Play" Appearance="Primary" Padding="6" VerticalAlignment="Center"/>
+                                            </Grid>
                                         </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </TabItem>
+                    <TabItem Header="Party Tyme Online" FontSize="12">
+                        <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="12" Margin="0,8,0,0">
+                            <Grid>
+                                <!-- Content when NOT authenticated -->
+                                <StackPanel Visibility="{Binding IsPartyTymeDisconnected, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Center" Margin="10,20">
+                                    <TextBlock Text="Party Tyme Subscription" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Commercial streaming integration. Enter credentials." FontSize="11" Foreground="#888888" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                                    
+                                    <TextBlock Text="Client ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <ui:TextBox Text="{Binding PartyTymeClientId, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter client ID..." Margin="0,0,0,12"/>
+                                    
+                                    <TextBlock Text="Client Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <ui:TextBox Text="{Binding PartyTymeClientSecret, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter client secret..." Margin="0,0,0,16"/>
+                                    
+                                    <ui:Button Content="Connect &amp; Authenticate" Icon="{ui:SymbolIcon Key24}" Command="{Binding ConnectPartyTymeCommand}" Appearance="Primary" HorizontalAlignment="Stretch" Background="{StaticResource UIAccentBrush}" Padding="10"/>
+                                    <TextBlock Text="{Binding PartyTymeConnectionStatus}" FontSize="11" Foreground="#FF8E53" Margin="0,12,0,0" HorizontalAlignment="Center"/>
+                                </StackPanel>
 
-                                        <ui:Button Grid.Column="2" Icon="{ui:SymbolIcon Play24}" Command="{Binding DataContext.PlaySongCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Direct Play" Appearance="Primary" Padding="6" VerticalAlignment="Center"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Border>
+                                <!-- Content when authenticated -->
+                                <Grid Visibility="{Binding IsPartyTymeConnected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <ListBox Grid.Row="0" ItemsSource="{Binding PartyTymeResults}" SelectedItem="{Binding SelectedPartyTymeTrack, Mode=TwoWay}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        
+                                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
+                                                            <TextBlock Text="{Binding Artist}" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                                                        </StackPanel>
+                                                        
+                                                        <!-- Badge indicating cache status -->
+                                                        <Border Grid.Column="1" CornerRadius="4" Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}" Padding="6,2" VerticalAlignment="Center" Margin="6,0" Visibility="{Binding IsCached, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                            <TextBlock Text="CACHED" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorSuccessBrush}"/>
+                                                        </Border>
+                                                        
+                                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                            <ui:Button Icon="{ui:SymbolIcon CloudDownload24}" Command="{Binding DataContext.CachePartyTymeTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Cache Offline" Appearance="Secondary" Padding="6" Margin="0,0,4,0"/>
+                                                            <ui:Button Icon="{ui:SymbolIcon Play24}" Command="{Binding DataContext.PlayPartyTymeTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Stream Track" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Padding="6"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <TextBlock Grid.Row="1" Text="{Binding PartyTymeConnectionStatus}" FontSize="10" Foreground="#888888" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </TabItem>
+                </TabControl>
 
                 <!-- Singer Assignment Card -->
                 <Border Grid.Row="2" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="16" Margin="0,12,0,0">
@@ -193,6 +257,7 @@
                                     <Border.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="Edit Singer Audio Defaults..." Command="{Binding DataContext.EditSingerSettingsCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
+                                            <MenuItem Header="Play Performer's Request" Command="{Binding DataContext.PlayPerformerRequestCommand, RelativeSource={RelativeSource AncestorType=Page}}" CommandParameter="{Binding}"/>
                                         </ContextMenu>
                                     </Border.ContextMenu>
                                     <Grid>

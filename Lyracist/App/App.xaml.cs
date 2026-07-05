@@ -15,6 +15,7 @@ using Lyracist.Services.Tablet;
 using Lyracist.ViewModels;
 using Lyracist.Views.Pages;
 using Lyracist.Windows;
+using Lyracist.Services.Integration;
 
 namespace Lyracist;
 
@@ -67,6 +68,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<IPlaylistService, PlaylistService>();
                 services.AddSingleton<IRequestService, Services.Requests.RequestService>();
                 services.AddSingleton<IOccasionService, Services.Occasions.OccasionService>();
+                services.AddSingleton<IPartyTymeService, PartyTymeService>();
                 services.AddKeyedSingleton<BackgroundMusicPlayer>("Opening");
                 services.AddKeyedSingleton<BackgroundMusicPlayer>("FillIn");
                 services.AddKeyedSingleton<BackgroundMusicPlayer>("EndRotation");

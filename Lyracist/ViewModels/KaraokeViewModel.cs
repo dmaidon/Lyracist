@@ -18,6 +18,7 @@ public partial class KaraokeViewModel : BaseViewModel
     private readonly ILibraryService _libraryService;
     private readonly IShowFlowService _showFlow;
     private readonly IOccasionService _occasions;
+    private readonly IPartyTymeService _partyTymeService;
 
     public RotationViewModel Rotation { get; }
 
@@ -41,6 +42,29 @@ public partial class KaraokeViewModel : BaseViewModel
 
     [ObservableProperty]
     private ImageSource? _currentFrame;
+
+    [ObservableProperty]
+    private string _partyTymeClientId = string.Empty;
+
+    [ObservableProperty]
+    private string _partyTymeClientSecret = string.Empty;
+
+    [ObservableProperty]
+    private bool _isPartyTymeConnected;
+
+    [ObservableProperty]
+    private bool _isPartyTymeDisconnected = true;
+
+    [ObservableProperty]
+    private string _partyTymeConnectionStatus = string.Empty;
+
+    [ObservableProperty]
+    private bool _isPartyTymeLoading;
+
+    [ObservableProperty]
+    private PartyTymeTrack? _selectedPartyTymeTrack;
+
+    public ObservableCollection<PartyTymeTrack> PartyTymeResults { get; } = new();
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -212,7 +236,8 @@ public partial class KaraokeViewModel : BaseViewModel
         ILibraryService libraryService,
         IShowFlowService showFlow,
         IOccasionService occasions,
-        RotationViewModel rotationViewModel)
+        RotationViewModel rotationViewModel,
+        IPartyTymeService partyTymeService)
     {
         _mediaEngine = mediaEngine;
         _displayService = displayService;
@@ -220,6 +245,7 @@ public partial class KaraokeViewModel : BaseViewModel
         _showFlow = showFlow;
         _occasions = occasions;
         Rotation = rotationViewModel;
+        _partyTymeService = partyTymeService;
 
         _mediaEngine.FrameReady += OnFrameReady;
         _libraryService.LibraryUpdated += OnLibraryUpdated;
@@ -423,10 +449,22 @@ public partial class KaraokeViewModel : BaseViewModel
     [RelayCommand]
     private void AddToRotation()
     {
-        if (string.IsNullOrWhiteSpace(NewSingerName) || SelectedSong == null)
+        if (string.IsNullOrWhiteSpace(NewSingerName))
             return;
 
-        Rotation.AddSinger(NewSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes);
+        if (SelectedSong != null)
+        {
+            Rotation.AddSinger(NewSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes);
+        }
+        else if (SelectedPartyTymeTrack != null)
+        {
+            Rotation.AddSinger(NewSingerName, SelectedPartyTymeTrack.Title, SelectedPartyTymeTrack.Artist, NewSingerKey, 
+                $"[Party Tyme ID: {SelectedPartyTymeTrack.TrackId}] {NewSingerNotes}");
+        }
+        else
+        {
+            return;
+        }
 
         // Reset inputs
         NewSingerName = string.Empty;
@@ -536,6 +574,154 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             _mediaEngine.UpdateAudioParameters();
             NotifyAudioPropertiesChanged();
+        }
+    }
+
+    [RelayCommand]
+    private async Task ConnectPartyTyme()
+    {
+        if (string.IsNullOrWhiteSpace(PartyTymeClientId) || string.IsNullOrWhiteSpace(PartyTymeClientSecret))
+        {
+            PartyTymeConnectionStatus = "Credentials cannot be empty.";
+            return;
+        }
+
+        PartyTymeConnectionStatus = "Authenticating...";
+        IsPartyTymeLoading = true;
+        
+        bool success = await _partyTymeService.AuthenticateAsync(PartyTymeClientId, PartyTymeClientSecret);
+        
+        IsPartyTymeLoading = false;
+        IsPartyTymeConnected = success;
+        IsPartyTymeDisconnected = !success;
+        
+        if (success)
+        {
+            PartyTymeConnectionStatus = "Connected successfully!";
+            await SearchPartyTyme();
+        }
+        else
+        {
+            PartyTymeConnectionStatus = "Authentication failed. Try again.";
+        }
+    }
+
+    [RelayCommand]
+    private async Task SearchPartyTyme()
+    {
+        if (!IsPartyTymeConnected) return;
+
+        IsPartyTymeLoading = true;
+        try
+        {
+            var results = await _partyTymeService.SearchCatalogAsync(SearchQuery);
+            PartyTymeResults.Clear();
+            foreach (var track in results)
+            {
+                PartyTymeResults.Add(track);
+            }
+        }
+        catch (Exception ex)
+        {
+            PartyTymeConnectionStatus = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            IsPartyTymeLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task PlayPartyTymeTrack(PartyTymeTrack track)
+    {
+        if (track == null) return;
+
+        IsPlaying = false;
+        CurrentSongName = $"{track.Artist} - {track.Title} [Party Tyme]";
+
+        string streamUrl = await _partyTymeService.GetStreamUrlAsync(track.TrackId);
+        
+        SelectedSongPath = streamUrl;
+        _mediaEngine.LoadSong(streamUrl);
+        _mediaEngine.Play();
+        IsPlaying = true;
+        
+        NotifyAudioPropertiesChanged();
+    }
+
+    [RelayCommand]
+    private async Task CachePartyTymeTrack(PartyTymeTrack track)
+    {
+        if (track == null) return;
+
+        PartyTymeConnectionStatus = $"Caching '{track.Title}'...";
+        IsPartyTymeLoading = true;
+        
+        string cachedPath = await _partyTymeService.DownloadTrackAsync(track.TrackId, track.Title, track.Artist);
+        
+        IsPartyTymeLoading = false;
+        
+        if (!string.IsNullOrEmpty(cachedPath))
+        {
+            PartyTymeConnectionStatus = $"Cached '{track.Title}' successfully!";
+            await SearchPartyTyme();
+        }
+        else
+        {
+            PartyTymeConnectionStatus = "Failed to cache track.";
+        }
+    }
+
+    [RelayCommand]
+    private async Task PlayPerformerRequest(Singer singer)
+    {
+        if (singer == null) return;
+
+        if (singer.Notes.Contains("[Party Tyme ID:"))
+        {
+            int startIdx = singer.Notes.IndexOf("[Party Tyme ID:") + 15;
+            int endIdx = singer.Notes.IndexOf("]", startIdx);
+            if (startIdx >= 15 && endIdx > startIdx)
+            {
+                string trackId = singer.Notes.Substring(startIdx, endIdx - startIdx).Trim();
+                
+                IsPlaying = false;
+                CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [Party Tyme]";
+                _mediaEngine.ActiveSingerName = singer.Name;
+
+                string streamUrl = await _partyTymeService.GetStreamUrlAsync(trackId);
+                
+                SelectedSongPath = streamUrl;
+                _mediaEngine.LoadSong(streamUrl);
+                _mediaEngine.Play();
+                IsPlaying = true;
+                
+                NotifyAudioPropertiesChanged();
+                return;
+            }
+        }
+
+        var localMatch = _libraryService.Search($"{singer.SongTitle} {singer.Artist}").FirstOrDefault();
+        if (localMatch != null)
+        {
+            IsPlaying = false;
+            CurrentSongName = $"{localMatch.Artist} - {localMatch.Title}";
+            _mediaEngine.ActiveSingerName = singer.Name;
+            
+            SelectedSongPath = localMatch.AudioPath;
+            _mediaEngine.LoadSong(localMatch.AudioPath);
+            _mediaEngine.Play();
+            IsPlaying = true;
+
+            NotifyAudioPropertiesChanged();
+        }
+        else
+        {
+            System.Windows.MessageBox.Show(
+                $"Could not locate file matching '{singer.SongTitle}' by '{singer.Artist}'. Please load it manually.",
+                "Song Not Found",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
         }
     }
 }
