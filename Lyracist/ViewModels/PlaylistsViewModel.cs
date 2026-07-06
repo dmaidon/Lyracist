@@ -14,12 +14,41 @@ public partial class PlaylistsViewModel : BaseViewModel
     private readonly IPlaylistService _playlistService;
     private readonly IShowFlowService _showFlow;
     private readonly ILibraryService _libraryService;
+    private readonly IOccasionService _occasions;
     private readonly DispatcherTimer _statusTimer;
 
     public ObservableCollection<PlaylistTrack> OpeningTracks { get; } = new();
     public ObservableCollection<PlaylistTrack> FillInTracks { get; } = new();
     public ObservableCollection<PlaylistTrack> EndRotationTracks { get; } = new();
     public ObservableCollection<KaraokeSong> LibrarySongs { get; } = new();
+
+    // Special Occasion editor
+    public ObservableCollection<OccasionNode> OccasionCategories { get; } = new();
+    public ObservableCollection<OccasionNode> OccasionItems { get; } = new();
+
+    [ObservableProperty]
+    private OccasionNode? _selectedOccasionCategory;
+
+    [ObservableProperty]
+    private OccasionNode? _selectedOccasionItem;
+
+    [ObservableProperty]
+    private string _newOccasionCategoryName = string.Empty;
+
+    [ObservableProperty]
+    private bool _addAsSubcategory;
+
+    [ObservableProperty]
+    private string _newOccasionItemName = string.Empty;
+
+    [ObservableProperty]
+    private double _occasionItemBass;
+
+    [ObservableProperty]
+    private double _occasionItemTreble;
+
+    [ObservableProperty]
+    private double _occasionItemGain;
 
     [ObservableProperty]
     private PlaylistTrack? _selectedOpeningTrack;
@@ -91,13 +120,15 @@ public partial class PlaylistsViewModel : BaseViewModel
         FilterLibrarySongs();
     }
 
-    public PlaylistsViewModel(IPlaylistService playlistService, IShowFlowService showFlow, ILibraryService libraryService)
+    public PlaylistsViewModel(IPlaylistService playlistService, IShowFlowService showFlow, ILibraryService libraryService, IOccasionService occasions)
     {
         _playlistService = playlistService;
         _showFlow = showFlow;
         _libraryService = libraryService;
+        _occasions = occasions;
 
         RefreshAll();
+        RefreshOccasionCategories();
 
         // Reflect MediaEngine-driven state changes (auto-pause/resume) that
         // happen outside of this ViewModel's own commands.
@@ -342,5 +373,120 @@ public partial class PlaylistsViewModel : BaseViewModel
         // the library search-by-path lookup the scanning engine indexed.
         using var context = new Lyracist.Data.LyracistDbContext();
         return context.Songs.Where(s => s.FilePath == audioPath).Select(s => (int?)s.SongId).FirstOrDefault();
+    }
+
+    private void RefreshOccasionCategories()
+    {
+        int? keepId = SelectedOccasionCategory?.Id;
+        OccasionCategories.Clear();
+        foreach (var category in _occasions.GetCategoriesFlat())
+        {
+            OccasionCategories.Add(category);
+        }
+        SelectedOccasionCategory = OccasionCategories.FirstOrDefault(c => c.Id == keepId)
+                                   ?? OccasionCategories.FirstOrDefault();
+    }
+
+    private void RefreshOccasionItems()
+    {
+        OccasionItems.Clear();
+        if (SelectedOccasionCategory == null) return;
+
+        foreach (var item in _occasions.GetItems(SelectedOccasionCategory.Id))
+        {
+            OccasionItems.Add(item);
+        }
+    }
+
+    partial void OnSelectedOccasionCategoryChanged(OccasionNode? value)
+    {
+        RefreshOccasionItems();
+    }
+
+    partial void OnSelectedOccasionItemChanged(OccasionNode? value)
+    {
+        if (value == null) return;
+        OccasionItemBass = value.Bass;
+        OccasionItemTreble = value.Treble;
+        OccasionItemGain = value.Gain;
+    }
+
+    [RelayCommand]
+    private void AddOccasionCategory()
+    {
+        if (string.IsNullOrWhiteSpace(NewOccasionCategoryName)) return;
+
+        int? parentId = AddAsSubcategory ? SelectedOccasionCategory?.Id : null;
+        _occasions.AddCategory(NewOccasionCategoryName, parentId);
+        NewOccasionCategoryName = string.Empty;
+        RefreshOccasionCategories();
+    }
+
+    [RelayCommand]
+    private void RemoveOccasionCategory()
+    {
+        if (SelectedOccasionCategory == null) return;
+        _occasions.RemoveCategory(SelectedOccasionCategory.Id);
+        SelectedOccasionCategory = null;
+        RefreshOccasionCategories();
+    }
+
+    [RelayCommand]
+    private void AddOccasionItem()
+    {
+        if (SelectedOccasionCategory == null) return;
+
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Select Occasion Music File",
+            Filter = "Audio files (*.mp3;*.wav;*.m4a;*.flac)|*.mp3;*.wav;*.m4a;*.flac|All files (*.*)|*.*"
+        };
+        if (dialog.ShowDialog() != true) return;
+
+        string name = string.IsNullOrWhiteSpace(NewOccasionItemName)
+            ? System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)
+            : NewOccasionItemName;
+
+        _occasions.AddItem(SelectedOccasionCategory.Id, name, dialog.FileName);
+        NewOccasionItemName = string.Empty;
+        RefreshOccasionItems();
+    }
+
+    [RelayCommand]
+    private void SearchOccasionItem()
+    {
+        if (SelectedOccasionCategory == null)
+        {
+            System.Windows.MessageBox.Show("Please select an Occasion Category first.", "Select Category", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var partyTyme = (IPartyTymeService)App.AppHost.Services.GetService(typeof(IPartyTymeService))!;
+        var window = new Lyracist.Windows.OccasionSearchWindow(
+            _occasions,
+            _libraryService,
+            partyTyme,
+            SelectedOccasionCategory.Id,
+            () => RefreshOccasionItems()
+        );
+        window.Owner = System.Windows.Application.Current.MainWindow;
+        window.ShowDialog();
+    }
+
+    [RelayCommand]
+    private void RemoveOccasionItem()
+    {
+        if (SelectedOccasionItem == null) return;
+        _occasions.RemoveItem(SelectedOccasionItem.Id);
+        SelectedOccasionItem = null;
+        RefreshOccasionItems();
+    }
+
+    [RelayCommand]
+    private void SaveOccasionItemAudio()
+    {
+        if (SelectedOccasionItem == null) return;
+        _occasions.UpdateItemAudio(SelectedOccasionItem.Id, OccasionItemBass, OccasionItemTreble, OccasionItemGain);
+        RefreshOccasionItems();
     }
 }

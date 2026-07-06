@@ -385,6 +385,7 @@ public partial class KaraokeViewModel : BaseViewModel
 
         // Hook rotation updates to sync Now/Next banners
         Rotation.Rotation.CollectionChanged += (s, e) => UpdateNowNext();
+        Rotation.RotationStateChanged += UpdateNowNext;
 
         // Apply starting defaults
         _mediaEngine.Volume = 100.0;
@@ -472,9 +473,19 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         string oldSinger = NowSingingName;
 
-        if (Rotation.Rotation.Count > 0)
+        // Reset flags for all singers in the rotation first
+        foreach (var s in Rotation.Rotation)
         {
-            var now = Rotation.Rotation[0];
+            s.IsCurrent = false;
+            s.IsNext = false;
+        }
+
+        var activeSingers = Rotation.Rotation.Where(s => !s.IsPaused).ToList();
+
+        if (activeSingers.Count > 0)
+        {
+            var now = activeSingers[0];
+            now.IsCurrent = true;
             NowSingingName = now.Name;
             NowSingingSong = string.IsNullOrEmpty(now.SongTitle) ? "No Song" : $"{now.Artist} - {now.SongTitle}";
         }
@@ -484,9 +495,10 @@ public partial class KaraokeViewModel : BaseViewModel
             NowSingingSong = "No Song";
         }
 
-        if (Rotation.Rotation.Count > 1)
+        if (activeSingers.Count > 1)
         {
-            var next = Rotation.Rotation[1];
+            var next = activeSingers[1];
+            next.IsNext = true;
             NextUpName = next.Name;
             NextUpSong = string.IsNullOrEmpty(next.SongTitle) ? "No Song" : $"{next.Artist} - {next.SongTitle}";
         }
@@ -536,23 +548,47 @@ public partial class KaraokeViewModel : BaseViewModel
     [RelayCommand]
     private void Play()
     {
-        _mediaEngine.Play();
-        IsPlaying = true;
+        if (!string.IsNullOrEmpty(SelectedSongPath))
+        {
+            _mediaEngine.Play();
+            IsPlaying = true;
+        }
+        else
+        {
+            _showFlow.ResumeBackgroundMusic();
+        }
     }
 
     [RelayCommand]
     private void Pause()
     {
-        _mediaEngine.Pause();
-        IsPlaying = false;
+        if (!string.IsNullOrEmpty(SelectedSongPath))
+        {
+            _mediaEngine.Pause();
+            IsPlaying = false;
+        }
+        else
+        {
+            _showFlow.PauseBackgroundMusic();
+        }
     }
 
     [RelayCommand]
     private void Stop()
     {
-        _mediaEngine.Stop();
-        IsPlaying = false;
-        SeekPosition = 0;
+        if (!string.IsNullOrEmpty(SelectedSongPath))
+        {
+            _mediaEngine.Stop();
+            IsPlaying = false;
+            SeekPosition = 0;
+        }
+        else
+        {
+            _showFlow.StopOpeningMusic();
+            _showFlow.StopFillIn();
+            _showFlow.StopEndRotationMusic();
+            _showFlow.StopOccasion();
+        }
     }
 
     [RelayCommand]

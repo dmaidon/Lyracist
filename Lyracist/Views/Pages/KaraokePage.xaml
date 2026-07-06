@@ -368,17 +368,17 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Margin="0,0,6,0" CornerRadius="8" Background="#1E133A" BorderBrush="#FF8E53" BorderThickness="1.5" Padding="12">
+                    <Border Grid.Column="0" Margin="0,0,6,0" CornerRadius="8" Background="#2A240A" BorderBrush="#F5D042" BorderThickness="1.5" Padding="12">
                         <StackPanel>
-                            <TextBlock Text="NOW SINGING" FontSize="11" FontWeight="Bold" Foreground="#FF8E53" HorizontalAlignment="Center" />
+                            <TextBlock Text="NOW SINGING" FontSize="11" FontWeight="Bold" Foreground="#F5D042" HorizontalAlignment="Center" />
                             <TextBlock Text="{Binding NowSingingName}" FontSize="16" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
                             <TextBlock Text="{Binding NowSingingSong}" FontSize="11" Foreground="#CCCCCC" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="1" Margin="6,0,0,0" CornerRadius="8" Background="#0C1D3A" BorderBrush="#0083B0" BorderThickness="1.5" Padding="12">
+                    <Border Grid.Column="1" Margin="6,0,0,0" CornerRadius="8" Background="#0A1C35" BorderBrush="#3B82F6" BorderThickness="1.5" Padding="12">
                         <StackPanel>
-                            <TextBlock Text="NEXT UP" FontSize="11" FontWeight="Bold" Foreground="#0083B0" HorizontalAlignment="Center" />
+                            <TextBlock Text="NEXT UP" FontSize="11" FontWeight="Bold" Foreground="#3B82F6" HorizontalAlignment="Center" />
                             <TextBlock Text="{Binding NextUpName}" FontSize="16" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
                             <TextBlock Text="{Binding NextUpSong}" FontSize="11" Foreground="#CCCCCC" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
@@ -459,7 +459,23 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Page}}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                                <Border Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Page}}" BorderThickness="2" CornerRadius="6" Padding="10" Margin="2">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+                                            <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="#F5D042" />
+                                                    <Setter Property="Background" Value="#15F5D042" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsNext}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="#3B82F6" />
+                                                    <Setter Property="Background" Value="#153B82F6" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
                                     <Border.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="Edit Singer Audio Defaults..." Command="{Binding Path=PlacementTarget.Tag.EditSingerSettingsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />

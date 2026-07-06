@@ -24,4 +24,19 @@ public partial class Singer : ObservableObject
 
     [ObservableProperty]
     private string _source = "Local"; // Local, PartyTyme, Spotify, YouTube, Amazon
+
+    [ObservableProperty]
+    private int _completedCount = 0;
+
+    [ObservableProperty]
+    private bool _isPaused = false;
+
+    [ObservableProperty]
+    private bool _isInactive = false;
+
+    [ObservableProperty]
+    private bool _isCurrent = false;
+
+    [ObservableProperty]
+    private bool _isNext = false;
 }

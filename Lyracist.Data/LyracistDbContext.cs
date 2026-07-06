@@ -1,5 +1,9 @@
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 using Lyracist.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Lyracist.Data
 {
@@ -34,7 +38,8 @@ namespace Lyracist.Data
                 string dataDir = System.IO.Path.Combine(baseDir, "Data");
                 System.IO.Directory.CreateDirectory(dataDir);
                 string dbPath = System.IO.Path.Combine(dataDir, "lyracist.db");
-                optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared;Busy Timeout=10000");
+                optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared")
+                              .AddInterceptors(new SqliteConnectionInterceptor());
             }
         }
 
@@ -138,6 +143,26 @@ namespace Lyracist.Data
                 new OccasionCategory { OccasionCategoryId = 5, Name = "Graduation" },
                 new OccasionCategory { OccasionCategoryId = 6, Name = "Retirement" }
             );
+        }
+    }
+
+    public class SqliteConnectionInterceptor : DbConnectionInterceptor
+    {
+        public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
+            command.ExecuteNonQuery();
+        }
+
+        public override async Task ConnectionOpenedAsync(
+            DbConnection connection, 
+            ConnectionEndEventData eventData, 
+            CancellationToken cancellationToken = default)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
+            await command.ExecuteNonQueryAsync(cancellationToken);
         }
     }
 }

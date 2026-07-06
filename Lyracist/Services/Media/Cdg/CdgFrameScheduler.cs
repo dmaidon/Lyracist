@@ -24,12 +24,7 @@ public class CdgFrameScheduler : ICdgFrameScheduler
 
     public void LoadPackets(List<CdgPacket> packets)
     {
-        _packets = packets;
-        if (_cdgDecoder is CdgDecoder cdg)
-        {
-            cdg.Packets.Clear();
-            cdg.Packets.AddRange(packets);
-        }
+        _packets = new List<CdgPacket>(packets);
     }
 
     public void Reset()
@@ -47,28 +42,25 @@ public class CdgFrameScheduler : ICdgFrameScheduler
     {
         if (_packets == null || _packets.Count == 0) return;
 
-        // 1. Calculate the target packet based on playback timing (300 packets per second)
-        int targetIndex = (int)(audioPosition.TotalSeconds * CdgConstants.PacketsPerSecond);
-        if (targetIndex < 0) targetIndex = 0;
-        if (targetIndex > _packets.Count) targetIndex = _packets.Count;
+        double targetSeconds = audioPosition.TotalSeconds;
 
-        // 2. Handle seeks backward by resetting and starting over
-        if (targetIndex < _currentPacketIndex)
+        // Handle seeks backward by resetting and starting over
+        if (_currentPacketIndex > 0 && targetSeconds < _packets[_currentPacketIndex - 1].Timestamp)
         {
             Reset();
         }
 
-        // 3. Process subcode packet blocks sequentially up to the target index
+        // Process subcode packet blocks sequentially up to the target timestamp
         if (_cdgDecoder is CdgDecoder cdg)
         {
-            while (_currentPacketIndex < targetIndex)
+            while (_currentPacketIndex < _packets.Count && _packets[_currentPacketIndex].Timestamp <= targetSeconds)
             {
                 CdgPacket packet = _packets[_currentPacketIndex];
                 cdg.ApplyPacket(packet);
                 _currentPacketIndex++;
             }
 
-            // 4. Render the frame at the requested target frame rate limit
+            // Render the frame at the requested target frame rate limit
             DateTime now = DateTime.UtcNow;
             if (now - _lastFrameTime >= _frameInterval)
             {

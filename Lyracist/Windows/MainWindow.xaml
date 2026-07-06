@@ -15,6 +15,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Custom TitleBar rendering Fluent Minimize, Maximize, and Close buttons -->
@@ -54,5 +55,57 @@
                 <ui:NavigationViewItem Content="About" Icon="{ui:SymbolIcon Info24}" TargetPageType="{x:Type pages:AboutPage}" />
             </ui:NavigationView.MenuItems>
         </ui:NavigationView>
+
+        <!-- Global Playback Control Bar at the bottom of the window -->
+        <Border Grid.Row="2" 
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" 
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" 
+                BorderThickness="0,1,0,0" 
+                Padding="24,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Currently Playing Info -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Karaoke.NowSingingName, StringFormat='Performer: {0}'}" 
+                               FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Text="{Binding Karaoke.CurrentSongName}" 
+                               FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+
+                <!-- Playback Controls -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <!-- Play Button -->
+                    <ui:Button Icon="{ui:SymbolIcon Play24}" 
+                               Command="{Binding Karaoke.PlayCommand}" 
+                               Appearance="Primary" 
+                               Width="46" Height="36" 
+                               Margin="0,0,8,0" 
+                               ToolTip="Play" />
+                    <!-- Pause Button -->
+                    <ui:Button Icon="{ui:SymbolIcon Pause24}" 
+                               Command="{Binding Karaoke.PauseCommand}" 
+                               Width="46" Height="36" 
+                               Margin="0,0,8,0" 
+                               ToolTip="Pause" />
+                    <!-- Stop Button -->
+                    <ui:Button Icon="{ui:SymbolIcon Stop24}" 
+                               Command="{Binding Karaoke.StopCommand}" 
+                               Appearance="Danger"
+                               Width="46" Height="36" 
+                               ToolTip="Stop / Reset" />
+                </StackPanel>
+
+                <!-- Display shortcut buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <ui:Button Content="Lyrics Window" Icon="{ui:SymbolIcon Window24}" Command="{Binding ShowLyricsCommand}" Appearance="Secondary" Margin="0,0,8,0" />
+                    <ui:Button Content="Rotation Window" Icon="{ui:SymbolIcon People24}" Command="{Binding ShowRotationCommand}" Appearance="Secondary" />
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </ui:FluentWindow>

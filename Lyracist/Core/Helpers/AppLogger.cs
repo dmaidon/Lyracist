@@ -25,6 +25,15 @@ public static class AppLogger
             File.AppendAllText(path, entry);
         }
         catch { }
+
+        try
+        {
+            string errFileName = $"err_{DateTime.Now:MMMdd}.log";
+            string errPath = Path.Combine(LogDir, errFileName);
+            string errEntry = $"{new string('=', 60)}{Environment.NewLine}App started {DateTime.Now:MMMM d} @ {DateTime.Now:HH:mm:ss}.{Environment.NewLine}{new string('=', 60)}{Environment.NewLine}{Environment.NewLine}";
+            File.AppendAllText(errPath, errEntry);
+        }
+        catch { }
     }
 
     public static void LogError(Exception ex, string? context = null)
@@ -35,7 +44,7 @@ public static class AppLogger
         string entry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]";
         if (!string.IsNullOrEmpty(context))
             entry += $" [{context}]";
-        entry += $" {ex.GetType().Name}: {ex.Message}{Environment.NewLine}{ex.StackTrace}{Environment.NewLine}";
+        entry += $" {ex.GetType().Name}: {ex.Message}{Environment.NewLine}{ex.StackTrace}{Environment.NewLine}{Environment.NewLine}";
 
         try
         {

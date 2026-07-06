@@ -21,7 +21,6 @@ public partial class SettingsViewModel : BaseViewModel
 {
     private readonly IDisplayService _display;
     private readonly ITabletLyricsServer _tablet;
-    private readonly IOccasionService _occasions;
     private readonly IShowFlowService _showFlow;
     private readonly INavigationService _navigation;
     private readonly ILibraryService _library;
@@ -80,33 +79,7 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private int _frameRate = 30;
 
-    // Special Occasion editor
-    public ObservableCollection<OccasionNode> OccasionCategories { get; } = new();
-    public ObservableCollection<OccasionNode> OccasionItems { get; } = new();
 
-    [ObservableProperty]
-    private OccasionNode? _selectedOccasionCategory;
-
-    [ObservableProperty]
-    private OccasionNode? _selectedOccasionItem;
-
-    [ObservableProperty]
-    private string _newOccasionCategoryName = string.Empty;
-
-    [ObservableProperty]
-    private bool _addAsSubcategory;
-
-    [ObservableProperty]
-    private string _newOccasionItemName = string.Empty;
-
-    [ObservableProperty]
-    private double _occasionItemBass;
-
-    [ObservableProperty]
-    private double _occasionItemTreble;
-
-    [ObservableProperty]
-    private double _occasionItemGain;
 
     // ─── Service Logins & API Keys ──────────────────────────────────────────
 
@@ -200,7 +173,6 @@ public partial class SettingsViewModel : BaseViewModel
 
     public SettingsViewModel(IDisplayService display,
                              ITabletLyricsServer tablet,
-                             IOccasionService occasions,
                              IShowFlowService showFlow,
                              INavigationService navigation,
                              ILibraryService library,
@@ -208,7 +180,6 @@ public partial class SettingsViewModel : BaseViewModel
     {
         _display = display;
         _tablet = tablet;
-        _occasions = occasions;
         _showFlow = showFlow;
         _navigation = navigation;
         _library = library;
@@ -263,34 +234,12 @@ public partial class SettingsViewModel : BaseViewModel
         CdgScalingModes = new List<string> { "Nearest", "Linear" };
         Mp4Backends = new List<string> { "LibVLC", "FFME" };
 
-        RefreshOccasionCategories();
         RefreshLibraryDirectories();
         RefreshLibraryStatus();
         RefreshScaryokeCategories();
     }
 
-    private void RefreshOccasionCategories()
-    {
-        int? keepId = SelectedOccasionCategory?.Id;
-        OccasionCategories.Clear();
-        foreach (var category in _occasions.GetCategoriesFlat())
-        {
-            OccasionCategories.Add(category);
-        }
-        SelectedOccasionCategory = OccasionCategories.FirstOrDefault(c => c.Id == keepId)
-                                   ?? OccasionCategories.FirstOrDefault();
-    }
 
-    private void RefreshOccasionItems()
-    {
-        OccasionItems.Clear();
-        if (SelectedOccasionCategory == null) return;
-
-        foreach (var item in _occasions.GetItems(SelectedOccasionCategory.Id))
-        {
-            OccasionItems.Add(item);
-        }
-    }
 
     private void RefreshLibraryDirectories()
     {
@@ -409,76 +358,7 @@ public partial class SettingsViewModel : BaseViewModel
         _library.ScanDirectory(SelectedLibraryDirectory);
     }
 
-    partial void OnSelectedOccasionCategoryChanged(OccasionNode? value)
-    {
-        RefreshOccasionItems();
-    }
 
-    partial void OnSelectedOccasionItemChanged(OccasionNode? value)
-    {
-        if (value == null) return;
-        OccasionItemBass = value.Bass;
-        OccasionItemTreble = value.Treble;
-        OccasionItemGain = value.Gain;
-    }
-
-    [RelayCommand]
-    private void AddOccasionCategory()
-    {
-        if (string.IsNullOrWhiteSpace(NewOccasionCategoryName)) return;
-
-        int? parentId = AddAsSubcategory ? SelectedOccasionCategory?.Id : null;
-        _occasions.AddCategory(NewOccasionCategoryName, parentId);
-        NewOccasionCategoryName = string.Empty;
-        RefreshOccasionCategories();
-    }
-
-    [RelayCommand]
-    private void RemoveOccasionCategory()
-    {
-        if (SelectedOccasionCategory == null) return;
-        _occasions.RemoveCategory(SelectedOccasionCategory.Id);
-        SelectedOccasionCategory = null;
-        RefreshOccasionCategories();
-    }
-
-    [RelayCommand]
-    private void AddOccasionItem()
-    {
-        if (SelectedOccasionCategory == null) return;
-
-        var dialog = new Microsoft.Win32.OpenFileDialog
-        {
-            Title = "Select Occasion Music File",
-            Filter = "Audio files (*.mp3;*.wav;*.m4a;*.flac)|*.mp3;*.wav;*.m4a;*.flac|All files (*.*)|*.*"
-        };
-        if (dialog.ShowDialog() != true) return;
-
-        string name = string.IsNullOrWhiteSpace(NewOccasionItemName)
-            ? System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)
-            : NewOccasionItemName;
-
-        _occasions.AddItem(SelectedOccasionCategory.Id, name, dialog.FileName);
-        NewOccasionItemName = string.Empty;
-        RefreshOccasionItems();
-    }
-
-    [RelayCommand]
-    private void RemoveOccasionItem()
-    {
-        if (SelectedOccasionItem == null) return;
-        _occasions.RemoveItem(SelectedOccasionItem.Id);
-        SelectedOccasionItem = null;
-        RefreshOccasionItems();
-    }
-
-    [RelayCommand]
-    private void SaveOccasionItemAudio()
-    {
-        if (SelectedOccasionItem == null) return;
-        _occasions.UpdateItemAudio(SelectedOccasionItem.Id, OccasionItemBass, OccasionItemTreble, OccasionItemGain);
-        RefreshOccasionItems();
-    }
 
     partial void OnShowSplashOnStartupChanged(bool value)
     {

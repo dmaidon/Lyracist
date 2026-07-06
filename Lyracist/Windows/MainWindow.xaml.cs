@@ -19,6 +19,8 @@ public partial class MainWindow : FluentWindow
     // Injected ViewModels
     private readonly KaraokeViewModel _karaokeViewModel;
     private readonly RotationViewModel _rotationViewModel;
+    
+    public KaraokeViewModel Karaoke => _karaokeViewModel;
     private readonly SettingsViewModel _settingsViewModel;
     private readonly HelpViewModel _helpViewModel;
     private readonly AboutViewModel _aboutViewModel;

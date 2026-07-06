@@ -75,11 +75,9 @@
             </StackPanel>
         </Border>
 
-        <!-- ── Settings Content: 5 Columns Grid ── -->
+        <!-- ── Settings Content: 4 Columns Grid ── -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="12" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="12" />
                 <ColumnDefinition Width="*" />
@@ -301,21 +299,14 @@
 
                             <TextBlock Text="Database Maintenance" FontSize="12" FontWeight="SemiBold" Margin="0,10,0,4" />
                             
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ui:Button Grid.Column="0" Content="Seed Test Data"
-                                           Command="{Binding SeedTestDataCommand}"
-                                           Appearance="Secondary"
-                                           HorizontalAlignment="Stretch" />
-                                <ui:Button Grid.Column="2" Content="Clear Database"
-                                           Command="{Binding ClearDatabaseCommand}"
-                                           Appearance="Secondary"
-                                           HorizontalAlignment="Stretch" />
-                            </Grid>
+                            <CheckBox Content="Seed 15 Test Performers"
+                                      IsChecked="{Binding IsTestMode, Mode=TwoWay}"
+                                      Margin="0,4,0,10"/>
+
+                            <ui:Button Content="Clear Database"
+                                       Command="{Binding ClearDatabaseCommand}"
+                                       Appearance="Secondary"
+                                       HorizontalAlignment="Stretch" />
                         </StackPanel>
                     </GroupBox>
 
@@ -355,226 +346,6 @@
                                        Icon="{ui:SymbolIcon Delete24}"
                                        Command="{Binding RemoveScaryokeCategoryCommand}"
                                        Appearance="Danger" HorizontalAlignment="Stretch" />
-                        </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-            </ScrollViewer>
-
-            <!-- COLUMN 4: Background Music & Special Occasion Music -->
-            <ScrollViewer Grid.Column="8" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,0,8,16">
-                    <!-- Background Music Channels -->
-                    <GroupBox Header="Background Music Channels"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <!-- Opening Music -->
-                            <TextBlock Text="Opening Music" FontSize="13" FontWeight="Bold"
-                                       Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,8" />
-                            <Grid Margin="0,0,0,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="56" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="46" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Volume" FontSize="12" VerticalAlignment="Center" />
-                                <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding OpeningVolume}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="{Binding OpeningVolume, StringFormat='{}{0}%'}"
-                                           FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                            </Grid>
-                            <Grid Margin="0,0,0,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="56" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="46" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Bass" FontSize="12" VerticalAlignment="Center" />
-                                <Slider Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding OpeningBass}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="{Binding OpeningBass, StringFormat='{}{0:0}dB'}"
-                                           FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                            </Grid>
-                            <Grid Margin="0,0,0,16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="56" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="46" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Treble" FontSize="12" VerticalAlignment="Center" />
-                                <Slider Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding OpeningTreble}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="{Binding OpeningTreble, StringFormat='{}{0:0}dB'}"
-                                           FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                            </Grid>
-
-                            <Separator Margin="0,4,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-
-                            <!-- Fill-In Music -->
-                            <TextBlock Text="Fill-In Music" FontSize="13" FontWeight="Bold"
-                                       Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,8" />
-                            <Grid Margin="0,0,0,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="56" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="46" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Volume" FontSize="12" VerticalAlignment="Center" />
-                                <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding FillInVolume}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="{Binding FillInVolume, StringFormat='{}{0}%'}"
-                                           FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                            </Grid>
-                            <Grid Margin="0,0,0,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="56" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="46" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Bass" FontSize="12" VerticalAlignment="Center" />
-                                <Slider Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding FillInBass}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="{Binding FillInBass, StringFormat='{}{0:0}dB'}"
-                                           FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                            </Grid>
-                            <Grid Margin="0,0,0,16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="56" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="46" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Treble" FontSize="12" VerticalAlignment="Center" />
-                                <Slider Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding FillInTreble}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="{Binding FillInTreble, StringFormat='{}{0:0}dB'}"
-                                           FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                            </Grid>
-
-                            <Separator Margin="0,4,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-
-                            <!-- End-of-Rotation Music -->
-                            <TextBlock Text="End of Rotation Music" FontSize="13" FontWeight="Bold"
-                                       Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,8" />
-                            <Grid Margin="0,0,0,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="56" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="46" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Volume" FontSize="12" VerticalAlignment="Center" />
-                                <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding EndRotationVolume}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="{Binding EndRotationVolume, StringFormat='{}{0}%'}"
-                                           FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                            </Grid>
-                            <Grid Margin="0,0,0,6">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="56" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="46" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Bass" FontSize="12" VerticalAlignment="Center" />
-                                <Slider Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding EndRotationBass}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="{Binding EndRotationBass, StringFormat='{}{0:0}dB'}"
-                                           FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                            </Grid>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="56" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="46" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Treble" FontSize="12" VerticalAlignment="Center" />
-                                <Slider Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding EndRotationTreble}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="{Binding EndRotationTreble, StringFormat='{}{0:0}dB'}"
-                                           FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                            </Grid>
-                        </StackPanel>
-                    </GroupBox>
-
-                    <!-- Special Occasion Music -->
-                    <GroupBox Header="Special Occasion Music"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <!-- Categories -->
-                            <TextBlock Text="Categories" FontSize="13" FontWeight="SemiBold"
-                                       Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,6" />
-                            <ListBox ItemsSource="{Binding OccasionCategories}"
-                                     SelectedItem="{Binding SelectedOccasionCategory}"
-                                     DisplayMemberPath="Label"
-                                     MaxHeight="120" Height="120" Margin="0,0,0,8" />
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ui:TextBox Grid.Column="0"
-                                            Text="{Binding NewOccasionCategoryName, UpdateSourceTrigger=PropertyChanged}"
-                                            PlaceholderText="New category..." Height="26" FontSize="11" />
-                                <ui:Button Grid.Column="2" Content="Add" Icon="{ui:SymbolIcon Add24}"
-                                           Command="{Binding AddOccasionCategoryCommand}"
-                                           Appearance="Primary" Height="26" FontSize="11" />
-                                <ui:Button Grid.Column="4" Icon="{ui:SymbolIcon Delete24}"
-                                           Command="{Binding RemoveOccasionCategoryCommand}"
-                                           Appearance="Danger" Height="26" FontSize="11"
-                                           ToolTip="Remove selected category" />
-                            </Grid>
-                            <CheckBox Content="Add as subcategory of selected"
-                                      IsChecked="{Binding AddAsSubcategory}" Margin="0,0,0,12" />
-
-                            <Separator Margin="0,4,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-
-                            <!-- Items -->
-                            <TextBlock Text="Music Items in Category" FontSize="13" FontWeight="SemiBold"
-                                       Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,6" />
-                            <ListBox ItemsSource="{Binding OccasionItems}"
-                                     SelectedItem="{Binding SelectedOccasionItem}"
-                                     DisplayMemberPath="Name"
-                                     MaxHeight="100" Height="100" Margin="0,0,0,8" />
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ui:TextBox Grid.Column="0"
-                                            Text="{Binding NewOccasionItemName, UpdateSourceTrigger=PropertyChanged}"
-                                            PlaceholderText="Item name..." Height="26" FontSize="11" />
-                                <ui:Button Grid.Column="2" Content="File..." Icon="{ui:SymbolIcon MusicNote224}"
-                                           Command="{Binding AddOccasionItemCommand}"
-                                           Appearance="Primary" Height="26" FontSize="11" />
-                                <ui:Button Grid.Column="4" Icon="{ui:SymbolIcon Delete24}"
-                                           Command="{Binding RemoveOccasionItemCommand}"
-                                           Appearance="Danger" Height="26" FontSize="11"
-                                           ToolTip="Remove selected item" />
-                            </Grid>
-
-                            <Separator Margin="0,4,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-
-                            <!-- per-item EQ -->
-                            <TextBlock Text="Per-Occasion Audio (selected item)"
-                                       FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8" />
-                            <Grid Margin="0,0,0,10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="52" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="46" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="28" />
-                                    <RowDefinition Height="28" />
-                                    <RowDefinition Height="28" />
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Bass"   FontSize="12" VerticalAlignment="Center" />
-                                <Slider    Grid.Row="0" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding OccasionItemBass}"   VerticalAlignment="Center" />
-                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding OccasionItemBass,   StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Treble" FontSize="12" VerticalAlignment="Center" />
-                                <Slider    Grid.Row="1" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding OccasionItemTreble}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding OccasionItemTreble, StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Gain"   FontSize="12" VerticalAlignment="Center" />
-                                <Slider    Grid.Row="2" Grid.Column="1" Minimum="-20" Maximum="20" Value="{Binding OccasionItemGain}"   VerticalAlignment="Center" />
-                                <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding OccasionItemGain,   StringFormat='{}{0:0}dB'}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                            </Grid>
-                            <ui:Button Content="Save Audio Settings" Icon="{ui:SymbolIcon Save24}"
-                                       Command="{Binding SaveOccasionItemAudioCommand}"
-                                       Appearance="Secondary" HorizontalAlignment="Stretch" />
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>

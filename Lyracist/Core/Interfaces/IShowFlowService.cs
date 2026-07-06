@@ -42,4 +42,7 @@ public interface IShowFlowService
 
     /// <summary>Stops opening/background music and pauses fill-in when a performance starts.</summary>
     void OnKaraokeTrackStarted();
+
+    void PauseBackgroundMusic();
+    void ResumeBackgroundMusic();
 }

@@ -104,7 +104,7 @@ public class ShowFlowService : IShowFlowService
     public void StartEndRotationMusic() => _endRotation.Play();
     public void StopEndRotationMusic() => _endRotation.Stop();
 
-    public void PlayOccasion(string occasionName, string filePath, double bassDb, double trebleDb, double preampDb)
+    public async void PlayOccasion(string occasionName, string filePath, double bassDb, double trebleDb, double preampDb)
     {
         if (string.IsNullOrWhiteSpace(filePath)) return;
 
@@ -114,7 +114,41 @@ public class ShowFlowService : IShowFlowService
         _occasion.BassDb = bassDb;
         _occasion.TrebleDb = trebleDb;
         _occasion.PreampDb = preampDb;
-        _occasion.LoadPlaylist(new[] { filePath });
+
+        string finalPath = filePath;
+
+        if (filePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+            filePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(filePath) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to open external link: {ex.Message}", "Browser Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+            _display.SetRotationAnnouncement($"🎉 {occasionName}!", true);
+            return;
+        }
+
+        if (filePath.StartsWith("PartyTyme:"))
+        {
+            string trackId = filePath.Substring(10);
+            try
+            {
+                var partyTyme = (IPartyTymeService)App.AppHost.Services.GetService(typeof(IPartyTymeService))!;
+                finalPath = await partyTyme.GetStreamUrlAsync(trackId);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to fetch Party Tyme stream: {ex.Message}", "Streaming Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                _fillIn.Resume();
+                return;
+            }
+        }
+
+        _occasion.LoadPlaylist(new[] { finalPath });
         _occasion.Play();
 
         _display.SetRotationAnnouncement($"🎉 {occasionName}!", true);
@@ -152,6 +186,8 @@ public class ShowFlowService : IShowFlowService
         _endRotation.PreampDb = preampDb;
     }
 
+    private string _pausedPlayer = string.Empty;
+
     public void OnKaraokeTrackStarted()
     {
         _opening.Stop();
@@ -161,5 +197,50 @@ public class ShowFlowService : IShowFlowService
             _occasion.Stop();
             _display.SetRotationAnnouncement(string.Empty, false);
         }
+    }
+
+    public void PauseBackgroundMusic()
+    {
+        if (_opening.IsPlaying)
+        {
+            _opening.Pause();
+            _pausedPlayer = "Opening";
+        }
+        else if (_endRotation.IsPlaying)
+        {
+            _endRotation.Pause();
+            _pausedPlayer = "EndRotation";
+        }
+        else if (_occasion.IsPlaying)
+        {
+            _occasion.Pause();
+            _pausedPlayer = "Occasion";
+        }
+        else if (_fillIn.IsPlaying)
+        {
+            _fillIn.Pause();
+            _pausedPlayer = "FillIn";
+        }
+    }
+
+    public void ResumeBackgroundMusic()
+    {
+        if (_pausedPlayer == "Opening")
+        {
+            _opening.Resume();
+        }
+        else if (_pausedPlayer == "EndRotation")
+        {
+            _endRotation.Resume();
+        }
+        else if (_pausedPlayer == "Occasion")
+        {
+            _occasion.Resume();
+        }
+        else if (_pausedPlayer == "FillIn" || string.IsNullOrEmpty(_pausedPlayer))
+        {
+            _fillIn.Resume();
+        }
+        _pausedPlayer = string.Empty;
     }
 }
