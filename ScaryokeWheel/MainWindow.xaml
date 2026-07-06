@@ -6,8 +6,8 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:ScaryokeWheel"
         mc:Ignorable="d"
-        Title="Scaryoke Standalone Wheel" 
-        Height="700" 
+        Title="Scaryoke Standalone Wheel"
+        Height="700"
         Width="920"
         WindowStartupLocation="CenterScreen"
         Background="#0E0D12"
@@ -16,40 +16,40 @@
         AllowsTransparency="True"
         BorderBrush="#332B45"
         BorderThickness="1">
-    
+
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="40" ResizeBorderThickness="5" GlassFrameThickness="0"/>
+        <WindowChrome CaptionHeight="40" ResizeBorderThickness="5" GlassFrameThickness="0" />
     </WindowChrome.WindowChrome>
 
     <Grid>
         <Grid.RowDefinitions>
             <!-- Title Bar -->
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
             <!-- Main Content -->
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <!-- Custom Title Bar for Dark Spooky Theme -->
         <Border Grid.Row="0" Background="#16141C" Height="40" MouseDown="OnTitleBarMouseDown">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="15,0,0,0">
-                    <TextBlock Text="🎃" FontSize="18" Margin="0,0,8,0"/>
-                    <TextBlock Text="Scaryoke Standalone Wheel" FontWeight="SemiBold" FontSize="14" Foreground="#FF6D00"/>
+                    <TextBlock Text="🎃" FontSize="18" Margin="0,0,8,0" />
+                    <TextBlock Text="Scaryoke Standalone Wheel" FontWeight="SemiBold" FontSize="14" Foreground="#FF6D00" />
                 </StackPanel>
 
                 <!-- Window Control Buttons (Minimize, Close) -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
                     <Button Width="46" Height="40" Background="Transparent" BorderThickness="0" Click="OnMinimizeClick" Cursor="Hand">
-                        <ui:SymbolIcon Symbol="Subtract24" Foreground="Gray"/>
+                        <ui:SymbolIcon Symbol="Subtract24" Foreground="Gray" />
                     </Button>
                     <Button Width="46" Height="40" Background="Transparent" BorderThickness="0" Click="OnCloseClick" Cursor="Hand">
-                        <ui:SymbolIcon Symbol="Dismiss24" Foreground="DarkRed"/>
+                        <ui:SymbolIcon Symbol="Dismiss24" Foreground="DarkRed" />
                     </Button>
                 </StackPanel>
             </Grid>
@@ -63,30 +63,30 @@
                     <Setter Property="HeaderTemplate">
                         <Setter.Value>
                             <DataTemplate>
-                                <ContentPresenter Content="{Binding}" Margin="15,8"/>
+                                <ContentPresenter Content="{Binding}" Margin="15,8" />
                             </DataTemplate>
                         </Setter.Value>
                     </Setter>
-                    <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="Foreground" Value="#8F8B9B"/>
-                    <Setter Property="FontSize" Value="15"/>
-                    <Setter Property="FontWeight" Value="SemiBold"/>
-                    <Setter Property="BorderThickness" Value="0,0,0,2"/>
-                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Foreground" Value="#8F8B9B" />
+                    <Setter Property="FontSize" Value="15" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                    <Setter Property="BorderThickness" Value="0,0,0,2" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="TabItem">
                                 <Border x:Name="Border" Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}">
-                                    <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header"/>
+                                    <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header" />
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Foreground" Value="#FF6D00"/>
-                                        <Setter Property="BorderBrush" Value="#FF6D00"/>
-                                        <Setter Property="Background" Value="#1E1A26"/>
+                                        <Setter Property="Foreground" Value="#FF6D00" />
+                                        <Setter Property="BorderBrush" Value="#FF6D00" />
+                                        <Setter Property="Background" Value="#1E1A26" />
                                     </Trigger>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="Foreground" Value="White" />
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -99,84 +99,84 @@
             <TabItem Header="Scaryoke Wheel">
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1.1*"/>
-                        <ColumnDefinition Width="0.9*"/>
+                        <ColumnDefinition Width="1.1*" />
+                        <ColumnDefinition Width="0.9*" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Left: Spin Wheel Graphic & Pointer -->
                     <Viewbox Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="15">
                         <Grid Width="436" Height="436">
                             <!-- Outer Shadow / Glow Rim -->
-                            <Ellipse Width="436" Height="436" Fill="#050406" Stroke="#3E1A60" StrokeThickness="4">
+                            <Ellipse Width="436" Height="436" Fill="#050406" Stroke="#3E1A60" StrokeThickness="4" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Ellipse.Effect>
-                                    <DropShadowEffect Color="#6A0DAD" BlurRadius="25" ShadowDepth="0" Opacity="0.5"/>
+                                    <DropShadowEffect Color="#6A0DAD" BlurRadius="25" ShadowDepth="0" Opacity="0.5" />
                                 </Ellipse.Effect>
                             </Ellipse>
 
                             <!-- Canvas containing the dynamically built segments -->
                             <Canvas x:Name="WheelCanvas" Width="420" Height="420" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
                                 <Canvas.RenderTransform>
-                                    <RotateTransform x:Name="WheelRotate" Angle="0"/>
+                                    <RotateTransform x:Name="WheelRotate" Angle="0" />
                                 </Canvas.RenderTransform>
                             </Canvas>
 
-                            <!-- Indicator Pointer pointing at 12 o'clock -->
-                            <Polygon Points="0,16 -14,-8 14,-8" Fill="#FF3D00" Stroke="#FFD600" StrokeThickness="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-4,0,0">
+                            <!-- Indicator Pointer pointing at 12 o'clock (Adjust first Margin value to shift pointer left/right) -->
+                            <Polygon Points="0,16 -14,-8 14,-8" Fill="#FF3D00" Stroke="#FFD600" StrokeThickness="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="3,-4,0,0">
                                 <Polygon.Effect>
-                                    <DropShadowEffect Color="#FF3D00" BlurRadius="10" ShadowDepth="0"/>
+                                    <DropShadowEffect Color="#FF3D00" BlurRadius="10" ShadowDepth="0" />
                                 </Polygon.Effect>
                             </Polygon>
 
                             <!-- Central Spooky Rim Cap -->
-                            <Ellipse Width="48" Height="48" Fill="#1E133A" Stroke="#FF6D00" StrokeThickness="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <TextBlock Text="💀" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF6D00"/>
+                            <Ellipse Width="48" Height="48" Fill="#1E133A" Stroke="#FF6D00" StrokeThickness="3" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="💀" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF6D00" />
                         </Grid>
                     </Viewbox>
 
                     <!-- Right: Control Panel & Results -->
                     <Grid Grid.Column="1" Margin="20,10,10,10">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <!-- Spooky Header -->
                         <StackPanel Grid.Row="0" Margin="0,15,0,25" HorizontalAlignment="Center">
-                            <TextBlock Text="🎃 SCARYOKE WHEEL 🎃" FontSize="24" FontWeight="Bold" Foreground="#FF6D00" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Spin to select a category" FontSize="14" Foreground="#8F8B9B" Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                            <TextBlock Text="🎃 SCARYOKE WHEEL 🎃" FontSize="24" FontWeight="Bold" Foreground="#FF6D00" HorizontalAlignment="Center" />
+                            <TextBlock Text="Spin to select a category" FontSize="14" Foreground="#8F8B9B" Margin="0,5,0,0" HorizontalAlignment="Center" />
                         </StackPanel>
 
                         <!-- Spinning Result Banner -->
                         <Border Grid.Row="1" CornerRadius="12" Background="#16141C" BorderBrush="#332B45" BorderThickness="1" VerticalAlignment="Center" Padding="25" Margin="0,0,0,10">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="CURRENT CHALLENGE" FontSize="11" FontWeight="Bold" Foreground="#8F8B9B" HorizontalAlignment="Center" Margin="0,0,0,15"/>
-                                <TextBlock x:Name="ResultTextBlock" 
-                                           Text="{Binding ResultText}" 
-                                           TextWrapping="Wrap" 
-                                           TextAlignment="Center" 
-                                           FontSize="26" 
-                                           FontWeight="Bold" 
-                                           Foreground="#00E676" 
-                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="CURRENT CHALLENGE" FontSize="11" FontWeight="Bold" Foreground="#8F8B9B" HorizontalAlignment="Center" Margin="0,0,0,15" />
+                                <TextBlock x:Name="ResultTextBlock"
+                                           Text="{Binding ResultText}"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center"
+                                           FontSize="26"
+                                           FontWeight="Bold"
+                                           Foreground="#00E676"
+                                           HorizontalAlignment="Center" />
                             </StackPanel>
                         </Border>
 
                         <!-- Actions -->
                         <StackPanel Grid.Row="2" Margin="0,0,0,25">
-                            <ui:Button x:Name="SpinButton" 
-                                       Content="SPIN THE WHEEL" 
-                                       FontSize="18" 
-                                       FontWeight="Bold" 
-                                       Height="60" 
-                                       HorizontalAlignment="Stretch" 
-                                       Appearance="Primary" 
+                            <ui:Button x:Name="SpinButton"
+                                       Content="SPIN THE WHEEL"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       Height="60"
+                                       HorizontalAlignment="Stretch"
+                                       Appearance="Primary"
                                        Background="#FF6D00"
                                        Foreground="White"
                                        Click="OnSpinClick"
                                        Cursor="Hand">
                                 <ui:Button.Effect>
-                                    <DropShadowEffect Color="#FF6D00" BlurRadius="12" ShadowDepth="0" Opacity="0.4"/>
+                                    <DropShadowEffect Color="#FF6D00" BlurRadius="12" ShadowDepth="0" Opacity="0.4" />
                                 </ui:Button.Effect>
                             </ui:Button>
                         </StackPanel>
@@ -188,41 +188,41 @@
             <TabItem Header="Settings &amp; About">
                 <Grid Margin="15">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1.1*"/>
-                        <ColumnDefinition Width="0.9*"/>
+                        <ColumnDefinition Width="1.1*" />
+                        <ColumnDefinition Width="0.9*" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Left: Category List Setup -->
                     <Grid Grid.Column="0" Margin="0,0,15,0">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <!-- Setup Header -->
                         <StackPanel Grid.Row="0" Margin="0,0,0,15">
-                            <TextBlock Text="Configure Scaryoke Categories" FontSize="18" FontWeight="SemiBold" Foreground="#FF6D00"/>
-                            <TextBlock Text="Categories will be randomized along with a black 'DJ's Choice' segment" FontSize="13" Foreground="#8F8B9B" Margin="0,4,0,0"/>
+                            <TextBlock Text="Configure Scaryoke Categories" FontSize="18" FontWeight="SemiBold" Foreground="#FF6D00" />
+                            <TextBlock Text="Categories will be randomized along with a black 'DJ's Choice' segment" FontSize="13" Foreground="#8F8B9B" Margin="0,4,0,0" />
                         </StackPanel>
 
                         <!-- Scrollable Category List -->
                         <Border Grid.Row="1" Background="#16141C" BorderBrush="#332B45" BorderThickness="1" CornerRadius="8" Padding="5">
-                            <ListBox ItemsSource="{Binding CustomCategories}" 
-                                     Background="Transparent" 
-                                     BorderThickness="0" 
+                            <ListBox ItemsSource="{Binding CustomCategories}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
                                      ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <ListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                        <Setter Property="BorderBrush" Value="#221E2C"/>
-                                        <Setter Property="Padding" Value="10,8"/>
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="#221E2C" />
+                                        <Setter Property="Padding" Value="10,8" />
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="ListBoxItem">
                                                     <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter/>
+                                                        <ContentPresenter />
                                                     </Border>
                                                 </ControlTemplate>
                                             </Setter.Value>
@@ -233,19 +233,19 @@
                                     <DataTemplate>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#E0DDEC"/>
-                                            <Button Grid.Column="1" 
-                                                    Width="34" 
-                                                    Height="34" 
-                                                    Background="#291F26" 
-                                                    BorderThickness="0" 
-                                                    Command="{Binding DataContext.RemoveCategoryCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                            <TextBlock Text="{Binding}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#E0DDEC" />
+                                            <Button Grid.Column="1"
+                                                    Width="34"
+                                                    Height="34"
+                                                    Background="#291F26"
+                                                    BorderThickness="0"
+                                                    Command="{Binding DataContext.RemoveCategoryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                     CommandParameter="{Binding}"
                                                     Cursor="Hand">
-                                                <ui:SymbolIcon Symbol="Delete24" Foreground="DarkRed"/>
+                                                <ui:SymbolIcon Symbol="Delete24" Foreground="DarkRed" />
                                             </Button>
                                         </Grid>
                                     </DataTemplate>
@@ -257,36 +257,36 @@
                         <StackPanel Grid.Row="2" Margin="0,15,0,0">
                             <!-- Helper Count -->
                             <Grid Margin="0,0,0,8">
-                                <TextBlock Text="Limit: Max 11 categories" FontSize="12" Foreground="#8F8B9B" VerticalAlignment="Center"/>
+                                <TextBlock Text="Limit: Max 11 categories" FontSize="12" Foreground="#8F8B9B" VerticalAlignment="Center" />
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <TextBlock Text="{Binding CustomCategories.Count}" FontWeight="Bold" Foreground="#FF6D00"/>
-                                    <TextBlock Text="/11" Foreground="#8F8B9B"/>
+                                    <TextBlock Text="{Binding CustomCategories.Count}" FontWeight="Bold" Foreground="#FF6D00" />
+                                    <TextBlock Text="/11" Foreground="#8F8B9B" />
                                 </StackPanel>
                             </Grid>
-                            
+
                             <!-- TextBox and Add Button -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <ui:TextBox Text="{Binding NewCategoryName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
-                                            PlaceholderText="Enter new category name..." 
-                                            Height="40" 
+                                <ui:TextBox Text="{Binding NewCategoryName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                            PlaceholderText="Enter new category name..."
+                                            Height="40"
                                             Margin="0,0,10,0"
                                             VerticalContentAlignment="Center"
                                             MaxLength="30"
                                             BorderBrush="#332B45"
-                                            Background="#1C1A24"/>
-                                <ui:Button Grid.Column="1" 
-                                           Content="Add Category" 
-                                           Height="40" 
+                                            Background="#1C1A24" />
+                                <ui:Button Grid.Column="1"
+                                           Content="Add Category"
+                                           Height="40"
                                            Width="120"
-                                           Appearance="Primary" 
+                                           Appearance="Primary"
                                            Command="{Binding AddCategoryCommand}"
                                            Background="#FF6D00"
                                            Foreground="White"
-                                           Cursor="Hand"/>
+                                           Cursor="Hand" />
                             </Grid>
                         </StackPanel>
                     </Grid>
@@ -295,70 +295,70 @@
                     <Border Grid.Column="1" Background="#16141C" BorderBrush="#332B45" BorderThickness="1" CornerRadius="12" Padding="25">
                         <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
                             <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                                <TextBlock Text="💀 ABOUT SCARYOKE WHEEL 💀" FontSize="18" FontWeight="Bold" Foreground="#FF6D00" HorizontalAlignment="Center"/>
-                                <Border Height="2" Background="#FF6D00" Margin="0,10,0,0" Width="100" HorizontalAlignment="Center"/>
+                                <TextBlock Text="💀 ABOUT SCARYOKE WHEEL 💀" FontSize="18" FontWeight="Bold" Foreground="#FF6D00" HorizontalAlignment="Center" />
+                                <Border Height="2" Background="#FF6D00" Margin="0,10,0,0" Width="100" HorizontalAlignment="Center" />
                             </StackPanel>
 
                             <!-- Descriptions & Rules -->
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,15">
                                 <StackPanel>
-                                    <TextBlock Text="Scaryoke is the ultimate singing challenge! Performers are forced to step outside their comfort zones and sing a song randomly picked by the wheel." 
-                                               TextWrapping="Wrap" 
-                                               FontSize="13" 
-                                               LineHeight="20" 
-                                               Foreground="#E0DDEC" 
-                                               Margin="0,0,0,15"/>
+                                    <TextBlock Text="Scaryoke is the ultimate singing challenge! Performers are forced to step outside their comfort zones and sing a song randomly picked by the wheel."
+                                               TextWrapping="Wrap"
+                                               FontSize="13"
+                                               LineHeight="20"
+                                               Foreground="#E0DDEC"
+                                               Margin="0,0,0,15" />
 
-                                    <TextBlock Text="RULES OF SPINS:" FontWeight="Bold" Foreground="#FF6D00" Margin="0,5,0,8" FontSize="13"/>
-                                    
+                                    <TextBlock Text="RULES OF SPINS:" FontWeight="Bold" Foreground="#FF6D00" Margin="0,5,0,8" FontSize="13" />
+
                                     <BulletDecorator Margin="0,0,0,8">
                                         <BulletDecorator.Bullet>
-                                            <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0"/>
+                                            <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0" />
                                         </BulletDecorator.Bullet>
-                                        <TextBlock Text="Enter up to 11 custom genre or artist categories in Settings." TextWrapping="Wrap" Foreground="#E0DDEC"/>
-                                    </BulletDecorator>
-                                    
-                                    <BulletDecorator Margin="0,0,0,8">
-                                        <BulletDecorator.Bullet>
-                                            <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0"/>
-                                        </BulletDecorator.Bullet>
-                                        <TextBlock Text="The 12th segment is always DJ's Choice (colored Black)." TextWrapping="Wrap" Foreground="#E0DDEC"/>
+                                        <TextBlock Text="Enter up to 11 custom genre or artist categories in Settings." TextWrapping="Wrap" Foreground="#E0DDEC" />
                                     </BulletDecorator>
 
                                     <BulletDecorator Margin="0,0,0,8">
                                         <BulletDecorator.Bullet>
-                                            <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0"/>
+                                            <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0" />
                                         </BulletDecorator.Bullet>
-                                        <TextBlock Text="When spinning, the wheel ticks on each boundary transition." TextWrapping="Wrap" Foreground="#E0DDEC"/>
+                                        <TextBlock Text="The 12th segment is always DJ's Choice (colored Black)." TextWrapping="Wrap" Foreground="#E0DDEC" />
                                     </BulletDecorator>
 
                                     <BulletDecorator Margin="0,0,0,8">
                                         <BulletDecorator.Bullet>
-                                            <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0"/>
+                                            <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0" />
                                         </BulletDecorator.Bullet>
-                                        <TextBlock Text="Land on 'DJ's Choice' for an evil laughter trigger!" TextWrapping="Wrap" Foreground="#E0DDEC"/>
+                                        <TextBlock Text="When spinning, the wheel ticks on each boundary transition." TextWrapping="Wrap" Foreground="#E0DDEC" />
                                     </BulletDecorator>
 
-                                    <TextBlock Text="Note: Configured categories are saved locally and load automatically each time you start the app." 
-                                               TextWrapping="Wrap" 
-                                               FontSize="12" 
-                                               FontStyle="Italic" 
-                                               Foreground="#8F8B9B" 
-                                               Margin="0,15,0,0"/>
+                                    <BulletDecorator Margin="0,0,0,8">
+                                        <BulletDecorator.Bullet>
+                                            <TextBlock Text="•" Foreground="#FF6D00" Margin="0,0,8,0" />
+                                        </BulletDecorator.Bullet>
+                                        <TextBlock Text="Land on 'DJ's Choice' for an evil laughter trigger!" TextWrapping="Wrap" Foreground="#E0DDEC" />
+                                    </BulletDecorator>
+
+                                    <TextBlock Text="Note: Configured categories are saved locally and load automatically each time you start the app."
+                                               TextWrapping="Wrap"
+                                               FontSize="12"
+                                               FontStyle="Italic"
+                                               Foreground="#8F8B9B"
+                                               Margin="0,15,0,0" />
                                 </StackPanel>
                             </ScrollViewer>
 
                             <!-- Standalone Metadata Info -->
                             <StackPanel Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Center">
-                                <TextBlock Text="{Binding Company}" FontWeight="Bold" FontSize="13" Foreground="#FF6D00" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{Binding Version}" FontSize="12" Foreground="#8F8B9B" HorizontalAlignment="Center" Margin="0,2,0,0"/>
-                                <TextBlock Text="{Binding Copyright}" FontSize="11" Foreground="#6C6975" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding Company}" FontWeight="Bold" FontSize="13" Foreground="#FF6D00" HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding Version}" FontSize="12" Foreground="#8F8B9B" HorizontalAlignment="Center" Margin="0,2,0,0" />
+                                <TextBlock Text="{Binding Copyright}" FontSize="11" Foreground="#6C6975" HorizontalAlignment="Center" Margin="0,4,0,0" />
                             </StackPanel>
                         </Grid>
                     </Border>
