@@ -28,6 +28,7 @@ public partial class MainWindow : Window
     private static readonly SoundPlayer LaughPlayer = new(LaughStream);
 
     private int _lastTickIndex = -1;
+    private System.Windows.Media.MediaPlayer? _laughMediaPlayer;
 
     public MainWindow()
     {
@@ -193,24 +194,31 @@ public partial class MainWindow : Window
                 try
                 {
                     TickPlayer.Stop();
-                    System.Threading.Tasks.Task.Run(() =>
+
+                    // Randomly select one of the 2 MP3 files in Assets folder
+                    string[] laughFiles = { "evil-laugh-deep.mp3", "evil-laugh-reverb.mp3" };
+                    string chosenFile = laughFiles[Random.Shared.Next(laughFiles.Length)];
+                    string appDir = AppDomain.CurrentDomain.BaseDirectory;
+                    string filePath = System.IO.Path.Combine(appDir, "Assets", chosenFile);
+
+                    if (File.Exists(filePath))
                     {
                         try
                         {
-                            using (var laughStream = ScaryokeAudio.CreateEvilLaughStream())
-                            using (var player = new SoundPlayer(laughStream))
-                            {
-                                player.PlaySync();
-                            }
+                            _laughMediaPlayer?.Close();
+                            _laughMediaPlayer = new System.Windows.Media.MediaPlayer();
+                            _laughMediaPlayer.Open(new Uri(filePath));
+                            _laughMediaPlayer.Play();
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                System.Windows.MessageBox.Show($"Failed to play evil laugh in background: {ex.Message}\n{ex.StackTrace}", "Sound Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                            });
+                            PlaySynthesizedLaughFallback();
                         }
-                    });
+                    }
+                    else
+                    {
+                        PlaySynthesizedLaughFallback();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -228,6 +236,28 @@ public partial class MainWindow : Window
         };
 
         WheelRotate.BeginAnimation(RotateTransform.AngleProperty, animation);
+    }
+
+    private void PlaySynthesizedLaughFallback()
+    {
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            try
+            {
+                using (var laughStream = ScaryokeAudio.CreateEvilLaughStream())
+                using (var player = new SoundPlayer(laughStream))
+                {
+                    player.PlaySync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.MessageBox.Show($"Failed to play fallback evil laugh: {ex.Message}", "Sound Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                });
+            }
+        });
     }
 
     // Window controls
