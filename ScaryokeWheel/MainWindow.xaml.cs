@@ -102,11 +102,12 @@ public partial class MainWindow : Window
             };
             
             var textColor = (Color)ColorConverter.ConvertFromString(segments[i].TextColor);
+            bool isSingersChoice = string.Equals(segments[i].Name, "Singer's Choice", StringComparison.OrdinalIgnoreCase);
             label.Children.Add(new TextBlock
             {
-                Text = segments[i].Name,
+                Text = isSingersChoice ? "🎤" : segments[i].Name,
                 Foreground = new SolidColorBrush(textColor),
-                FontSize = segments[i].Name == "Singer's Choice" ? 10 : 13,
+                FontSize = isSingersChoice ? 14 : 13,
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center

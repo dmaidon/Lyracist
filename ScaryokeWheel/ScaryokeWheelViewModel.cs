@@ -170,16 +170,16 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         }
 
         // Calculate custom non-uniform sweeps
-        // Regular categories and DJ's Choice get weight 1.0. Slivers get weight 0.35.
+        // Regular categories and DJ's Choice get weight 1.0. Slivers get weight 0.15.
         // There are exactly 2 slivers in the list.
-        double totalWeight = (list.Count - 2) + (2 * 0.35);
+        double totalWeight = (list.Count - 2) + (2 * 0.15);
         double baseSweep = 360.0 / totalWeight;
 
         foreach (var segment in list)
         {
             if (segment.Name == "Singer's Choice")
             {
-                segment.Sweep = baseSweep * 0.35;
+                segment.Sweep = baseSweep * 0.15;
             }
             else
             {
