@@ -79,6 +79,40 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private int _frameRate = 30;
 
+    public List<int> FpsOptions { get; } = new() { 15, 30, 60 };
+
+    [ObservableProperty]
+    private bool _enableHardwareAcceleration = AppSettings.EnableHardwareAcceleration;
+
+    [ObservableProperty]
+    private bool _enableNoiseGate = AppSettings.EnableNoiseGate;
+
+    [ObservableProperty]
+    private bool _enableReverb = AppSettings.EnableReverb;
+
+    public List<int> BufferSizes { get; } = new() { 64, 128, 256, 512, 1024 };
+
+    [ObservableProperty]
+    private int _selectedBufferSize = AppSettings.SelectedBufferSize;
+
+    public List<string> AsioDevices => AudioDevices;
+
+    public string SelectedAsioDevice
+    {
+        get => SelectedAudioDevice;
+        set => SelectedAudioDevice = value;
+    }
+
+    partial void OnEnableHardwareAccelerationChanged(bool value) => AppSettings.EnableHardwareAcceleration = value;
+    partial void OnEnableNoiseGateChanged(bool value) => AppSettings.EnableNoiseGate = value;
+    partial void OnEnableReverbChanged(bool value) => AppSettings.EnableReverb = value;
+    partial void OnSelectedBufferSizeChanged(int value) => AppSettings.SelectedBufferSize = value;
+
+    partial void OnSelectedAudioDeviceChanged(string value)
+    {
+        OnPropertyChanged(nameof(SelectedAsioDevice));
+    }
+
 
 
     // ─── Service Logins & API Keys ──────────────────────────────────────────
@@ -356,6 +390,40 @@ public partial class SettingsViewModel : BaseViewModel
         IsScanning = true;
         LibraryStatus = "Scanning…";
         _library.ScanDirectory(SelectedLibraryDirectory);
+    }
+
+    [RelayCommand]
+    private void ClearDatabase()
+    {
+        var confirm = System.Windows.MessageBox.Show(
+            "Are you sure you want to clear the entire database? This will remove all songs, playlists, performer history, and active rotation queue.",
+            "Confirm Clear Database",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        try
+        {
+            using (var db = new Lyracist.Data.LyracistDbContext())
+            {
+                db.Database.EnsureDeleted();
+                db.Database.EnsureCreated();
+            }
+
+            // Clear lists in memory
+            LibraryDirectories.Clear();
+            RefreshLibraryDirectories();
+            RefreshLibraryStatus();
+            _rotation.ClearRotationQueue();
+
+            System.Windows.MessageBox.Show("Database cleared successfully.", "Database Cleared", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "Clear Database");
+            System.Windows.MessageBox.Show($"Failed to clear database: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
     }
 
 

@@ -51,6 +51,30 @@ public static class AppSettings
         set { _data.ShowSplashOnStartup = value; Save(); }
     }
 
+    public static bool EnableHardwareAcceleration
+    {
+        get => _data.EnableHardwareAcceleration;
+        set { _data.EnableHardwareAcceleration = value; Save(); }
+    }
+
+    public static bool EnableNoiseGate
+    {
+        get => _data.EnableNoiseGate;
+        set { _data.EnableNoiseGate = value; Save(); }
+    }
+
+    public static bool EnableReverb
+    {
+        get => _data.EnableReverb;
+        set { _data.EnableReverb = value; Save(); }
+    }
+
+    public static int SelectedBufferSize
+    {
+        get => _data.SelectedBufferSize;
+        set { _data.SelectedBufferSize = value; Save(); }
+    }
+
     public static bool IsTestMode
     {
         get => _data.IsTestMode;
@@ -202,6 +226,10 @@ public static class AppSettings
     private sealed class SettingsData
     {
         public bool ShowSplashOnStartup { get; set; } = true;
+        public bool EnableHardwareAcceleration { get; set; } = true;
+        public bool EnableNoiseGate { get; set; } = false;
+        public bool EnableReverb { get; set; } = false;
+        public int SelectedBufferSize { get; set; } = 256;
         public bool IsTestMode { get; set; } = false;
 
         public string YouTubeApiKey { get; set; } = string.Empty;

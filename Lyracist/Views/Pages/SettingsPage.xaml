@@ -114,13 +114,13 @@
                             <TextBlock Text="Lyrics Projection Screen" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                             <ComboBox ItemsSource="{Binding Screens}"
                                       SelectedItem="{Binding LyricsScreen, Mode=TwoWay}"
-                                      DisplayMemberPath="Name"
+                                      DisplayMemberPath="DisplayName"
                                       Margin="0,0,0,12" />
 
                             <TextBlock Text="Singer Rotation Billboard Screen" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                             <ComboBox ItemsSource="{Binding Screens}"
                                       SelectedItem="{Binding RotationScreen, Mode=TwoWay}"
-                                      DisplayMemberPath="Name"
+                                      DisplayMemberPath="DisplayName"
                                       Margin="0,0,0,12" />
 
                             <CheckBox Content="Mirror Lyrics display on control view"
