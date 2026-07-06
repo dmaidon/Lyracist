@@ -222,34 +222,47 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
     {
         if (_bitmap == null || _pixelBuffer == IntPtr.Zero || _isDisposed) return;
 
-        // Perform fast memory copying inside UI thread dispatcher to prevent cross-threading access exceptions
-        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        var app = System.Windows.Application.Current;
+        if (app == null) return;
+
+        var dispatcher = app.Dispatcher;
+        if (dispatcher == null) return;
+
+        try
         {
-            if (_isDisposed || _bitmap == null || _pixelBuffer == IntPtr.Zero) return;
-
-            try
+            // Perform fast memory copying inside UI thread dispatcher to prevent cross-threading access exceptions
+            dispatcher.Invoke(() =>
             {
-                _bitmap.Lock();
-                int size = (int)(_pitch * _lines);
-                unsafe
+                if (_isDisposed || _bitmap == null || _pixelBuffer == IntPtr.Zero) return;
+
+                try
                 {
-                    Buffer.MemoryCopy(
-                        (void*)_pixelBuffer,
-                        (void*)_bitmap.BackBuffer,
-                        size,
-                        size
-                    );
-                }
-                _bitmap.AddDirtyRect(new Int32Rect(0, 0, (int)_width, (int)_height));
-                _bitmap.Unlock();
+                    _bitmap.Lock();
+                    int size = (int)(_pitch * _lines);
+                    unsafe
+                    {
+                        Buffer.MemoryCopy(
+                            (void*)_pixelBuffer,
+                            (void*)_bitmap.BackBuffer,
+                            size,
+                            size
+                        );
+                    }
+                    _bitmap.AddDirtyRect(new Int32Rect(0, 0, (int)_width, (int)_height));
+                    _bitmap.Unlock();
 
-                FrameReady?.Invoke(this, new VideoFrame(_bitmap, Position));
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"LibVLC custom rendering exception: {ex.Message}");
-            }
-        });
+                    FrameReady?.Invoke(this, new VideoFrame(_bitmap, Position));
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"LibVLC custom rendering exception: {ex.Message}");
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"LibVLC DisplayCallback dispatcher invocation exception: {ex.Message}");
+        }
     }
 
     public void Dispose()
