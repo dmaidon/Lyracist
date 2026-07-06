@@ -149,6 +149,9 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private string _libraryStatus = string.Empty;
 
+    [ObservableProperty]
+    private bool _isScanning;
+
     // ─── Scaryoke Configuration ────────────────────────────────────────
 
     public ObservableCollection<string> ScaryokeCategories { get; } = new();
@@ -211,7 +214,14 @@ public partial class SettingsViewModel : BaseViewModel
         _library = library;
         _rotation = rotation;
 
-        _library.LibraryUpdated += (_, _) => RefreshLibraryStatus();
+        _library.LibraryUpdated += (_, _) =>
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                IsScanning = false;
+                RefreshLibraryStatus();
+            });
+        };
 
         // Apply persisted channel settings to the show flow service on load
         _showFlow.SetOpeningVolume(OpeningVolume);
@@ -356,6 +366,7 @@ public partial class SettingsViewModel : BaseViewModel
         };
         if (dialog.ShowDialog() != true) return;
 
+        IsScanning = true;
         // ScanDirectory persists to AppSettings internally.
         _library.ScanDirectory(dialog.FolderName);
         RefreshLibraryDirectories();
@@ -375,8 +386,27 @@ public partial class SettingsViewModel : BaseViewModel
     private void RescanLibrary()
     {
         if (LibraryDirectories.Count == 0) return;
+        IsScanning = true;
         LibraryStatus = "Scanning…";
         _library.RescanAllDirectories();
+    }
+
+    [RelayCommand]
+    private void ScanSelectedDirectory()
+    {
+        if (SelectedLibraryDirectory == null) return;
+        IsScanning = true;
+        LibraryStatus = "Scanning…";
+        _library.ScanDirectory(SelectedLibraryDirectory);
+    }
+
+    [RelayCommand]
+    private void RescanSelectedDirectory()
+    {
+        if (SelectedLibraryDirectory == null) return;
+        IsScanning = true;
+        LibraryStatus = "Scanning…";
+        _library.ScanDirectory(SelectedLibraryDirectory);
     }
 
     partial void OnSelectedOccasionCategoryChanged(OccasionNode? value)

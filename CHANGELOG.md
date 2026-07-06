@@ -7,6 +7,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.7.6.1] - 2026-07-06
 
 ### Added
+- **Settings Multi-Column Redesign**: Converted settings page into a 5-column independent scrolling configuration, stacking background music channels and special occasion channels vertically to optimize screenspace.
+- **Global ScrollBar Thumb Sizing**: Styled all scrollbar thumbs to enforce a minimum width/height of 45 pixels, preventing microscopic scroll bars on large library lists.
+- **Folder-Specific Directory Scans**: Exposed Scan and Rescan selected directory buttons next to the local library folders list.
+- **Visual Scan Feedback**: Integrated a dynamic progress ring spinner showing active background directory scanning tasks.
 - **Rescan Sync & Purge**: Rescanning directories now identifies renamed or deleted files on the drive, removing dead records from both the main SQL database and the FTS5 search index to maintain library integrity.
 - **Rescan Transaction Safety**: Refactored multi-directory rescans to execute sequentially in a single transaction on a background thread, preventing concurrent SQLite database locks.
 - **Mechanical Spin Clicking**: Integrated mechanical ticking sound effect programmatically synthesized in-memory and synchronized to sector boundary crossings during active wheel spin rendering.
