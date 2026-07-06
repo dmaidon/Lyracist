@@ -7,8 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.7.6.7</AssemblyVersion>
-    <FileVersion>26.7.6.7</FileVersion>
+    <AssemblyVersion>26.7.6.9</AssemblyVersion>
+    <FileVersion>26.7.6.9</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,10 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\evil-laugh-deep.mp3">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\evil-laugh-reverb.mp3">
+    <None Update="Assets\*.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

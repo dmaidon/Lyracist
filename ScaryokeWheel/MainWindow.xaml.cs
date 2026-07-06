@@ -22,6 +22,7 @@ public partial class MainWindow : Window
 
     // Pre-loaded synthesized WAV streams and players
     private static readonly MemoryStream TickStream = ScaryokeAudio.CreateTickStream();
+
     private static readonly SoundPlayer TickPlayer = new(TickStream);
 
     private static readonly MemoryStream LaughStream = ScaryokeAudio.CreateEvilLaughStream();
@@ -100,12 +101,12 @@ public partial class MainWindow : Window
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new RotateTransform(textAngle)
             };
-            
+
             var textColor = (Color)ColorConverter.ConvertFromString(segments[i].TextColor);
             bool isDjsChoice = string.Equals(segments[i].Name, "DJ's Choice", StringComparison.OrdinalIgnoreCase);
             label.Children.Add(new TextBlock
             {
-                Text = isDjsChoice ? "🎧" : segments[i].Name,
+                Text = isDjsChoice ? "💀" : segments[i].Name,
                 Foreground = new SolidColorBrush(textColor),
                 FontSize = isDjsChoice ? 14 : 13,
                 FontWeight = FontWeights.Bold,
@@ -231,6 +232,28 @@ public partial class MainWindow : Window
                             _laughMediaPlayer?.Close();
                             _laughMediaPlayer = new System.Windows.Media.MediaPlayer();
                             _laughMediaPlayer.Open(new Uri(filePath));
+
+                            // Chain play "be_afraid.mp3" immediately after the evil laugh completes
+                            EventHandler? endedHandler = null;
+                            endedHandler = (s, ev) =>
+                            {
+                                if (_laughMediaPlayer != null)
+                                {
+                                    _laughMediaPlayer.MediaEnded -= endedHandler;
+                                    try
+                                    {
+                                        string nextFile = System.IO.Path.Combine(appDir, "Assets", "be_afraid.mp3");
+                                        if (File.Exists(nextFile))
+                                        {
+                                            _laughMediaPlayer.Open(new Uri(nextFile));
+                                            _laughMediaPlayer.Play();
+                                        }
+                                    }
+                                    catch { }
+                                }
+                            };
+                            _laughMediaPlayer.MediaEnded += endedHandler;
+
                             _laughMediaPlayer.Play();
                         }
                         catch
