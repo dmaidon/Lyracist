@@ -635,7 +635,7 @@ public partial class KaraokeViewModel : BaseViewModel
 
         if (!string.IsNullOrWhiteSpace(NewSingerName))
         {
-            Rotation.AddSinger(NewSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local");
+            Rotation.AddSinger(NewSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local", song.AudioPath);
             NewSingerName = string.Empty;
             NewSingerNotes = string.Empty;
             NewSingerKey = "0";
@@ -643,11 +643,11 @@ public partial class KaraokeViewModel : BaseViewModel
         }
         else if (Rotation.SelectedSinger != null)
         {
-            Rotation.AddSinger(Rotation.SelectedSinger.Name, song.Title, song.Artist, "0", string.Empty, "Local");
+            Rotation.AddSinger(Rotation.SelectedSinger.Name, song.Title, song.Artist, "0", string.Empty, "Local", song.AudioPath);
         }
         else
         {
-            Rotation.AddSinger("Singer", song.Title, song.Artist, "0", string.Empty, "Local");
+            Rotation.AddSinger("Singer", song.Title, song.Artist, "0", string.Empty, "Local", song.AudioPath);
         }
     }
 
@@ -689,7 +689,7 @@ public partial class KaraokeViewModel : BaseViewModel
 
         if (SelectedSong != null)
         {
-            Rotation.AddSinger(NewSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local");
+            Rotation.AddSinger(NewSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local", SelectedSong.AudioPath);
         }
         else if (SelectedPartyTymeTrack != null)
         {
@@ -989,27 +989,46 @@ public partial class KaraokeViewModel : BaseViewModel
                 _mediaEngine.Play();
                 IsPlaying = true;
 
+                IsPlaying = true;
+
                 NotifyAudioPropertiesChanged();
                 return;
             }
         }
 
-        var localMatch = _libraryService.Search($"{singer.SongTitle} {singer.Artist}").FirstOrDefault();
-        if (localMatch != null)
+        string localPath = string.Empty;
+        if (singer.Source == "Local" && !string.IsNullOrWhiteSpace(singer.ExternalLink) && System.IO.File.Exists(singer.ExternalLink))
+        {
+            localPath = singer.ExternalLink;
+        }
+        else
+        {
+            var localMatch = _libraryService.Search($"{singer.SongTitle} {singer.Artist}").FirstOrDefault();
+            if (localMatch == null && !string.IsNullOrWhiteSpace(singer.SongTitle))
+            {
+                localMatch = _libraryService.Search(singer.SongTitle).FirstOrDefault();
+            }
+
+            if (localMatch != null)
+            {
+                localPath = localMatch.AudioPath;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(localPath))
         {
             IsPlaying = false;
-            CurrentSongName = $"{localMatch.Artist} - {localMatch.Title}";
+            CurrentSongName = $"{singer.Artist} - {singer.SongTitle}";
             _mediaEngine.ActiveSingerName = singer.Name;
 
             IsExternalPerformanceActive = false;
             ExternalPerformanceSource = string.Empty;
             ExternalPerformanceUrl = string.Empty;
 
-            SelectedSongPath = localMatch.AudioPath;
-            _mediaEngine.LoadSong(localMatch.AudioPath);
+            SelectedSongPath = localPath;
+            _mediaEngine.LoadSong(localPath);
             _mediaEngine.Play();
             IsPlaying = true;
-
             NotifyAudioPropertiesChanged();
         }
         else

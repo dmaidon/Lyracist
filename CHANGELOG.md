@@ -11,6 +11,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Global ScrollBar Thumb Sizing**: Styled all scrollbar thumbs to enforce a minimum width/height of 45 pixels, preventing microscopic scroll bars on large library lists.
 - **Folder-Specific Directory Scans**: Exposed Scan and Rescan selected directory buttons next to the local library folders list.
 - **Visual Scan Feedback**: Integrated a dynamic progress ring spinner showing active background directory scanning tasks.
+- **Queued Track Playback Fix**: Cached local song file paths directly in rotation queue slots on selection and added loose song title fallback matching + warning alerts when manual song searches fail, correcting the missing lyrics rendering.
 - **Rescan Sync & Purge**: Rescanning directories now identifies renamed or deleted files on the drive, removing dead records from both the main SQL database and the FTS5 search index to maintain library integrity.
 
 ### Optimized
