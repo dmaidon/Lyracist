@@ -25,7 +25,7 @@ Lyracist is a premium, modern Windows WPF Karaoke hosting application designed f
 - **Special Occasion Audio**: Add custom sound bites and clips (Birthdays, Holiday jingles) with individual tone (Bass/Treble) and gain overrides.
 
 ### 🎵 Song Library & Integrations
-- **Local Scanner**: Scans specified folders for `.mp3 + .cdg` or `.mp4` files and builds a fast local query database.
+- **Local Scanner & Rescan Maintenance**: Scans folders for `.mp3 + .cdg`, `.mp4` or `.zip` files and builds a local query database. Cleanly deletes obsolete database logs and search indexes for files that were renamed or deleted on the drive during rescans.
 - **Streaming & Search Integration**: Includes search support for:
   - **Party Tyme Karaoke** (built-in streaming provider)
   - **YouTube** (direct URL stream linking and metadata lookups)

@@ -43,8 +43,23 @@ public class LibraryService : ILibraryService
 
     public void RescanAllDirectories()
     {
-        foreach (var dir in AppSettings.LibraryDirectories)
-            ScanDirectory(dir);
+        var dirs = AppSettings.LibraryDirectories.ToList();
+        if (dirs.Count == 0) return;
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                using var context = new LyracistDbContext();
+                var scanningService = new ScanningService(context);
+                await scanningService.ScanDirectories(dirs);
+                LibraryUpdated?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to rescan library directories: {ex.Message}");
+            }
+        });
     }
 
     public int GetSongCount()

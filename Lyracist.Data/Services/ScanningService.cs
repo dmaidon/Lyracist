@@ -286,6 +286,28 @@ namespace Lyracist.Data.Services
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                // Clean up dead records for files that no longer exist under the scanned directory paths
+                var allSongs = await _context.Songs.ToListAsync();
+                foreach (var s in allSongs)
+                {
+                    bool isInScannedPath = false;
+                    foreach (var path in paths)
+                    {
+                        if (s.FilePath.StartsWith(path, StringComparison.OrdinalIgnoreCase))
+                        {
+                            isInScannedPath = true;
+                            break;
+                        }
+                    }
+
+                    if (isInScannedPath && !File.Exists(s.FilePath))
+                    {
+                        _context.Songs.Remove(s);
+                        await _context.SaveChangesAsync();
+                        await searchService.RemoveSongFromIndex(s.SongId);
+                    }
+                }
+
                 foreach (var file in candidateFiles)
                 {
                     processed++;

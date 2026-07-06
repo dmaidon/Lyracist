@@ -118,5 +118,13 @@ namespace Lyracist.Data.Services
             // Join word prefixes with AND operator
             return string.Join(" AND ", words);
         }
+
+        public async Task RemoveSongFromIndex(int songId)
+        {
+            await _context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM SongSearch WHERE SongId = {0}",
+                songId
+            );
+        }
     }
 }
