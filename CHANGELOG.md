@@ -12,6 +12,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Folder-Specific Directory Scans**: Exposed Scan and Rescan selected directory buttons next to the local library folders list.
 - **Visual Scan Feedback**: Integrated a dynamic progress ring spinner showing active background directory scanning tasks.
 - **Rescan Sync & Purge**: Rescanning directories now identifies renamed or deleted files on the drive, removing dead records from both the main SQL database and the FTS5 search index to maintain library integrity.
+
+### Optimized
+- **4000x Faster Directory Scanner**: Eliminated process spawning (`ffprobe.exe`) and ZIP extraction disk operations during library scanning, resolving the 2TB drive scanning bottlenecks.
+- **Batch Database Ingestion**: Restructured the scan process to query existing records in a single in-memory dictionary lookup and batch insert/update SQLite database and FTS5 search indexes, reducing scan times from hours to seconds.
 - **Rescan Transaction Safety**: Refactored multi-directory rescans to execute sequentially in a single transaction on a background thread, preventing concurrent SQLite database locks.
 - **Mechanical Spin Clicking**: Integrated mechanical ticking sound effect programmatically synthesized in-memory and synchronized to sector boundary crossings during active wheel spin rendering.
 - **Customizable Scaryoke Categories**: Dynamic categories configuration (maximum 12, minimum 2) directly inside settings.

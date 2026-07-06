@@ -56,7 +56,7 @@ namespace Lyracist.Data.Services
             return (artist, title);
         }
 
-        public static (string Artist, string Title, string KaraokeType, bool IsKaraoke) ParseStoreDownload(string filePath, FFprobeResult probe)
+        public static (string Artist, string Title, string KaraokeType, bool IsKaraoke) ParseStoreDownload(string filePath)
         {
             string filename = Path.GetFileNameWithoutExtension(filePath);
             string artist = "Unknown Artist";
@@ -65,24 +65,6 @@ namespace Lyracist.Data.Services
             bool isKaraoke = false;
             string catalogCode = "";
             string ext = Path.GetExtension(filePath).ToLowerInvariant();
-
-            // 1. Tag checks from FFprobe
-            if (!string.IsNullOrEmpty(probe.ArtistTag))
-            {
-                artist = probe.ArtistTag.Trim();
-            }
-            if (!string.IsNullOrEmpty(probe.TitleTag))
-            {
-                title = probe.TitleTag.Trim();
-            }
-
-            if (probe.GenreTag.Contains("Karaoke", StringComparison.OrdinalIgnoreCase) ||
-                probe.CommentTag.Contains("Karaoke", StringComparison.OrdinalIgnoreCase) ||
-                probe.CommentTag.Contains("Sunfly", StringComparison.OrdinalIgnoreCase) ||
-                probe.CommentTag.Contains("Karaoke Version", StringComparison.OrdinalIgnoreCase))
-            {
-                isKaraoke = true;
-            }
 
             string pathLower = filePath.ToLowerInvariant();
             if (pathLower.Contains("karaoke") ||
@@ -241,7 +223,7 @@ namespace Lyracist.Data.Services
         }
 
         // ==========================================
-        // CORE SCAN ENGINE
+        // CORE SCAN ENGINE (HIGH-PERFORMANCE BATCH SCAN)
         // ==========================================
 
         public async Task ScanDirectories(IEnumerable<string> paths, IProgress<ScanProgress>? progress = null)
@@ -282,14 +264,19 @@ namespace Lyracist.Data.Services
             var searchService = new SearchService(_context);
             int processed = 0;
 
+            // Query existing song paths in this transaction for fast local duplicate checks
+            var existingSongsMap = await _context.Songs
+                .ToDictionaryAsync(s => s.FilePath, s => s, StringComparer.OrdinalIgnoreCase);
+
             // Start a single database transaction to maximize SQLite performance
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 // Clean up dead records for files that no longer exist under the scanned directory paths
-                var allSongs = await _context.Songs.ToListAsync();
-                foreach (var s in allSongs)
+                var songsToRemove = new List<Song>();
+                foreach (var kvp in existingSongsMap)
                 {
+                    var s = kvp.Value;
                     bool isInScannedPath = false;
                     foreach (var path in paths)
                     {
@@ -302,147 +289,119 @@ namespace Lyracist.Data.Services
 
                     if (isInScannedPath && !File.Exists(s.FilePath))
                     {
-                        _context.Songs.Remove(s);
-                        await _context.SaveChangesAsync();
-                        await searchService.RemoveSongFromIndex(s.SongId);
+                        songsToRemove.Add(s);
                     }
                 }
+
+                if (songsToRemove.Count > 0)
+                {
+                    _context.Songs.RemoveRange(songsToRemove);
+                    await _context.SaveChangesAsync();
+                    foreach (var s in songsToRemove)
+                    {
+                        await searchService.RemoveSongFromIndex(s.SongId);
+                        existingSongsMap.Remove(s.FilePath);
+                    }
+                }
+
+                var songsToInsert = new List<Song>();
+                var songsToUpdate = new List<Song>();
 
                 foreach (var file in candidateFiles)
                 {
                     processed++;
-                    progress?.Report(new ScanProgress
+                    if (processed % 250 == 0 || processed == totalFiles)
                     {
-                        TotalFilesFound = totalFiles,
-                        FilesProcessed = processed,
-                        CurrentFile = Path.GetFileName(file)
-                    });
+                        progress?.Report(new ScanProgress
+                        {
+                            TotalFilesFound = totalFiles,
+                            FilesProcessed = processed,
+                            CurrentFile = Path.GetFileName(file)
+                        });
+                    }
 
                     string ext = Path.GetExtension(file).ToLowerInvariant();
 
                     // Standalone CDGs are skipped since they are processed in tandem with MP3 files
                     if (ext == ".cdg") continue;
 
-                    Song? song = null;
-
-                    if (ext == ".mp3")
+                    var parsed = ParseStoreDownload(file);
+                    if (!parsed.IsKaraoke && ext == ".mp3")
                     {
-                        var probe = await FFprobeRunner.ProbeFile(file);
-                        var parsed = ParseStoreDownload(file, probe);
-
                         string cdgPath = Path.ChangeExtension(file, ".cdg");
-                        bool hasCdg = cdgFileSet.Contains(cdgPath);
-                        bool isKaraoke = parsed.IsKaraoke || hasCdg;
-                        string kType = hasCdg ? "MP3G" : parsed.KaraokeType;
-
-                        song = new Song
+                        if (cdgFileSet.Contains(cdgPath))
                         {
-                            Title = parsed.Title,
-                            Artist = parsed.Artist,
-                            FilePath = file,
-                            IsKaraoke = isKaraoke,
-                            KaraokeType = isKaraoke ? (string.IsNullOrEmpty(kType) ? "MP3G" : kType) : "",
-                            Duration = probe.Duration,
-                            KeyDefault = 0,
-                            TempoDefault = 1.0,
-                            DateAdded = DateTime.UtcNow
-                        };
+                            parsed = (parsed.Artist, parsed.Title, "MP3G", true);
+                        }
                     }
-                    else if (ext == ".mp4")
+                    else if (!parsed.IsKaraoke && ext == ".mp4")
                     {
-                        var probe = await FFprobeRunner.ProbeFile(file);
-                        var parsed = ParseStoreDownload(file, probe);
-                        bool isKaraoke = parsed.IsKaraoke || IsMp4Karaoke(file);
-
-                        song = new Song
+                        if (IsMp4Karaoke(file))
                         {
-                            Title = parsed.Title,
-                            Artist = parsed.Artist,
-                            FilePath = file,
-                            IsKaraoke = isKaraoke,
-                            KaraokeType = isKaraoke ? "MP4" : "",
-                            Duration = probe.Duration,
-                            KeyDefault = 0,
-                            TempoDefault = 1.0,
-                            DateAdded = DateTime.UtcNow
-                        };
+                            parsed = (parsed.Artist, parsed.Title, "MP4", true);
+                        }
                     }
                     else if (ext == ".zip")
                     {
-                        var (isKaraoke, audioEntryName) = CheckZipKaraoke(file);
+                        var (isKaraoke, _) = CheckZipKaraoke(file);
                         if (isKaraoke)
                         {
-                            double duration = 0;
-                            var zipProbe = new FFprobeResult();
-
-                            string tempPath = string.Empty;
-                            try
-                            {
-                                using var archive = ZipFile.OpenRead(file);
-                                var entry = archive.GetEntry(audioEntryName);
-                                if (entry != null)
-                                {
-                                    tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntryName));
-                                    entry.ExtractToFile(tempPath);
-
-                                    zipProbe = await FFprobeRunner.ProbeFile(tempPath);
-                                    duration = zipProbe.Duration;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine($"Failed to extract and probe zip entry {audioEntryName} in {file}: {ex.Message}");
-                            }
-                            finally
-                            {
-                                if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
-                                {
-                                    try { File.Delete(tempPath); } catch { }
-                                }
-                            }
-
-                            var parsed = ParseStoreDownload(file, zipProbe);
-
-                            song = new Song
-                            {
-                                Title = parsed.Title,
-                                Artist = parsed.Artist,
-                                FilePath = file,
-                                IsKaraoke = true,
-                                KaraokeType = "ZIPCDG",
-                                Duration = duration,
-                                KeyDefault = 0,
-                                TempoDefault = 1.0,
-                                DateAdded = DateTime.UtcNow
-                            };
+                            parsed = (parsed.Artist, parsed.Title, "ZIPCDG", true);
                         }
                     }
 
-                    if (song != null)
+                    if (!parsed.IsKaraoke) continue;
+
+                    if (existingSongsMap.TryGetValue(file, out var existing))
                     {
-                        // Check for duplicate FilePath to decide if we update or insert
-                        var existing = await _context.Songs.FirstOrDefaultAsync(s => s.FilePath == song.FilePath);
-                        if (existing != null)
+                        existing.Title = parsed.Title;
+                        existing.Artist = parsed.Artist;
+                        existing.IsKaraoke = true;
+                        existing.KaraokeType = parsed.KaraokeType;
+                        songsToUpdate.Add(existing);
+                    }
+                    else
+                    {
+                        var newSong = new Song
                         {
-                            existing.Title = song.Title;
-                            existing.Artist = song.Artist;
-                            existing.IsKaraoke = song.IsKaraoke;
-                            existing.KaraokeType = song.KaraokeType;
-                            existing.Duration = song.Duration;
-                            _context.Songs.Update(existing);
-                            await _context.SaveChangesAsync();
+                            Title = parsed.Title,
+                            Artist = parsed.Artist,
+                            FilePath = file,
+                            IsKaraoke = true,
+                            KaraokeType = parsed.KaraokeType,
+                            Duration = 0,
+                            KeyDefault = 0,
+                            TempoDefault = 1.0,
+                            DateAdded = DateTime.UtcNow
+                        };
+                        songsToInsert.Add(newSong);
+                    }
+                }
 
-                            // Re-index FTS5
-                            await searchService.IndexSong(existing);
-                        }
-                        else
-                        {
-                            _context.Songs.Add(song);
-                            await _context.SaveChangesAsync();
+                // Save insertion changes to database in a single batch
+                if (songsToInsert.Count > 0)
+                {
+                    _context.Songs.AddRange(songsToInsert);
+                }
 
-                            // Index FTS5
-                            await searchService.IndexSong(song);
-                        }
+                // Save update changes to database in a single batch
+                if (songsToUpdate.Count > 0)
+                {
+                    _context.Songs.UpdateRange(songsToUpdate);
+                }
+
+                if (songsToInsert.Count > 0 || songsToUpdate.Count > 0)
+                {
+                    await _context.SaveChangesAsync();
+
+                    // Index into the FTS5 search table
+                    foreach (var s in songsToInsert)
+                    {
+                        await searchService.IndexSong(s);
+                    }
+                    foreach (var s in songsToUpdate)
+                    {
+                        await searchService.IndexSong(s);
                     }
                 }
 
