@@ -64,12 +64,12 @@ public partial class MainWindow : Window
         var segments = _vm.WheelSegments;
         if (segments == null || segments.Count == 0) return;
 
-        double sweep = 360.0 / segments.Count;
         var strokeBrush = new SolidColorBrush(Color.FromRgb(0x1A, 0x18, 0x22));
+        double start = 0;
 
         for (int i = 0; i < segments.Count; i++)
         {
-            double start = i * sweep;
+            double sweep = segments[i].Sweep;
             double end = start + sweep;
 
             var figure = new PathFigure { StartPoint = new Point(Radius, Radius), IsClosed = true };
@@ -106,7 +106,7 @@ public partial class MainWindow : Window
             {
                 Text = segments[i].Name,
                 Foreground = new SolidColorBrush(textColor),
-                FontSize = 13,
+                FontSize = segments[i].Name == "Singer's Choice" ? 10 : 13,
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
@@ -115,14 +115,27 @@ public partial class MainWindow : Window
             Canvas.SetLeft(label, labelPos.X - label.Width / 2);
             Canvas.SetTop(label, labelPos.Y - label.Height / 2);
             WheelCanvas.Children.Add(label);
+
+            start = end;
         }
     }
 
     private void OnRendering(object? sender, EventArgs e)
     {
-        double angle = WheelRotate.Angle;
-        double sweep = 360.0 / _vm.WheelSegments.Count;
-        int currentTickIndex = (int)Math.Floor(angle / sweep);
+        double angle = (360 - (WheelRotate.Angle % 360)) % 360;
+
+        int currentTickIndex = 0;
+        double currentStart = 0;
+        for (int i = 0; i < _vm.WheelSegments.Count; i++)
+        {
+            double currentEnd = currentStart + _vm.WheelSegments[i].Sweep;
+            if (angle >= currentStart && angle < currentEnd)
+            {
+                currentTickIndex = i;
+                break;
+            }
+            currentStart = currentEnd;
+        }
 
         if (_lastTickIndex == -1)
         {
@@ -162,8 +175,6 @@ public partial class MainWindow : Window
         _vm.RebuildWheelSegments();
         RebuildWheel();
 
-        double sweep = 360.0 / _vm.WheelSegments.Count;
-
         // 4-6 full turns plus a random landing angle
         double target = _currentAngle + 1440 + Random.Shared.NextDouble() * 720;
         var animation = new DoubleAnimation(_currentAngle, target, TimeSpan.FromSeconds(4.2))
@@ -184,8 +195,19 @@ public partial class MainWindow : Window
             _vm.IsSpinning = false;
             SpinButton.IsEnabled = true;
 
-            int index = (int)(((360 - _currentAngle) % 360) / sweep) % _vm.WheelSegments.Count;
-            var landedSegment = _vm.WheelSegments[index];
+            double targetAngle = (360 - _currentAngle) % 360;
+            WheelSegment landedSegment = _vm.WheelSegments[0];
+            double currentStart = 0;
+            for (int i = 0; i < _vm.WheelSegments.Count; i++)
+            {
+                double currentEnd = currentStart + _vm.WheelSegments[i].Sweep;
+                if (targetAngle >= currentStart && targetAngle < currentEnd)
+                {
+                    landedSegment = _vm.WheelSegments[i];
+                    break;
+                }
+                currentStart = currentEnd;
+            }
 
             _vm.ResultText = landedSegment.Name.ToUpper();
 
