@@ -87,7 +87,7 @@ public partial class ScaryokeViewModel : BaseViewModel
 
         if (matches.Count == 0)
         {
-            return $"{category}: nothing matching in the library — {singerName} picks!";
+            return $"{singerName} picks any song from {category}!";
         }
 
         var song = matches[Random.Shared.Next(matches.Count)];
