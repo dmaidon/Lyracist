@@ -9,7 +9,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ### Added
 - **Mechanical Spin Clicking**: Integrated mechanical ticking sound effect programmatically synthesized in-memory and synchronized to sector boundary crossings during active wheel spin rendering.
 - **Customizable Scaryoke Categories**: Dynamic categories configuration (maximum 12, minimum 2) directly inside settings.
-- **Dynamic Scaryoke Wheel Sectors**: Real-time reconstruction of wheel slice angles, sector sweeps, sector text labels, and dynamic database song search terms. Fallback search failures instruct the performer to pick any song from the category rather than raising search failure logs.
+- **Simplified Scaryoke Selector**: Removed all library querying and automatic song assignment logic. The wheel now simply announces the selected category sector, allowing the singer to always choose their own song within that genre/theme.
 - **Scaryoke Help & Settings Documentation**: Expanded the Split-Pane Help system to 12 categories, detailing custom wheel configurations.
 
 ---

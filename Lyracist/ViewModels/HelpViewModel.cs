@@ -118,7 +118,7 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "PlayCircle24",
                 AccentColor = "#FF8E53",
                 DescriptionHeader = "Customizing Wheel Segments & Genres",
-                DescriptionContent = "• Wheel Categories: View and edit the list of segments displayed on the Scaryoke wheel. You can customize the name of each category (e.g., '90s Pop', 'Metallica', 'Dolly Parton').\n\n• Category Bounds: Enforces a maximum of 12 categories (for wheel design formatting) and a minimum of 2 categories (to ensure a valid choice is selectable).\n\n• Automatic Track Lookup: When the wheel lands on a custom category, the media engine automatically searches the library for songs matching that name. If no tracks match, the singer picks any song from that category."
+                DescriptionContent = "• Wheel Categories: View and edit the list of segments displayed on the Scaryoke wheel. You can customize the name of each category (e.g., '90s Pop', 'Metallica', 'Dolly Parton').\n\n• Category Bounds: Enforces a maximum of 12 categories (for wheel design formatting) and a minimum of 2 categories (to ensure a valid choice is selectable).\n\n• Segment Landings: When the wheel lands on a category, the overlay board and display monitor announce the selection, instructing the current performer to pick any song of their choice from that category."
             }
         };
 
