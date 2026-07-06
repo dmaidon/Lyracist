@@ -121,7 +121,7 @@
                             </Canvas>
 
                             <!-- Indicator Pointer pointing at 12 o'clock (Adjust first Margin value to shift pointer left/right) -->
-                            <Polygon Points="0,16 -14,-8 14,-8" Fill="#FF3D00" Stroke="#FFD600" StrokeThickness="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="7,-4,0,0">
+                            <Polygon Points="0,16 -14,-8 14,-8" Fill="#FF3D00" Stroke="#FFD600" StrokeThickness="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="9,-4,0,0">
                                 <Polygon.Effect>
                                     <DropShadowEffect Color="#FF3D00" BlurRadius="10" ShadowDepth="0" />
                                 </Polygon.Effect>

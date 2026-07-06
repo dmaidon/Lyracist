@@ -102,12 +102,12 @@ public partial class MainWindow : Window
             };
             
             var textColor = (Color)ColorConverter.ConvertFromString(segments[i].TextColor);
-            bool isSingersChoice = string.Equals(segments[i].Name, "Singer's Choice", StringComparison.OrdinalIgnoreCase);
+            bool isDjsChoice = string.Equals(segments[i].Name, "DJ's Choice", StringComparison.OrdinalIgnoreCase);
             label.Children.Add(new TextBlock
             {
-                Text = isSingersChoice ? "🎤" : segments[i].Name,
+                Text = isDjsChoice ? "🎧" : segments[i].Name,
                 Foreground = new SolidColorBrush(textColor),
-                FontSize = isSingersChoice ? 14 : 13,
+                FontSize = isDjsChoice ? 14 : 13,
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
