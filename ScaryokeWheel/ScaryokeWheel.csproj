@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
+    <AssemblyVersion>26.7.6.1</AssemblyVersion>
+    <FileVersion>26.7.6.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

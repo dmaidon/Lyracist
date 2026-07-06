@@ -188,14 +188,34 @@ public partial class MainWindow : Window
 
             _vm.ResultText = landedSegment.Name.ToUpper();
 
-            if (landedSegment.Name == "DJ's Choice")
+            if (string.Equals(landedSegment.Name?.Trim(), "DJ's Choice", StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
-                    LaughStream.Position = 0;
-                    LaughPlayer.Play();
+                    TickPlayer.Stop();
+                    System.Threading.Tasks.Task.Run(() =>
+                    {
+                        try
+                        {
+                            using (var laughStream = ScaryokeAudio.CreateEvilLaughStream())
+                            using (var player = new SoundPlayer(laughStream))
+                            {
+                                player.PlaySync();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                System.Windows.MessageBox.Show($"Failed to play evil laugh in background: {ex.Message}\n{ex.StackTrace}", "Sound Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                            });
+                        }
+                    });
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Failed to play evil laugh: {ex.Message}\n{ex.StackTrace}", "Sound Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                }
             }
             else
             {
