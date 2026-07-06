@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -23,6 +25,9 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     private bool _isMp4Mode;
     private string _currentSongPath = string.Empty;
     private string? _activeSingerName;
+    private string? _tempAudioPath;
+    private string? _tempCdgPath;
+    private string? _tempDir;
 
     public event Action<ImageSource>? FrameReady;
     public event Action? Started;
@@ -135,28 +140,66 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     public void LoadSong(string path)
     {
         Stop();
+        CleanUpTempFiles();
         _position = 0;
 
         if (string.IsNullOrEmpty(path)) return;
 
         _currentSongPath = path;
+
+        string audioToLoad = path;
+        string cdgToLoad = string.Empty;
+        bool isZip = path.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
         _isMp4Mode = path.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase);
+
+        if (isZip)
+        {
+            try
+            {
+                _tempDir = Path.Combine(Path.GetTempPath(), "LyracistPlayback_" + Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(_tempDir);
+
+                using (var archive = ZipFile.OpenRead(path))
+                {
+                    var cdgEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase));
+                    var audioEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) || e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
+
+                    if (cdgEntry != null && audioEntry != null)
+                    {
+                        _tempAudioPath = Path.Combine(_tempDir, "audio" + Path.GetExtension(audioEntry.FullName));
+                        _tempCdgPath = Path.Combine(_tempDir, "lyrics.cdg");
+
+                        audioEntry.ExtractToFile(_tempAudioPath, true);
+                        cdgEntry.ExtractToFile(_tempCdgPath, true);
+
+                        audioToLoad = _tempAudioPath;
+                        cdgToLoad = _tempCdgPath;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error extracting ZIP playback: {ex.Message}");
+                audioToLoad = path;
+            }
+        }
+        else if (!_isMp4Mode)
+        {
+            cdgToLoad = Path.ChangeExtension(path, ".cdg");
+        }
 
         // Apply dynamic settings merging (Song -> Singer -> Defaults)
         UpdateAudioParameters();
 
         // Always load the file (mp4 or mp3 audio) in the unmanaged video player to play the audio track
-        Task.Run(async () => await _video.LoadAsync(path));
+        Task.Run(async () => await _video.LoadAsync(audioToLoad));
 
-        if (!_isMp4Mode)
+        if (!string.IsNullOrEmpty(cdgToLoad))
         {
-            // CDG files share the same folder and filename base as the audio file (.mp3)
-            string cdgPath = Path.ChangeExtension(path, ".cdg");
-
             // Load the CDG packets in a task wrapper to keep UI responsive
             Task.Run(async () =>
             {
-                await _cdgDecoder.LoadAsync(cdgPath);
+                await _cdgDecoder.LoadAsync(cdgToLoad);
                 if (_cdgDecoder is CdgDecoder cdg)
                 {
                     _scheduler.LoadPackets(cdg.Packets);
@@ -201,7 +244,11 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         _isPlaying = false;
         _position = 0;
 
-        Task.Run(async () => await _video.StopAsync());
+        Task.Run(async () =>
+        {
+            await _video.StopAsync();
+            CleanUpTempFiles();
+        });
 
         if (!_isMp4Mode)
         {
@@ -213,6 +260,49 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         {
             Stopped?.Invoke();
         }
+    }
+
+    private void CleanUpTempFiles()
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(_tempAudioPath) && File.Exists(_tempAudioPath))
+            {
+                File.Delete(_tempAudioPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to delete temp audio file: {ex.Message}");
+        }
+
+        try
+        {
+            if (!string.IsNullOrEmpty(_tempCdgPath) && File.Exists(_tempCdgPath))
+            {
+                File.Delete(_tempCdgPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to delete temp CDG file: {ex.Message}");
+        }
+
+        try
+        {
+            if (!string.IsNullOrEmpty(_tempDir) && Directory.Exists(_tempDir))
+            {
+                Directory.Delete(_tempDir, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to delete temp directory: {ex.Message}");
+        }
+
+        _tempAudioPath = null;
+        _tempCdgPath = null;
+        _tempDir = null;
     }
 
     public void Seek(double position)

@@ -12,6 +12,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Folder-Specific Directory Scans**: Exposed Scan and Rescan selected directory buttons next to the local library folders list.
 - **Visual Scan Feedback**: Integrated a dynamic progress ring spinner showing active background directory scanning tasks.
 - **Queued Track Playback Fix**: Cached local song file paths directly in rotation queue slots on selection and added loose song title fallback matching + warning alerts when manual song searches fail, correcting the missing lyrics rendering.
+- **ZIP Format Playback Support**: Implemented on-the-fly extraction of `.mp3`/`.cdg` pairs from ZIP karaoke archives during playback loading, resolving the issue where CDG lyrics and audio failed to render. Included background thread cleanup to purge temporary directory tracks when stopping or transitioning songs.
 - **Rescan Sync & Purge**: Rescanning directories now identifies renamed or deleted files on the drive, removing dead records from both the main SQL database and the FTS5 search index to maintain library integrity.
 
 ### Optimized
