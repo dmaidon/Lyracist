@@ -9,12 +9,8 @@ namespace Lyracist.ViewModels;
 
 public partial class ScaryokeViewModel : BaseViewModel
 {
-    /// <summary>The 12 wheel segments, clockwise from the top.</summary>
-    public static readonly string[] WheelCategories =
-    {
-        "Gender Bender", "Elvis", "Country", "Rock & Roll", "Pop", "80s Music",
-        "70s Music", "60s Oldies", "Singer's Choice", "Spin Again", "DJ's Choice", "Motown"
-    };
+    /// <summary>The wheel segments, clockwise from the top.</summary>
+    public static string[] WheelCategories => Core.Helpers.AppSettings.ScaryokeCategories.ToArray();
 
     // Library search terms per genre segment; null = a challenge with no
     // forced song lookup.
@@ -86,8 +82,8 @@ public partial class ScaryokeViewModel : BaseViewModel
 
     private string AssignRandomSong(string category, Models.Singer? singer, string singerName)
     {
-        string? term = SearchTerms.GetValueOrDefault(category);
-        var matches = term == null ? new List<Models.KaraokeSong>() : _library.Search(term).ToList();
+        string term = SearchTerms.GetValueOrDefault(category) ?? category;
+        var matches = _library.Search(term).ToList();
 
         if (matches.Count == 0)
         {

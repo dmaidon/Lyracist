@@ -10,6 +10,7 @@ Lyracist is a premium, modern Windows WPF Karaoke hosting application designed f
 - **Interactive Singer Queue**: Dynamic list matching performer names with requested song, artist, key changes, and custom notes.
 - **Click-to-Deselect**: Easily toggle current singer selection on/off (highlighted in red) to allow correcting misclicks.
 - **Test Mode**: Accessible under Settings → Theme & Appearance to instantly seed default performers (Alice, Bob, Charlie, Diana) for audio/video checks, or clear them when ready for the show.
+- **Customizable Scaryoke Categories**: Add, edit, or remove categories (2 to 12 total) from the settings page. The Scaryoke wheel will dynamically rebuild its structure, sector colors, and automatically search the library for the landed category.
 
 ### 🖥️ Display & Projection Management
 - **Dual-Window Projection**: Supports launching standalone windows for **Lyrics Projection** and the **Rotation Billboard**.
@@ -40,7 +41,7 @@ Lyracist is a premium, modern Windows WPF Karaoke hosting application designed f
 - **Singer Preview Monitor**: Allows singers to scan a local QR code and follow the live scrolling lyrics directly from their phone or tablet.
 
 ### ❓ Split-Pane Help System
-- **Interactive Index Menu**: Left-pane sidebar allowing direct navigation between 11 detailed help categories covering every user-facing page and setting.
+- **Interactive Index Menu**: Left-pane sidebar allowing direct navigation between 12 detailed help categories covering every user-facing page and setting.
 - **Rich Detail Panel**: Right-pane scroll-contained viewer displaying page guides, setting definitions, tone balancing parameters, decoders, and API settings, preventing excessive page scrolling.
 
 ---

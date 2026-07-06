@@ -782,6 +782,7 @@ public partial class KaraokeViewModel : BaseViewModel
     private void OpenScaryokeWheel()
     {
         var wheel = App.AppHost.Services.GetRequiredService<Windows.ScaryokeWindow>();
+        wheel.RebuildWheel();
         wheel.Show();
         wheel.Activate();
     }

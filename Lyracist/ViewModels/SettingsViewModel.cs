@@ -149,6 +149,16 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private string _libraryStatus = string.Empty;
 
+    // ─── Scaryoke Configuration ────────────────────────────────────────
+
+    public ObservableCollection<string> ScaryokeCategories { get; } = new();
+
+    [ObservableProperty]
+    private string? _selectedScaryokeCategory;
+
+    [ObservableProperty]
+    private string _newScaryokeCategoryName = string.Empty;
+
     // ─── Splash Screen ─────────────────────────────────────────────────
 
     [ObservableProperty]
@@ -246,6 +256,7 @@ public partial class SettingsViewModel : BaseViewModel
         RefreshOccasionCategories();
         RefreshLibraryDirectories();
         RefreshLibraryStatus();
+        RefreshScaryokeCategories();
     }
 
     private void RefreshOccasionCategories()
@@ -276,6 +287,56 @@ public partial class SettingsViewModel : BaseViewModel
         LibraryDirectories.Clear();
         foreach (var dir in Core.Helpers.AppSettings.LibraryDirectories)
             LibraryDirectories.Add(dir);
+    }
+
+    private void RefreshScaryokeCategories()
+    {
+        ScaryokeCategories.Clear();
+        foreach (var cat in AppSettings.ScaryokeCategories)
+        {
+            ScaryokeCategories.Add(cat);
+        }
+    }
+
+    [RelayCommand]
+    private void AddScaryokeCategory()
+    {
+        string cat = NewScaryokeCategoryName?.Trim() ?? "";
+        if (string.IsNullOrWhiteSpace(cat)) return;
+
+        if (AppSettings.ScaryokeCategories.Count >= 12)
+        {
+            System.Windows.MessageBox.Show(
+                "A maximum of 12 categories is allowed for the Scaryoke wheel.",
+                "Max Categories Reached",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        AppSettings.AddScaryokeCategory(cat);
+        NewScaryokeCategoryName = string.Empty;
+        RefreshScaryokeCategories();
+    }
+
+    [RelayCommand]
+    private void RemoveScaryokeCategory()
+    {
+        if (SelectedScaryokeCategory == null) return;
+
+        if (AppSettings.ScaryokeCategories.Count <= 2)
+        {
+            System.Windows.MessageBox.Show(
+                "The Scaryoke wheel must have at least 2 categories to be playable.",
+                "Minimum Categories Warning",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        AppSettings.RemoveScaryokeCategory(SelectedScaryokeCategory);
+        SelectedScaryokeCategory = null;
+        RefreshScaryokeCategories();
     }
 
     private void RefreshLibraryStatus()

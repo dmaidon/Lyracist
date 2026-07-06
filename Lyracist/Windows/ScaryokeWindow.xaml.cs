@@ -20,7 +20,7 @@ public partial class ScaryokeWindow : Window
 {
     private const double WheelSize = 420;
     private const double Radius = WheelSize / 2;
-    private const double SegmentSweep = 360.0 / 12;
+    private double SegmentSweep => 360.0 / ScaryokeViewModel.WheelCategories.Length;
 
     private static readonly string[] SegmentColors =
     {
@@ -41,6 +41,12 @@ public partial class ScaryokeWindow : Window
         InitializeComponent();
         _vm = vm;
         DataContext = vm;
+        BuildWheel();
+    }
+
+    public void RebuildWheel()
+    {
+        WheelCanvas.Children.Clear();
         BuildWheel();
     }
 

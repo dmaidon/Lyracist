@@ -111,6 +111,14 @@ public partial class HelpViewModel : BaseViewModel
                 AccentColor = "#00B294",
                 DescriptionHeader = "Background Music Channels & Occasion Jingle Settings",
                 DescriptionContent = "• BGM Volumes: Adjust default audio volumes specifically for Opening, Fill-In, and End-of-Rotation music players.\n\n• Special Occasions Category: Manage occasions (Holidays, Weddings, Birthdays) and assign local audio files. Set individual Bass, Treble, and Gain overrides for each occasion track and click Save."
+            },
+            new HelpTopic
+            {
+                Title = "12. Settings: Scaryoke Customization",
+                Icon = "PlayCircle24",
+                AccentColor = "#FF8E53",
+                DescriptionHeader = "Customizing Wheel Segments & Genres",
+                DescriptionContent = "• Wheel Categories: View and edit the list of segments displayed on the Scaryoke wheel. You can customize the name of each category (e.g., '90s Pop', 'Metallica', 'Dolly Parton').\n\n• Category Bounds: Enforces a maximum of 12 categories (for wheel design formatting) and a minimum of 2 categories (to ensure a valid choice is selectable).\n\n• Automatic Track Lookup: When the wheel lands on a custom category, the media engine automatically searches the library for songs matching that name. If no tracks match, the singer gets a free choice."
             }
         };
 

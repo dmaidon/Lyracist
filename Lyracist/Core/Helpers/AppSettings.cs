@@ -153,6 +153,28 @@ public static class AppSettings
         set { _data.EndRotationTreble = Math.Clamp(value, -20, 20); Save(); }
     }
 
+    // ─── Scaryoke Categories ──────────────────────────────────────────────────
+
+    public static System.Collections.Generic.IReadOnlyList<string> ScaryokeCategories =>
+        _data.ScaryokeCategories.AsReadOnly();
+
+    public static void AddScaryokeCategory(string category)
+    {
+        if (string.IsNullOrWhiteSpace(category)) return;
+        if (_data.ScaryokeCategories.Count >= 12) return;
+        if (!_data.ScaryokeCategories.Contains(category, StringComparer.OrdinalIgnoreCase))
+        {
+            _data.ScaryokeCategories.Add(category);
+            Save();
+        }
+    }
+
+    public static void RemoveScaryokeCategory(string category)
+    {
+        _data.ScaryokeCategories.Remove(category);
+        Save();
+    }
+
     // ─── Library Scan Directories ──────────────────────────────────────────
 
     public static IReadOnlyList<string> LibraryDirectories =>
@@ -205,5 +227,12 @@ public static class AppSettings
 
         // Library scan roots — persisted so the app can rescan on demand
         public List<string> LibraryDirectories { get; set; } = new();
+
+        // Scaryoke categories - dynamic configuration up to 12 sectors
+        public List<string> ScaryokeCategories { get; set; } = new()
+        {
+            "Gender Bender", "Elvis", "Country", "Rock & Roll", "Pop", "80s Music",
+            "70s Music", "60s Oldies", "Singer's Choice", "Spin Again", "DJ's Choice", "Motown"
+        };
     }
 }
