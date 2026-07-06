@@ -104,7 +104,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Left: Spin Wheel Graphic & Pointer -->
-                    <Grid Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid Grid.Column="0" Width="436" Height="436" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <!-- Outer Shadow / Glow Rim -->
                         <Ellipse Width="436" Height="436" Fill="#050406" Stroke="#3E1A60" StrokeThickness="4">
                             <Ellipse.Effect>
@@ -120,7 +120,7 @@
                         </Canvas>
 
                         <!-- Indicator Pointer pointing at 12 o'clock -->
-                        <Polygon Points="218,0 206,-22 230,-22" Fill="#FF3D00" Stroke="#FFD600" StrokeThickness="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-2,0,0">
+                        <Polygon Points="0,16 -14,-8 14,-8" Fill="#FF3D00" Stroke="#FFD600" StrokeThickness="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,-4,0,0">
                             <Polygon.Effect>
                                 <DropShadowEffect Color="#FF3D00" BlurRadius="10" ShadowDepth="0"/>
                             </Polygon.Effect>
