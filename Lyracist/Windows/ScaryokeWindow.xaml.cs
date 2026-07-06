@@ -32,6 +32,70 @@ public partial class ScaryokeWindow : Window
     private double _currentAngle;
     private bool _isSpinning;
 
+    private static readonly System.IO.MemoryStream TickStream = CreateTickStream();
+    private static readonly System.Media.SoundPlayer TickPlayer = new(TickStream);
+    private int _lastTickIndex = -1;
+
+    private static System.IO.MemoryStream CreateTickStream()
+    {
+        var ms = new System.IO.MemoryStream();
+        using (var writer = new System.IO.BinaryWriter(ms, System.Text.Encoding.UTF8, true))
+        {
+            writer.Write("RIFF".ToCharArray());
+            writer.Write(0); // Placeholder
+            writer.Write("WAVE".ToCharArray());
+            writer.Write("fmt ".ToCharArray());
+            writer.Write(16);
+            writer.Write((short)1); // PCM
+            writer.Write((short)1); // Mono
+            writer.Write(11025); // Sample rate
+            writer.Write(11025 * 2); // Byte rate
+            writer.Write((short)2); // Block align
+            writer.Write((short)16); // Bits per sample
+            writer.Write("data".ToCharArray());
+            writer.Write(0); // Placeholder
+
+            // Ticking sound: a very short click wave
+            int sampleCount = 120; // ~10 ms
+            for (int i = 0; i < sampleCount; i++)
+            {
+                double fade = (double)(sampleCount - i) / sampleCount;
+                short value = (short)(Math.Sin(i * 1.8) * fade * 16000);
+                writer.Write(value);
+            }
+
+            long endPos = ms.Position;
+            ms.Position = 4;
+            writer.Write((int)(endPos - 8));
+            ms.Position = 40;
+            writer.Write((int)(sampleCount * 2));
+            ms.Position = endPos;
+        }
+        ms.Position = 0;
+        return ms;
+    }
+
+    private void OnRendering(object? sender, EventArgs e)
+    {
+        double angle = WheelRotate.Angle;
+        int currentTickIndex = (int)Math.Floor(angle / SegmentSweep);
+
+        if (_lastTickIndex == -1)
+        {
+            _lastTickIndex = currentTickIndex;
+        }
+        else if (currentTickIndex != _lastTickIndex)
+        {
+            try
+            {
+                TickStream.Position = 0;
+                TickPlayer.Play();
+            }
+            catch { /* Best-effort */ }
+            _lastTickIndex = currentTickIndex;
+        }
+    }
+
     /// <summary>Sound/effect hooks for the spin lifecycle.</summary>
     public event EventHandler? SpinStarted;
     public event EventHandler<string>? SpinCompleted;
@@ -139,6 +203,9 @@ public partial class ScaryokeWindow : Window
         SpinStarted?.Invoke(this, EventArgs.Empty);
         System.Media.SystemSounds.Asterisk.Play();
 
+        _lastTickIndex = -1;
+        CompositionTarget.Rendering += OnRendering;
+
         // 4-6 full turns plus a random landing offset, easing to a stop.
         double target = _currentAngle + 1440 + Random.Shared.NextDouble() * 720;
         var animation = new DoubleAnimation(_currentAngle, target, TimeSpan.FromSeconds(4.5))
@@ -149,6 +216,8 @@ public partial class ScaryokeWindow : Window
 
         animation.Completed += (_, _) =>
         {
+            CompositionTarget.Rendering -= OnRendering;
+
             _currentAngle = target % 360;
             WheelRotate.BeginAnimation(RotateTransform.AngleProperty, null);
             WheelRotate.Angle = _currentAngle;
