@@ -831,14 +831,7 @@
                                         <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedRotationScreenIndex, Mode=TwoWay}" DisplayMemberPath="DisplayName" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
                                         <ui:Button Content="Open Rotation Window" Icon="{ui:SymbolIcon People24}" Command="{Binding ShowRotationCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
                                     </StackPanel>
-                                </Grid>
-
-                                <!-- Billboard View Mode Selection -->
-                                <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-                                <TextBlock Text="Billboard Screen View Mode" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
-                                <ComboBox ItemsSource="{Binding ProjectionViews}" SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}" HorizontalAlignment="Stretch" />
-
-                                <!-- Rotation Banner controls -->
+                                                             <!-- Rotation Banner controls -->
                                 <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
                                 <TextBlock Text="Rotation Screen Billboard Banner" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                                 <Grid>
@@ -872,8 +865,8 @@
                                             </MenuItem.Header>
                                             <MenuItem.Resources>
                                                 <!-- Keyed + self-referencing so it cascades down every
-                                                     nested level of the data-bound menu tree without
-                                                     applying to the top-level dropdown header itself. -->
+                                                      nested level of the data-bound menu tree without
+                                                      applying to the top-level dropdown header itself. -->
                                                 <Style x:Key="OccasionMenuItemStyle" TargetType="MenuItem">
                                                     <Setter Property="Header" Value="{Binding Name}" />
                                                     <Setter Property="ItemsSource" Value="{Binding Children}" />
@@ -886,6 +879,13 @@
                                     </Menu>
 
                                     <ui:Button Grid.Column="1" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopOccasionCommand}" Appearance="Secondary" ToolTip="Stop Occasion Music" Margin="6,0,0,0" />
+
+                                    <ComboBox Grid.Column="2" 
+                                              ItemsSource="{Binding ProjectionViews}" 
+                                              SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}" 
+                                              Height="32"
+                                              VerticalAlignment="Center"
+                                              Margin="12,0" />
 
                                     <ui:ToggleSwitch Grid.Column="3" Content="Scaryoke" IsChecked="{Binding IsScaryokeMode, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,10,0" />
                                     <ui:Button Grid.Column="4" Content="Spin!" Icon="{ui:SymbolIcon PlayingCards20}" Command="{Binding OpenScaryokeWheelCommand}" IsEnabled="{Binding IsScaryokeMode}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" />
