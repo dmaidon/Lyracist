@@ -478,6 +478,31 @@
                                        Appearance="Danger" HorizontalAlignment="Stretch" />
                         </StackPanel>
                     </GroupBox>
+
+                    <!-- System Simulator -->
+                    <GroupBox Header="System Simulator Auto-Pilot"
+                              Style="{StaticResource SettingsGroupBoxStyle}">
+                        <StackPanel>
+                            <TextBlock Text="System Stress-Test Simulator" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <TextBlock Text="Simulates rapid user actions: adds/removes singers, triggers requests, adjusts volumes/EQ, and plays/pauses tracks to stress-test database, network, and audio engine stability." FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,12" TextWrapping="Wrap" />
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:Button Grid.Column="0" Content="{Binding SimulationButtonText}" Icon="{ui:SymbolIcon Play24}" Command="{Binding StartSimulationCommand}" Appearance="Primary" Height="30" />
+                                <TextBlock Grid.Column="1" Text="{Binding SimulationStatusText}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </Grid>
+
+                            <!-- Console log box: green on dark translucent background -->
+                            <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="#CC111115" Padding="8" Height="140">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <TextBlock Text="{Binding SimulationLogText}" FontSize="10" FontFamily="Consolas" Foreground="#FF00FF00" TextWrapping="Wrap" />
+                                </ScrollViewer>
+                            </Border>
+                        </StackPanel>
+                    </GroupBox>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

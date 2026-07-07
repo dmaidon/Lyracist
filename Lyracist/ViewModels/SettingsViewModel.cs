@@ -281,13 +281,18 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private double _endRotationTreble = AppSettings.EndRotationTreble;
 
+    private readonly KaraokeViewModel _karaoke;
+    private readonly IRequestService _requests;
+
     public SettingsViewModel(IDisplayService display,
                              ITabletLyricsServer tablet,
                              IShowFlowService showFlow,
                              INavigationService navigation,
                              ILibraryService library,
                              RotationViewModel rotation,
-                             RotationWindowViewModel rotationWindowVm)
+                             RotationWindowViewModel rotationWindowVm,
+                             KaraokeViewModel karaoke,
+                             IRequestService requests)
     {
         _display = display;
         _tablet = tablet;
@@ -296,6 +301,8 @@ public partial class SettingsViewModel : BaseViewModel
         _library = library;
         _rotation = rotation;
         _rotationWindowVm = rotationWindowVm;
+        _karaoke = karaoke;
+        _requests = requests;
 
         _library.LibraryUpdated += (_, _) =>
         {
@@ -857,5 +864,186 @@ public partial class SettingsViewModel : BaseViewModel
                 System.Windows.MessageBoxButton.OK,
                 System.Windows.MessageBoxImage.Error);
         }
+    }
+
+    // ─── Stress-Test System Simulator ──────────────────────────────────────
+
+    [ObservableProperty]
+    private string _simulationButtonText = "Start Stress-Test";
+
+    [ObservableProperty]
+    private string _simulationStatusText = "Idle";
+
+    [ObservableProperty]
+    private string _simulationLogText = "Stress-Test Log Console:\nClick 'Start Stress-Test' to launch auto-pilot.";
+
+    private System.Threading.CancellationTokenSource? _simulationCts;
+
+    [RelayCommand]
+    private async Task StartSimulation()
+    {
+        if (_simulationCts != null)
+        {
+            _simulationCts.Cancel();
+            _simulationCts = null;
+            SimulationButtonText = "Start Stress-Test";
+            SimulationStatusText = "Aborted";
+            LogSim(">> Simulation aborted by host.");
+            return;
+        }
+
+        _simulationCts = new System.Threading.CancellationTokenSource();
+        SimulationButtonText = "Stop Stress-Test";
+        SimulationStatusText = "Running...";
+        SimulationLogText = string.Empty;
+        LogSim(">> System Stress-Test Simulation Started (Duration: 30 seconds)");
+        LogSim($">> Database track count: {_library.GetSongCount()}");
+        LogSim($">> Operating IP: {AppSettings.GetActiveIPAddress()}");
+
+        var token = _simulationCts.Token;
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var random = new Random();
+                int steps = 15;
+                for (int i = 0; i < steps && !token.IsCancellationRequested; i++)
+                {
+                    SimulationStatusText = $"Running ({i + 1}/{steps})...";
+                    int action = random.Next(6);
+
+                    switch (action)
+                    {
+                        case 0:
+                            string newSinger = $"SimPerformer_{random.Next(100, 999)}";
+                            LogSim($"[QUEUE] Simulating Add Performer: {newSinger}");
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                _rotation.NewSingerName = newSinger;
+                                _rotation.NewSingerKey = $"{random.Next(-3, 4)}";
+                                _rotation.NewSingerNotes = "Simulated request via Auto-Pilot stress-test.";
+                                _rotation.AddSingerCommand.Execute(null);
+                            });
+                            break;
+
+                        case 1:
+                            if (_rotation.Rotation.Count > 0)
+                            {
+                                var singer = _rotation.Rotation[random.Next(_rotation.Rotation.Count)];
+                                LogSim($"[QUEUE] Simulating Inactivate Performer: {singer.Name}");
+                                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    _rotation.ToggleInactiveSingerCommand.Execute(singer);
+                                });
+                            }
+                            else if (_rotation.InactiveSingers.Count > 0)
+                            {
+                                var singer = _rotation.InactiveSingers[random.Next(_rotation.InactiveSingers.Count)];
+                                LogSim($"[QUEUE] Simulating Reactivate Performer: {singer.Name}");
+                                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    _rotation.ToggleInactiveSingerCommand.Execute(singer);
+                                });
+                            }
+                            break;
+
+                        case 2:
+                            string rSinger = $"MobileSinger_{random.Next(100, 999)}";
+                            string rTitle = $"Simulated Hit {random.Next(1, 50)}";
+                            string rArtist = "The Stress Testers";
+                            LogSim($"[PORTAL] Simulating incoming request: '{rTitle}' by '{rArtist}' for {rSinger}");
+                            _requests.AddRequest(rSinger, rTitle, rArtist, "Mobile Portal");
+                            break;
+
+                        case 3:
+                            var pendingList = _requests.GetPending().ToList();
+                            if (pendingList.Count > 0)
+                            {
+                                var req = pendingList[0];
+                                LogSim($"[PORTAL] Simulating approving request ID {req.Id} for {req.SingerName}");
+                                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    var reqVm = App.AppHost.Services.GetService(typeof(RequestsViewModel)) as RequestsViewModel;
+                                    if (reqVm != null)
+                                    {
+                                        reqVm.SelectedPending = reqVm.Pending.FirstOrDefault(p => p.Id == req.Id);
+                                        reqVm.ApproveCommand.Execute(null);
+                                    }
+                                    else
+                                    {
+                                        _requests.Approve(req.Id);
+                                    }
+                                });
+                            }
+                            break;
+
+                        case 4:
+                            double treble = random.Next(-10, 11);
+                            double mid = random.Next(-10, 11);
+                            double bass = random.Next(-10, 11);
+                            int volume = random.Next(50, 101);
+                            LogSim($"[AUDIO] Adjusting EQ settings: Treble={treble}dB, Mid={mid}dB, Bass={bass}dB, Volume={volume}%");
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                _karaoke.Treble = treble;
+                                _karaoke.Mid = mid;
+                                _karaoke.Bass = bass;
+                                _karaoke.Volume = volume;
+                            });
+                            break;
+
+                        case 5:
+                            LogSim("[AUDIO] Triggering playback start/pause simulation");
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                if (_karaoke.IsPlaying)
+                                {
+                                    _karaoke.PauseCommand.Execute(null);
+                                    LogSim("[AUDIO] Playback PAUSED");
+                                }
+                                else
+                                {
+                                    _karaoke.PlayCommand.Execute(null);
+                                    LogSim("[AUDIO] Playback RESUMED");
+                                }
+                            });
+                            break;
+                    }
+
+                    await Task.Delay(2000, token);
+                }
+
+                LogSim(">> System Stress-Test Simulation Completed Successfully.");
+                LogSim(">> Restoring system rotation queue to defaults.");
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _rotation.ClearRotationQueue();
+                    _rotation.SeedSingers();
+                    _karaoke.ResetAudioCommand.Execute(null);
+                });
+            }
+            catch (TaskCanceledException)
+            {
+                LogSim(">> Simulation task canceled.");
+            }
+            catch (Exception ex)
+            {
+                LogSim($"[ERROR] Simulation encountered exception: {ex.Message}");
+            }
+            finally
+            {
+                SimulationButtonText = "Start Stress-Test";
+                SimulationStatusText = "Completed";
+                _simulationCts = null;
+            }
+        }, token);
+    }
+
+    private void LogSim(string message)
+    {
+        System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            SimulationLogText += $"{DateTime.Now:HH:mm:ss} {message}\n";
+        }));
     }
 }
