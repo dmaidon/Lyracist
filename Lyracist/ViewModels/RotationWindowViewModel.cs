@@ -3,13 +3,64 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lyracist.Models;
+using Lyracist.Core.Helpers;
 
 namespace Lyracist.ViewModels;
 
 public partial class RotationWindowViewModel : ObservableObject
 {
     [ObservableProperty]
+    private string _joinUrl = string.Empty;
+
+    [ObservableProperty]
+    private System.Windows.Media.ImageSource? _qrCodeImage;
+
+    [ObservableProperty]
     private string _currentSinger = string.Empty;
+
+    public RotationWindowViewModel()
+    {
+        RefreshQrCode();
+    }
+
+    public void RefreshQrCode()
+    {
+        try
+        {
+            string ip = AppSettings.GetActiveIPAddress();
+            JoinUrl = $"http://{ip}:{AppSettings.TabletPort}";
+
+            using (var qrGenerator = new QRCoder.QRCodeGenerator())
+            using (var qrCodeData = qrGenerator.CreateQrCode(JoinUrl, QRCoder.QRCodeGenerator.ECCLevel.Q))
+            using (var qrCode = new QRCoder.PngByteQRCode(qrCodeData))
+            {
+                byte[] qrCodeAsPngByteArr = qrCode.GetGraphic(20);
+                QrCodeImage = LoadImage(qrCodeAsPngByteArr);
+            }
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to generate QR Code: {ex.Message}");
+        }
+    }
+
+    private static System.Windows.Media.Imaging.BitmapImage? LoadImage(byte[] imageData)
+    {
+        if (imageData == null || imageData.Length == 0) return null;
+        var image = new System.Windows.Media.Imaging.BitmapImage();
+        using (var mem = new System.IO.MemoryStream(imageData))
+        {
+            mem.Position = 0;
+            image.BeginInit();
+            image.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat;
+            image.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+            image.UriSource = null;
+            image.StreamSource = mem;
+            image.EndInit();
+        }
+        image.Freeze();
+        return image;
+    }
 
     [ObservableProperty]
     private string _nextSinger = string.Empty;

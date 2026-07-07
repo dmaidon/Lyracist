@@ -147,6 +147,55 @@ public static class AppSettings
         set { _data.PartyTymeClientSecret = value; Save(); }
     }
 
+    public static string StaticIPAddress
+    {
+        get => _data.StaticIPAddress;
+        set { _data.StaticIPAddress = value; Save(); }
+    }
+
+    public static int TabletPort
+    {
+        get => _data.TabletPort;
+        set { _data.TabletPort = value; Save(); }
+    }
+
+    public static string GetLocalIPAddress()
+    {
+        try
+        {
+            foreach (var netInterface in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (netInterface.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
+                    (netInterface.NetworkInterfaceType == System.Net.NetworkInformation.NetworkInterfaceType.Wireless80211 ||
+                     netInterface.NetworkInterfaceType == System.Net.NetworkInformation.NetworkInterfaceType.Ethernet))
+                {
+                    foreach (var ip in netInterface.GetIPProperties().UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        {
+                            var ipStr = ip.Address.ToString();
+                            if (!ipStr.StartsWith("127.") && !ipStr.StartsWith("169.254"))
+                            {
+                                return ipStr;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
+        return "127.0.0.1";
+    }
+
+    public static string GetActiveIPAddress()
+    {
+        if (!string.IsNullOrWhiteSpace(StaticIPAddress))
+        {
+            return StaticIPAddress.Trim();
+        }
+        return GetLocalIPAddress();
+    }
+
     public static int OpeningVolume
     {
         get => _data.OpeningVolume;
@@ -382,6 +431,8 @@ public static class AppSettings
         public string AmazonSecretKey { get; set; } = string.Empty;
         public string PartyTymeClientId { get; set; } = string.Empty;
         public string PartyTymeClientSecret { get; set; } = string.Empty;
+        public string StaticIPAddress { get; set; } = string.Empty;
+        public int TabletPort { get; set; } = 5005;
 
         // Channel volumes (0–100)
         public int OpeningVolume { get; set; } = 80;

@@ -8,8 +8,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.7.7.142</AssemblyVersion>
-    <FileVersion>26.7.7.142</FileVersion>
+    <AssemblyVersion>26.7.7.145</AssemblyVersion>
+    <FileVersion>26.7.7.145</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <Authors>Dennis Maidon</Authors>
@@ -44,6 +44,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
     <PackageReference Include="LibVLCSharp" Version="3.10.0" />
+    <PackageReference Include="QRCoder" Version="1.8.0" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.23.1" />
     <PackageReference Include="WPF-UI" Version="4.3.0" />
     <PackageReference Include="Dapper" Version="2.1.35" />

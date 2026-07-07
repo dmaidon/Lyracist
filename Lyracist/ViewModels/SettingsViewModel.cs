@@ -25,6 +25,7 @@ public partial class SettingsViewModel : BaseViewModel
     private readonly INavigationService _navigation;
     private readonly ILibraryService _library;
     private readonly RotationViewModel _rotation;
+    private readonly RotationWindowViewModel _rotationWindowVm;
 
     // Theme
     [ObservableProperty]
@@ -121,7 +122,13 @@ public partial class SettingsViewModel : BaseViewModel
 
     // Tablet Server
     [ObservableProperty]
-    private int _tabletPort = 5005;
+    private int _tabletPort = AppSettings.TabletPort;
+
+    partial void OnTabletPortChanged(int value)
+    {
+        AppSettings.TabletPort = value;
+        _rotationWindowVm.RefreshQrCode();
+    }
 
     [ObservableProperty]
     private string _tabletStatus = "Running";
@@ -199,6 +206,9 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private string _partyTymeClientSecret = AppSettings.PartyTymeClientSecret;
 
+    [ObservableProperty]
+    private string _staticIPAddress = AppSettings.StaticIPAddress;
+
     partial void OnYouTubeApiKeyChanged(string value) => AppSettings.YouTubeApiKey = value;
     partial void OnSpotifyClientIdChanged(string value) => AppSettings.SpotifyClientId = value;
     partial void OnSpotifyClientSecretChanged(string value) => AppSettings.SpotifyClientSecret = value;
@@ -206,6 +216,11 @@ public partial class SettingsViewModel : BaseViewModel
     partial void OnAmazonSecretKeyChanged(string value) => AppSettings.AmazonSecretKey = value;
     partial void OnPartyTymeClientIdChanged(string value) => AppSettings.PartyTymeClientId = value;
     partial void OnPartyTymeClientSecretChanged(string value) => AppSettings.PartyTymeClientSecret = value;
+    partial void OnStaticIPAddressChanged(string value)
+    {
+        AppSettings.StaticIPAddress = value;
+        _rotationWindowVm.RefreshQrCode();
+    }
 
     // ─── Music Library ─────────────────────────────────────────────────
 
@@ -271,7 +286,8 @@ public partial class SettingsViewModel : BaseViewModel
                              IShowFlowService showFlow,
                              INavigationService navigation,
                              ILibraryService library,
-                             RotationViewModel rotation)
+                             RotationViewModel rotation,
+                             RotationWindowViewModel rotationWindowVm)
     {
         _display = display;
         _tablet = tablet;
@@ -279,6 +295,7 @@ public partial class SettingsViewModel : BaseViewModel
         _navigation = navigation;
         _library = library;
         _rotation = rotation;
+        _rotationWindowVm = rotationWindowVm;
 
         _library.LibraryUpdated += (_, _) =>
         {

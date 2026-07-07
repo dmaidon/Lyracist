@@ -57,8 +57,8 @@ public class TabletLyricsServer : ITabletLyricsServer
         {
             var builder = WebApplication.CreateBuilder();
 
-            // Listen on port 5005 across all interfaces (allows tablet connection over LAN)
-            builder.WebHost.UseUrls("http://*:5005");
+            // Listen on the configured port across all interfaces (allows tablet connection over LAN)
+            builder.WebHost.UseUrls($"http://*:{Lyracist.Core.Helpers.AppSettings.TabletPort}");
 
             // Register SignalR services
             builder.Services.AddSignalR();
