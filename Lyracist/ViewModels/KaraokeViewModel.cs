@@ -1180,12 +1180,19 @@ public partial class KaraokeViewModel : BaseViewModel
     [RelayCommand]
     private async Task LoadAndPlaySelectedPerformer()
     {
-        if (Rotation.SelectedSinger == null) return;
+        Singer? targetSinger = Rotation.SelectedSinger;
+
+        if (targetSinger == null && !string.IsNullOrEmpty(NowSingingName) && !NowSingingName.Equals("None", StringComparison.OrdinalIgnoreCase))
+        {
+            targetSinger = Rotation.Rotation.FirstOrDefault(s => s.Name.Equals(NowSingingName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (targetSinger == null) return;
 
         _displayService.ShowRotationWindow();
-        _displayService.HighlightSinger(Rotation.SelectedSinger);
+        _displayService.HighlightSinger(targetSinger);
 
-        await PlayPerformerRequest(Rotation.SelectedSinger);
+        await PlayPerformerRequest(targetSinger);
     }
 
     [RelayCommand]
