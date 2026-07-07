@@ -21,6 +21,8 @@ namespace Lyracist;
 
 public partial class App : System.Windows.Application
 {
+    public static readonly Microsoft.IO.RecyclableMemoryStreamManager MemoryStreamManager = new();
+
     public static IHost? Host { get; private set; }
     public static IHost AppHost => Host!;
 

@@ -22,6 +22,15 @@ namespace Lyracist.Data
         public DbSet<OccasionItem> OccasionItems { get; set; } = null!;
         public DbSet<SongSearch> SongSearches { get; set; } = null!;
 
+        public static string GetConnectionString()
+        {
+            string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
+            string dataDir = System.IO.Path.Combine(baseDir, "Data");
+            System.IO.Directory.CreateDirectory(dataDir);
+            string dbPath = System.IO.Path.Combine(dataDir, "lyracist.db");
+            return $"Data Source={dbPath};Cache=Shared";
+        }
+
         public LyracistDbContext()
         {
         }
@@ -34,11 +43,7 @@ namespace Lyracist.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
-                string dataDir = System.IO.Path.Combine(baseDir, "Data");
-                System.IO.Directory.CreateDirectory(dataDir);
-                string dbPath = System.IO.Path.Combine(dataDir, "lyracist.db");
-                optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared")
+                optionsBuilder.UseSqlite(GetConnectionString())
                               .AddInterceptors(new SqliteConnectionInterceptor());
             }
         }

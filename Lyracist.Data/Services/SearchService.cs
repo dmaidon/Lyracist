@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Lyracist.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Dapper;
+using Microsoft.Data.Sqlite;
 
 namespace Lyracist.Data.Services
 {
@@ -90,12 +92,51 @@ namespace Lyracist.Data.Services
                 return new List<Song>();
             }
 
-            // Execute full-text query using SQLite's MATCH operator
-            return await _context.Songs
-                .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0})", ftsQuery)
-                .AsNoTracking()
-                .Include(s => s.AudioSettings)
-                .ToListAsync();
+            try
+            {
+                using var connection = new SqliteConnection(LyracistDbContext.GetConnectionString());
+                await connection.OpenAsync();
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                // Query matching songs and join with their respective audio settings, clamping to 150 items max
+                string sql = @"
+                    SELECT s.*, a.* 
+                    FROM Songs s
+                    LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
+                    WHERE s.SongId IN (
+                        SELECT SongId FROM SongSearch WHERE SongSearch MATCH @ftsQuery
+                    )
+                    LIMIT 150";
+
+                var results = await connection.QueryAsync<Song, SongAudioSettings, Song>(
+                    sql,
+                    (song, audioSettings) =>
+                    {
+                        song.AudioSettings = audioSettings;
+                        return song;
+                    },
+                    new { ftsQuery },
+                    splitOn: "SongAudioSettingsId"
+                );
+
+                return results.ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Dapper search execution failed: {ex.Message}");
+                // Fallback to standard EF Core query (clamped) in case of connection exceptions
+                return await _context.Songs
+                    .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0})", ftsQuery)
+                    .AsNoTracking()
+                    .Include(s => s.AudioSettings)
+                    .Take(150)
+                    .ToListAsync();
+            }
         }
 
         // Helper to transform user search query into a safe FTS5 MATCH expression

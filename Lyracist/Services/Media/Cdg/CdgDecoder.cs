@@ -35,8 +35,13 @@ public class CdgDecoder : ICDGDecoder
 
         try
         {
-            byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(cdgPath);
-            int packetCount = fileBytes.Length / CdgConstants.PacketSize;
+            using var fileStream = System.IO.File.OpenRead(cdgPath);
+            using var memoryStream = App.MemoryStreamManager.GetStream();
+            await fileStream.CopyToAsync(memoryStream);
+
+            byte[] fileBytes = memoryStream.GetBuffer();
+            int length = (int)memoryStream.Length;
+            int packetCount = length / CdgConstants.PacketSize;
 
             for (int i = 0; i < packetCount; i++)
             {

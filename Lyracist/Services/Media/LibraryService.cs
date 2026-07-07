@@ -110,7 +110,7 @@ public class LibraryService : ILibraryService
 
             if (string.IsNullOrWhiteSpace(query))
             {
-                return context.Songs.AsNoTracking().ToList().Select(MapToKaraokeSong);
+                return context.Songs.AsNoTracking().Take(150).ToList().Select(MapToKaraokeSong);
             }
 
             var searchService = new SearchService(context);
@@ -133,7 +133,7 @@ public class LibraryService : ILibraryService
 
             if (string.IsNullOrWhiteSpace(query))
             {
-                var all = await context.Songs.AsNoTracking().ToListAsync();
+                var all = await context.Songs.AsNoTracking().Take(150).ToListAsync();
                 return all.Select(MapToKaraokeSong);
             }
 
