@@ -586,11 +586,22 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                            <TextBlock Text="{Binding SongTitle}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Notes}" FontSize="10" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Visibility="{Binding Notes, Converter={StaticResource NullToVisibilityConverter}}" Margin="0,2,0,0" TextWrapping="Wrap" />
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                 <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                                 <Border Visibility="{Binding IsPaused, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#CC3300" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                     <TextBlock Text="PAUSED" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                                                 </Border>
+
+                                                 <!-- Separator and song info only if there is a song loaded -->
+                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding SongTitle, Converter={StaticResource NullToVisibilityConverter}}">
+                                                     <TextBlock Text="  ➔  " FontSize="11" Foreground="#888888" VerticalAlignment="Center"/>
+                                                     <TextBlock Text="{Binding SongTitle}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="150"/>
+                                                     <TextBlock Text=" by " FontSize="10" Foreground="#888888" VerticalAlignment="Center"/>
+                                                     <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="130"/>
+                                                 </StackPanel>
+                                             </StackPanel>
+                                             <TextBlock Text="{Binding Notes}" FontSize="9" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="{Binding Notes, Converter={StaticResource NullToVisibilityConverter}}"/>
                                         </StackPanel>
 
                                         <!-- Badge for Service Provider (Local, Party Tyme, Spotify, YouTube, Amazon) -->

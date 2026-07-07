@@ -174,14 +174,20 @@
 
                                         <!-- Name & Song Info -->
                                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                            <StackPanel Orientation="Horizontal">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
                                                 <Border Visibility="{Binding IsPaused, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#CC3300" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock Text="PAUSED" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
                                                 </Border>
+
+                                                <!-- Separator and song info only if there is a song loaded -->
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding SongTitle, Converter={StaticResource NullToVisibilityConverter}}">
+                                                    <TextBlock Text="  ➔  " FontSize="11" Foreground="#888888" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding SongTitle}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="180"/>
+                                                    <TextBlock Text=" by " FontSize="10" Foreground="#888888" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="150"/>
+                                                </StackPanel>
                                             </StackPanel>
-                                            <TextBlock Text="{Binding SongTitle}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" FontWeight="SemiBold" Margin="0,1,0,0" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Artist, StringFormat='by {0}'}" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,0" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Text="{Binding Notes}" FontSize="9" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="{Binding Notes, Converter={StaticResource NullToVisibilityConverter}}"/>
                                         </StackPanel>
 
