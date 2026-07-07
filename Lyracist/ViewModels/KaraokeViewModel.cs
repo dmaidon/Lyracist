@@ -1184,4 +1184,30 @@ public partial class KaraokeViewModel : BaseViewModel
             System.Windows.MessageBox.Show($"Failed to open link: {ex.Message}", "Browser Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
     }
+
+    public System.Collections.Generic.List<string> ProjectionViews { get; } = new() { "Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable" };
+
+    public string SelectedProjectionView
+    {
+        get => _displayService.GetPreferences().RotationViewMode ?? "Normal List";
+        set
+        {
+            if (SelectedProjectionView != value)
+            {
+                _displayService.SetRotationViewMode(value);
+                OnPropertyChanged(nameof(SelectedProjectionView));
+
+                var settingsVm = App.AppHost.Services.GetService<SettingsViewModel>();
+                if (settingsVm != null && settingsVm.SelectedProjectionView != value)
+                {
+                    settingsVm.SelectedProjectionView = value;
+                }
+            }
+        }
+    }
+
+    public void RaiseSelectedProjectionViewChanged()
+    {
+        OnPropertyChanged(nameof(SelectedProjectionView));
+    }
 }

@@ -833,6 +833,11 @@
                                     </StackPanel>
                                 </Grid>
 
+                                <!-- Billboard View Mode Selection -->
+                                <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                                <TextBlock Text="Billboard Screen View Mode" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                <ComboBox ItemsSource="{Binding ProjectionViews}" SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+
                                 <!-- Rotation Banner controls -->
                                 <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
                                 <TextBlock Text="Rotation Screen Billboard Banner" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />

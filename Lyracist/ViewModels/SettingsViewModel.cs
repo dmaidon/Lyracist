@@ -654,6 +654,12 @@ public partial class SettingsViewModel : BaseViewModel
     {
         _display.SetRotationViewMode(value);
         OnPropertyChanged(nameof(IsStarWarsCrawlSelected));
+
+        var karaokeVm = App.AppHost.Services.GetService(typeof(KaraokeViewModel)) as KaraokeViewModel;
+        if (karaokeVm != null)
+        {
+            karaokeVm.RaiseSelectedProjectionViewChanged();
+        }
     }
 
     [RelayCommand]
