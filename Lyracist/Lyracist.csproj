@@ -8,8 +8,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.7.7.146</AssemblyVersion>
-    <FileVersion>26.7.7.146</FileVersion>
+    <AssemblyVersion>26.7.7.147</AssemblyVersion>
+    <FileVersion>26.7.7.147</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <Authors>Dennis Maidon</Authors>

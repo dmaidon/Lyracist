@@ -326,24 +326,42 @@ namespace Lyracist.Data.Services
                 filters.Add($"volume={gain.ToString(System.Globalization.CultureInfo.InvariantCulture)}dB");
             }
 
-            // 3. Pitch / Key & Tempo (using rubberband)
+            // 3. Pitch / Key & Tempo (using asetrate + atempo for maximum compatibility across all FFmpeg builds)
             bool hasPitch = key != 0;
             bool hasTempo = tempo != 1.0;
 
             if (hasPitch || hasTempo)
             {
-                var rbParams = new List<string>();
+                double pitchRatio = hasPitch ? Math.Pow(2.0, key / 12.0) : 1.0;
+
                 if (hasPitch)
                 {
-                    double pitchRatio = Math.Pow(2.0, key / 12.0);
-                    rbParams.Add($"pitch={pitchRatio.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
-                }
-                if (hasTempo)
-                {
-                    rbParams.Add($"tempo={tempo.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+                    // asetrate changes pitch and speed by altering the sample rate
+                    // We assume 44100Hz as base, which is standard for karaoke tracks
+                    double newRate = 44100.0 * pitchRatio;
+                    filters.Add($"asetrate=r={((int)newRate).ToString(System.Globalization.CultureInfo.InvariantCulture)}");
                 }
 
-                filters.Add($"rubberband={string.Join(":", rbParams)}");
+                // Calculate the corrective tempo ratio to offset the pitch-shift speed change
+                double correctiveTempo = tempo / pitchRatio;
+
+                // FFmpeg's atempo filter is limited to 0.5 - 2.0.
+                // If the corrective tempo falls outside this, we chain multiple atempo filters.
+                if (correctiveTempo != 1.0)
+                {
+                    if (correctiveTempo >= 0.5 && correctiveTempo <= 2.0)
+                    {
+                        filters.Add($"atempo={correctiveTempo.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+                    }
+                    else
+                    {
+                        // Chain two atempo filters to cover wider ranges if necessary
+                        double part1 = Math.Clamp(correctiveTempo, 0.5, 2.0);
+                        double part2 = correctiveTempo / part1;
+                        filters.Add($"atempo={part1.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+                        filters.Add($"atempo={part2.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+                    }
+                }
             }
 
             // 4. Dynamic Audio Compressor

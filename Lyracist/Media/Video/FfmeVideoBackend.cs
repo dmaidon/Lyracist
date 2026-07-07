@@ -75,6 +75,31 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
                 UnloadedBehavior = MediaPlaybackState.Manual,
                 Volume = _volume / 100.0
             };
+            _mediaElement.MediaOpening += (s, e) =>
+            {
+                try
+                {
+                    string filters = Lyracist.Data.Services.FFmpegService.BuildAudioFilterString(
+                        Treble,
+                        Mid,
+                        Bass,
+                        0.0,
+                        Pitch,
+                        1.0,
+                        Compressor / 100.0,
+                        Limiter
+                    );
+
+                    if (!string.IsNullOrEmpty(filters))
+                    {
+                        e.Options.AudioFilter = filters;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to apply FFmpeg audio filters: {ex.Message}");
+                }
+            };
             _mediaElement.RenderingVideo += OnRenderingVideo;
         });
     }
