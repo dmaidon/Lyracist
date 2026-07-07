@@ -15,7 +15,7 @@ namespace Lyracist.Media.Audio;
 /// </summary>
 public class BackgroundMusicPlayer : IDisposable
 {
-    private static readonly TimeSpan CrossfadeDuration = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan CrossfadeDuration = TimeSpan.FromSeconds(5);
 
     // Standard 10-band graphic EQ (31.25Hz .. 16kHz). Bass/Treble knobs move
     // the low and high bands together rather than exposing all 10 to the KJ.
@@ -109,9 +109,22 @@ public class BackgroundMusicPlayer : IDisposable
     public void LoadPlaylist(IReadOnlyList<string> trackPaths)
     {
         _playlist = trackPaths.Where(File.Exists).ToList();
+        ShufflePlaylist();
         if (_currentIndex >= _playlist.Count)
         {
             _currentIndex = _playlist.Count > 0 ? 0 : -1;
+        }
+    }
+
+    private static readonly Random _rng = new();
+
+    private void ShufflePlaylist()
+    {
+        if (_playlist == null || _playlist.Count <= 1) return;
+        for (int i = _playlist.Count - 1; i > 0; i--)
+        {
+            int j = _rng.Next(i + 1);
+            (_playlist[i], _playlist[j]) = (_playlist[j], _playlist[i]);
         }
     }
 

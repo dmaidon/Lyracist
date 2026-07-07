@@ -1,7 +1,12 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Lyracist.Core.Interfaces;
 using Lyracist.Media.Audio;
 using Lyracist.Services.Display;
+using Lyracist.ViewModels;
 
 namespace Lyracist.Services.Media;
 
@@ -21,6 +26,12 @@ public class ShowFlowService : IShowFlowService
     private readonly BackgroundMusicPlayer _occasion;
     private readonly IPlaylistService _playlists;
     private readonly IDisplayService _display;
+    private readonly RotationViewModel _rotation;
+
+    private System.Threading.CancellationTokenSource? _fillInDelayCts;
+    private System.Threading.CancellationTokenSource? _endRotationDelayCts;
+    private System.Threading.CancellationTokenSource? _unduckTimerCts;
+    private static readonly Random _rng = new();
 
     public bool IsOpeningPlaying => _opening.IsPlaying;
     public bool IsFillInPlaying => _fillIn.IsPlaying;
@@ -35,7 +46,8 @@ public class ShowFlowService : IShowFlowService
         [FromKeyedServices("Occasion")] BackgroundMusicPlayer occasion,
         IPlaylistService playlists,
         IMediaEngine mediaEngine,
-        IDisplayService displayService)
+        IDisplayService displayService,
+        RotationViewModel rotation)
     {
         _opening = opening;
         _fillIn = fillIn;
@@ -43,8 +55,11 @@ public class ShowFlowService : IShowFlowService
         _occasion = occasion;
         _playlists = playlists;
         _display = displayService;
+        _rotation = rotation;
 
         RefreshPlaylists();
+
+        _rotation.RotationStateChanged += OnRotationStateChanged;
 
         // Occasion tracks play once; when one finishes naturally, drop the
         // banner and hand the room back to fill-in music.
@@ -60,23 +75,21 @@ public class ShowFlowService : IShowFlowService
         mediaEngine.Started += OnKaraokeTrackStarted;
 
         // The singer's song ending re-opens the gap for fill-in music.
-        mediaEngine.Stopped += () => _fillIn.Resume();
+        mediaEngine.Stopped += () => ScheduleFillInMusic();
 
         // The rotation queue running dry means the night's singers are done:
         // stop the between-singer fill-in music and send the room off with
-        // the end-of-rotation playlist.
-        displayService.RotationCompleted += () =>
-        {
-            _fillIn.Stop();
-            _endRotation.Play();
-        };
+        // the end-of-rotation playlist after a 10-second delay.
+        displayService.RotationCompleted += () => ScheduleEndRotationMusic();
 
         // A latecomer joining an empty queue means the show isn't actually
         // over -- cut the send-off music and go back to normal fill-in.
         displayService.RotationResumed += () =>
         {
+            CancelFillInSchedules();
             _endRotation.Stop();
             _fillIn.Resume();
+            _fillIn.Unduck();
         };
     }
 
@@ -190,6 +203,7 @@ public class ShowFlowService : IShowFlowService
 
     public void OnKaraokeTrackStarted()
     {
+        CancelFillInSchedules();
         _opening.Stop();
         _fillIn.Pause();
         if (_occasion.IsPlaying)
@@ -242,5 +256,119 @@ public class ShowFlowService : IShowFlowService
             _fillIn.Resume();
         }
         _pausedPlayer = string.Empty;
+    }
+
+    // ─── Automated Transition Helpers ─────────────────────────────────────
+
+    private void ScheduleFillInMusic()
+    {
+        CancelFillInSchedules();
+
+        _fillInDelayCts = new System.Threading.CancellationTokenSource();
+        var token = _fillInDelayCts.Token;
+
+        int delayMs = _rng.Next(5000, 7001); // 5 to 7 seconds random delay
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(delayMs, token);
+                if (token.IsCancellationRequested) return;
+
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _fillIn.Duck(); // Start at reduced volume
+                    _fillIn.Resume();
+                    ScheduleAutoUnduck();
+                });
+            }
+            catch (TaskCanceledException) { }
+        }, token);
+    }
+
+    private void ScheduleAutoUnduck()
+    {
+        CancelUnduckTimer();
+
+        if (_rotation.Rotation.Count == 0) return;
+
+        _unduckTimerCts = new System.Threading.CancellationTokenSource();
+        var token = _unduckTimerCts.Token;
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(15000, token); // 15 seconds quiet/KJ speaking announcement window
+                if (token.IsCancellationRequested) return;
+
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (_rotation.Rotation.Count > 0)
+                    {
+                        _fillIn.Unduck();
+                    }
+                });
+            }
+            catch (TaskCanceledException) { }
+        }, token);
+    }
+
+    private void OnRotationStateChanged()
+    {
+        if (_fillIn.IsPlaying)
+        {
+            if (_rotation.Rotation.Count > 0)
+            {
+                _fillIn.Unduck();
+                CancelUnduckTimer();
+            }
+            else
+            {
+                _fillIn.Duck();
+            }
+        }
+    }
+
+    private void ScheduleEndRotationMusic()
+    {
+        CancelFillInSchedules();
+
+        _endRotationDelayCts = new System.Threading.CancellationTokenSource();
+        var token = _endRotationDelayCts.Token;
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(10000, token); // 10 seconds delay
+                if (token.IsCancellationRequested) return;
+
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _fillIn.Stop();
+                    _endRotation.Play();
+                });
+            }
+            catch (TaskCanceledException) { }
+        }, token);
+    }
+
+    private void CancelFillInSchedules()
+    {
+        _fillInDelayCts?.Cancel();
+        _fillInDelayCts = null;
+
+        _endRotationDelayCts?.Cancel();
+        _endRotationDelayCts = null;
+
+        CancelUnduckTimer();
+    }
+
+    private void CancelUnduckTimer()
+    {
+        _unduckTimerCts?.Cancel();
+        _unduckTimerCts = null;
     }
 }
