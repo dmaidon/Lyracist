@@ -15,10 +15,9 @@ public class CdgDecoder : ICDGDecoder
     private int _currentPacketIndex;
 
     private WriteableBitmap? _bitmap;
-    private byte[] _renderBuffer = Array.Empty<byte>();
 
-    public int TargetWidth { get; set; } = 1280;
-    public int TargetHeight { get; set; } = 720;
+    public int TargetWidth { get; set; } = CdgConstants.Width;
+    public int TargetHeight { get; set; } = CdgConstants.Height;
 
     public List<CdgPacket> Packets => _packets;
 
@@ -177,46 +176,58 @@ public class CdgDecoder : ICDGDecoder
 
     public WriteableBitmap RenderToBitmap()
     {
-        // Instantiate bitmap if it's the first render or the window target size changed
-        if (_bitmap == null || _bitmap.PixelWidth != TargetWidth || _bitmap.PixelHeight != TargetHeight)
+        int width = TargetWidth;
+        int height = TargetHeight;
+
+        if (_bitmap == null || _bitmap.PixelWidth != width || _bitmap.PixelHeight != height)
         {
-            _bitmap = new WriteableBitmap(TargetWidth, TargetHeight, 96, 96, PixelFormats.Pbgra32, null);
-            _renderBuffer = new byte[TargetWidth * TargetHeight * 4];
+            _bitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Pbgra32, null);
         }
 
-        // Apply nearest-neighbor scaling from native 300x216 resolution to the target size
-        for (int dstY = 0; dstY < TargetHeight; dstY++)
+        _bitmap.Lock();
+        try
         {
-            int srcY = (dstY * CdgConstants.Height) / TargetHeight;
-            if (srcY >= CdgConstants.Height) srcY = CdgConstants.Height - 1;
-
-            int dstRowOffset = dstY * TargetWidth * 4;
-
-            for (int dstX = 0; dstX < TargetWidth; dstX++)
+            unsafe
             {
-                int srcX = (dstX * CdgConstants.Width) / TargetWidth;
-                if (srcX >= CdgConstants.Width) srcX = CdgConstants.Width - 1;
+                byte* backBuffer = (byte*)_bitmap.BackBuffer;
+                int stride = _bitmap.BackBufferStride;
 
-                byte colorIndex = _state.Pixels[srcX, srcY];
-                Color color = _state.Palette.Colors[colorIndex];
+                for (int y = 0; y < height; y++)
+                {
+                    byte* row = backBuffer + (y * stride);
 
-                byte alpha = (colorIndex == _state.Palette.TransparentColorIndex) ? (byte)0 : (byte)255;
+                    int srcY = (y * CdgConstants.Height) / height;
+                    if (srcY >= CdgConstants.Height) srcY = CdgConstants.Height - 1;
 
-                // WPF Pbgra32 expects pre-multiplied alpha values
-                byte r = (byte)((color.R * alpha) / 255);
-                byte g = (byte)((color.G * alpha) / 255);
-                byte b = (byte)((color.B * alpha) / 255);
+                    for (int x = 0; x < width; x++)
+                    {
+                        int srcX = (x * CdgConstants.Width) / width;
+                        if (srcX >= CdgConstants.Width) srcX = CdgConstants.Width - 1;
 
-                int dstIndex = dstRowOffset + dstX * 4;
-                _renderBuffer[dstIndex] = b;
-                _renderBuffer[dstIndex + 1] = g;
-                _renderBuffer[dstIndex + 2] = r;
-                _renderBuffer[dstIndex + 3] = alpha;
+                        byte colorIndex = _state.Pixels[srcX, srcY];
+                        Color color = _state.Palette.Colors[colorIndex];
+
+                        byte alpha = (colorIndex == _state.Palette.TransparentColorIndex) ? (byte)0 : (byte)255;
+
+                        // Pre-multiply alpha for WPF Pbgra32 format
+                        byte r = (byte)((color.R * alpha) / 255);
+                        byte g = (byte)((color.G * alpha) / 255);
+                        byte b = (byte)((color.B * alpha) / 255);
+
+                        int colOffset = x * 4;
+                        row[colOffset] = b;
+                        row[colOffset + 1] = g;
+                        row[colOffset + 2] = r;
+                        row[colOffset + 3] = alpha;
+                    }
+                }
             }
+            _bitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
         }
-
-        // Commit pixel buffer data to the WriteableBitmap
-        _bitmap.WritePixels(new Int32Rect(0, 0, TargetWidth, TargetHeight), _renderBuffer, TargetWidth * 4, 0);
+        finally
+        {
+            _bitmap.Unlock();
+        }
 
         return _bitmap;
     }
