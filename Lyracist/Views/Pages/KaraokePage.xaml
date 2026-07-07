@@ -9,6 +9,7 @@
       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
     <Page.Resources>
         <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <helpers:NotEmptyToVisibilityConverter x:Key="NotEmptyToVisibilityConverter" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
             <GradientStop Color="#FF8E53" Offset="0.0" />
@@ -594,14 +595,14 @@
                                                  </Border>
 
                                                  <!-- Separator and song info only if there is a song loaded -->
-                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding SongTitle, Converter={StaticResource NullToVisibilityConverter}}">
+                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding SongTitle, Converter={StaticResource NotEmptyToVisibilityConverter}}">
                                                      <TextBlock Text="  ➔  " FontSize="11" Foreground="#888888" VerticalAlignment="Center"/>
                                                      <TextBlock Text="{Binding SongTitle}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="150"/>
                                                      <TextBlock Text=" by " FontSize="10" Foreground="#888888" VerticalAlignment="Center"/>
                                                      <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="130"/>
                                                  </StackPanel>
                                              </StackPanel>
-                                             <TextBlock Text="{Binding Notes}" FontSize="9" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="{Binding Notes, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                             <TextBlock Text="{Binding Notes}" FontSize="9" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="{Binding Notes, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
                                         </StackPanel>
 
                                         <!-- Badge for Service Provider (Local, Party Tyme, Spotify, YouTube, Amazon) -->
