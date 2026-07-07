@@ -877,6 +877,9 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private string _simulationLogText = "Stress-Test Log Console:\nClick 'Start Stress-Test' to launch auto-pilot.";
 
+    [ObservableProperty]
+    private int _simulationDurationMinutes = 1;
+
     private System.Threading.CancellationTokenSource? _simulationCts;
 
     [RelayCommand]
@@ -896,7 +899,7 @@ public partial class SettingsViewModel : BaseViewModel
         SimulationButtonText = "Stop Stress-Test";
         SimulationStatusText = "Running...";
         SimulationLogText = string.Empty;
-        LogSim(">> System Stress-Test Simulation Started (Duration: 30 seconds)");
+        LogSim($">> System Stress-Test Simulation Started (Duration: {SimulationDurationMinutes} minute(s))");
         LogSim($">> Database track count: {_library.GetSongCount()}");
         LogSim($">> Operating IP: {AppSettings.GetActiveIPAddress()}");
 
@@ -910,7 +913,7 @@ public partial class SettingsViewModel : BaseViewModel
             int countEqAdjustments = 0;
             int countPlaybackToggles = 0;
             int countErrors = 0;
-            int steps = 15;
+            int steps = (SimulationDurationMinutes * 60) / 2;
             int i = 0;
 
             try

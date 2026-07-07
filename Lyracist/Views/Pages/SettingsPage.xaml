@@ -486,6 +486,18 @@
                             <TextBlock Text="System Stress-Test Simulator" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                             <TextBlock Text="Simulates rapid user actions: adds/removes singers, triggers requests, adjusts volumes/EQ, and plays/pauses tracks to stress-test database, network, and audio engine stability." FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,12" TextWrapping="Wrap" />
 
+                            <!-- Duration Selection Slider -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Simulation Duration" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <Slider Grid.Column="1" Minimum="1" Maximum="30" Value="{Binding SimulationDurationMinutes, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="12,0,0,0" />
+                                <TextBlock Grid.Column="2" Text="{Binding SimulationDurationMinutes, StringFormat='{}{0} Min'}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Width="40" TextAlignment="Right" Margin="12,0,0,0" />
+                            </Grid>
+
                             <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
