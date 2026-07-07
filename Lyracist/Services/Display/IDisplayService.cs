@@ -35,4 +35,6 @@ public interface IDisplayService
     /// <summary>Flashes a temporary banner over the lyrics display (Scaryoke results, shout-outs).</summary>
     void ShowLyricsOverlay(string text, int seconds = 8);
     void SetRotationAnnouncement(string message, bool visible);
+    void SetRotationViewMode(string mode);
+    void SetCrawlBannerText(string text);
 }

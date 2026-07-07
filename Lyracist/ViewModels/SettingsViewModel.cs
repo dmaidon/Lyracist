@@ -58,6 +58,49 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private bool _isLyricsMirrored;
 
+    public List<string> ProjectionViews { get; } = new() { "Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable" };
+
+    [ObservableProperty]
+    private string _selectedProjectionView = "Normal List";
+
+    // Venues & DJ
+    public ObservableCollection<string> Venues { get; } = new();
+
+    [ObservableProperty]
+    private string _djName = AppSettings.DjName;
+
+    [ObservableProperty]
+    private string? _selectedVenue = AppSettings.SelectedVenue;
+
+    [ObservableProperty]
+    private string _newVenueName = string.Empty;
+
+    // Crawl Banner Settings
+    public List<string> CrawlBannerTypes { get; } = new() { "Dramatic", "Comedic", "Over-the-Top", "Custom" };
+
+    [ObservableProperty]
+    private string _selectedCrawlBannerType = AppSettings.CrawlBannerType;
+
+    [ObservableProperty]
+    private string _crawlBannerCustomText = AppSettings.CrawlBannerCustomText;
+
+    public bool IsStarWarsCrawlSelected => SelectedProjectionView == "Star Wars Crawl";
+    public bool IsCustomCrawlBannerSelected => SelectedCrawlBannerType == "Custom";
+
+    public string CrawlBannerPreviewText
+    {
+        get
+        {
+            return SelectedCrawlBannerType switch
+            {
+                "Dramatic" => "Dramatic: \"In a tavern far, far away, known only as {venue}, the patrons have risen in glorious rebellion — and under the wicked command of their sinister DJ, {dj}, they have chosen their ultimate weapon… karaoke.\"",
+                "Comedic" => "Comedic: \"Somewhere in the distant reaches of the galaxy, inside a questionable establishment called {venue}, the patrons have staged a full‑blown uprising. Led by their diabolical DJ, {dj}, they now march toward their destiny: screaming karaoke like it’s a battle cry.\"",
+                "Over-the-Top" => "Over-the-Top: \"In a tavern lost to time and space — a place whispered about only as {venue} — the patrons have revolted. Guided by the dark influence of DJ {dj}, they embark on a quest of unimaginable terror… karaoke night.\"",
+                _ => "Custom: \"" + CrawlBannerCustomText + "\""
+            };
+        }
+    }
+
     // Tablet Server
     [ObservableProperty]
     private int _tabletPort = 5005;
@@ -253,6 +296,7 @@ public partial class SettingsViewModel : BaseViewModel
             ? Screens.FirstOrDefault(s => s.Index == prefs.LyricsScreenIndex.Value)
             : Screens.FirstOrDefault(s => s.Index == -1);
         _isLyricsMirrored = prefs.IsLyricsMirrored;
+        _selectedProjectionView = prefs.RotationViewMode ?? "Normal List";
 
         // Seed available devices
         AudioDevices = new List<string>
@@ -271,6 +315,7 @@ public partial class SettingsViewModel : BaseViewModel
         RefreshLibraryDirectories();
         RefreshLibraryStatus();
         RefreshScaryokeCategories();
+        RefreshVenues();
     }
 
 
@@ -289,6 +334,72 @@ public partial class SettingsViewModel : BaseViewModel
         {
             ScaryokeCategories.Add(cat);
         }
+    }
+
+    private void RefreshVenues()
+    {
+        Venues.Clear();
+        foreach (var v in AppSettings.Venues)
+        {
+            Venues.Add(v);
+        }
+        SelectedVenue = AppSettings.SelectedVenue;
+    }
+
+    partial void OnDjNameChanged(string value)
+    {
+        AppSettings.DjName = value;
+    }
+
+    partial void OnSelectedVenueChanged(string? value)
+    {
+        if (!string.IsNullOrEmpty(value))
+        {
+            AppSettings.SelectedVenue = value;
+        }
+    }
+
+    partial void OnSelectedCrawlBannerTypeChanged(string value)
+    {
+        AppSettings.CrawlBannerType = value;
+        OnPropertyChanged(nameof(IsCustomCrawlBannerSelected));
+        OnPropertyChanged(nameof(CrawlBannerPreviewText));
+        UpdateCrawlBannerOnWindow();
+    }
+
+    partial void OnCrawlBannerCustomTextChanged(string value)
+    {
+        AppSettings.CrawlBannerCustomText = value;
+        OnPropertyChanged(nameof(CrawlBannerPreviewText));
+        UpdateCrawlBannerOnWindow();
+    }
+
+    private void UpdateCrawlBannerOnWindow()
+    {
+        string template = AppSettings.GetActiveCrawlBannerTemplate();
+        _display.SetCrawlBannerText(template);
+    }
+
+    [RelayCommand]
+    private void AddVenue()
+    {
+        string venue = NewVenueName?.Trim() ?? "";
+        if (string.IsNullOrWhiteSpace(venue)) return;
+
+        AppSettings.AddVenue(venue);
+        NewVenueName = string.Empty;
+        RefreshVenues();
+        SelectedVenue = venue;
+    }
+
+    [RelayCommand]
+    private void RemoveVenue()
+    {
+        if (SelectedVenue == null) return;
+
+        AppSettings.RemoveVenue(SelectedVenue);
+        SelectedVenue = null;
+        RefreshVenues();
     }
 
     [RelayCommand]
@@ -360,9 +471,20 @@ public partial class SettingsViewModel : BaseViewModel
     private void RemoveLibraryDirectory()
     {
         if (SelectedLibraryDirectory == null) return;
+
+        var confirm = System.Windows.MessageBox.Show(
+            $"Remove '{SelectedLibraryDirectory}' from the scan list? Songs already indexed from this folder will also be removed from the library.",
+            "Confirm Remove Directory",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        _library.RemoveSongsUnderDirectory(SelectedLibraryDirectory);
         Core.Helpers.AppSettings.RemoveLibraryDirectory(SelectedLibraryDirectory);
         SelectedLibraryDirectory = null;
         RefreshLibraryDirectories();
+        RefreshLibraryStatus();
     }
 
     [RelayCommand]
@@ -376,15 +498,6 @@ public partial class SettingsViewModel : BaseViewModel
 
     [RelayCommand]
     private void ScanSelectedDirectory()
-    {
-        if (SelectedLibraryDirectory == null) return;
-        IsScanning = true;
-        LibraryStatus = "Scanning…";
-        _library.ScanDirectory(SelectedLibraryDirectory);
-    }
-
-    [RelayCommand]
-    private void RescanSelectedDirectory()
     {
         if (SelectedLibraryDirectory == null) return;
         IsScanning = true;
@@ -408,7 +521,10 @@ public partial class SettingsViewModel : BaseViewModel
             using (var db = new Lyracist.Data.LyracistDbContext())
             {
                 db.Database.EnsureDeleted();
-                db.Database.EnsureCreated();
+                // Use Migrate (not EnsureCreated) so __EFMigrationsHistory is populated
+                // correctly — otherwise the next app startup's Migrate() call sees no
+                // history and tries to re-apply migrations against tables that already exist.
+                db.Database.Migrate();
             }
 
             // Clear lists in memory
@@ -532,6 +648,12 @@ public partial class SettingsViewModel : BaseViewModel
     partial void OnIsLyricsMirroredChanged(bool value)
     {
         _display.SetLyricsMirror(value);
+    }
+
+    partial void OnSelectedProjectionViewChanged(string value)
+    {
+        _display.SetRotationViewMode(value);
+        OnPropertyChanged(nameof(IsStarWarsCrawlSelected));
     }
 
     [RelayCommand]

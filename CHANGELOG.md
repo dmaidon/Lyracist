@@ -4,6 +4,25 @@ All notable changes to the Lyracist project are documented here. The format is b
 
 ---
 
+## [26.7.7.0] - 2026-07-07
+
+### Added
+- **Star Wars Crawl View Mode**: High-fidelity 3D projection view mode for the rotation billboard, rendering a starfield backdrop with rotating/twinkling stars, cool/warm color variance, and a 3D-angled text block crawling upward in perspective.
+- **Vegas Marquee View Mode**: Theatrical stage theme rendering the current performer's name in giant glowing letters inside a brass frame ringed by purple "marching ants" chasing lights (pulsing Lavender/Purple core), with an "Up Next" strip of next-performers badges below.
+- **Vinyl Turntable View Mode**: Warm DJ-booth theme featuring a dynamic rotating vinyl 45 record, static tonearm pivot, and center label showing current performer and song title details alongside an "On Deck" list.
+- **Dynamic DJ & Venue Variables**: Integrated `{dj}` and `{venue}` template parameter replacements across the scrolling marquee and all Star Wars crawl templates.
+- **DJ & Venue Settings**: Management card on the Settings page to configure the DJ Name and curate/select the Venue database list.
+- **Crawl Intro Text Templates**: Provided 3 preconfigured options (Dramatic, Comedic, Over-the-Top) and custom template inputs.
+- **Crawl Template Preview**: Added an inline, italicized text block preview in settings to immediately inspect formatted crawl template strings.
+- **Show Banner Toggle Support**: Wired the "Show Banner" CheckBox on the Karaoke page to dynamically control the visibility of the billboard scrolling performer marquee.
+- **CPU Resource Saver**: Automated animation freeze hooks using the window's `IsVisibleChanged` state, pausing chaser timers and rotation animations when the screen is hidden.
+
+### Changed
+- **Billboard Scrolling Perquee**: Upgraded the billboard performer marquee to a continuous scrolling canvas showing the active queue sequence starting from the current performer (yellow/bold highlighted) and the next 5 performers (cyan).
+- **Settings View Modes Dropdown**: Exposed all 4 view mode choices ("Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable").
+
+---
+
 ## [26.7.6.1] - 2026-07-06
 
 ### Added

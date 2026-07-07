@@ -62,6 +62,33 @@ public class LibraryService : ILibraryService
         });
     }
 
+    public void RemoveSongsUnderDirectory(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+
+        try
+        {
+            // Normalize so "C:\Music" also matches "C:\Music\" prefixed paths.
+            string prefix = path.TrimEnd('\\', '/') + Path.DirectorySeparatorChar;
+
+            using var context = new LyracistDbContext();
+            var orphaned = context.Songs
+                .Where(s => s.FilePath.StartsWith(prefix))
+                .ToList();
+
+            if (orphaned.Count == 0) return;
+
+            context.Songs.RemoveRange(orphaned);
+            context.SaveChanges();
+
+            LibraryUpdated?.Invoke(this, EventArgs.Empty);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to remove songs under directory {path}: {ex.Message}");
+        }
+    }
+
     public int GetSongCount()
     {
         try
@@ -89,6 +116,29 @@ public class LibraryService : ILibraryService
             var searchService = new SearchService(context);
             // Run matching search on SQLite FTS5 table
             var results = Task.Run(() => searchService.Search(query)).Result;
+            return results.Select(MapToKaraokeSong);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to search library: {ex.Message}");
+            return Enumerable.Empty<KaraokeSong>();
+        }
+    }
+
+    public async Task<IEnumerable<KaraokeSong>> SearchAsync(string query)
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                var all = await context.Songs.AsNoTracking().ToListAsync();
+                return all.Select(MapToKaraokeSong);
+            }
+
+            var searchService = new SearchService(context);
+            var results = await searchService.Search(query);
             return results.Select(MapToKaraokeSong);
         }
         catch (Exception ex)

@@ -7,6 +7,7 @@
       Foreground="{DynamicResource AppTextPrimaryBrush}">
 
     <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
 
         <!-- Page header gradient -->
         <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
@@ -123,8 +124,80 @@
                                       DisplayMemberPath="DisplayName"
                                       Margin="0,0,0,12" />
 
+                            <TextBlock Text="Billboard View Mode" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <ComboBox ItemsSource="{Binding ProjectionViews}"
+                                      SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}"
+                                      Margin="0,0,0,12" />
+
+                            <!-- Star Wars Crawl Template Selection -->
+                            <StackPanel Margin="0,0,0,12" Visibility="{Binding IsStarWarsCrawlSelected, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Crawl Intro Text Template" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                <ComboBox ItemsSource="{Binding CrawlBannerTypes}"
+                                          SelectedItem="{Binding SelectedCrawlBannerType, Mode=TwoWay}"
+                                          Margin="0,0,0,8" />
+
+                                <TextBlock Text="{Binding CrawlBannerPreviewText}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="4,0,4,12"
+                                           FontStyle="Italic" />
+                                
+                                <StackPanel Visibility="{Binding IsCustomCrawlBannerSelected, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="Custom Crawl Text" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
+                                    <ui:TextBox Text="{Binding CrawlBannerCustomText, UpdateSourceTrigger=PropertyChanged}"
+                                                PlaceholderText="Enter custom Star Wars crawl text..."
+                                                AcceptsReturn="True"
+                                                TextWrapping="Wrap"
+                                                Height="80"
+                                                VerticalScrollBarVisibility="Auto" />
+                                </StackPanel>
+                            </StackPanel>
+
                             <CheckBox Content="Mirror Lyrics display on control view"
                                       IsChecked="{Binding IsLyricsMirrored, Mode=TwoWay}" />
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- DJ & Venue Settings -->
+                    <GroupBox Header="DJ &amp; Venue Management"
+                              Style="{StaticResource SettingsGroupBoxStyle}">
+                        <StackPanel>
+                            <TextBlock Text="DJ / Host Name" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <ui:TextBox Text="{Binding DjName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="DJ Name..." Margin="0,0,0,12" />
+
+                            <TextBlock Text="Venues List" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <ListBox ItemsSource="{Binding Venues}"
+                                     SelectedItem="{Binding SelectedVenue, Mode=TwoWay}"
+                                     MaxHeight="120" Height="120" Margin="0,0,0,8"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <TextBlock Text="Add Venue" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ui:TextBox Grid.Column="0"
+                                            Text="{Binding NewVenueName, UpdateSourceTrigger=PropertyChanged}"
+                                            PlaceholderText="Venue Name..." Height="26" FontSize="11" />
+                                <ui:Button Grid.Column="2" Content="Add"
+                                           Command="{Binding AddVenueCommand}"
+                                           Appearance="Primary"
+                                           Height="26" FontSize="11" />
+                            </Grid>
+
+                            <ui:Button Content="Remove Selected Venue"
+                                       Icon="{ui:SymbolIcon Delete24}"
+                                       Command="{Binding RemoveVenueCommand}"
+                                       Appearance="Danger" HorizontalAlignment="Stretch" />
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>
@@ -260,8 +333,6 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="8" />
                                     <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="4" />
-                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <ui:Button Grid.Column="0" Icon="{ui:SymbolIcon FolderAdd24}"
                                            Command="{Binding AddLibraryDirectoryCommand}"
@@ -269,12 +340,9 @@
                                 <ui:Button Grid.Column="2" Icon="{ui:SymbolIcon Delete24}"
                                            Command="{Binding RemoveLibraryDirectoryCommand}"
                                            Appearance="Danger" ToolTip="Remove selected directory"/>
-                                <ui:Button Grid.Column="6" Icon="{ui:SymbolIcon Play24}"
+                                <ui:Button Grid.Column="6" Icon="{ui:SymbolIcon ArrowSync24}"
                                            Command="{Binding ScanSelectedDirectoryCommand}"
-                                           Appearance="Secondary" ToolTip="Scan selected folder"/>
-                                <ui:Button Grid.Column="8" Icon="{ui:SymbolIcon ArrowSync24}"
-                                           Command="{Binding RescanSelectedDirectoryCommand}"
-                                           Appearance="Secondary" ToolTip="Rescan selected folder"/>
+                                           Appearance="Secondary" ToolTip="Scan/rescan selected folder"/>
                             </Grid>
 
                             <Grid Margin="0,4,0,10">

@@ -20,6 +20,23 @@ public partial class RotationWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool _isAnnouncementVisible;
 
+    [ObservableProperty]
+    private string _selectedProjectionView = "Normal List";
+
+    [ObservableProperty]
+    private string _crawlBannerText = string.Empty;
+
+    [ObservableProperty]
+    private string _currentSingerSong = string.Empty;
+
+    [ObservableProperty]
+    private string _currentSongTitle = string.Empty;
+
+    [ObservableProperty]
+    private string _performerHeaderText = "NOW SINGING";
+
+    public ObservableCollection<string> NextSingers { get; } = new();
+
     public ObservableCollection<Singer> Rotation { get; } = new();
 
     public void UpdateRotation(List<Singer> singers)
@@ -43,10 +60,14 @@ public partial class RotationWindowViewModel : ObservableObject
             var match = Rotation.FirstOrDefault(s => s.Name == now.Name);
             if (match != null) match.IsCurrent = true;
             CurrentSinger = now.Name;
+            CurrentSongTitle = now.SongTitle ?? string.Empty;
+            CurrentSingerSong = string.IsNullOrEmpty(now.Artist) ? (now.SongTitle ?? string.Empty) : $"{now.SongTitle} - {now.Artist}";
         }
         else
         {
             CurrentSinger = "No Singer";
+            CurrentSongTitle = string.Empty;
+            CurrentSingerSong = string.Empty;
         }
 
         if (activeSingers.Count > 1)
@@ -59,6 +80,21 @@ public partial class RotationWindowViewModel : ObservableObject
         else
         {
             NextSinger = "None";
+        }
+
+        bool hasDesignated = activeSingers.Any(s => s.IsCurrent);
+        PerformerHeaderText = hasDesignated ? "NOW SINGING" : "FIRST PERFORMER";
+
+        NextSingers.Clear();
+        if (activeSingers.Count > 0)
+        {
+            int count = activeSingers.Count;
+            for (int offset = 1; offset < count && NextSingers.Count < 5; offset++)
+            {
+                var singer = activeSingers[offset];
+                string display = string.IsNullOrEmpty(singer.SongTitle) ? singer.Name : $"{singer.Name} (\"{singer.SongTitle}\")";
+                NextSingers.Add(display);
+            }
         }
     }
 
@@ -73,6 +109,8 @@ public partial class RotationWindowViewModel : ObservableObject
         var currentMatch = Rotation.FirstOrDefault(s => s.Name == singer.Name);
         if (currentMatch != null) currentMatch.IsCurrent = true;
         CurrentSinger = singer.Name;
+        CurrentSongTitle = singer.SongTitle ?? string.Empty;
+        CurrentSingerSong = string.IsNullOrEmpty(singer.Artist) ? (singer.SongTitle ?? string.Empty) : $"{singer.SongTitle} - {singer.Artist}";
 
         // The next singer is the first active/non-paused singer in the queue who is not the current singer
         var activeSingers = Rotation.Where(s => !s.IsPaused && s.Name != singer.Name).ToList();
@@ -86,6 +124,15 @@ public partial class RotationWindowViewModel : ObservableObject
         else
         {
             NextSinger = "None";
+        }
+
+        PerformerHeaderText = "NOW SINGING";
+
+        NextSingers.Clear();
+        foreach (var ns in activeSingers.Take(5))
+        {
+            string display = string.IsNullOrEmpty(ns.SongTitle) ? ns.Name : $"{ns.Name} (\"{ns.SongTitle}\")";
+            NextSingers.Add(display);
         }
     }
 }

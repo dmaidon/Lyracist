@@ -14,6 +14,11 @@ Lyracist is a premium, modern Windows WPF Karaoke hosting application designed f
 
 ### 🖥️ Display & Projection Management
 - **Dual-Window Projection**: Supports launching standalone windows for **Lyrics Projection** and the **Rotation Billboard**.
+- **Four Dynamic Billboard View Modes**:
+  - **Normal List**: A standard listing of the current singer and upcoming rotation queue.
+  - **Star Wars Crawl**: High-fidelity 3D projection rendering a starry night sky with cool/warm twinkling star layers, and a 3D-angled text block crawling upward in space.
+  - **Vegas Marquee**: Theatrical Broadway stage layout displaying the current performer's name in glowing letters inside a brass frame ringed by lavender/purple "marching ants" chase bulb animations.
+  - **Vinyl Turntable**: Classic warm DJ-booth theme with a dynamic rotating vinyl 45 record, tonearm, and center label showing the current singer and song metadata.
 - **Flexible Monitor Assignment**: Direct dropdown selection in the KJ interface to project to any secondary monitor (with borderless, topmost, maximized sizing).
 - **"None" Targeting (Deselection)**: Support for selecting *None (Do not show)* in settings or projection controls to immediately close or hide projection windows when not in use.
 - **Rear-Projection Mirroring**: Mirror the lyrics screen horizontally for custom projector arrangements.
@@ -68,3 +73,4 @@ Lyracist is a premium, modern Windows WPF Karaoke hosting application designed f
 3. In **Theme & Appearance**, toggle **Test Mode** on to test queue workflows.
 4. Set up monitor assignments under **Display & Projection Monitors** or the main control panel.
 5. Manage backups and database restorations in the **Database Maintenance** section under the **Music Library** group box.
+6. Curate the DJ Name, active Venues catalog list, Billboard View Mode, and Star Wars Crawl Text Template (Dramatic, Comedic, Over-the-Top, or Custom) on the Settings page, with real-time text previews.

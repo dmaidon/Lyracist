@@ -70,6 +70,13 @@ public class DisplayService : IDisplayService
         }
         _rotationWindow!.Show();
 
+        var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+        if (vm != null)
+        {
+            vm.SelectedProjectionView = _preferences.RotationViewMode ?? "Normal List";
+            vm.CrawlBannerText = Core.Helpers.AppSettings.GetActiveCrawlBannerTemplate();
+        }
+
         if (isNewWindow)
         {
             MoveWindowToScreen(_rotationWindow, _preferences.RotationScreenIndex.Value);
@@ -284,6 +291,27 @@ public class DisplayService : IDisplayService
         {
             vm.AnnouncementBanner = message;
             vm.IsAnnouncementVisible = visible;
+        }
+    }
+
+    public void SetRotationViewMode(string mode)
+    {
+        _preferences.RotationViewMode = mode;
+        DisplayPreferencesStore.Save(_preferences);
+
+        var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+        if (vm != null)
+        {
+            vm.SelectedProjectionView = mode;
+        }
+    }
+
+    public void SetCrawlBannerText(string text)
+    {
+        var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+        if (vm != null)
+        {
+            vm.CrawlBannerText = text;
         }
     }
 }

@@ -727,9 +727,9 @@
                                     </StackPanel>
 
                                     <!-- Pitch -->
-                                    <StackPanel Grid.Column="4">
+                                    <StackPanel Grid.Column="4" ToolTip="Pitch transposition is not yet implemented in the audio engine — this control has no audible effect.">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Pitch Transpose" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="Pitch Transpose ⓘ" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                             <TextBlock Text="{Binding Pitch, StringFormat='{}{0:+0;-0;0}'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
                                         <Slider Minimum="-6" Maximum="6" Value="{Binding Pitch, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" />
@@ -786,18 +786,18 @@
                                     </Grid.ColumnDefinitions>
 
                                     <!-- Compressor -->
-                                    <StackPanel Grid.Column="0">
+                                    <StackPanel Grid.Column="0" ToolTip="Dynamics compression is not yet implemented in the audio engine — this control has no audible effect.">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Compressor Threshold" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="Compressor Threshold ⓘ" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                             <TextBlock Text="{Binding Compressor, StringFormat='{}{0:0}%'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
                                         <Slider Minimum="0" Maximum="100" Value="{Binding Compressor, Mode=TwoWay}" />
                                     </StackPanel>
 
                                     <!-- Limiter -->
-                                    <StackPanel Grid.Column="2">
+                                    <StackPanel Grid.Column="2" ToolTip="Peak limiting is not yet implemented in the audio engine — this control has no audible effect.">
                                         <Grid Margin="0,0,0,4">
-                                            <TextBlock Text="Limiter Threshold" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="Limiter Threshold ⓘ" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                             <TextBlock Text="{Binding Limiter, StringFormat='{}{0:0} dB'}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" />
                                         </Grid>
                                         <Slider Minimum="-20" Maximum="0" Value="{Binding Limiter, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" />

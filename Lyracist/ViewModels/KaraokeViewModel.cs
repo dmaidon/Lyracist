@@ -24,6 +24,8 @@ public partial class KaraokeViewModel : BaseViewModel
     private readonly IOccasionService _occasions;
     private readonly IPartyTymeService _partyTymeService;
     private readonly ExternalLinkService _externalLinkService;
+    private readonly System.Windows.Threading.DispatcherTimer _searchDebounceTimer;
+    private int _searchRequestToken;
 
     public RotationViewModel Rotation { get; }
 
@@ -375,6 +377,19 @@ public partial class KaraokeViewModel : BaseViewModel
         _partyTymeService = partyTymeService;
         _externalLinkService = new ExternalLinkService();
 
+        // Debounce search-as-you-type so we don't fire a DB query per keystroke;
+        // RefreshFilteredList also discards stale results via _searchRequestToken
+        // in case an older query's results resolve after a newer one's.
+        _searchDebounceTimer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(250)
+        };
+        _searchDebounceTimer.Tick += (_, _) =>
+        {
+            _searchDebounceTimer.Stop();
+            RefreshFilteredList();
+        };
+
         _mediaEngine.FrameReady += OnFrameReady;
         _libraryService.LibraryUpdated += OnLibraryUpdated;
         LoadSingerNames();
@@ -440,7 +455,9 @@ public partial class KaraokeViewModel : BaseViewModel
 
     partial void OnSearchQueryChanged(string value)
     {
-        RefreshFilteredList();
+        _searchDebounceTimer.Stop();
+        _searchDebounceTimer.Start();
+
         if (IsPartyTymeConnected)
         {
             SearchPartyTymeCommand.Execute(null);
@@ -448,25 +465,27 @@ public partial class KaraokeViewModel : BaseViewModel
         SearchExternalCommand.Execute(null);
     }
 
-    private void RefreshFilteredList()
+    private async void RefreshFilteredList()
     {
         string query = SearchQuery;
-        System.Threading.Tasks.Task.Run(() =>
+        int myToken = ++_searchRequestToken;
+
+        try
         {
-            try
+            var results = (await _libraryService.SearchAsync(query))
+                .Where(s => s.IsKaraoke)
+                .ToList();
+
+            // Discard results if a newer search has since been issued.
+            if (myToken != _searchRequestToken) return;
+
+            FilteredSongs.Clear();
+            foreach (var song in results)
             {
-                var results = _libraryService.Search(query).Where(s => s.IsKaraoke).ToList();
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    FilteredSongs.Clear();
-                    foreach (var song in results)
-                    {
-                        FilteredSongs.Add(song);
-                    }
-                });
+                FilteredSongs.Add(song);
             }
-            catch { }
-        });
+        }
+        catch { }
     }
 
     private void UpdateNowNext()

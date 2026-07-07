@@ -21,6 +21,13 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
     private uint _pitch;
     private uint _lines;
     private bool _isDisposed;
+
+    // Guards _pixelBuffer/_pitch/_lines/_width/_height against concurrent access:
+    // VideoFormatCallback frees and reallocates the buffer on a stream-setup thread
+    // while LockCallback/DisplayCallback read/write it on the decode thread.
+    // Without this, a mid-stream format change (e.g. loading new media) can free
+    // the buffer while a decode is still writing to it (use-after-free).
+    private readonly object _bufferLock = new();
     private double _volume = 100.0;
     private double _speed = 1.0;
     private int _pitchShift = 0;
@@ -176,21 +183,24 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         pitches = width * 4;
         lines = height;
 
-        _width = width;
-        _height = height;
-        _pitch = pitches;
-        _lines = lines;
-
-        int bufferSize = (int)(_pitch * _lines);
-
-        // Deallocate old unmanaged pixel buffer
-        if (_pixelBuffer != IntPtr.Zero)
+        lock (_bufferLock)
         {
-            Marshal.FreeHGlobal(_pixelBuffer);
-        }
+            _width = width;
+            _height = height;
+            _pitch = pitches;
+            _lines = lines;
 
-        // Allocate the unmanaged buffer for frame pixels
-        _pixelBuffer = Marshal.AllocHGlobal(bufferSize);
+            int bufferSize = (int)(_pitch * _lines);
+
+            // Deallocate old unmanaged pixel buffer
+            if (_pixelBuffer != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(_pixelBuffer);
+            }
+
+            // Allocate the unmanaged buffer for frame pixels
+            _pixelBuffer = Marshal.AllocHGlobal(bufferSize);
+        }
 
         // Allocate WriteableBitmap on the main UI dispatcher thread
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -208,8 +218,16 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
 
     private IntPtr LockCallback(IntPtr opaque, IntPtr planes)
     {
-        // Instruct VLC to write decoded frames directly to our unmanaged buffer pointer
-        Marshal.WriteIntPtr(planes, 0, _pixelBuffer);
+        // Narrowly scoped: only protects the pointer hand-off against a concurrent
+        // buffer swap in VideoFormatCallback. Deliberately does NOT span into
+        // UnlockCallback — Lock/Unlock are separate native callback invocations with
+        // no try/finally guarantee between them, so holding a Monitor across that gap
+        // risks a permanent deadlock if Unlock is ever skipped (e.g. Pause interrupting
+        // mid-frame). This was tried and caused exactly that hang.
+        lock (_bufferLock)
+        {
+            Marshal.WriteIntPtr(planes, 0, _pixelBuffer);
+        }
         return IntPtr.Zero;
     }
 
@@ -228,27 +246,45 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         var dispatcher = app.Dispatcher;
         if (dispatcher == null) return;
 
+        // Snapshot the buffer pointer/dimensions under a narrowly-scoped lock, then
+        // release before dispatching to the UI thread. Never hold _bufferLock across
+        // Dispatcher.Invoke — if any other code path (e.g. Dispose) ever needs this
+        // lock from the UI thread, holding it across a blocking cross-thread Invoke
+        // is a deadlock waiting to happen.
+        IntPtr pixelBuffer;
+        uint pitch, lines, width, height;
+        lock (_bufferLock)
+        {
+            pixelBuffer = _pixelBuffer;
+            pitch = _pitch;
+            lines = _lines;
+            width = _width;
+            height = _height;
+        }
+
+        if (pixelBuffer == IntPtr.Zero) return;
+
         try
         {
             // Perform fast memory copying inside UI thread dispatcher to prevent cross-threading access exceptions
             dispatcher.Invoke(() =>
             {
-                if (_isDisposed || _bitmap == null || _pixelBuffer == IntPtr.Zero) return;
+                if (_isDisposed || _bitmap == null) return;
 
                 try
                 {
                     _bitmap.Lock();
-                    int size = (int)(_pitch * _lines);
+                    int size = (int)(pitch * lines);
                     unsafe
                     {
                         Buffer.MemoryCopy(
-                            (void*)_pixelBuffer,
+                            (void*)pixelBuffer,
                             (void*)_bitmap.BackBuffer,
                             size,
                             size
                         );
                     }
-                    _bitmap.AddDirtyRect(new Int32Rect(0, 0, (int)_width, (int)_height));
+                    _bitmap.AddDirtyRect(new Int32Rect(0, 0, (int)width, (int)height));
                     _bitmap.Unlock();
 
                     FrameReady?.Invoke(this, new VideoFrame(_bitmap, Position));
@@ -270,15 +306,20 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         if (_isDisposed) return;
         _isDisposed = true;
 
+        // Stop/dispose the player first so no further Lock/Unlock/Format callbacks
+        // can fire before we free the buffer below.
         _mediaPlayer?.Stop();
         _mediaPlayer?.Dispose();
         _equalizer.Dispose();
         _libVLC?.Dispose();
 
-        if (_pixelBuffer != IntPtr.Zero)
+        lock (_bufferLock)
         {
-            Marshal.FreeHGlobal(_pixelBuffer);
-            _pixelBuffer = IntPtr.Zero;
+            if (_pixelBuffer != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(_pixelBuffer);
+                _pixelBuffer = IntPtr.Zero;
+            }
         }
 
         GC.SuppressFinalize(this);
