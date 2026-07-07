@@ -38,32 +38,89 @@
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Add Singer Form (Left Column) -->
-            <Border Grid.Column="0" Margin="0,0,12,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="20" VerticalAlignment="Top">
-                <StackPanel>
-                    <TextBlock Text="Add Performer" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16"/>
+            <!-- Left Column: Add Singer & Inactive Performers -->
+            <Grid Grid.Column="0" Margin="0,0,12,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                    <TextBlock Text="Singer Name" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                    <ComboBox IsEditable="True"
-                              Text="{Binding NewSingerName, UpdateSourceTrigger=PropertyChanged}"
-                              ItemsSource="{Binding SingerNames}"
-                              Margin="0,0,0,12" />
+                <!-- Add Singer Form (Row 0) -->
+                <Border Grid.Row="0" Margin="0,0,0,16" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="16" VerticalAlignment="Top">
+                    <StackPanel>
+                        <TextBlock Text="Add Performer" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
 
-                    <TextBlock Text="Key Transposition (Semitones)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                    <ui:TextBox Text="{Binding NewSingerKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. +2, -1, 0..." Margin="0,0,0,12"/>
+                        <TextBlock Text="Singer Name" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ComboBox IsEditable="True"
+                                  Text="{Binding NewSingerName, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding SingerNames}"
+                                  Margin="0,0,0,10" />
 
-                    <TextBlock Text="Notes / Song Request" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                    <ui:TextBox Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Details..." MinLines="3" MaxLines="5" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16"/>
+                        <TextBlock Text="Key Transposition (Semitones)" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ui:TextBox Text="{Binding NewSingerKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. +2, -1, 0..." Margin="0,0,0,10"/>
 
-                    <ui:Button Content="Add to Rotation" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddSingerCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" HorizontalAlignment="Stretch"/>
-                </StackPanel>
-            </Border>
+                        <TextBlock Text="Notes / Song Request" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ui:TextBox Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Details..." MinLines="2" MaxLines="3" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12"/>
+
+                        <ui:Button Content="Add to Rotation" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddSingerCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Inactive Performers Section (Row 1) -->
+                <Grid Grid.Row="1" Margin="0,8,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Inactive Performers" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                    <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="6">
+                        <ListBox ItemsSource="{Binding InactiveSingers}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                                                <TextBlock Text="{Binding Notes}" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="{Binding Notes, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                <!-- Reinstate Button -->
+                                                <ui:Button Icon="{ui:SymbolIcon Add20}" 
+                                                           Command="{Binding DataContext.ToggleInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                                                           CommandParameter="{Binding}" 
+                                                           Appearance="Primary" 
+                                                           Background="{StaticResource UIAccentBrush}"
+                                                           Margin="0,0,4,0" 
+                                                           Padding="4"
+                                                           ToolTip="Reinstate performer to active rotation"/>
+                                                <!-- Permanent Delete Button -->
+                                                <ui:Button Icon="{ui:SymbolIcon Delete20}" 
+                                                           Command="{Binding DataContext.DeleteInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                                                           CommandParameter="{Binding}" 
+                                                           Appearance="Danger" 
+                                                           Padding="4"
+                                                           ToolTip="Remove performer permanently"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+                </Grid>
+            </Grid>
 
             <!-- Queue Management (Right Column) -->
             <Grid Grid.Column="1" Margin="12,0,0,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="2*"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
@@ -87,11 +144,11 @@
                     </StackPanel>
                 </Grid>
 
-                <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="8">
+                <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="6">
                     <ListBox ItemsSource="{Binding Rotation}" SelectedItem="{Binding SelectedSinger}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderThickness="2" CornerRadius="6" Padding="12" Margin="4">
+                                <Border BorderThickness="1.5" CornerRadius="6" Padding="6,4" Margin="1">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
@@ -116,97 +173,59 @@
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Name & Song Info -->
-                                        <StackPanel Grid.Column="0">
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
-                                                <Border Visibility="{Binding IsPaused, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#CC3300" CornerRadius="4" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="PAUSED" FontSize="10" FontWeight="ExtraBold" Foreground="White"/>
+                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                                <Border Visibility="{Binding IsPaused, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#CC3300" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="PAUSED" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
                                                 </Border>
                                             </StackPanel>
-                                            <TextBlock Text="{Binding SongTitle}" FontSize="13" Foreground="{DynamicResource AppTextSecondaryBrush}" FontWeight="SemiBold" Margin="0,2,0,0" />
-                                            <TextBlock Text="{Binding Artist, StringFormat='by {0}'}" FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,1,0,0" />
-                                            <TextBlock Text="{Binding Notes}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                                            <TextBlock Text="{Binding SongTitle}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" FontWeight="SemiBold" Margin="0,1,0,0" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Artist, StringFormat='by {0}'}" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,0" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Notes}" FontSize="9" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="{Binding Notes, Converter={StaticResource NullToVisibilityConverter}}"/>
                                         </StackPanel>
 
-                                         <!-- 10 Completed Rotation CheckBoxes -->
-                                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=1, Mode=TwoWay}" Margin="2,0" ToolTip="Rotations completed">
-                                                 <CheckBox.LayoutTransform>
-                                                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                                                 </CheckBox.LayoutTransform>
-                                             </CheckBox>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=2, Mode=TwoWay}" Margin="2,0">
-                                                 <CheckBox.LayoutTransform>
-                                                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                                                 </CheckBox.LayoutTransform>
-                                             </CheckBox>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=3, Mode=TwoWay}" Margin="2,0">
-                                                 <CheckBox.LayoutTransform>
-                                                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                                                 </CheckBox.LayoutTransform>
-                                             </CheckBox>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=4, Mode=TwoWay}" Margin="2,0">
-                                                 <CheckBox.LayoutTransform>
-                                                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                                                 </CheckBox.LayoutTransform>
-                                             </CheckBox>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=5, Mode=TwoWay}" Margin="2,0">
-                                                 <CheckBox.LayoutTransform>
-                                                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                                                 </CheckBox.LayoutTransform>
-                                             </CheckBox>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=6, Mode=TwoWay}" Margin="2,0">
-                                                 <CheckBox.LayoutTransform>
-                                                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                                                 </CheckBox.LayoutTransform>
-                                             </CheckBox>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=7, Mode=TwoWay}" Margin="2,0">
-                                                 <CheckBox.LayoutTransform>
-                                                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                                                 </CheckBox.LayoutTransform>
-                                             </CheckBox>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=8, Mode=TwoWay}" Margin="2,0">
-                                                 <CheckBox.LayoutTransform>
-                                                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                                                 </CheckBox.LayoutTransform>
-                                             </CheckBox>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=9, Mode=TwoWay}" Margin="2,0">
-                                                 <CheckBox.LayoutTransform>
-                                                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                                                 </CheckBox.LayoutTransform>
-                                             </CheckBox>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=10, Mode=TwoWay}" Margin="2,0">
-                                                 <CheckBox.LayoutTransform>
-                                                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                                                 </CheckBox.LayoutTransform>
-                                             </CheckBox>
+                                         <!-- 10 Completed Rotation CheckBoxes (standard size) -->
+                                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
+                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=1, Mode=TwoWay}" Margin="1,0" ToolTip="Rotations completed"/>
+                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=2, Mode=TwoWay}" Margin="1,0"/>
+                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=3, Mode=TwoWay}" Margin="1,0"/>
+                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=4, Mode=TwoWay}" Margin="1,0"/>
+                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=5, Mode=TwoWay}" Margin="1,0"/>
+                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=6, Mode=TwoWay}" Margin="1,0"/>
+                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=7, Mode=TwoWay}" Margin="1,0"/>
+                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=8, Mode=TwoWay}" Margin="1,0"/>
+                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=9, Mode=TwoWay}" Margin="1,0"/>
+                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=10, Mode=TwoWay}" Margin="1,0"/>
                                          </StackPanel>
 
                                         <!-- Key & Actions -->
-                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
-                                            <Border CornerRadius="4" Background="{DynamicResource SystemFillColorCautionBackgroundBrush}" Padding="8,4" VerticalAlignment="Center" Margin="0,0,8,0">
-                                                <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
+                                            <Border CornerRadius="4" Background="{DynamicResource SystemFillColorCautionBackgroundBrush}" Padding="6,2" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
                                             </Border>
                                             
                                             <!-- Done Button -->
-                                            <ui:Button Icon="{ui:SymbolIcon Checkmark24}" 
+                                            <ui:Button Icon="{ui:SymbolIcon Checkmark20}" 
                                                        Command="{Binding DataContext.DoneSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
                                                        CommandParameter="{Binding}" 
                                                        Appearance="Success" 
-                                                       Margin="0,0,4,0" 
+                                                       Margin="0,0,2,0" 
+                                                       Padding="4"
                                                        ToolTip="Mark current song as completed (moves singer to end of rotation)"/>
                                             
                                             <!-- Pause/Resume Button -->
                                             <ui:Button Command="{Binding DataContext.TogglePauseSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
                                                        CommandParameter="{Binding}" 
-                                                       Margin="0,0,4,0">
+                                                       Margin="0,0,2,0"
+                                                       Padding="4">
                                                 <ui:Button.Style>
                                                     <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
-                                                        <Setter Property="Icon" Value="{ui:SymbolIcon Pause24}" />
+                                                        <Setter Property="Icon" Value="{ui:SymbolIcon Pause20}" />
                                                         <Setter Property="ToolTip" Value="Pause performer (temporary skip)" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsPaused}" Value="True">
-                                                                <Setter Property="Icon" Value="{ui:SymbolIcon Play24}" />
+                                                                <Setter Property="Icon" Value="{ui:SymbolIcon Play20}" />
                                                                 <Setter Property="ToolTip" Value="Resume performer" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
@@ -215,55 +234,12 @@
                                             </ui:Button>
                                             
                                             <!-- Inactive Button -->
-                                            <ui:Button Icon="{ui:SymbolIcon Dismiss24}" 
+                                            <ui:Button Icon="{ui:SymbolIcon Dismiss20}" 
                                                        Command="{Binding DataContext.ToggleInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
                                                        CommandParameter="{Binding}" 
                                                        Appearance="Secondary" 
+                                                       Padding="4"
                                                        ToolTip="Set performer inactive (removes from active rotation)"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Border>
-
-                <!-- Inactive Performers Section -->
-                <Grid Grid.Row="2" VerticalAlignment="Center" Margin="0,16,0,8">
-                    <TextBlock Text="Inactive Performers" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                </Grid>
-
-                <Border Grid.Row="3" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="8">
-                    <ListBox ItemsSource="{Binding InactiveSingers}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="4" Background="{DynamicResource ControlFillColorDefaultBrush}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                            <TextBlock Text="{Binding Notes}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" Margin="0,4,0,0"/>
-                                        </StackPanel>
-
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
-                                            <!-- Reinstate Button -->
-                                            <ui:Button Icon="{ui:SymbolIcon Add24}" 
-                                                       Command="{Binding DataContext.ToggleInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
-                                                       CommandParameter="{Binding}" 
-                                                       Appearance="Primary" 
-                                                       Background="{StaticResource UIAccentBrush}"
-                                                       Margin="0,0,4,0" 
-                                                       ToolTip="Reinstate performer to active rotation"/>
-                                            <!-- Permanent Delete Button -->
-                                            <ui:Button Icon="{ui:SymbolIcon Delete24}" 
-                                                       Command="{Binding DataContext.DeleteInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
-                                                       CommandParameter="{Binding}" 
-                                                       Appearance="Danger" 
-                                                       ToolTip="Remove performer permanently"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
