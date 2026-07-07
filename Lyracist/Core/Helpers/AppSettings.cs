@@ -33,7 +33,20 @@ public static class AppSettings
             if (File.Exists(_settingsPath))
             {
                 var json = File.ReadAllText(_settingsPath);
-                return JsonSerializer.Deserialize<SettingsData>(json) ?? new SettingsData();
+                var data = JsonSerializer.Deserialize<SettingsData>(json) ?? new SettingsData();
+
+                // Clean up loaded categories to enforce the new 8-category limit
+                if (data.ScaryokeCategories != null)
+                {
+                    data.ScaryokeCategories = data.ScaryokeCategories
+                        .Where(c => !string.Equals(c, "Singer's Choice", StringComparison.OrdinalIgnoreCase) &&
+                                    !string.Equals(c, "DJ's Choice", StringComparison.OrdinalIgnoreCase))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Take(8)
+                        .ToList();
+                }
+
+                return data;
             }
         }
         catch { /* Use defaults on any parse error */ }
@@ -201,7 +214,7 @@ public static class AppSettings
 
         lock (_lock)
         {
-            if (_data.ScaryokeCategories.Count >= 12) return;
+            if (_data.ScaryokeCategories.Count >= 8) return;
             if (!_data.ScaryokeCategories.Contains(category, StringComparer.OrdinalIgnoreCase))
             {
                 _data.ScaryokeCategories.Add(category);
@@ -243,6 +256,35 @@ public static class AppSettings
     {
         get { lock (_lock) { return _data.CrawlBannerCustomText; } }
         set { lock (_lock) { _data.CrawlBannerCustomText = value; Save(); } }
+    }
+
+    public static int CrawlSpaceshipFontSize
+    {
+        get { lock (_lock) { return _data.CrawlSpaceshipFontSize; } }
+        set { lock (_lock) { _data.CrawlSpaceshipFontSize = value; Save(); } }
+    }
+
+    public static int CrawlSpaceshipDuration
+    {
+        get { lock (_lock) { return _data.CrawlSpaceshipDuration; } }
+        set { lock (_lock) { _data.CrawlSpaceshipDuration = value; Save(); } }
+    }
+
+    public static int CrawlSpaceshipFrequency
+    {
+        get { lock (_lock) { return _data.CrawlSpaceshipFrequency; } }
+        set { lock (_lock) { _data.CrawlSpaceshipFrequency = value; Save(); } }
+    }
+
+    public static System.Collections.Generic.List<Lyracist.Models.SpaceshipSnippet> CrawlSpaceshipSnippets
+    {
+        get { lock (_lock) { return _data.CrawlSpaceshipSnippets; } }
+        set { lock (_lock) { _data.CrawlSpaceshipSnippets = value; Save(); } }
+    }
+
+    public static void SaveSpaceshipSnippets()
+    {
+        lock (_lock) { Save(); }
     }
 
     public static string GetActiveCrawlBannerTemplate()
@@ -357,11 +399,11 @@ public static class AppSettings
         // Library scan roots — persisted so the app can rescan on demand
         public List<string> LibraryDirectories { get; set; } = new();
 
-        // Scaryoke categories - dynamic configuration up to 12 sectors
+        // Scaryoke categories - dynamic configuration up to 8 sectors
         public List<string> ScaryokeCategories { get; set; } = new()
         {
             "Gender Bender", "Elvis", "Country", "Rock & Roll", "Pop", "80s Music",
-            "70s Music", "60s Oldies", "Singer's Choice", "Spin Again", "DJ's Choice", "Motown"
+            "60s Oldies", "Motown"
         };
 
         // Venues & DJ name
@@ -372,5 +414,19 @@ public static class AppSettings
         // Crawl banner type and custom text
         public string CrawlBannerType { get; set; } = "Dramatic";
         public string CrawlBannerCustomText { get; set; } = "Enter custom crawl text here...";
+
+        // Spaceship overlay configurations
+        public int CrawlSpaceshipFontSize { get; set; } = 26;
+        public int CrawlSpaceshipDuration { get; set; } = 13;
+        public int CrawlSpaceshipFrequency { get; set; } = 60;
+        public List<Lyracist.Models.SpaceshipSnippet> CrawlSpaceshipSnippets { get; set; } = new()
+        {
+            new() { Text = "Tip your bartender! 🍹", IsEnabled = true },
+            new() { Text = "Tip your servers! 💸", IsEnabled = true },
+            new() { Text = "Buy a drink at the bar! 🍺", IsEnabled = true },
+            new() { Text = "Keep the queue moving, request a song! 🎤", IsEnabled = true },
+            new() { Text = "Remember to tip the staff! 💵", IsEnabled = true },
+            new() { Text = "Scaryoke party mode active! 🎡", IsEnabled = true }
+        };
     }
 }

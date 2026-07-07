@@ -859,8 +859,11 @@
 
                                 <!-- Show Extras: Special Occasions + Scaryoke Party Mode -->
                                 <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-                                <TextBlock Text="Show Extras" FontSize="11" Width="200" HorizontalAlignment ="Left" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                                 <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
@@ -869,7 +872,11 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
-                                    <Menu Grid.Column="0" Background="Transparent" VerticalAlignment="Center">
+                                    <!-- Headers Row -->
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Show Extras" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Billboard Display Type" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="12,0,0,4" />
+
+                                    <Menu Grid.Row="1" Grid.Column="0" Background="Transparent" VerticalAlignment="Center">
                                         <MenuItem Padding="10,6"
                                                   ItemsSource="{Binding OccasionMenu}"
                                                   ItemContainerStyle="{DynamicResource OccasionMenuItemStyle}">
@@ -879,17 +886,18 @@
                                         </MenuItem>
                                     </Menu>
 
-                                    <ui:Button Grid.Column="1" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopOccasionCommand}" Appearance="Secondary" ToolTip="Stop Occasion Music" Margin="6,0,0,0" />
+                                    <ui:Button Grid.Row="1" Grid.Column="1" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopOccasionCommand}" Appearance="Secondary" ToolTip="Stop Occasion Music" Margin="6,0,0,0" />
 
-                                    <ComboBox Grid.Column="2"
+                                    <ComboBox x:Name="CmbBannerType" Grid.Row="1" Grid.Column="2"
                                               ItemsSource="{Binding ProjectionViews}"
                                               SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}"
                                               Height="35"
+                                              HorizontalAlignment="Left"
                                               VerticalAlignment="Center" Width="200"
                                               Margin="12,0" />
 
-                                    <ui:ToggleSwitch Grid.Column="3" Content="Scaryoke" IsChecked="{Binding IsScaryokeMode, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,10,0" />
-                                    <ui:Button Grid.Column="4" Content="Spin!" Icon="{ui:SymbolIcon PlayingCards20}" Command="{Binding OpenScaryokeWheelCommand}" IsEnabled="{Binding IsScaryokeMode}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" />
+                                    <ui:ToggleSwitch Grid.Row="1" Grid.Column="3" Content="Scaryoke" IsChecked="{Binding IsScaryokeMode, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                    <ui:Button Grid.Row="1" Grid.Column="4" Content="Spin!" Icon="{ui:SymbolIcon PlayingCards20}" Command="{Binding OpenScaryokeWheelCommand}" IsEnabled="{Binding IsScaryokeMode}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" />
                                 </Grid>
                             </StackPanel>
                         </Border>

@@ -84,6 +84,24 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private string _crawlBannerCustomText = AppSettings.CrawlBannerCustomText;
 
+    // Spaceship overlay settings
+    [ObservableProperty]
+    private int _crawlSpaceshipFontSize = AppSettings.CrawlSpaceshipFontSize;
+
+    [ObservableProperty]
+    private int _crawlSpaceshipDuration = AppSettings.CrawlSpaceshipDuration;
+
+    [ObservableProperty]
+    private int _crawlSpaceshipFrequency = AppSettings.CrawlSpaceshipFrequency;
+
+    public ObservableCollection<Lyracist.Models.SpaceshipSnippet> CrawlSpaceshipSnippets { get; } = new(AppSettings.CrawlSpaceshipSnippets);
+
+    [ObservableProperty]
+    private string _newSpaceshipSnippetText = string.Empty;
+
+    [ObservableProperty]
+    private Lyracist.Models.SpaceshipSnippet? _selectedSpaceshipSnippet;
+
     public bool IsStarWarsCrawlSelected => SelectedProjectionView == "Star Wars Crawl";
     public bool IsCustomCrawlBannerSelected => SelectedCrawlBannerType == "Custom";
 
@@ -374,6 +392,47 @@ public partial class SettingsViewModel : BaseViewModel
         UpdateCrawlBannerOnWindow();
     }
 
+    partial void OnCrawlSpaceshipFontSizeChanged(int value) => AppSettings.CrawlSpaceshipFontSize = value;
+    partial void OnCrawlSpaceshipDurationChanged(int value) => AppSettings.CrawlSpaceshipDuration = value;
+    partial void OnCrawlSpaceshipFrequencyChanged(int value) => AppSettings.CrawlSpaceshipFrequency = value;
+
+    [RelayCommand]
+    private void AddSpaceshipSnippet()
+    {
+        string text = NewSpaceshipSnippetText?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        if (CrawlSpaceshipSnippets.Count >= 10)
+        {
+            System.Windows.MessageBox.Show(
+                "A maximum of 10 snippets is allowed.",
+                "Max Snippets Reached",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var snippet = new Lyracist.Models.SpaceshipSnippet { Text = text, IsEnabled = true };
+        CrawlSpaceshipSnippets.Add(snippet);
+        NewSpaceshipSnippetText = string.Empty;
+        SaveSpaceshipSnippets();
+    }
+
+    [RelayCommand]
+    private void RemoveSpaceshipSnippet()
+    {
+        if (SelectedSpaceshipSnippet == null) return;
+        CrawlSpaceshipSnippets.Remove(SelectedSpaceshipSnippet);
+        SelectedSpaceshipSnippet = null;
+        SaveSpaceshipSnippets();
+    }
+
+    [RelayCommand]
+    private void SaveSpaceshipSnippets()
+    {
+        AppSettings.CrawlSpaceshipSnippets = CrawlSpaceshipSnippets.ToList();
+    }
+
     private void UpdateCrawlBannerOnWindow()
     {
         string template = AppSettings.GetActiveCrawlBannerTemplate();
@@ -408,10 +467,10 @@ public partial class SettingsViewModel : BaseViewModel
         string cat = NewScaryokeCategoryName?.Trim() ?? "";
         if (string.IsNullOrWhiteSpace(cat)) return;
 
-        if (AppSettings.ScaryokeCategories.Count >= 12)
+        if (AppSettings.ScaryokeCategories.Count >= 8)
         {
             System.Windows.MessageBox.Show(
-                "A maximum of 12 categories is allowed for the Scaryoke wheel.",
+                "A maximum of 8 categories is allowed for the Scaryoke wheel.",
                 "Max Categories Reached",
                 System.Windows.MessageBoxButton.OK,
                 System.Windows.MessageBoxImage.Warning);

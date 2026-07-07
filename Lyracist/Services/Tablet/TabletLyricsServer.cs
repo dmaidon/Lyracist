@@ -25,19 +25,22 @@ public class TabletLyricsServer : ITabletLyricsServer
     private readonly ILibraryService _library;
     private readonly IOccasionService _occasions;
     private readonly KaraokeViewModel _karaoke;
+    private readonly Lyracist.Windows.ScaryokeWindow _scaryokeWindow;
 
     public TabletLyricsServer(
         IRequestService requests,
         RotationViewModel rotation,
         ILibraryService library,
         IOccasionService occasions,
-        KaraokeViewModel karaoke)
+        KaraokeViewModel karaoke,
+        Lyracist.Windows.ScaryokeWindow scaryokeWindow)
     {
         _requests = requests;
         _rotation = rotation;
         _library = library;
         _occasions = occasions;
         _karaoke = karaoke;
+        _scaryokeWindow = scaryokeWindow;
     }
 
     /// <summary>Payload for POST /api/requests from the singer mobile portal.</summary>
@@ -72,6 +75,8 @@ public class TabletLyricsServer : ITabletLyricsServer
 
             _rotation.Rotation.CollectionChanged += OnRotationChanged;
             _karaoke.PropertyChanged += OnKaraokePropertyChanged;
+            _scaryokeWindow.SpinStarted += OnScaryokeSpinStarted;
+            _scaryokeWindow.SpinCompleted += OnScaryokeSpinCompleted;
 
             // Map the lyrics hub endpoint
             _webApp.MapHub<LyricsHub>("/lyricsHub");
@@ -102,6 +107,20 @@ public class TabletLyricsServer : ITabletLyricsServer
                     artist,
                     dto.Source ?? "Portal");
                 return Results.Ok(request);
+            });
+
+            _webApp.MapGet("/api/scaryoke/categories", () => Results.Json(_scaryokeWindow.ViewModel.WheelSegments));
+            _webApp.MapPost("/api/scaryoke/spin", () =>
+            {
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    var wheel = App.AppHost.Services.GetRequiredService<Lyracist.Windows.ScaryokeWindow>();
+                    wheel.RebuildWheel();
+                    wheel.Show();
+                    wheel.Activate();
+                    wheel.Spin();
+                }));
+                return Results.Ok(new { success = true });
             });
 
             _webApp.MapGet("/api/requests", () => Results.Json(_requests.GetPending()));
@@ -188,6 +207,8 @@ public class TabletLyricsServer : ITabletLyricsServer
     {
         _rotation.Rotation.CollectionChanged -= OnRotationChanged;
         _karaoke.PropertyChanged -= OnKaraokePropertyChanged;
+        _scaryokeWindow.SpinStarted -= OnScaryokeSpinStarted;
+        _scaryokeWindow.SpinCompleted -= OnScaryokeSpinCompleted;
 
         if (_cts != null)
         {
@@ -362,6 +383,7 @@ public class TabletLyricsServer : ITabletLyricsServer
                         <button id="tab-queue" class="tab-btn active" onclick="switchTab('queue')">Queue Status</button>
                         <button id="tab-catalog" class="tab-btn" onclick="switchTab('catalog')">Search Catalog</button>
                         <button id="tab-custom" class="tab-btn" onclick="switchTab('custom')">Custom Link</button>
+                        <button id="tab-scaryoke" class="tab-btn" onclick="switchTab('scaryoke')">Scaryoke</button>
                     </div>
 
                     <!-- Queue Tab Content -->
@@ -419,6 +441,23 @@ public class TabletLyricsServer : ITabletLyricsServer
                         </div>
                         <button class="btn-primary" onclick="submitCustomRequest()">Submit Request</button>
                         <div id="custom-msg" style="margin-top: 12px; font-size: 12px; text-align: center; color: var(--accent);"></div>
+                    </div>
+
+                    <!-- Scaryoke Tab Content -->
+                    <div id="content-scaryoke" class="tab-content card" style="text-align: center;">
+                        <h2 style="font-size: 18px; margin-bottom: 12px; color: var(--partytyme); text-shadow: 0 0 10px rgba(255, 110, 0, 0.3);">🎃 SCARYOKE WHEEL 🎃</h2>
+                        <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 16px;">Test your courage! Spin the wheel of terror!</p>
+                        
+                        <div style="position: relative; display: inline-block; width: 260px; height: 260px; margin: 0 auto 16px;">
+                            <canvas id="wheel-canvas" width="260" height="260" style="border-radius: 50%; box-shadow: 0 0 20px rgba(255, 110, 0, 0.25);"></canvas>
+                            <div style="position: absolute; top: -8px; left: 120px; width: 20px; height: 25px; background-color: var(--accent); clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></div>
+                        </div>
+                        
+                        <div style="margin-top: 10px;">
+                            <button id="btn-spin-wheel" class="btn-primary" style="max-width: 200px; margin: 0 auto; display: block;" onclick="requestSpin()">SPIN WHEEL</button>
+                        </div>
+                        
+                        <div id="scaryoke-result" style="margin-top: 16px; font-size: 15px; font-weight: bold; color: var(--partytyme); height: 24px;"></div>
                     </div>
                 </div>
             </div>
@@ -513,6 +552,29 @@ public class TabletLyricsServer : ITabletLyricsServer
                             document.getElementById("next-song").textContent = next.song;
                         });
 
+                        connection.on("ScaryokeSpinStarted", (targetFinalAngle, activeCategories, durationSec) => {
+                            if (activeCategories && activeCategories.length > 0) {
+                                categories = activeCategories;
+                            }
+                            duration = (durationSec || 4.5) * 1000;
+                            document.getElementById("btn-spin-wheel").disabled = true;
+                            document.getElementById("scaryoke-result").textContent = "Spinning...";
+                            
+                            // Trigger animation
+                            startAngle = currentAngle;
+                            target = currentAngle + 1440 + (targetFinalAngle - (currentAngle % 360));
+                            if (target < currentAngle + 1440) {
+                                target += 360;
+                            }
+                            startTime = null;
+                            requestAnimationFrame(animateSpin);
+                        });
+
+                        connection.on("ScaryokeSpinCompleted", (category) => {
+                            document.getElementById("scaryoke-result").textContent = "Landed on: " + category;
+                            document.getElementById("btn-spin-wheel").disabled = false;
+                        });
+
                         connection.start().then(() => {
                             console.log("SignalR connected!");
                         }).catch(err => {
@@ -539,6 +601,8 @@ public class TabletLyricsServer : ITabletLyricsServer
 
                     if (tabId === 'catalog') {
                         document.getElementById("catalog-search").focus();
+                    } else if (tabId === 'scaryoke') {
+                        loadScaryoke();
                     }
                 }
 
@@ -760,6 +824,117 @@ public class TabletLyricsServer : ITabletLyricsServer
                         msgDiv.style.color = "var(--accent)";
                         msgDiv.textContent = "Network error. Try again.";
                     }
+                    // --- SCARYOKE WHEEL CLIENT IMPLEMENTATION ---
+                    let categories = [];
+                    let currentAngle = 0;
+                    let startAngle = 0;
+                    let target = 0;
+                    let startTime = null;
+                    let duration = 4500; // Matches WPF animation
+                    const canvas = document.getElementById("wheel-canvas");
+                    const colors = ["#6A0DAD", "#FF6D00", "#00838F", "#C2185B", "#4527A0", "#EF6C00", "#00695C", "#AD1457", "#5E35B1", "#F57C00", "#00796B", "#D81B60"];
+
+                    async function loadScaryoke() {
+                        try {
+                            const res = await fetch("/api/scaryoke/categories");
+                            if (res.ok) {
+                                categories = await res.json();
+                                drawWheel(currentAngle * Math.PI / 180);
+                            }
+                        } catch (err) {
+                            console.error("Failed to load scaryoke categories", err);
+                        }
+                    }
+
+                    function drawWheel(angleOffset) {
+                        if (!canvas || categories.length === 0) return;
+                        const ctx = canvas.getContext("2d");
+                        const r = canvas.width / 2;
+                        
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        
+                        let currentStartAngle = angleOffset - Math.PI / 2; // Offset so 0 is at 12 o'clock
+                        
+                        for (let i = 0; i < categories.length; i++) {
+                            const segment = categories[i];
+                            const sweepRad = (segment.sweep || segment.Sweep) * Math.PI / 180;
+                            const currentEndAngle = currentStartAngle + sweepRad;
+                            
+                            ctx.fillStyle = segment.color || segment.Color || "#8A2BE2";
+                            ctx.beginPath();
+                            ctx.moveTo(r, r);
+                            ctx.arc(r, r, r - 2, currentStartAngle, currentEndAngle);
+                            ctx.closePath();
+                            ctx.fill();
+                            ctx.strokeStyle = "#1E133A";
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            
+                            // Segment Label text along the radius
+                            ctx.save();
+                            ctx.translate(r, r);
+                            ctx.rotate(currentStartAngle + sweepRad / 2);
+                            ctx.fillStyle = segment.textColor || segment.TextColor || "#ffffff";
+                            
+                            const segName = segment.name || segment.Name || "";
+                            const isDjsChoice = segName.toLowerCase() === "dj's choice";
+                            
+                            ctx.font = isDjsChoice ? "bold 13px -apple-system, sans-serif" : "bold 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+                            ctx.textAlign = "right";
+                            
+                            let text = isDjsChoice ? "💀" : segName;
+                            if (text.length > 15) text = text.substring(0, 13) + "...";
+                            
+                            ctx.fillText(text, r - 15, 3);
+                            ctx.restore();
+                            
+                            currentStartAngle = currentEndAngle;
+                        }
+                        
+                        // Center pin
+                        ctx.fillStyle = "#1e133a";
+                        ctx.beginPath();
+                        ctx.arc(r, r, 12, 0, 2 * Math.PI);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.strokeStyle = "#ff6e00";
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+
+                    function animateSpin(timestamp) {
+                        if (!startTime) startTime = timestamp;
+                        const elapsed = timestamp - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        const easeProgress = 1 - Math.pow(1 - progress, 2.5);
+                        const current = startAngle + (target - startAngle) * easeProgress;
+                        
+                        drawWheel(current * Math.PI / 180);
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animateSpin);
+                        } else {
+                            currentAngle = target % 360;
+                        }
+                    }
+
+                    async function requestSpin() {
+                        const btn = document.getElementById("btn-spin-wheel");
+                        btn.disabled = true;
+                        document.getElementById("scaryoke-result").textContent = "Spinning...";
+                        try {
+                            const res = await fetch("/api/scaryoke/spin", { method: "POST" });
+                            if (!res.ok) {
+                                btn.disabled = false;
+                                document.getElementById("scaryoke-result").textContent = "Failed to trigger spin.";
+                            }
+                        } catch (err) {
+                            console.error("Failed to request spin", err);
+                            btn.disabled = false;
+                            document.getElementById("scaryoke-result").textContent = "Network error.";
+                        }
+                    }
                 }
             </script>
         </body>
@@ -857,6 +1032,46 @@ public class TabletLyricsServer : ITabletLyricsServer
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error broadcasting lyrics: {ex.Message}");
+        }
+    }
+
+    private void OnScaryokeSpinStarted(object? sender, EventArgs e)
+    {
+        _ = BroadcastScaryokeSpinStartedAsync();
+    }
+
+    private void OnScaryokeSpinCompleted(object? sender, string category)
+    {
+        _ = BroadcastScaryokeSpinCompletedAsync(category);
+    }
+
+    private async Task BroadcastScaryokeSpinStartedAsync()
+    {
+        if (_webApp == null) return;
+        try
+        {
+            var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
+            double finalAngle = _scaryokeWindow.TargetAngle % 360;
+            var categories = _scaryokeWindow.ViewModel.WheelSegments;
+            await hubContext.Clients.All.SendAsync("ScaryokeSpinStarted", finalAngle, categories);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error broadcasting scaryoke spin start: {ex.Message}");
+        }
+    }
+
+    private async Task BroadcastScaryokeSpinCompletedAsync(string category)
+    {
+        if (_webApp == null) return;
+        try
+        {
+            var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
+            await hubContext.Clients.All.SendAsync("ScaryokeSpinCompleted", category);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error broadcasting scaryoke spin complete: {ex.Message}");
         }
     }
 }

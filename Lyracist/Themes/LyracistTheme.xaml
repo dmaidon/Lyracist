@@ -103,9 +103,11 @@
         <Setter Property="Height" Value="22" />
     </Style>
 
-    <!-- Ensure ScrollBar thumbs never shrink to microscopic sizes -->
+    <!-- Ensure ScrollBar thumbs are locked to a fixed 45px size -->
     <Style TargetType="Thumb" BasedOn="{StaticResource {x:Type Thumb}}">
         <Setter Property="MinHeight" Value="45" />
+        <Setter Property="MaxHeight" Value="45" />
         <Setter Property="MinWidth" Value="45" />
+        <Setter Property="MaxWidth" Value="45" />
     </Style>
 </ResourceDictionary>

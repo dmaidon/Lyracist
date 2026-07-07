@@ -58,7 +58,7 @@
             <!-- CDG / MP4 Frame Display -->
             <Image Source="{Binding Frame}"
                    Stretch="Uniform"
-                   RenderOptions.BitmapScalingMode="Fant"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center" />
 

@@ -1,18 +1,17 @@
 <Application x:Class="Lyracist.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-
-                <!-- Lyracist Theme -->
-                <ResourceDictionary Source="pack://application:,,,/Themes/LyracistTheme.xaml" />
 
                 <!-- WPF UI Theme and Controls -->
                 <ui:ThemesDictionary Theme="Dark" />
                 <ui:ControlsDictionary />
 
+                <!-- Lyracist Theme -->
+                <ResourceDictionary Source="pack://application:,,,/Themes/LyracistTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Global Styles -->
@@ -33,6 +32,10 @@
                 <Setter Property="FontFamily" Value="Segoe UI Variable" />
             </Style>
 
+            <Style TargetType="{x:Type Thumb}">
+                <Setter Property="MinHeight" Value="80" />
+                <Setter Property="MaxHeight" Value="80" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

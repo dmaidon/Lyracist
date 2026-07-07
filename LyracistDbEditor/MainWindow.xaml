@@ -1,0 +1,252 @@
+<Window x:Class="LyracistDbEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LyracistDbEditor"
+        mc:Ignorable="d"
+        Title="Lyracist Database Editor &amp; Metadata Scanner"
+        Height="700" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource ApplicationBackgroundBrush}">
+
+    <Window.Resources>
+        <Style TargetType="{x:Type Thumb}">
+            <Setter Property="MinHeight" Value="80" />
+            <Setter Property="MaxHeight" Value="80" />
+        </Style>
+
+        <local:NullToBoolConverter x:Key="NullToBoolConverter" />
+        <local:InvertBoolConverter x:Key="InvertBoolConverter" />
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="12" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header Panel with Title and Stats -->
+        <Border Grid.Row="0" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="Lyracist Database Manager" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                    <TextBlock Text="Modify song details or run slow metadata scans without disrupting Lyracist" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="{DynamicResource ControlFillColorDefaultBrush}" CornerRadius="4" Padding="12,6" Margin="0,0,12,0" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="MusicNote224" Margin="0,0,6,0" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" />
+                            <TextBlock Text="Total Tracks: " FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding TotalSongCount}" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="{DynamicResource ControlFillColorDefaultBrush}" CornerRadius="4" Padding="12,6" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Warning24" Margin="0,0,6,0" Foreground="#E0A96D" />
+                            <TextBlock Text="Unknown Artist: " FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding MissingArtistCount}" FontWeight="Bold" Foreground="#E0A96D" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <!-- Song Edit Pane -->
+                <ColumnDefinition Width="16" />
+                <!-- Spacer -->
+                <ColumnDefinition Width="2*" />
+                <!-- Scanner Pane -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Column 1: Song Search & Editing -->
+            <Border Grid.Column="0" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Search and Filters -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ui:TextBox Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Search by title, artist, or file path..." Height="35">
+                            <ui:TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                            </ui:TextBox.InputBindings>
+                        </ui:TextBox>
+
+                        <ui:Button Grid.Column="2" Content="Search" Icon="{ui:SymbolIcon Search24}" Command="{Binding SearchCommand}" Appearance="Primary" Height="35" Width="100" />
+                    </Grid>
+
+                    <!-- Results List -->
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="6" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <CheckBox Grid.Row="0" Content="Only show songs missing an artist ('Unknown Artist')" IsChecked="{Binding OnlyShowMissingArtist, Mode=TwoWay}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+                        <ListBox Grid.Row="2" ItemsSource="{Binding Songs}" SelectedItem="{Binding SelectedSong, Mode=TwoWay}" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Background="{DynamicResource ControlFillColorDefaultBrush}">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                    <Setter Property="ContextMenu">
+                                        <Setter.Value>
+                                            <ContextMenu>
+                                                <MenuItem Header="Scan Metadata for this file"
+                                                          Command="{Binding DataContext.ScanSongMetadataCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                          CommandParameter="{Binding}" />
+                                            </ContextMenu>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0" />
+                                            <TextBlock Text="{Binding FilePath}" FontSize="10" Foreground="{DynamicResource TextFillColorTertiaryBrush}" FontStyle="Italic" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" VerticalAlignment="Center" CornerRadius="4" Padding="6,3" Margin="8,0,0,0" BorderThickness="1">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding KaraokeType}" Value="ZIPCDG">
+                                                            <Setter Property="Background" Value="#324B30" />
+                                                            <Setter Property="BorderBrush" Value="#4C6E4A" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding KaraokeType}" Value="MP4">
+                                                            <Setter Property="Background" Value="#2D4660" />
+                                                            <Setter Property="BorderBrush" Value="#44648A" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding KaraokeType}" Value="MP3G">
+                                                            <Setter Property="Background" Value="#483354" />
+                                                            <Setter Property="BorderBrush" Value="#674B78" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding KaraokeType}" FontSize="10" FontWeight="Bold" Foreground="White" />
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+
+                    <!-- Edit Frame -->
+                    <Border Grid.Row="4" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
+                        <StackPanel>
+                            <TextBlock Text="Edit Track Details" FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Title" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                    <ui:TextBox Text="{Binding EditTitle, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Track title..." Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" GotFocus="TextBox_GotFocus" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Artist" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                    <ui:TextBox Text="{Binding EditArtist, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Artist name..." Height="35" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" GotFocus="TextBox_GotFocus" />
+                                </StackPanel>
+                            </Grid>
+
+                            <ui:Button Content="Save Changes" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveSongCommand}" Appearance="Primary" HorizontalAlignment="Right" Height="35" Width="140" IsEnabled="{Binding SelectedSong, Converter={StaticResource NullToBoolConverter}}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Column 3: Metadata Scanner -->
+            <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="Slow Metadata Extractor" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Scans files missing an artist and extracts metadata tags using FFprobe. Safe to run while hosting." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                    </StackPanel>
+
+                    <!-- Progress and Controls -->
+                    <Border Grid.Row="2" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <ui:Button Grid.Column="0" Content="Start Scan" Icon="{ui:SymbolIcon Play24}" Command="{Binding StartScanCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsScanning, Converter={StaticResource InvertBoolConverter}}" />
+                                <ui:Button Grid.Column="2" Content="Stop Scan" Icon="{ui:SymbolIcon Stop24}" Command="{Binding StopScanCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsScanning}" />
+                            </Grid>
+
+                            <TextBlock Text="{Binding ScanProgressText}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,0,0,6" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <ProgressBar Value="{Binding ScanProgressPercent}" Height="6" Maximum="100" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Scan Logs -->
+                    <Grid Grid.Row="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="6" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Activity Log" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+                        <ListBox Grid.Row="2" ItemsSource="{Binding ScanLog}" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Background="{DynamicResource ControlFillColorDefaultBrush}" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" FontSize="11" Foreground="#95D191" TextWrapping="Wrap" Margin="0,2" FontFamily="Consolas" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

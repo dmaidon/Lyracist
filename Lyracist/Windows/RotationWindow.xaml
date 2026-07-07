@@ -201,6 +201,7 @@
                     </ModelVisual3D.Content>
                 </ModelVisual3D>
             </Viewport3D>
+            <Canvas x:Name="CrawlOverlayCanvas" Panel.ZIndex="4" ClipToBounds="True" />
         </Grid>
 
         <!-- Vegas / Broadway Marquee panel -->

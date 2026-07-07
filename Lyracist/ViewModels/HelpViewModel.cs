@@ -86,7 +86,7 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "Server24",
                 AccentColor = "#8764B8",
                 DescriptionHeader = "SignalR Performer Portal Host Port Settings",
-                DescriptionContent = "• SignalR Server Port: Sets the hosting socket port (default: 5005). Ensure the port is open in Windows Defender Firewall.\n\n• Status indicators: Displays active connection state and device sockets.\n\n• Start/Stop Broadcast: Toggles hosting of the performer web portal. Performers on the same local network can access the portal at http://[Your-KJ-Computer-IP]:5005."
+                DescriptionContent = "• SignalR Server Port: Sets the hosting socket port (default: 5005). Ensure the port is open in Windows Defender Firewall.\n\n• Local Wi-Fi & Travel Routers: Host a private offline network by connecting your laptop and performers' devices to a local Wi-Fi travel router. Performers can connect to http://[Your-Laptop-IP]:5005 without needing any internet connection.\n\n• Live Performer Portal: Once logged in, performers can view rotation queues, search the song library, submit song requests, and view/spin the synchronized Scaryoke wheel.\n\n• Start/Stop Broadcast: Toggles hosting of the performer web portal."
             },
             new HelpTopic
             {
@@ -118,7 +118,7 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "PlayCircle24",
                 AccentColor = "#FF8E53",
                 DescriptionHeader = "Customizing Wheel Segments & Genres",
-                DescriptionContent = "• Wheel Categories: View and edit the list of segments displayed on the Scaryoke wheel. You can customize the name of each category (e.g., '90s Pop', 'Metallica', 'Dolly Parton').\n\n• Category Bounds: Enforces a maximum of 12 categories (for wheel design formatting) and a minimum of 2 categories (to ensure a valid choice is selectable).\n\n• Segment Landings: When the wheel lands on a category, the overlay board and display monitor announce the selection, instructing the current performer to pick any song of their choice from that category."
+                DescriptionContent = "• Wheel Categories: View and edit the list of segments displayed on the Scaryoke wheel. You can customize the name of each category (e.g., '90s Pop', 'Metallica', 'Dolly Parton').\n\n• Category Bounds: Enforces a maximum of 8 categories (for wheel design formatting) and a minimum of 2 categories (to ensure a valid choice is selectable).\n\n• Performer Portal Synchronization: The Scaryoke wheel is completely synchronized over Wi-Fi with connected tablets and mobile phones. When spun, the canvas-based wheel on the performer's device spins and lands on the exact same category as the DJ's screen.\n\n• Remote Spin Request: Performers can trigger the Scaryoke wheel directly from their mobile portal by clicking 'SPIN WHEEL', launching the wheel animation on the DJ's monitor in real time."
             }
         };
 

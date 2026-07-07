@@ -55,6 +55,7 @@
                     
                     <Image Source="{Binding FramePreview}"
                            Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center" />
                 </Grid>

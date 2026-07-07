@@ -152,6 +152,65 @@
                                                 Height="80"
                                                 VerticalScrollBarVisibility="Auto" />
                                 </StackPanel>
+
+                                <!-- Spaceship Overlay Settings -->
+                                <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                                <TextBlock Text="Spaceship Overlay Settings" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8" />
+                                
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Font Size" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                        <ui:TextBox Text="{Binding CrawlSpaceshipFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="26" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Flight Duration (sec)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" ToolTip="Duration in seconds (larger is slower)" />
+                                        <ui:TextBox Text="{Binding CrawlSpaceshipDuration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="13" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="4">
+                                        <TextBlock Text="Frequency (sec)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" ToolTip="Interval in seconds between spawns" />
+                                        <ui:TextBox Text="{Binding CrawlSpaceshipFrequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="60" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Text="Custom Text Snippets (Max 10)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                
+                                <ListBox ItemsSource="{Binding CrawlSpaceshipSnippets}"
+                                         SelectedItem="{Binding SelectedSpaceshipSnippet, Mode=TwoWay}"
+                                         Height="120"
+                                         Margin="0,0,0,8">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Text}"
+                                                      IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                      Command="{Binding DataContext.SaveSpaceshipSnippetsCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                      VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <ui:TextBox Text="{Binding NewSpaceshipSnippetText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="New snippet message..." />
+                                    <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddSpaceshipSnippetCommand}" Appearance="Primary" />
+                                    <ui:Button Grid.Column="4" Content="Remove" Command="{Binding RemoveSpaceshipSnippetCommand}" Appearance="Secondary" />
+                                </Grid>
                             </StackPanel>
 
                             <CheckBox Content="Mirror Lyrics display on control view"

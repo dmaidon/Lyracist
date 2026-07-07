@@ -77,8 +77,20 @@ public partial class ScaryokeWindow : Window
 
     private void OnRendering(object? sender, EventArgs e)
     {
-        double angle = WheelRotate.Angle;
-        int currentTickIndex = (int)Math.Floor(angle / SegmentSweep);
+        double angle = (360 - (WheelRotate.Angle % 360)) % 360;
+        int currentTickIndex = 0;
+        double currentStart = 0;
+
+        for (int i = 0; i < _vm.WheelSegments.Count; i++)
+        {
+            double currentEnd = currentStart + _vm.WheelSegments[i].Sweep;
+            if (angle >= currentStart && angle < currentEnd)
+            {
+                currentTickIndex = i;
+                break;
+            }
+            currentStart = currentEnd;
+        }
 
         if (_lastTickIndex == -1)
         {
@@ -100,16 +112,21 @@ public partial class ScaryokeWindow : Window
     public event EventHandler? SpinStarted;
     public event EventHandler<string>? SpinCompleted;
 
+    public ScaryokeViewModel ViewModel => _vm;
+    private System.Windows.Media.MediaPlayer? _laughMediaPlayer;
+
     public ScaryokeWindow(ScaryokeViewModel vm)
     {
         InitializeComponent();
         _vm = vm;
         DataContext = vm;
+        _vm.RebuildWheelSegments();
         BuildWheel();
     }
 
     public void RebuildWheel()
     {
+        _vm.RebuildWheelSegments();
         WheelCanvas.Children.Clear();
         BuildWheel();
     }
@@ -141,31 +158,33 @@ public partial class ScaryokeWindow : Window
 
     private void BuildWheel()
     {
-        var categories = ScaryokeViewModel.WheelCategories;
+        var segments = _vm.WheelSegments;
+        if (segments == null || segments.Count == 0) return;
         var strokeBrush = new SolidColorBrush(Color.FromRgb(0x1E, 0x13, 0x3A));
+        double start = 0;
 
-        for (int i = 0; i < categories.Length; i++)
+        for (int i = 0; i < segments.Count; i++)
         {
-            double start = i * SegmentSweep;
-            double end = start + SegmentSweep;
+            double sweep = segments[i].Sweep;
+            double end = start + sweep;
 
             var figure = new PathFigure { StartPoint = new Point(Radius, Radius), IsClosed = true };
             figure.Segments.Add(new LineSegment(Polar(start, Radius), true));
             figure.Segments.Add(new ArcSegment(Polar(end, Radius), new Size(Radius, Radius), 0,
                 false, SweepDirection.Clockwise, true));
 
-            var slice = new Path
+            var sliceColor = (Color)ColorConverter.ConvertFromString(segments[i].Color);
+            var slice = new System.Windows.Shapes.Path
             {
                 Data = new PathGeometry(new[] { figure }),
-                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(SegmentColors[i % SegmentColors.Length])),
+                Fill = new SolidColorBrush(sliceColor),
                 Stroke = strokeBrush,
                 StrokeThickness = 2
             };
             WheelCanvas.Children.Add(slice);
 
-            // Label reads along the radius; flipped on the left half so it
-            // isn't upside down.
-            double mid = start + SegmentSweep / 2;
+            // Label
+            double mid = start + sweep / 2;
             var labelPos = Polar(mid, Radius * 0.62);
             double textAngle = mid - 90;
             if (mid > 180) textAngle += 180;
@@ -177,11 +196,14 @@ public partial class ScaryokeWindow : Window
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new RotateTransform(textAngle)
             };
+
+            var textColor = (Color)ColorConverter.ConvertFromString(segments[i].TextColor);
+            bool isDjsChoice = string.Equals(segments[i].Name, "DJ's Choice", StringComparison.OrdinalIgnoreCase);
             label.Children.Add(new TextBlock
             {
-                Text = categories[i],
-                Foreground = Brushes.White,
-                FontSize = 14,
+                Text = isDjsChoice ? "💀" : segments[i].Name,
+                Foreground = new SolidColorBrush(textColor),
+                FontSize = isDjsChoice ? 16 : 13,
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                 VerticalAlignment = System.Windows.VerticalAlignment.Center
@@ -189,26 +211,41 @@ public partial class ScaryokeWindow : Window
             Canvas.SetLeft(label, labelPos.X - label.Width / 2);
             Canvas.SetTop(label, labelPos.Y - label.Height / 2);
             WheelCanvas.Children.Add(label);
+
+            start = end;
         }
     }
 
     private void OnSpinClick(object sender, RoutedEventArgs e) => Spin();
 
-    private void Spin()
+    public double TargetAngle { get; private set; }
+    public double SpinDuration { get; private set; }
+
+    public void Spin(double? forceTarget = null)
     {
         if (_isSpinning) return;
         _isSpinning = true;
         SpinButton.IsEnabled = false;
 
-        SpinStarted?.Invoke(this, EventArgs.Empty);
-        System.Media.SystemSounds.Asterisk.Play();
-
         _lastTickIndex = -1;
         CompositionTarget.Rendering += OnRendering;
 
-        // 4-6 full turns plus a random landing offset, easing to a stop.
-        double target = _currentAngle + 1440 + Random.Shared.NextDouble() * 720;
-        var animation = new DoubleAnimation(_currentAngle, target, TimeSpan.FromSeconds(4.5))
+        // Rebuild segments on start spin to place "DJ's Choice" in a fresh random index
+        RebuildWheel();
+
+        // 4-7 full turns plus a random landing offset, easing to a stop.
+        double target = forceTarget ?? (_currentAngle + 1440 + Random.Shared.NextDouble() * 1080);
+        TargetAngle = target;
+
+        // Calculate dynamic duration based on rotation angle (harder spin = more rotations = longer duration)
+        double totalDegrees = target - _currentAngle;
+        double durationSec = 3.2 + (totalDegrees / 360.0) * 0.4;
+        SpinDuration = durationSec;
+
+        SpinStarted?.Invoke(this, EventArgs.Empty);
+        System.Media.SystemSounds.Asterisk.Play();
+
+        var animation = new DoubleAnimation(_currentAngle, target, TimeSpan.FromSeconds(SpinDuration))
         {
             DecelerationRatio = 0.9,
             FillBehavior = FillBehavior.HoldEnd
@@ -225,10 +262,67 @@ public partial class ScaryokeWindow : Window
             _isSpinning = false;
             SpinButton.IsEnabled = true;
 
-            int index = (int)(((360 - _currentAngle) % 360) / SegmentSweep) % ScaryokeViewModel.WheelCategories.Length;
-            string category = ScaryokeViewModel.WheelCategories[index];
+            // Determine landed segment using non-uniform sweeps
+            double targetAngle = (360 - _currentAngle) % 360;
+            Lyracist.ViewModels.WheelSegment landedSegment = _vm.WheelSegments[0];
+            double currentStart = 0;
+            for (int i = 0; i < _vm.WheelSegments.Count; i++)
+            {
+                double currentEnd = currentStart + _vm.WheelSegments[i].Sweep;
+                if (targetAngle >= currentStart && targetAngle < currentEnd)
+                {
+                    landedSegment = _vm.WheelSegments[i];
+                    break;
+                }
+                currentStart = currentEnd;
+            }
+            string category = landedSegment.Name;
 
-            System.Media.SystemSounds.Exclamation.Play();
+            // Play custom laughter if landing on DJ's Choice
+            if (string.Equals(category, "DJ's Choice", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    string[] laughFiles = { "evil-laugh-deep.mp3", "evil-laugh-reverb.mp3" };
+                    string chosenFile = laughFiles[Random.Shared.Next(laughFiles.Length)];
+                    string appDir = AppDomain.CurrentDomain.BaseDirectory;
+                    string filePath = System.IO.Path.Combine(appDir, "Assets", chosenFile);
+
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        _laughMediaPlayer?.Close();
+                        _laughMediaPlayer = new System.Windows.Media.MediaPlayer();
+                        _laughMediaPlayer.Open(new Uri(filePath));
+
+                        EventHandler? endedHandler = null;
+                        endedHandler = (s, ev) =>
+                        {
+                            if (_laughMediaPlayer != null)
+                            {
+                                _laughMediaPlayer.MediaEnded -= endedHandler;
+                                try
+                                {
+                                    string nextFile = System.IO.Path.Combine(appDir, "Assets", "be_afraid.mp3");
+                                    if (System.IO.File.Exists(nextFile))
+                                    {
+                                        _laughMediaPlayer.Open(new Uri(nextFile));
+                                        _laughMediaPlayer.Play();
+                                    }
+                                }
+                                catch { }
+                            }
+                        };
+                        _laughMediaPlayer.MediaEnded += endedHandler;
+                        _laughMediaPlayer.Play();
+                    }
+                }
+                catch { }
+            }
+            else
+            {
+                System.Media.SystemSounds.Exclamation.Play();
+            }
+
             SpinCompleted?.Invoke(this, category);
 
             if (_vm.ApplyResult(category))
