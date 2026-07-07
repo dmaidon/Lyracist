@@ -110,13 +110,13 @@ public class LibraryService : ILibraryService
 
             if (string.IsNullOrWhiteSpace(query))
             {
-                return context.Songs.AsNoTracking().Take(150).ToList().Select(MapToKaraokeSong);
+                return context.Songs.AsNoTracking().Where(s => s.IsKaraoke).Take(150).ToList().Select(MapToKaraokeSong);
             }
 
             var searchService = new SearchService(context);
             // Run matching search on SQLite FTS5 table
             var results = Task.Run(() => searchService.Search(query)).Result;
-            return results.Select(MapToKaraokeSong);
+            return results.Where(s => s.IsKaraoke).Select(MapToKaraokeSong);
         }
         catch (Exception ex)
         {
@@ -133,13 +133,13 @@ public class LibraryService : ILibraryService
 
             if (string.IsNullOrWhiteSpace(query))
             {
-                var all = await context.Songs.AsNoTracking().Take(150).ToListAsync();
+                var all = await context.Songs.AsNoTracking().Where(s => s.IsKaraoke).Take(150).ToListAsync();
                 return all.Select(MapToKaraokeSong);
             }
 
             var searchService = new SearchService(context);
             var results = await searchService.Search(query);
-            return results.Select(MapToKaraokeSong);
+            return results.Where(s => s.IsKaraoke).Select(MapToKaraokeSong);
         }
         catch (Exception ex)
         {

@@ -350,14 +350,14 @@ namespace Lyracist.Data.Services
                         }
                     }
 
-                    if (!parsed.IsKaraoke) continue;
+                    string typeLabel = parsed.IsKaraoke ? parsed.KaraokeType : "Audio";
 
                     if (existingSongsMap.TryGetValue(file, out var existing))
                     {
                         existing.Title = parsed.Title;
                         existing.Artist = parsed.Artist;
-                        existing.IsKaraoke = true;
-                        existing.KaraokeType = parsed.KaraokeType;
+                        existing.IsKaraoke = parsed.IsKaraoke;
+                        existing.KaraokeType = typeLabel;
                         songsToUpdate.Add(existing);
                     }
                     else
@@ -367,8 +367,8 @@ namespace Lyracist.Data.Services
                             Title = parsed.Title,
                             Artist = parsed.Artist,
                             FilePath = file,
-                            IsKaraoke = true,
-                            KaraokeType = parsed.KaraokeType,
+                            IsKaraoke = parsed.IsKaraoke,
+                            KaraokeType = typeLabel,
                             Duration = 0,
                             KeyDefault = 0,
                             TempoDefault = 1.0,
