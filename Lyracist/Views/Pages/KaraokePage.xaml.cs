@@ -30,4 +30,12 @@ public partial class KaraokePage : Page
             }
         }
     }
+
+    private void OnSongDoubleClicked(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (DataContext is KaraokeViewModel vm && vm.SelectedSong != null)
+        {
+            vm.AddSongToRotationCommand.Execute(vm.SelectedSong);
+        }
+    }
 }

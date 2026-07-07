@@ -10,6 +10,27 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lyracist.ViewModels;
 
+public partial class PendingSong : ObservableObject
+{
+    [ObservableProperty]
+    private string _title = string.Empty;
+
+    [ObservableProperty]
+    private string _artist = string.Empty;
+
+    [ObservableProperty]
+    private string _key = "0";
+
+    [ObservableProperty]
+    private string _notes = string.Empty;
+
+    [ObservableProperty]
+    private string _source = "Local";
+
+    [ObservableProperty]
+    private string _externalLink = string.Empty;
+}
+
 public partial class RotationViewModel : BaseViewModel
 {
     private readonly IDisplayService _display;
@@ -23,10 +44,29 @@ public partial class RotationViewModel : BaseViewModel
 
     public ObservableCollection<string> SingerNames { get; } = new();
 
-    private readonly Dictionary<string, List<(string Title, string Artist, string Key, string Notes, string Source, string ExternalLink)>> _pendingSingerSongs = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, ObservableCollection<PendingSong>> _pendingSingerSongs = new(StringComparer.OrdinalIgnoreCase);
+
+    public ObservableCollection<PendingSong> SelectedSingerQueue { get; } = new();
 
     [ObservableProperty]
     private Singer? _selectedSinger;
+
+    partial void OnSelectedSingerChanged(Singer? oldValue, Singer? newValue)
+    {
+        RefreshSelectedSingerQueue();
+    }
+
+    public void RefreshSelectedSingerQueue()
+    {
+        SelectedSingerQueue.Clear();
+        if (SelectedSinger != null && _pendingSingerSongs.TryGetValue(SelectedSinger.Name, out var queue))
+        {
+            foreach (var song in queue)
+            {
+                SelectedSingerQueue.Add(song);
+            }
+        }
+    }
 
     [ObservableProperty]
     private string _newSingerName = string.Empty;
@@ -153,10 +193,23 @@ public partial class RotationViewModel : BaseViewModel
                 // Buffer/queue the song request for this singer
                 if (!_pendingSingerSongs.TryGetValue(name, out var list))
                 {
-                    list = new();
+                    list = new ObservableCollection<PendingSong>();
                     _pendingSingerSongs[name] = list;
                 }
-                list.Add((title, artist, key, notes, source, externalLink));
+                list.Add(new PendingSong
+                {
+                    Title = title,
+                    Artist = artist,
+                    Key = key,
+                    Notes = notes,
+                    Source = source,
+                    ExternalLink = externalLink
+                });
+
+                if (SelectedSinger != null && SelectedSinger.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    RefreshSelectedSingerQueue();
+                }
             }
             _display.UpdateRotation(Rotation.ToList());
             RotationStateChanged?.Invoke();
@@ -326,6 +379,11 @@ public partial class RotationViewModel : BaseViewModel
                 });
             }
 
+            if (SelectedSinger != null && SelectedSinger.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+            {
+                RefreshSelectedSingerQueue();
+            }
+
             _display.UpdateRotation(Rotation.ToList());
             RotationStateChanged?.Invoke();
         }
@@ -472,6 +530,11 @@ public partial class RotationViewModel : BaseViewModel
             singer.Source = "Local";
         }
 
+        if (SelectedSinger != null && SelectedSinger.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+        {
+            RefreshSelectedSingerQueue();
+        }
+
         // Add to end of active rotation list
         Rotation.Add(singer);
 
@@ -528,5 +591,51 @@ public partial class RotationViewModel : BaseViewModel
     {
         if (singer == null) return;
         InactiveSingers.Remove(singer);
+    }
+
+    [RelayCommand]
+    private void MovePendingSongUp(PendingSong song)
+    {
+        if (SelectedSinger == null || song == null) return;
+        if (_pendingSingerSongs.TryGetValue(SelectedSinger.Name, out var queue))
+        {
+            int index = queue.IndexOf(song);
+            if (index > 0)
+            {
+                queue.RemoveAt(index);
+                queue.Insert(index - 1, song);
+                RefreshSelectedSingerQueue();
+                RotationStateChanged?.Invoke();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void MovePendingSongDown(PendingSong song)
+    {
+        if (SelectedSinger == null || song == null) return;
+        if (_pendingSingerSongs.TryGetValue(SelectedSinger.Name, out var queue))
+        {
+            int index = queue.IndexOf(song);
+            if (index >= 0 && index < queue.Count - 1)
+            {
+                queue.RemoveAt(index);
+                queue.Insert(index + 1, song);
+                RefreshSelectedSingerQueue();
+                RotationStateChanged?.Invoke();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void RemovePendingSong(PendingSong song)
+    {
+        if (SelectedSinger == null || song == null) return;
+        if (_pendingSingerSongs.TryGetValue(SelectedSinger.Name, out var queue))
+        {
+            queue.Remove(song);
+            RefreshSelectedSingerQueue();
+            RotationStateChanged?.Invoke();
+        }
     }
 }

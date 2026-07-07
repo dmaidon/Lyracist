@@ -688,22 +688,26 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         if (song == null) return;
 
-        if (!string.IsNullOrWhiteSpace(NewSingerName))
+        string targetSingerName = NewSingerName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(targetSingerName))
         {
-            Rotation.AddSinger(NewSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local", song.AudioPath);
-            NewSingerName = string.Empty;
-            NewSingerNotes = string.Empty;
-            NewSingerKey = "0";
-            LoadSingerNames();
+            if (Rotation.SelectedSinger != null)
+            {
+                targetSingerName = Rotation.SelectedSinger.Name;
+            }
+            else
+            {
+                targetSingerName = "Singer";
+            }
         }
-        else if (Rotation.SelectedSinger != null)
-        {
-            Rotation.AddSinger(Rotation.SelectedSinger.Name, song.Title, song.Artist, "0", string.Empty, "Local", song.AudioPath);
-        }
-        else
-        {
-            Rotation.AddSinger("Singer", song.Title, song.Artist, "0", string.Empty, "Local", song.AudioPath);
-        }
+
+        Rotation.AddSinger(targetSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local", song.AudioPath);
+
+        // Reset inputs
+        NewSingerName = string.Empty;
+        NewSingerNotes = string.Empty;
+        NewSingerKey = "0";
+        LoadSingerNames();
     }
 
     [RelayCommand]
@@ -711,49 +715,77 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         if (track == null) return;
 
-        if (!string.IsNullOrWhiteSpace(NewSingerName))
+        string targetSingerName = NewSingerName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(targetSingerName))
         {
-            Rotation.AddSinger(NewSingerName, track.Title, track.Artist, NewSingerKey, NewSingerNotes, track.Source, track.Url);
-            NewSingerName = string.Empty;
-            NewSingerNotes = string.Empty;
-            NewSingerKey = "0";
-            LoadSingerNames();
+            if (Rotation.SelectedSinger != null)
+            {
+                targetSingerName = Rotation.SelectedSinger.Name;
+            }
+            else
+            {
+                targetSingerName = "Singer";
+            }
         }
-        else if (Rotation.SelectedSinger != null)
-        {
-            Rotation.AddSinger(Rotation.SelectedSinger.Name, track.Title, track.Artist, "0", string.Empty, track.Source, track.Url);
-        }
-        else
-        {
-            Rotation.AddSinger("Singer", track.Title, track.Artist, "0", string.Empty, track.Source, track.Url);
-        }
+
+        Rotation.AddSinger(targetSingerName, track.Title, track.Artist, NewSingerKey, NewSingerNotes, track.Source, track.Url);
+
+        // Reset inputs
+        NewSingerName = string.Empty;
+        NewSingerNotes = string.Empty;
+        NewSingerKey = "0";
+        LoadSingerNames();
     }
 
     [RelayCommand]
     private void AddHistorySongToRotation(SingerHistoryEntry entry)
     {
         if (entry == null) return;
-        Rotation.AddSinger(NewSingerName, entry.SongTitle, entry.Artist, "0", string.Empty, entry.Source, entry.Link);
+
+        string targetSingerName = NewSingerName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(targetSingerName))
+        {
+            if (Rotation.SelectedSinger != null)
+            {
+                targetSingerName = Rotation.SelectedSinger.Name;
+            }
+            else
+            {
+                targetSingerName = "Singer";
+            }
+        }
+
+        Rotation.AddSinger(targetSingerName, entry.SongTitle, entry.Artist, "0", string.Empty, entry.Source, entry.Link);
     }
 
     [RelayCommand]
     private void AddToRotation()
     {
-        if (string.IsNullOrWhiteSpace(NewSingerName))
-            return;
+        string targetSingerName = NewSingerName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(targetSingerName))
+        {
+            if (Rotation.SelectedSinger != null)
+            {
+                targetSingerName = Rotation.SelectedSinger.Name;
+            }
+            else
+            {
+                return;
+            }
+        }
 
         if (SelectedSong != null)
         {
-            Rotation.AddSinger(NewSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local", SelectedSong.AudioPath);
+            Rotation.AddSinger(targetSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local", SelectedSong.AudioPath);
         }
         else if (SelectedPartyTymeTrack != null)
         {
-            Rotation.AddSinger(NewSingerName, SelectedPartyTymeTrack.Title, SelectedPartyTymeTrack.Artist, NewSingerKey,
+            Rotation.AddSinger(targetSingerName, SelectedPartyTymeTrack.Title, SelectedPartyTymeTrack.Artist, NewSingerKey,
                 $"[Party Tyme ID: {SelectedPartyTymeTrack.TrackId}] {NewSingerNotes}", "PartyTyme");
         }
         else if (SelectedExternalTrack != null)
         {
-            Rotation.AddSinger(NewSingerName, SelectedExternalTrack.Title, SelectedExternalTrack.Artist, NewSingerKey,
+            Rotation.AddSinger(targetSingerName, SelectedExternalTrack.Title, SelectedExternalTrack.Artist, NewSingerKey,
                 NewSingerNotes, SelectedExternalTrack.Source, SelectedExternalTrack.Url);
         }
         else if (!string.IsNullOrWhiteSpace(CustomExternalUrl))
@@ -763,7 +795,7 @@ public partial class KaraokeViewModel : BaseViewModel
             {
                 string title = string.IsNullOrWhiteSpace(CustomExternalTitle) ? parsed.Title : CustomExternalTitle;
                 string artist = string.IsNullOrWhiteSpace(CustomExternalArtist) ? parsed.Artist : CustomExternalArtist;
-                Rotation.AddSinger(NewSingerName, title, artist, NewSingerKey, NewSingerNotes, parsed.Source, CustomExternalUrl);
+                Rotation.AddSinger(targetSingerName, title, artist, NewSingerKey, NewSingerNotes, parsed.Source, CustomExternalUrl);
             }
         }
         else

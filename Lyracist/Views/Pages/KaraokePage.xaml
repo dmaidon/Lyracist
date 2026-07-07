@@ -64,6 +64,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <!-- Search Input Row -->
@@ -82,6 +83,7 @@
                         <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="4" Margin="0,8,0,0">
                             <DataGrid ItemsSource="{Binding FilteredSongs}"
                                       SelectedItem="{Binding SelectedSong, Mode=TwoWay}"
+                                      MouseDoubleClick="OnSongDoubleClicked"
                                       AutoGenerateColumns="False"
                                       IsReadOnly="True"
                                       HeadersVisibility="Column"
@@ -351,6 +353,76 @@
 
                         <ui:Button Content="Add to Rotation" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddToRotationCommand}" Appearance="Primary" HorizontalAlignment="Stretch" Background="{StaticResource UIAccentBrush}" />
                     </StackPanel>
+                </Border>
+
+                <!-- Selected Performer's Pending Songs Card -->
+                <Border Grid.Row="3" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="16" Margin="0,12,0,0">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Rotation.SelectedSinger}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,10">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Songs Queue for: {0}">
+                                    <Binding Path="Rotation.SelectedSinger.Name" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding Rotation.SelectedSingerQueue}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  MaxHeight="180"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Song" Binding="{Binding Title, Mode=TwoWay}" IsReadOnly="False" Width="1.2*" />
+                                <DataGridTextColumn Header="Artist" Binding="{Binding Artist, Mode=TwoWay}" IsReadOnly="False" Width="*" />
+                                <DataGridTextColumn Header="Key" Binding="{Binding Key, Mode=TwoWay}" IsReadOnly="False" Width="40" />
+                                <DataGridTextColumn Header="Notes" Binding="{Binding Notes, Mode=TwoWay}" IsReadOnly="False" Width="1.2*" />
+                                <DataGridTemplateColumn Width="Auto" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <ui:Button Icon="{ui:SymbolIcon ArrowUp16}"
+                                                           Command="{Binding DataContext.Rotation.MovePendingSongUpCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                           CommandParameter="{Binding}"
+                                                           ToolTip="Move Up"
+                                                           Padding="4" Margin="0,0,2,0" />
+                                                <ui:Button Icon="{ui:SymbolIcon ArrowDown16}"
+                                                           Command="{Binding DataContext.Rotation.MovePendingSongDownCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                           CommandParameter="{Binding}"
+                                                           ToolTip="Move Down"
+                                                           Padding="4" Margin="0,0,2,0" />
+                                                <ui:Button Icon="{ui:SymbolIcon Delete16}"
+                                                           Command="{Binding DataContext.Rotation.RemovePendingSongCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                           CommandParameter="{Binding}"
+                                                           ToolTip="Remove"
+                                                           Appearance="Danger"
+                                                           Padding="4" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
                 </Border>
             </Grid>
 
