@@ -831,7 +831,9 @@
                                         <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedRotationScreenIndex, Mode=TwoWay}" DisplayMemberPath="DisplayName" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
                                         <ui:Button Content="Open Rotation Window" Icon="{ui:SymbolIcon People24}" Command="{Binding ShowRotationCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
                                     </StackPanel>
-                                                             <!-- Rotation Banner controls -->
+                                </Grid>
+
+                                <!-- Rotation Banner controls -->
                                 <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
                                 <TextBlock Text="Rotation Screen Billboard Banner" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                                 <Grid>
