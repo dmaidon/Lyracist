@@ -10,7 +10,7 @@ namespace Lyracist.Data.Models
 
         // Navigation Properties
         public OccasionCategory? ParentCategory { get; set; }
-        public ICollection<OccasionCategory> SubCategories { get; set; } = new List<OccasionCategory>();
-        public ICollection<OccasionItem> Items { get; set; } = new List<OccasionItem>();
+        public ICollection<OccasionCategory> SubCategories { get; set; } = [];
+        public ICollection<OccasionItem> Items { get; set; } = [];
     }
 }

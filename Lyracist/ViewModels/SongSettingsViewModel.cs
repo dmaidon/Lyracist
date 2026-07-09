@@ -6,9 +6,9 @@ using Lyracist.Models;
 
 namespace Lyracist.ViewModels
 {
-    public partial class SongSettingsViewModel : BaseViewModel
+    public partial class SongSettingsViewModel(ILibraryService libraryService) : BaseViewModel
     {
-        private readonly ILibraryService _libraryService;
+        private readonly ILibraryService _libraryService = libraryService;
         private string _audioPath = string.Empty;
 
         [ObservableProperty]
@@ -43,11 +43,6 @@ namespace Lyracist.ViewModels
 
         [ObservableProperty]
         private string _notes = string.Empty;
-
-        public SongSettingsViewModel(ILibraryService libraryService)
-        {
-            _libraryService = libraryService;
-        }
 
         public void Load(KaraokeSong song)
         {

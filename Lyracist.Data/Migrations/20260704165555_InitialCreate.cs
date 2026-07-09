@@ -283,7 +283,7 @@ namespace Lyracist.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "OccasionCategories",
-                columns: new[] { "OccasionCategoryId", "Name", "ParentCategoryId" },
+                columns: ["OccasionCategoryId", "Name", "ParentCategoryId"],
                 values: new object[,]
                 {
                     { 1, "Holiday", null },

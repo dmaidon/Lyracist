@@ -50,8 +50,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private int _missingArtistCount = 0;
 
-    public ObservableCollection<Song> Songs { get; } = new();
-    public ObservableCollection<string> ScanLog { get; } = new();
+    public ObservableCollection<Song> Songs { get; } = [];
+    public ObservableCollection<string> ScanLog { get; } = [];
 
     public MainViewModel()
     {

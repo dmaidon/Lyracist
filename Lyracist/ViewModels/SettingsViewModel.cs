@@ -36,7 +36,7 @@ public partial class SettingsViewModel : BaseViewModel
 
     // Audio
     [ObservableProperty]
-    private List<string> _audioDevices = new();
+    private List<string> _audioDevices = [];
 
     [ObservableProperty]
     private string _selectedAudioDevice = string.Empty;
@@ -59,13 +59,13 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private bool _isLyricsMirrored;
 
-    public List<string> ProjectionViews { get; } = new() { "Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable" };
+    public List<string> ProjectionViews { get; } = ["Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable"];
 
     [ObservableProperty]
     private string _selectedProjectionView = "Normal List";
 
     // Venues & DJ
-    public ObservableCollection<string> Venues { get; } = new();
+    public ObservableCollection<string> Venues { get; } = [];
 
     [ObservableProperty]
     private string _djName = AppSettings.DjName;
@@ -77,7 +77,7 @@ public partial class SettingsViewModel : BaseViewModel
     private string _newVenueName = string.Empty;
 
     // Crawl Banner Settings
-    public List<string> CrawlBannerTypes { get; } = new() { "Dramatic", "Comedic", "Over-the-Top", "Custom" };
+    public List<string> CrawlBannerTypes { get; } = ["Dramatic", "Comedic", "Over-the-Top", "Custom"];
 
     [ObservableProperty]
     private string _selectedCrawlBannerType = AppSettings.CrawlBannerType;
@@ -147,7 +147,7 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private int _frameRate = 30;
 
-    public List<int> FpsOptions { get; } = new() { 15, 30, 60 };
+    public List<int> FpsOptions { get; } = [15, 30, 60];
 
     [ObservableProperty]
     private bool _enableHardwareAcceleration = AppSettings.EnableHardwareAcceleration;
@@ -158,7 +158,12 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private bool _enableReverb = AppSettings.EnableReverb;
 
-    public List<int> BufferSizes { get; } = new() { 64, 128, 256, 512, 1024 };
+    public List<string> BackdropModes { get; } = ["Original Color", "Neon Waveform", "Nebula Bokeh", "Retro Synthwave", "Space Starfield"];
+
+    [ObservableProperty]
+    private string _cdgBackdropMode = AppSettings.CdgBackdropMode;
+
+    public List<int> BufferSizes { get; } = [64, 128, 256, 512, 1024];
 
     [ObservableProperty]
     private int _selectedBufferSize = AppSettings.SelectedBufferSize;
@@ -175,6 +180,13 @@ public partial class SettingsViewModel : BaseViewModel
     partial void OnEnableNoiseGateChanged(bool value) => AppSettings.EnableNoiseGate = value;
     partial void OnEnableReverbChanged(bool value) => AppSettings.EnableReverb = value;
     partial void OnSelectedBufferSizeChanged(int value) => AppSettings.SelectedBufferSize = value;
+
+    partial void OnCdgBackdropModeChanged(string value)
+    {
+        AppSettings.CdgBackdropMode = value;
+        var lyricsVm = App.AppHost.Services.GetService(typeof(LyricsWindowViewModel)) as LyricsWindowViewModel;
+        lyricsVm?.NotifyBackdropChanged();
+    }
 
     partial void OnSelectedAudioDeviceChanged(string value)
     {
@@ -224,7 +236,7 @@ public partial class SettingsViewModel : BaseViewModel
 
     // ─── Music Library ─────────────────────────────────────────────────
 
-    public ObservableCollection<string> LibraryDirectories { get; } = new();
+    public ObservableCollection<string> LibraryDirectories { get; } = [];
 
     [ObservableProperty]
     private string? _selectedLibraryDirectory;
@@ -237,13 +249,40 @@ public partial class SettingsViewModel : BaseViewModel
 
     // ─── Scaryoke Configuration ────────────────────────────────────────
 
-    public ObservableCollection<string> ScaryokeCategories { get; } = new();
+    public ObservableCollection<string> ScaryokeCategories { get; } = [];
 
     [ObservableProperty]
     private string? _selectedScaryokeCategory;
 
     [ObservableProperty]
     private string _newScaryokeCategoryName = string.Empty;
+
+    // ─── Performer Rating Configuration ────────────────────────────────
+    [ObservableProperty]
+    private bool _isRatingSystemEnabled = AppSettings.IsRatingSystemEnabled;
+
+    [ObservableProperty]
+    private string _selectedRatingIcon = AppSettings.SelectedRatingIcon;
+
+    [ObservableProperty]
+    private string _newRatingIconName = string.Empty;
+
+    public ObservableCollection<string> AvailableRatingIcons { get; } = [];
+
+    partial void OnIsRatingSystemEnabledChanged(bool value)
+    {
+        AppSettings.IsRatingSystemEnabled = value;
+        _rotationWindowVm.NotifyPropertyChanged(nameof(RotationWindowViewModel.IsRatingSystemEnabled));
+    }
+
+    partial void OnSelectedRatingIconChanged(string value)
+    {
+        if (!string.IsNullOrEmpty(value))
+        {
+            AppSettings.SelectedRatingIcon = value;
+            _rotationWindowVm.NotifyPropertyChanged(nameof(RotationWindowViewModel.RatingIconSymbol));
+        }
+    }
 
     // ─── Splash Screen ─────────────────────────────────────────────────
 
@@ -322,7 +361,7 @@ public partial class SettingsViewModel : BaseViewModel
         _showFlow.SetEndRotationTone(EndRotationBass, EndRotationTreble, 0);
 
         // Load active screen list with a 'None' option first
-        var screens = new List<ScreenInfo> { new ScreenInfo { Index = -1, DeviceName = "None (Do not show)" } };
+        List<ScreenInfo> screens = [new() { Index = -1, DeviceName = "None (Do not show)" }];
         screens.AddRange(_display.GetScreens());
         Screens = screens;
 
@@ -341,23 +380,24 @@ public partial class SettingsViewModel : BaseViewModel
         _selectedProjectionView = prefs.RotationViewMode ?? "Normal List";
 
         // Seed available devices
-        AudioDevices = new List<string>
-        {
+        AudioDevices =
+        [
             "Default System Device",
             "Speakers (Realtek High Definition Audio)",
             "Headphones (USB Audio Device)",
             "Digital Output (HDMI)"
-        };
+        ];
         SelectedAudioDevice = AudioDevices[0];
 
         // Seed list values
-        CdgScalingModes = new List<string> { "Nearest", "Linear" };
-        Mp4Backends = new List<string> { "LibVLC", "FFME" };
+        CdgScalingModes = ["Nearest", "Linear"];
+        Mp4Backends = ["LibVLC", "FFME"];
 
         RefreshLibraryDirectories();
         RefreshLibraryStatus();
         RefreshScaryokeCategories();
         RefreshVenues();
+        RefreshAvailableRatingIcons();
     }
 
 
@@ -454,7 +494,7 @@ public partial class SettingsViewModel : BaseViewModel
     [RelayCommand]
     private void SaveSpaceshipSnippets()
     {
-        AppSettings.CrawlSpaceshipSnippets = CrawlSpaceshipSnippets.ToList();
+        AppSettings.CrawlSpaceshipSnippets = [.. CrawlSpaceshipSnippets];
     }
 
     private void UpdateCrawlBannerOnWindow()
@@ -526,6 +566,85 @@ public partial class SettingsViewModel : BaseViewModel
         RefreshScaryokeCategories();
     }
 
+    private void RefreshAvailableRatingIcons()
+    {
+        AvailableRatingIcons.Clear();
+        foreach (var icon in AppSettings.AvailableRatingIcons)
+        {
+            AvailableRatingIcons.Add(icon);
+        }
+        SelectedRatingIcon = AppSettings.SelectedRatingIcon;
+    }
+
+    [RelayCommand]
+    private void AddRatingIcon()
+    {
+        string icon = NewRatingIconName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(icon)) return;
+
+        // Validation for "NOTHING negative or detrimental."
+        // We block any words/emojis that could express negativity.
+        var negativeKeywords = new[]
+        {
+            "poop", "poo", "shit", "down", "thumbs down", "thumb down", "garbage", "trash", 
+            "bad", "boo", "dislike", "hate", "ugly", "fail", "loser", "suck", "terrible", "awful",
+            "👎", "💩", "💔", "💀", "😠", "😡", "🗑️", "❌", "👎", "🤮", "👿"
+        };
+
+        bool isNegative = false;
+        foreach (var keyword in negativeKeywords)
+        {
+            if (icon.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+            {
+                isNegative = true;
+                break;
+            }
+        }
+
+        if (isNegative)
+        {
+            System.Windows.MessageBox.Show(
+                "Detrimental or negative feedback icons are not allowed. Please enter a positive icon!",
+                "Validation Error",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        AppSettings.AddAvailableRatingIcon(icon);
+        NewRatingIconName = string.Empty;
+        RefreshAvailableRatingIcons();
+        SelectedRatingIcon = icon;
+    }
+
+    [RelayCommand]
+    private void RemoveRatingIcon()
+    {
+        if (string.IsNullOrEmpty(SelectedRatingIcon)) return;
+
+        if (AppSettings.AvailableRatingIcons.Count <= 1)
+        {
+            System.Windows.MessageBox.Show(
+                "You must have at least one rating icon available.",
+                "Cannot Remove Icon",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        AppSettings.RemoveAvailableRatingIcon(SelectedRatingIcon);
+        RefreshAvailableRatingIcons();
+    }
+
+    [RelayCommand]
+    private void AddPresetIcon(string iconPreset)
+    {
+        if (string.IsNullOrWhiteSpace(iconPreset)) return;
+        AppSettings.AddAvailableRatingIcon(iconPreset);
+        RefreshAvailableRatingIcons();
+        SelectedRatingIcon = iconPreset;
+    }
+
     private void RefreshLibraryStatus()
     {
         int count = _library.GetSongCount();
@@ -577,6 +696,32 @@ public partial class SettingsViewModel : BaseViewModel
         IsScanning = true;
         LibraryStatus = "Scanning…";
         _library.RescanAllDirectories();
+    }
+
+    [RelayCommand]
+    private void LoadDbEditor()
+    {
+        try
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string exePath = Path.Combine(baseDir, "LyracistDbEditor.exe");
+
+            if (!File.Exists(exePath))
+            {
+                exePath = "LyracistDbEditor.exe";
+            }
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exePath)
+            {
+                UseShellExecute = true,
+                WorkingDirectory = baseDir
+            });
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "Load LyracistDbEditor");
+            System.Windows.MessageBox.Show($"Failed to launch LyracistDbEditor: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
     }
 
     [RelayCommand]
@@ -978,8 +1123,7 @@ public partial class SettingsViewModel : BaseViewModel
                                 LogSim($"[PORTAL] Simulating approving request ID {req.Id} for {req.SingerName}");
                                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                                 {
-                                    var reqVm = App.AppHost.Services.GetService(typeof(RequestsViewModel)) as RequestsViewModel;
-                                    if (reqVm != null)
+                                    if (App.AppHost.Services.GetService(typeof(RequestsViewModel)) is RequestsViewModel reqVm)
                                     {
                                         reqVm.SelectedPending = reqVm.Pending.FirstOrDefault(p => p.Id == req.Id);
                                         reqVm.ApproveCommand.Execute(null);

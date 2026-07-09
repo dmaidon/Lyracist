@@ -39,10 +39,7 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
         set
         {
             _speed = Math.Clamp(value, 0.5, 2.0);
-            if (_mediaElement != null)
-            {
-                _mediaElement.SpeedRatio = _speed;
-            }
+            _mediaElement?.SpeedRatio = _speed;
         }
     }
 
@@ -139,6 +136,14 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
         if (_mediaElement != null)
         {
             await _mediaElement.Stop();
+        }
+    }
+
+    public async Task SeekAsync(TimeSpan position)
+    {
+        if (_mediaElement != null)
+        {
+            await _mediaElement.Seek(position);
         }
     }
 

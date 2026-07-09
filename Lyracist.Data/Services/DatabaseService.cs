@@ -6,14 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lyracist.Data.Services
 {
-    public class DatabaseService
+    public class DatabaseService(LyracistDbContext context)
     {
-        private readonly LyracistDbContext _context;
-
-        public DatabaseService(LyracistDbContext context)
-        {
-            _context = context;
-        }
+        private readonly LyracistDbContext _context = context;
 
         // ==========================================
         // SONG OPERATIONS

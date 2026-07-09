@@ -3,14 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:pages="clr-namespace:Lyracist.Views.Pages"
-        Title="Lyracist" Height="700" Width="1000"
+        Title="Lyracist Pro" Height="700" Width="1000"
         WindowState="Maximized"
         ExtendsContentIntoTitleBar="True"
         WindowBackdropType="Mica"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource AppBackgroundBrush}"
         Foreground="{DynamicResource AppTextPrimaryBrush}">
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -33,7 +33,7 @@
                    VerticalAlignment="Center" />
 
             <ui:TitleBar Grid.Column="1"
-                         Title="Lyracist - Control Panel" />
+                         Title="Lyracist Professional - Control Panel" />
         </Grid>
 
         <!-- Fluent navigation panel at the top (Horizontal Tabs) -->
@@ -57,10 +57,10 @@
         </ui:NavigationView>
 
         <!-- Global Playback Control Bar at the bottom of the window -->
-        <Border Grid.Row="2" 
-                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" 
-                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" 
-                BorderThickness="0,1,0,0" 
+        <Border Grid.Row="2"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,1,0,0"
                 Padding="24,12">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -71,32 +71,32 @@
 
                 <!-- Currently Playing Info -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding Karaoke.NowSingingName, StringFormat='Performer: {0}'}" 
+                    <TextBlock Text="{Binding Karaoke.NowSingingName, StringFormat='Performer: {0}'}"
                                FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                    <TextBlock Text="{Binding Karaoke.CurrentSongName}" 
+                    <TextBlock Text="{Binding Karaoke.CurrentSongName}"
                                FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
 
                 <!-- Playback Controls -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                     <!-- Play Button -->
-                    <ui:Button Icon="{ui:SymbolIcon Play24}" 
-                               Command="{Binding Karaoke.PlayCommand}" 
-                               Appearance="Primary" 
-                               Width="46" Height="36" 
-                               Margin="0,0,8,0" 
+                    <ui:Button Icon="{ui:SymbolIcon Play24}"
+                               Command="{Binding Karaoke.PlayCommand}"
+                               Appearance="Primary"
+                               Width="46" Height="36"
+                               Margin="0,0,8,0"
                                ToolTip="Play" />
                     <!-- Pause Button -->
-                    <ui:Button Icon="{ui:SymbolIcon Pause24}" 
-                               Command="{Binding Karaoke.PauseCommand}" 
-                               Width="46" Height="36" 
-                               Margin="0,0,8,0" 
+                    <ui:Button Icon="{ui:SymbolIcon Pause24}"
+                               Command="{Binding Karaoke.PauseCommand}"
+                               Width="46" Height="36"
+                               Margin="0,0,8,0"
                                ToolTip="Pause" />
                     <!-- Stop Button -->
-                    <ui:Button Icon="{ui:SymbolIcon Stop24}" 
-                               Command="{Binding Karaoke.StopCommand}" 
+                    <ui:Button Icon="{ui:SymbolIcon Stop24}"
+                               Command="{Binding Karaoke.StopCommand}"
                                Appearance="Danger"
-                               Width="46" Height="36" 
+                               Width="46" Height="36"
                                ToolTip="Stop / Reset" />
                 </StackPanel>
 

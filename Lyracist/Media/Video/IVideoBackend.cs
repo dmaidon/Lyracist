@@ -11,6 +11,7 @@ public interface IVideoBackend
     Task PlayAsync();
     Task PauseAsync();
     Task StopAsync();
+    Task SeekAsync(TimeSpan position);
 
     TimeSpan Position { get; }
     bool IsPlaying { get; }

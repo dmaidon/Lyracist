@@ -23,10 +23,10 @@ public partial class ScaryokeWindow : Window
     private double SegmentSweep => 360.0 / ScaryokeViewModel.WheelCategories.Length;
 
     private static readonly string[] SegmentColors =
-    {
+    [
         "#6A0DAD", "#FF6D00", "#00838F", "#C2185B", "#4527A0", "#EF6C00",
         "#00695C", "#AD1457", "#5E35B1", "#F57C00", "#00796B", "#D81B60"
-    };
+    ];
 
     private readonly ScaryokeViewModel _vm;
     private double _currentAngle;
@@ -283,7 +283,7 @@ public partial class ScaryokeWindow : Window
             {
                 try
                 {
-                    string[] laughFiles = { "evil-laugh-deep.mp3", "evil-laugh-reverb.mp3" };
+                    string[] laughFiles = ["evil-laugh-deep.mp3", "evil-laugh-reverb.mp3"];
                     string chosenFile = laughFiles[Random.Shared.Next(laughFiles.Length)];
                     string appDir = AppDomain.CurrentDomain.BaseDirectory;
                     string filePath = System.IO.Path.Combine(appDir, "Assets", chosenFile);
@@ -294,8 +294,7 @@ public partial class ScaryokeWindow : Window
                         _laughMediaPlayer = new System.Windows.Media.MediaPlayer();
                         _laughMediaPlayer.Open(new Uri(filePath));
 
-                        EventHandler? endedHandler = null;
-                        endedHandler = (s, ev) =>
+                        void endedHandler(object? s, EventArgs ev)
                         {
                             if (_laughMediaPlayer != null)
                             {
@@ -311,7 +310,8 @@ public partial class ScaryokeWindow : Window
                                 }
                                 catch { }
                             }
-                        };
+                        }
+
                         _laughMediaPlayer.MediaEnded += endedHandler;
                         _laughMediaPlayer.Play();
                     }

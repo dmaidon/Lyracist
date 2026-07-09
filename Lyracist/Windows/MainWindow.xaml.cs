@@ -75,10 +75,7 @@ public partial class MainWindow : FluentWindow
 
         // Find the hosting Frame and subscribe to its Navigated event to ensure chrome scrollbars remain disabled
         var frame = FindVisualChild<System.Windows.Controls.Frame>(RootNavigation);
-        if (frame != null)
-        {
-            frame.Navigated += (s, ev) => DisableChromeScrollbar(RootNavigation);
-        }
+        frame?.Navigated += (s, ev) => DisableChromeScrollbar(RootNavigation);
 
         // Navigate to the main Karaoke page once control templates are fully applied
         _navigationService.Navigate(typeof(KaraokePage));

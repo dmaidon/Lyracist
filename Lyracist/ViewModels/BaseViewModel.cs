@@ -56,4 +56,9 @@ public abstract class BaseViewModel : ObservableObject
        
        Call username changes: SubmitCommand.NotifyCanExecuteChanged();
     */
+
+    public void NotifyPropertyChanged(string propertyName)
+    {
+        OnPropertyChanged(propertyName);
+    }
 }

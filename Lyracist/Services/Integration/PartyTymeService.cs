@@ -20,15 +20,15 @@ namespace Lyracist.Services.Integration
         public string ClientId { get; set; } = string.Empty;
         public string ClientSecret { get; set; } = string.Empty;
 
-        private readonly List<PartyTymeTrack> _mockTracks = new()
-        {
+        private readonly List<PartyTymeTrack> _mockTracks =
+        [
             new PartyTymeTrack { TrackId = "pt_hello", Title = "Hello", Artist = "Adele", DurationSeconds = 295, StreamUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
             new PartyTymeTrack { TrackId = "pt_bohemian", Title = "Bohemian Rhapsody", Artist = "Queen", DurationSeconds = 354, StreamUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
             new PartyTymeTrack { TrackId = "pt_shapeofyou", Title = "Shape of You", Artist = "Ed Sheeran", DurationSeconds = 233, StreamUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
             new PartyTymeTrack { TrackId = "pt_badguy", Title = "Bad Guy", Artist = "Billie Eilish", DurationSeconds = 194, StreamUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
             new PartyTymeTrack { TrackId = "pt_flyme", Title = "Fly Me to the Moon", Artist = "Frank Sinatra", DurationSeconds = 147, StreamUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
             new PartyTymeTrack { TrackId = "pt_dontstop", Title = "Don't Stop Believin'", Artist = "Journey", DurationSeconds = 251, StreamUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" }
-        };
+        ];
 
         public PartyTymeService()
         {

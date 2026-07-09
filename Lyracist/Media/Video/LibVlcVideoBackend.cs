@@ -12,8 +12,8 @@ namespace Lyracist.Media.Video;
 
 public class LibVlcVideoBackend : IVideoBackend, IDisposable
 {
-    private LibVLC? _libVLC;
-    private LibVLCSharp.Shared.MediaPlayer? _mediaPlayer;
+    private readonly LibVLC? _libVLC;
+    private readonly LibVLCSharp.Shared.MediaPlayer? _mediaPlayer;
     private WriteableBitmap? _bitmap;
     private IntPtr _pixelBuffer = IntPtr.Zero;
     private uint _width;
@@ -27,14 +27,14 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
     // while LockCallback/DisplayCallback read/write it on the decode thread.
     // Without this, a mid-stream format change (e.g. loading new media) can free
     // the buffer while a decode is still writing to it (use-after-free).
-    private readonly object _bufferLock = new();
+    private readonly Lock _bufferLock = new();
     private double _volume = 100.0;
     private double _speed = 1.0;
     private int _pitchShift = 0;
 
-    private static readonly uint[] BassBands = { 0, 1, 2 };
-    private static readonly uint[] MidBands = { 3, 4, 5, 6 };
-    private static readonly uint[] TrebleBands = { 7, 8, 9 };
+    private static readonly uint[] BassBands = [0, 1, 2];
+    private static readonly uint[] MidBands = [3, 4, 5, 6];
+    private static readonly uint[] TrebleBands = [7, 8, 9];
 
     private readonly Equalizer _equalizer = new();
     private double _treble = 0.0;
@@ -174,6 +174,15 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         return Task.CompletedTask;
     }
 
+    public Task SeekAsync(TimeSpan position)
+    {
+        if (_mediaPlayer != null)
+        {
+            _mediaPlayer.Time = (long)position.TotalMilliseconds;
+        }
+        return Task.CompletedTask;
+    }
+
     private uint VideoFormatCallback(ref IntPtr opaque, IntPtr chroma, ref uint width, ref uint height, ref uint pitches, ref uint lines)
     {
         // Force RV32 pixel format (4 bytes per pixel: BGRA)
@@ -266,8 +275,8 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
 
         try
         {
-            // Perform fast memory copying inside UI thread dispatcher to prevent cross-threading access exceptions
-            dispatcher.Invoke(() =>
+            // Perform fast memory copying inside UI thread dispatcher asynchronously to prevent cross-threading deadlocks
+            dispatcher.BeginInvoke(new Action(() =>
             {
                 if (_isDisposed || _bitmap == null) return;
 
@@ -293,7 +302,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
                 {
                     System.Diagnostics.Debug.WriteLine($"LibVLC custom rendering exception: {ex.Message}");
                 }
-            });
+            }));
         }
         catch (Exception ex)
         {

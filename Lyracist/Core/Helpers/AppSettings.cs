@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 
 namespace Lyracist.Core.Helpers;
@@ -22,9 +19,9 @@ public static class AppSettings
     // from background scan threads (AddLibraryDirectory) as well as the UI thread,
     // so concurrent Save() calls could otherwise interleave and corrupt the file,
     // and concurrent check-then-add list mutations could race and duplicate entries.
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
 
-    private static SettingsData _data = Load();
+    private static readonly SettingsData _data = Load();
 
     private static SettingsData Load()
     {
@@ -38,12 +35,11 @@ public static class AppSettings
                 // Clean up loaded categories to enforce the new 8-category limit
                 if (data.ScaryokeCategories != null)
                 {
-                    data.ScaryokeCategories = data.ScaryokeCategories
+                    data.ScaryokeCategories = [.. data.ScaryokeCategories
                         .Where(c => !string.Equals(c, "Singer's Choice", StringComparison.OrdinalIgnoreCase) &&
                                     !string.Equals(c, "DJ's Choice", StringComparison.OrdinalIgnoreCase))
                         .Distinct(StringComparer.OrdinalIgnoreCase)
-                        .Take(8)
-                        .ToList();
+                        .Take(8)];
                 }
 
                 return data;
@@ -382,6 +378,73 @@ public static class AppSettings
         }
     }
 
+    // ─── Rating System Settings ────────────────────────────────────────────────
+
+    public static bool IsRatingSystemEnabled
+    {
+        get => _data.IsRatingSystemEnabled;
+        set { _data.IsRatingSystemEnabled = value; Save(); }
+    }
+
+    public static string SelectedRatingIcon
+    {
+        get => _data.SelectedRatingIcon;
+        set { _data.SelectedRatingIcon = value; Save(); }
+    }
+
+    public static System.Collections.Generic.IReadOnlyList<string> AvailableRatingIcons
+    {
+        get { lock (_lock) { return _data.AvailableRatingIcons.ToList(); } }
+    }
+
+    public static void AddAvailableRatingIcon(string icon)
+    {
+        if (string.IsNullOrWhiteSpace(icon)) return;
+
+        lock (_lock)
+        {
+            if (!_data.AvailableRatingIcons.Contains(icon, StringComparer.OrdinalIgnoreCase))
+            {
+                _data.AvailableRatingIcons.Add(icon);
+                Save();
+            }
+        }
+    }
+
+    public static void RemoveAvailableRatingIcon(string icon)
+    {
+        lock (_lock)
+        {
+            _data.AvailableRatingIcons.Remove(icon);
+            if (string.Equals(_data.SelectedRatingIcon, icon, StringComparison.OrdinalIgnoreCase))
+            {
+                _data.SelectedRatingIcon = _data.AvailableRatingIcons.FirstOrDefault() ?? string.Empty;
+            }
+            Save();
+        }
+    }
+
+    public static string ActiveRatingIconSymbol
+    {
+        get
+        {
+            string full = SelectedRatingIcon;
+            if (string.IsNullOrWhiteSpace(full)) return "⭐";
+            var parts = full.Split(' ', 2);
+            return parts[0];
+        }
+    }
+
+    // ─── CDG Video Backdrop Settings ──────────────────────────────────────────
+
+    public static string CdgBackdropMode
+    {
+        get => _data.CdgBackdropMode;
+        set { _data.CdgBackdropMode = value ?? "Original Color"; Save(); }
+    }
+
+    public static bool IsCdgChromaKeyEnabled => CdgBackdropMode != "Original Color";
+
     // ─── Library Scan Directories ──────────────────────────────────────────
 
     public static IReadOnlyList<string> LibraryDirectories
@@ -436,11 +499,13 @@ public static class AppSettings
 
         // Channel volumes (0–100)
         public int OpeningVolume { get; set; } = 80;
+
         public int FillInVolume { get; set; } = 70;
         public int EndRotationVolume { get; set; } = 80;
 
         // Channel tone (–20 to +20 dB)
         public double OpeningBass { get; set; } = 0;
+
         public double OpeningTreble { get; set; } = 0;
         public double FillInBass { get; set; } = 0;
         public double FillInTreble { get; set; } = 0;
@@ -448,36 +513,45 @@ public static class AppSettings
         public double EndRotationTreble { get; set; } = 0;
 
         // Library scan roots — persisted so the app can rescan on demand
-        public List<string> LibraryDirectories { get; set; } = new();
+        public List<string> LibraryDirectories { get; set; } = [];
 
         // Scaryoke categories - dynamic configuration up to 8 sectors
-        public List<string> ScaryokeCategories { get; set; } = new()
-        {
+        public List<string> ScaryokeCategories { get; set; } =
+        [
             "Gender Bender", "Elvis", "Country", "Rock & Roll", "Pop", "80s Music",
             "60s Oldies", "Motown"
-        };
+        ];
 
         // Venues & DJ name
         public string DjName { get; set; } = "DJ Karaoke";
-        public List<string> Venues { get; set; } = new() { "The Tavern", "The Stage", "The Pub" };
+
+        public List<string> Venues { get; set; } = ["The Tavern", "The Stage", "The Pub"];
         public string SelectedVenue { get; set; } = "The Tavern";
 
         // Crawl banner type and custom text
         public string CrawlBannerType { get; set; } = "Dramatic";
+
         public string CrawlBannerCustomText { get; set; } = "Enter custom crawl text here...";
 
         // Spaceship overlay configurations
         public int CrawlSpaceshipFontSize { get; set; } = 26;
+
         public int CrawlSpaceshipDuration { get; set; } = 13;
         public int CrawlSpaceshipFrequency { get; set; } = 60;
-        public List<Lyracist.Models.SpaceshipSnippet> CrawlSpaceshipSnippets { get; set; } = new()
-        {
+
+        public List<Lyracist.Models.SpaceshipSnippet> CrawlSpaceshipSnippets { get; set; } =
+        [
             new() { Text = "Tip your bartender! 🍹", IsEnabled = true },
             new() { Text = "Tip your servers! 💸", IsEnabled = true },
             new() { Text = "Buy a drink at the bar! 🍺", IsEnabled = true },
             new() { Text = "Keep the queue moving, request a song! 🎤", IsEnabled = true },
             new() { Text = "Remember to tip the staff! 💵", IsEnabled = true },
             new() { Text = "Scaryoke party mode active! 🎡", IsEnabled = true }
-        };
+        ];
+
+        public bool IsRatingSystemEnabled { get; set; } = true;
+        public string SelectedRatingIcon { get; set; } = "⭐ Star";
+        public List<string> AvailableRatingIcons { get; set; } = ["⭐ Star", "❤️ Heart", "🔥 Fire", "🎵 Note", "🏆 Trophy", "👑 Crown", "👍 Like"];
+        public string CdgBackdropMode { get; set; } = "Original Color";
     }
 }

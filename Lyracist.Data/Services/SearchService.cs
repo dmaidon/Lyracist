@@ -12,14 +12,9 @@ using Microsoft.Data.Sqlite;
 
 namespace Lyracist.Data.Services
 {
-    public class SearchService
+    public class SearchService(LyracistDbContext context)
     {
-        private readonly LyracistDbContext _context;
-
-        public SearchService(LyracistDbContext context)
-        {
-            _context = context;
-        }
+        private readonly LyracistDbContext _context = context;
 
         // ==========================================
         // TEXT NORMALIZATION
@@ -83,13 +78,13 @@ namespace Lyracist.Data.Services
         {
             if (string.IsNullOrWhiteSpace(query))
             {
-                return new List<Song>();
+                return [];
             }
 
             string ftsQuery = PrepareFtsQuery(query);
             if (string.IsNullOrWhiteSpace(ftsQuery))
             {
-                return new List<Song>();
+                return [];
             }
 
             try
@@ -124,7 +119,7 @@ namespace Lyracist.Data.Services
                     splitOn: "SongAudioSettingsId"
                 );
 
-                return results.ToList();
+                return [.. results];
             }
             catch (Exception ex)
             {
@@ -149,7 +144,7 @@ namespace Lyracist.Data.Services
             string cleaned = Regex.Replace(query, @"[^\w\s]", " ");
 
             // Split into words and append '*' to each word for prefix matching
-            var words = cleaned.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+            var words = cleaned.Split([' '], StringSplitOptions.RemoveEmptyEntries)
                                .Select(word => $"{word}*")
                                .ToList();
 

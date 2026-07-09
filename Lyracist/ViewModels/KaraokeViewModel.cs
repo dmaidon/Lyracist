@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Linq;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -30,7 +31,7 @@ public partial class KaraokeViewModel : BaseViewModel
     public RotationViewModel Rotation { get; }
 
     /// <summary>Nested Special Occasion menu (categories > subcategories > playable items).</summary>
-    public ObservableCollection<OccasionNode> OccasionMenu { get; } = new();
+    public ObservableCollection<OccasionNode> OccasionMenu { get; } = [];
 
     [ObservableProperty]
     private bool _isScaryokeMode;
@@ -71,7 +72,7 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private PartyTymeTrack? _selectedPartyTymeTrack;
 
-    public ObservableCollection<PartyTymeTrack> PartyTymeResults { get; } = new();
+    public ObservableCollection<PartyTymeTrack> PartyTymeResults { get; } = [];
 
     [ObservableProperty]
     private string _customExternalUrl = string.Empty;
@@ -91,8 +92,8 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private bool _isExternalLoading;
 
-    public ObservableCollection<ExternalTrack> ExternalResults { get; } = new();
-    public ObservableCollection<SingerHistoryEntry> SingerHistoryResults { get; } = new();
+    public ObservableCollection<ExternalTrack> ExternalResults { get; } = [];
+    public ObservableCollection<SingerHistoryEntry> SingerHistoryResults { get; } = [];
 
     [ObservableProperty]
     private bool _showLocalFilter = true;
@@ -131,7 +132,7 @@ public partial class KaraokeViewModel : BaseViewModel
     private string _searchQuery = string.Empty;
 
     [ObservableProperty]
-    private ObservableCollection<KaraokeSong> _filteredSongs = new();
+    private ObservableCollection<KaraokeSong> _filteredSongs = [];
 
     [ObservableProperty]
     private bool _isPreviewExpanded;
@@ -140,7 +141,7 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private KaraokeSong? _selectedSong;
 
-    public ObservableCollection<string> SingerNames { get; } = new();
+    public ObservableCollection<string> SingerNames { get; } = [];
 
     public void LoadSingerNames()
     {
@@ -296,7 +297,7 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     // Added properties for Multi-Monitor display lists
-    public ObservableCollection<ScreenInfo> AvailableScreens { get; } = new();
+    public ObservableCollection<ScreenInfo> AvailableScreens { get; } = [];
 
     [ObservableProperty]
     private int _selectedLyricsScreenIndex = 0;
@@ -492,37 +493,81 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         string oldSinger = NowSingingName;
 
-        // Reset flags for all singers in the rotation first
-        foreach (var s in Rotation.Rotation)
+        var rotationList = Rotation.Rotation.ToList();
+        var activeSingers = rotationList.Where(s => !s.IsPaused && !s.IsInactive).ToList();
+
+        if (activeSingers.Count == 0)
+        {
+            foreach (var s in rotationList)
+            {
+                s.IsCurrent = false;
+                s.IsNext = false;
+            }
+            NowSingingName = "None";
+            NowSingingSong = "No Song";
+            NextUpName = "None";
+            NextUpSong = "No Song";
+
+            if (NowSingingName != oldSinger)
+            {
+                _mediaEngine.ActiveSingerName = NowSingingName;
+                NotifyAudioPropertiesChanged();
+            }
+            return;
+        }
+
+        // Find the designated current singer
+        Singer? current = rotationList.FirstOrDefault(s => s.IsCurrent);
+
+        // Fallback if current is not set or is no longer active
+        if (current == null || current.IsPaused || current.IsInactive || !rotationList.Contains(current))
+        {
+            current = activeSingers.FirstOrDefault();
+        }
+
+        foreach (var s in rotationList)
         {
             s.IsCurrent = false;
             s.IsNext = false;
         }
 
-        var activeSingers = Rotation.Rotation.Where(s => !s.IsPaused).ToList();
-
-        if (activeSingers.Count > 0)
+        if (current != null)
         {
-            var now = activeSingers[0];
-            now.IsCurrent = true;
-            NowSingingName = now.Name;
-            NowSingingSong = string.IsNullOrEmpty(now.SongTitle) ? "No Song" : $"{now.Artist} - {now.SongTitle}";
+            current.IsCurrent = true;
+            NowSingingName = current.Name;
+            NowSingingSong = string.IsNullOrEmpty(current.SongTitle) ? "No Song" : $"{current.Artist} - {current.SongTitle}";
+
+            // Find next active singer sequentially (wrapping around)
+            int currentIndex = rotationList.IndexOf(current);
+            Singer? next = null;
+
+            for (int i = 1; i <= rotationList.Count; i++)
+            {
+                int nextIndex = (currentIndex + i) % rotationList.Count;
+                var candidate = rotationList[nextIndex];
+                if (candidate != current && !candidate.IsPaused && !candidate.IsInactive)
+                {
+                    next = candidate;
+                    break;
+                }
+            }
+
+            if (next != null)
+            {
+                next.IsNext = true;
+                NextUpName = next.Name;
+                NextUpSong = string.IsNullOrEmpty(next.SongTitle) ? "No Song" : $"{next.Artist} - {next.SongTitle}";
+            }
+            else
+            {
+                NextUpName = "None";
+                NextUpSong = "No Song";
+            }
         }
         else
         {
             NowSingingName = "None";
             NowSingingSong = "No Song";
-        }
-
-        if (activeSingers.Count > 1)
-        {
-            var next = activeSingers[1];
-            next.IsNext = true;
-            NextUpName = next.Name;
-            NextUpSong = string.IsNullOrEmpty(next.SongTitle) ? "No Song" : $"{next.Artist} - {next.SongTitle}";
-        }
-        else
-        {
             NextUpName = "None";
             NextUpSong = "No Song";
         }
@@ -565,11 +610,11 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Play()
+    private async Task Play()
     {
         if (!string.IsNullOrEmpty(SelectedSongPath))
         {
-            _mediaEngine.Play();
+            await _mediaEngine.Play();
             IsPlaying = true;
         }
         else
@@ -579,11 +624,11 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Pause()
+    private async Task Pause()
     {
         if (!string.IsNullOrEmpty(SelectedSongPath))
         {
-            _mediaEngine.Pause();
+            await _mediaEngine.Pause();
             IsPlaying = false;
         }
         else
@@ -593,11 +638,11 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Stop()
+    private async Task Stop()
     {
         if (!string.IsNullOrEmpty(SelectedSongPath))
         {
-            _mediaEngine.Stop();
+            await _mediaEngine.Stop();
             IsPlaying = false;
             SeekPosition = 0;
         }
@@ -611,7 +656,7 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void LoadSong()
+    private async Task LoadSong()
     {
         var openFileDialog = new Microsoft.Win32.OpenFileDialog
         {
@@ -627,7 +672,7 @@ public partial class KaraokeViewModel : BaseViewModel
             ExternalPerformanceSource = string.Empty;
             ExternalPerformanceUrl = string.Empty;
 
-            _mediaEngine.LoadSong(SelectedSongPath);
+            await _mediaEngine.LoadSong(SelectedSongPath);
 
             // Sync slider states to the view
             OnPropertyChanged(nameof(Volume));
@@ -657,7 +702,7 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void PlaySong(KaraokeSong song)
+    private async Task PlaySong(KaraokeSong song)
     {
         if (song == null) return;
 
@@ -668,8 +713,8 @@ public partial class KaraokeViewModel : BaseViewModel
         ExternalPerformanceSource = string.Empty;
         ExternalPerformanceUrl = string.Empty;
 
-        _mediaEngine.LoadSong(song.AudioPath);
-        _mediaEngine.Play();
+        await _mediaEngine.LoadSong(song.AudioPath);
+        await _mediaEngine.Play();
         IsPlaying = true;
 
         // Sync states to the view
@@ -989,8 +1034,8 @@ public partial class KaraokeViewModel : BaseViewModel
         string streamUrl = await _partyTymeService.GetStreamUrlAsync(track.TrackId);
 
         SelectedSongPath = streamUrl;
-        _mediaEngine.LoadSong(streamUrl);
-        _mediaEngine.Play();
+        await _mediaEngine.LoadSong(streamUrl);
+        await _mediaEngine.Play();
         IsPlaying = true;
 
         NotifyAudioPropertiesChanged();
@@ -1024,13 +1069,20 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         if (singer == null) return;
 
+        // Mark this singer as current in the static list
+        foreach (var s in Rotation.Rotation)
+        {
+            s.IsCurrent = s.Name.Equals(singer.Name, StringComparison.OrdinalIgnoreCase);
+        }
+        UpdateNowNext();
+
         // Check if it's an external link
         if (singer.Source == "Spotify" || singer.Source == "YouTube" || singer.Source == "Amazon")
         {
             IsPlaying = false;
             CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [{singer.Source}]";
             _mediaEngine.ActiveSingerName = singer.Name;
-            _mediaEngine.Stop();
+            await _mediaEngine.Stop();
 
             // Stop background music as performance is launching externally
             _showFlow.OnKaraokeTrackStarted();
@@ -1059,7 +1111,7 @@ public partial class KaraokeViewModel : BaseViewModel
             int endIdx = singer.Notes.IndexOf("]", startIdx);
             if (startIdx >= 15 && endIdx > startIdx)
             {
-                string trackId = singer.Notes.Substring(startIdx, endIdx - startIdx).Trim();
+                string trackId = singer.Notes[startIdx..endIdx].Trim();
 
                 IsPlaying = false;
                 CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [Party Tyme]";
@@ -1072,12 +1124,11 @@ public partial class KaraokeViewModel : BaseViewModel
                 string streamUrl = await _partyTymeService.GetStreamUrlAsync(trackId);
 
                 SelectedSongPath = streamUrl;
-                _mediaEngine.LoadSong(streamUrl);
-                _mediaEngine.Play();
+                await _mediaEngine.LoadSong(streamUrl);
+                await _mediaEngine.Play();
                 IsPlaying = true;
 
                 IsPlaying = true;
-
                 NotifyAudioPropertiesChanged();
                 return;
             }
@@ -1113,8 +1164,8 @@ public partial class KaraokeViewModel : BaseViewModel
             ExternalPerformanceUrl = string.Empty;
 
             SelectedSongPath = localPath;
-            _mediaEngine.LoadSong(localPath);
-            _mediaEngine.Play();
+            await _mediaEngine.LoadSong(localPath);
+            await _mediaEngine.Play();
             IsPlaying = true;
             NotifyAudioPropertiesChanged();
         }
@@ -1152,13 +1203,13 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void PlayExternalTrack(ExternalTrack track)
+    private async Task PlayExternalTrack(ExternalTrack track)
     {
         if (track == null) return;
 
         IsPlaying = false;
         CurrentSongName = $"{track.Artist} - {track.Title} [{track.Source}]";
-        _mediaEngine.Stop();
+        await _mediaEngine.Stop();
 
         // Stop background music as performance is launching externally
         _showFlow.OnKaraokeTrackStarted();
@@ -1224,7 +1275,7 @@ public partial class KaraokeViewModel : BaseViewModel
         }
     }
 
-    public System.Collections.Generic.List<string> ProjectionViews { get; } = new() { "Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable" };
+    public System.Collections.Generic.List<string> ProjectionViews { get; } = ["Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable"];
 
     public string SelectedProjectionView
     {

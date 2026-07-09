@@ -15,36 +15,28 @@ using Lyracist.Models;
 
 namespace Lyracist.Services.Tablet;
 
-public class TabletLyricsServer : ITabletLyricsServer
+public class TabletLyricsServer(
+    IRequestService requests,
+    RotationViewModel rotation,
+    ILibraryService library,
+    IOccasionService occasions,
+    KaraokeViewModel karaoke,
+    Lyracist.Windows.ScaryokeWindow scaryokeWindow) : ITabletLyricsServer
 {
     private WebApplication? _webApp;
     private CancellationTokenSource? _cts;
     private Task? _serverTask;
-    private readonly IRequestService _requests;
-    private readonly RotationViewModel _rotation;
-    private readonly ILibraryService _library;
-    private readonly IOccasionService _occasions;
-    private readonly KaraokeViewModel _karaoke;
-    private readonly Lyracist.Windows.ScaryokeWindow _scaryokeWindow;
-
-    public TabletLyricsServer(
-        IRequestService requests,
-        RotationViewModel rotation,
-        ILibraryService library,
-        IOccasionService occasions,
-        KaraokeViewModel karaoke,
-        Lyracist.Windows.ScaryokeWindow scaryokeWindow)
-    {
-        _requests = requests;
-        _rotation = rotation;
-        _library = library;
-        _occasions = occasions;
-        _karaoke = karaoke;
-        _scaryokeWindow = scaryokeWindow;
-    }
+    private readonly IRequestService _requests = requests;
+    private readonly RotationViewModel _rotation = rotation;
+    private readonly ILibraryService _library = library;
+    private readonly IOccasionService _occasions = occasions;
+    private readonly KaraokeViewModel _karaoke = karaoke;
+    private readonly Lyracist.Windows.ScaryokeWindow _scaryokeWindow = scaryokeWindow;
 
     /// <summary>Payload for POST /api/requests from the singer mobile portal.</summary>
     public record MobileRequestDto(string? SingerName, string? Title, string? Artist, string? Source, string? Key, string? Notes);
+
+    public record MobileRatingDto(string? SingerName, int Rating);
 
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
@@ -107,6 +99,59 @@ public class TabletLyricsServer : ITabletLyricsServer
                     artist,
                     dto.Source ?? "Portal");
                 return Results.Ok(request);
+            });
+
+            _webApp.MapPost("/api/rate", async (MobileRatingDto dto) =>
+            {
+                if (string.IsNullOrWhiteSpace(dto.SingerName) || dto.SingerName == "None")
+                {
+                    return Results.BadRequest(new { error = "Singer name is required." });
+                }
+
+                if (dto.Rating < 1 || dto.Rating > 5)
+                {
+                    return Results.BadRequest(new { error = "Rating must be between 1 and 5." });
+                }
+
+                try
+                {
+                    using var context = new Lyracist.Data.LyracistDbContext();
+                    var dbSinger = context.Singers.FirstOrDefault(s => s.Name == dto.SingerName);
+                    if (dbSinger != null)
+                    {
+                        int pointsEarned = dto.Rating * 10;
+                        dbSinger.Score += pointsEarned;
+                        
+                        int totalPoints = dbSinger.RatingPoints + dto.Rating;
+                        int newCount = dbSinger.RatingCount + 1;
+                        dbSinger.RatingPoints = totalPoints;
+                        dbSinger.RatingCount = newCount;
+                        dbSinger.AverageRating = Math.Round((double)totalPoints / newCount, 1);
+
+                        context.Singers.Update(dbSinger);
+                        await context.SaveChangesAsync();
+
+                        // Update active rotation memory model
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            var activeSinger = _rotation.Rotation.FirstOrDefault(s => s.Name.Equals(dto.SingerName, StringComparison.OrdinalIgnoreCase));
+                            if (activeSinger != null)
+                            {
+                                activeSinger.Score = dbSinger.Score;
+                                activeSinger.AverageRating = dbSinger.AverageRating;
+                                activeSinger.RatingCount = dbSinger.RatingCount;
+                            }
+                            _rotation.NotifyRotationReordered();
+                        });
+
+                        return Results.Ok(new { success = true, score = dbSinger.Score, avgRating = dbSinger.AverageRating });
+                    }
+                    return Results.NotFound(new { error = "Singer not found." });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message);
+                }
             });
 
             _webApp.MapGet("/api/scaryoke/categories", () => Results.Json(_scaryokeWindow.ViewModel.WheelSegments));
@@ -340,6 +385,11 @@ public class TabletLyricsServer : ITabletLyricsServer
                 .btn-secondary { flex: 1; padding: 12px; background-color: #1e1e27; border: 1px solid #333344; border-radius: 8px; color: var(--text-primary); font-weight: 700; cursor: pointer; }
                 
                 .no-data { font-size: 13px; color: var(--text-secondary); text-align: center; padding: 30px 0; }
+                
+                /* Rating System Styles */
+                .stars-container { display: flex; justify-content: center; gap: 12px; margin: 15px 0 10px; }
+                .star { font-size: 32px; color: var(--text-secondary); cursor: pointer; transition: transform 0.15s, color 0.15s; }
+                .star:hover, .star.active { color: #F5D042; transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(245, 208, 66, 0.4)); }
             </style>
         </head>
         <body>
@@ -363,6 +413,20 @@ public class TabletLyricsServer : ITabletLyricsServer
                 <!-- Dashboard Screen -->
                 <div id="dashboard-screen" style="display: none;">
                     <div class="welcome-title">Hey, <span id="display-name">Singer</span>! 👋</div>
+                    
+                    <!-- Performer Rating Card -->
+                    <div id="rating-card" class="card" style="display: none; border-color: #F5D042; background: rgba(245, 208, 66, 0.05);">
+                        <div style="font-size: 11px; font-weight: 800; color: #F5D042; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">⭐ Rate Current Performance ⭐</div>
+                        <div style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">How is <span id="rate-singer-name" style="color: #F5D042;">Singer</span> doing?</div>
+                        <div class="stars-container">
+                            <span class="star" data-value="1" onclick="submitRating(1)">☆</span>
+                            <span class="star" data-value="2" onclick="submitRating(2)">☆</span>
+                            <span class="star" data-value="3" onclick="submitRating(3)">☆</span>
+                            <span class="star" data-value="4" onclick="submitRating(4)">☆</span>
+                            <span class="star" data-value="5" onclick="submitRating(5)">☆</span>
+                        </div>
+                        <div id="rating-status" style="font-size: 11px; color: var(--text-secondary); margin-top: 8px; font-style: italic; height: 16px; text-align: center;">Tap a star to rate!</div>
+                    </div>
                     
                     <!-- Now / Next Up Grid -->
                     <div class="banners-grid">
@@ -545,6 +609,21 @@ public class TabletLyricsServer : ITabletLyricsServer
                         connection.on("ActiveSingerUpdated", (active) => {
                             document.getElementById("now-name").textContent = active.name;
                             document.getElementById("now-song").textContent = active.song;
+                            
+                            const rateCard = document.getElementById("rating-card");
+                            if (active.name && active.name !== "None" && active.name.toLowerCase() !== singerName.toLowerCase()) {
+                                document.getElementById("rate-singer-name").textContent = active.name;
+                                rateCard.style.display = "block";
+                                // Reset stars
+                                document.querySelectorAll(".star").forEach(s => {
+                                    s.textContent = "☆";
+                                    s.classList.remove("active");
+                                });
+                                document.getElementById("rating-status").textContent = "Tap a star to rate!";
+                                document.getElementById("rating-status").style.color = "var(--text-secondary)";
+                            } else {
+                                rateCard.style.display = "none";
+                            }
                         });
 
                         connection.on("NextSingerUpdated", (next) => {
@@ -823,6 +902,54 @@ public class TabletLyricsServer : ITabletLyricsServer
                     } catch (err) {
                         msgDiv.style.color = "var(--accent)";
                         msgDiv.textContent = "Network error. Try again.";
+                    }
+
+                    async function submitRating(value) {
+                        const activeName = document.getElementById("now-name").textContent;
+                        if (!activeName || activeName === "None") return;
+
+                        // Highlight stars
+                        for (let i = 1; i <= 5; i++) {
+                            const star = document.querySelector(`.star[data-value="${i}"]`);
+                            if (star) {
+                                if (i <= value) {
+                                    star.textContent = "★";
+                                    star.classList.add("active");
+                                } else {
+                                    star.textContent = "☆";
+                                    star.classList.remove("active");
+                                }
+                            }
+                        }
+
+                        const statusDiv = document.getElementById("rating-status");
+                        statusDiv.style.color = "var(--text-secondary)";
+                        statusDiv.textContent = "Submitting rating...";
+
+                        try {
+                            const res = await fetch("/api/rate", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    singerName: activeName,
+                                    rating: value
+                                })
+                            });
+
+                            if (res.ok) {
+                                statusDiv.style.color = "var(--success)";
+                                statusDiv.textContent = "Rating submitted successfully! ⭐";
+                                setTimeout(() => {
+                                    document.getElementById("rating-card").style.display = "none";
+                                }, 1500);
+                            } else {
+                                statusDiv.style.color = "var(--accent)";
+                                statusDiv.textContent = "Failed to submit rating.";
+                            }
+                        } catch (err) {
+                            statusDiv.style.color = "var(--accent)";
+                            statusDiv.textContent = "Network error. Try again.";
+                        }
                     }
                     // --- SCARYOKE WHEEL CLIENT IMPLEMENTATION ---
                     let categories = [];

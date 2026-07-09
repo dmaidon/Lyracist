@@ -1,11 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
 using Lyracist.Windows;
+using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 
 namespace Lyracist.Services.Display;
 
@@ -224,10 +222,7 @@ public class DisplayService : IDisplayService
     public void UpdateRotation(List<Singer> singers)
     {
         var vm = _serviceProvider.GetService<RotationWindowViewModel>();
-        if (vm != null)
-        {
-            vm.UpdateRotation(singers);
-        }
+        vm?.UpdateRotation(singers);
 
         bool hasSingers = singers.Count > 0;
         if (_rotationHadSingers && !hasSingers)
@@ -244,28 +239,19 @@ public class DisplayService : IDisplayService
     public void HighlightSinger(Singer singer)
     {
         var vm = _serviceProvider.GetService<RotationWindowViewModel>();
-        if (vm != null)
-        {
-            vm.HighlightSinger(singer);
-        }
+        vm?.HighlightSinger(singer);
     }
 
     public void UpdateLyricsFrame(System.Windows.Media.ImageSource frame)
     {
         var vm = _serviceProvider.GetService<LyricsWindowViewModel>();
-        if (vm != null)
-        {
-            vm.UpdateFrame(frame);
-        }
+        vm?.UpdateFrame(frame);
     }
 
     public void SetLyricsMirror(bool mirrored)
     {
         var vm = _serviceProvider.GetService<LyricsWindowViewModel>();
-        if (vm != null)
-        {
-            vm.IsMirrored = mirrored;
-        }
+        vm?.IsMirrored = mirrored;
 
         _preferences.IsLyricsMirrored = mirrored;
         DisplayPreferencesStore.Save(_preferences);
@@ -300,18 +286,12 @@ public class DisplayService : IDisplayService
         DisplayPreferencesStore.Save(_preferences);
 
         var vm = _serviceProvider.GetService<RotationWindowViewModel>();
-        if (vm != null)
-        {
-            vm.SelectedProjectionView = mode;
-        }
+        vm?.SelectedProjectionView = mode;
     }
 
     public void SetCrawlBannerText(string text)
     {
         var vm = _serviceProvider.GetService<RotationWindowViewModel>();
-        if (vm != null)
-        {
-            vm.CrawlBannerText = text;
-        }
+        vm?.CrawlBannerText = text;
     }
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace Lyracist.Services.Media.Cdg;
 
-public struct CdgTile
+public readonly struct CdgTile
 {
     public byte Color0 { get; }
     public byte Color1 { get; }
@@ -21,7 +21,7 @@ public struct CdgTile
         data.Slice(4, 12).CopyTo(Data);
     }
 
-    public void Apply(CdgState state, bool isXor)
+    public readonly void Apply(CdgState state, bool isXor)
     {
         // Safe check for grid sizes: 50 columns x 18 rows
         if (Row >= 18 || Col >= 50) return;

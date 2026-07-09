@@ -28,6 +28,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     private string? _tempAudioPath;
     private string? _tempCdgPath;
     private string? _tempDir;
+    private string? _loadedAudioPath;
 
     public event Action<ImageSource>? FrameReady;
     public event Action? Started;
@@ -48,7 +49,46 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     public int Pitch
     {
         get => _video.Pitch;
-        set => _video.Pitch = value;
+        set
+        {
+            if (_video.Pitch != value)
+            {
+                _video.Pitch = value;
+
+                // Hot-reload track with new pitch filter if currently playing
+                if (_isPlaying && !string.IsNullOrEmpty(_loadedAudioPath))
+                {
+                    Task.Run(async () =>
+                    {
+                        var currentPos = _video.Position;
+                        bool wasPlaying = _isPlaying;
+
+                        if (!_isMp4Mode)
+                        {
+                            _timer?.Stop();
+                        }
+
+                        // Load the media backend again
+                        await _video.LoadAsync(_loadedAudioPath);
+                        
+                        // Apply equalizer, speed, volume, and the new Pitch setting
+                        UpdateAudioParameters();
+
+                        // Seek to the exact same position
+                        await _video.SeekAsync(currentPos);
+
+                        if (wasPlaying)
+                        {
+                            await _video.PlayAsync();
+                            if (!_isMp4Mode)
+                            {
+                                _timer?.Start();
+                            }
+                        }
+                    });
+                }
+            }
+        }
     }
 
     public double Treble
@@ -137,9 +177,9 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         }
     }
 
-    public void LoadSong(string path)
+    public async Task LoadSong(string path)
     {
-        Stop();
+        await Stop();
         CleanUpTempFiles();
         _position = 0;
 
@@ -159,22 +199,20 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
                 _tempDir = Path.Combine(Path.GetTempPath(), "LyracistPlayback_" + Guid.NewGuid().ToString("N"));
                 Directory.CreateDirectory(_tempDir);
 
-                using (var archive = ZipFile.OpenRead(path))
+                using var archive = ZipFile.OpenRead(path);
+                var cdgEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase));
+                var audioEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) || e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
+
+                if (cdgEntry != null && audioEntry != null)
                 {
-                    var cdgEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase));
-                    var audioEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) || e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
+                    _tempAudioPath = Path.Combine(_tempDir, "audio" + Path.GetExtension(audioEntry.FullName));
+                    _tempCdgPath = Path.Combine(_tempDir, "lyrics.cdg");
 
-                    if (cdgEntry != null && audioEntry != null)
-                    {
-                        _tempAudioPath = Path.Combine(_tempDir, "audio" + Path.GetExtension(audioEntry.FullName));
-                        _tempCdgPath = Path.Combine(_tempDir, "lyrics.cdg");
+                    audioEntry.ExtractToFile(_tempAudioPath, true);
+                    cdgEntry.ExtractToFile(_tempCdgPath, true);
 
-                        audioEntry.ExtractToFile(_tempAudioPath, true);
-                        cdgEntry.ExtractToFile(_tempCdgPath, true);
-
-                        audioToLoad = _tempAudioPath;
-                        cdgToLoad = _tempCdgPath;
-                    }
+                    audioToLoad = _tempAudioPath;
+                    cdgToLoad = _tempCdgPath;
                 }
             }
             catch (Exception ex)
@@ -191,31 +229,29 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         // Apply dynamic settings merging (Song -> Singer -> Defaults)
         UpdateAudioParameters();
 
+        _loadedAudioPath = audioToLoad;
+
         // Always load the file (mp4 or mp3 audio) in the unmanaged video player to play the audio track
-        Task.Run(async () => await _video.LoadAsync(audioToLoad));
+        await Task.Run(async () => await _video.LoadAsync(audioToLoad));
 
         if (!string.IsNullOrEmpty(cdgToLoad))
         {
-            // Load the CDG packets in a task wrapper to keep UI responsive
-            Task.Run(async () =>
+            await _cdgDecoder.LoadAsync(cdgToLoad);
+            if (_cdgDecoder is CdgDecoder cdg)
             {
-                await _cdgDecoder.LoadAsync(cdgToLoad);
-                if (_cdgDecoder is CdgDecoder cdg)
-                {
-                    _scheduler.LoadPackets(cdg.Packets);
-                    _scheduler.Reset();
-                }
-            });
+                _scheduler.LoadPackets(cdg.Packets);
+                _scheduler.Reset();
+            }
         }
     }
 
-    public void Play()
+    public async Task Play()
     {
         if (_isPlaying) return;
         _isPlaying = true;
 
         // Start playback on video/audio backend
-        Task.Run(async () => await _video.PlayAsync());
+        await Task.Run(async () => await _video.PlayAsync());
 
         if (!_isMp4Mode)
         {
@@ -226,11 +262,11 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         Started?.Invoke();
     }
 
-    public void Pause()
+    public async Task Pause()
     {
         _isPlaying = false;
 
-        Task.Run(async () => await _video.PauseAsync());
+        await Task.Run(async () => await _video.PauseAsync());
 
         if (!_isMp4Mode)
         {
@@ -238,17 +274,15 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         }
     }
 
-    public void Stop()
+    public async Task Stop()
     {
         bool wasPlaying = _isPlaying;
         _isPlaying = false;
         _position = 0;
+        _loadedAudioPath = null;
 
-        Task.Run(async () =>
-        {
-            await _video.StopAsync();
-            CleanUpTempFiles();
-        });
+        await Task.Run(async () => await _video.StopAsync());
+        CleanUpTempFiles();
 
         if (!_isMp4Mode)
         {

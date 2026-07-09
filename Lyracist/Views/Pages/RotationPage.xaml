@@ -147,6 +147,15 @@
 
                 <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="6">
                     <ListBox ItemsSource="{Binding Rotation}" SelectedItem="{Binding SelectedSinger}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="AllowDrop" Value="True"/>
+                                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown"/>
+                                <EventSetter Event="MouseMove" Handler="ListBoxItem_MouseMove"/>
+                                <EventSetter Event="DragOver" Handler="ListBoxItem_DragOver"/>
+                                <EventSetter Event="Drop" Handler="ListBoxItem_Drop"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border BorderThickness="1.5" CornerRadius="6" Padding="6,4" Margin="1">
@@ -219,7 +228,7 @@
                                                        Appearance="Success" 
                                                        Margin="0,0,2,0" 
                                                        Padding="4"
-                                                       ToolTip="Mark current song as completed (moves singer to end of rotation)"/>
+                                                       ToolTip="Mark current song as completed (updates song request and advances active indicator)"/>
                                             
                                             <!-- Pause/Resume Button -->
                                             <ui:Button Command="{Binding DataContext.TogglePauseSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 

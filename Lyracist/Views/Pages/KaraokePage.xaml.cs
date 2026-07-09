@@ -21,8 +21,7 @@ public partial class KaraokePage : Page
         {
             if (item.IsSelected)
             {
-                var listBox = ItemsControl.ItemsControlFromItemContainer(item) as System.Windows.Controls.ListBox;
-                if (listBox != null)
+                if (ItemsControl.ItemsControlFromItemContainer(item) is System.Windows.Controls.ListBox listBox)
                 {
                     listBox.SelectedItem = null;
                     e.Handled = true;

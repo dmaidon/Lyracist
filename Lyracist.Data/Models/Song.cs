@@ -20,6 +20,6 @@ namespace Lyracist.Data.Models
 
         // Navigation Properties
         public SongAudioSettings? AudioSettings { get; set; }
-        public ICollection<RotationEntry> RotationEntries { get; set; } = new List<RotationEntry>();
+        public ICollection<RotationEntry> RotationEntries { get; set; } = [];
     }
 }

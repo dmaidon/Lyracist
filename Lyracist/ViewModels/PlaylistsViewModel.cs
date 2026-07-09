@@ -17,14 +17,14 @@ public partial class PlaylistsViewModel : BaseViewModel
     private readonly IOccasionService _occasions;
     private readonly DispatcherTimer _statusTimer;
 
-    public ObservableCollection<PlaylistTrack> OpeningTracks { get; } = new();
-    public ObservableCollection<PlaylistTrack> FillInTracks { get; } = new();
-    public ObservableCollection<PlaylistTrack> EndRotationTracks { get; } = new();
-    public ObservableCollection<KaraokeSong> LibrarySongs { get; } = new();
+    public ObservableCollection<PlaylistTrack> OpeningTracks { get; } = [];
+    public ObservableCollection<PlaylistTrack> FillInTracks { get; } = [];
+    public ObservableCollection<PlaylistTrack> EndRotationTracks { get; } = [];
+    public ObservableCollection<KaraokeSong> LibrarySongs { get; } = [];
 
     // Special Occasion editor
-    public ObservableCollection<OccasionNode> OccasionCategories { get; } = new();
-    public ObservableCollection<OccasionNode> OccasionItems { get; } = new();
+    public ObservableCollection<OccasionNode> OccasionCategories { get; } = [];
+    public ObservableCollection<OccasionNode> OccasionItems { get; } = [];
 
     [ObservableProperty]
     private OccasionNode? _selectedOccasionCategory;
@@ -110,7 +110,7 @@ public partial class PlaylistsViewModel : BaseViewModel
     [ObservableProperty]
     private bool _isEndRotationPlaying;
 
-    private System.Collections.Generic.List<KaraokeSong> _allLibrarySongs = new();
+    private System.Collections.Generic.List<KaraokeSong> _allLibrarySongs = [];
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -468,8 +468,10 @@ public partial class PlaylistsViewModel : BaseViewModel
             partyTyme,
             SelectedOccasionCategory.Id,
             () => RefreshOccasionItems()
-        );
-        window.Owner = System.Windows.Application.Current.MainWindow;
+        )
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
         window.ShowDialog();
     }
 

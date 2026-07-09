@@ -55,7 +55,361 @@
                 </Style>
             </Grid.Style>
 
-            <!-- CDG / MP4 Frame Display -->
+             <!-- Dynamic FX Backdrops (Visible when Chroma-Key is active) -->
+            <!-- 1. Nebula Bokeh (Liquid Glow) Backdrop -->
+            <Grid Grid.ZIndex="-2" Background="#FF090514" Visibility="{Binding IsNebulaVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                <Viewbox Stretch="UniformToFill">
+                    <Canvas Width="1920" Height="1080" ClipToBounds="True">
+                        <!-- Glowing Bokeh Bubble 1 -->
+                        <Ellipse Width="700" Height="700" Fill="#CC4F1A8F" Opacity="0.45">
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="280" />
+                            </Ellipse.Effect>
+                            <Ellipse.RenderTransform>
+                                <TranslateTransform x:Name="Bokeh1Trans" X="200" Y="160" />
+                            </Ellipse.RenderTransform>
+                            <Ellipse.Triggers>
+                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetName="Bokeh1Trans" Storyboard.TargetProperty="X" From="100" To="1200" Duration="0:0:18" />
+                                            <DoubleAnimation Storyboard.TargetName="Bokeh1Trans" Storyboard.TargetProperty="Y" From="100" To="800" Duration="0:0:22" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Ellipse.Triggers>
+                        </Ellipse>
+
+                        <!-- Glowing Bokeh Bubble 2 -->
+                        <Ellipse Width="800" Height="800" Fill="#CC0D47A1" Opacity="0.4">
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="320" />
+                            </Ellipse.Effect>
+                            <Ellipse.RenderTransform>
+                                <TranslateTransform x:Name="Bokeh2Trans" X="1000" Y="600" />
+                            </Ellipse.RenderTransform>
+                            <Ellipse.Triggers>
+                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetName="Bokeh2Trans" Storyboard.TargetProperty="X" From="1300" To="200" Duration="0:0:25" />
+                                            <DoubleAnimation Storyboard.TargetName="Bokeh2Trans" Storyboard.TargetProperty="Y" From="760" To="160" Duration="0:0:16" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Ellipse.Triggers>
+                        </Ellipse>
+
+                        <!-- Glowing Bokeh Bubble 3 -->
+                        <Ellipse Width="600" Height="600" Fill="#CCB71C1C" Opacity="0.3">
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="240" />
+                            </Ellipse.Effect>
+                            <Ellipse.RenderTransform>
+                                <TranslateTransform x:Name="Bokeh3Trans" X="400" Y="800" />
+                            </Ellipse.RenderTransform>
+                            <Ellipse.Triggers>
+                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetName="Bokeh3Trans" Storyboard.TargetProperty="X" From="300" To="1400" Duration="0:0:14" />
+                                            <DoubleAnimation Storyboard.TargetName="Bokeh3Trans" Storyboard.TargetProperty="Y" From="900" To="100" Duration="0:0:28" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Ellipse.Triggers>
+                        </Ellipse>
+                    </Canvas>
+                </Viewbox>
+            </Grid>
+
+            <!-- 2. Neon Waveform Visualizer Backdrop -->
+            <Grid Grid.ZIndex="-1" Background="#FF040209" Visibility="{Binding IsWaveformVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                <Viewbox Stretch="UniformToFill">
+                    <Grid Width="1920" Height="1080">
+                        <!-- Ambient central glow -->
+                        <Ellipse Width="1200" Height="600" Fill="#1A8F128E" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="240" />
+                            </Ellipse.Effect>
+                        </Ellipse>
+                        
+                        <!-- Shifting Neon Wave Curves -->
+                        <Canvas VerticalAlignment="Center" Height="400" ClipToBounds="True">
+                            <!-- Cyan Wave -->
+                            <Path Stroke="#8000E5FF" StrokeThickness="7" Fill="Transparent">
+                                <Path.Effect>
+                                    <DropShadowEffect Color="#00E5FF" BlurRadius="24" ShadowDepth="0" Opacity="0.8"/>
+                                </Path.Effect>
+                                <Path.Data>
+                                    <PathGeometry>
+                                        <PathFigure StartPoint="0,200">
+                                            <BezierSegment Point1="500,40" Point2="1000,360" Point3="1500,200" />
+                                            <BezierSegment Point1="2000,40" Point2="2500,360" Point3="3000,200" />
+                                        </PathFigure>
+                                    </PathGeometry>
+                                </Path.Data>
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform x:Name="Wave1Trans" X="0" Y="0" />
+                                        <ScaleTransform x:Name="Wave1Scale" ScaleY="1" CenterY="200"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                                <Path.Triggers>
+                                    <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                        <BeginStoryboard>
+                                            <Storyboard RepeatBehavior="Forever">
+                                                <DoubleAnimation Storyboard.TargetName="Wave1Trans" Storyboard.TargetProperty="X" From="0" To="-1500" Duration="0:0:8" />
+                                                <DoubleAnimation Storyboard.TargetName="Wave1Scale" Storyboard.TargetProperty="ScaleY" From="0.75" To="1.35" Duration="0:0:3" AutoReverse="True" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </Path.Triggers>
+                            </Path>
+
+                            <!-- Magenta/Pink Wave -->
+                            <Path Stroke="#80E040FB" StrokeThickness="8" Fill="Transparent">
+                                <Path.Effect>
+                                    <DropShadowEffect Color="#E040FB" BlurRadius="30" ShadowDepth="0" Opacity="0.8"/>
+                                </Path.Effect>
+                                <Path.Data>
+                                    <PathGeometry>
+                                        <PathFigure StartPoint="0,200">
+                                            <BezierSegment Point1="500,360" Point2="1000,40" Point3="1500,200" />
+                                            <BezierSegment Point1="2000,360" Point2="2500,40" Point3="3000,200" />
+                                        </PathFigure>
+                                    </PathGeometry>
+                                </Path.Data>
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform x:Name="Wave2Trans" X="0" Y="0" />
+                                        <ScaleTransform x:Name="Wave2Scale" ScaleY="1" CenterY="200"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                                <Path.Triggers>
+                                    <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                        <BeginStoryboard>
+                                            <Storyboard RepeatBehavior="Forever">
+                                                <DoubleAnimation Storyboard.TargetName="Wave2Trans" Storyboard.TargetProperty="X" From="-1500" To="0" Duration="0:0:11" />
+                                                <DoubleAnimation Storyboard.TargetName="Wave2Scale" Storyboard.TargetProperty="ScaleY" From="1.25" To="0.65" Duration="0:0:4" AutoReverse="True" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </Path.Triggers>
+                            </Path>
+                        </Canvas>
+                    </Grid>
+                </Viewbox>
+            </Grid>
+
+            <!-- 3. Retro Synthwave Backdrop -->
+            <Grid Grid.ZIndex="-3" Background="#FF03010B" Visibility="{Binding IsSynthwaveVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                <Viewbox Stretch="UniformToFill">
+                    <Grid Width="1920" Height="1080">
+                        <!-- Glowing Horizon Sun -->
+                        <Ellipse Width="680" Height="680" Margin="0,0,0,160" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Ellipse.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#FFFF3D00" Offset="0.0" />
+                                    <GradientStop Color="#FFFF007F" Offset="0.5" />
+                                    <GradientStop Color="#00FF007F" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Ellipse.Fill>
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="50" />
+                            </Ellipse.Effect>
+                        </Ellipse>
+                        
+                        <!-- Neon grid overlay in the bottom half -->
+                        <Grid Height="640" VerticalAlignment="Bottom" ClipToBounds="True">
+                            <Grid.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#00000000" Offset="0" />
+                                    <GradientStop Color="#22FF007F" Offset="0.4" />
+                                    <GradientStop Color="#E6050212" Offset="1" />
+                                </LinearGradientBrush>
+                            </Grid.Background>
+                            
+                            <Canvas>
+                                <!-- Perspective Converging Lines (center is 960) -->
+                                <Line X1="960" Y1="0" X2="-800" Y2="640" Stroke="#4D00E5FF" StrokeThickness="4" />
+                                <Line X1="960" Y1="0" X2="-200" Y2="640" Stroke="#4D00E5FF" StrokeThickness="4" />
+                                <Line X1="960" Y1="0" X2="300" Y2="640" Stroke="#4D00E5FF" StrokeThickness="4" />
+                                <Line X1="960" Y1="0" X2="700" Y2="640" Stroke="#4D00E5FF" StrokeThickness="4" />
+                                <Line X1="960" Y1="0" X2="960" Y2="640" Stroke="#B300E5FF" StrokeThickness="5" />
+                                <Line X1="960" Y1="0" X2="1220" Y2="640" Stroke="#4D00E5FF" StrokeThickness="4" />
+                                <Line X1="960" Y1="0" X2="1620" Y2="640" Stroke="#4D00E5FF" StrokeThickness="4" />
+                                <Line X1="960" Y1="0" X2="2120" Y2="640" Stroke="#4D00E5FF" StrokeThickness="4" />
+                                <Line X1="960" Y1="0" X2="2720" Y2="640" Stroke="#4D00E5FF" StrokeThickness="4" />
+                                
+                                <!-- Horizontal lines moving in perspective -->
+                                <Line X1="-800" X2="2720" Stroke="#99FF007F" StrokeThickness="5">
+                                    <Line.RenderTransform>
+                                        <TranslateTransform x:Name="HLine1" Y="0" />
+                                    </Line.RenderTransform>
+                                    <Line.Triggers>
+                                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation Storyboard.TargetName="HLine1" Storyboard.TargetProperty="Y" From="0" To="640" Duration="0:0:3.5" BeginTime="0:0:0">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <ExponentialEase Exponent="3" EasingMode="EaseIn" />
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Line.Triggers>
+                                </Line>
+                                
+                                <Line X1="-800" X2="2720" Stroke="#99FF007F" StrokeThickness="5">
+                                    <Line.RenderTransform>
+                                        <TranslateTransform x:Name="HLine2" Y="0" />
+                                    </Line.RenderTransform>
+                                    <Line.Triggers>
+                                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation Storyboard.TargetName="HLine2" Storyboard.TargetProperty="Y" From="0" To="640" Duration="0:0:3.5" BeginTime="0:0:0.7">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <ExponentialEase Exponent="3" EasingMode="EaseIn" />
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Line.Triggers>
+                                </Line>
+
+                                <Line X1="-800" X2="2720" Stroke="#99FF007F" StrokeThickness="5">
+                                    <Line.RenderTransform>
+                                        <TranslateTransform x:Name="HLine3" Y="0" />
+                                    </Line.RenderTransform>
+                                    <Line.Triggers>
+                                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation Storyboard.TargetName="HLine3" Storyboard.TargetProperty="Y" From="0" To="640" Duration="0:0:3.5" BeginTime="0:0:1.4">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <ExponentialEase Exponent="3" EasingMode="EaseIn" />
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Line.Triggers>
+                                </Line>
+
+                                <Line X1="-800" X2="2720" Stroke="#99FF007F" StrokeThickness="5">
+                                    <Line.RenderTransform>
+                                        <TranslateTransform x:Name="HLine4" Y="0" />
+                                    </Line.RenderTransform>
+                                    <Line.Triggers>
+                                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation Storyboard.TargetName="HLine4" Storyboard.TargetProperty="Y" From="0" To="640" Duration="0:0:3.5" BeginTime="0:0:2.1">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <ExponentialEase Exponent="3" EasingMode="EaseIn" />
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Line.Triggers>
+                                </Line>
+
+                                <Line X1="-800" X2="2720" Stroke="#99FF007F" StrokeThickness="5">
+                                    <Line.RenderTransform>
+                                        <TranslateTransform x:Name="HLine5" Y="0" />
+                                    </Line.RenderTransform>
+                                    <Line.Triggers>
+                                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation Storyboard.TargetName="HLine5" Storyboard.TargetProperty="Y" From="0" To="640" Duration="0:0:3.5" BeginTime="0:0:2.8">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <ExponentialEase Exponent="3" EasingMode="EaseIn" />
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Line.Triggers>
+                                </Line>
+                            </Canvas>
+                        </Grid>
+                    </Grid>
+                </Viewbox>
+            </Grid>
+
+            <!-- 4. Space Parallax Starfield Backdrop -->
+            <Grid Grid.ZIndex="-4" Background="#FF01030A" Visibility="{Binding IsSpaceVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                <Viewbox Stretch="UniformToFill">
+                    <Grid Width="1920" Height="1080">
+                        <!-- Ambient blue nebula glow -->
+                        <Ellipse Width="1400" Height="800" Fill="#15003366" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="280" />
+                            </Ellipse.Effect>
+                        </Ellipse>
+                        
+                        <!-- Far Star Layer (Parallax 1) -->
+                        <Canvas ClipToBounds="True">
+                            <Canvas.RenderTransform>
+                                <TranslateTransform x:Name="FarStarsTrans" X="0" />
+                            </Canvas.RenderTransform>
+                            <Canvas.Triggers>
+                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="FarStarsTrans" Storyboard.TargetProperty="X" From="0" To="-1920" Duration="0:0:28" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Canvas.Triggers>
+                            
+                            <!-- Zone 1 -->
+                            <Ellipse Canvas.Left="200" Canvas.Top="100" Width="3" Height="3" Fill="White" Opacity="0.5" />
+                            <Ellipse Canvas.Left="600" Canvas.Top="500" Width="4" Height="4" Fill="LightBlue" Opacity="0.6" />
+                            <Ellipse Canvas.Left="900" Canvas.Top="240" Width="2" Height="2" Fill="White" Opacity="0.4" />
+                            <Ellipse Canvas.Left="1400" Canvas.Top="760" Width="4" Height="4" Fill="White" Opacity="0.7" />
+                            <Ellipse Canvas.Left="1700" Canvas.Top="160" Width="3" Height="3" Fill="LightCyan" Opacity="0.5" />
+                            <!-- Zone 2 -->
+                            <Ellipse Canvas.Left="2120" Canvas.Top="100" Width="3" Height="3" Fill="White" Opacity="0.5" />
+                            <Ellipse Canvas.Left="2520" Canvas.Top="500" Width="4" Height="4" Fill="LightBlue" Opacity="0.6" />
+                            <Ellipse Canvas.Left="2820" Canvas.Top="240" Width="2" Height="2" Fill="White" Opacity="0.4" />
+                            <Ellipse Canvas.Left="3320" Canvas.Top="760" Width="4" Height="4" Fill="White" Opacity="0.7" />
+                            <Ellipse Canvas.Left="3620" Canvas.Top="160" Width="3" Height="3" Fill="LightCyan" Opacity="0.5" />
+                        </Canvas>
+
+                        <!-- Mid Star Layer (Parallax 2) -->
+                        <Canvas ClipToBounds="True">
+                            <Canvas.RenderTransform>
+                                <TranslateTransform x:Name="MidStarsTrans" X="0" />
+                            </Canvas.RenderTransform>
+                            <Canvas.Triggers>
+                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="MidStarsTrans" Storyboard.TargetProperty="X" From="0" To="-1920" Duration="0:0:16" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Canvas.Triggers>
+                            
+                            <!-- Zone 1 -->
+                            <Ellipse Canvas.Left="300" Canvas.Top="360" Width="6" Height="6" Fill="White" Opacity="0.8" />
+                            <Ellipse Canvas.Left="1100" Canvas.Top="120" Width="5" Height="5" Fill="PaleGoldenrod" Opacity="0.75" />
+                            <Ellipse Canvas.Left="1600" Canvas.Top="600" Width="7" Height="7" Fill="White" Opacity="0.85" />
+                            <!-- Zone 2 -->
+                            <Ellipse Canvas.Left="2220" Canvas.Top="360" Width="6" Height="6" Fill="White" Opacity="0.8" />
+                            <Ellipse Canvas.Left="3020" Canvas.Top="120" Width="5" Height="5" Fill="PaleGoldenrod" Opacity="0.75" />
+                            <Ellipse Canvas.Left="3520" Canvas.Top="600" Width="7" Height="7" Fill="White" Opacity="0.85" />
+                        </Canvas>
+                    </Grid>
+                </Viewbox>
+            </Grid>
             <Image Source="{Binding Frame}"
                    Stretch="Uniform"
                    RenderOptions.BitmapScalingMode="NearestNeighbor"

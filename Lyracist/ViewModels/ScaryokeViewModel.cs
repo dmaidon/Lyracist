@@ -19,9 +19,9 @@ public class WheelSegment
 public partial class ScaryokeViewModel : BaseViewModel
 {
     /// <summary>The wheel segments, clockwise from the top.</summary>
-    public static string[] WheelCategories => Core.Helpers.AppSettings.ScaryokeCategories.ToArray();
+    public static string[] WheelCategories => [.. Core.Helpers.AppSettings.ScaryokeCategories];
 
-    public ObservableCollection<WheelSegment> WheelSegments { get; } = new();
+    public ObservableCollection<WheelSegment> WheelSegments { get; } = [];
 
     private readonly IDisplayService _display;
     private readonly RotationViewModel _rotation;
@@ -129,25 +129,13 @@ public partial class ScaryokeViewModel : BaseViewModel
         var singer = _rotation.SelectedSinger ?? _rotation.Rotation.FirstOrDefault();
         string singerName = singer?.Name ?? "The singer";
 
-        switch (category)
+        ResultText = category switch
         {
-            case "Singer's Choice":
-                ResultText = $"{singerName} sings whatever they want!";
-                break;
-
-            case "DJ's Choice":
-                ResultText = $"The DJ picks {singerName}'s fate!";
-                break;
-
-            case "Gender Bender":
-                ResultText = $"{singerName} must sing a song made famous by the opposite gender!";
-                break;
-
-            default:
-                ResultText = $"{singerName} picks any song from: {category}!";
-                break;
-        }
-
+            "Singer's Choice" => $"{singerName} sings whatever they want!",
+            "DJ's Choice" => $"The DJ picks {singerName}'s fate!",
+            "Gender Bender" => $"{singerName} must sing a song made famous by the opposite gender!",
+            _ => $"{singerName} picks any song from: {category}!",
+        };
         _display.ShowLyricsOverlay($"🎃 SCARYOKE: {category}!\n{ResultText}", 10);
         return false;
     }

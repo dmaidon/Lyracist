@@ -39,4 +39,45 @@ public partial class Singer : ObservableObject
 
     [ObservableProperty]
     private bool _isNext = false;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(XP))]
+    [NotifyPropertyChangedFor(nameof(Level))]
+    [NotifyPropertyChangedFor(nameof(XPProgress))]
+    [NotifyPropertyChangedFor(nameof(LevelName))]
+    [NotifyPropertyChangedFor(nameof(Badges))]
+    private int _score = 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRatings))]
+    [NotifyPropertyChangedFor(nameof(XP))]
+    [NotifyPropertyChangedFor(nameof(Level))]
+    [NotifyPropertyChangedFor(nameof(XPProgress))]
+    [NotifyPropertyChangedFor(nameof(LevelName))]
+    [NotifyPropertyChangedFor(nameof(Badges))]
+    private int _ratingCount = 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(XP))]
+    [NotifyPropertyChangedFor(nameof(Level))]
+    [NotifyPropertyChangedFor(nameof(XPProgress))]
+    [NotifyPropertyChangedFor(nameof(LevelName))]
+    [NotifyPropertyChangedFor(nameof(Badges))]
+    private double _averageRating = 0.0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(XP))]
+    [NotifyPropertyChangedFor(nameof(Level))]
+    [NotifyPropertyChangedFor(nameof(XPProgress))]
+    [NotifyPropertyChangedFor(nameof(LevelName))]
+    [NotifyPropertyChangedFor(nameof(Badges))]
+    private int _totalSongsSung = 0;
+
+    public bool HasRatings => RatingCount > 0;
+
+    public int XP => Lyracist.Core.Helpers.SingerXpHelper.CalculateXP(TotalSongsSung, Score);
+    public int Level => Lyracist.Core.Helpers.SingerXpHelper.CalculateLevel(XP);
+    public double XPProgress => Lyracist.Core.Helpers.SingerXpHelper.CalculateXPProgress(XP, Level);
+    public string LevelName => Lyracist.Core.Helpers.SingerXpHelper.GetLevelName(Level);
+    public List<string> Badges => Lyracist.Core.Helpers.SingerXpHelper.GetBadges(TotalSongsSung, Score, AverageRating, RatingCount);
 }

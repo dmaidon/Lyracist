@@ -13,10 +13,10 @@ public class OccasionService : IOccasionService
     // Nested Holiday submenu entries, inserted at runtime on first use so no
     // EF migration is needed on top of the seeded top-level categories.
     private static readonly string[] DefaultHolidays =
-    {
+    [
         "Christmas", "Halloween", "New Year's Eve", "Valentine's Day",
         "St. Patrick's Day", "Thanksgiving", "Independence Day"
-    };
+    ];
 
     public event EventHandler? OccasionsChanged;
 
@@ -55,7 +55,7 @@ public class OccasionService : IOccasionService
         var items = context.OccasionItems.ToList();
 
         List<OccasionNode> Build(int? parentId, int depth) =>
-            categories.Where(c => c.ParentCategoryId == parentId)
+            [.. categories.Where(c => c.ParentCategoryId == parentId)
                 .OrderBy(c => c.Name)
                 .Select(c =>
                 {
@@ -66,8 +66,7 @@ public class OccasionService : IOccasionService
                         .OrderBy(i => i.Name)
                         .Select(i => MapItem(i, depth + 1)));
                     return node;
-                })
-                .ToList();
+                })];
 
         return Build(null, 0);
     }
@@ -82,7 +81,7 @@ public class OccasionService : IOccasionService
                 var children = node.Children.ToList();
                 node.Children.Clear();
                 flat.Add(node);
-                Walk(children.Where(c => !c.IsItem).ToList());
+                Walk([.. children.Where(c => !c.IsItem)]);
             }
         }
         Walk(GetMenuTree());
@@ -92,12 +91,11 @@ public class OccasionService : IOccasionService
     public List<OccasionNode> GetItems(int categoryId)
     {
         using var context = new LyracistDbContext();
-        return context.OccasionItems
+        return [.. context.OccasionItems
             .Where(i => i.OccasionCategoryId == categoryId)
             .OrderBy(i => i.Name)
             .ToList()
-            .Select(i => MapItem(i, 0))
-            .ToList();
+            .Select(i => MapItem(i, 0))];
     }
 
     public void AddCategory(string name, int? parentCategoryId)

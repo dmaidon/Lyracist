@@ -3,20 +3,24 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.7.7.154</AssemblyVersion>
-    <FileVersion>26.7.7.154</FileVersion>
+    <AssemblyVersion>26.7.9.171</AssemblyVersion>
+    <FileVersion>26.7.9.171</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <Authors>Dennis Maidon</Authors>
     <Company>PAROLE Software</Company>
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <Title>Lyracist</Title>
+    <Title>Lyracist Pro</Title>
+    <Product>Lyracist Pro</Product>
+    <AssemblyTitle>Lyracist Pro</AssemblyTitle>
     <Copyright>© 2026 PAROLE Software - All rights reserved.</Copyright>
   </PropertyGroup>
 
@@ -51,6 +55,10 @@
     <PackageReference Include="Dapper" Version="2.1.35" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
     <PackageReference Include="WriteableBitmapEx" Version="1.6.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

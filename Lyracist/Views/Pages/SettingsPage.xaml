@@ -76,447 +76,429 @@
             </StackPanel>
         </Border>
 
-        <!-- ── Settings Content: 4 Columns Grid ── -->
+        <!-- ── Settings Content: 4 Columns ── -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="12" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="12" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="16" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- COLUMN 0: General settings (Theme, Displays, Splash) -->
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,0,8,16">
-                    <!-- Theme & Appearance -->
-                    <GroupBox Header="Theme &amp; Appearance"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <CheckBox Content="Dark Application Theme Mode"
-                                      IsChecked="{Binding IsDarkMode, Mode=TwoWay}"
-                                      Margin="0,0,0,12" />
+            <!-- LEFT SIDE TabControl -->
+            <TabControl Grid.Column="0" Background="Transparent" BorderThickness="0">
+                <TabItem Header="Presentation &amp; DJ" FontSize="12">
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                            <CheckBox Content="Enable Hardware Rendering (Restart required)"
-                                      IsChecked="{Binding EnableHardwareAcceleration, Mode=TwoWay}"
-                                      Margin="0,0,0,12" />
-
-                            <CheckBox Content="Show splash screen on startup"
-                                      IsChecked="{Binding ShowSplashOnStartup, Mode=TwoWay}" />
-                        </StackPanel>
-                    </GroupBox>
-
-                    <!-- Displays & Projection Monitors -->
-                    <GroupBox Header="Displays &amp; Projection"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <TextBlock Text="Lyrics Projection Screen" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ComboBox ItemsSource="{Binding Screens}"
-                                      SelectedItem="{Binding LyricsScreen, Mode=TwoWay}"
-                                      DisplayMemberPath="DisplayName"
-                                      Margin="0,0,0,12" />
-
-                            <TextBlock Text="Singer Rotation Billboard Screen" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ComboBox ItemsSource="{Binding Screens}"
-                                      SelectedItem="{Binding RotationScreen, Mode=TwoWay}"
-                                      DisplayMemberPath="DisplayName"
-                                      Margin="0,0,0,12" />
-
-                            <TextBlock Text="Billboard View Mode" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ComboBox ItemsSource="{Binding ProjectionViews}"
-                                      SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}"
-                                      Margin="0,0,0,12" />
-
-                            <!-- Star Wars Crawl Template Selection -->
-                            <StackPanel Margin="0,0,0,12" Visibility="{Binding IsStarWarsCrawlSelected, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="Crawl Intro Text Template" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                                <ComboBox ItemsSource="{Binding CrawlBannerTypes}"
-                                          SelectedItem="{Binding SelectedCrawlBannerType, Mode=TwoWay}"
-                                          Margin="0,0,0,8" />
-
-                                <TextBlock Text="{Binding CrawlBannerPreviewText}"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                           TextWrapping="Wrap"
-                                           Margin="4,0,4,12"
-                                           FontStyle="Italic" />
-                                
-                                <StackPanel Visibility="{Binding IsCustomCrawlBannerSelected, Converter={StaticResource BoolToVis}}">
-                                    <TextBlock Text="Custom Crawl Text" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
-                                    <ui:TextBox Text="{Binding CrawlBannerCustomText, UpdateSourceTrigger=PropertyChanged}"
-                                                PlaceholderText="Enter custom Star Wars crawl text..."
-                                                AcceptsReturn="True"
-                                                TextWrapping="Wrap"
-                                                Height="80"
-                                                VerticalScrollBarVisibility="Auto" />
-                                </StackPanel>
-
-                                <!-- Spaceship Overlay Settings -->
-                                <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-                                <TextBlock Text="Spaceship Overlay Settings" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8" />
-                                
-                                <Grid Margin="0,0,0,12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="12" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="12" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Font Size" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
-                                        <ui:TextBox Text="{Binding CrawlSpaceshipFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="26" />
+                        <!-- Column 0 -->
+                        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,4,16">
+                                <!-- Theme & Appearance -->
+                                <GroupBox Header="Theme &amp; Appearance" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <CheckBox Content="Dark Application Theme Mode" IsChecked="{Binding IsDarkMode, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        <CheckBox Content="Enable Hardware Rendering (Restart required)" IsChecked="{Binding EnableHardwareAcceleration, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        <CheckBox Content="Show splash screen on startup" IsChecked="{Binding ShowSplashOnStartup, Mode=TwoWay}" />
                                     </StackPanel>
+                                </GroupBox>
 
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Flight Duration (sec)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" ToolTip="Duration in seconds (larger is slower)" />
-                                        <ui:TextBox Text="{Binding CrawlSpaceshipDuration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="13" />
+                                <!-- Displays & Projection Monitors -->
+                                <GroupBox Header="Displays &amp; Projection" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Lyrics Projection Screen" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding Screens}" SelectedItem="{Binding LyricsScreen, Mode=TwoWay}" DisplayMemberPath="DisplayName" Margin="0,0,0,12" />
+                                        <TextBlock Text="Singer Rotation Billboard Screen" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding Screens}" SelectedItem="{Binding RotationScreen, Mode=TwoWay}" DisplayMemberPath="DisplayName" Margin="0,0,0,12" />
+                                        <TextBlock Text="Billboard View Mode" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding ProjectionViews}" SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}" Margin="0,0,0,12" />
+
+                                        <!-- Star Wars Crawl Template Selection -->
+                                        <StackPanel Margin="0,0,0,12" Visibility="{Binding IsStarWarsCrawlSelected, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="Crawl Intro Text Template" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                            <ComboBox ItemsSource="{Binding CrawlBannerTypes}" SelectedItem="{Binding SelectedCrawlBannerType, Mode=TwoWay}" Margin="0,0,0,8" />
+                                            <TextBlock Text="{Binding CrawlBannerPreviewText}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="4,0,4,12" FontStyle="Italic" />
+                                            <StackPanel Visibility="{Binding IsCustomCrawlBannerSelected, Converter={StaticResource BoolToVis}}">
+                                                <TextBlock Text="Custom Crawl Text" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
+                                                <ui:TextBox Text="{Binding CrawlBannerCustomText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter custom Star Wars crawl text..." AcceptsReturn="True" TextWrapping="Wrap" Height="80" VerticalScrollBarVisibility="Auto" />
+                                            </StackPanel>
+
+                                            <!-- Spaceship Overlay Settings -->
+                                            <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                                            <TextBlock Text="Spaceship Overlay Settings" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8" />
+                                            <Grid Margin="0,0,0,12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="12" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="12" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Font Size" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                                    <ui:TextBox Text="{Binding CrawlSpaceshipFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="26" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="Flight Duration (sec)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" ToolTip="Duration in seconds (larger is slower)" />
+                                                    <ui:TextBox Text="{Binding CrawlSpaceshipDuration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="13" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="4">
+                                                    <TextBlock Text="Frequency (sec)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" ToolTip="Interval in seconds between spawns" />
+                                                    <ui:TextBox Text="{Binding CrawlSpaceshipFrequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="60" />
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <TextBlock Text="Custom Text Snippets (Max 10)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                            <ListBox ItemsSource="{Binding CrawlSpaceshipSnippets}" SelectedItem="{Binding SelectedSpaceshipSnippet, Mode=TwoWay}" Height="120" Margin="0,0,0,8">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox Content="{Binding Text}" IsChecked="{Binding IsEnabled, Mode=TwoWay}" Command="{Binding DataContext.SaveSpaceshipSnippetsCommand, RelativeSource={RelativeSource AncestorType=Page}}" VerticalAlignment="Center" />
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <ui:TextBox Text="{Binding NewSpaceshipSnippetText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="New snippet message..." />
+                                                <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddSpaceshipSnippetCommand}" Appearance="Primary" />
+                                                <ui:Button Grid.Column="4" Content="Remove" Command="{Binding RemoveSpaceshipSnippetCommand}" Appearance="Secondary" />
+                                            </Grid>
+                                        </StackPanel>
+
+                                        <CheckBox Content="Mirror Lyrics display on control view" IsChecked="{Binding IsLyricsMirrored, Mode=TwoWay}" />
                                     </StackPanel>
-
-                                    <StackPanel Grid.Column="4">
-                                        <TextBlock Text="Frequency (sec)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" ToolTip="Interval in seconds between spawns" />
-                                        <ui:TextBox Text="{Binding CrawlSpaceshipFrequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="60" />
-                                    </StackPanel>
-                                </Grid>
-
-                                <TextBlock Text="Custom Text Snippets (Max 10)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
-                                
-                                <ListBox ItemsSource="{Binding CrawlSpaceshipSnippets}"
-                                         SelectedItem="{Binding SelectedSpaceshipSnippet, Mode=TwoWay}"
-                                         Height="120"
-                                         Margin="0,0,0,8">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <CheckBox Content="{Binding Text}"
-                                                      IsChecked="{Binding IsEnabled, Mode=TwoWay}"
-                                                      Command="{Binding DataContext.SaveSpaceshipSnippetsCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                                      VerticalAlignment="Center" />
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="8" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="8" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    
-                                    <ui:TextBox Text="{Binding NewSpaceshipSnippetText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="New snippet message..." />
-                                    <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddSpaceshipSnippetCommand}" Appearance="Primary" />
-                                    <ui:Button Grid.Column="4" Content="Remove" Command="{Binding RemoveSpaceshipSnippetCommand}" Appearance="Secondary" />
-                                </Grid>
+                                </GroupBox>
                             </StackPanel>
+                        </ScrollViewer>
 
-                            <CheckBox Content="Mirror Lyrics display on control view"
-                                      IsChecked="{Binding IsLyricsMirrored, Mode=TwoWay}" />
-                        </StackPanel>
-                    </GroupBox>
+                        <!-- Column 2 -->
+                        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,4,16">
+                                <!-- DJ & Venue Settings -->
+                                <GroupBox Header="DJ &amp; Venue Management" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="DJ / Host Name" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ui:TextBox Text="{Binding DjName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="DJ Name..." Margin="0,0,0,12" />
+                                        <TextBlock Text="Venues List" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ListBox ItemsSource="{Binding Venues}" SelectedItem="{Binding SelectedVenue, Mode=TwoWay}" MaxHeight="120" Height="120" Margin="0,0,0,8" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <TextBlock Text="Add Venue" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ui:TextBox Grid.Column="0" Text="{Binding NewVenueName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Venue Name..." Height="26" FontSize="11" />
+                                            <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddVenueCommand}" Appearance="Primary" Height="26" FontSize="11" />
+                                        </Grid>
+                                        <ui:Button Content="Remove Selected Venue" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveVenueCommand}" Appearance="Danger" HorizontalAlignment="Stretch" />
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
 
-                    <!-- DJ & Venue Settings -->
-                    <GroupBox Header="DJ &amp; Venue Management"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <TextBlock Text="DJ / Host Name" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ui:TextBox Text="{Binding DjName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="DJ Name..." Margin="0,0,0,12" />
+                <TabItem Header="Special Events" FontSize="12">
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="Venues List" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ListBox ItemsSource="{Binding Venues}"
-                                     SelectedItem="{Binding SelectedVenue, Mode=TwoWay}"
-                                     MaxHeight="120" Height="120" Margin="0,0,0,8"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}" FontSize="11" TextTrimming="CharacterEllipsis" />
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                        <!-- Column 0 -->
+                        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,4,16">
+                                <!-- Scaryoke Settings -->
+                                <GroupBox Header="Scaryoke Categories" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Wheel Categories (Max 12)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ListBox ItemsSource="{Binding ScaryokeCategories}" SelectedItem="{Binding SelectedScaryokeCategory}" MaxHeight="140" Height="140" Margin="0,0,0,8" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <TextBlock Text="Add Category" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ui:TextBox Grid.Column="0" Text="{Binding NewScaryokeCategoryName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Category Name..." Height="26" FontSize="11" />
+                                            <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddScaryokeCategoryCommand}" Appearance="Primary" Height="26" FontSize="11" />
+                                        </Grid>
+                                        <ui:Button Content="Remove Selected" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveScaryokeCategoryCommand}" Appearance="Danger" HorizontalAlignment="Stretch" />
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </ScrollViewer>
 
-                            <TextBlock Text="Add Venue" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ui:TextBox Grid.Column="0"
-                                            Text="{Binding NewVenueName, UpdateSourceTrigger=PropertyChanged}"
-                                            PlaceholderText="Venue Name..." Height="26" FontSize="11" />
-                                <ui:Button Grid.Column="2" Content="Add"
-                                           Command="{Binding AddVenueCommand}"
-                                           Appearance="Primary"
-                                           Height="26" FontSize="11" />
-                            </Grid>
+                        <!-- Column 2 -->
+                        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,4,16">
+                                <!-- System Simulator -->
+                                <GroupBox Header="System Simulator Auto-Pilot" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="System Stress-Test Simulator" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <TextBlock Text="Simulates rapid user actions: adds/removes singers, triggers requests, adjusts volumes/EQ, and plays/pauses tracks to stress-test database, network, and audio engine stability." FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,12" TextWrapping="Wrap" />
 
-                            <ui:Button Content="Remove Selected Venue"
-                                       Icon="{ui:SymbolIcon Delete24}"
-                                       Command="{Binding RemoveVenueCommand}"
-                                       Appearance="Danger" HorizontalAlignment="Stretch" />
-                        </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-            </ScrollViewer>
+                                        <!-- Duration Selection Slider -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Simulation Duration" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <Slider Grid.Column="1" Minimum="1" Maximum="30" Value="{Binding SimulationDurationMinutes, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="12,0,0,0" />
+                                            <TextBlock Grid.Column="2" Text="{Binding SimulationDurationMinutes, StringFormat='{}{0} Min'}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Width="40" TextAlignment="Right" Margin="12,0,0,0" />
+                                        </Grid>
 
-            <!-- COLUMN 1: Audio Configuration & Service Logins -->
-            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,0,8,16">
-                    <!-- Audio Configuration -->
-                    <GroupBox Header="Audio &amp; Equalizers"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <TextBlock Text="ASIO Output Device" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ComboBox ItemsSource="{Binding AsioDevices}"
-                                      SelectedItem="{Binding SelectedAsioDevice, Mode=TwoWay}"
-                                      Margin="0,0,0,12" />
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <ui:Button Grid.Column="0" Content="{Binding SimulationButtonText}" Icon="{ui:SymbolIcon Play24}" Command="{Binding StartSimulationCommand}" Appearance="Primary" Height="30" />
+                                            <TextBlock Grid.Column="1" Text="{Binding SimulationStatusText}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        </Grid>
 
-                            <TextBlock Text="Audio Latency / Buffer" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ComboBox ItemsSource="{Binding BufferSizes}"
-                                      SelectedItem="{Binding SelectedBufferSize, Mode=TwoWay}"
-                                      Margin="0,0,0,12" />
+                                        <!-- Console log box -->
+                                        <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="#CC111115" Padding="8" Height="140">
+                                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                                <TextBlock Text="{Binding SimulationLogText}" FontSize="10" FontFamily="Consolas" Foreground="#FF00FF00" TextWrapping="Wrap" />
+                                            </ScrollViewer>
+                                        </Border>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+            </TabControl>
 
-                            <CheckBox Content="Enable Vocal Noise Gate filter"
-                                      IsChecked="{Binding EnableNoiseGate, Mode=TwoWay}"
-                                      Margin="0,0,0,12" />
+            <!-- Vertical Divider -->
+            <Border Grid.Column="1" Width="1" Background="{DynamicResource DividerStrokeColorDefaultBrush}" Margin="7,0" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
-                            <CheckBox Content="Enable Reverb feedback on singer vocals"
-                                      IsChecked="{Binding EnableReverb, Mode=TwoWay}" />
-                        </StackPanel>
-                    </GroupBox>
+            <!-- RIGHT SIDE TabControl -->
+            <TabControl Grid.Column="2" Background="Transparent" BorderThickness="0">
+                <TabItem Header="Audio &amp; Engine" FontSize="12">
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Service Logins & API Keys -->
-                    <GroupBox Header="APIs &amp; Logins"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <TextBlock Text="YouTube API v3 Key" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ui:TextBox Text="{Binding YouTubeApiKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="AIzaSy..." Margin="0,0,0,10" />
+                        <!-- Column 0 -->
+                        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,4,16">
+                                <!-- Audio Configuration -->
+                                <GroupBox Header="Audio &amp; Equalizers" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="ASIO Output Device" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding AsioDevices}" SelectedItem="{Binding SelectedAsioDevice, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        <TextBlock Text="Audio Latency / Buffer" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding BufferSizes}" SelectedItem="{Binding SelectedBufferSize, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        <CheckBox Content="Enable Vocal Noise Gate filter" IsChecked="{Binding EnableNoiseGate, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        <CheckBox Content="Enable Reverb feedback on singer vocals" IsChecked="{Binding EnableReverb, Mode=TwoWay}" />
+                                    </StackPanel>
+                                </GroupBox>
 
-                            <TextBlock Text="Spotify Client ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ui:TextBox Text="{Binding SpotifyClientId, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="ID..." Margin="0,0,0,10" />
+                                <!-- Media Engine & Decoders -->
+                                <GroupBox Header="Decoders &amp; Layout" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="CDG Canvas Scaling Mode" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding CdgScalingModes}" SelectedItem="{Binding SelectedCdgScalingMode, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        <TextBlock Text="MP4 Decoding Backend" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding Mp4Backends}" SelectedItem="{Binding SelectedMp4Backend, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        <TextBlock Text="CDG Backdrop Mode" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding BackdropModes}" SelectedItem="{Binding CdgBackdropMode, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        <TextBlock Text="Rendering Target FPS" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding FpsOptions}" SelectedItem="{Binding FrameRate, Mode=TwoWay}" />
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </ScrollViewer>
 
-                            <TextBlock Text="Spotify Client Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ui:PasswordBox PasswordChar="*" Password="{Binding SpotifyClientSecret, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="Secret..." Margin="0,0,0,10" />
+                        <!-- Column 2 -->
+                        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,4,16">
+                                <!-- Service Logins & API Keys -->
+                                <GroupBox Header="APIs &amp; Logins" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="YouTube API v3 Key" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ui:TextBox Text="{Binding YouTubeApiKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="AIzaSy..." Margin="0,0,0,10" />
+                                        <TextBlock Text="Spotify Client ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ui:TextBox Text="{Binding SpotifyClientId, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="ID..." Margin="0,0,0,10" />
+                                        <TextBlock Text="Spotify Client Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ui:PasswordBox PasswordChar="*" Password="{Binding SpotifyClientSecret, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="Secret..." Margin="0,0,0,10" />
+                                        <TextBlock Text="Amazon AWS Key ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ui:TextBox Text="{Binding AmazonAccessKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="AKIA..." Margin="0,0,0,10" />
+                                        <TextBlock Text="Amazon AWS Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10" />
+                                        <ui:PasswordBox PasswordChar="*" Password="{Binding AmazonSecretKey, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="AWS Secret..." Margin="0,0,0,10" />
+                                        <TextBlock Text="Party Tyme Client ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ui:TextBox Text="{Binding PartyTymeClientId, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="PT-ID..." Margin="0,0,0,10" />
+                                        <TextBlock Text="Party Tyme Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ui:PasswordBox PasswordChar="*" Password="{Binding PartyTymeClientSecret, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="PT-Secret..." />
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
 
-                            <TextBlock Text="Amazon AWS Key ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ui:TextBox Text="{Binding AmazonAccessKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="AKIA..." Margin="0,0,0,10" />
+                <TabItem Header="Library &amp; Ratings" FontSize="12">
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="Amazon AWS Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10" />
-                            <ui:PasswordBox PasswordChar="*" Password="{Binding AmazonSecretKey, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="AWS Secret..." Margin="0,0,0,10" />
+                        <!-- Column 0 -->
+                        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,4,16">
+                                <!-- Music Library -->
+                                <GroupBox Header="Music Library" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Folders Scanned" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ListBox ItemsSource="{Binding LibraryDirectories}" SelectedItem="{Binding SelectedLibraryDirectory}" MaxHeight="120" Height="120" Margin="0,0,0,8" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="4" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ui:Button Grid.Column="0" Icon="{ui:SymbolIcon FolderAdd24}" Command="{Binding AddLibraryDirectoryCommand}" Appearance="Primary" ToolTip="Add directory..."/>
+                                            <ui:Button Grid.Column="2" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveLibraryDirectoryCommand}" Appearance="Danger" ToolTip="Remove selected directory"/>
+                                            <ui:Button Grid.Column="6" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding ScanSelectedDirectoryCommand}" Appearance="Secondary" ToolTip="Scan/rescan selected folder"/>
+                                        </Grid>
+                                        <Grid Margin="0,4,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ui:ProgressRing Grid.Column="0" IsIndeterminate="True" Width="16" Height="16" Margin="0,0,8,0" Visibility="{Binding IsScanning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding LibraryStatus}" FontSize="11" FontStyle="Italic" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                        </Grid>
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <ui:Button Grid.Column="0" Content="Rescan All" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding RescanLibraryCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" ToolTip="Rescan all directories in the library"/>
+                                            <ui:Button Grid.Column="2" Content="LyracistDbEditor" Icon="{ui:SymbolIcon Database24}" Command="{Binding LoadDbEditorCommand}" Appearance="Primary" HorizontalAlignment="Stretch" ToolTip="Launch the Lyracist Database Editor"/>
+                                        </Grid>
 
-                            <TextBlock Text="Party Tyme Client ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ui:TextBox Text="{Binding PartyTymeClientId, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="PT-ID..." Margin="0,0,0,10" />
+                                        <TextBlock Text="Database Maintenance" FontSize="12" FontWeight="SemiBold" Margin="0,10,0,4" />
+                                        <CheckBox Content="Seed 15 Test Performers" IsChecked="{Binding IsTestMode, Mode=TwoWay}" Margin="0,4,0,10"/>
+                                        <ui:Button Content="Clear Database" Command="{Binding ClearDatabaseCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
+                                    </StackPanel>
+                                </GroupBox>
 
-                            <TextBlock Text="Party Tyme Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ui:PasswordBox PasswordChar="*" Password="{Binding PartyTymeClientSecret, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="PT-Secret..." />
-                        </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-            </ScrollViewer>
+                                <!-- Self-Hosted Tablet Server -->
+                                <GroupBox Header="Tablet Server Settings" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Listening Network Port" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ui:TextBox Text="{Binding TabletPort, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                                        <TextBlock Text="Static/Override IP Address (Optional)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" ToolTip="Override automatically detected IP address for QR codes (e.g. for travel routers)." />
+                                        <ui:TextBox Text="{Binding StaticIPAddress, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. 192.168.1.100" Margin="0,0,0,10" />
+                                        <TextBlock Text="Server Status: " FontSize="12" FontWeight="SemiBold" Margin="0,0,0,2" />
+                                        <TextBlock Text="{Binding TabletStatus}" FontSize="12" FontStyle="Italic" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,12" />
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <ui:Button Grid.Column="0" Content="Start" Command="{Binding StartTabletServerCommand}" Appearance="Primary" HorizontalAlignment="Stretch" />
+                                            <ui:Button Grid.Column="2" Content="Stop" Command="{Binding StopTabletServerCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
+                                        </Grid>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </ScrollViewer>
 
-            <!-- COLUMN 2: Tablet Server & Media Decoders -->
-            <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,0,8,16">
-                    <!-- Self-Hosted Tablet Server -->
-                    <GroupBox Header="Tablet Server Settings"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <TextBlock Text="Listening Network Port" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ui:TextBox Text="{Binding TabletPort, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10" />
+                        <!-- Column 2 -->
+                        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="0,0,4,16">
+                                <!-- Performer Ratings Settings -->
+                                <GroupBox Header="Performer Ratings Settings" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <CheckBox Content="Enable Performer Ratings System" IsChecked="{Binding IsRatingSystemEnabled, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        <TextBlock Text="Active Rating Icon / Symbol" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding AvailableRatingIcons}" SelectedItem="{Binding SelectedRatingIcon, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        <TextBlock Text="Manage Available Symbols" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ListBox ItemsSource="{Binding AvailableRatingIcons}" SelectedItem="{Binding SelectedRatingIcon, Mode=TwoWay}" MaxHeight="220" Height="185" Margin="0,0,0,8" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" FontSize="11" />
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <TextBlock Text="Add Custom Symbol" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ui:TextBox Grid.Column="0" Text="{Binding NewRatingIconName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. 💎 Diamond" Height="26" FontSize="11" />
+                                            <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddRatingIconCommand}" Appearance="Primary" Height="26" FontSize="11" />
+                                        </Grid>
+                                        
+                                        <TextBlock Text="Quick Add Presets" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
+                                        <WrapPanel Margin="0,0,0,12">
+                                            <ui:Button Content="💋 Kiss" Command="{Binding AddPresetIconCommand}" CommandParameter="💋 Kiss" Margin="0,0,4,4" Padding="6,4" FontSize="10" />
+                                            <ui:Button Content="👋 Wave" Command="{Binding AddPresetIconCommand}" CommandParameter="👋 Wave" Margin="0,0,4,4" Padding="6,4" FontSize="10" />
+                                            <ui:Button Content="✨ Sparkle" Command="{Binding AddPresetIconCommand}" CommandParameter="✨ Sparkle" Margin="0,0,4,4" Padding="6,4" FontSize="10" />
+                                            <ui:Button Content="🎸 Rock" Command="{Binding AddPresetIconCommand}" CommandParameter="🎸 Rock" Margin="0,0,4,4" Padding="6,4" FontSize="10" />
+                                            <ui:Button Content="🌈 Rainbow" Command="{Binding AddPresetIconCommand}" CommandParameter="🌈 Rainbow" Margin="0,0,4,4" Padding="6,4" FontSize="10" />
+                                            <ui:Button Content="🎈 Balloon" Command="{Binding AddPresetIconCommand}" CommandParameter="🎈 Balloon" Margin="0,0,4,4" Padding="6,4" FontSize="10" />
+                                            <ui:Button Content="⭐ Star" Command="{Binding AddPresetIconCommand}" CommandParameter="⭐ Star" Margin="0,0,4,4" Padding="6,4" FontSize="10" />
+                                            <ui:Button Content="❤️ Heart" Command="{Binding AddPresetIconCommand}" CommandParameter="❤️ Heart" Margin="0,0,4,4" Padding="6,4" FontSize="10" />
+                                            <ui:Button Content="🔥 Fire" Command="{Binding AddPresetIconCommand}" CommandParameter="🔥 Fire" Margin="0,0,4,4" Padding="6,4" FontSize="10" />
+                                            <ui:Button Content="🎵 Note" Command="{Binding AddPresetIconCommand}" CommandParameter="🎵 Note" Margin="0,0,4,4" Padding="6,4" FontSize="10" />
+                                        </WrapPanel>
 
-                            <TextBlock Text="Static/Override IP Address (Optional)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" ToolTip="Override automatically detected IP address for QR codes (e.g. for travel routers)." />
-                            <ui:TextBox Text="{Binding StaticIPAddress, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. 192.168.1.100" Margin="0,0,0,10" />
-
-                            <TextBlock Text="Server Status: " FontSize="12" FontWeight="SemiBold" Margin="0,0,0,2" />
-                            <TextBlock Text="{Binding TabletStatus}" FontSize="12" FontStyle="Italic" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,12" />
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ui:Button Grid.Column="0" Content="Start" Command="{Binding StartTabletServerCommand}" Appearance="Primary" HorizontalAlignment="Stretch" />
-                                <ui:Button Grid.Column="2" Content="Stop" Command="{Binding StopTabletServerCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
-                            </Grid>
-                        </StackPanel>
-                    </GroupBox>
-
-                    <!-- Media Engine & Decoders -->
-                    <GroupBox Header="Decoders &amp; Layout"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <TextBlock Text="CDG Canvas Scaling Mode" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ComboBox ItemsSource="{Binding CdgScalingModes}"
-                                      SelectedItem="{Binding SelectedCdgScalingMode, Mode=TwoWay}"
-                                      Margin="0,0,0,12" />
-
-                            <TextBlock Text="MP4 Decoding Backend" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ComboBox ItemsSource="{Binding Mp4Backends}"
-                                      SelectedItem="{Binding SelectedMp4Backend, Mode=TwoWay}"
-                                      Margin="0,0,0,12" />
-
-                            <TextBlock Text="Rendering Target FPS" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ComboBox ItemsSource="{Binding FpsOptions}"
-                                      SelectedItem="{Binding FrameRate, Mode=TwoWay}" />
-                        </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-            </ScrollViewer>
-
-            <!-- COLUMN 3: Library, Maintenance & Scaryoke categories -->
-            <ScrollViewer Grid.Column="6" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,0,8,16">
-                    <!-- Music Library -->
-                    <GroupBox Header="Music Library"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <TextBlock Text="Folders Scanned" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ListBox ItemsSource="{Binding LibraryDirectories}"
-                                     SelectedItem="{Binding SelectedLibraryDirectory}"
-                                     MaxHeight="120" Height="120" Margin="0,0,0,8"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}" FontSize="11" TextTrimming="CharacterEllipsis" />
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="4" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ui:Button Grid.Column="0" Icon="{ui:SymbolIcon FolderAdd24}"
-                                           Command="{Binding AddLibraryDirectoryCommand}"
-                                           Appearance="Primary" ToolTip="Add directory..."/>
-                                <ui:Button Grid.Column="2" Icon="{ui:SymbolIcon Delete24}"
-                                           Command="{Binding RemoveLibraryDirectoryCommand}"
-                                           Appearance="Danger" ToolTip="Remove selected directory"/>
-                                <ui:Button Grid.Column="6" Icon="{ui:SymbolIcon ArrowSync24}"
-                                           Command="{Binding ScanSelectedDirectoryCommand}"
-                                           Appearance="Secondary" ToolTip="Scan/rescan selected folder"/>
-                            </Grid>
-
-                            <Grid Margin="0,4,0,10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <ui:ProgressRing Grid.Column="0" IsIndeterminate="True"
-                                                 Width="16" Height="16" Margin="0,0,8,0"
-                                                 Visibility="{Binding IsScanning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                <TextBlock Grid.Column="1" Text="{Binding LibraryStatus}"
-                                           FontSize="11" FontStyle="Italic"
-                                           Foreground="{DynamicResource AppTextSecondaryBrush}"
-                                           TextWrapping="Wrap" VerticalAlignment="Center"/>
-                            </Grid>
-
-                            <ui:Button Content="Rescan All Directories"
-                                       Icon="{ui:SymbolIcon ArrowSync24}"
-                                       Command="{Binding RescanLibraryCommand}"
-                                       Appearance="Secondary" HorizontalAlignment="Stretch"
-                                       Margin="0,0,0,10"/>
-
-                            <TextBlock Text="Database Maintenance" FontSize="12" FontWeight="SemiBold" Margin="0,10,0,4" />
-                            
-                            <CheckBox Content="Seed 15 Test Performers"
-                                      IsChecked="{Binding IsTestMode, Mode=TwoWay}"
-                                      Margin="0,4,0,10"/>
-
-                            <ui:Button Content="Clear Database"
-                                       Command="{Binding ClearDatabaseCommand}"
-                                       Appearance="Secondary"
-                                       HorizontalAlignment="Stretch" />
-                        </StackPanel>
-                    </GroupBox>
-
-                    <!-- Scaryoke Settings -->
-                    <GroupBox Header="Scaryoke Categories"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <TextBlock Text="Wheel Categories (Max 12)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <ListBox ItemsSource="{Binding ScaryokeCategories}"
-                                     SelectedItem="{Binding SelectedScaryokeCategory}"
-                                     MaxHeight="140" Height="140" Margin="0,0,0,8"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}" FontSize="11" TextTrimming="CharacterEllipsis" />
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-
-                            <TextBlock Text="Add Category" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SubHeaderBrush}" Margin="0,0,0,4" />
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ui:TextBox Grid.Column="0"
-                                            Text="{Binding NewScaryokeCategoryName, UpdateSourceTrigger=PropertyChanged}"
-                                            PlaceholderText="Category Name..." Height="26" FontSize="11" />
-                                <ui:Button Grid.Column="2" Content="Add"
-                                           Command="{Binding AddScaryokeCategoryCommand}"
-                                           Appearance="Primary"
-                                           Height="26" FontSize="11" />
-                            </Grid>
-
-                            <ui:Button Content="Remove Selected"
-                                       Icon="{ui:SymbolIcon Delete24}"
-                                       Command="{Binding RemoveScaryokeCategoryCommand}"
-                                       Appearance="Danger" HorizontalAlignment="Stretch" />
-                        </StackPanel>
-                    </GroupBox>
-
-                    <!-- System Simulator -->
-                    <GroupBox Header="System Simulator Auto-Pilot"
-                              Style="{StaticResource SettingsGroupBoxStyle}">
-                        <StackPanel>
-                            <TextBlock Text="System Stress-Test Simulator" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                            <TextBlock Text="Simulates rapid user actions: adds/removes singers, triggers requests, adjusts volumes/EQ, and plays/pauses tracks to stress-test database, network, and audio engine stability." FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,12" TextWrapping="Wrap" />
-
-                            <!-- Duration Selection Slider -->
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="Simulation Duration" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                <Slider Grid.Column="1" Minimum="1" Maximum="30" Value="{Binding SimulationDurationMinutes, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="12,0,0,0" />
-                                <TextBlock Grid.Column="2" Text="{Binding SimulationDurationMinutes, StringFormat='{}{0} Min'}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Width="40" TextAlignment="Right" Margin="12,0,0,0" />
-                            </Grid>
-
-                            <Grid Margin="0,0,0,10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <ui:Button Grid.Column="0" Content="{Binding SimulationButtonText}" Icon="{ui:SymbolIcon Play24}" Command="{Binding StartSimulationCommand}" Appearance="Primary" Height="30" />
-                                <TextBlock Grid.Column="1" Text="{Binding SimulationStatusText}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            </Grid>
-
-                            <!-- Console log box: green on dark translucent background -->
-                            <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="#CC111115" Padding="8" Height="140">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                    <TextBlock Text="{Binding SimulationLogText}" FontSize="10" FontFamily="Consolas" Foreground="#FF00FF00" TextWrapping="Wrap" />
-                                </ScrollViewer>
-                            </Border>
-                        </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-            </ScrollViewer>
+                                        <ui:Button Content="Remove Selected Symbol" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveRatingIconCommand}" Appearance="Danger" HorizontalAlignment="Stretch" />
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+            </TabControl>
         </Grid>
     </Grid>
 </Page>

@@ -147,7 +147,7 @@ public class ShowFlowService : IShowFlowService
 
         if (filePath.StartsWith("PartyTyme:"))
         {
-            string trackId = filePath.Substring(10);
+            string trackId = filePath[10..];
             try
             {
                 var partyTyme = (IPartyTymeService)App.AppHost.Services.GetService(typeof(IPartyTymeService))!;

@@ -10,7 +10,7 @@ namespace Lyracist.Services.Media.Cdg;
 
 public class CdgDecoder : ICDGDecoder
 {
-    private readonly List<CdgPacket> _packets = new();
+    private readonly List<CdgPacket> _packets = [];
     private readonly CdgState _state = new();
     private int _currentPacketIndex;
 
@@ -51,7 +51,7 @@ public class CdgDecoder : ICDGDecoder
                 byte instruction = (byte)(fileBytes[offset + 1] & CdgConstants.CommandMask);
 
                 // Payload starts after the 4-byte header (Command, Instruction, 2 bytes Parity)
-                ReadOnlySpan<byte> data = new ReadOnlySpan<byte>(fileBytes, offset + 4, CdgConstants.DataSize);
+                ReadOnlySpan<byte> data = new(fileBytes, offset + 4, CdgConstants.DataSize);
 
                 // Only process CDG graphic command (0x09)
                 if (command == CdgConstants.CommandCdg)
@@ -207,7 +207,21 @@ public class CdgDecoder : ICDGDecoder
                         byte colorIndex = _state.Pixels[srcX, srcY];
                         Color color = _state.Palette.Colors[colorIndex];
 
-                        byte alpha = (colorIndex == _state.Palette.TransparentColorIndex) ? (byte)0 : (byte)255;
+                        bool isTransparent = false;
+                        if (colorIndex == _state.Palette.TransparentColorIndex)
+                        {
+                            isTransparent = true;
+                        }
+                        else if (Lyracist.Core.Helpers.AppSettings.IsCdgChromaKeyEnabled)
+                        {
+                            byte bgIndex = _state.Pixels[0, 0];
+                            if (colorIndex == bgIndex)
+                            {
+                                isTransparent = true;
+                            }
+                        }
+
+                        byte alpha = isTransparent ? (byte)0 : (byte)255;
 
                         // Pre-multiply alpha for WPF Pbgra32 format
                         byte r = (byte)((color.R * alpha) / 255);

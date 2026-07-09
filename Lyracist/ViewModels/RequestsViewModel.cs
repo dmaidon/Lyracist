@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Linq;
 using System.Windows;
 using Application = System.Windows.Application;
@@ -16,9 +17,9 @@ public partial class RequestsViewModel : BaseViewModel
     private readonly ILibraryService _library;
     private readonly IMediaEngine _mediaEngine;
 
-    public ObservableCollection<RequestInfo> Pending { get; } = new();
-    public ObservableCollection<RequestInfo> Approved { get; } = new();
-    public ObservableCollection<RequestInfo> History { get; } = new();
+    public ObservableCollection<RequestInfo> Pending { get; } = [];
+    public ObservableCollection<RequestInfo> Approved { get; } = [];
+    public ObservableCollection<RequestInfo> History { get; } = [];
 
     [ObservableProperty]
     private RequestInfo? _selectedPending;
@@ -93,7 +94,7 @@ public partial class RequestsViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void PlayApproved()
+    private async Task PlayApproved()
     {
         if (SelectedApproved == null) return;
 
@@ -108,8 +109,8 @@ public partial class RequestsViewModel : BaseViewModel
             return;
         }
 
-        _mediaEngine.LoadSong(song.AudioPath);
-        _mediaEngine.Play();
+        await _mediaEngine.LoadSong(song.AudioPath);
+        await _mediaEngine.Play();
         _requests.MarkPlayed(SelectedApproved.Id);
         StatusMessage = $"Playing {song.Title} — {song.Artist}.";
     }

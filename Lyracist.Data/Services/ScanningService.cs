@@ -19,14 +19,9 @@ namespace Lyracist.Data.Services
         public double Percentage => TotalFilesFound > 0 ? (double)FilesProcessed / TotalFilesFound * 100 : 0;
     }
 
-    public class ScanningService
+    public class ScanningService(LyracistDbContext context)
     {
-        private readonly LyracistDbContext _context;
-
-        public ScanningService(LyracistDbContext context)
-        {
-            _context = context;
-        }
+        private readonly LyracistDbContext _context = context;
 
         // ==========================================
         // FILENAME METADATA PARSER
@@ -46,7 +41,7 @@ namespace Lyracist.Data.Services
             string title = cleaned.Trim();
 
             // 3. Split by " - " to differentiate Artist and Title
-            var parts = cleaned.Split(new[] { " - " }, StringSplitOptions.None);
+            var parts = cleaned.Split([" - "], StringSplitOptions.None);
             if (parts.Length >= 2)
             {
                 artist = parts[0].Trim();
@@ -86,7 +81,7 @@ namespace Lyracist.Data.Services
                 isKaraoke = true;
 
                 string remaining = sfMatch.Groups[3].Value.Trim();
-                var parts = remaining.Split(new[] { " - " }, StringSplitOptions.None);
+                var parts = remaining.Split([" - "], StringSplitOptions.None);
                 if (parts.Length >= 2)
                 {
                     artist = parts[0].Trim();
@@ -126,7 +121,7 @@ namespace Lyracist.Data.Services
 
             if (isKv)
             {
-                var parts = cleaned.Split(new[] { " - " }, StringSplitOptions.None);
+                var parts = cleaned.Split([" - "], StringSplitOptions.None);
                 if (parts.Length >= 2)
                 {
                     artist = parts[0].Trim();
@@ -149,14 +144,14 @@ namespace Lyracist.Data.Services
             // 4. Default ParseFilename fallback
             if (artist == "Unknown Artist" || title == filename)
             {
-                var fallback = ParseFilename(filePath);
-                if (artist == "Unknown Artist" && fallback.Artist != "Unknown Artist")
+                var (Artist, Title) = ParseFilename(filePath);
+                if (artist == "Unknown Artist" && Artist != "Unknown Artist")
                 {
-                    artist = fallback.Artist;
+                    artist = Artist;
                 }
-                if (title == filename && fallback.Title != filename)
+                if (title == filename && Title != filename)
                 {
-                    title = fallback.Title;
+                    title = Title;
                 }
             }
 

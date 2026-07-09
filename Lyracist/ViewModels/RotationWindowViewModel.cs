@@ -7,7 +7,7 @@ using Lyracist.Core.Helpers;
 
 namespace Lyracist.ViewModels;
 
-public partial class RotationWindowViewModel : ObservableObject
+public partial class RotationWindowViewModel : BaseViewModel
 {
     [ObservableProperty]
     private string _joinUrl = string.Empty;
@@ -18,9 +18,79 @@ public partial class RotationWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _currentSinger = string.Empty;
 
+    [ObservableProperty]
+    private int _currentSingerScore = 0;
+
+    [ObservableProperty]
+    private double _currentSingerAverageRating = 0.0;
+
+    [ObservableProperty]
+    private int _currentSingerRatingCount = 0;
+
+    [ObservableProperty]
+    private bool _currentSingerHasRatings = false;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowQueue))]
+    private bool _showLeaderboard = false;
+
+    public bool ShowQueue => !ShowLeaderboard;
+
+    public ObservableCollection<SingerRank> Leaderboard { get; } = [];
+
+    public record SingerRank(string Name, int Score, double AverageRating, int Rank, int Level, string LevelName, string Badges);
+
+    private readonly System.Timers.Timer? _toggleTimer;
+
+    public string RatingIconSymbol => Lyracist.Core.Helpers.AppSettings.ActiveRatingIconSymbol;
+    public bool IsRatingSystemEnabled => Lyracist.Core.Helpers.AppSettings.IsRatingSystemEnabled;
+
     public RotationWindowViewModel()
     {
         RefreshQrCode();
+
+        _toggleTimer = new System.Timers.Timer(10000); // Toggle between queue and leaderboard every 10s
+        _toggleTimer.Elapsed += (s, e) =>
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                ShowLeaderboard = !ShowLeaderboard;
+                if (ShowLeaderboard)
+                {
+                    RefreshLeaderboard();
+                }
+                OnPropertyChanged(nameof(RatingIconSymbol));
+                OnPropertyChanged(nameof(IsRatingSystemEnabled));
+            });
+        };
+        _toggleTimer.Start();
+    }
+
+    public void RefreshLeaderboard()
+    {
+        try
+        {
+            using var context = new Lyracist.Data.LyracistDbContext();
+            var topSingers = context.Singers
+                .Where(s => s.Score > 0)
+                .OrderByDescending(s => s.Score)
+                .Take(5)
+                .ToList();
+
+            Leaderboard.Clear();
+            for (int i = 0; i < topSingers.Count; i++)
+            {
+                var s = topSingers[i];
+                int xp = Lyracist.Core.Helpers.SingerXpHelper.CalculateXP(s.TotalSongsSung, s.Score);
+                int level = Lyracist.Core.Helpers.SingerXpHelper.CalculateLevel(xp);
+                string levelName = Lyracist.Core.Helpers.SingerXpHelper.GetLevelName(level);
+                var badgesList = Lyracist.Core.Helpers.SingerXpHelper.GetBadges(s.TotalSongsSung, s.Score, s.AverageRating, s.RatingCount);
+                string badges = string.Join(" ", badgesList);
+
+                Leaderboard.Add(new SingerRank(s.Name, s.Score, s.AverageRating, i + 1, level, levelName, badges));
+            }
+        }
+        catch { }
     }
 
     public void RefreshQrCode()
@@ -30,13 +100,11 @@ public partial class RotationWindowViewModel : ObservableObject
             string ip = AppSettings.GetActiveIPAddress();
             JoinUrl = $"http://{ip}:{AppSettings.TabletPort}";
 
-            using (var qrGenerator = new QRCoder.QRCodeGenerator())
-            using (var qrCodeData = qrGenerator.CreateQrCode(JoinUrl, QRCoder.QRCodeGenerator.ECCLevel.Q))
-            using (var qrCode = new QRCoder.PngByteQRCode(qrCodeData))
-            {
-                byte[] qrCodeAsPngByteArr = qrCode.GetGraphic(20);
-                QrCodeImage = LoadImage(qrCodeAsPngByteArr);
-            }
+            using var qrGenerator = new QRCoder.QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(JoinUrl, QRCoder.QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
+            byte[] qrCodeAsPngByteArr = qrCode.GetGraphic(20);
+            QrCodeImage = LoadImage(qrCodeAsPngByteArr);
         }
         catch (System.Exception ex)
         {
@@ -86,9 +154,9 @@ public partial class RotationWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _performerHeaderText = "NOW SINGING";
 
-    public ObservableCollection<string> NextSingers { get; } = new();
+    public ObservableCollection<string> NextSingers { get; } = [];
 
-    public ObservableCollection<Singer> Rotation { get; } = new();
+    public ObservableCollection<Singer> Rotation { get; } = [];
 
     public void UpdateRotation(List<Singer> singers)
     {
@@ -98,34 +166,32 @@ public partial class RotationWindowViewModel : ObservableObject
             Rotation.Add(s);
         }
 
-        foreach (var s in Rotation)
+        // Find current singer from the passed list (already computed by main VM)
+        var now = singers.FirstOrDefault(s => s.IsCurrent);
+        if (now != null)
         {
-            s.IsCurrent = false;
-            s.IsNext = false;
-        }
-
-        var activeSingers = singers.Where(s => !s.IsPaused).ToList();
-        if (activeSingers.Count > 0)
-        {
-            var now = activeSingers[0];
-            var match = Rotation.FirstOrDefault(s => s.Name == now.Name);
-            if (match != null) match.IsCurrent = true;
             CurrentSinger = now.Name;
             CurrentSongTitle = now.SongTitle ?? string.Empty;
             CurrentSingerSong = string.IsNullOrEmpty(now.Artist) ? (now.SongTitle ?? string.Empty) : $"{now.SongTitle} - {now.Artist}";
+            CurrentSingerScore = now.Score;
+            CurrentSingerAverageRating = now.AverageRating;
+            CurrentSingerRatingCount = now.RatingCount;
+            CurrentSingerHasRatings = now.RatingCount > 0;
         }
         else
         {
             CurrentSinger = "No Singer";
             CurrentSongTitle = string.Empty;
             CurrentSingerSong = string.Empty;
+            CurrentSingerScore = 0;
+            CurrentSingerAverageRating = 0.0;
+            CurrentSingerRatingCount = 0;
+            CurrentSingerHasRatings = false;
         }
 
-        if (activeSingers.Count > 1)
+        var next = singers.FirstOrDefault(s => s.IsNext);
+        if (next != null)
         {
-            var next = activeSingers[1];
-            var match = Rotation.FirstOrDefault(s => s.Name == next.Name);
-            if (match != null) match.IsNext = true;
             NextSinger = next.Name;
         }
         else
@@ -133,20 +199,37 @@ public partial class RotationWindowViewModel : ObservableObject
             NextSinger = "None";
         }
 
-        bool hasDesignated = activeSingers.Any(s => s.IsCurrent);
+        bool hasDesignated = now != null;
         PerformerHeaderText = hasDesignated ? "NOW SINGING" : "FIRST PERFORMER";
 
+        // Build NextSingers queue sequentially starting after the current singer (wrapping around)
         NextSingers.Clear();
-        if (activeSingers.Count > 0)
+        if (now != null)
         {
-            int count = activeSingers.Count;
-            for (int offset = 1; offset < count && NextSingers.Count < 5; offset++)
+            int currentIndex = singers.IndexOf(now);
+            int count = singers.Count;
+            for (int i = 1; i <= count && NextSingers.Count < 5; i++)
             {
-                var singer = activeSingers[offset];
+                int idx = (currentIndex + i) % count;
+                var candidate = singers[idx];
+                if (candidate != now && !candidate.IsPaused && !candidate.IsInactive)
+                {
+                    string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
+                    NextSingers.Add(display);
+                }
+            }
+        }
+        else
+        {
+            var activeSingers = singers.Where(s => !s.IsPaused && !s.IsInactive).Take(5).ToList();
+            foreach (var singer in activeSingers)
+            {
                 string display = string.IsNullOrEmpty(singer.SongTitle) ? singer.Name : $"{singer.Name} (\"{singer.SongTitle}\")";
                 NextSingers.Add(display);
             }
         }
+        OnPropertyChanged(nameof(RatingIconSymbol));
+        OnPropertyChanged(nameof(IsRatingSystemEnabled));
     }
 
     public void HighlightSinger(Singer singer)
@@ -158,18 +241,50 @@ public partial class RotationWindowViewModel : ObservableObject
         }
 
         var currentMatch = Rotation.FirstOrDefault(s => s.Name == singer.Name);
-        if (currentMatch != null) currentMatch.IsCurrent = true;
-        CurrentSinger = singer.Name;
-        CurrentSongTitle = singer.SongTitle ?? string.Empty;
-        CurrentSingerSong = string.IsNullOrEmpty(singer.Artist) ? (singer.SongTitle ?? string.Empty) : $"{singer.SongTitle} - {singer.Artist}";
+        if (currentMatch != null)
+        {
+            currentMatch.IsCurrent = true;
+            CurrentSinger = singer.Name;
+            CurrentSongTitle = singer.SongTitle ?? string.Empty;
+            CurrentSingerSong = string.IsNullOrEmpty(singer.Artist) ? (singer.SongTitle ?? string.Empty) : $"{singer.SongTitle} - {singer.Artist}";
+            CurrentSingerScore = currentMatch.Score;
+            CurrentSingerAverageRating = currentMatch.AverageRating;
+            CurrentSingerRatingCount = currentMatch.RatingCount;
+            CurrentSingerHasRatings = currentMatch.RatingCount > 0;
+        }
+        else
+        {
+            CurrentSinger = singer.Name;
+            CurrentSongTitle = singer.SongTitle ?? string.Empty;
+            CurrentSingerSong = string.IsNullOrEmpty(singer.Artist) ? (singer.SongTitle ?? string.Empty) : $"{singer.SongTitle} - {singer.Artist}";
+            CurrentSingerScore = singer.Score;
+            CurrentSingerAverageRating = singer.AverageRating;
+            CurrentSingerRatingCount = singer.RatingCount;
+            CurrentSingerHasRatings = singer.RatingCount > 0;
+        }
 
-        // The next singer is the first active/non-paused singer in the queue who is not the current singer
-        var activeSingers = Rotation.Where(s => !s.IsPaused && s.Name != singer.Name).ToList();
-        var next = activeSingers.FirstOrDefault();
+        // Find the next active singer sequentially in the static list, starting after the highlighted singer
+        var next = (Singer?)null;
+        if (currentMatch != null)
+        {
+            int currentIndex = Rotation.IndexOf(currentMatch);
+            int count = Rotation.Count;
+            for (int i = 1; i <= count; i++)
+            {
+                int idx = (currentIndex + i) % count;
+                var candidate = Rotation[idx];
+                if (candidate != currentMatch && !candidate.IsPaused && !candidate.IsInactive)
+                {
+                    next = candidate;
+                    break;
+                }
+            }
+        }
+
         if (next != null)
         {
             var nextMatch = Rotation.FirstOrDefault(s => s.Name == next.Name);
-            if (nextMatch != null) nextMatch.IsNext = true;
+            nextMatch?.IsNext = true;
             NextSinger = next.Name;
         }
         else
@@ -179,11 +294,33 @@ public partial class RotationWindowViewModel : ObservableObject
 
         PerformerHeaderText = "NOW SINGING";
 
+        // Build NextSingers queue sequentially starting after currentMatch
         NextSingers.Clear();
-        foreach (var ns in activeSingers.Take(5))
+        if (currentMatch != null)
         {
-            string display = string.IsNullOrEmpty(ns.SongTitle) ? ns.Name : $"{ns.Name} (\"{ns.SongTitle}\")";
-            NextSingers.Add(display);
+            int currentIndex = Rotation.IndexOf(currentMatch);
+            int count = Rotation.Count;
+            for (int i = 1; i <= count && NextSingers.Count < 5; i++)
+            {
+                int idx = (currentIndex + i) % count;
+                var candidate = Rotation[idx];
+                if (candidate != currentMatch && !candidate.IsPaused && !candidate.IsInactive)
+                {
+                    string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
+                    NextSingers.Add(display);
+                }
+            }
         }
+        else
+        {
+            var activeSingers = Rotation.Where(s => !s.IsPaused && !s.IsInactive).Take(5).ToList();
+            foreach (var s in activeSingers)
+            {
+                string display = string.IsNullOrEmpty(s.SongTitle) ? s.Name : $"{s.Name} (\"{s.SongTitle}\")";
+                NextSingers.Add(display);
+            }
+        }
+        OnPropertyChanged(nameof(RatingIconSymbol));
+        OnPropertyChanged(nameof(IsRatingSystemEnabled));
     }
 }

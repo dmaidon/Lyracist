@@ -19,8 +19,8 @@ public class BackgroundMusicPlayer : IDisposable
 
     // Standard 10-band graphic EQ (31.25Hz .. 16kHz). Bass/Treble knobs move
     // the low and high bands together rather than exposing all 10 to the KJ.
-    private static readonly uint[] BassBands = { 0, 1, 2 };
-    private static readonly uint[] TrebleBands = { 7, 8, 9 };
+    private static readonly uint[] BassBands = [0, 1, 2];
+    private static readonly uint[] TrebleBands = [7, 8, 9];
 
     private readonly LibVLC _libVLC;
     private readonly MediaPlayer _playerA;
@@ -30,7 +30,7 @@ public class BackgroundMusicPlayer : IDisposable
     private readonly Equalizer _equalizer;
 
     private readonly DispatcherTimer _monitorTimer;
-    private List<string> _playlist = new();
+    private List<string> _playlist = [];
     private int _currentIndex = -1;
     private int _pendingNextIndex = -1;
     private bool _isCrossfading;
@@ -108,7 +108,7 @@ public class BackgroundMusicPlayer : IDisposable
 
     public void LoadPlaylist(IReadOnlyList<string> trackPaths)
     {
-        _playlist = trackPaths.Where(File.Exists).ToList();
+        _playlist = [.. trackPaths.Where(File.Exists)];
         ShufflePlaylist();
         if (_currentIndex >= _playlist.Count)
         {

@@ -220,7 +220,7 @@ public partial class MainWindow : Window
                     TickPlayer.Stop();
 
                     // Randomly select one of the 2 MP3 files in Assets folder
-                    string[] laughFiles = { "evil-laugh-deep.mp3", "evil-laugh-reverb.mp3" };
+                    string[] laughFiles = ["evil-laugh-deep.mp3", "evil-laugh-reverb.mp3"];
                     string chosenFile = laughFiles[Random.Shared.Next(laughFiles.Length)];
                     string appDir = AppDomain.CurrentDomain.BaseDirectory;
                     string filePath = System.IO.Path.Combine(appDir, "Assets", chosenFile);
@@ -234,8 +234,7 @@ public partial class MainWindow : Window
                             _laughMediaPlayer.Open(new Uri(filePath));
 
                             // Chain play "be_afraid.mp3" immediately after the evil laugh completes
-                            EventHandler? endedHandler = null;
-                            endedHandler = (s, ev) =>
+                            void endedHandler(object? s, EventArgs ev)
                             {
                                 if (_laughMediaPlayer != null)
                                 {
@@ -251,7 +250,8 @@ public partial class MainWindow : Window
                                     }
                                     catch { }
                                 }
-                            };
+                            }
+
                             _laughMediaPlayer.MediaEnded += endedHandler;
 
                             _laughMediaPlayer.Play();
@@ -290,11 +290,9 @@ public partial class MainWindow : Window
         {
             try
             {
-                using (var laughStream = ScaryokeAudio.CreateEvilLaughStream())
-                using (var player = new SoundPlayer(laughStream))
-                {
-                    player.PlaySync();
-                }
+                using var laughStream = ScaryokeAudio.CreateEvilLaughStream();
+                using var player = new SoundPlayer(laughStream);
+                player.PlaySync();
             }
             catch (Exception ex)
             {

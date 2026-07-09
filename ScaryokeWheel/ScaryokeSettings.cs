@@ -15,8 +15,8 @@ public class ScaryokeSettings
 
     private static readonly string SettingsPath = Path.Combine(SettingsFolder, "settings.json");
 
-    public List<string> Categories { get; set; } = new()
-    {
+    public List<string> Categories { get; set; } =
+    [
         "Elvis",
         "Rock",
         "Country",
@@ -28,7 +28,7 @@ public class ScaryokeSettings
         "Hard Rock",
         "Disney Songs",
         "90s Pop"
-    };
+    ];
 
     public static ScaryokeSettings Load()
     {

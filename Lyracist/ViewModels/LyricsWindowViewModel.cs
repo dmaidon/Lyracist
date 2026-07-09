@@ -10,9 +10,9 @@ namespace Lyracist.ViewModels;
 
 public sealed record MonitorOption(int Index, string Label);
 
-public partial class LyricsWindowViewModel : ObservableObject
+public partial class LyricsWindowViewModel(IDisplayService display) : ObservableObject
 {
-    private readonly IDisplayService _display;
+    private readonly IDisplayService _display = display;
 
     [ObservableProperty]
     private ImageSource? _frame;
@@ -24,7 +24,7 @@ public partial class LyricsWindowViewModel : ObservableObject
     private bool _isFallbackVisible = true;
 
     [ObservableProperty]
-    private bool _isMirrored;
+    private bool _isMirrored = display.GetPreferences().IsLyricsMirrored;
 
     [ObservableProperty]
     private string _overlayText = string.Empty;
@@ -34,13 +34,7 @@ public partial class LyricsWindowViewModel : ObservableObject
 
     private DispatcherTimer? _overlayTimer;
 
-    public ObservableCollection<MonitorOption> Monitors { get; } = new();
-
-    public LyricsWindowViewModel(IDisplayService display)
-    {
-        _display = display;
-        _isMirrored = display.GetPreferences().IsLyricsMirrored;
-    }
+    public ObservableCollection<MonitorOption> Monitors { get; } = [];
 
     /// <summary>
     /// Persists the mirror flag whenever it changes, whether set via the
@@ -119,5 +113,20 @@ public partial class LyricsWindowViewModel : ObservableObject
     public void ToggleMirror()
     {
         IsMirrored = !IsMirrored;
+    }
+
+    public string CdgBackdropMode => Lyracist.Core.Helpers.AppSettings.CdgBackdropMode;
+    public bool IsNebulaVisible => CdgBackdropMode == "Nebula Bokeh";
+    public bool IsWaveformVisible => CdgBackdropMode == "Neon Waveform";
+    public bool IsSynthwaveVisible => CdgBackdropMode == "Retro Synthwave";
+    public bool IsSpaceVisible => CdgBackdropMode == "Space Starfield";
+
+    public void NotifyBackdropChanged()
+    {
+        OnPropertyChanged(nameof(CdgBackdropMode));
+        OnPropertyChanged(nameof(IsNebulaVisible));
+        OnPropertyChanged(nameof(IsWaveformVisible));
+        OnPropertyChanged(nameof(IsSynthwaveVisible));
+        OnPropertyChanged(nameof(IsSpaceVisible));
     }
 }

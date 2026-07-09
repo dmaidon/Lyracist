@@ -1,14 +1,15 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace Lyracist.Core.Interfaces;
 
 public interface IMediaEngine
 {
-    void LoadSong(string path);
-    void Play();
-    void Pause();
-    void Stop();
+    Task LoadSong(string path);
+    Task Play();
+    Task Pause();
+    Task Stop();
     void Seek(double position);
     event Action<ImageSource>? FrameReady;
 

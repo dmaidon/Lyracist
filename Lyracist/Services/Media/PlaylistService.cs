@@ -17,7 +17,7 @@ public class PlaylistService : IPlaylistService
             .Include(i => i.Song)
             .OrderBy(i => i.Order)
             .ToList();
-        return items.Select(i => Map(i.OpeningPlaylistItemId, i.SongId, i.Order, i.Song)).ToList();
+        return [.. items.Select(i => Map(i.OpeningPlaylistItemId, i.SongId, i.Order, i.Song))];
     }
 
     public List<PlaylistTrack> GetFillInPlaylist()
@@ -27,7 +27,7 @@ public class PlaylistService : IPlaylistService
             .Include(i => i.Song)
             .OrderBy(i => i.Order)
             .ToList();
-        return items.Select(i => Map(i.FillInPlaylistItemId, i.SongId, i.Order, i.Song)).ToList();
+        return [.. items.Select(i => Map(i.FillInPlaylistItemId, i.SongId, i.Order, i.Song))];
     }
 
     public List<PlaylistTrack> GetEndRotationPlaylist()
@@ -37,7 +37,7 @@ public class PlaylistService : IPlaylistService
             .Include(i => i.Song)
             .OrderBy(i => i.Order)
             .ToList();
-        return items.Select(i => Map(i.EndRotationPlaylistItemId, i.SongId, i.Order, i.Song)).ToList();
+        return [.. items.Select(i => Map(i.EndRotationPlaylistItemId, i.SongId, i.Order, i.Song))];
     }
 
     public void AddSongToOpening(int songId)

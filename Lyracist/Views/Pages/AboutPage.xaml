@@ -32,7 +32,7 @@
         <!-- Header -->
         <Border Grid.Row="0" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
             <StackPanel>
-                <TextBlock Text="About Lyracist" FontSize="28" FontWeight="Bold" Foreground="White" />
+                <TextBlock Text="About Lyracist Pro" FontSize="28" FontWeight="Bold" Foreground="White" />
                 <TextBlock Text="Application information, specifications, and development credits." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0" />
             </StackPanel>
         </Border>
@@ -58,7 +58,7 @@
                             </Grid>
                         </Border>
 
-                        <TextBlock Text="Karaoke Lyracist" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBlock Text="Lyracist Pro" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,4" />
                         <TextBlock Text="{Binding Company}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
 
                         <!-- Lyracist System Info Card -->
@@ -70,7 +70,7 @@
                                 </Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Symbol="Info24" FontSize="28" Foreground="{DynamicResource SystemFillColorAttentionBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="Lyracist Foundation v1.0" FontSize="14" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Lyracist Pro Foundation v1.0" FontSize="14" FontWeight="SemiBold"/>
                                     <TextBlock Text="Running on .NET 10.0 with WPF UI (Fluent)." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0"/>
                                 </StackPanel>
                             </Grid>

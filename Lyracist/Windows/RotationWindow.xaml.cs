@@ -45,7 +45,7 @@ public partial class RotationWindow : Window
     private const double ViewH = 1200;
     private const double ScrollPixelsPerSecond = 90;
 
-    private readonly List<Ellipse> _marqueeBulbs = new();
+    private readonly List<Ellipse> _marqueeBulbs = [];
     private DispatcherTimer? _marqueeTimer;
     private int _marqueeStep;
     private const int MarqueeLitPeriod = 3;
@@ -83,6 +83,14 @@ public partial class RotationWindow : Window
         IsVisibleChanged -= RotationWindow_IsVisibleChanged;
         HookViewModel(null);
         StopSpaceshipTimer();
+
+        var scaryokeWindow = App.AppHost.Services.GetService(typeof(ScaryokeWindow)) as ScaryokeWindow;
+        if (scaryokeWindow != null)
+        {
+            scaryokeWindow.SpinStarted -= ScaryokeWindow_SpinStarted;
+            scaryokeWindow.SpinCompleted -= ScaryokeWindow_SpinCompleted;
+            scaryokeWindow.IsVisibleChanged -= ScaryokeWindow_IsVisibleChanged;
+        }
     }
 
     private void RotationWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -104,6 +112,15 @@ public partial class RotationWindow : Window
         HookViewModel(DataContext as RotationWindowViewModel);
         RebuildBanner();
         ApplyProjectionViewMode();
+
+        var scaryokeWindow = App.AppHost.Services.GetService(typeof(ScaryokeWindow)) as ScaryokeWindow;
+        if (scaryokeWindow != null)
+        {
+            scaryokeWindow.SpinStarted += ScaryokeWindow_SpinStarted;
+            scaryokeWindow.SpinCompleted += ScaryokeWindow_SpinCompleted;
+            scaryokeWindow.IsVisibleChanged += ScaryokeWindow_IsVisibleChanged;
+            UpdateScaryokeOverlayVisibility(scaryokeWindow);
+        }
     }
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -817,15 +834,9 @@ public partial class RotationWindow : Window
 
     private void StopSpaceshipTimer()
     {
-        if (_spaceshipTimer != null)
-        {
-            _spaceshipTimer.Stop();
-            _spaceshipTimer = null;
-        }
-        if (CrawlOverlayCanvas != null)
-        {
-            CrawlOverlayCanvas.Children.Clear();
-        }
+        _spaceshipTimer?.Stop();
+        _spaceshipTimer = null;
+        CrawlOverlayCanvas?.Children.Clear();
     }
 
     private void ScheduleNextSpaceship()
@@ -876,15 +887,14 @@ public partial class RotationWindow : Window
             Text = text.ToUpperInvariant(),
             FontSize = Lyracist.Core.Helpers.AppSettings.CrawlSpaceshipFontSize,
             FontWeight = FontWeights.Bold,
-            Foreground = System.Windows.Media.Brushes.White
-        };
-
-        textBlock.Effect = new DropShadowEffect
-        {
-            Color = System.Windows.Media.Color.FromRgb(0xFF, 0xD7, 0x00),
-            BlurRadius = 8,
-            ShadowDepth = 0,
-            Opacity = 0.8
+            Foreground = System.Windows.Media.Brushes.White,
+            Effect = new DropShadowEffect
+            {
+                Color = System.Windows.Media.Color.FromRgb(0xFF, 0xD7, 0x00),
+                BlurRadius = 8,
+                ShadowDepth = 0,
+                Opacity = 0.8
+            }
         };
         border.Child = textBlock;
 
@@ -970,5 +980,126 @@ public partial class RotationWindow : Window
         };
 
         storyboard.Begin();
+    }
+
+    private void ScaryokeWindow_SpinStarted(object? sender, EventArgs e)
+    {
+        if (sender is ScaryokeWindow scaryokeWindow)
+        {
+            BuildScaryokeWheel(scaryokeWindow.ViewModel);
+            
+            double currentAngle = BillboardWheelRotate.Angle;
+            double targetAngle = scaryokeWindow.TargetAngle;
+            double duration = scaryokeWindow.SpinDuration;
+            
+            BillboardResultText.Text = "Spinning the wheel to seal a singer's fate...";
+            
+            var animation = new DoubleAnimation(currentAngle % 360, targetAngle, TimeSpan.FromSeconds(duration))
+            {
+                DecelerationRatio = 0.9,
+                FillBehavior = FillBehavior.HoldEnd
+            };
+            BillboardWheelRotate.BeginAnimation(RotateTransform.AngleProperty, animation);
+        }
+    }
+
+    private void ScaryokeWindow_SpinCompleted(object? sender, string category)
+    {
+        if (sender is ScaryokeWindow scaryokeWindow)
+        {
+            BillboardWheelRotate.BeginAnimation(RotateTransform.AngleProperty, null);
+            BillboardWheelRotate.Angle = scaryokeWindow.TargetAngle % 360;
+            
+            BillboardResultText.Text = scaryokeWindow.ViewModel.ResultText;
+        }
+    }
+
+    private void ScaryokeWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (sender is ScaryokeWindow scaryokeWindow)
+        {
+            UpdateScaryokeOverlayVisibility(scaryokeWindow);
+        }
+    }
+
+    private void UpdateScaryokeOverlayVisibility(ScaryokeWindow scaryokeWindow)
+    {
+        if (scaryokeWindow.IsVisible)
+        {
+            BuildScaryokeWheel(scaryokeWindow.ViewModel);
+            BillboardResultText.Text = scaryokeWindow.ViewModel.ResultText;
+            ScaryokeWheelOverlay.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            ScaryokeWheelOverlay.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private static System.Windows.Point PolarPoint(double angleDegrees, double radius)
+    {
+        double rad = angleDegrees * Math.PI / 180.0;
+        return new System.Windows.Point(230 + radius * Math.Sin(rad), 230 - radius * Math.Cos(rad));
+    }
+
+    private void BuildScaryokeWheel(ScaryokeViewModel vm)
+    {
+        BillboardWheelCanvas.Children.Clear();
+        var segments = vm.WheelSegments;
+        if (segments == null || segments.Count == 0) return;
+        var strokeBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1E, 0x13, 0x3A));
+        double start = 0;
+
+        for (int i = 0; i < segments.Count; i++)
+        {
+            double sweep = segments[i].Sweep;
+            double end = start + sweep;
+
+            var figure = new PathFigure { StartPoint = new System.Windows.Point(230, 230), IsClosed = true };
+            figure.Segments.Add(new LineSegment(PolarPoint(start, 230), true));
+            figure.Segments.Add(new ArcSegment(PolarPoint(end, 230), new System.Windows.Size(230, 230), 0,
+                false, SweepDirection.Clockwise, true));
+
+            var sliceColor = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(segments[i].Color);
+            var slice = new System.Windows.Shapes.Path
+            {
+                Data = new PathGeometry(new[] { figure }),
+                Fill = new SolidColorBrush(sliceColor),
+                Stroke = strokeBrush,
+                StrokeThickness = 2
+            };
+            BillboardWheelCanvas.Children.Add(slice);
+
+            // Label
+            double mid = start + sweep / 2;
+            var labelPos = PolarPoint(mid, 230 * 0.62);
+            double textAngle = mid - 90;
+            if (mid > 180) textAngle += 180;
+
+            var label = new Grid
+            {
+                Width = 150,
+                Height = 26,
+                RenderTransformOrigin = new System.Windows.Point(0.5, 0.5),
+                RenderTransform = new RotateTransform(textAngle)
+            };
+
+            var textColor = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(segments[i].TextColor);
+            bool isDjsChoice = string.Equals(segments[i].Name, "DJ's Choice", StringComparison.OrdinalIgnoreCase);
+            label.Children.Add(new TextBlock
+            {
+                Text = isDjsChoice ? "💀" : segments[i].Name,
+                Foreground = new SolidColorBrush(textColor),
+                FontSize = isDjsChoice ? 16 : 13,
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center
+            });
+            Canvas.SetLeft(label, labelPos.X - label.Width / 2);
+            Canvas.SetTop(label, labelPos.Y - label.Height / 2);
+            BillboardWheelCanvas.Children.Add(label);
+
+            start = end;
+        }
     }
 }

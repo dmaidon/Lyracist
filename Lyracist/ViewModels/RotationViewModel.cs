@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lyracist.Core.Helpers;
@@ -38,15 +39,15 @@ public partial class RotationViewModel : BaseViewModel
 
     public event Action? RotationStateChanged;
 
-    public ObservableCollection<Singer> Rotation { get; } = new();
+    public ObservableCollection<Singer> Rotation { get; } = [];
 
-    public ObservableCollection<Singer> InactiveSingers { get; } = new();
+    public ObservableCollection<Singer> InactiveSingers { get; } = [];
 
-    public ObservableCollection<string> SingerNames { get; } = new();
+    public ObservableCollection<string> SingerNames { get; } = [];
 
     private readonly Dictionary<string, ObservableCollection<PendingSong>> _pendingSingerSongs = new(StringComparer.OrdinalIgnoreCase);
 
-    public ObservableCollection<PendingSong> SelectedSingerQueue { get; } = new();
+    public ObservableCollection<PendingSong> SelectedSingerQueue { get; } = [];
 
     [ObservableProperty]
     private Singer? _selectedSinger;
@@ -92,12 +93,12 @@ public partial class RotationViewModel : BaseViewModel
     public void SeedSingers()
     {
         Rotation.Clear();
-        Rotation.Add(new Singer { Name = "Alice Johnson", Key = "+1", Notes = "Sings soprano, prefers classic pop", SongTitle = "Sweet Caroline", Artist = "Neil Diamond" });
-        Rotation.Add(new Singer { Name = "Bob Caruthers", Key = "-2", Notes = "Prefers baritone classic rock", SongTitle = "Hotel California", Artist = "Eagles" });
-        Rotation.Add(new Singer { Name = "Charlie Brown", Key = "0", Notes = "First time singing today", SongTitle = "Billie Jean", Artist = "Michael Jackson" });
-        Rotation.Add(new Singer { Name = "Diana Smith", Key = "+2", Notes = "Sings alto, loves jazz standards", SongTitle = "Fly Me to the Moon", Artist = "Frank Sinatra" });
-        Rotation.Add(new Singer { Name = "Emma Watson", Key = "0", Notes = "Loves pop ballads", SongTitle = "Rolling in the Deep", Artist = "Adele" });
-        Rotation.Add(new Singer { Name = "Frank Miller", Key = "-1", Notes = "Prefers classic soul", SongTitle = "My Girl", Artist = "Temptations" });
+        Rotation.Add(new Singer { Name = "Alice Johnson", Key = "+1", Notes = "Sings soprano, prefers classic pop", SongTitle = "Sweet Caroline", Artist = "Neil Diamond", Score = 240, AverageRating = 4.8, RatingCount = 5 });
+        Rotation.Add(new Singer { Name = "Bob Caruthers", Key = "-2", Notes = "Prefers baritone classic rock", SongTitle = "Hotel California", Artist = "Eagles", Score = 180, AverageRating = 4.5, RatingCount = 4 });
+        Rotation.Add(new Singer { Name = "Charlie Brown", Key = "0", Notes = "First time singing today", SongTitle = "Billie Jean", Artist = "Michael Jackson", Score = 120, AverageRating = 4.0, RatingCount = 3 });
+        Rotation.Add(new Singer { Name = "Diana Smith", Key = "+2", Notes = "Sings alto, loves jazz standards", SongTitle = "Fly Me to the Moon", Artist = "Frank Sinatra", Score = 90, AverageRating = 4.5, RatingCount = 2 });
+        Rotation.Add(new Singer { Name = "Emma Watson", Key = "0", Notes = "Loves pop ballads", SongTitle = "Rolling in the Deep", Artist = "Adele", Score = 50, AverageRating = 5.0, RatingCount = 1 });
+        Rotation.Add(new Singer { Name = "Frank Miller", Key = "-1", Notes = "Prefers classic soul", SongTitle = "My Girl", Artist = "Temptations", Score = 40, AverageRating = 4.0, RatingCount = 1 });
         Rotation.Add(new Singer { Name = "Grace Hopper", Key = "+3", Notes = "Energetic performance style", SongTitle = "Respect", Artist = "Aretha Franklin" });
         Rotation.Add(new Singer { Name = "Harry Potter", Key = "0", Notes = "Group favorite song choice", SongTitle = "Bohemian Rhapsody", Artist = "Queen" });
         Rotation.Add(new Singer { Name = "Irene Adler", Key = "+2", Notes = "Sings soprano powerhouse tracks", SongTitle = "I Will Always Love You", Artist = "Whitney Houston" });
@@ -107,13 +108,50 @@ public partial class RotationViewModel : BaseViewModel
         Rotation.Add(new Singer { Name = "Mary Shelley", Key = "-1", Notes = "Loves spooky themed pop", SongTitle = "Thriller", Artist = "Michael Jackson" });
         Rotation.Add(new Singer { Name = "Ned Stark", Key = "+2", Notes = "Epic rock singalong", SongTitle = "Don't Stop Believin'", Artist = "Journey" });
         Rotation.Add(new Singer { Name = "Oliver Twist", Key = "0", Notes = "Prefers 80s synth rock", SongTitle = "Purple Rain", Artist = "Prince" });
-        _display.UpdateRotation(Rotation.ToList());
+
+        // Save seed singers to DB for leaderboard
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            try
+            {
+                using var context = new Lyracist.Data.LyracistDbContext();
+                foreach (var r in Rotation)
+                {
+                    var dbSinger = context.Singers.FirstOrDefault(s => s.Name == r.Name);
+                    if (dbSinger == null)
+                    {
+                        dbSinger = new Lyracist.Data.Models.Singer
+                        {
+                            Name = r.Name,
+                            JoinDate = System.DateTime.UtcNow,
+                            Score = r.Score,
+                            AverageRating = r.AverageRating,
+                            RatingCount = r.RatingCount,
+                            RatingPoints = (int)(r.AverageRating * r.RatingCount)
+                        };
+                        context.Singers.Add(dbSinger);
+                    }
+                    else
+                    {
+                        dbSinger.Score = r.Score;
+                        dbSinger.AverageRating = r.AverageRating;
+                        dbSinger.RatingCount = r.RatingCount;
+                        dbSinger.RatingPoints = (int)(r.AverageRating * r.RatingCount);
+                        context.Singers.Update(dbSinger);
+                    }
+                }
+                context.SaveChanges();
+            }
+            catch { }
+        });
+
+        _display.UpdateRotation([.. Rotation]);
     }
 
     public void ClearRotationQueue()
     {
         Rotation.Clear();
-        _display.UpdateRotation(Rotation.ToList());
+        _display.UpdateRotation([.. Rotation]);
     }
 
     public void LoadSingerNames()
@@ -175,6 +213,24 @@ public partial class RotationViewModel : BaseViewModel
             Lyracist.Services.Database.SingerHistoryService.SaveHistory(name, title, artist, source, externalLink);
         });
 
+        int score = 0;
+        double avgRating = 0.0;
+        int ratingCount = 0;
+        int totalSongsSung = 0;
+        try
+        {
+            using var context = new Lyracist.Data.LyracistDbContext();
+            var dbSinger = context.Singers.FirstOrDefault(s => s.Name == name);
+            if (dbSinger != null)
+            {
+                score = dbSinger.Score;
+                avgRating = dbSinger.AverageRating;
+                ratingCount = dbSinger.RatingCount;
+                totalSongsSung = dbSinger.TotalSongsSung;
+            }
+        }
+        catch { }
+
         // First, check if singer already exists in active rotation:
         var existingSinger = Rotation.FirstOrDefault(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         if (existingSinger != null)
@@ -187,13 +243,17 @@ public partial class RotationViewModel : BaseViewModel
                 existingSinger.Notes = notes;
                 existingSinger.Source = source;
                 existingSinger.ExternalLink = externalLink;
+                existingSinger.Score = score;
+                existingSinger.AverageRating = avgRating;
+                existingSinger.RatingCount = ratingCount;
+                existingSinger.TotalSongsSung = totalSongsSung;
             }
             else
             {
                 // Buffer/queue the song request for this singer
                 if (!_pendingSingerSongs.TryGetValue(name, out var list))
                 {
-                    list = new ObservableCollection<PendingSong>();
+                    list = [];
                     _pendingSingerSongs[name] = list;
                 }
                 list.Add(new PendingSong
@@ -211,7 +271,7 @@ public partial class RotationViewModel : BaseViewModel
                     RefreshSelectedSingerQueue();
                 }
             }
-            _display.UpdateRotation(Rotation.ToList());
+            _display.UpdateRotation([.. Rotation]);
             RotationStateChanged?.Invoke();
             return;
         }
@@ -227,11 +287,15 @@ public partial class RotationViewModel : BaseViewModel
             inactiveSinger.Notes = notes;
             inactiveSinger.Source = source;
             inactiveSinger.ExternalLink = externalLink;
+            inactiveSinger.Score = score;
+            inactiveSinger.AverageRating = avgRating;
+            inactiveSinger.RatingCount = ratingCount;
+            inactiveSinger.TotalSongsSung = totalSongsSung;
             
             InactiveSingers.Remove(inactiveSinger);
             Rotation.Add(inactiveSinger);
 
-            _display.UpdateRotation(Rotation.ToList());
+            _display.UpdateRotation([.. Rotation]);
             RotationStateChanged?.Invoke();
             return;
         }
@@ -267,10 +331,14 @@ public partial class RotationViewModel : BaseViewModel
             Key = key,
             Notes = notes,
             Source = source,
-            ExternalLink = externalLink
+            ExternalLink = externalLink,
+            Score = score,
+            AverageRating = avgRating,
+            RatingCount = ratingCount,
+            TotalSongsSung = totalSongsSung
         });
 
-        _display.UpdateRotation(Rotation.ToList());
+        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
     }
 
@@ -292,12 +360,12 @@ public partial class RotationViewModel : BaseViewModel
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";
 
-        _display.UpdateRotation(Rotation.ToList());
+        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
     }
 
     [RelayCommand]
-    private void RemoveSinger()
+    private async Task RemoveSinger()
     {
         if (SelectedSinger != null)
         {
@@ -311,11 +379,11 @@ public partial class RotationViewModel : BaseViewModel
             // If this performer is currently singing, stop playback
             if (string.Equals(name, _mediaEngine.ActiveSingerName, StringComparison.OrdinalIgnoreCase))
             {
-                _mediaEngine.Stop();
+                await _mediaEngine.Stop();
             }
 
             // Log performance history in database
-            System.Threading.Tasks.Task.Run(() =>
+            _ = System.Threading.Tasks.Task.Run(() =>
             {
                 try
                 {
@@ -384,7 +452,7 @@ public partial class RotationViewModel : BaseViewModel
                 RefreshSelectedSingerQueue();
             }
 
-            _display.UpdateRotation(Rotation.ToList());
+            _display.UpdateRotation([.. Rotation]);
             RotationStateChanged?.Invoke();
         }
     }
@@ -403,7 +471,7 @@ public partial class RotationViewModel : BaseViewModel
             Rotation.Insert(index - 1, singer);
             SelectedSinger = singer;
 
-            _display.UpdateRotation(Rotation.ToList());
+            _display.UpdateRotation([.. Rotation]);
             RotationStateChanged?.Invoke();
         }
     }
@@ -422,7 +490,7 @@ public partial class RotationViewModel : BaseViewModel
             Rotation.Insert(index + 1, singer);
             SelectedSinger = singer;
 
-            _display.UpdateRotation(Rotation.ToList());
+            _display.UpdateRotation([.. Rotation]);
             RotationStateChanged?.Invoke();
         }
     }
@@ -443,7 +511,7 @@ public partial class RotationViewModel : BaseViewModel
         Rotation.Clear();
         SelectedSinger = null;
 
-        _display.UpdateRotation(Rotation.ToList());
+        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
     }
 
@@ -456,8 +524,9 @@ public partial class RotationViewModel : BaseViewModel
         string title = singer.SongTitle;
         string artist = singer.Artist;
 
-        // 1. Increment completed count (cap at 10)
+        // 1. Increment completed count (cap at 10) and total songs sung
         singer.CompletedCount = Math.Min(singer.CompletedCount + 1, 10);
+        singer.TotalSongsSung++;
 
         // 2. Log performance history in database
         System.Threading.Tasks.Task.Run(() =>
@@ -503,8 +572,21 @@ public partial class RotationViewModel : BaseViewModel
             catch { }
         });
 
-        // Remove from current position
-        Rotation.Remove(singer);
+        // If the singer being marked Done is the current singer, advance the indicator first
+        if (singer.IsCurrent)
+        {
+            // Find the next active singer (the one currently marked as IsNext)
+            var nextActive = Rotation.FirstOrDefault(s => s.IsNext);
+            if (nextActive != null)
+            {
+                nextActive.IsCurrent = true;
+                singer.IsCurrent = false;
+            }
+            else
+            {
+                singer.IsCurrent = false;
+            }
+        }
 
         // 3. Check for pending songs
         if (_pendingSingerSongs.TryGetValue(name, out var list) && list.Count > 0)
@@ -535,15 +617,12 @@ public partial class RotationViewModel : BaseViewModel
             RefreshSelectedSingerQueue();
         }
 
-        // Add to end of active rotation list
-        Rotation.Add(singer);
-
-        _display.UpdateRotation(Rotation.ToList());
+        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
     }
 
     [RelayCommand]
-    private void TogglePauseSinger(Singer singer)
+    private async Task TogglePauseSinger(Singer singer)
     {
         if (singer == null) return;
         singer.IsPaused = !singer.IsPaused;
@@ -551,15 +630,15 @@ public partial class RotationViewModel : BaseViewModel
         // If they are currently singing and we paused them, pause the music
         if (singer.IsPaused && string.Equals(singer.Name, _mediaEngine.ActiveSingerName, StringComparison.OrdinalIgnoreCase))
         {
-            _mediaEngine.Pause();
+            await _mediaEngine.Pause();
         }
 
-        _display.UpdateRotation(Rotation.ToList());
+        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
     }
 
     [RelayCommand]
-    private void ToggleInactiveSinger(Singer singer)
+    private async Task ToggleInactiveSinger(Singer singer)
     {
         if (singer == null) return;
 
@@ -578,11 +657,11 @@ public partial class RotationViewModel : BaseViewModel
             // If they are currently singing and we set them inactive, stop playback
             if (string.Equals(singer.Name, _mediaEngine.ActiveSingerName, StringComparison.OrdinalIgnoreCase))
             {
-                _mediaEngine.Stop();
+                await _mediaEngine.Stop();
             }
         }
 
-        _display.UpdateRotation(Rotation.ToList());
+        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
     }
 
@@ -637,5 +716,11 @@ public partial class RotationViewModel : BaseViewModel
             RefreshSelectedSingerQueue();
             RotationStateChanged?.Invoke();
         }
+    }
+
+    public void NotifyRotationReordered()
+    {
+        _display.UpdateRotation([.. Rotation]);
+        RotationStateChanged?.Invoke();
     }
 }

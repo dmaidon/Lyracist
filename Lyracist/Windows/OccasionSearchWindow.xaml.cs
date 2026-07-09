@@ -19,9 +19,9 @@ public partial class OccasionSearchWindow : Window
     private readonly int _categoryId;
     private readonly Action _callback;
 
-    public ObservableCollection<KaraokeSong> LocalSongs { get; } = new();
-    public ObservableCollection<PartyTymeTrack> PartyTymeSongs { get; } = new();
-    public ObservableCollection<ExternalTrack> ExternalSongs { get; } = new();
+    public ObservableCollection<KaraokeSong> LocalSongs { get; } = [];
+    public ObservableCollection<PartyTymeTrack> PartyTymeSongs { get; } = [];
+    public ObservableCollection<ExternalTrack> ExternalSongs { get; } = [];
 
     public OccasionSearchWindow(
         IOccasionService occasions,

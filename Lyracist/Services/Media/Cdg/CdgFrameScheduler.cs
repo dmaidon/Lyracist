@@ -8,7 +8,7 @@ namespace Lyracist.Services.Media.Cdg;
 public class CdgFrameScheduler : ICdgFrameScheduler
 {
     private readonly ICDGDecoder _cdgDecoder;
-    private List<CdgPacket> _packets = new();
+    private List<CdgPacket> _packets = [];
     private int _currentPacketIndex;
     private DateTime _lastFrameTime = DateTime.MinValue;
     private WriteableBitmap? _lastFrame;
@@ -24,7 +24,7 @@ public class CdgFrameScheduler : ICdgFrameScheduler
 
     public void LoadPackets(List<CdgPacket> packets)
     {
-        _packets = new List<CdgPacket>(packets);
+        _packets = [.. packets];
     }
 
     public void Reset()

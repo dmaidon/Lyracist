@@ -121,7 +121,7 @@ public class LibraryService : ILibraryService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to search library: {ex.Message}");
-            return Enumerable.Empty<KaraokeSong>();
+            return [];
         }
     }
 
@@ -144,7 +144,7 @@ public class LibraryService : ILibraryService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to search library: {ex.Message}");
-            return Enumerable.Empty<KaraokeSong>();
+            return [];
         }
     }
 
@@ -158,7 +158,7 @@ public class LibraryService : ILibraryService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to get all library songs: {ex.Message}");
-            return Enumerable.Empty<KaraokeSong>();
+            return [];
         }
     }
 
@@ -176,7 +176,7 @@ public class LibraryService : ILibraryService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to get background music songs: {ex.Message}");
-            return Enumerable.Empty<KaraokeSong>();
+            return [];
         }
     }
 

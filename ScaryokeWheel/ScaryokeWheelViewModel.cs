@@ -22,7 +22,7 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     private static readonly Random Rng = new();
 
     private static readonly string[] SegmentColors =
-    {
+    [
         "#6A0DAD", // Purple
         "#FF6D00", // Orange
         "#00838F", // Teal
@@ -34,16 +34,16 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         "#5E35B1", // Dark Purple
         "#F57C00", // Yellow Orange
         "#00796B"  // Teal Blue
-    };
+    ];
 
     [ObservableProperty]
-    private ObservableCollection<string> _customCategories = new();
+    private ObservableCollection<string> _customCategories = [];
 
     [ObservableProperty]
     private string _newCategoryName = string.Empty;
 
     [ObservableProperty]
-    private ObservableCollection<WheelSegment> _wheelSegments = new();
+    private ObservableCollection<WheelSegment> _wheelSegments = [];
 
     [ObservableProperty]
     private string _resultText = "Spin the wheel for a challenge!";
@@ -98,7 +98,7 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         CustomCategories.Add(name);
         NewCategoryName = string.Empty;
 
-        _settings.Categories = CustomCategories.ToList();
+        _settings.Categories = [.. CustomCategories];
         _settings.Save();
 
         RebuildWheelSegments();
@@ -111,7 +111,7 @@ public partial class ScaryokeWheelViewModel : ObservableObject
 
         CustomCategories.Remove(category);
 
-        _settings.Categories = CustomCategories.ToList();
+        _settings.Categories = [.. CustomCategories];
         _settings.Save();
 
         RebuildWheelSegments();

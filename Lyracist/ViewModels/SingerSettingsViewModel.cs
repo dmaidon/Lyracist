@@ -6,9 +6,9 @@ using Lyracist.Models;
 
 namespace Lyracist.ViewModels
 {
-    public partial class SingerSettingsViewModel : BaseViewModel
+    public partial class SingerSettingsViewModel(ILibraryService libraryService) : BaseViewModel
     {
-        private readonly ILibraryService _libraryService;
+        private readonly ILibraryService _libraryService = libraryService;
         private string _singerName = string.Empty;
 
         [ObservableProperty]
@@ -40,11 +40,6 @@ namespace Lyracist.ViewModels
 
         [ObservableProperty]
         private string _notes = string.Empty;
-
-        public SingerSettingsViewModel(ILibraryService libraryService)
-        {
-            _libraryService = libraryService;
-        }
 
         public void Load(Lyracist.Models.Singer singer)
         {

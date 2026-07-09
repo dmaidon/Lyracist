@@ -5,16 +5,10 @@ using Lyracist.ViewModels;
 
 namespace Lyracist.Services.Tablet;
 
-public class LyricsHub : Hub
+public class LyricsHub(RotationViewModel rotation, KaraokeViewModel karaoke) : Hub
 {
-    private readonly RotationViewModel _rotation;
-    private readonly KaraokeViewModel _karaoke;
-
-    public LyricsHub(RotationViewModel rotation, KaraokeViewModel karaoke)
-    {
-        _rotation = rotation;
-        _karaoke = karaoke;
-    }
+    private readonly RotationViewModel _rotation = rotation;
+    private readonly KaraokeViewModel _karaoke = karaoke;
 
     public override async Task OnConnectedAsync()
     {

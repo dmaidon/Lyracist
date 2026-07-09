@@ -96,7 +96,7 @@ public static class ScaryokeAudio
                     double val = wave + noise;
 
                     // Envelope: fast attack, linear decay
-                    double env = 1.0;
+                    double env;
                     if (t < 0.02)
                     {
                         env = t / 0.02;

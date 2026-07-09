@@ -11,8 +11,8 @@ namespace Lyracist.Services.Integration
 {
     public class ExternalLinkService
     {
-        private readonly List<ExternalTrack> _mockDatabase = new()
-        {
+        private readonly List<ExternalTrack> _mockDatabase =
+        [
             // Spotify
             new ExternalTrack { Title = "Yellow", Artist = "Coldplay", Url = "https://open.spotify.com/track/3ee8J1Fw65u2hSuVv41u6J", Source = "Spotify" },
             new ExternalTrack { Title = "Blinding Lights", Artist = "The Weeknd", Url = "https://open.spotify.com/track/0VjIjW4GlUZg4qZJZ34A30", Source = "Spotify" },
@@ -27,7 +27,7 @@ namespace Lyracist.Services.Integration
             new ExternalTrack { Title = "Stairway to Heaven", Artist = "Led Zeppelin", Url = "https://music.amazon.com/tracks/B00F3T4EBA", Source = "Amazon" },
             new ExternalTrack { Title = "Hotel California", Artist = "Eagles", Url = "https://music.amazon.com/tracks/B002Q1AGF4", Source = "Amazon" },
             new ExternalTrack { Title = "Billie Jean", Artist = "Michael Jackson", Url = "https://music.amazon.com/tracks/B00138GY1A", Source = "Amazon" }
-        };
+        ];
 
         public async Task<IEnumerable<ExternalTrack>> SearchAsync(string query, string service = "All")
         {
@@ -62,7 +62,7 @@ namespace Lyracist.Services.Integration
                                     if (dashIdx > 0)
                                     {
                                         artist = fullTitle[..dashIdx].Trim();
-                                        title = fullTitle.Substring(dashIdx + 3).Trim();
+                                        title = fullTitle[(dashIdx + 3)..].Trim();
                                     }
 
                                     title = System.Net.WebUtility.HtmlDecode(title);
@@ -134,7 +134,7 @@ namespace Lyracist.Services.Integration
                 var match = Regex.Match(url, @"/track/([^/?]+)");
                 if (match.Success)
                 {
-                    title = $"Spotify Track ({match.Groups[1].Value.Substring(0, Math.Min(6, match.Groups[1].Value.Length))})";
+                    title = $"Spotify Track ({match.Groups[1].Value[..Math.Min(6, match.Groups[1].Value.Length)]})";
                 }
             }
             else if (url.Contains("amazon.com", StringComparison.OrdinalIgnoreCase) || url.Contains("media-amazon.com", StringComparison.OrdinalIgnoreCase))

@@ -22,5 +22,5 @@ public class OccasionNode
     public int Depth { get; set; }
     public string Label => new string(' ', Depth * 4) + Name;
 
-    public List<OccasionNode> Children { get; } = new();
+    public List<OccasionNode> Children { get; } = [];
 }

@@ -25,14 +25,13 @@ public class RequestService : IRequestService
     public List<RequestInfo> GetHistory()
     {
         using var context = new LyracistDbContext();
-        return context.MusicRequests
+        return [.. context.MusicRequests
             .Include(r => r.Singer)
             .Where(r => r.Status == "Played" || r.Status == "Rejected")
             .OrderByDescending(r => r.Timestamp)
             .Take(200)
             .ToList()
-            .Select(Map)
-            .ToList();
+            .Select(Map)];
     }
 
     public RequestInfo AddRequest(string singerName, string title, string artist, string source = "Local")
@@ -77,13 +76,12 @@ public class RequestService : IRequestService
     private List<RequestInfo> GetByStatus(string status)
     {
         using var context = new LyracistDbContext();
-        return context.MusicRequests
+        return [.. context.MusicRequests
             .Include(r => r.Singer)
             .Where(r => r.Status == status)
             .OrderBy(r => r.Timestamp)
             .ToList()
-            .Select(Map)
-            .ToList();
+            .Select(Map)];
     }
 
     private static RequestInfo Map(MusicRequest request) => new()
