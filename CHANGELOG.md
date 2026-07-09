@@ -2,6 +2,23 @@
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [26.7.9.0] - 2026-07-09
+
+### Added
+- **Performer XP, Levels & Progression**: Gamified singer progression using `XP = TotalSongsSung * 100 + Score`, automatically granting performance titles (e.g. *Shower Singer*, *Pub Regular*, *Vocal Powerhouse*, *Karaoke Legend*) and achievement badges (Debut, Legend, Rising Star, Crowd Pleaser, High Scorer) on both active queues and leaderboard displays.
+- **Projected Scaryoke Wheel**: Syncs category wheel spin animations onto the crowd billboard rotation screen with identical deceleration physics, rotation angles, sector colors, and ticking sound effects.
+- **Customizable Feedback Ratings**: Symmetrical DJ-side settings controls allowing hosts to curate a list of positive feedback rating symbols (e.g. ⭐, ❤️, 🔥, 🏆, 👑) with strict non-detrimental positive-only validation rules and regular emoji preset support.
+- **CDG Background Chroma-Keying**: Strips the native background color of `.cdg` lyrics files (index 0,0) in real time to render them transparent, letting the custom backdrops show through.
+- **Dynamic GPU-Accelerated Backdrops**: Added four beautiful, responsive visualizer layers behind transparent lyrics, wrapped in Viewbox controls to scale smoothly on HD and 4K displays:
+  - *Neon Waveform*: morphing neon cyan and magenta curves.
+  - *Nebula Bokeh*: liquid-glow purple, blue, and red blurred circles floating smoothly.
+  - *Retro Synthwave*: scrolling perspective grids and glowing neon sun.
+  - *Space Starfield*: multi-layer parallax space stardust canvas.
+- **Active Performance Key Transposition**: Real-time pitch transposition from `-6` to `+6` semitones. Hot-reloads and seeks under 150ms to apply FFmpeg-based pitch shifting (`asetrate` + `atempo`) dynamically during live performances.
+
+### Changed
+- **Rebranded to Lyracist Pro**: Rebranded the entire application, assembly metadata, and documentation to *Lyracist Pro* to reflect its professional KJ feature set.
+
 ---
 
 ## [26.7.7.0] - 2026-07-07

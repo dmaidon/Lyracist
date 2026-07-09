@@ -1,6 +1,6 @@
-# Lyracist
+# Lyracist Pro
 
-Lyracist is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.
 
 ---
 
@@ -8,9 +8,11 @@ Lyracist is a premium, modern Windows WPF Karaoke hosting application designed f
 
 ### 🎙️ Performer & Rotation Queue
 - **Interactive Singer Queue**: Dynamic list matching performer names with requested song, artist, key changes, and custom notes.
+- **Performer XP & Levels**: Automatic XP and Leveling system (`XP = TotalSongsSung * 100 + Score`) that tracks history, displays custom titles (e.g. *Shower Singer*, *Karaoke Legend*), and unlocks visual milestone badges directly in the queue and leaderboard.
+- **Customizable Feedback Ratings**: Symmetrical DJ tab controls allowing hosts to customize positive symbol choices (⭐, ❤️, 🔥, 🏆, 👑) with strict safety guidelines (preventing negative feedback) and regular emoji preset support.
 - **Click-to-Deselect**: Easily toggle current singer selection on/off (highlighted in red) to allow correcting misclicks.
-- **Test Mode**: Accessible under Settings → Theme & Appearance to instantly seed default performers (Alice, Bob, Charlie, Diana) for audio/video checks, or clear them when ready for the show.
-- **Customizable Scaryoke Categories**: Add, edit, or remove categories (2 to 12 total) from the settings page. The Scaryoke wheel will dynamically rebuild its structure, sector colors, play a mechanical pointer clicking sound synchronized to sector crossings, and announce the selected category for the singer to choose their song.
+- **Test Mode**: Accessible under Settings → Theme & Appearance to instantly seed default performers for audio/video checks, or clear them when ready for the show.
+- **Customizable Scaryoke Categories**: Add, edit, or remove categories (2 to 12 total) from the settings page. The Scaryoke wheel will dynamically rebuild its structure, sector colors, play a mechanical pointer clicking sound synchronized to sector crossings, and project the active wheel and category announcement onto the rotation billboard window.
 
 ### 🖥️ Display & Projection Management
 - **Dual-Window Projection**: Supports launching standalone windows for **Lyrics Projection** and the **Rotation Billboard**.
@@ -19,12 +21,19 @@ Lyracist is a premium, modern Windows WPF Karaoke hosting application designed f
   - **Star Wars Crawl**: High-fidelity 3D projection rendering a starry night sky with cool/warm twinkling star layers, and a 3D-angled text block crawling upward in space.
   - **Vegas Marquee**: Theatrical Broadway stage layout displaying the current performer's name in glowing letters inside a brass frame ringed by lavender/purple "marching ants" chase bulb animations.
   - **Vinyl Turntable**: Classic warm DJ-booth theme with a dynamic rotating vinyl 45 record, tonearm, and center label showing the current singer and song metadata.
+- **Dynamic Chroma-Keying**: Automatically strips standard `.cdg` file backgrounds and borders (pixel index `0,0`) in real time to render lyrics transparent.
+- **GPU-Accelerated 4K Backdrops**: Beautiful, responsive vector backdrops layered behind transparent lyrics, wrapped in Viewbox controls to fit HD and 4K displays:
+  - *Neon Waveform*: Shifting and morphing neon waves.
+  - *Nebula Bokeh*: Liquid purple, blue, and red glow bubbles floating slowly.
+  - *Retro Synthwave*: Horizontal 3D perspective grids scrolling under a neon sun.
+  - *Space Starfield*: Multi-layer parallax stardust canvas.
 - **Flexible Monitor Assignment**: Direct dropdown selection in the KJ interface to project to any secondary monitor (with borderless, topmost, maximized sizing).
 - **"None" Targeting (Deselection)**: Support for selecting *None (Do not show)* in settings or projection controls to immediately close or hide projection windows when not in use.
 - **Rear-Projection Mirroring**: Mirror the lyrics screen horizontally for custom projector arrangements.
 
 ### 🔊 Audio Configuration & Background Music (BGM)
 - **Advanced Audio Engine**: Master volume, latency compensation, and active output device selection.
+- **Active Performance Key Transposition**: Real-time pitch transposition from `-6` to `+6` semitones. Automatically hot-reloads the audio track and seeks back to the exact millisecond in under 150ms to apply FFmpeg-based pitch shifting (`asetrate` + `atempo`) during active playback.
 - **Audio Processing Controls**: Fully adjustable 3-band EQ (Bass, Mid, Treble) alongside integrated Compressor and Limiter.
 - **Show Flow Automation**: Automatically manages background music levels between tracks (Opening Music, Fill-in Music, and End of Rotation sets).
 - **Special Occasion Audio**: Add custom sound bites and clips (Birthdays, Holiday jingles) with individual tone (Bass/Treble) and gain overrides.
