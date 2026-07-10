@@ -118,6 +118,16 @@ public partial class App : System.Windows.Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        // Subscribe to theme changes to apply Lyracist custom brushes
+        Wpf.Ui.Appearance.ApplicationThemeManager.Changed += (theme, accent) =>
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                bool isDark = theme == Wpf.Ui.Appearance.ApplicationTheme.Dark;
+                Lyracist.Themes.LyracistThemeManager.Apply(isDark);
+            });
+        };
+
         await Host!.StartAsync();
 
         // Apply any pending EF Core migrations so a fresh install gets a
@@ -159,6 +169,16 @@ public partial class App : System.Windows.Application
         var mainWindow = Host.Services.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
         ShutdownMode = ShutdownMode.OnMainWindowClose;
+
+        // Apply theme settings
+        ApplyAppTheme(mainWindow, AppSettings.ThemeMode);
+
+        // Listen for future setting changes
+        AppSettings.ThemeModeChanged += theme =>
+        {
+            Dispatcher.Invoke(() => ApplyAppTheme(mainWindow, theme));
+        };
+
         mainWindow.Show();
 
         // Close splash window now that MainWindow is ready
@@ -183,5 +203,32 @@ public partial class App : System.Windows.Application
         }
 
         base.OnExit(e);
+    }
+
+    private static void ApplyAppTheme(Window window, string themeMode)
+    {
+        var handle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
+
+        if (string.Equals(themeMode, "Dark", StringComparison.OrdinalIgnoreCase))
+        {
+            if (handle != System.IntPtr.Zero)
+            {
+                Wpf.Ui.Appearance.SystemThemeWatcher.UnWatch(window);
+            }
+            Wpf.Ui.Appearance.ApplicationThemeManager.Apply(Wpf.Ui.Appearance.ApplicationTheme.Dark);
+        }
+        else if (string.Equals(themeMode, "Light", StringComparison.OrdinalIgnoreCase))
+        {
+            if (handle != System.IntPtr.Zero)
+            {
+                Wpf.Ui.Appearance.SystemThemeWatcher.UnWatch(window);
+            }
+            Wpf.Ui.Appearance.ApplicationThemeManager.Apply(Wpf.Ui.Appearance.ApplicationTheme.Light);
+        }
+        else // System
+        {
+            Wpf.Ui.Appearance.SystemThemeWatcher.Watch(window);
+            Wpf.Ui.Appearance.ApplicationThemeManager.ApplySystemTheme();
+        }
     }
 }

@@ -516,6 +516,25 @@ public partial class RotationViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private void SetCurrentSinger(Singer singer)
+    {
+        if (singer == null)
+            return;
+
+        foreach (var s in Rotation)
+        {
+            s.IsCurrent = (s == singer);
+            if (s == singer)
+            {
+                s.IsNext = false;
+            }
+        }
+
+        _display.UpdateRotation([.. Rotation]);
+        RotationStateChanged?.Invoke();
+    }
+
+    [RelayCommand]
     private void DoneSinger(Singer singer)
     {
         if (singer == null) return;

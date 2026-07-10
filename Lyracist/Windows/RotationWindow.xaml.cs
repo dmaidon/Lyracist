@@ -73,6 +73,8 @@ public partial class RotationWindow : Window
         Closed += OnClosed;
         DataContextChanged += OnDataContextChanged;
         IsVisibleChanged += RotationWindow_IsVisibleChanged;
+
+        Lyracist.Services.Tablet.LyricsHub.ReactionReceived += OnReactionReceived;
     }
 
     private void OnClosed(object? sender, EventArgs e)
@@ -83,6 +85,8 @@ public partial class RotationWindow : Window
         IsVisibleChanged -= RotationWindow_IsVisibleChanged;
         HookViewModel(null);
         StopSpaceshipTimer();
+
+        Lyracist.Services.Tablet.LyricsHub.ReactionReceived -= OnReactionReceived;
 
         var scaryokeWindow = App.AppHost.Services.GetService(typeof(ScaryokeWindow)) as ScaryokeWindow;
         if (scaryokeWindow != null)
@@ -135,13 +139,13 @@ public partial class RotationWindow : Window
         if (_vm != null)
         {
             _vm.PropertyChanged -= Vm_PropertyChanged;
-            _vm.Rotation.CollectionChanged -= Rotation_CollectionChanged;
+            _vm.FullRotation.CollectionChanged -= Rotation_CollectionChanged;
         }
         _vm = vm;
         if (_vm != null)
         {
             _vm.PropertyChanged += Vm_PropertyChanged;
-            _vm.Rotation.CollectionChanged += Rotation_CollectionChanged;
+            _vm.FullRotation.CollectionChanged += Rotation_CollectionChanged;
         }
     }
 
@@ -154,12 +158,13 @@ public partial class RotationWindow : Window
                 break;
 
             case nameof(RotationWindowViewModel.CrawlBannerText):
+            case nameof(RotationWindowViewModel.HasDesignatedCurrentSinger):
                 RestartCrawlIfActive();
                 break;
 
-            default:
+            case nameof(RotationWindowViewModel.IsAnnouncementVisible):
+            case nameof(RotationWindowViewModel.AnnouncementBanner):
                 RebuildBanner();
-                RestartCrawlIfActive();
                 break;
         }
     }
@@ -428,7 +433,7 @@ public partial class RotationWindow : Window
 
     private void StartCrawl()
     {
-        if (_vm == null || _vm.SelectedProjectionView != "Star Wars Crawl" || _vm.Rotation.Count == 0) return;
+        if (_vm == null || _vm.SelectedProjectionView != "Star Wars Crawl" || _vm.FullRotation.Count == 0) return;
 
         int gen = ++_crawlGen;
 
@@ -439,25 +444,7 @@ public partial class RotationWindow : Window
             RegenerateStars(starW, starH);
         }
 
-        // Get active ordered list of singers (excluding paused ones, and reordered so current is first)
-        var activeSingers = _vm.Rotation.Where(s => !s.IsPaused).ToList();
-        if (activeSingers.Count == 0) return;
-
-        var current = activeSingers.FirstOrDefault(s => s.IsCurrent) ?? activeSingers.FirstOrDefault();
-        var orderedList = new List<Singer>();
-        if (current != null)
-        {
-            int currentIndex = activeSingers.IndexOf(current);
-            int count = activeSingers.Count;
-            for (int offset = 0; offset < count; offset++)
-            {
-                orderedList.Add(activeSingers[(currentIndex + offset) % count]);
-            }
-        }
-
-        bool hasDesignatedCurrentSinger = activeSingers.Any(s => s.IsCurrent);
-
-        StackPanel textPanel = BuildCrawlTextPanel(orderedList, _vm.CrawlBannerText, hasDesignatedCurrentSinger);
+        StackPanel textPanel = BuildCrawlTextPanel([.. _vm.FullRotation], _vm.CrawlBannerText, _vm.HasDesignatedCurrentSinger);
         textPanel.Measure(new System.Windows.Size(PanelWidth, double.PositiveInfinity));
         textPanel.Arrange(new Rect(0, 0, PanelWidth, textPanel.DesiredSize.Height));
         double panelH = textPanel.DesiredSize.Height;
@@ -473,18 +460,14 @@ public partial class RotationWindow : Window
         _crawlSource.Measure(new System.Windows.Size(PanelWidth, ViewH));
         _crawlSource.Arrange(new Rect(0, 0, PanelWidth, ViewH));
 
-        if (_crawlBrush == null)
+        _crawlBrush = new VisualBrush(_crawlSource)
         {
-            _crawlBrush = new VisualBrush(_crawlSource)
-            {
-                ViewboxUnits = BrushMappingMode.Absolute,
-                Viewbox = new Rect(0, 0, PanelWidth, ViewH),
-                Stretch = Stretch.Fill
-            };
-            RenderOptions.SetCachingHint(_crawlBrush, CachingHint.Cache);
-            CrawlMaterial.Brush = _crawlBrush;
-            CrawlBackMaterial.Brush = _crawlBrush;
-        }
+            ViewboxUnits = BrushMappingMode.Absolute,
+            Viewbox = new Rect(0, 0, PanelWidth, ViewH),
+            Stretch = Stretch.Fill
+        };
+        CrawlMaterial.Brush = _crawlBrush;
+        CrawlBackMaterial.Brush = _crawlBrush;
 
         double duration = Math.Max(20.0, (ViewH + panelH) / ScrollPixelsPerSecond);
         var anim = new DoubleAnimation(ViewH, -panelH, TimeSpan.FromSeconds(duration));
@@ -1101,5 +1084,67 @@ public partial class RotationWindow : Window
 
             start = end;
         }
+    }
+
+    private void OnReactionReceived(string emoji)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            if (ReactionsCanvas == null) return;
+
+            var textBlock = new TextBlock
+            {
+                Text = emoji,
+                FontSize = 72,
+                FontFamily = new System.Windows.Media.FontFamily("Segoe UI Emoji"),
+                RenderTransform = new TranslateTransform()
+            };
+
+            double width = ActualWidth > 0 ? ActualWidth : 800;
+            double height = ActualHeight > 0 ? ActualHeight : 600;
+
+            // Random start position
+            double left = _rng.Next(50, (int)Math.Max(200, width - 100));
+            double bottom = _rng.Next(20, 100);
+            Canvas.SetLeft(textBlock, left);
+            Canvas.SetBottom(textBlock, bottom);
+
+            ReactionsCanvas.Children.Add(textBlock);
+
+            var transform = (TranslateTransform)textBlock.RenderTransform;
+            var duration = TimeSpan.FromSeconds(5.5);
+
+            var yAnimation = new DoubleAnimation
+            {
+                From = 0,
+                To = -height + 150,
+                Duration = duration
+            };
+
+            // Random horizontal drift/sway
+            double drift = _rng.NextDouble() * 200 - 100;
+            var xAnimation = new DoubleAnimation
+            {
+                From = 0,
+                To = drift,
+                Duration = duration
+            };
+
+            var opacityAnimation = new DoubleAnimation
+            {
+                From = 1.0,
+                To = 0.0,
+                Duration = duration
+            };
+
+            opacityAnimation.Completed += (s, e) =>
+            {
+                ReactionsCanvas.Children.Remove(textBlock);
+            };
+
+            transform.BeginAnimation(TranslateTransform.YProperty, yAnimation);
+            transform.BeginAnimation(TranslateTransform.XProperty, xAnimation);
+            textBlock.BeginAnimation(OpacityProperty, opacityAnimation);
+        });
     }
 }

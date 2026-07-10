@@ -642,5 +642,8 @@
                 </Border>
             </Grid>
         </Border>
+
+        <!-- Floating Emoji Reactions Overlay -->
+        <Canvas x:Name="ReactionsCanvas" IsHitTestVisible="False" Background="Transparent" />
     </Grid>
 </Window>

@@ -65,6 +65,22 @@ public static class AppSettings
 
     // ─── Settings Properties ───────────────────────────────────────────────
 
+    public static event System.Action<string>? ThemeModeChanged;
+
+    public static string ThemeMode
+    {
+        get => _data.ThemeMode;
+        set
+        {
+            if (_data.ThemeMode != value)
+            {
+                _data.ThemeMode = value;
+                Save();
+                ThemeModeChanged?.Invoke(value);
+            }
+        }
+    }
+
     public static bool ShowSplashOnStartup
     {
         get => _data.ShowSplashOnStartup;
@@ -435,6 +451,12 @@ public static class AppSettings
         }
     }
 
+    public static int FillInDelaySeconds
+    {
+        get => _data.FillInDelaySeconds;
+        set { _data.FillInDelaySeconds = value; Save(); }
+    }
+
     // ─── CDG Video Backdrop Settings ──────────────────────────────────────────
 
     public static string CdgBackdropMode
@@ -480,6 +502,7 @@ public static class AppSettings
 
     private sealed class SettingsData
     {
+        public string ThemeMode { get; set; } = "Dark";
         public bool ShowSplashOnStartup { get; set; } = true;
         public bool EnableHardwareAcceleration { get; set; } = true;
         public bool EnableNoiseGate { get; set; } = false;
@@ -553,5 +576,6 @@ public static class AppSettings
         public string SelectedRatingIcon { get; set; } = "⭐ Star";
         public List<string> AvailableRatingIcons { get; set; } = ["⭐ Star", "❤️ Heart", "🔥 Fire", "🎵 Note", "🏆 Trophy", "👑 Crown", "👍 Like"];
         public string CdgBackdropMode { get; set; } = "Original Color";
+        public int FillInDelaySeconds { get; set; } = 5;
     }
 }

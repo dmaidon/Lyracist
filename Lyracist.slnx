@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="Lyracist/Lyracist.csproj" />
+  <Project Path="../KSRotation/KSRotation/KSRotation.csproj" />
   <Project Path="Lyracist.Data/Lyracist.Data.csproj" />
   <Project Path="LyracistDbEditor/LyracistDbEditor.csproj" Id="46565c60-fa0a-4967-b35a-eda261064d4a" />
   <Project Path="ScaryokeWheel/ScaryokeWheel.csproj" Id="2a544b5d-6e94-4b4b-99b5-0978ae21ff2f" />

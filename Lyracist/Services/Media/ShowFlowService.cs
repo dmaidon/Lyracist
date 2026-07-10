@@ -267,7 +267,7 @@ public class ShowFlowService : IShowFlowService
         _fillInDelayCts = new System.Threading.CancellationTokenSource();
         var token = _fillInDelayCts.Token;
 
-        int delayMs = _rng.Next(5000, 7001); // 5 to 7 seconds random delay
+        int delayMs = Lyracist.Core.Helpers.AppSettings.FillInDelaySeconds * 1000;
 
         Task.Run(async () =>
         {

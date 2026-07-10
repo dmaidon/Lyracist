@@ -2,6 +2,26 @@
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [26.7.10.0] - 2026-07-10
+
+### Added
+- **Emoji Crowd Reactions**: Singers can tap 👏 🔥 ❤️ 🙌 🎉 👑 buttons on the tablet portal to fire floating, animated emoji reactions that drift and fade across both the Lyrics and Rotation projection screens in real time over SignalR.
+- **Live Server Log Viewer**: Added a "Logs" tab to the tablet web portal exposing the most recent app and error log entries via a new `/api/logs` endpoint, with a manual Refresh button.
+- **Rating Symbol & Score Sync to Tablet**: The tablet dashboard now shows the current performer's live average rating next to their name and labels the rating card with the host's chosen feedback icon instead of a hardcoded star, refreshing immediately after each new rating submission.
+- **QR Code "Scan to Join" Badges**: Auto-generated QR codes linking to the tablet portal now appear as a badge on the Karaoke page header and as a floating overlay on the Lyrics projection window.
+- **System/Light/Dark Theme Selector**: Replaced the dark-mode-only checkbox with a three-way Theme Mode dropdown (Light/Dark/System) on the Karaoke page header and Settings, with live system-theme watching.
+- **Manual "Set as Current Performer" Override**: Added a star-toggle on each singer row (Karaoke and Rotation pages) letting hosts manually designate who's currently singing, taking priority over automatic sequencing.
+- **Configurable Fill-In Music Delay**: New Settings slider (0-30s) lets hosts set the exact delay before fill-in background music starts, replacing the previous fixed random 5-7 second delay.
+- **Add From Singer History**: Singers can be re-queued directly from the Singer History tab via row selection or double-click, without re-searching the catalog.
+- **Queue Singer Without a Song Selected**: Adding a performer with no song/track chosen now creates a placeholder queue entry instead of silently doing nothing.
+
+### Fixed
+- **Star Wars Crawl Resetting Every 10 Seconds**: The rotation billboard's crawl view restarted itself on every view-model property change, including an unrelated leaderboard-toggle timer that fires every 10 seconds — so the crawl never scrolled past its header before resetting. Narrowed the restart trigger to only the properties the crawl actually depends on.
+- **Tablet Rating & Reaction Buttons Unreachable**: The tablet portal's `submitRating` function and the rest of the client script (including the Scaryoke Wheel logic) had been accidentally nested inside another function's scope, making them unreachable from `onclick` handlers.
+- **Manually Designated Next Singer Ignored**: `KaraokeViewModel` and the rotation display previously always recalculated the next singer sequentially, ignoring a manually designated next singer; both now respect the manual designation.
+
+---
+
 ## [26.7.9.0] - 2026-07-09
 
 ### Added

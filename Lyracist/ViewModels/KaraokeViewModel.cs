@@ -141,6 +141,60 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private KaraokeSong? _selectedSong;
 
+    [ObservableProperty]
+    private SingerHistoryEntry? _selectedHistoryEntry;
+
+    // Theme selection properties for header
+    public List<string> ThemeModes { get; } = ["Light", "Dark", "System"];
+
+    [ObservableProperty]
+    private string _themeMode = AppSettings.ThemeMode;
+
+    partial void OnThemeModeChanged(string value)
+    {
+        AppSettings.ThemeMode = value;
+    }
+
+    partial void OnSelectedSongChanged(KaraokeSong? value)
+    {
+        if (value != null)
+        {
+            SelectedPartyTymeTrack = null;
+            SelectedExternalTrack = null;
+            SelectedHistoryEntry = null;
+        }
+    }
+
+    partial void OnSelectedPartyTymeTrackChanged(PartyTymeTrack? value)
+    {
+        if (value != null)
+        {
+            SelectedSong = null;
+            SelectedExternalTrack = null;
+            SelectedHistoryEntry = null;
+        }
+    }
+
+    partial void OnSelectedExternalTrackChanged(ExternalTrack? value)
+    {
+        if (value != null)
+        {
+            SelectedSong = null;
+            SelectedPartyTymeTrack = null;
+            SelectedHistoryEntry = null;
+        }
+    }
+
+    partial void OnSelectedHistoryEntryChanged(SingerHistoryEntry? value)
+    {
+        if (value != null)
+        {
+            SelectedSong = null;
+            SelectedPartyTymeTrack = null;
+            SelectedExternalTrack = null;
+        }
+    }
+
     public ObservableCollection<string> SingerNames { get; } = [];
 
     public void LoadSingerNames()
@@ -230,6 +284,49 @@ public partial class KaraokeViewModel : BaseViewModel
 
     [ObservableProperty]
     private string _nextUpSong = "No Song";
+
+    [ObservableProperty]
+    private System.Windows.Media.Imaging.BitmapImage? _qrCodeImage;
+
+    [ObservableProperty]
+    private string _joinUrl = string.Empty;
+
+    public void RefreshQrCode()
+    {
+        try
+        {
+            string ip = AppSettings.GetActiveIPAddress();
+            JoinUrl = $"http://{ip}:{AppSettings.TabletPort}";
+
+            using var qrGenerator = new QRCoder.QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(JoinUrl, QRCoder.QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
+            byte[] qrCodeAsPngByteArr = qrCode.GetGraphic(20);
+            QrCodeImage = LoadImage(qrCodeAsPngByteArr);
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to generate QR Code: {ex.Message}");
+        }
+    }
+
+    private static System.Windows.Media.Imaging.BitmapImage? LoadImage(byte[] imageData)
+    {
+        if (imageData == null || imageData.Length == 0) return null;
+        var image = new System.Windows.Media.Imaging.BitmapImage();
+        using (var mem = new System.IO.MemoryStream(imageData))
+        {
+            mem.Position = 0;
+            image.BeginInit();
+            image.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat;
+            image.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+            image.UriSource = null;
+            image.StreamSource = mem;
+            image.EndInit();
+        }
+        image.Freeze();
+        return image;
+    }
 
     public double Treble
     {
@@ -394,6 +491,7 @@ public partial class KaraokeViewModel : BaseViewModel
         _mediaEngine.FrameReady += OnFrameReady;
         _libraryService.LibraryUpdated += OnLibraryUpdated;
         LoadSingerNames();
+        RefreshQrCode();
 
         RebuildOccasionMenu();
         _occasions.OccasionsChanged += (_, _) =>
@@ -402,6 +500,15 @@ public partial class KaraokeViewModel : BaseViewModel
         // Hook rotation updates to sync Now/Next banners
         Rotation.Rotation.CollectionChanged += (s, e) => UpdateNowNext();
         Rotation.RotationStateChanged += UpdateNowNext;
+
+        AppSettings.ThemeModeChanged += theme =>
+        {
+            if (_themeMode != theme)
+            {
+                _themeMode = theme;
+                OnPropertyChanged(nameof(ThemeMode));
+            }
+        };
 
         // Apply starting defaults
         _mediaEngine.Volume = 100.0;
@@ -519,6 +626,13 @@ public partial class KaraokeViewModel : BaseViewModel
         // Find the designated current singer
         Singer? current = rotationList.FirstOrDefault(s => s.IsCurrent);
 
+        // Find the designated next singer BEFORE we clear the flags
+        Singer? next = rotationList.FirstOrDefault(s => s.IsNext);
+        if (next != null && (next.IsPaused || next.IsInactive || next == current || !rotationList.Contains(next)))
+        {
+            next = null;
+        }
+
         // Fallback if current is not set or is no longer active
         if (current == null || current.IsPaused || current.IsInactive || !rotationList.Contains(current))
         {
@@ -537,18 +651,19 @@ public partial class KaraokeViewModel : BaseViewModel
             NowSingingName = current.Name;
             NowSingingSong = string.IsNullOrEmpty(current.SongTitle) ? "No Song" : $"{current.Artist} - {current.SongTitle}";
 
-            // Find next active singer sequentially (wrapping around)
-            int currentIndex = rotationList.IndexOf(current);
-            Singer? next = null;
-
-            for (int i = 1; i <= rotationList.Count; i++)
+            // Find next active singer (falling back to sequential if not manually set)
+            if (next == null)
             {
-                int nextIndex = (currentIndex + i) % rotationList.Count;
-                var candidate = rotationList[nextIndex];
-                if (candidate != current && !candidate.IsPaused && !candidate.IsInactive)
+                int currentIndex = rotationList.IndexOf(current);
+                for (int i = 1; i <= rotationList.Count; i++)
                 {
-                    next = candidate;
-                    break;
+                    int nextIndex = (currentIndex + i) % rotationList.Count;
+                    var candidate = rotationList[nextIndex];
+                    if (candidate != current && !candidate.IsPaused && !candidate.IsInactive)
+                    {
+                        next = candidate;
+                        break;
+                    }
                 }
             }
 
@@ -833,6 +948,11 @@ public partial class KaraokeViewModel : BaseViewModel
             Rotation.AddSinger(targetSingerName, SelectedExternalTrack.Title, SelectedExternalTrack.Artist, NewSingerKey,
                 NewSingerNotes, SelectedExternalTrack.Source, SelectedExternalTrack.Url);
         }
+        else if (SelectedHistoryEntry != null)
+        {
+            Rotation.AddSinger(targetSingerName, SelectedHistoryEntry.SongTitle, SelectedHistoryEntry.Artist, NewSingerKey,
+                NewSingerNotes, SelectedHistoryEntry.Source, SelectedHistoryEntry.Link);
+        }
         else if (!string.IsNullOrWhiteSpace(CustomExternalUrl))
         {
             var parsed = _externalLinkService.ParseUrl(CustomExternalUrl);
@@ -845,7 +965,7 @@ public partial class KaraokeViewModel : BaseViewModel
         }
         else
         {
-            return;
+            Rotation.AddSinger(targetSingerName, string.Empty, string.Empty, NewSingerKey, NewSingerNotes);
         }
 
         // Reset inputs
@@ -855,6 +975,7 @@ public partial class KaraokeViewModel : BaseViewModel
         CustomExternalUrl = string.Empty;
         CustomExternalTitle = string.Empty;
         CustomExternalArtist = string.Empty;
+        SelectedHistoryEntry = null;
 
         LoadSingerNames();
     }

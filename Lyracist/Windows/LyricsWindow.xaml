@@ -501,5 +501,24 @@
                     Click="OnHide"
                     ToolTip="Close Lyrics Screen" />
         </StackPanel>
+        
+        <!-- Floating QR Code Badge (Always on top, bottom-right) -->
+        <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="24"
+                Background="#D916161E" BorderBrush="#3B82F6" BorderThickness="1.5" CornerRadius="12" Padding="10"
+                Panel.ZIndex="100" IsHitTestVisible="False">
+            <StackPanel Orientation="Horizontal">
+                <Border Background="White" Padding="4" CornerRadius="6" Width="70" Height="70" VerticalAlignment="Center">
+                    <Image Source="{Binding QrCodeImage}" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
+                    <TextBlock Text="SCAN TO JOIN" FontSize="11" FontWeight="ExtraBold" Foreground="#3B82F6" />
+                    <TextBlock Text="Request Songs!" FontSize="13" FontWeight="Bold" Foreground="White" Margin="0,2,0,0"/>
+                    <TextBlock Text="{Binding JoinUrl}" FontSize="11" Foreground="#FFF5D042" FontWeight="SemiBold" Margin="0,2,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Floating Emoji Reactions Overlay -->
+        <Canvas x:Name="ReactionsCanvas" IsHitTestVisible="False" Background="Transparent" />
     </Grid>
 </Window>

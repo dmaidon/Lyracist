@@ -37,4 +37,12 @@ public partial class KaraokePage : Page
             vm.AddSongToRotationCommand.Execute(vm.SelectedSong);
         }
     }
+
+    private void OnHistoryDoubleClicked(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (DataContext is KaraokeViewModel vm && vm.SelectedHistoryEntry != null)
+        {
+            vm.AddHistorySongToRotationCommand.Execute(vm.SelectedHistoryEntry);
+        }
+    }
 }

@@ -156,6 +156,11 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     public ObservableCollection<string> NextSingers { get; } = [];
 
+    [ObservableProperty]
+    private bool _hasDesignatedCurrentSinger;
+
+    public ObservableCollection<Singer> FullRotation { get; } = [];
+
     public ObservableCollection<Singer> Rotation { get; } = [];
 
     public void UpdateRotation(List<Singer> singers)
@@ -202,17 +207,25 @@ public partial class RotationWindowViewModel : BaseViewModel
         bool hasDesignated = now != null;
         PerformerHeaderText = hasDesignated ? "NOW SINGING" : "FIRST PERFORMER";
 
-        // Build NextSingers queue sequentially starting after the current singer (wrapping around)
+        // Build NextSingers queue starting with designated next singer if available,
+        // followed sequentially starting after them (wrapping around).
         NextSingers.Clear();
         if (now != null)
         {
-            int currentIndex = singers.IndexOf(now);
+            var startFrom = next ?? now;
+            if (next != null)
+            {
+                string display = string.IsNullOrEmpty(next.SongTitle) ? next.Name : $"{next.Name} (\"{next.SongTitle}\")";
+                NextSingers.Add(display);
+            }
+
+            int currentIndex = singers.IndexOf(startFrom);
             int count = singers.Count;
             for (int i = 1; i <= count && NextSingers.Count < 5; i++)
             {
                 int idx = (currentIndex + i) % count;
                 var candidate = singers[idx];
-                if (candidate != now && !candidate.IsPaused && !candidate.IsInactive)
+                if (candidate != now && candidate != next && !candidate.IsPaused && !candidate.IsInactive)
                 {
                     string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
                     NextSingers.Add(display);
@@ -228,6 +241,25 @@ public partial class RotationWindowViewModel : BaseViewModel
                 NextSingers.Add(display);
             }
         }
+
+        // POPULATE FullRotation exactly like KSRotation does!
+        FullRotation.Clear();
+        var activeRotation = singers.Where(s => !s.IsInactive && !s.IsPaused).ToList();
+        HasDesignatedCurrentSinger = singers.Any(s => s.IsCurrent && !s.IsInactive && !s.IsPaused);
+
+        var currentSingerForCrawl = singers.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused)
+                                  ?? singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+
+        if (currentSingerForCrawl != null && activeRotation.Count > 0)
+        {
+            int currentIndex = activeRotation.IndexOf(currentSingerForCrawl);
+            int count = activeRotation.Count;
+            for (int offset = 0; offset < count; offset++)
+            {
+                FullRotation.Add(activeRotation[(currentIndex + offset) % count]);
+            }
+        }
+
         OnPropertyChanged(nameof(RatingIconSymbol));
         OnPropertyChanged(nameof(IsRatingSystemEnabled));
     }
@@ -320,6 +352,24 @@ public partial class RotationWindowViewModel : BaseViewModel
                 NextSingers.Add(display);
             }
         }
+        // POPULATE FullRotation exactly like KSRotation does!
+        FullRotation.Clear();
+        var activeRotation = Rotation.Where(s => !s.IsInactive && !s.IsPaused).ToList();
+        HasDesignatedCurrentSinger = Rotation.Any(s => s.IsCurrent && !s.IsInactive && !s.IsPaused);
+
+        var currentSingerForCrawl = Rotation.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused)
+                                  ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+
+        if (currentSingerForCrawl != null && activeRotation.Count > 0)
+        {
+            int currentIndex = activeRotation.IndexOf(currentSingerForCrawl);
+            int count = activeRotation.Count;
+            for (int offset = 0; offset < count; offset++)
+            {
+                FullRotation.Add(activeRotation[(currentIndex + offset) % count]);
+            }
+        }
+
         OnPropertyChanged(nameof(RatingIconSymbol));
         OnPropertyChanged(nameof(IsRatingSystemEnabled));
     }

@@ -28,8 +28,10 @@ public partial class SettingsViewModel : BaseViewModel
     private readonly RotationWindowViewModel _rotationWindowVm;
 
     // Theme
+    public List<string> ThemeModes { get; } = ["Light", "Dark", "System"];
+
     [ObservableProperty]
-    private bool _isDarkMode = true;
+    private string _themeMode = AppSettings.ThemeMode;
 
     [ObservableProperty]
     private bool _isTestMode = AppSettings.IsTestMode;
@@ -298,6 +300,9 @@ public partial class SettingsViewModel : BaseViewModel
     private int _fillInVolume = AppSettings.FillInVolume;
 
     [ObservableProperty]
+    private int _fillInDelaySeconds = AppSettings.FillInDelaySeconds;
+
+    [ObservableProperty]
     private int _endRotationVolume = AppSettings.EndRotationVolume;
 
     // ─── Background Music Channel Tone (–20 to +20 dB) ────────────────
@@ -398,6 +403,15 @@ public partial class SettingsViewModel : BaseViewModel
         RefreshScaryokeCategories();
         RefreshVenues();
         RefreshAvailableRatingIcons();
+
+        AppSettings.ThemeModeChanged += theme =>
+        {
+            if (_themeMode != theme)
+            {
+                _themeMode = theme;
+                OnPropertyChanged(nameof(ThemeMode));
+            }
+        };
     }
 
 
@@ -789,6 +803,11 @@ public partial class SettingsViewModel : BaseViewModel
         _showFlow.SetFillInVolume(value);
     }
 
+    partial void OnFillInDelaySecondsChanged(int value)
+    {
+        AppSettings.FillInDelaySeconds = value;
+    }
+
     partial void OnEndRotationVolumeChanged(int value)
     {
         AppSettings.EndRotationVolume = value;
@@ -837,11 +856,9 @@ public partial class SettingsViewModel : BaseViewModel
         _navigation.Navigate(typeof(Views.Pages.PlaylistsPage));
     }
 
-    partial void OnIsDarkModeChanged(bool value)
+    partial void OnThemeModeChanged(string value)
     {
-        var applicationTheme = value ? ApplicationTheme.Dark : ApplicationTheme.Light;
-        ApplicationThemeManager.Apply(applicationTheme);
-        Lyracist.Themes.LyracistThemeManager.Apply(value);
+        AppSettings.ThemeMode = value;
     }
 
     partial void OnIsTestModeChanged(bool value)

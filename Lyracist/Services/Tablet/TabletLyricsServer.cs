@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
@@ -144,6 +145,9 @@ public class TabletLyricsServer(
                             _rotation.NotifyRotationReordered();
                         });
 
+                        // Rebroadcast updated rating live to other performers
+                        _ = BroadcastActiveSingerAsync();
+
                         return Results.Ok(new { success = true, score = dbSinger.Score, avgRating = dbSinger.AverageRating });
                     }
                     return Results.NotFound(new { error = "Singer not found." });
@@ -169,6 +173,40 @@ public class TabletLyricsServer(
             });
 
             _webApp.MapGet("/api/requests", () => Results.Json(_requests.GetPending()));
+
+            _webApp.MapGet("/api/logs", () =>
+            {
+                try
+                {
+                    var list = new List<string>();
+                    string startupFolder = AppDomain.CurrentDomain.BaseDirectory;
+                    string logDir = Path.Combine(startupFolder, "Logs");
+                    
+                    string appLogPath = Path.Combine(logDir, "app.log");
+                    if (File.Exists(appLogPath))
+                    {
+                        list.Add("=== App Log ===");
+                        var lines = File.ReadLines(appLogPath).TakeLast(50).ToList();
+                        list.AddRange(lines);
+                    }
+
+                    string errFileName = $"err_{DateTime.Now:MMMdd}.log";
+                    string errPath = Path.Combine(logDir, errFileName);
+                    if (File.Exists(errPath))
+                    {
+                        list.Add(string.Empty);
+                        list.Add("=== Error Log ===");
+                        var lines = File.ReadLines(errPath).TakeLast(50).ToList();
+                        list.AddRange(lines);
+                    }
+
+                    return Results.Ok(list);
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message);
+                }
+            });
 
             _webApp.MapGet("/api/queue", (RotationViewModel rotation) =>
             {
@@ -390,6 +428,24 @@ public class TabletLyricsServer(
                 .stars-container { display: flex; justify-content: center; gap: 12px; margin: 15px 0 10px; }
                 .star { font-size: 32px; color: var(--text-secondary); cursor: pointer; transition: transform 0.15s, color 0.15s; }
                 .star:hover, .star.active { color: #F5D042; transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(245, 208, 66, 0.4)); }
+
+                /* Reaction Button Styles */
+                .reaction-btn {
+                    font-size: 26px;
+                    background: #191922;
+                    border: 1px solid #2d2d3d;
+                    border-radius: 10px;
+                    padding: 8px 12px;
+                    cursor: pointer;
+                    transition: transform 0.15s, background-color 0.15s;
+                }
+                .reaction-btn:hover {
+                    transform: scale(1.15);
+                    background-color: #242432;
+                }
+                .reaction-btn:active {
+                    transform: scale(0.9);
+                }
             </style>
         </head>
         <body>
@@ -416,7 +472,7 @@ public class TabletLyricsServer(
                     
                     <!-- Performer Rating Card -->
                     <div id="rating-card" class="card" style="display: none; border-color: #F5D042; background: rgba(245, 208, 66, 0.05);">
-                        <div style="font-size: 11px; font-weight: 800; color: #F5D042; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">⭐ Rate Current Performance ⭐</div>
+                        <div id="rating-title-label" style="font-size: 11px; font-weight: 800; color: #F5D042; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">⭐ Rate Current Performance ⭐</div>
                         <div style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">How is <span id="rate-singer-name" style="color: #F5D042;">Singer</span> doing?</div>
                         <div class="stars-container">
                             <span class="star" data-value="1" onclick="submitRating(1)">☆</span>
@@ -442,12 +498,26 @@ public class TabletLyricsServer(
                         </div>
                     </div>
 
+                    <!-- Emoji Reactions Card -->
+                    <div id="reactions-card" class="card">
+                        <div id="reactions-title" style="font-size: 11px; font-weight: 800; color: var(--secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">🎉 Send Reaction to Screen 🎉</div>
+                        <div style="display: flex; justify-content: space-around; gap: 8px;">
+                            <button class="reaction-btn" onclick="sendReaction('👏')">👏</button>
+                            <button class="reaction-btn" onclick="sendReaction('🔥')">🔥</button>
+                            <button class="reaction-btn" onclick="sendReaction('❤️')">❤️</button>
+                            <button class="reaction-btn" onclick="sendReaction('🙌')">🙌</button>
+                            <button class="reaction-btn" onclick="sendReaction('🎉')">🎉</button>
+                            <button class="reaction-btn" onclick="sendReaction('👑')">👑</button>
+                        </div>
+                    </div>
+
                     <!-- Tab Selectors -->
                     <div class="tabs">
                         <button id="tab-queue" class="tab-btn active" onclick="switchTab('queue')">Queue Status</button>
                         <button id="tab-catalog" class="tab-btn" onclick="switchTab('catalog')">Search Catalog</button>
                         <button id="tab-custom" class="tab-btn" onclick="switchTab('custom')">Custom Link</button>
                         <button id="tab-scaryoke" class="tab-btn" onclick="switchTab('scaryoke')">Scaryoke</button>
+                        <button id="tab-logs" class="tab-btn" onclick="switchTab('logs')">Logs</button>
                     </div>
 
                     <!-- Queue Tab Content -->
@@ -523,6 +593,17 @@ public class TabletLyricsServer(
                         
                         <div id="scaryoke-result" style="margin-top: 16px; font-size: 15px; font-weight: bold; color: var(--partytyme); height: 24px;"></div>
                     </div>
+
+                    <!-- Logs Tab Content -->
+                    <div id="content-logs" class="tab-content card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div style="font-size: 14px; font-weight: 700; color: var(--secondary);">System Log Entries</div>
+                            <button class="btn-primary" onclick="refreshLogs()" style="padding: 6px 12px; font-size: 11px; width: auto; box-shadow: none;">Refresh</button>
+                        </div>
+                        <div id="logs-container" style="background-color: #0b0b0e; border: 1px solid #22222f; border-radius: 8px; padding: 12px; height: 350px; overflow-y: auto; font-family: monospace; font-size: 11px; white-space: pre-wrap; color: #a0a0a8; text-align: left;">
+                            Loading logs...
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -571,7 +652,12 @@ public class TabletLyricsServer(
                 let searchTimeout = null;
 
                 window.onload = () => {
-                    const savedName = localStorage.getItem("singerName");
+                    let savedName = null;
+                    try {
+                        savedName = localStorage.getItem("singerName");
+                    } catch (e) {
+                        console.warn("localStorage not available", e);
+                    }
                     if (savedName) {
                         singerName = savedName;
                         showDashboard();
@@ -585,7 +671,11 @@ public class TabletLyricsServer(
                         return;
                     }
                     singerName = input;
-                    localStorage.setItem("singerName", singerName);
+                    try {
+                        localStorage.setItem("singerName", singerName);
+                    } catch (e) {
+                        console.warn("localStorage not available", e);
+                    }
                     showDashboard();
                 }
 
@@ -607,12 +697,22 @@ public class TabletLyricsServer(
                         });
 
                         connection.on("ActiveSingerUpdated", (active) => {
-                            document.getElementById("now-name").textContent = active.name;
+                            const showRating = active.isRatingSystemEnabled && active.avgRating > 0;
+                            const symbol = active.ratingSymbol || "⭐";
+                            const ratingSuffix = showRating ? ` (${symbol} ${active.avgRating})` : "";
+                            
+                            document.getElementById("now-name").textContent = active.name + ratingSuffix;
                             document.getElementById("now-song").textContent = active.song;
                             
                             const rateCard = document.getElementById("rating-card");
                             if (active.name && active.name !== "None" && active.name.toLowerCase() !== singerName.toLowerCase()) {
                                 document.getElementById("rate-singer-name").textContent = active.name;
+                                
+                                const titleLabel = document.getElementById("rating-title-label");
+                                if (titleLabel) {
+                                    titleLabel.textContent = `${symbol} Rate Current Performance ${symbol}`;
+                                }
+                                
                                 rateCard.style.display = "block";
                                 // Reset stars
                                 document.querySelectorAll(".star").forEach(s => {
@@ -682,6 +782,26 @@ public class TabletLyricsServer(
                         document.getElementById("catalog-search").focus();
                     } else if (tabId === 'scaryoke') {
                         loadScaryoke();
+                    } else if (tabId === 'logs') {
+                        refreshLogs();
+                    }
+                }
+
+                async function refreshLogs() {
+                    const container = document.getElementById("logs-container");
+                    if (!container) return;
+                    container.textContent = "Loading logs...";
+                    try {
+                        const res = await fetch("/api/logs");
+                        if (res.ok) {
+                            const logs = await res.json();
+                            container.textContent = logs.join("\n");
+                            container.scrollTop = container.scrollHeight;
+                        } else {
+                            container.textContent = "Failed to load logs.";
+                        }
+                    } catch (err) {
+                        container.textContent = "Error: " + err.message;
                     }
                 }
 
@@ -903,54 +1023,67 @@ public class TabletLyricsServer(
                         msgDiv.style.color = "var(--accent)";
                         msgDiv.textContent = "Network error. Try again.";
                     }
+                }
 
-                    async function submitRating(value) {
-                        const activeName = document.getElementById("now-name").textContent;
-                        if (!activeName || activeName === "None") return;
+                function sendReaction(emoji) {
+                    if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                        connection.invoke("SendReaction", emoji).catch(err => console.error(err));
+                    }
+                }
 
-                        // Highlight stars
-                        for (let i = 1; i <= 5; i++) {
-                            const star = document.querySelector(`.star[data-value="${i}"]`);
-                            if (star) {
-                                if (i <= value) {
-                                    star.textContent = "★";
-                                    star.classList.add("active");
-                                } else {
-                                    star.textContent = "☆";
-                                    star.classList.remove("active");
-                                }
-                            }
-                        }
+                async function submitRating(value) {
+                    let activeName = document.getElementById("now-name").textContent;
+                    if (!activeName || activeName === "None") return;
+                    
+                    // Strip the rating suffix if present: e.g. "Alice Johnson (⭐ 4.8)" -> "Alice Johnson"
+                    const parenIndex = activeName.lastIndexOf(" (");
+                    if (parenIndex !== -1) {
+                        activeName = activeName.substring(0, parenIndex).trim();
+                    }
 
-                        const statusDiv = document.getElementById("rating-status");
-                        statusDiv.style.color = "var(--text-secondary)";
-                        statusDiv.textContent = "Submitting rating...";
-
-                        try {
-                            const res = await fetch("/api/rate", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    singerName: activeName,
-                                    rating: value
-                                })
-                            });
-
-                            if (res.ok) {
-                                statusDiv.style.color = "var(--success)";
-                                statusDiv.textContent = "Rating submitted successfully! ⭐";
-                                setTimeout(() => {
-                                    document.getElementById("rating-card").style.display = "none";
-                                }, 1500);
+                    // Highlight stars
+                    for (let i = 1; i <= 5; i++) {
+                        const star = document.querySelector(`.star[data-value="${i}"]`);
+                        if (star) {
+                            if (i <= value) {
+                                star.textContent = "★";
+                                star.classList.add("active");
                             } else {
-                                statusDiv.style.color = "var(--accent)";
-                                statusDiv.textContent = "Failed to submit rating.";
+                                star.textContent = "☆";
+                                star.classList.remove("active");
                             }
-                        } catch (err) {
-                            statusDiv.style.color = "var(--accent)";
-                            statusDiv.textContent = "Network error. Try again.";
                         }
                     }
+
+                    const statusDiv = document.getElementById("rating-status");
+                    statusDiv.style.color = "var(--text-secondary)";
+                    statusDiv.textContent = "Submitting rating...";
+
+                    try {
+                        const res = await fetch("/api/rate", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                singerName: activeName,
+                                rating: value
+                            })
+                        });
+
+                        if (res.ok) {
+                            statusDiv.style.color = "var(--success)";
+                            statusDiv.textContent = "Rating submitted successfully! ⭐";
+                            setTimeout(() => {
+                                document.getElementById("rating-card").style.display = "none";
+                            }, 1500);
+                        } else {
+                            statusDiv.style.color = "var(--accent)";
+                            statusDiv.textContent = "Failed to submit rating.";
+                        }
+                    } catch (err) {
+                        statusDiv.style.color = "var(--accent)";
+                        statusDiv.textContent = "Network error. Try again.";
+                    }
+                }
                     // --- SCARYOKE WHEEL CLIENT IMPLEMENTATION ---
                     let categories = [];
                     let currentAngle = 0;
@@ -1062,7 +1195,6 @@ public class TabletLyricsServer(
                             document.getElementById("scaryoke-result").textContent = "Network error.";
                         }
                     }
-                }
             </script>
         </body>
         </html>
@@ -1116,11 +1248,21 @@ public class TabletLyricsServer(
         try
         {
             var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
+            double avgRating = 0.0;
+            var activeSinger = _rotation.Rotation.FirstOrDefault(s => s.Name.Equals(_karaoke.NowSingingName, StringComparison.OrdinalIgnoreCase));
+            if (activeSinger != null)
+            {
+                avgRating = activeSinger.AverageRating;
+            }
+
             await hubContext.Clients.All.SendAsync("ActiveSingerUpdated", new
             {
                 name = _karaoke.NowSingingName,
                 song = _karaoke.NowSingingSong,
-                isPlaying = _karaoke.IsPlaying
+                isPlaying = _karaoke.IsPlaying,
+                avgRating = avgRating,
+                isRatingSystemEnabled = Lyracist.Core.Helpers.AppSettings.IsRatingSystemEnabled,
+                ratingSymbol = Lyracist.Core.Helpers.AppSettings.ActiveRatingIconSymbol
             });
         }
         catch (Exception ex)

@@ -10,9 +10,59 @@ namespace Lyracist.ViewModels;
 
 public sealed record MonitorOption(int Index, string Label);
 
-public partial class LyricsWindowViewModel(IDisplayService display) : ObservableObject
+public partial class LyricsWindowViewModel : ObservableObject
 {
-    private readonly IDisplayService _display = display;
+    private readonly IDisplayService _display;
+
+    public LyricsWindowViewModel(IDisplayService display)
+    {
+        _display = display;
+        IsMirrored = display.GetPreferences().IsLyricsMirrored;
+        RefreshQrCode();
+    }
+
+    [ObservableProperty]
+    private System.Windows.Media.Imaging.BitmapImage? _qrCodeImage;
+
+    [ObservableProperty]
+    private string _joinUrl = string.Empty;
+
+    public void RefreshQrCode()
+    {
+        try
+        {
+            string ip = Lyracist.Core.Helpers.AppSettings.GetActiveIPAddress();
+            JoinUrl = $"http://{ip}:{Lyracist.Core.Helpers.AppSettings.TabletPort}";
+
+            using var qrGenerator = new QRCoder.QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(JoinUrl, QRCoder.QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
+            byte[] qrCodeAsPngByteArr = qrCode.GetGraphic(20);
+            QrCodeImage = LoadImage(qrCodeAsPngByteArr);
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to generate QR Code: {ex.Message}");
+        }
+    }
+
+    private static System.Windows.Media.Imaging.BitmapImage? LoadImage(byte[] imageData)
+    {
+        if (imageData == null || imageData.Length == 0) return null;
+        var image = new System.Windows.Media.Imaging.BitmapImage();
+        using (var mem = new System.IO.MemoryStream(imageData))
+        {
+            mem.Position = 0;
+            image.BeginInit();
+            image.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat;
+            image.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+            image.UriSource = null;
+            image.StreamSource = mem;
+            image.EndInit();
+        }
+        image.Freeze();
+        return image;
+    }
 
     [ObservableProperty]
     private ImageSource? _frame;
@@ -24,7 +74,7 @@ public partial class LyricsWindowViewModel(IDisplayService display) : Observable
     private bool _isFallbackVisible = true;
 
     [ObservableProperty]
-    private bool _isMirrored = display.GetPreferences().IsLyricsMirrored;
+    private bool _isMirrored;
 
     [ObservableProperty]
     private string _overlayText = string.Empty;
