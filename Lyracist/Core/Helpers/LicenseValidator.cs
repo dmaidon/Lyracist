@@ -1,9 +1,10 @@
+using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace LyracistKeyGen
+namespace Lyracist.Core.Helpers
 {
-    public static class LicenseManager
+    public static class LicenseValidator
     {
         private const string SecretSalt = "PrudenceGodBeWithUsSimplicitySmith2026";
         private const string Base32Chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Omit easily-confused: 0, 1, I, O
@@ -16,7 +17,7 @@ namespace LyracistKeyGen
             string fName = (firstName ?? "").Trim().ToLower();
             string lName = (lastName ?? "").Trim().ToLower();
             string sName = (stageName ?? "").Trim().ToLower();
-            if (string.IsNullOrEmpty(sName)) sName = "none";
+            if (string.IsNullOrEmpty(sName) || sName.Equals("none", StringComparison.OrdinalIgnoreCase)) sName = "none";
             string mail = (email ?? "").Trim().ToLower();
 
             string rawInput = $"{fName}:{lName}:{sName}:{mail}:{SecretSalt}";

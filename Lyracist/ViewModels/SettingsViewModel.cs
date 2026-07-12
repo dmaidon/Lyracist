@@ -129,6 +129,49 @@ public partial class SettingsViewModel : BaseViewModel
         }
     }
 
+    // Registration settings
+    [ObservableProperty]
+    private string _regFirstName = AppSettings.RegFirstName;
+
+    [ObservableProperty]
+    private string _regLastName = AppSettings.RegLastName;
+
+    [ObservableProperty]
+    private string _regStageName = AppSettings.RegStageName;
+
+    [ObservableProperty]
+    private string _regEmail = AppSettings.RegEmail;
+
+    [ObservableProperty]
+    private string _regLicenseKey = AppSettings.RegLicenseKey;
+
+    [ObservableProperty]
+    private bool _isRegistered = AppSettings.IsRegistered;
+
+    [ObservableProperty]
+    private bool? _registrationStatus = null;
+
+    partial void OnRegFirstNameChanged(string value) { AppSettings.RegFirstName = value; ValidateRegistration(); }
+    partial void OnRegLastNameChanged(string value) { AppSettings.RegLastName = value; ValidateRegistration(); }
+    partial void OnRegStageNameChanged(string value) { AppSettings.RegStageName = value; ValidateRegistration(); }
+    partial void OnRegEmailChanged(string value) { AppSettings.RegEmail = value; ValidateRegistration(); }
+    partial void OnRegLicenseKeyChanged(string value) { AppSettings.RegLicenseKey = value; ValidateRegistration(); }
+
+    private void ValidateRegistration()
+    {
+        if (string.IsNullOrWhiteSpace(RegLicenseKey))
+        {
+            RegistrationStatus = null;
+            IsRegistered = false;
+        }
+        else
+        {
+            bool isValid = LicenseValidator.ValidateKey(RegFirstName, RegLastName, RegStageName, RegEmail, RegLicenseKey);
+            RegistrationStatus = isValid;
+            IsRegistered = isValid;
+        }
+    }
+
     // Tablet Server
     [ObservableProperty]
     private int _tabletPort = AppSettings.TabletPort;
@@ -419,6 +462,8 @@ public partial class SettingsViewModel : BaseViewModel
                 OnPropertyChanged(nameof(ThemeMode));
             }
         };
+
+        ValidateRegistration();
     }
 
 

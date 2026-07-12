@@ -207,9 +207,9 @@
                                             <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddVenueCommand}" Appearance="Primary" Height="26" FontSize="11" />
                                         </Grid>
                                         <ui:Button Content="Remove Selected Venue" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveVenueCommand}" Appearance="Danger" HorizontalAlignment="Stretch" />
-                                        
+
                                         <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-                                        
+
                                         <TextBlock Text="Venue Graphics (Slideshow)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                         <ListBox ItemsSource="{Binding SelectedVenueGraphics}" MaxHeight="100" Height="100" Margin="0,0,0,8" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                             <ListBox.ItemTemplate>
@@ -220,11 +220,11 @@
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Text="{Binding}" FontSize="10" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding}" />
-                                                        <ui:Button Grid.Column="1" Content="✕" 
-                                                                   Command="{Binding DataContext.RemoveVenueGraphicCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                                                        <ui:Button Grid.Column="1" Content="✕"
+                                                                   Command="{Binding DataContext.RemoveVenueGraphicCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                                    CommandParameter="{Binding}"
-                                                                   Appearance="Transparent" 
-                                                                   Padding="4,2" 
+                                                                   Appearance="Transparent"
+                                                                   Padding="4,2"
                                                                    FontSize="10" />
                                                     </Grid>
                                                 </DataTemplate>
@@ -238,7 +238,7 @@
                                 <GroupBox Header="Auto-Advance Countdown" Style="{StaticResource SettingsGroupBoxStyle}">
                                     <StackPanel>
                                         <CheckBox Content="Enable Auto-Advance Countdown" IsChecked="{Binding EnableAutoAdvance, Mode=TwoWay}" Margin="0,0,0,12" />
-                                        
+
                                         <TextBlock Text="Countdown Duration" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -362,7 +362,7 @@
                                         <ComboBox ItemsSource="{Binding BufferSizes}" SelectedItem="{Binding SelectedBufferSize, Mode=TwoWay}" Margin="0,0,0,12" />
                                         <CheckBox Content="Enable Vocal Noise Gate filter" IsChecked="{Binding EnableNoiseGate, Mode=TwoWay}" Margin="0,0,0,12" />
                                         <CheckBox Content="Enable Reverb feedback on singer vocals" IsChecked="{Binding EnableReverb, Mode=TwoWay}" Margin="0,0,0,12" />
-                                        
+
                                         <TextBlock Text="Fill-In Music Delay (Seconds)" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,4" />
                                         <Grid Margin="0,0,0,4">
                                             <Grid.ColumnDefinitions>
@@ -548,6 +548,100 @@
                                 </GroupBox>
                             </StackPanel>
                         </ScrollViewer>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Registration" FontSize="12">
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.5*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Form Inputs -->
+                        <Border Grid.Column="0" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,16,0">
+                            <StackPanel>
+                                <TextBlock Text="Product Registration" FontSize="16" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,16"/>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="First Name" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                        <ui:TextBox Text="{Binding RegFirstName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="First Name"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <TextBlock Text="Last Name" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                        <ui:TextBox Text="{Binding RegLastName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Last Name"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Text="Stage Name (or 'None')" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                <ui:TextBox Text="{Binding RegStageName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Stage Name" Margin="0,0,0,12"/>
+
+                                <TextBlock Text="Email Address" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                <ui:TextBox Text="{Binding RegEmail, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Email Address" Margin="0,0,0,12"/>
+
+                                <TextBlock Text="Registration Serial Key" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                <ui:TextBox Text="{Binding RegLicenseKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="XXXXX-XXXXX-XXXXX" Margin="0,0,0,16"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Activation Status Box -->
+                        <Border Grid.Column="1" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="24" Height="260" VerticalAlignment="Top">
+                            <Grid>
+                                <!-- Default / Empty State -->
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RegistrationStatus}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <ui:SymbolIcon Symbol="Key24" FontSize="48" Foreground="Gray" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                    <TextBlock Text="Awaiting Registration Key" FontSize="14" FontWeight="SemiBold" Foreground="Gray" HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Valid Activation State -->
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RegistrationStatus}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <ui:SymbolIcon Symbol="CheckmarkCircle24" FontSize="64" Foreground="LimeGreen" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                    <TextBlock Text="Lyracist Pro Activated!" FontSize="16" FontWeight="Bold" Foreground="LimeGreen" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Thank you for registering Lyracist." FontSize="12" Foreground="#FFAAAAAA" HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Invalid Activation State -->
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RegistrationStatus}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <ui:SymbolIcon Symbol="DismissCircle24" FontSize="64" Foreground="Crimson" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                    <TextBlock Text="Invalid Registration Code" FontSize="16" FontWeight="Bold" Foreground="Crimson" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Please double check your details." FontSize="12" Foreground="#FFAAAAAA" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </TabItem>
             </TabControl>

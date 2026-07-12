@@ -595,10 +595,58 @@ public static class AppSettings
         }
     }
 
+    // ─── Registration Settings ──────────────────────────────────────────────
+
+    public static string RegFirstName
+    {
+        get => _data.RegFirstName;
+        set { _data.RegFirstName = value ?? string.Empty; Save(); }
+    }
+
+    public static string RegLastName
+    {
+        get => _data.RegLastName;
+        set { _data.RegLastName = value ?? string.Empty; Save(); }
+    }
+
+    public static string RegStageName
+    {
+        get => _data.RegStageName;
+        set { _data.RegStageName = value ?? string.Empty; Save(); }
+    }
+
+    public static string RegEmail
+    {
+        get => _data.RegEmail;
+        set { _data.RegEmail = value ?? string.Empty; Save(); }
+    }
+
+    public static string RegLicenseKey
+    {
+        get => _data.RegLicenseKey;
+        set { _data.RegLicenseKey = value ?? string.Empty; Save(); }
+    }
+
+    public static bool IsRegistered
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_data.RegLicenseKey)) return false;
+            return LicenseValidator.ValidateKey(_data.RegFirstName, _data.RegLastName, _data.RegStageName, _data.RegEmail, _data.RegLicenseKey);
+        }
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
     {
+        // Registration data
+        public string RegFirstName { get; set; } = string.Empty;
+        public string RegLastName { get; set; } = string.Empty;
+        public string RegStageName { get; set; } = string.Empty;
+        public string RegEmail { get; set; } = string.Empty;
+        public string RegLicenseKey { get; set; } = string.Empty;
+
         public string ThemeMode { get; set; } = "Dark";
         public bool ShowSplashOnStartup { get; set; } = true;
         public bool EnableHardwareAcceleration { get; set; } = true;
