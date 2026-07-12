@@ -6,7 +6,27 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Sonya-Swarm-Microphone.ico</ApplicationIcon>
+    <BaseOutputPath>C:\VB26\Release\LyracistKeyGen</BaseOutputPath>
+    <Title>Lyracist Key Generator</Title>
+    <Authors>Dennis Maidon</Authors>
+    <Company>PAROLE Software</Company>
+    <PackageIcon>Firefly_change name at top of logo from -Lyracist- to -Lyracist Pro- 753182.png</PackageIcon>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <AssemblyVersion>26.7.12.1</AssemblyVersion>
+    <FileVersion>26.7.12.1</FileVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Sonya-Swarm-Microphone.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\Users\dmaid\Downloads\Firefly_change name at top of logo from -Lyracist- to -Lyracist Pro- 753182.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="WPF-UI" Version="4.3.0" />
