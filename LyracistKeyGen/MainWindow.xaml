@@ -1,0 +1,238 @@
+<Window x:Class="LyracistKeyGen.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="Lyracist Pro Key Generator" Height="700" Width="950"
+        WindowStartupLocation="CenterScreen"
+        Background="#FF0B0B11"
+        Foreground="White"
+        FontFamily="Segoe UI Variable">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title / Header -->
+        <Border Grid.Row="0" Padding="20,16" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="🔑 LYRACIST LICENSE MANAGER" FontSize="20" FontWeight="ExtraBold" Foreground="#FF8E53" />
+                    <TextBlock Text="Generate, store, and email registration codes for Lyracist Pro" FontSize="12" Foreground="#FFAAAAAA" Margin="0,4,0,0" />
+                </StackPanel>
+                <ui:SymbolIcon Grid.Column="1" Symbol="Key24" FontSize="36" Foreground="#FF8E53" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <TabControl Grid.Row="1" Margin="16" Background="Transparent" BorderThickness="0">
+            <TabControl.Resources>
+                <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="Padding" Value="16,8"/>
+                </Style>
+            </TabControl.Resources>
+
+            <!-- Tab 1: Generate -->
+            <TabItem Header="Generate License">
+                <Grid Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Form Inputs -->
+                    <Border Grid.Column="0" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,16,0">
+                        <StackPanel>
+                            <TextBlock Text="Customer Information" FontSize="16" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,16"/>
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="First Name" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                    <ui:TextBox x:Name="TxtFirstName" PlaceholderText="e.g. John" TextChanged="InputFields_TextChanged"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="Last Name" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                    <ui:TextBox x:Name="TxtLastName" PlaceholderText="e.g. Doe" TextChanged="InputFields_TextChanged"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="Stage Name (or 'None')" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                            <ui:TextBox x:Name="TxtStageName" PlaceholderText="e.g. DJ Johnny" Text="None" Margin="0,0,0,12" TextChanged="InputFields_TextChanged"/>
+
+                            <TextBlock Text="Email Address" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                            <ui:TextBox x:Name="TxtEmail" PlaceholderText="e.g. john.doe@example.com" Margin="0,0,0,20" TextChanged="InputFields_TextChanged"/>
+
+                            <CheckBox x:Name="ChkAutoSendEmail" Content="Email generated license key immediately to client" IsChecked="True" FontSize="13" Foreground="#FFAAAAAA" Margin="0,0,0,24"/>
+
+                            <ui:Button x:Name="BtnGenerate" Content="Generate Registration Key" Appearance="Primary" Height="40" FontSize="14" FontWeight="Bold" Background="#FF8E53" Click="BtnGenerate_Click"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Key Output / Action panel -->
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Key display -->
+                        <Border Grid.Row="0" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="License Key Output" FontSize="16" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,16"/>
+
+                                <Border Background="#FF09090F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,20">
+                                    <TextBox x:Name="TxtGeneratedKey" Text="XXXXX-XXXXX-XXXXX" FontSize="20" FontWeight="ExtraBold" Foreground="#FFF5D042" HorizontalAlignment="Center" VerticalAlignment="Center" IsReadOnly="True" Background="Transparent" BorderThickness="0" TextAlignment="Center"/>
+                                </Border>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ui:Button Grid.Column="0" Content="Copy Key" Icon="{ui:SymbolIcon Copy24}" Margin="0,0,6,0" Click="BtnCopyKey_Click" HorizontalAlignment="Stretch"/>
+                                    <ui:Button Grid.Column="1" x:Name="BtnEmailKey" Content="Email Key" Icon="{ui:SymbolIcon Mail24}" Margin="6,0,0,0" Click="BtnEmailKey_Click" HorizontalAlignment="Stretch" IsEnabled="False"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Instructions card -->
+                        <Border Grid.Row="1" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="ℹ️ How It Works" FontSize="14" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,10"/>
+                                <TextBlock Text="The key is cryptographically signed using a secure SHA-256 validation salt based on the customer's input parameters." TextWrapping="Wrap" FontSize="12" Foreground="#FFAAAAAA" Margin="0,0,0,10"/>
+                                <TextBlock Text="During registration inside Lyracist, the software computes the same checksum. If the generated key matches the checksum of their registration details, it activates without needing internet access!" TextWrapping="Wrap" FontSize="12" Foreground="#FFAAAAAA"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 2: History -->
+            <TabItem Header="Registration History" Selector.Selected="TabHistory_Selected">
+                <Grid Margin="0,16,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="List of generated keys stored in database" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#FFAAAAAA"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <ui:Button Content="Refresh" Icon="{ui:SymbolIcon Refresh24}" Click="BtnRefreshHistory_Click" Margin="0,0,8,0"/>
+                            <ui:Button x:Name="BtnDeleteHistoryItem" Content="Copy Selected" Icon="{ui:SymbolIcon Copy24}" Click="BtnCopySelectedHistory_Click"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <DataGrid Grid.Row="1" x:Name="GridHistory" AutoGenerateColumns="False" IsReadOnly="True"
+                              Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" RowBackground="#FF13131F" AlternatingRowBackground="#FF181827"
+                              Foreground="White" GridLinesVisibility="Horizontal" HeadersVisibility="Column" SelectionMode="Single"
+                              ColumnHeaderHeight="32" RowHeight="32">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="#FF1E1E2F"/>
+                                <Setter Property="Foreground" Value="#FF8E53"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Padding" Value="10,0"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                            </Style>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Padding" Value="10,0"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#33FF8E53"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                            <DataGridTextColumn Header="First Name" Binding="{Binding FirstName}" Width="120"/>
+                            <DataGridTextColumn Header="Last Name" Binding="{Binding LastName}" Width="120"/>
+                            <DataGridTextColumn Header="Stage Name" Binding="{Binding StageName}" Width="120"/>
+                            <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180"/>
+                            <DataGridTextColumn Header="License Key" Binding="{Binding LicenseKey}" Width="180"/>
+                            <DataGridTextColumn Header="Created Date" Binding="{Binding CreatedAt, StringFormat=\{0:yyyy-MM-dd HH:mm\}}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 3: SMTP Settings -->
+            <TabItem Header="SMTP Email Configuration">
+                <Grid Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Settings Form -->
+                    <Border Grid.Column="0" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,16,0">
+                        <StackPanel>
+                            <TextBlock Text="Mail Server Configuration" FontSize="16" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,16"/>
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="SMTP Host Server" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                    <ui:TextBox x:Name="TxtSmtpHost" PlaceholderText="e.g. smtp.gmail.com"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="Port" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                    <ui:TextBox x:Name="TxtSmtpPort" PlaceholderText="587" Text="587"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="Sender Email (From Address)" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                            <ui:TextBox x:Name="TxtFromAddress" PlaceholderText="e.g. noreply@mycompany.com" Margin="0,0,0,12"/>
+
+                            <TextBlock Text="SMTP Username" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                            <ui:TextBox x:Name="TxtSmtpUser" PlaceholderText="e.g. your_email@gmail.com" Margin="0,0,0,12"/>
+
+                            <TextBlock Text="SMTP Password" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                            <PasswordBox x:Name="TxtSmtpPassword" Margin="0,0,0,12" Height="36" Background="#FF09090F" BorderBrush="#FF212135" Foreground="White" BorderThickness="1" Padding="6"/>
+
+                            <CheckBox x:Name="ChkEnableSsl" Content="Enable SSL/TLS security" IsChecked="True" FontSize="13" Foreground="#FFAAAAAA" Margin="0,0,0,24"/>
+
+                            <ui:Button Content="Save Mail Settings" Appearance="Primary" Height="40" FontSize="14" FontWeight="Bold" Background="#FF8E53" Click="BtnSaveSmtp_Click"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Test Smtp Connection panel -->
+                    <Border Grid.Column="1" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="24" Height="320" VerticalAlignment="Top">
+                        <StackPanel>
+                            <TextBlock Text="Test Email Connection" FontSize="16" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,16"/>
+                            <TextBlock Text="Send a test message to verify the SMTP connection parameters are working correctly." TextWrapping="Wrap" FontSize="12" Foreground="#FFAAAAAA" Margin="0,0,0,20"/>
+
+                            <TextBlock Text="Test Recipient Email" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                            <ui:TextBox x:Name="TxtTestRecipient" PlaceholderText="e.g. test@recipient.com" Margin="0,0,0,20"/>
+
+                            <ui:Button Content="Send Test Email" Appearance="Secondary" Height="40" FontSize="13" FontWeight="Bold" Click="BtnTestSmtp_Click"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
