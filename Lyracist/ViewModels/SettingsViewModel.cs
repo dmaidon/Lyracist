@@ -68,6 +68,7 @@ public partial class SettingsViewModel : BaseViewModel
 
     // Venues & DJ
     public ObservableCollection<string> Venues { get; } = [];
+    public ObservableCollection<string> SelectedVenueGraphics { get; } = [];
 
     [ObservableProperty]
     private string _djName = AppSettings.DjName;
@@ -104,6 +105,12 @@ public partial class SettingsViewModel : BaseViewModel
 
     [ObservableProperty]
     private Lyracist.Models.SpaceshipSnippet? _selectedSpaceshipSnippet;
+
+    [ObservableProperty]
+    private bool _enableAutoAdvance = AppSettings.EnableAutoAdvance;
+
+    [ObservableProperty]
+    private int _autoAdvanceCountdownSeconds = AppSettings.AutoAdvanceCountdownSeconds;
 
     public bool IsStarWarsCrawlSelected => SelectedProjectionView == "Star Wars Crawl";
     public bool IsCustomCrawlBannerSelected => SelectedCrawlBannerType == "Custom";
@@ -440,6 +447,7 @@ public partial class SettingsViewModel : BaseViewModel
             Venues.Add(v);
         }
         SelectedVenue = AppSettings.SelectedVenue;
+        RefreshSelectedVenueGraphics();
     }
 
     partial void OnDjNameChanged(string value)
@@ -452,6 +460,28 @@ public partial class SettingsViewModel : BaseViewModel
         if (!string.IsNullOrEmpty(value))
         {
             AppSettings.SelectedVenue = value;
+            RefreshSelectedVenueGraphics();
+
+            var lyricsVm = App.AppHost.Services.GetService(typeof(LyricsWindowViewModel)) as LyricsWindowViewModel;
+            lyricsVm?.StartSlideshow();
+        }
+        else
+        {
+            SelectedVenueGraphics.Clear();
+            var lyricsVm = App.AppHost.Services.GetService(typeof(LyricsWindowViewModel)) as LyricsWindowViewModel;
+            lyricsVm?.StopSlideshow();
+        }
+    }
+
+    private void RefreshSelectedVenueGraphics()
+    {
+        SelectedVenueGraphics.Clear();
+        if (!string.IsNullOrEmpty(SelectedVenue))
+        {
+            foreach (var img in AppSettings.GetVenueGraphics(SelectedVenue))
+            {
+                SelectedVenueGraphics.Add(img);
+            }
         }
     }
 
@@ -473,6 +503,8 @@ public partial class SettingsViewModel : BaseViewModel
     partial void OnCrawlSpaceshipFontSizeChanged(int value) => AppSettings.CrawlSpaceshipFontSize = value;
     partial void OnCrawlSpaceshipDurationChanged(int value) => AppSettings.CrawlSpaceshipDuration = value;
     partial void OnCrawlSpaceshipFrequencyChanged(int value) => AppSettings.CrawlSpaceshipFrequency = value;
+    partial void OnEnableAutoAdvanceChanged(bool value) => AppSettings.EnableAutoAdvance = value;
+    partial void OnAutoAdvanceCountdownSecondsChanged(int value) => AppSettings.AutoAdvanceCountdownSeconds = value;
 
     [RelayCommand]
     private void AddSpaceshipSnippet()
@@ -537,6 +569,40 @@ public partial class SettingsViewModel : BaseViewModel
         AppSettings.RemoveVenue(SelectedVenue);
         SelectedVenue = null;
         RefreshVenues();
+    }
+
+    [RelayCommand]
+    private void AddVenueGraphic()
+    {
+        if (string.IsNullOrEmpty(SelectedVenue)) return;
+
+        var openFileDialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Images (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp",
+            Multiselect = false,
+            Title = "Select Graphic for Venue"
+        };
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            AppSettings.AddVenueGraphic(SelectedVenue, openFileDialog.FileName);
+            RefreshSelectedVenueGraphics();
+
+            var lyricsVm = App.AppHost.Services.GetService(typeof(LyricsWindowViewModel)) as LyricsWindowViewModel;
+            lyricsVm?.StartSlideshow();
+        }
+    }
+
+    [RelayCommand]
+    private void RemoveVenueGraphic(string? path)
+    {
+        if (string.IsNullOrEmpty(SelectedVenue) || string.IsNullOrEmpty(path)) return;
+
+        AppSettings.RemoveVenueGraphic(SelectedVenue, path);
+        RefreshSelectedVenueGraphics();
+
+        var lyricsVm = App.AppHost.Services.GetService(typeof(LyricsWindowViewModel)) as LyricsWindowViewModel;
+        lyricsVm?.StartSlideshow();
     }
 
     [RelayCommand]

@@ -13,9 +13,14 @@
         </LinearGradientBrush>
         <DataTemplate x:Key="RequestItemTemplate">
             <StackPanel Margin="0,4">
-                <TextBlock FontSize="14" FontWeight="SemiBold">
-                    <Run Text="{Binding Title}"/><Run Text=" — "/><Run Text="{Binding Artist}"/>
-                </TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <Border Background="{DynamicResource UIAccentBrush}" CornerRadius="4" Padding="6,1" Margin="0,0,6,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding RequestType}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                    </Border>
+                    <TextBlock FontSize="14" FontWeight="SemiBold">
+                        <Run Text="{Binding Title}"/><Run Text=" — "/><Run Text="{Binding Artist}"/>
+                    </TextBlock>
+                </StackPanel>
                 <TextBlock FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}">
                     <Run Text="{Binding SingerName}"/><Run Text=" · "/><Run Text="{Binding Source}"/><Run Text=" · "/><Run Text="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}"/>
                 </TextBlock>
@@ -27,7 +32,7 @@
                     <Run Text="{Binding Title}"/><Run Text=" — "/><Run Text="{Binding Artist}"/>
                 </TextBlock>
                 <TextBlock FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}">
-                    <Run Text="{Binding SingerName}"/><Run Text=" · "/><Run Text="{Binding Status}"/><Run Text=" · "/><Run Text="{Binding Timestamp, StringFormat='{}{0:MMM d HH:mm}'}"/>
+                    <Run Text="{Binding SingerName}"/><Run Text=" · "/><Run Text="{Binding RequestType}"/><Run Text=" · "/><Run Text="{Binding Status}"/><Run Text=" · "/><Run Text="{Binding Timestamp, StringFormat='{}{0:MMM d HH:mm}'}"/>
                 </TextBlock>
             </StackPanel>
         </DataTemplate>

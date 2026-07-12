@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.7.10.185</AssemblyVersion>
-    <FileVersion>26.7.10.185</FileVersion>
+    <AssemblyVersion>26.7.12.207</AssemblyVersion>
+    <FileVersion>26.7.12.207</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <Authors>Dennis Maidon</Authors>
@@ -46,6 +46,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Emoji.Wpf" Version="0.3.4" />
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
     <PackageReference Include="LibVLCSharp" Version="3.10.0" />
     <PackageReference Include="QRCoder" Version="1.8.0" />

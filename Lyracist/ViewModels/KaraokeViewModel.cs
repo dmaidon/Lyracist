@@ -13,6 +13,7 @@ using Lyracist.Services.Integration;
 using Lyracist.Services.Database;
 using Lyracist.Models;
 using Microsoft.EntityFrameworkCore;
+using Wpf.Ui;
 
 namespace Lyracist.ViewModels;
 
@@ -24,6 +25,8 @@ public partial class KaraokeViewModel : BaseViewModel
     private readonly IShowFlowService _showFlow;
     private readonly IOccasionService _occasions;
     private readonly IPartyTymeService _partyTymeService;
+    private readonly IRequestService _requests;
+    private readonly INavigationService _navigation;
     private readonly ExternalLinkService _externalLinkService;
     private readonly System.Windows.Threading.DispatcherTimer _searchDebounceTimer;
     private int _searchRequestToken;
@@ -35,6 +38,12 @@ public partial class KaraokeViewModel : BaseViewModel
 
     [ObservableProperty]
     private bool _isScaryokeMode;
+
+    [ObservableProperty]
+    private bool _hasPendingKaraokeRequest;
+
+    [ObservableProperty]
+    private bool _hasPendingMusicRequest;
 
     [ObservableProperty]
     private string _currentSongName = "No Song Loaded";
@@ -272,6 +281,17 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private string _newSingerKey = "0";
 
+    [ObservableProperty]
+    private string _newDuetPartnerName = string.Empty;
+
+    [ObservableProperty]
+    private int _autoAdvanceRemainingSeconds;
+
+    [ObservableProperty]
+    private bool _isAutoAdvanceActive;
+
+    public int AutoAdvanceMaxSeconds => Lyracist.Core.Helpers.AppSettings.AutoAdvanceCountdownSeconds;
+
     // Added properties for Now/Next prominent display banners
     [ObservableProperty]
     private string _nowSingingName = "None";
@@ -464,7 +484,9 @@ public partial class KaraokeViewModel : BaseViewModel
         IShowFlowService showFlow,
         IOccasionService occasions,
         RotationViewModel rotationViewModel,
-        IPartyTymeService partyTymeService)
+        IPartyTymeService partyTymeService,
+        IRequestService requests,
+        INavigationService navigation)
     {
         _mediaEngine = mediaEngine;
         _displayService = displayService;
@@ -473,7 +495,13 @@ public partial class KaraokeViewModel : BaseViewModel
         _occasions = occasions;
         Rotation = rotationViewModel;
         _partyTymeService = partyTymeService;
+        _requests = requests;
+        _navigation = navigation;
         _externalLinkService = new ExternalLinkService();
+
+        RefreshPendingRequestIndicators();
+        _requests.RequestsChanged += (_, _) =>
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(RefreshPendingRequestIndicators);
 
         // Debounce search-as-you-type so we don't fire a DB query per keystroke;
         // RefreshFilteredList also discards stale results via _searchRequestToken
@@ -500,6 +528,16 @@ public partial class KaraokeViewModel : BaseViewModel
         // Hook rotation updates to sync Now/Next banners
         Rotation.Rotation.CollectionChanged += (s, e) => UpdateNowNext();
         Rotation.RotationStateChanged += UpdateNowNext;
+
+        _showFlow.AutoAdvanceCountdownTick += (seconds, active) =>
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                AutoAdvanceRemainingSeconds = seconds;
+                IsAutoAdvanceActive = active;
+                OnPropertyChanged(nameof(AutoAdvanceMaxSeconds));
+            });
+        };
 
         AppSettings.ThemeModeChanged += theme =>
         {
@@ -596,6 +634,19 @@ public partial class KaraokeViewModel : BaseViewModel
         catch { }
     }
 
+    private void RefreshPendingRequestIndicators()
+    {
+        var pending = _requests.GetPending();
+        HasPendingKaraokeRequest = pending.Any(r => r.RequestType == "Karaoke");
+        HasPendingMusicRequest = pending.Any(r => r.RequestType == "Music");
+    }
+
+    [RelayCommand]
+    private void NavigateToRequests()
+    {
+        _navigation.Navigate(typeof(Views.Pages.RequestsPage));
+    }
+
     private void UpdateNowNext()
     {
         string oldSinger = NowSingingName;
@@ -618,6 +669,7 @@ public partial class KaraokeViewModel : BaseViewModel
             if (NowSingingName != oldSinger)
             {
                 _mediaEngine.ActiveSingerName = NowSingingName;
+                _mediaEngine.ActiveDuetPartnerName = "None";
                 NotifyAudioPropertiesChanged();
             }
             return;
@@ -625,13 +677,6 @@ public partial class KaraokeViewModel : BaseViewModel
 
         // Find the designated current singer
         Singer? current = rotationList.FirstOrDefault(s => s.IsCurrent);
-
-        // Find the designated next singer BEFORE we clear the flags
-        Singer? next = rotationList.FirstOrDefault(s => s.IsNext);
-        if (next != null && (next.IsPaused || next.IsInactive || next == current || !rotationList.Contains(next)))
-        {
-            next = null;
-        }
 
         // Fallback if current is not set or is no longer active
         if (current == null || current.IsPaused || current.IsInactive || !rotationList.Contains(current))
@@ -651,19 +696,19 @@ public partial class KaraokeViewModel : BaseViewModel
             NowSingingName = current.Name;
             NowSingingSong = string.IsNullOrEmpty(current.SongTitle) ? "No Song" : $"{current.Artist} - {current.SongTitle}";
 
-            // Find next active singer (falling back to sequential if not manually set)
-            if (next == null)
+            // Next is always whoever sequentially follows the current singer in the
+            // rotation, wrapping around — matching KSRotation. Never reuse a stale
+            // IsNext flag: it may point at someone left over from before Current moved.
+            Singer? next = null;
+            int currentIndex = rotationList.IndexOf(current);
+            for (int i = 1; i <= rotationList.Count; i++)
             {
-                int currentIndex = rotationList.IndexOf(current);
-                for (int i = 1; i <= rotationList.Count; i++)
+                int nextIndex = (currentIndex + i) % rotationList.Count;
+                var candidate = rotationList[nextIndex];
+                if (candidate != current && !candidate.IsPaused && !candidate.IsInactive)
                 {
-                    int nextIndex = (currentIndex + i) % rotationList.Count;
-                    var candidate = rotationList[nextIndex];
-                    if (candidate != current && !candidate.IsPaused && !candidate.IsInactive)
-                    {
-                        next = candidate;
-                        break;
-                    }
+                    next = candidate;
+                    break;
                 }
             }
 
@@ -687,9 +732,11 @@ public partial class KaraokeViewModel : BaseViewModel
             NextUpSong = "No Song";
         }
 
-        if (NowSingingName != oldSinger)
+        string partnerName = current?.DuetPartnerName ?? string.Empty;
+        if (NowSingingName != oldSinger || _mediaEngine.ActiveDuetPartnerName != partnerName)
         {
             _mediaEngine.ActiveSingerName = NowSingingName;
+            _mediaEngine.ActiveDuetPartnerName = partnerName;
             NotifyAudioPropertiesChanged();
         }
     }
@@ -861,10 +908,11 @@ public partial class KaraokeViewModel : BaseViewModel
             }
         }
 
-        Rotation.AddSinger(targetSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local", song.AudioPath);
+        Rotation.AddSinger(targetSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local", song.AudioPath, NewDuetPartnerName);
 
         // Reset inputs
         NewSingerName = string.Empty;
+        NewDuetPartnerName = string.Empty;
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";
         LoadSingerNames();
@@ -888,13 +936,26 @@ public partial class KaraokeViewModel : BaseViewModel
             }
         }
 
-        Rotation.AddSinger(targetSingerName, track.Title, track.Artist, NewSingerKey, NewSingerNotes, track.Source, track.Url);
+        Rotation.AddSinger(targetSingerName, track.Title, track.Artist, NewSingerKey, NewSingerNotes, track.Source, track.Url, NewDuetPartnerName);
 
         // Reset inputs
         NewSingerName = string.Empty;
+        NewDuetPartnerName = string.Empty;
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";
         LoadSingerNames();
+    }
+
+    [RelayCommand]
+    private void CancelAutoAdvance()
+    {
+        _showFlow.CancelAutoAdvance();
+    }
+
+    [RelayCommand]
+    private void TriggerAutoAdvanceNow()
+    {
+        _showFlow.TriggerAutoAdvanceNow();
     }
 
     [RelayCommand]
@@ -915,7 +976,7 @@ public partial class KaraokeViewModel : BaseViewModel
             }
         }
 
-        Rotation.AddSinger(targetSingerName, entry.SongTitle, entry.Artist, "0", string.Empty, entry.Source, entry.Link);
+        Rotation.AddSinger(targetSingerName, entry.SongTitle, entry.Artist, "0", string.Empty, entry.Source, entry.Link, NewDuetPartnerName);
     }
 
     [RelayCommand]
@@ -936,22 +997,22 @@ public partial class KaraokeViewModel : BaseViewModel
 
         if (SelectedSong != null)
         {
-            Rotation.AddSinger(targetSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local", SelectedSong.AudioPath);
+            Rotation.AddSinger(targetSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local", SelectedSong.AudioPath, NewDuetPartnerName);
         }
         else if (SelectedPartyTymeTrack != null)
         {
             Rotation.AddSinger(targetSingerName, SelectedPartyTymeTrack.Title, SelectedPartyTymeTrack.Artist, NewSingerKey,
-                $"[Party Tyme ID: {SelectedPartyTymeTrack.TrackId}] {NewSingerNotes}", "PartyTyme");
+                $"[Party Tyme ID: {SelectedPartyTymeTrack.TrackId}] {NewSingerNotes}", "PartyTyme", string.Empty, NewDuetPartnerName);
         }
         else if (SelectedExternalTrack != null)
         {
             Rotation.AddSinger(targetSingerName, SelectedExternalTrack.Title, SelectedExternalTrack.Artist, NewSingerKey,
-                NewSingerNotes, SelectedExternalTrack.Source, SelectedExternalTrack.Url);
+                NewSingerNotes, SelectedExternalTrack.Source, SelectedExternalTrack.Url, NewDuetPartnerName);
         }
         else if (SelectedHistoryEntry != null)
         {
             Rotation.AddSinger(targetSingerName, SelectedHistoryEntry.SongTitle, SelectedHistoryEntry.Artist, NewSingerKey,
-                NewSingerNotes, SelectedHistoryEntry.Source, SelectedHistoryEntry.Link);
+                NewSingerNotes, SelectedHistoryEntry.Source, SelectedHistoryEntry.Link, NewDuetPartnerName);
         }
         else if (!string.IsNullOrWhiteSpace(CustomExternalUrl))
         {
@@ -960,16 +1021,17 @@ public partial class KaraokeViewModel : BaseViewModel
             {
                 string title = string.IsNullOrWhiteSpace(CustomExternalTitle) ? parsed.Title : CustomExternalTitle;
                 string artist = string.IsNullOrWhiteSpace(CustomExternalArtist) ? parsed.Artist : CustomExternalArtist;
-                Rotation.AddSinger(targetSingerName, title, artist, NewSingerKey, NewSingerNotes, parsed.Source, CustomExternalUrl);
+                Rotation.AddSinger(targetSingerName, title, artist, NewSingerKey, NewSingerNotes, parsed.Source, CustomExternalUrl, NewDuetPartnerName);
             }
         }
         else
         {
-            Rotation.AddSinger(targetSingerName, string.Empty, string.Empty, NewSingerKey, NewSingerNotes);
+            Rotation.AddSinger(targetSingerName, string.Empty, string.Empty, NewSingerKey, NewSingerNotes, "Local", string.Empty, NewDuetPartnerName);
         }
 
         // Reset inputs
         NewSingerName = string.Empty;
+        NewDuetPartnerName = string.Empty;
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";
         CustomExternalUrl = string.Empty;
@@ -1203,6 +1265,7 @@ public partial class KaraokeViewModel : BaseViewModel
             IsPlaying = false;
             CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [{singer.Source}]";
             _mediaEngine.ActiveSingerName = singer.Name;
+            _mediaEngine.ActiveDuetPartnerName = singer.DuetPartnerName;
             await _mediaEngine.Stop();
 
             // Stop background music as performance is launching externally
@@ -1237,6 +1300,7 @@ public partial class KaraokeViewModel : BaseViewModel
                 IsPlaying = false;
                 CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [Party Tyme]";
                 _mediaEngine.ActiveSingerName = singer.Name;
+                _mediaEngine.ActiveDuetPartnerName = singer.DuetPartnerName;
 
                 IsExternalPerformanceActive = false;
                 ExternalPerformanceSource = string.Empty;
@@ -1279,6 +1343,7 @@ public partial class KaraokeViewModel : BaseViewModel
             IsPlaying = false;
             CurrentSongName = $"{singer.Artist} - {singer.SongTitle}";
             _mediaEngine.ActiveSingerName = singer.Name;
+            _mediaEngine.ActiveDuetPartnerName = singer.DuetPartnerName;
 
             IsExternalPerformanceActive = false;
             ExternalPerformanceSource = string.Empty;

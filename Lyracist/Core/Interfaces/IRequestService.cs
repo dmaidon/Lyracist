@@ -13,8 +13,10 @@ public interface IRequestService
     List<RequestInfo> GetApproved();
     List<RequestInfo> GetHistory();
 
-    RequestInfo AddRequest(string singerName, string title, string artist, string source = "Local");
+    RequestInfo AddRequest(string singerName, string title, string artist, string source = "Local",
+        string requestType = "Karaoke", string key = "0", string notes = "");
     void Approve(int requestId);
     void Reject(int requestId);
     void MarkPlayed(int requestId);
+    void MarkQueued(int requestId);
 }

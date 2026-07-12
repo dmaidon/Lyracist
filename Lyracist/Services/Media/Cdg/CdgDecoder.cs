@@ -192,47 +192,65 @@ public class CdgDecoder : ICDGDecoder
                 byte* backBuffer = (byte*)_bitmap.BackBuffer;
                 int stride = _bitmap.BackBufferStride;
 
-                for (int y = 0; y < height; y++)
+                bool noScale = width == CdgConstants.Width && height == CdgConstants.Height;
+                bool chromaEnabled = Lyracist.Core.Helpers.AppSettings.IsCdgChromaKeyEnabled;
+                byte bgIndex = chromaEnabled ? _state.Pixels[0, 0] : (byte)0;
+                int transIndex = _state.Palette.TransparentColorIndex;
+
+                if (noScale)
                 {
-                    byte* row = backBuffer + (y * stride);
-
-                    int srcY = (y * CdgConstants.Height) / height;
-                    if (srcY >= CdgConstants.Height) srcY = CdgConstants.Height - 1;
-
-                    for (int x = 0; x < width; x++)
+                    for (int y = 0; y < height; y++)
                     {
-                        int srcX = (x * CdgConstants.Width) / width;
-                        if (srcX >= CdgConstants.Width) srcX = CdgConstants.Width - 1;
-
-                        byte colorIndex = _state.Pixels[srcX, srcY];
-                        Color color = _state.Palette.Colors[colorIndex];
-
-                        bool isTransparent = false;
-                        if (colorIndex == _state.Palette.TransparentColorIndex)
+                        byte* row = backBuffer + (y * stride);
+                        for (int x = 0; x < width; x++)
                         {
-                            isTransparent = true;
+                            byte colorIndex = _state.Pixels[x, y];
+                            
+                            bool isTransparent = colorIndex == transIndex || (chromaEnabled && colorIndex == bgIndex);
+                            byte alpha = isTransparent ? (byte)0 : (byte)255;
+                            Color color = _state.Palette.Colors[colorIndex];
+
+                            byte r = isTransparent ? (byte)0 : color.R;
+                            byte g = isTransparent ? (byte)0 : color.G;
+                            byte b = isTransparent ? (byte)0 : color.B;
+
+                            int colOffset = x * 4;
+                            row[colOffset] = b;
+                            row[colOffset + 1] = g;
+                            row[colOffset + 2] = r;
+                            row[colOffset + 3] = alpha;
                         }
-                        else if (Lyracist.Core.Helpers.AppSettings.IsCdgChromaKeyEnabled)
+                    }
+                }
+                else
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        byte* row = backBuffer + (y * stride);
+                        int srcY = (y * CdgConstants.Height) / height;
+                        if (srcY >= CdgConstants.Height) srcY = CdgConstants.Height - 1;
+
+                        for (int x = 0; x < width; x++)
                         {
-                            byte bgIndex = _state.Pixels[0, 0];
-                            if (colorIndex == bgIndex)
-                            {
-                                isTransparent = true;
-                            }
+                            int srcX = (x * CdgConstants.Width) / width;
+                            if (srcX >= CdgConstants.Width) srcX = CdgConstants.Width - 1;
+
+                            byte colorIndex = _state.Pixels[srcX, srcY];
+                            
+                            bool isTransparent = colorIndex == transIndex || (chromaEnabled && colorIndex == bgIndex);
+                            byte alpha = isTransparent ? (byte)0 : (byte)255;
+                            Color color = _state.Palette.Colors[colorIndex];
+
+                            byte r = isTransparent ? (byte)0 : color.R;
+                            byte g = isTransparent ? (byte)0 : color.G;
+                            byte b = isTransparent ? (byte)0 : color.B;
+
+                            int colOffset = x * 4;
+                            row[colOffset] = b;
+                            row[colOffset + 1] = g;
+                            row[colOffset + 2] = r;
+                            row[colOffset + 3] = alpha;
                         }
-
-                        byte alpha = isTransparent ? (byte)0 : (byte)255;
-
-                        // Pre-multiply alpha for WPF Pbgra32 format
-                        byte r = (byte)((color.R * alpha) / 255);
-                        byte g = (byte)((color.G * alpha) / 255);
-                        byte b = (byte)((color.B * alpha) / 255);
-
-                        int colOffset = x * 4;
-                        row[colOffset] = b;
-                        row[colOffset + 1] = g;
-                        row[colOffset + 2] = r;
-                        row[colOffset + 3] = alpha;
                     }
                 }
             }

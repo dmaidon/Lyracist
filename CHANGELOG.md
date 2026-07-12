@@ -2,6 +2,24 @@
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [26.7.10.1] - 2026-07-10
+
+### Added
+- **Karaoke/Music Request Indicator Bulbs**: Two glowing "K" (yellow) and "M" (neon green) bulb indicators on the Karaoke page header light up and gently pulse whenever a pending karaoke or music request is waiting for review, and go dim again automatically once it's approved or rejected.
+- **Separate Karaoke vs. Music Requests**: The mobile portal and the KJ's request queue now distinguish "Karaoke" requests (a singer performing) from "Music" requests (just play the track), end-to-end. Added a "Search Music" tab on the tablet portal for browsing the background-music library separately from the karaoke catalog, and a Karaoke/Music toggle on the Custom Link tab.
+- **Current-Performer-Only Scaryoke Spin**: Once Scaryoke Mode is enabled, only the singer currently marked as performing can spin the wheel from their phone. Everyone else still watches it spin live, but the Spin button is hidden for them, and a spin attempt from anyone else is rejected server-side.
+- **Scaryoke Wheel Gated Behind DJ Toggle**: The mobile portal's Scaryoke tab and its underlying API endpoints are now hidden/blocked until the host enables Scaryoke Mode on the Karaoke page, instead of always being reachable to anyone connected.
+
+### Fixed
+- **Approving a Karaoke Request Didn't Add the Singer to the Rotation**: Approving a pending request from the mobile portal only flipped its database status; it never added the singer to the show. Approving a Karaoke-type request now adds the singer and song straight into the active rotation, matching what KJs expect from the mobile "request" feature.
+- **Next Singer Didn't Follow the Current Singer**: The previous fix that preserved a manually-designated "Next" singer interacted badly with the "Set as Current Performer" star toggle — marking a new singer as Current could leave a stale Next flag pointing at whoever used to be next, since there's no actual UI to pick a Next singer independently of Current. Next Up now always recalculates sequentially from whoever is Current, on both the Karaoke page and the rotation billboard.
+- **Fill-In / Opening / End-Rotation "Play" Ignored the Highlighted Track**: Clicking Play on any of the three background-music playlists always started from the first track in the internal (possibly shuffled) playback order, regardless of which song was highlighted in the list. Play now starts at the highlighted track.
+- **Floating Emoji Reactions Rendered in Black & White**: WPF's built-in text renderer can't display color emoji glyphs; reactions sent from the mobile portal now render in full color on both projection screens.
+- **Emoji Reactions Always Floated Bottom-to-Top**: Reactions now spawn from a random screen edge (top, bottom, left, or right) and drift across the screen instead of always rising from the bottom, and render about 20% larger.
+- **Karaoke Page Header Fixed-Width Hack**: The header banner had picked up a hardcoded pixel width; it now stretches to fill the page width like every other header, and the "Scan to Join" QR code badge was enlarged for easier scanning.
+
+---
+
 ## [26.7.10.0] - 2026-07-10
 
 ### Added

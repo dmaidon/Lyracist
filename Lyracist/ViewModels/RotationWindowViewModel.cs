@@ -36,6 +36,14 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     public bool ShowQueue => !ShowLeaderboard;
 
+    [ObservableProperty]
+    private int _autoAdvanceRemainingSeconds;
+
+    [ObservableProperty]
+    private bool _isAutoAdvanceActive;
+
+    public int AutoAdvanceMaxSeconds => Lyracist.Core.Helpers.AppSettings.AutoAdvanceCountdownSeconds;
+
     public ObservableCollection<SingerRank> Leaderboard { get; } = [];
 
     public record SingerRank(string Name, int Score, double AverageRating, int Rank, int Level, string LevelName, string Badges);
@@ -64,6 +72,20 @@ public partial class RotationWindowViewModel : BaseViewModel
             });
         };
         _toggleTimer.Start();
+
+        var showFlow = App.AppHost?.Services?.GetService(typeof(Lyracist.Core.Interfaces.IShowFlowService)) as Lyracist.Core.Interfaces.IShowFlowService;
+        if (showFlow != null)
+        {
+            showFlow.AutoAdvanceCountdownTick += (seconds, active) =>
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    AutoAdvanceRemainingSeconds = seconds;
+                    IsAutoAdvanceActive = active;
+                    OnPropertyChanged(nameof(AutoAdvanceMaxSeconds));
+                });
+            };
+        }
     }
 
     public void RefreshLeaderboard()

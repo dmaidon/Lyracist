@@ -30,5 +30,6 @@ public interface IMediaEngine
     double Limiter { get; set; }
 
     string? ActiveSingerName { get; set; }
+    string? ActiveDuetPartnerName { get; set; }
     void UpdateAudioParameters();
 }

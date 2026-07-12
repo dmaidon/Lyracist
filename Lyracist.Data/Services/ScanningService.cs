@@ -389,15 +389,9 @@ namespace Lyracist.Data.Services
                 {
                     await _context.SaveChangesAsync();
 
-                    // Index into the FTS5 search table
-                    foreach (var s in songsToInsert)
-                    {
-                        await searchService.IndexSong(s);
-                    }
-                    foreach (var s in songsToUpdate)
-                    {
-                        await searchService.IndexSong(s);
-                    }
+                    // Index into the FTS5 search table in batches
+                    var allChangedSongs = songsToInsert.Concat(songsToUpdate);
+                    await searchService.IndexSongsBatch(allChangedSongs);
                 }
 
                 await transaction.CommitAsync();

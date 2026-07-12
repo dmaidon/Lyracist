@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Lyracist.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Dapper;
 using Microsoft.Data.Sqlite;
 
@@ -161,6 +162,132 @@ namespace Lyracist.Data.Services
                 "DELETE FROM SongSearch WHERE SongId = {0}",
                 songId
             );
+        }
+
+        public async Task IndexSongsBatch(IEnumerable<Song> songs)
+        {
+            var songList = songs.ToList();
+            if (songList.Count == 0) return;
+
+            var connection = _context.Database.GetDbConnection();
+            bool wasOpen = connection.State == System.Data.ConnectionState.Open;
+            if (!wasOpen)
+            {
+                await connection.OpenAsync();
+            }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                var currentTransaction = _context.Database.CurrentTransaction?.GetDbTransaction();
+                if (currentTransaction != null)
+                {
+                    command.Transaction = currentTransaction;
+                }
+
+                command.CommandText = @"
+                    INSERT OR REPLACE INTO SongSearch 
+                    (SongId, Title, Artist, NormalizedTitle, NormalizedArtist) 
+                    VALUES (@SongId, @Title, @Artist, @NormalizedTitle, @NormalizedArtist)";
+
+                var songIdParam = command.CreateParameter();
+                songIdParam.ParameterName = "@SongId";
+                command.Parameters.Add(songIdParam);
+
+                var titleParam = command.CreateParameter();
+                titleParam.ParameterName = "@Title";
+                command.Parameters.Add(titleParam);
+
+                var artistParam = command.CreateParameter();
+                artistParam.ParameterName = "@Artist";
+                command.Parameters.Add(artistParam);
+
+                var normTitleParam = command.CreateParameter();
+                normTitleParam.ParameterName = "@NormalizedTitle";
+                command.Parameters.Add(normTitleParam);
+
+                var normArtistParam = command.CreateParameter();
+                normArtistParam.ParameterName = "@NormalizedArtist";
+                command.Parameters.Add(normArtistParam);
+
+                await command.PrepareAsync();
+
+                foreach (var song in songList)
+                {
+                    songIdParam.Value = song.SongId;
+                    titleParam.Value = song.Title ?? string.Empty;
+                    artistParam.Value = song.Artist ?? string.Empty;
+                    normTitleParam.Value = Normalize(song.Title ?? string.Empty);
+                    normArtistParam.Value = Normalize(song.Artist ?? string.Empty);
+
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+            finally
+            {
+                if (!wasOpen)
+                {
+                    await connection.CloseAsync();
+                }
+            }
+        }
+
+        public List<Song> SearchSync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return [];
+            }
+
+            string ftsQuery = PrepareFtsQuery(query);
+            if (string.IsNullOrWhiteSpace(ftsQuery))
+            {
+                return [];
+            }
+
+            try
+            {
+                using var connection = new SqliteConnection(LyracistDbContext.GetConnectionString());
+                connection.Open();
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
+                    cmd.ExecuteNonQuery();
+                }
+
+                string sql = @"
+                    SELECT s.*, a.* 
+                    FROM Songs s
+                    LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
+                    WHERE s.SongId IN (
+                        SELECT SongId FROM SongSearch WHERE SongSearch MATCH @ftsQuery
+                    )
+                    LIMIT 150";
+
+                var results = connection.Query<Song, SongAudioSettings, Song>(
+                    sql,
+                    (song, audioSettings) =>
+                    {
+                        song.AudioSettings = audioSettings;
+                        return song;
+                    },
+                    new { ftsQuery },
+                    splitOn: "SongAudioSettingsId"
+                );
+
+                return [.. results];
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Dapper sync search execution failed: {ex.Message}");
+                return _context.Songs
+                    .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0})", ftsQuery)
+                    .AsNoTracking()
+                    .Include(s => s.AudioSettings)
+                    .Take(150)
+                    .ToList();
+            }
         }
     }
 }

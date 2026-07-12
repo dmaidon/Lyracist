@@ -1092,22 +1092,47 @@ public partial class RotationWindow : Window
         {
             if (ReactionsCanvas == null) return;
 
-            var textBlock = new TextBlock
+            var textBlock = new Emoji.Wpf.TextBlock
             {
                 Text = emoji,
-                FontSize = 72,
-                FontFamily = new System.Windows.Media.FontFamily("Segoe UI Emoji"),
+                FontSize = 86,
                 RenderTransform = new TranslateTransform()
             };
 
             double width = ActualWidth > 0 ? ActualWidth : 800;
             double height = ActualHeight > 0 ? ActualHeight : 600;
 
-            // Random start position
-            double left = _rng.Next(50, (int)Math.Max(200, width - 100));
-            double bottom = _rng.Next(20, 100);
-            Canvas.SetLeft(textBlock, left);
-            Canvas.SetBottom(textBlock, bottom);
+            // Random entry side: 0=bottom, 1=top, 2=left, 3=right
+            int side = _rng.Next(4);
+            double toX, toY;
+
+            switch (side)
+            {
+                case 0: // bottom -> travels up
+                    Canvas.SetLeft(textBlock, _rng.Next(50, (int)Math.Max(200, width - 100)));
+                    Canvas.SetBottom(textBlock, _rng.Next(20, 100));
+                    toY = -(height - 150);
+                    toX = _rng.NextDouble() * 200 - 100;
+                    break;
+                case 1: // top -> travels down
+                    Canvas.SetLeft(textBlock, _rng.Next(50, (int)Math.Max(200, width - 100)));
+                    Canvas.SetTop(textBlock, _rng.Next(20, 100));
+                    toY = height - 150;
+                    toX = _rng.NextDouble() * 200 - 100;
+                    break;
+                case 2: // left -> travels right
+                    Canvas.SetTop(textBlock, _rng.Next(50, (int)Math.Max(200, height - 100)));
+                    Canvas.SetLeft(textBlock, _rng.Next(20, 100));
+                    toX = width - 150;
+                    toY = _rng.NextDouble() * 200 - 100;
+                    break;
+                default: // right -> travels left
+                    Canvas.SetTop(textBlock, _rng.Next(50, (int)Math.Max(200, height - 100)));
+                    Canvas.SetRight(textBlock, _rng.Next(20, 100));
+                    toX = -(width - 150);
+                    toY = _rng.NextDouble() * 200 - 100;
+                    break;
+            }
 
             ReactionsCanvas.Children.Add(textBlock);
 
@@ -1117,16 +1142,14 @@ public partial class RotationWindow : Window
             var yAnimation = new DoubleAnimation
             {
                 From = 0,
-                To = -height + 150,
+                To = toY,
                 Duration = duration
             };
 
-            // Random horizontal drift/sway
-            double drift = _rng.NextDouble() * 200 - 100;
             var xAnimation = new DoubleAnimation
             {
                 From = 0,
-                To = drift,
+                To = toX,
                 Duration = duration
             };
 

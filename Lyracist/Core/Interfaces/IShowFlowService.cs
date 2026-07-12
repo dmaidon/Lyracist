@@ -11,16 +11,19 @@ public interface IShowFlowService
     /// <summary>Reloads all playlists from the database. Call after editing them.</summary>
     void RefreshPlaylists();
 
-    void StartOpeningMusic();
+    /// <param name="startTrackPath">When provided, playback starts at this track instead of the next one in rotation.</param>
+    void StartOpeningMusic(string? startTrackPath = null);
     void StopOpeningMusic();
 
-    void PlayFillIn();
+    /// <param name="startTrackPath">When provided, playback starts at this track instead of the next one in rotation.</param>
+    void PlayFillIn(string? startTrackPath = null);
     void StopFillIn();
 
     void DuckFillIn();
     void UnduckFillIn();
 
-    void StartEndRotationMusic();
+    /// <param name="startTrackPath">When provided, playback starts at this track instead of the next one in rotation.</param>
+    void StartEndRotationMusic(string? startTrackPath = null);
     void StopEndRotationMusic();
 
     /// <summary>
@@ -45,4 +48,8 @@ public interface IShowFlowService
 
     void PauseBackgroundMusic();
     void ResumeBackgroundMusic();
+
+    event Action<int, bool>? AutoAdvanceCountdownTick;
+    void CancelAutoAdvance();
+    void TriggerAutoAdvanceNow();
 }

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -25,10 +26,12 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     private bool _isMp4Mode;
     private string _currentSongPath = string.Empty;
     private string? _activeSingerName;
+    private string? _activeDuetPartnerName;
     private string? _tempAudioPath;
     private string? _tempCdgPath;
     private string? _tempDir;
     private string? _loadedAudioPath;
+    private CancellationTokenSource? _pitchChangeCts;
 
     public event Action<ImageSource>? FrameReady;
     public event Action? Started;
@@ -58,34 +61,48 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
                 // Hot-reload track with new pitch filter if currently playing
                 if (_isPlaying && !string.IsNullOrEmpty(_loadedAudioPath))
                 {
+                    _pitchChangeCts?.Cancel();
+                    _pitchChangeCts = new CancellationTokenSource();
+                    var token = _pitchChangeCts.Token;
+
                     Task.Run(async () =>
                     {
-                        var currentPos = _video.Position;
-                        bool wasPlaying = _isPlaying;
-
-                        if (!_isMp4Mode)
+                        try
                         {
-                            _timer?.Stop();
-                        }
+                            await Task.Delay(150, token); // Debounce slider drags
 
-                        // Load the media backend again
-                        await _video.LoadAsync(_loadedAudioPath);
-                        
-                        // Apply equalizer, speed, volume, and the new Pitch setting
-                        UpdateAudioParameters();
+                            var currentPos = _video.Position;
+                            bool wasPlaying = _isPlaying;
 
-                        // Seek to the exact same position
-                        await _video.SeekAsync(currentPos);
-
-                        if (wasPlaying)
-                        {
-                            await _video.PlayAsync();
                             if (!_isMp4Mode)
                             {
-                                _timer?.Start();
+                                System.Windows.Application.Current.Dispatcher.Invoke(() => _timer?.Stop());
+                            }
+
+                            // Load the media backend again
+                            await _video.LoadAsync(_loadedAudioPath);
+                            
+                            // Apply equalizer, speed, volume, and the new Pitch setting
+                            UpdateAudioParameters();
+
+                            // Seek to the exact same position
+                            await _video.SeekAsync(currentPos);
+
+                            if (wasPlaying && _isPlaying)
+                            {
+                                await _video.PlayAsync();
+                                if (!_isMp4Mode)
+                                {
+                                    System.Windows.Application.Current.Dispatcher.Invoke(() => _timer?.Start());
+                                }
                             }
                         }
-                    });
+                        catch (OperationCanceledException) { }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error during pitch hot-reload: {ex.Message}");
+                        }
+                    }, token);
                 }
             }
         }
@@ -129,6 +146,19 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
             if (_activeSingerName != value)
             {
                 _activeSingerName = value;
+                UpdateAudioParameters();
+            }
+        }
+    }
+
+    public string? ActiveDuetPartnerName
+    {
+        get => _activeDuetPartnerName;
+        set
+        {
+            if (_activeDuetPartnerName != value)
+            {
+                _activeDuetPartnerName = value;
                 UpdateAudioParameters();
             }
         }
@@ -368,6 +398,9 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         var singerSettings = !string.IsNullOrEmpty(ActiveSingerName) && ActiveSingerName != "None"
             ? _libraryService.GetSingerSettings(ActiveSingerName)
             : null;
+        var partnerSettings = !string.IsNullOrEmpty(ActiveDuetPartnerName) && ActiveDuetPartnerName != "None"
+            ? _libraryService.GetSingerSettings(ActiveDuetPartnerName)
+            : null;
 
         // Base defaults
         double mergedVolume = 100.0;
@@ -409,6 +442,17 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
             mergedCompressor = Math.Clamp(Math.Max(mergedCompressor, singerSettings.Compressor), 0.0, 100.0);
             // Limiter threshold: use lowest (most restrictive) dB ceiling (Min)
             mergedLimiter = Math.Clamp(Math.Min(mergedLimiter, singerSettings.Limiter), -20.0, 0.0);
+        }
+
+        // Merge in Duet Partner settings
+        if (partnerSettings != null && partnerSettings.SingerId > 0)
+        {
+            mergedVolume = Math.Clamp((mergedVolume / 100.0) * (partnerSettings.Gain / 100.0) * 100.0, 0.0, 100.0);
+            mergedTreble = Math.Clamp((mergedTreble + partnerSettings.Treble) / 2.0, -10.0, 10.0);
+            mergedMid = Math.Clamp((mergedMid + partnerSettings.Mid) / 2.0, -10.0, 10.0);
+            mergedBass = Math.Clamp((mergedBass + partnerSettings.Bass) / 2.0, -10.0, 10.0);
+            mergedCompressor = Math.Clamp(Math.Max(mergedCompressor, partnerSettings.Compressor), 0.0, 100.0);
+            mergedLimiter = Math.Clamp(Math.Min(mergedLimiter, partnerSettings.Limiter), -20.0, 0.0);
         }
 
         // Apply merged results to the unmanaged player backend

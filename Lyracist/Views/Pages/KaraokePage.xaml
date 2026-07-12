@@ -1,7 +1,7 @@
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:helpers="clr-namespace:Lyracist.Core.Helpers"
       Title="Karaoke"
       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -31,11 +31,12 @@
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
+        <Border Grid.Row="0" CornerRadius="12" Padding="10" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -46,15 +47,108 @@
                     <TextBlock Text="Control your audio, CDG decoding, and singer queues here." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Pending Request Indicator Bulbs -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center">
+                        <Border Width="36" Height="36" CornerRadius="18" Margin="0,0,8,0" BorderBrush="#40000000" BorderThickness="1"
+                                Cursor="Hand" ToolTip="Pending karaoke request — click to review">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateToRequestsCommand}" />
+                            </Border.InputBindings>
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#33000000" />
+                                    <Setter Property="Effect" Value="{x:Null}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasPendingKaraokeRequest}" Value="True">
+                                            <Setter Property="Background" Value="#FFD700" />
+                                            <Setter Property="Effect">
+                                                <Setter.Value>
+                                                    <DropShadowEffect Color="#FFD700" BlurRadius="18" ShadowDepth="0" Opacity="0.95" />
+                                                </Setter.Value>
+                                            </Setter>
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard x:Name="KaraokeBulbPulse">
+                                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.5" Duration="0:0:0.8" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <StopStoryboard BeginStoryboardName="KaraokeBulbPulse" />
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <ui:SymbolIcon Symbol="Mic24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <ui:SymbolIcon.Style>
+                                    <Style TargetType="ui:SymbolIcon">
+                                        <Setter Property="Foreground" Value="#66FFFFFF" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasPendingKaraokeRequest}" Value="True">
+                                                <Setter Property="Foreground" Value="#3A2E00" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:SymbolIcon.Style>
+                            </ui:SymbolIcon>
+                        </Border>
+
+                        <Border Width="36" Height="36" CornerRadius="18" BorderBrush="#40000000" BorderThickness="1"
+                                Cursor="Hand" ToolTip="Pending music request — click to review">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateToRequestsCommand}" />
+                            </Border.InputBindings>
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#33000000" />
+                                    <Setter Property="Effect" Value="{x:Null}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasPendingMusicRequest}" Value="True">
+                                            <Setter Property="Background" Value="#39FF14" />
+                                            <Setter Property="Effect">
+                                                <Setter.Value>
+                                                    <DropShadowEffect Color="#39FF14" BlurRadius="18" ShadowDepth="0" Opacity="0.95" />
+                                                </Setter.Value>
+                                            </Setter>
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard x:Name="MusicBulbPulse">
+                                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.5" Duration="0:0:0.8" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <StopStoryboard BeginStoryboardName="MusicBulbPulse" />
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <ui:SymbolIcon Symbol="MusicNote224" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <ui:SymbolIcon.Style>
+                                    <Style TargetType="ui:SymbolIcon">
+                                        <Setter Property="Foreground" Value="#66FFFFFF" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasPendingMusicRequest}" Value="True">
+                                                <Setter Property="Foreground" Value="#0A3300" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:SymbolIcon.Style>
+                            </ui:SymbolIcon>
+                        </Border>
+                    </StackPanel>
+
                     <!-- QR Code Badge -->
                     <Border Background="#20000000" BorderBrush="White" BorderThickness="1" CornerRadius="8" Padding="6" Margin="0,0,16,0">
                         <StackPanel Orientation="Horizontal">
-                            <Border Background="White" Padding="2" CornerRadius="4" Width="40" Height="40" VerticalAlignment="Center">
-                                <Image Source="{Binding QrCodeImage}" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                            <Border Background="White" Padding="2" CornerRadius="4" Width="70" Height="70" VerticalAlignment="Center">
+                                <Image Source="{Binding QrCodeImage}" RenderOptions.BitmapScalingMode="NearestNeighbor" Stretch="Uniform" />
                             </Border>
                             <StackPanel VerticalAlignment="Center" Margin="8,0,0,0">
                                 <TextBlock Text="SCAN TO JOIN" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
-                                <TextBlock Text="{Binding JoinUrl}" FontSize="10" Foreground="#FFF5D042" FontWeight="SemiBold" Margin="0,1,0,0"/>
+                                <TextBlock Text="{Binding JoinUrl}" FontSize="10" Foreground="#FFF5D042" FontWeight="SemiBold" Margin="0,1,0,0" />
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -65,8 +159,62 @@
             </Grid>
         </Border>
 
+        <!-- Auto-Advance Countdown Strip -->
+        <Border Grid.Row="1" 
+                Background="#1E1E2A" 
+                BorderBrush="#FFD700" 
+                BorderThickness="1.5" 
+                CornerRadius="8" 
+                Padding="16,8" 
+                Margin="0,0,0,16"
+                Visibility="{Binding IsAutoAdvanceActive, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:SymbolIcon Symbol="Clock24" Foreground="#FFD700" Margin="0,0,8,0" FontSize="20" />
+                    <TextBlock Text="Auto-Advance Countdown:" FontSize="13" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding AutoAdvanceRemainingSeconds, StringFormat='{} {0}s'}" FontSize="14" FontWeight="Bold" Foreground="#FFD700" VerticalAlignment="Center" Margin="4,0,0,0" />
+                </StackPanel>
+                
+                <ProgressBar Grid.Column="1" 
+                             Minimum="0" 
+                             Maximum="{Binding AutoAdvanceMaxSeconds}" 
+                             Value="{Binding AutoAdvanceRemainingSeconds}" 
+                             Foreground="#FFD700" 
+                             Background="#333344" 
+                             Height="6" 
+                             Margin="16,0" 
+                             VerticalAlignment="Center" 
+                             IsIndeterminate="False" />
+                             
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <ui:Button Content="Cancel Advance" 
+                               Icon="{ui:SymbolIcon Dismiss24}" 
+                               Command="{Binding CancelAutoAdvanceCommand}" 
+                               Appearance="Secondary" 
+                               Height="28" 
+                               Padding="10,2"
+                               Margin="0,0,8,0" 
+                               FontSize="11" />
+                    <ui:Button Content="Advance Now" 
+                               Icon="{ui:SymbolIcon Next24}" 
+                               Command="{Binding TriggerAutoAdvanceNowCommand}" 
+                               Appearance="Primary" 
+                               Background="{StaticResource UIAccentBrush}"
+                               Height="28" 
+                               Padding="10,2"
+                               FontSize="11" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- Main Content -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2.8*" />
                 <ColumnDefinition Width="3.2*" />
@@ -364,6 +512,12 @@
                                   ItemsSource="{Binding SingerNames}"
                                   Margin="0,0,0,8" />
 
+                        <TextBlock Text="Duet Partner Name (Optional)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                        <ComboBox IsEditable="True"
+                                  Text="{Binding NewDuetPartnerName, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding SingerNames}"
+                                  Margin="0,0,0,8" />
+
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -621,15 +775,15 @@
                                                     ToolTip="Set as Current Performer">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                                        <Setter Property="Foreground" Value="#888888"/>
-                                                        <Setter Property="Content" Value="☆"/>
-                                                        <Setter Property="FontSize" Value="14"/>
-                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                        <Setter Property="Foreground" Value="#888888" />
+                                                        <Setter Property="Content" Value="☆" />
+                                                        <Setter Property="FontSize" Value="14" />
+                                                        <Setter Property="FontWeight" Value="Bold" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                                                <Setter Property="Foreground" Value="#F5D042"/>
-                                                                <Setter Property="Content" Value="★"/>
-                                                                <Setter Property="BorderBrush" Value="#F5D042"/>
+                                                                <Setter Property="Foreground" Value="#F5D042" />
+                                                                <Setter Property="Content" Value="★" />
+                                                                <Setter Property="BorderBrush" Value="#F5D042" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>

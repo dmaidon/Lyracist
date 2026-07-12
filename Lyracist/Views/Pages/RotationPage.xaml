@@ -57,6 +57,12 @@
                                   ItemsSource="{Binding SingerNames}"
                                   Margin="0,0,0,10" />
 
+                        <TextBlock Text="Duet Partner Name (Optional)" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <ComboBox IsEditable="True"
+                                  Text="{Binding NewDuetPartnerName, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemsSource="{Binding SingerNames}"
+                                  Margin="0,0,0,10" />
+
                         <TextBlock Text="Key Transposition (Semitones)" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <ui:TextBox Text="{Binding NewSingerKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. +2, -1, 0..." Margin="0,0,0,10"/>
 

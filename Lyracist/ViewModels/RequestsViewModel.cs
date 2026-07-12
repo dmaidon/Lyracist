@@ -16,6 +16,7 @@ public partial class RequestsViewModel : BaseViewModel
     private readonly IRequestService _requests;
     private readonly ILibraryService _library;
     private readonly IMediaEngine _mediaEngine;
+    private readonly RotationViewModel _rotation;
 
     public ObservableCollection<RequestInfo> Pending { get; } = [];
     public ObservableCollection<RequestInfo> Approved { get; } = [];
@@ -39,11 +40,12 @@ public partial class RequestsViewModel : BaseViewModel
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
-    public RequestsViewModel(IRequestService requests, ILibraryService library, IMediaEngine mediaEngine)
+    public RequestsViewModel(IRequestService requests, ILibraryService library, IMediaEngine mediaEngine, RotationViewModel rotation)
     {
         _requests = requests;
         _library = library;
         _mediaEngine = mediaEngine;
+        _rotation = rotation;
 
         // Mobile portal submissions arrive on Kestrel threads; marshal back.
         _requests.RequestsChanged += (_, _) =>
@@ -81,8 +83,21 @@ public partial class RequestsViewModel : BaseViewModel
     private void Approve()
     {
         if (SelectedPending == null) return;
-        _requests.Approve(SelectedPending.Id);
-        StatusMessage = "Request approved.";
+        var request = SelectedPending;
+
+        if (request.RequestType == "Music")
+        {
+            // Music requests are just played back directly — hand off to the Approved queue.
+            _requests.Approve(request.Id);
+            StatusMessage = "Request approved — ready to play.";
+        }
+        else
+        {
+            // Karaoke requests mean the singer performs, so send them straight into the rotation.
+            _rotation.AddSinger(request.SingerName, request.Title, request.Artist, request.Key, request.Notes, request.Source);
+            _requests.MarkQueued(request.Id);
+            StatusMessage = $"{request.SingerName} added to the rotation.";
+        }
     }
 
     [RelayCommand]
@@ -99,9 +114,15 @@ public partial class RequestsViewModel : BaseViewModel
         if (SelectedApproved == null) return;
 
         // Try the library for a matching track; play the best hit.
+        // Music requests point at background-music tracks, which live outside the karaoke catalog.
         var query = $"{SelectedApproved.Title} {SelectedApproved.Artist}".Trim();
         var song = _library.Search(query).FirstOrDefault()
-                   ?? _library.Search(SelectedApproved.Title).FirstOrDefault();
+                   ?? _library.Search(SelectedApproved.Title).FirstOrDefault()
+                   ?? _library.GetBackgroundMusicSongs().FirstOrDefault(s =>
+                       s.Title.Equals(SelectedApproved.Title, StringComparison.OrdinalIgnoreCase) &&
+                       (string.IsNullOrEmpty(SelectedApproved.Artist) || s.Artist.Equals(SelectedApproved.Artist, StringComparison.OrdinalIgnoreCase)))
+                   ?? _library.GetBackgroundMusicSongs().FirstOrDefault(s =>
+                       s.Title.Contains(SelectedApproved.Title, StringComparison.OrdinalIgnoreCase));
 
         if (song == null)
         {

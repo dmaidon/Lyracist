@@ -121,11 +121,23 @@ public partial class App : System.Windows.Application
         // Subscribe to theme changes to apply Lyracist custom brushes
         Wpf.Ui.Appearance.ApplicationThemeManager.Changed += (theme, accent) =>
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher != null)
             {
-                bool isDark = theme == Wpf.Ui.Appearance.ApplicationTheme.Dark;
-                Lyracist.Themes.LyracistThemeManager.Apply(isDark);
-            });
+                if (dispatcher.CheckAccess())
+                {
+                    bool isDark = theme == Wpf.Ui.Appearance.ApplicationTheme.Dark;
+                    Lyracist.Themes.LyracistThemeManager.Apply(isDark);
+                }
+                else
+                {
+                    dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        bool isDark = theme == Wpf.Ui.Appearance.ApplicationTheme.Dark;
+                        Lyracist.Themes.LyracistThemeManager.Apply(isDark);
+                    }));
+                }
+            }
         };
 
         await Host!.StartAsync();
@@ -176,14 +188,23 @@ public partial class App : System.Windows.Application
         // Listen for future setting changes
         AppSettings.ThemeModeChanged += theme =>
         {
-            Dispatcher.Invoke(() => ApplyAppTheme(mainWindow, theme));
+            if (Dispatcher.CheckAccess())
+            {
+                ApplyAppTheme(mainWindow, theme);
+            }
+            else
+            {
+                Dispatcher.BeginInvoke(new Action(() => ApplyAppTheme(mainWindow, theme)));
+            }
         };
 
         mainWindow.Show();
 
         // Close splash window now that MainWindow is ready
         if (AppSettings.ShowSplashOnStartup)
+        {
             splash.Close();
+        }
 
         base.OnStartup(e);
     }

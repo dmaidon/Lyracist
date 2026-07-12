@@ -19,6 +19,7 @@ public partial class LyricsWindowViewModel : ObservableObject
         _display = display;
         IsMirrored = display.GetPreferences().IsLyricsMirrored;
         RefreshQrCode();
+        StartSlideshow();
     }
 
     [ObservableProperty]
@@ -77,6 +78,60 @@ public partial class LyricsWindowViewModel : ObservableObject
     private bool _isMirrored;
 
     [ObservableProperty]
+    private string _slideshowImagePath = string.Empty;
+
+    [ObservableProperty]
+    private bool _isSlideshowVisible;
+
+    private DispatcherTimer? _slideshowTimer;
+    private int _slideshowIndex;
+
+    public void StartSlideshow()
+    {
+        _slideshowTimer?.Stop();
+        
+        string venue = Lyracist.Core.Helpers.AppSettings.SelectedVenue;
+        var graphics = Lyracist.Core.Helpers.AppSettings.GetVenueGraphics(venue);
+
+        if (graphics == null || graphics.Count == 0)
+        {
+            IsSlideshowVisible = false;
+            SlideshowImagePath = string.Empty;
+            return;
+        }
+
+        _slideshowIndex = 0;
+        SlideshowImagePath = graphics[_slideshowIndex];
+        IsSlideshowVisible = true;
+
+        if (graphics.Count > 1)
+        {
+            _slideshowTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+            _slideshowTimer.Tick += (s, e) =>
+            {
+                var currentGraphics = Lyracist.Core.Helpers.AppSettings.GetVenueGraphics(Lyracist.Core.Helpers.AppSettings.SelectedVenue);
+                if (currentGraphics == null || currentGraphics.Count == 0)
+                {
+                    StopSlideshow();
+                    return;
+                }
+
+                _slideshowIndex = (_slideshowIndex + 1) % currentGraphics.Count;
+                SlideshowImagePath = currentGraphics[_slideshowIndex];
+            };
+            _slideshowTimer.Start();
+        }
+    }
+
+    public void StopSlideshow()
+    {
+        _slideshowTimer?.Stop();
+        _slideshowTimer = null;
+        IsSlideshowVisible = false;
+        SlideshowImagePath = string.Empty;
+    }
+
+    [ObservableProperty]
     private string _overlayText = string.Empty;
 
     [ObservableProperty]
@@ -109,6 +164,7 @@ public partial class LyricsWindowViewModel : ObservableObject
         {
             Frame = newFrame;
             IsFallbackVisible = false;
+            StopSlideshow();
         }
     }
 
@@ -119,7 +175,8 @@ public partial class LyricsWindowViewModel : ObservableObject
     {
         Frame = null;
         FallbackText = text;
-        IsFallbackVisible = true;
+        StartSlideshow();
+        IsFallbackVisible = !IsSlideshowVisible;
     }
 
     /// <summary>

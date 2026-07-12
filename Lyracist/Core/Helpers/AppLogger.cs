@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 
 namespace Lyracist.Core.Helpers;
@@ -17,7 +16,7 @@ public static class AppLogger
 
     public static void LogAppStart()
     {
-        string path = Path.Combine(LogDir, "app.log");
+        string path = Path.Combine(LogDir, $"app_{DateTime.Now:MMMdd}.log");
         string entry = $"{new string('-', 60)}{Environment.NewLine}App started {DateTime.Now:MMMM d} @ {DateTime.Now:HH:mm:ss}.{Environment.NewLine}{Environment.NewLine}";
 
         try

@@ -153,6 +153,18 @@ public static class AppSettings
         set { _data.PartyTymeClientId = value; Save(); }
     }
 
+    public static bool EnableAutoAdvance
+    {
+        get => _data.EnableAutoAdvance;
+        set { _data.EnableAutoAdvance = value; Save(); }
+    }
+
+    public static int AutoAdvanceCountdownSeconds
+    {
+        get => _data.AutoAdvanceCountdownSeconds;
+        set { _data.AutoAdvanceCountdownSeconds = value; Save(); }
+    }
+
     public static string PartyTymeClientSecret
     {
         get => _data.PartyTymeClientSecret;
@@ -394,6 +406,91 @@ public static class AppSettings
         }
     }
 
+    public static System.Collections.Generic.IReadOnlyList<string> GetVenueGraphics(string venue)
+    {
+        if (string.IsNullOrWhiteSpace(venue)) return [];
+        lock (_lock)
+        {
+            if (_data.VenueGraphics.TryGetValue(venue, out var list))
+            {
+                return [.. list];
+            }
+            return [];
+        }
+    }
+
+    public static void AddVenueGraphic(string venue, string sourcePath)
+    {
+        if (string.IsNullOrWhiteSpace(venue) || string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
+            return;
+
+        try
+        {
+            string destDir = Path.Combine(_settingsDir, "VenueGraphics", venue);
+            Directory.CreateDirectory(destDir);
+            string destFileName = Path.GetFileName(sourcePath);
+            string destPath = Path.Combine(destDir, destFileName);
+            
+            // To handle duplicates safely
+            int counter = 1;
+            while (File.Exists(destPath))
+            {
+                string ext = Path.GetExtension(destFileName);
+                string nameNoExt = Path.GetFileNameWithoutExtension(destFileName);
+                destPath = Path.Combine(destDir, $"{nameNoExt}_{counter++}{ext}");
+            }
+
+            File.Copy(sourcePath, destPath);
+
+            lock (_lock)
+            {
+                if (!_data.VenueGraphics.TryGetValue(venue, out var list))
+                {
+                    list = [];
+                    _data.VenueGraphics[venue] = list;
+                }
+                if (!list.Contains(destPath))
+                {
+                    list.Add(destPath);
+                    Save();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to copy venue graphic: {ex.Message}");
+        }
+    }
+
+    public static void RemoveVenueGraphic(string venue, string path)
+    {
+        if (string.IsNullOrWhiteSpace(venue) || string.IsNullOrWhiteSpace(path))
+            return;
+
+        lock (_lock)
+        {
+            if (_data.VenueGraphics.TryGetValue(venue, out var list))
+            {
+                if (list.Remove(path))
+                {
+                    Save();
+                }
+            }
+        }
+
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to delete venue graphic file: {ex.Message}");
+        }
+    }
+
     // ─── Rating System Settings ────────────────────────────────────────────────
 
     public static bool IsRatingSystemEnabled
@@ -577,5 +674,8 @@ public static class AppSettings
         public List<string> AvailableRatingIcons { get; set; } = ["⭐ Star", "❤️ Heart", "🔥 Fire", "🎵 Note", "🏆 Trophy", "👑 Crown", "👍 Like"];
         public string CdgBackdropMode { get; set; } = "Original Color";
         public int FillInDelaySeconds { get; set; } = 5;
+        public Dictionary<string, List<string>> VenueGraphics { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public bool EnableAutoAdvance { get; set; } = true;
+        public int AutoAdvanceCountdownSeconds { get; set; } = 10;
     }
 }

@@ -321,13 +321,13 @@ public partial class PlaylistsViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void StartOpeningMusic() => _showFlow.StartOpeningMusic();
+    private void StartOpeningMusic() => _showFlow.StartOpeningMusic(SelectedOpeningTrack?.AudioPath);
 
     [RelayCommand]
     private void StopOpeningMusic() => _showFlow.StopOpeningMusic();
 
     [RelayCommand]
-    private void PlayFillIn() => _showFlow.PlayFillIn();
+    private void PlayFillIn() => _showFlow.PlayFillIn(SelectedFillInTrack?.AudioPath);
 
     [RelayCommand]
     private void StopFillIn() => _showFlow.StopFillIn();
@@ -346,7 +346,7 @@ public partial class PlaylistsViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void StartEndRotationMusic() => _showFlow.StartEndRotationMusic();
+    private void StartEndRotationMusic() => _showFlow.StartEndRotationMusic(SelectedEndRotationTrack?.AudioPath);
 
     [RelayCommand]
     private void StopEndRotationMusic() => _showFlow.StopEndRotationMusic();

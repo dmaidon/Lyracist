@@ -8,6 +8,11 @@ public partial class Singer : ObservableObject
     private string _name = string.Empty;
 
     [ObservableProperty]
+    private string _duetPartnerName = string.Empty;
+
+    public bool IsDuet => !string.IsNullOrEmpty(DuetPartnerName) && DuetPartnerName != "None";
+
+    [ObservableProperty]
     private string _key = "0"; // e.g., +2, -1, or 0
 
     [ObservableProperty]

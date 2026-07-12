@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Lyracist.Core.Interfaces;
 using Lyracist.Media.Audio;
@@ -74,8 +75,12 @@ public class ShowFlowService : IShowFlowService
         // to duck out.
         mediaEngine.Started += OnKaraokeTrackStarted;
 
-        // The singer's song ending re-opens the gap for fill-in music.
-        mediaEngine.Stopped += () => ScheduleFillInMusic();
+        // The singer's song ending re-opens the gap for fill-in music and starts countdown.
+        mediaEngine.Stopped += () =>
+        {
+            ScheduleFillInMusic();
+            StartAutoAdvanceCountdown();
+        };
 
         // The rotation queue running dry means the night's singers are done:
         // stop the between-singer fill-in music and send the room off with
@@ -105,16 +110,16 @@ public class ShowFlowService : IShowFlowService
         _endRotation.LoadPlaylist(endRotation.ConvertAll(t => t.AudioPath));
     }
 
-    public void StartOpeningMusic() => _opening.Play();
+    public void StartOpeningMusic(string? startTrackPath = null) => _opening.Play(startTrackPath);
     public void StopOpeningMusic() => _opening.Stop();
 
-    public void PlayFillIn() => _fillIn.Play();
+    public void PlayFillIn(string? startTrackPath = null) => _fillIn.Play(startTrackPath);
     public void StopFillIn() => _fillIn.Stop();
 
     public void DuckFillIn() => _fillIn.Duck();
     public void UnduckFillIn() => _fillIn.Unduck();
 
-    public void StartEndRotationMusic() => _endRotation.Play();
+    public void StartEndRotationMusic(string? startTrackPath = null) => _endRotation.Play(startTrackPath);
     public void StopEndRotationMusic() => _endRotation.Stop();
 
     public async void PlayOccasion(string occasionName, string filePath, double bassDb, double trebleDb, double preampDb)
@@ -203,6 +208,7 @@ public class ShowFlowService : IShowFlowService
 
     public void OnKaraokeTrackStarted()
     {
+        StopAutoAdvanceCountdown();
         CancelFillInSchedules();
         _opening.Stop();
         _fillIn.Pause();
@@ -370,5 +376,75 @@ public class ShowFlowService : IShowFlowService
     {
         _unduckTimerCts?.Cancel();
         _unduckTimerCts = null;
+    }
+
+    public event Action<int, bool>? AutoAdvanceCountdownTick;
+    private DispatcherTimer? _autoAdvanceTimer;
+    private int _autoAdvanceSecondsRemaining;
+
+    private void StartAutoAdvanceCountdown()
+    {
+        StopAutoAdvanceCountdown();
+
+        if (!Lyracist.Core.Helpers.AppSettings.EnableAutoAdvance)
+        {
+            return;
+        }
+
+        // Only advance if there are actually singers in rotation
+        if (_rotation.Rotation.Count == 0)
+        {
+            return;
+        }
+
+        _autoAdvanceSecondsRemaining = Lyracist.Core.Helpers.AppSettings.AutoAdvanceCountdownSeconds;
+        AutoAdvanceCountdownTick?.Invoke(_autoAdvanceSecondsRemaining, true);
+
+        _autoAdvanceTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _autoAdvanceTimer.Tick += (s, e) =>
+        {
+            _autoAdvanceSecondsRemaining--;
+            if (_autoAdvanceSecondsRemaining <= 0)
+            {
+                TriggerAutoAdvanceNow();
+            }
+            else
+            {
+                AutoAdvanceCountdownTick?.Invoke(_autoAdvanceSecondsRemaining, true);
+            }
+        };
+        _autoAdvanceTimer.Start();
+    }
+
+    public void CancelAutoAdvance()
+    {
+        StopAutoAdvanceCountdown();
+    }
+
+    public void TriggerAutoAdvanceNow()
+    {
+        StopAutoAdvanceCountdown();
+
+        // Advance rotation to next singer
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        {
+            // The current singer is the one marked as IsCurrent
+            var currentSinger = _rotation.Rotation.FirstOrDefault(s => s.IsCurrent);
+            if (currentSinger == null)
+            {
+                currentSinger = _rotation.Rotation.FirstOrDefault();
+            }
+            if (currentSinger != null)
+            {
+                _rotation.DoneSingerCommand.Execute(currentSinger);
+            }
+        });
+    }
+
+    private void StopAutoAdvanceCountdown()
+    {
+        _autoAdvanceTimer?.Stop();
+        _autoAdvanceTimer = null;
+        AutoAdvanceCountdownTick?.Invoke(0, false);
     }
 }

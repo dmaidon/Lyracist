@@ -78,6 +78,9 @@ public partial class RotationViewModel : BaseViewModel
     [ObservableProperty]
     private string _newSingerKey = "0";
 
+    [ObservableProperty]
+    private string _newDuetPartnerName = string.Empty;
+
     public RotationViewModel(IDisplayService display, IMediaEngine mediaEngine)
     {
         _display = display;
@@ -145,7 +148,15 @@ public partial class RotationViewModel : BaseViewModel
             catch { }
         });
 
-        _display.UpdateRotation([.. Rotation]);
+        // Deferred: seeding runs from the RotationViewModel constructor when test
+        // mode is on, and UpdateRotation transitively resolves ShowFlowService,
+        // which depends on RotationViewModel itself. Calling it synchronously here
+        // would reenter this constructor before the DI container has cached the
+        // singleton, causing unbounded recursive construction.
+        System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+        {
+            _display.UpdateRotation([.. Rotation]);
+        });
     }
 
     public void ClearRotationQueue()
@@ -205,7 +216,7 @@ public partial class RotationViewModel : BaseViewModel
         });
     }
 
-    public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "")
+    public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "", string duetPartner = "")
     {
         // Save to singer song history database
         System.Threading.Tasks.Task.Run(() =>
@@ -243,6 +254,7 @@ public partial class RotationViewModel : BaseViewModel
                 existingSinger.Notes = notes;
                 existingSinger.Source = source;
                 existingSinger.ExternalLink = externalLink;
+                existingSinger.DuetPartnerName = duetPartner;
                 existingSinger.Score = score;
                 existingSinger.AverageRating = avgRating;
                 existingSinger.RatingCount = ratingCount;
@@ -287,6 +299,7 @@ public partial class RotationViewModel : BaseViewModel
             inactiveSinger.Notes = notes;
             inactiveSinger.Source = source;
             inactiveSinger.ExternalLink = externalLink;
+            inactiveSinger.DuetPartnerName = duetPartner;
             inactiveSinger.Score = score;
             inactiveSinger.AverageRating = avgRating;
             inactiveSinger.RatingCount = ratingCount;
@@ -332,6 +345,7 @@ public partial class RotationViewModel : BaseViewModel
             Notes = notes,
             Source = source,
             ExternalLink = externalLink,
+            DuetPartnerName = duetPartner,
             Score = score,
             AverageRating = avgRating,
             RatingCount = ratingCount,
@@ -351,12 +365,14 @@ public partial class RotationViewModel : BaseViewModel
         Rotation.Add(new Singer
         {
             Name = NewSingerName,
+            DuetPartnerName = NewDuetPartnerName,
             Notes = NewSingerNotes,
             Key = NewSingerKey
         });
 
         // Reset input properties
         NewSingerName = string.Empty;
+        NewDuetPartnerName = string.Empty;
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";
 
@@ -524,9 +540,22 @@ public partial class RotationViewModel : BaseViewModel
         foreach (var s in Rotation)
         {
             s.IsCurrent = (s == singer);
-            if (s == singer)
+            s.IsNext = false;
+        }
+
+        // Next is always whoever sequentially follows the newly-current singer in the
+        // rotation, wrapping around — matching KSRotation. Computed here (rather than
+        // left for a downstream listener) so every display picks up the correct value
+        // as soon as this command pushes the update out.
+        int currentIndex = Rotation.IndexOf(singer);
+        for (int i = 1; i <= Rotation.Count; i++)
+        {
+            int nextIndex = (currentIndex + i) % Rotation.Count;
+            var candidate = Rotation[nextIndex];
+            if (candidate != singer && !candidate.IsPaused && !candidate.IsInactive)
             {
-                s.IsNext = false;
+                candidate.IsNext = true;
+                break;
             }
         }
 

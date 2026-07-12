@@ -207,6 +207,47 @@
                                             <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddVenueCommand}" Appearance="Primary" Height="26" FontSize="11" />
                                         </Grid>
                                         <ui:Button Content="Remove Selected Venue" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveVenueCommand}" Appearance="Danger" HorizontalAlignment="Stretch" />
+                                        
+                                        <Separator Margin="0,12,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                                        
+                                        <TextBlock Text="Venue Graphics (Slideshow)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ListBox ItemsSource="{Binding SelectedVenueGraphics}" MaxHeight="100" Height="100" Margin="0,0,0,8" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,2">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding}" FontSize="10" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding}" />
+                                                        <ui:Button Grid.Column="1" Content="✕" 
+                                                                   Command="{Binding DataContext.RemoveVenueGraphicCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                                                                   CommandParameter="{Binding}"
+                                                                   Appearance="Transparent" 
+                                                                   Padding="4,2" 
+                                                                   FontSize="10" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <ui:Button Content="Add Graphic..." Icon="{ui:SymbolIcon Add24}" Command="{Binding AddVenueGraphicCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <!-- Auto-Advance Countdown Settings -->
+                                <GroupBox Header="Auto-Advance Countdown" Style="{StaticResource SettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <CheckBox Content="Enable Auto-Advance Countdown" IsChecked="{Binding EnableAutoAdvance, Mode=TwoWay}" Margin="0,0,0,12" />
+                                        
+                                        <TextBlock Text="Countdown Duration" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Slider Grid.Column="0" Minimum="5" Maximum="30" Value="{Binding AutoAdvanceCountdownSeconds, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                            <TextBlock Grid.Column="1" Text="{Binding AutoAdvanceCountdownSeconds, StringFormat='{}{0}s'}" FontSize="12" FontWeight="Bold" Width="30" TextAlignment="Right" VerticalAlignment="Center" Foreground="White" />
+                                        </Grid>
                                     </StackPanel>
                                 </GroupBox>
                             </StackPanel>

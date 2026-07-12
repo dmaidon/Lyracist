@@ -416,6 +416,13 @@
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center" />
 
+            <!-- Venue Graphics Slideshow Mode -->
+            <Image Source="{Binding SlideshowImagePath, TargetNullValue={x:Null}}"
+                   Stretch="Uniform"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Visibility="{Binding IsSlideshowVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+
             <!-- Fallback Text Mode -->
             <TextBlock Text="{Binding FallbackText}"
                        FontSize="48"

@@ -5,6 +5,7 @@ namespace Lyracist.Services.Media.Cdg;
 public class CdgState
 {
     public byte[,] Pixels { get; } = new byte[CdgConstants.Width, CdgConstants.Height];
+    private readonly byte[,] _tempPixels = new byte[CdgConstants.Width, CdgConstants.Height];
     public CdgPalette Palette { get; } = new CdgPalette();
 
     public CdgState()
@@ -47,8 +48,6 @@ public class CdgState
 
     public void Scroll(byte colorIndex, int hShift, int vShift, bool isCopy)
     {
-        byte[,] temp = new byte[CdgConstants.Width, CdgConstants.Height];
-
         for (int y = 0; y < CdgConstants.Height; y++)
         {
             for (int x = 0; x < CdgConstants.Width; x++)
@@ -58,7 +57,7 @@ public class CdgState
 
                 if (srcX >= 0 && srcX < CdgConstants.Width && srcY >= 0 && srcY < CdgConstants.Height)
                 {
-                    temp[x, y] = Pixels[srcX, srcY];
+                    _tempPixels[x, y] = Pixels[srcX, srcY];
                 }
                 else
                 {
@@ -67,17 +66,17 @@ public class CdgState
                         // Wrap around
                         int wrapX = (srcX % CdgConstants.Width + CdgConstants.Width) % CdgConstants.Width;
                         int wrapY = (srcY % CdgConstants.Height + CdgConstants.Height) % CdgConstants.Height;
-                        temp[x, y] = Pixels[wrapX, wrapY];
+                        _tempPixels[x, y] = Pixels[wrapX, wrapY];
                     }
                     else
                     {
                         // Preset color
-                        temp[x, y] = colorIndex;
+                        _tempPixels[x, y] = colorIndex;
                     }
                 }
             }
         }
 
-        Array.Copy(temp, Pixels, temp.Length);
+        Array.Copy(_tempPixels, Pixels, _tempPixels.Length);
     }
 }

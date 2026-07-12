@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using Lyracist.Core.Interfaces;
 using Lyracist.ViewModels;
 using Lyracist.Models;
@@ -35,9 +36,11 @@ public class TabletLyricsServer(
     private readonly Lyracist.Windows.ScaryokeWindow _scaryokeWindow = scaryokeWindow;
 
     /// <summary>Payload for POST /api/requests from the singer mobile portal.</summary>
-    public record MobileRequestDto(string? SingerName, string? Title, string? Artist, string? Source, string? Key, string? Notes);
+    public record MobileRequestDto(string? SingerName, string? Title, string? Artist, string? Source, string? Key, string? Notes, string? RequestType);
 
     public record MobileRatingDto(string? SingerName, int Rating);
+
+    public record ScaryokeSpinDto(string? SingerName);
 
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
@@ -82,23 +85,14 @@ public class TabletLyricsServer(
                     return Results.BadRequest(new { error = "Title is required." });
                 }
 
-                string title = dto.Title;
-                if (!string.IsNullOrWhiteSpace(dto.Key) && dto.Key != "0")
-                {
-                    title += $" [{dto.Key}]";
-                }
-
-                string artist = dto.Artist ?? string.Empty;
-                if (!string.IsNullOrWhiteSpace(dto.Notes))
-                {
-                    artist += $" (Notes: {dto.Notes})";
-                }
-
                 var request = _requests.AddRequest(
                     dto.SingerName ?? "Anonymous",
-                    title,
-                    artist,
-                    dto.Source ?? "Portal");
+                    dto.Title,
+                    dto.Artist ?? string.Empty,
+                    dto.Source ?? "Portal",
+                    dto.RequestType ?? "Karaoke",
+                    dto.Key ?? "0",
+                    dto.Notes ?? string.Empty);
                 return Results.Ok(request);
             });
 
@@ -117,7 +111,7 @@ public class TabletLyricsServer(
                 try
                 {
                     using var context = new Lyracist.Data.LyracistDbContext();
-                    var dbSinger = context.Singers.FirstOrDefault(s => s.Name == dto.SingerName);
+                    var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == dto.SingerName);
                     if (dbSinger != null)
                     {
                         int pointsEarned = dto.Rating * 10;
@@ -132,8 +126,8 @@ public class TabletLyricsServer(
                         context.Singers.Update(dbSinger);
                         await context.SaveChangesAsync();
 
-                        // Update active rotation memory model
-                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        // Update active rotation memory model asynchronously
+                        _ = System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             var activeSinger = _rotation.Rotation.FirstOrDefault(s => s.Name.Equals(dto.SingerName, StringComparison.OrdinalIgnoreCase));
                             if (activeSinger != null)
@@ -143,7 +137,7 @@ public class TabletLyricsServer(
                                 activeSinger.RatingCount = dbSinger.RatingCount;
                             }
                             _rotation.NotifyRotationReordered();
-                        });
+                        }));
 
                         // Rebroadcast updated rating live to other performers
                         _ = BroadcastActiveSingerAsync();
@@ -158,9 +152,33 @@ public class TabletLyricsServer(
                 }
             });
 
-            _webApp.MapGet("/api/scaryoke/categories", () => Results.Json(_scaryokeWindow.ViewModel.WheelSegments));
-            _webApp.MapPost("/api/scaryoke/spin", () =>
+            _webApp.MapGet("/api/scaryoke/enabled", () => Results.Json(new { enabled = _karaoke.IsScaryokeMode }));
+
+            _webApp.MapGet("/api/scaryoke/categories", () =>
             {
+                if (!_karaoke.IsScaryokeMode)
+                {
+                    return Results.StatusCode(StatusCodes.Status403Forbidden);
+                }
+                return Results.Json(_scaryokeWindow.ViewModel.WheelSegments);
+            });
+            _webApp.MapPost("/api/scaryoke/spin", (ScaryokeSpinDto? dto) =>
+            {
+                if (!_karaoke.IsScaryokeMode)
+                {
+                    return Results.StatusCode(StatusCodes.Status403Forbidden);
+                }
+
+                bool isCurrentPerformer =
+                    !string.IsNullOrWhiteSpace(dto?.SingerName) &&
+                    !_karaoke.NowSingingName.Equals("None", StringComparison.OrdinalIgnoreCase) &&
+                    _karaoke.NowSingingName.Equals(dto!.SingerName, StringComparison.OrdinalIgnoreCase);
+
+                if (!isCurrentPerformer)
+                {
+                    return Results.Json(new { error = "Only the current performer can spin the wheel." }, statusCode: StatusCodes.Status403Forbidden);
+                }
+
                 System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     var wheel = App.AppHost.Services.GetRequiredService<Lyracist.Windows.ScaryokeWindow>();
@@ -221,11 +239,28 @@ public class TabletLyricsServer(
                 return Results.Json(queueList);
             });
 
-            _webApp.MapGet("/api/catalog", (string? query, ILibraryService library, IOccasionService occasions) =>
+            _webApp.MapGet("/api/catalog", async (string? query, string? scope, ILibraryService library, IOccasionService occasions) =>
             {
                 var list = new List<object>();
 
-                var localMatch = library.Search(query ?? "");
+                if (string.Equals(scope, "music", StringComparison.OrdinalIgnoreCase))
+                {
+                    var musicMatch = library.GetBackgroundMusicSongs();
+                    if (!string.IsNullOrWhiteSpace(query))
+                    {
+                        musicMatch = musicMatch.Where(s =>
+                            s.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                            s.Artist.Contains(query, StringComparison.OrdinalIgnoreCase));
+                    }
+                    foreach (var song in musicMatch.Take(50))
+                    {
+                        list.Add(new { title = song.Title, artist = song.Artist, source = "Local" });
+                    }
+
+                    return Results.Json(list.Take(50));
+                }
+
+                var localMatch = await library.SearchAsync(query ?? "");
                 foreach (var song in localMatch.Take(30))
                 {
                     list.Add(new { title = song.Title, artist = song.Artist, source = "Local" });
@@ -515,8 +550,9 @@ public class TabletLyricsServer(
                     <div class="tabs">
                         <button id="tab-queue" class="tab-btn active" onclick="switchTab('queue')">Queue Status</button>
                         <button id="tab-catalog" class="tab-btn" onclick="switchTab('catalog')">Search Catalog</button>
+                        <button id="tab-music" class="tab-btn" onclick="switchTab('music')">Search Music</button>
                         <button id="tab-custom" class="tab-btn" onclick="switchTab('custom')">Custom Link</button>
-                        <button id="tab-scaryoke" class="tab-btn" onclick="switchTab('scaryoke')">Scaryoke</button>
+                        <button id="tab-scaryoke" class="tab-btn" style="display:none;" onclick="switchTab('scaryoke')">Scaryoke</button>
                         <button id="tab-logs" class="tab-btn" onclick="switchTab('logs')">Logs</button>
                     </div>
 
@@ -537,8 +573,26 @@ public class TabletLyricsServer(
                         </div>
                     </div>
 
+                    <!-- Search Music Tab Content -->
+                    <div id="content-music" class="tab-content card">
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">Request a track to be played in the background — no performance, just music.</div>
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <input id="music-search" type="text" placeholder="Search by title or artist..." oninput="debounceMusicSearch()" />
+                        </div>
+                        <div id="music-list" class="search-results">
+                            <div class="no-data">Type to search the music library...</div>
+                        </div>
+                    </div>
+
                     <!-- Custom Link Tab Content -->
                     <div id="content-custom" class="tab-content card">
+                        <div class="form-group">
+                            <label>Request Type</label>
+                            <div style="display: flex; gap: 8px;">
+                                <label style="display: flex; align-items: center; gap: 6px; font-weight: normal;"><input type="radio" name="custom-type" value="Karaoke" checked onchange="onCustomTypeChanged()" /> Karaoke (I'm performing)</label>
+                                <label style="display: flex; align-items: center; gap: 6px; font-weight: normal;"><input type="radio" name="custom-type" value="Music" onchange="onCustomTypeChanged()" /> Music (just play it)</label>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label>Music/Video Link</label>
                             <input id="custom-url" type="text" placeholder="Paste Spotify, YouTube, or Amazon Link..." />
@@ -551,7 +605,7 @@ public class TabletLyricsServer(
                             <label>Artist Name</label>
                             <input id="custom-artist" type="text" placeholder="E.g. Coldplay..." />
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="custom-key-group">
                             <label>Key Transposition</label>
                             <select id="custom-key">
                                 <option value="-6">-6 semitones</option>
@@ -570,7 +624,7 @@ public class TabletLyricsServer(
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Performer Notes</label>
+                            <label>Notes</label>
                             <textarea id="custom-notes" placeholder="Notes for the KJ..." rows="2"></textarea>
                         </div>
                         <button class="btn-primary" onclick="submitCustomRequest()">Submit Request</button>
@@ -589,8 +643,9 @@ public class TabletLyricsServer(
                         
                         <div style="margin-top: 10px;">
                             <button id="btn-spin-wheel" class="btn-primary" style="max-width: 200px; margin: 0 auto; display: block;" onclick="requestSpin()">SPIN WHEEL</button>
+                            <div id="scaryoke-not-your-turn" style="display: none; font-size: 12px; color: var(--text-secondary); max-width: 240px; margin: 0 auto;">🎤 Only the current performer can spin. Watch here for the results!</div>
                         </div>
-                        
+
                         <div id="scaryoke-result" style="margin-top: 16px; font-size: 15px; font-weight: bold; color: var(--partytyme); height: 24px;"></div>
                     </div>
 
@@ -613,7 +668,7 @@ public class TabletLyricsServer(
                     <div id="modal-title" class="modal-title">Song Title</div>
                     <div id="modal-artist" class="modal-artist">Artist</div>
                     
-                    <div class="form-group">
+                    <div class="form-group" id="request-key-group">
                         <label>Key Transposition</label>
                         <select id="request-key">
                             <option value="-6">-6 semitones</option>
@@ -631,9 +686,9 @@ public class TabletLyricsServer(
                             <option value="+6">+6 semitones</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label>Performer Notes</label>
+                        <label>Notes</label>
                         <textarea id="request-notes" placeholder="Any special requests or instructions..." rows="2"></textarea>
                     </div>
                     
@@ -648,6 +703,7 @@ public class TabletLyricsServer(
 
             <script>
                 let singerName = "";
+                let currentPerformerName = "None";
                 let selectedCatalogTrack = null;
                 let searchTimeout = null;
 
@@ -685,7 +741,9 @@ public class TabletLyricsServer(
                     document.getElementById("join-screen").style.display = "none";
                     document.getElementById("dashboard-screen").style.display = "block";
                     document.getElementById("display-name").textContent = singerName;
-                    
+
+                    checkScaryokeAvailability();
+
                     if (typeof signalR !== 'undefined') {
                         connection = new signalR.HubConnectionBuilder()
                             .withUrl("/lyricsHub")
@@ -700,9 +758,12 @@ public class TabletLyricsServer(
                             const showRating = active.isRatingSystemEnabled && active.avgRating > 0;
                             const symbol = active.ratingSymbol || "⭐";
                             const ratingSuffix = showRating ? ` (${symbol} ${active.avgRating})` : "";
-                            
+
                             document.getElementById("now-name").textContent = active.name + ratingSuffix;
                             document.getElementById("now-song").textContent = active.song;
+
+                            currentPerformerName = active.name || "None";
+                            updateScaryokeSpinPermission();
                             
                             const rateCard = document.getElementById("rating-card");
                             if (active.name && active.name !== "None" && active.name.toLowerCase() !== singerName.toLowerCase()) {
@@ -754,6 +815,10 @@ public class TabletLyricsServer(
                             document.getElementById("btn-spin-wheel").disabled = false;
                         });
 
+                        connection.on("ScaryokeAvailabilityChanged", (data) => {
+                            setScaryokeTabVisible(data.enabled);
+                        });
+
                         connection.start().then(() => {
                             console.log("SignalR connected!");
                         }).catch(err => {
@@ -769,19 +834,58 @@ public class TabletLyricsServer(
                 function startPolling() {
                     refreshQueue();
                     setInterval(refreshQueue, 5000);
+                    setInterval(checkScaryokeAvailability, 5000);
+                }
+
+                async function checkScaryokeAvailability() {
+                    try {
+                        const res = await fetch("/api/scaryoke/enabled");
+                        if (res.ok) {
+                            const data = await res.json();
+                            setScaryokeTabVisible(data.enabled);
+                        }
+                    } catch (err) {
+                        console.error("Failed to check scaryoke availability", err);
+                    }
+                }
+
+                function setScaryokeTabVisible(enabled) {
+                    const tabBtn = document.getElementById("tab-scaryoke");
+                    tabBtn.style.display = enabled ? "" : "none";
+
+                    // If the DJ turned it off while a guest was on that tab, bounce back to the queue.
+                    if (!enabled && tabBtn.classList.contains("active")) {
+                        switchTab("queue");
+                    }
+                }
+
+                function updateScaryokeSpinPermission() {
+                    const btn = document.getElementById("btn-spin-wheel");
+                    const notice = document.getElementById("scaryoke-not-your-turn");
+                    if (!btn || !notice) return;
+
+                    const isCurrentPerformer = !!singerName && !!currentPerformerName &&
+                        currentPerformerName.toLowerCase() !== "none" &&
+                        singerName.toLowerCase() === currentPerformerName.toLowerCase();
+
+                    btn.style.display = isCurrentPerformer ? "block" : "none";
+                    notice.style.display = isCurrentPerformer ? "none" : "block";
                 }
 
                 function switchTab(tabId) {
                     document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
                     document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
-                    
+
                     document.getElementById("tab-" + tabId).classList.add("active");
                     document.getElementById("content-" + tabId).classList.add("active");
 
                     if (tabId === 'catalog') {
                         document.getElementById("catalog-search").focus();
+                    } else if (tabId === 'music') {
+                        document.getElementById("music-search").focus();
                     } else if (tabId === 'scaryoke') {
                         loadScaryoke();
+                        updateScaryokeSpinPermission();
                     } else if (tabId === 'logs') {
                         refreshLogs();
                     }
@@ -823,7 +927,10 @@ public class TabletLyricsServer(
 
                     document.getElementById("now-name").textContent = nowSinging ? nowSinging.name : "None";
                     document.getElementById("now-song").textContent = nowSinging ? `${nowSinging.artist} - ${nowSinging.songTitle}` : "No Song Loaded";
-                    
+
+                    currentPerformerName = nowSinging ? nowSinging.name : "None";
+                    updateScaryokeSpinPermission();
+
                     document.getElementById("next-name").textContent = nextUp ? nextUp.name : "None";
                     document.getElementById("next-song").textContent = nextUp ? `${nextUp.artist} - ${nextUp.songTitle}` : "No Song Loaded";
 
@@ -892,7 +999,7 @@ public class TabletLyricsServer(
                     songs.forEach((song, idx) => {
                         const badgeClass = `badge-source badge-${song.source.toLowerCase()}`;
                         html += `
-                            <div class="search-item" onclick='openRequestModal(${JSON.stringify(song)})'>
+                            <div class="search-item" onclick='openRequestModal(${JSON.stringify(song)}, "Karaoke")'>
                                 <div class="search-item-info">
                                     <span class="search-item-title">${song.title}</span>
                                     <span class="search-item-artist">${song.artist}</span>
@@ -904,13 +1011,65 @@ public class TabletLyricsServer(
                     container.innerHTML = html;
                 }
 
-                function openRequestModal(song) {
-                    selectedCatalogTrack = song;
+                let musicSearchTimeout = null;
+
+                function debounceMusicSearch() {
+                    clearTimeout(musicSearchTimeout);
+                    musicSearchTimeout = setTimeout(performMusicSearch, 300);
+                }
+
+                async function performMusicSearch() {
+                    const query = document.getElementById("music-search").value.trim();
+                    const container = document.getElementById("music-list");
+
+                    if (!query) {
+                        container.innerHTML = '<div class="no-data">Type to search the music library...</div>';
+                        return;
+                    }
+
+                    container.innerHTML = '<div class="no-data">Searching music library...</div>';
+
+                    try {
+                        const res = await fetch(`/api/catalog?scope=music&query=${encodeURIComponent(query)}`);
+                        if (res.ok) {
+                            const songs = await res.json();
+                            renderMusicCatalog(songs);
+                        }
+                    } catch (err) {
+                        container.innerHTML = '<div class="no-data">Search failed. Try again.</div>';
+                    }
+                }
+
+                function renderMusicCatalog(songs) {
+                    const container = document.getElementById("music-list");
+                    if (songs.length === 0) {
+                        container.innerHTML = '<div class="no-data">No matching tracks found. Try a different query.</div>';
+                        return;
+                    }
+
+                    let html = "";
+                    songs.forEach((song) => {
+                        html += `
+                            <div class="search-item" onclick='openRequestModal(${JSON.stringify(song)}, "Music")'>
+                                <div class="search-item-info">
+                                    <span class="search-item-title">${song.title}</span>
+                                    <span class="search-item-artist">${song.artist}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    container.innerHTML = html;
+                }
+
+                function openRequestModal(song, type) {
+                    selectedCatalogTrack = { ...song, requestType: type || "Karaoke" };
                     document.getElementById("modal-title").textContent = song.title;
                     document.getElementById("modal-artist").textContent = song.artist;
                     document.getElementById("request-key").value = "0";
                     document.getElementById("request-notes").value = "";
                     document.getElementById("request-msg").textContent = "";
+                    document.getElementById("request-key-group").style.display =
+                        selectedCatalogTrack.requestType === "Music" ? "none" : "block";
                     document.getElementById("request-modal").style.display = "flex";
                 }
 
@@ -938,6 +1097,7 @@ public class TabletLyricsServer(
                                 title: selectedCatalogTrack.title,
                                 artist: selectedCatalogTrack.artist,
                                 source: selectedCatalogTrack.source,
+                                requestType: selectedCatalogTrack.requestType || "Karaoke",
                                 key: key,
                                 notes: notes
                             })
@@ -945,7 +1105,9 @@ public class TabletLyricsServer(
 
                         if (res.ok) {
                             msgDiv.style.color = "var(--success)";
-                            msgDiv.textContent = "Request queued successfully! 🎤";
+                            msgDiv.textContent = selectedCatalogTrack.requestType === "Music"
+                                ? "Request queued successfully! 🎶"
+                                : "Request queued successfully! 🎤";
                             setTimeout(() => {
                                 closeRequestModal();
                                 switchTab("queue");
@@ -961,11 +1123,17 @@ public class TabletLyricsServer(
                     }
                 }
 
+                function onCustomTypeChanged() {
+                    const type = document.querySelector('input[name="custom-type"]:checked').value;
+                    document.getElementById("custom-key-group").style.display = type === "Music" ? "none" : "block";
+                }
+
                 async function submitCustomRequest() {
                     const url = document.getElementById("custom-url").value.trim();
                     const title = document.getElementById("custom-title").value.trim();
                     const artist = document.getElementById("custom-artist").value.trim();
                     const msgDiv = document.getElementById("custom-msg");
+                    const requestType = document.querySelector('input[name="custom-type"]:checked').value;
 
                     if (!url) {
                         msgDiv.textContent = "Please paste a music URL!";
@@ -995,6 +1163,7 @@ public class TabletLyricsServer(
                                 title: title,
                                 artist: artist || "Unknown Artist",
                                 source: source,
+                                requestType: requestType,
                                 key: key,
                                 notes: `[Link: ${url}] ${notes}`
                             })
@@ -1003,7 +1172,7 @@ public class TabletLyricsServer(
                         if (res.ok) {
                             msgDiv.style.color = "var(--success)";
                             msgDiv.textContent = "Custom request queued successfully! 🎶";
-                            
+
                             document.getElementById("custom-url").value = "";
                             document.getElementById("custom-title").value = "";
                             document.getElementById("custom-artist").value = "";
@@ -1184,10 +1353,19 @@ public class TabletLyricsServer(
                         btn.disabled = true;
                         document.getElementById("scaryoke-result").textContent = "Spinning...";
                         try {
-                            const res = await fetch("/api/scaryoke/spin", { method: "POST" });
+                            const res = await fetch("/api/scaryoke/spin", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ singerName: singerName })
+                            });
                             if (!res.ok) {
                                 btn.disabled = false;
-                                document.getElementById("scaryoke-result").textContent = "Failed to trigger spin.";
+                                if (res.status === 403) {
+                                    document.getElementById("scaryoke-result").textContent = "Only the current performer can spin.";
+                                    updateScaryokeSpinPermission();
+                                } else {
+                                    document.getElementById("scaryoke-result").textContent = "Failed to trigger spin.";
+                                }
                             }
                         } catch (err) {
                             console.error("Failed to request spin", err);
@@ -1217,6 +1395,24 @@ public class TabletLyricsServer(
                  e.PropertyName == nameof(KaraokeViewModel.NextUpSong))
         {
             _ = BroadcastNextSingerAsync();
+        }
+        else if (e.PropertyName == nameof(KaraokeViewModel.IsScaryokeMode))
+        {
+            _ = BroadcastScaryokeAvailabilityAsync();
+        }
+    }
+
+    private async Task BroadcastScaryokeAvailabilityAsync()
+    {
+        if (_webApp == null) return;
+        try
+        {
+            var hubContext = _webApp.Services.GetRequiredService<IHubContext<LyricsHub>>();
+            await hubContext.Clients.All.SendAsync("ScaryokeAvailabilityChanged", new { enabled = _karaoke.IsScaryokeMode });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error broadcasting scaryoke availability: {ex.Message}");
         }
     }
 

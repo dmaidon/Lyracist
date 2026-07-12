@@ -10,6 +10,9 @@ public class RequestInfo
     public string Title { get; set; } = string.Empty;
     public string Artist { get; set; } = string.Empty;
     public string Source { get; set; } = "Local";
+    public string RequestType { get; set; } = "Karaoke";
+    public string Key { get; set; } = "0";
+    public string Notes { get; set; } = string.Empty;
     public string Status { get; set; } = "Pending";
     public DateTime Timestamp { get; set; }
 }

@@ -27,14 +27,15 @@ public class RequestService : IRequestService
         using var context = new LyracistDbContext();
         return [.. context.MusicRequests
             .Include(r => r.Singer)
-            .Where(r => r.Status == "Played" || r.Status == "Rejected")
+            .Where(r => r.Status == "Played" || r.Status == "Rejected" || r.Status == "Queued")
             .OrderByDescending(r => r.Timestamp)
             .Take(200)
             .ToList()
             .Select(Map)];
     }
 
-    public RequestInfo AddRequest(string singerName, string title, string artist, string source = "Local")
+    public RequestInfo AddRequest(string singerName, string title, string artist, string source = "Local",
+        string requestType = "Karaoke", string key = "0", string notes = "")
     {
         using var context = new LyracistDbContext();
 
@@ -48,6 +49,9 @@ public class RequestService : IRequestService
             Title = title.Trim(),
             Artist = artist.Trim(),
             Source = string.IsNullOrWhiteSpace(source) ? "Local" : source,
+            RequestType = string.IsNullOrWhiteSpace(requestType) ? "Karaoke" : requestType,
+            Key = string.IsNullOrWhiteSpace(key) ? "0" : key,
+            Notes = notes?.Trim() ?? string.Empty,
             Status = "Pending",
             Timestamp = DateTime.UtcNow
         };
@@ -61,6 +65,7 @@ public class RequestService : IRequestService
     public void Approve(int requestId) => SetStatus(requestId, "Approved");
     public void Reject(int requestId) => SetStatus(requestId, "Rejected");
     public void MarkPlayed(int requestId) => SetStatus(requestId, "Played");
+    public void MarkQueued(int requestId) => SetStatus(requestId, "Queued");
 
     private void SetStatus(int requestId, string status)
     {
@@ -91,6 +96,9 @@ public class RequestService : IRequestService
         Title = request.Title,
         Artist = request.Artist,
         Source = request.Source,
+        RequestType = request.RequestType,
+        Key = request.Key,
+        Notes = request.Notes,
         Status = request.Status,
         Timestamp = request.Timestamp.ToLocalTime()
     };

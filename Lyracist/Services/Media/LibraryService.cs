@@ -114,8 +114,8 @@ public class LibraryService : ILibraryService
             }
 
             var searchService = new SearchService(context);
-            // Run matching search on SQLite FTS5 table
-            var results = Task.Run(() => searchService.Search(query)).Result;
+            // Run matching search synchronously on SQLite FTS5 table
+            var results = searchService.SearchSync(query);
             return results.Where(s => s.IsKaraoke).Select(MapToKaraokeSong);
         }
         catch (Exception ex)

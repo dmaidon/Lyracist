@@ -61,7 +61,7 @@ public partial class HelpViewModel : BaseViewModel
             },
             new() {
                 Title = "6. Settings: Audio & DSP Engine",
-                Icon = "Equalizer24",
+                Icon = "Settings24",
                 AccentColor = "#A700EC",
                 DescriptionHeader = "Global Equalizer, Compressor, and Peak Limiter",
                 DescriptionContent = "• Global EQ defaults: 3-band tone balancing. Adjust Bass (low frequencies), Midrange (vocal clarity), and Treble (vocal presence) sliders from -20dB to +20dB. Click Reset to revert to default settings.\n\n• Global Key/Tempo: Sets default transpositions (semitone adjustments) and playback speeds.\n\n• Dynamic Compressor: Evens out voice fluctuations by boosting quiet sections and ducking loud parts.\n\n• Peak Limiter: Clamps sound levels to prevent digital clipping, microphone feedback, or hardware speaker damage."

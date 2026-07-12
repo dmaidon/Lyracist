@@ -108,12 +108,36 @@ public class BackgroundMusicPlayer : IDisposable
 
     public void LoadPlaylist(IReadOnlyList<string> trackPaths)
     {
-        _playlist = [.. trackPaths.Where(File.Exists)];
+        _playlist = [.. trackPaths];
         ShufflePlaylist();
         if (_currentIndex >= _playlist.Count)
         {
             _currentIndex = _playlist.Count > 0 ? 0 : -1;
         }
+
+        // Validate paths asynchronously in background to prune invalid entries
+        var pathsCopy = trackPaths.ToList();
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            var validPaths = pathsCopy.Where(File.Exists).ToList();
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                // Preserve current track if it's still valid
+                string? currentTrack = _currentIndex >= 0 && _currentIndex < _playlist.Count ? _playlist[_currentIndex] : null;
+
+                _playlist = validPaths;
+                ShufflePlaylist();
+
+                if (currentTrack != null && _playlist.Contains(currentTrack))
+                {
+                    _currentIndex = _playlist.IndexOf(currentTrack);
+                }
+                else if (_currentIndex >= _playlist.Count)
+                {
+                    _currentIndex = _playlist.Count > 0 ? 0 : -1;
+                }
+            }));
+        });
     }
 
     private static readonly Random _rng = new();
@@ -128,9 +152,22 @@ public class BackgroundMusicPlayer : IDisposable
         }
     }
 
-    public void Play()
+    /// <param name="startTrackPath">
+    /// When provided and found in the loaded playlist, playback starts at that
+    /// track instead of wherever the internal (possibly shuffled) index points.
+    /// </param>
+    public void Play(string? startTrackPath = null)
     {
         if (IsPlaying || _playlist.Count == 0) return;
+
+        if (!string.IsNullOrEmpty(startTrackPath))
+        {
+            int requestedIndex = _playlist.FindIndex(p => string.Equals(p, startTrackPath, StringComparison.OrdinalIgnoreCase));
+            if (requestedIndex >= 0)
+            {
+                _currentIndex = requestedIndex;
+            }
+        }
 
         if (_currentIndex < 0) _currentIndex = 0;
         PlayTrack(_active, _playlist[_currentIndex]);
