@@ -644,6 +644,61 @@
                         </Border>
                     </Grid>
                 </TabItem>
+                <TabItem Header="Keyboard Hotkeys" FontSize="12">
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.5*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Hotkeys List -->
+                        <Border Grid.Column="0" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,16,0">
+                            <StackPanel>
+                                <TextBlock Text="Hotkey Mappings (Learn Mode)" FontSize="16" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,8"/>
+                                <TextBlock Text="Click in any input box and press a key on your keyboard to map it." FontSize="12" Foreground="#FFAAAAAA" Margin="0,0,0,20"/>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="Play / Pause" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                        <ui:TextBox Text="{Binding HkPlayPause, Mode=TwoWay}" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" IsReadOnly="True" Margin="0,0,0,12"/>
+
+                                        <TextBlock Text="Stop Playback" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                        <ui:TextBox Text="{Binding HkStop, Mode=TwoWay}" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" IsReadOnly="True" Margin="0,0,0,12"/>
+
+                                        <TextBlock Text="Done Singer (Advance)" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                        <ui:TextBox Text="{Binding HkDoneSinger, Mode=TwoWay}" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" IsReadOnly="True" Margin="0,0,0,12"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <TextBlock Text="Toggle Marquee Banner" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                        <ui:TextBox Text="{Binding HkToggleBanner, Mode=TwoWay}" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" IsReadOnly="True" Margin="0,0,0,12"/>
+
+                                        <TextBlock Text="Toggle Lyrics Window" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                        <ui:TextBox Text="{Binding HkToggleLyricsWindow, Mode=TwoWay}" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" IsReadOnly="True" Margin="0,0,0,12"/>
+
+                                        <TextBlock Text="Toggle Rotation Window" FontSize="12" FontWeight="SemiBold" Foreground="#FFAAAAAA" Margin="0,0,0,4"/>
+                                        <ui:TextBox Text="{Binding HkToggleRotationWindow, Mode=TwoWay}" PreviewKeyDown="HotkeyTextBox_PreviewKeyDown" IsReadOnly="True" Margin="0,0,0,12"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Help / Notes Panel -->
+                        <Border Grid.Column="1" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="20" VerticalAlignment="Top">
+                            <StackPanel>
+                                <TextBlock Text="ℹ️ Hotkey Usage Notes" FontSize="14" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,10"/>
+                                <TextBlock Text="• Global Intercept: Hotkeys are checked globally across the main window." TextWrapping="Wrap" FontSize="12" Foreground="#FFAAAAAA" Margin="0,0,0,6"/>
+                                <TextBlock Text="• Text Input Safety: Hotkeys are automatically disabled when you are typing inside search boxes or text fields, preventing accidental triggers." TextWrapping="Wrap" FontSize="12" Foreground="#FFAAAAAA" Margin="0,0,0,6"/>
+                                <TextBlock Text="• To clear a hotkey mapping, select the textbox and press Backspace or Delete to set it to 'None'." TextWrapping="Wrap" FontSize="12" Foreground="#FFAAAAAA"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </TabItem>
             </TabControl>
         </Grid>
     </Grid>

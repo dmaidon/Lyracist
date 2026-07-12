@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Lyracist.Core.Interfaces;
+using Lyracist.Core.Helpers;
 using Lyracist.Media.Video;
 using Lyracist.Services.Media.Cdg;
 
@@ -130,6 +131,19 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     {
         get => _video.Compressor;
         set => _video.Compressor = value;
+    }
+
+    public bool EnableKillVocal
+    {
+        get => _video.EnableKillVocal;
+        set
+        {
+            if (_video.EnableKillVocal != value)
+            {
+                _video.EnableKillVocal = value;
+                AppSettings.EnableKillVocal = value;
+            }
+        }
     }
 
     public double Limiter
@@ -391,6 +405,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
             _video.Bass = 0.0;
             _video.Compressor = 0.0;
             _video.Limiter = 0.0;
+            _video.EnableKillVocal = AppSettings.EnableKillVocal;
             return;
         }
 
@@ -464,5 +479,6 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         _video.Bass = mergedBass;
         _video.Compressor = mergedCompressor;
         _video.Limiter = mergedLimiter;
+        _video.EnableKillVocal = AppSettings.EnableKillVocal;
     }
 }

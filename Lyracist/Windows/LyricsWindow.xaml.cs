@@ -3,12 +3,16 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Lyracist.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Lyracist.Windows;
 
 public partial class LyricsWindow : Window
 {
     private readonly LyricsWindowViewModel _vm;
+    private readonly System.Random _rng = new();
+    private double[] _barHeights = new double[40];
+    private double[] _targetHeights = new double[40];
 
     public LyricsWindow(LyricsWindowViewModel vm)
     {
@@ -17,6 +21,7 @@ public partial class LyricsWindow : Window
         DataContext = vm;
 
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived += OnReactionReceived;
+        System.Windows.Media.CompositionTarget.Rendering += OnCompositionTargetRendering;
     }
 
     protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
@@ -74,6 +79,68 @@ public partial class LyricsWindow : Window
         WindowState = WindowState == WindowState.Maximized
             ? WindowState.Normal
             : WindowState.Maximized;
+    }
+
+    private void OnCompositionTargetRendering(object? sender, System.EventArgs e)
+    {
+        if (!IsVisible || VisualizerCanvas == null) return;
+
+        double width = VisualizerCanvas.ActualWidth;
+        double height = VisualizerCanvas.ActualHeight;
+        if (width <= 0 || height <= 0) return;
+
+        VisualizerCanvas.Children.Clear();
+
+        var karaoke = App.AppHost.Services.GetService<KaraokeViewModel>();
+        bool isPlaying = karaoke != null && karaoke.IsPlaying;
+
+        int numBars = 40;
+        double barWidth = width / numBars;
+        double decay = 0.15;
+        double rise = 0.4;
+
+        for (int i = 0; i < numBars; i++)
+        {
+            if (isPlaying)
+            {
+                if (_rng.Next(10) > 7)
+                {
+                    double volFactor = karaoke != null ? (karaoke.Volume / 100.0) : 1.0;
+                    _targetHeights[i] = _rng.NextDouble() * height * 0.7 * volFactor;
+                }
+            }
+            else
+            {
+                double time = System.DateTime.Now.TimeOfDay.TotalSeconds;
+                _targetHeights[i] = (System.Math.Sin(time * 2.0 + i * 0.3) + 1.0) * 0.5 * height * 0.15;
+            }
+
+            _barHeights[i] += (_targetHeights[i] - _barHeights[i]) * (isPlaying ? rise : decay);
+
+            var rect = new System.Windows.Shapes.Rectangle
+            {
+                Width = System.Math.Max(1.0, barWidth - 2),
+                Height = System.Math.Max(4, _barHeights[i]),
+                RadiusX = 3,
+                RadiusY = 3,
+                Fill = new System.Windows.Media.LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 1),
+                    EndPoint = new System.Windows.Point(0, 0),
+                    GradientStops =
+                    {
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(37, 99, 235), 0.0), // Blue
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(168, 85, 247), 0.5), // Purple
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(236, 72, 153), 1.0) // Pink
+                    }
+                },
+                Opacity = isPlaying ? 0.65 : 0.25
+            };
+
+            Canvas.SetLeft(rect, i * barWidth + 1);
+            Canvas.SetBottom(rect, 0);
+            VisualizerCanvas.Children.Add(rect);
+        }
     }
 
     private void OnReactionReceived(string emoji)

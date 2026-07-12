@@ -31,5 +31,6 @@ public interface IMediaEngine
 
     string? ActiveSingerName { get; set; }
     string? ActiveDuetPartnerName { get; set; }
+    bool EnableKillVocal { get; set; }
     void UpdateAudioParameters();
 }

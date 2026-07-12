@@ -525,6 +525,9 @@
             </StackPanel>
         </Border>
 
+        <!-- Audio Visualizer Canvas -->
+        <Canvas x:Name="VisualizerCanvas" Height="150" VerticalAlignment="Bottom" IsHitTestVisible="False" Background="Transparent" Opacity="0.8"/>
+
         <!-- Floating Emoji Reactions Overlay -->
         <Canvas x:Name="ReactionsCanvas" IsHitTestVisible="False" Background="Transparent" />
     </Grid>

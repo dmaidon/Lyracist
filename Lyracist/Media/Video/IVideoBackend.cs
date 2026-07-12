@@ -25,4 +25,5 @@ public interface IVideoBackend
     double Bass { get; set; }
     double Compressor { get; set; }
     double Limiter { get; set; }
+    bool EnableKillVocal { get; set; }
 }

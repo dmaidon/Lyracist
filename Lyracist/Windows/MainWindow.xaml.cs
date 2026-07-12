@@ -66,6 +66,84 @@ public partial class MainWindow : FluentWindow
         RootNavigation.SetPageProviderService(pageProvider);
 
         Loaded += OnMainWindowLoaded;
+        PreviewKeyDown += OnMainWindowPreviewKeyDown;
+    }
+
+    private void OnMainWindowPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        // Bypass hotkeys if the user is typing in a text input control
+        var focused = System.Windows.Input.Keyboard.FocusedElement;
+        if (focused is System.Windows.Controls.TextBox || focused is System.Windows.Controls.PasswordBox)
+        {
+            return;
+        }
+
+        // Get key string representation (e.g. "Space", "Return", "Escape", "F5", "F6")
+        string keyStr = e.Key == System.Windows.Input.Key.System ? e.SystemKey.ToString() : e.Key.ToString();
+        var hotkeys = Core.Helpers.AppSettings.Hotkeys;
+        if (hotkeys.TryGetValue(keyStr, out string? action) && !string.IsNullOrWhiteSpace(action))
+        {
+            e.Handled = true;
+            ExecuteHotkeyAction(action);
+        }
+    }
+
+    private void ExecuteHotkeyAction(string action)
+    {
+        try
+        {
+            switch (action)
+            {
+                case "PlayPause":
+                    if (_karaokeViewModel.IsPlaying)
+                    {
+                        if (_karaokeViewModel.PauseCommand.CanExecute(null))
+                        {
+                            _karaokeViewModel.PauseCommand.Execute(null);
+                        }
+                    }
+                    else
+                    {
+                        if (_karaokeViewModel.PlayCommand.CanExecute(null))
+                        {
+                            _karaokeViewModel.PlayCommand.Execute(null);
+                        }
+                    }
+                    break;
+                case "Stop":
+                    if (_karaokeViewModel.StopCommand.CanExecute(null))
+                    {
+                        _karaokeViewModel.StopCommand.Execute(null);
+                    }
+                    break;
+                case "DoneSinger":
+                    var currentSinger = _rotationViewModel.Rotation.FirstOrDefault(s => s.IsCurrent);
+                    if (currentSinger != null && _rotationViewModel.DoneSingerCommand.CanExecute(currentSinger))
+                    {
+                        _rotationViewModel.DoneSingerCommand.Execute(currentSinger);
+                    }
+                    break;
+                case "ToggleBanner":
+                    _karaokeViewModel.ShowRotationBanner = !_karaokeViewModel.ShowRotationBanner;
+                    break;
+                case "ToggleLyricsWindow":
+                    if (ShowLyricsCommand.CanExecute(null))
+                    {
+                        ShowLyricsCommand.Execute(null);
+                    }
+                    break;
+                case "ToggleRotationWindow":
+                    if (ShowRotationCommand.CanExecute(null))
+                    {
+                        ShowRotationCommand.Execute(null);
+                    }
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to execute hotkey action '{action}': {ex.Message}");
+        }
     }
 
     private void OnMainWindowLoaded(object sender, System.Windows.RoutedEventArgs e)

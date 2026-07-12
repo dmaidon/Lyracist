@@ -636,10 +636,57 @@ public static class AppSettings
         }
     }
 
+    // ─── Hotkeys & KillVocal Settings ────────────────────────────────────────
+
+    public static Dictionary<string, string> Hotkeys
+    {
+        get
+        {
+            lock (_lock)
+            {
+                if (_data.Hotkeys == null || _data.Hotkeys.Count == 0)
+                {
+                    _data.Hotkeys = GetDefaultHotkeys();
+                }
+                return new Dictionary<string, string>(_data.Hotkeys, StringComparer.OrdinalIgnoreCase);
+            }
+        }
+        set
+        {
+            lock (_lock)
+            {
+                _data.Hotkeys = value ?? GetDefaultHotkeys();
+                Save();
+            }
+        }
+    }
+
+    private static Dictionary<string, string> GetDefaultHotkeys()
+    {
+        return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Space", "PlayPause" },
+            { "Return", "DoneSinger" },
+            { "Escape", "Stop" },
+            { "Back", "ToggleBanner" },
+            { "F5", "ToggleLyricsWindow" },
+            { "F6", "ToggleRotationWindow" }
+        };
+    }
+
+    public static bool EnableKillVocal
+    {
+        get => _data.EnableKillVocal;
+        set { _data.EnableKillVocal = value; Save(); }
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
     {
+        public Dictionary<string, string> Hotkeys { get; set; } = [];
+        public bool EnableKillVocal { get; set; } = false;
+
         // Registration data
         public string RegFirstName { get; set; } = string.Empty;
         public string RegLastName { get; set; } = string.Empty;

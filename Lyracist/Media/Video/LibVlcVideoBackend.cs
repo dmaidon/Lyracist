@@ -42,6 +42,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
     private double _bass = 0.0;
     private double _compressor = 0.0;
     private double _limiter = 0.0;
+    private bool _enableKillVocal = false;
 
     public event EventHandler<VideoFrame>? FrameReady;
 
@@ -74,14 +75,48 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         set => _pitchShift = Math.Clamp(value, -6, 6); // Note: Native pitch transposition simulation
     }
 
+    private void UpdateEqualizer()
+    {
+        if (_equalizer == null) return;
+
+        if (_enableKillVocal)
+        {
+            // Cut vocal bands completely (-20dB represents complete suppression in LibVLC)
+            foreach (uint band in MidBands) _equalizer.SetAmp(-20.0f, band);
+            // Boost Bass and Treble slightly to emphasize accompaniment tracks
+            foreach (uint band in BassBands) _equalizer.SetAmp((float)Math.Clamp(_bass + 4.0, -20.0, 20.0), band);
+            foreach (uint band in TrebleBands) _equalizer.SetAmp((float)Math.Clamp(_treble + 2.0, -20.0, 20.0), band);
+        }
+        else
+        {
+            foreach (uint band in BassBands) _equalizer.SetAmp((float)_bass, band);
+            foreach (uint band in MidBands) _equalizer.SetAmp((float)_mid, band);
+            foreach (uint band in TrebleBands) _equalizer.SetAmp((float)_treble, band);
+        }
+
+        _mediaPlayer?.SetEqualizer(_equalizer);
+    }
+
+    public bool EnableKillVocal
+    {
+        get => _enableKillVocal;
+        set
+        {
+            if (_enableKillVocal != value)
+            {
+                _enableKillVocal = value;
+                UpdateEqualizer();
+            }
+        }
+    }
+
     public double Treble
     {
         get => _treble;
         set
         {
             _treble = Math.Clamp(value, -20.0, 20.0);
-            foreach (uint band in TrebleBands) _equalizer.SetAmp((float)_treble, band);
-            _mediaPlayer?.SetEqualizer(_equalizer);
+            UpdateEqualizer();
         }
     }
 
@@ -91,8 +126,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         set
         {
             _mid = Math.Clamp(value, -20.0, 20.0);
-            foreach (uint band in MidBands) _equalizer.SetAmp((float)_mid, band);
-            _mediaPlayer?.SetEqualizer(_equalizer);
+            UpdateEqualizer();
         }
     }
 
@@ -102,8 +136,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         set
         {
             _bass = Math.Clamp(value, -20.0, 20.0);
-            foreach (uint band in BassBands) _equalizer.SetAmp((float)_bass, band);
-            _mediaPlayer?.SetEqualizer(_equalizer);
+            UpdateEqualizer();
         }
     }
 
@@ -132,7 +165,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
 
         // Apply default volume and equalizer
         _mediaPlayer.Volume = (int)_volume;
-        _mediaPlayer.SetEqualizer(_equalizer);
+        UpdateEqualizer();
     }
 
     public Task LoadAsync(string path)
@@ -150,7 +183,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
             // Re-apply rate, volume, and equalizer settings
             _mediaPlayer.Volume = (int)_volume;
             _mediaPlayer.SetRate((float)_speed);
-            _mediaPlayer.SetEqualizer(_equalizer);
+            UpdateEqualizer();
         }
 
         return Task.CompletedTask;

@@ -54,6 +54,7 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
     public double Bass { get; set; } = 0.0;
     public double Compressor { get; set; } = 0.0;
     public double Limiter { get; set; } = 0.0;
+    public bool EnableKillVocal { get; set; } = false;
 
     public FfmeVideoBackend()
     {

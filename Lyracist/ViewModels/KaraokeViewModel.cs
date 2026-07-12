@@ -51,6 +51,19 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private bool _isPlaying;
 
+    public bool EnableKillVocal
+    {
+        get => _mediaEngine.EnableKillVocal;
+        set
+        {
+            if (_mediaEngine.EnableKillVocal != value)
+            {
+                _mediaEngine.EnableKillVocal = value;
+                OnPropertyChanged(nameof(EnableKillVocal));
+            }
+        }
+    }
+
     [ObservableProperty]
     private double _seekPosition;
 
