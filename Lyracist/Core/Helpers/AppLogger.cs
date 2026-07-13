@@ -92,6 +92,17 @@ public static class AppLogger
         }
     }
 
+    public static void LogInfo(string message)
+    {
+        string path = Path.Combine(LogDir, "app.log");
+        string entry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [INFO] {message}{Environment.NewLine}";
+        try
+        {
+            File.AppendAllText(path, entry);
+        }
+        catch { }
+    }
+
     private static void PurgeOldLogs()
     {
         try

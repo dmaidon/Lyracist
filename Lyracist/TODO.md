@@ -302,6 +302,7 @@ This is ready to paste directly into TODO.md.
 ### STAGE 8 — Optional Future Enhancements
 
 (Not required for v1.0, but easy to add later)
+- [ ] Responsive MAUI console screen (auto-adjust layout for different screen sizes, e.g., mobile, tablet, and desktop)
 - [ ] Singer profiles
 - [ ] Song tagging
 - [ ] Cloud sync

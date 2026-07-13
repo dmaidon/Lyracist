@@ -183,6 +183,30 @@ public static class AppSettings
         set { _data.TabletPort = value; Save(); }
     }
 
+    public static bool KSRotationSyncEnabled
+    {
+        get => _data.KSRotationSyncEnabled;
+        set { _data.KSRotationSyncEnabled = value; Save(); }
+    }
+
+    public static string KSRotationIpAddress
+    {
+        get => _data.KSRotationIpAddress;
+        set { _data.KSRotationIpAddress = value ?? "127.0.0.1"; Save(); }
+    }
+
+    public static int KSRotationPort
+    {
+        get => _data.KSRotationPort;
+        set { _data.KSRotationPort = value; Save(); }
+    }
+
+    public static int KSRotationSyncIntervalSeconds
+    {
+        get => _data.KSRotationSyncIntervalSeconds;
+        set { _data.KSRotationSyncIntervalSeconds = value; Save(); }
+    }
+
     public static string GetLocalIPAddress()
     {
         try
@@ -711,6 +735,11 @@ public static class AppSettings
         public string PartyTymeClientSecret { get; set; } = string.Empty;
         public string StaticIPAddress { get; set; } = string.Empty;
         public int TabletPort { get; set; } = 5005;
+
+        public bool KSRotationSyncEnabled { get; set; } = false;
+        public string KSRotationIpAddress { get; set; } = "127.0.0.1";
+        public int KSRotationPort { get; set; } = 5000;
+        public int KSRotationSyncIntervalSeconds { get; set; } = 2;
 
         // Channel volumes (0–100)
         public int OpeningVolume { get; set; } = 80;

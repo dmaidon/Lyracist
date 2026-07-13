@@ -14,6 +14,7 @@ using Lyracist.Services.Display;
 using Lyracist.Services.Tablet;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
+using Lyracist.Services.Integration;
 
 namespace Lyracist.ViewModels;
 
@@ -26,6 +27,7 @@ public partial class SettingsViewModel : BaseViewModel
     private readonly ILibraryService _library;
     private readonly RotationViewModel _rotation;
     private readonly RotationWindowViewModel _rotationWindowVm;
+    private readonly IKSRotationSyncService _ksRotationSync;
 
     // Theme
     public List<string> ThemeModes { get; } = ["Light", "Dark", "System"];
@@ -234,6 +236,34 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private string _tabletStatus = "Running";
 
+    // KSRotation Sync
+    [ObservableProperty]
+    private bool _kSRotationSyncEnabled = AppSettings.KSRotationSyncEnabled;
+
+    [ObservableProperty]
+    private string _kSRotationIpAddress = AppSettings.KSRotationIpAddress;
+
+    [ObservableProperty]
+    private int _kSRotationPort = AppSettings.KSRotationPort;
+
+    partial void OnKSRotationSyncEnabledChanged(bool value)
+    {
+        AppSettings.KSRotationSyncEnabled = value;
+        _ksRotationSync.TriggerSettingsReloadAsync();
+    }
+
+    partial void OnKSRotationIpAddressChanged(string value)
+    {
+        AppSettings.KSRotationIpAddress = value;
+        _ksRotationSync.TriggerSettingsReloadAsync();
+    }
+
+    partial void OnKSRotationPortChanged(int value)
+    {
+        AppSettings.KSRotationPort = value;
+        _ksRotationSync.TriggerSettingsReloadAsync();
+    }
+
     // MediaEngine
     public List<string> CdgScalingModes { get; }
 
@@ -435,7 +465,8 @@ public partial class SettingsViewModel : BaseViewModel
                              RotationViewModel rotation,
                              RotationWindowViewModel rotationWindowVm,
                              KaraokeViewModel karaoke,
-                             IRequestService requests)
+                             IRequestService requests,
+                             IKSRotationSyncService ksRotationSync)
     {
         _display = display;
         _tablet = tablet;
@@ -446,6 +477,7 @@ public partial class SettingsViewModel : BaseViewModel
         _rotationWindowVm = rotationWindowVm;
         _karaoke = karaoke;
         _requests = requests;
+        _ksRotationSync = ksRotationSync;
 
         _library.LibraryUpdated += (_, _) =>
         {

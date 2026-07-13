@@ -76,6 +76,7 @@ public partial class App : System.Windows.Application
                 services.AddKeyedSingleton<BackgroundMusicPlayer>("EndRotation");
                 services.AddKeyedSingleton("Occasion", (_, _) => new BackgroundMusicPlayer { Loop = false });
                 services.AddSingleton<IShowFlowService, ShowFlowService>();
+                services.AddSingleton<IKSRotationSyncService, KSRotationSyncService>();
 
                 // ViewModels
                 services.AddSingleton<SplashViewModel>();
@@ -176,6 +177,10 @@ public partial class App : System.Windows.Application
         // Start the tablet lyrics server in the background
         var server = Host.Services.GetRequiredService<ITabletLyricsServer>();
         await server.StartAsync();
+
+        // Start the KSRotation sync service in the background
+        var syncService = Host.Services.GetRequiredService<IKSRotationSyncService>();
+        syncService.Start();
 
         // Resolve and show the MainWindow via dependency injection
         var mainWindow = Host.Services.GetRequiredService<MainWindow>();
