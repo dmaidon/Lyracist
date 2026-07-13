@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.7.12.210</AssemblyVersion>
-    <FileVersion>26.7.12.210</FileVersion>
+    <AssemblyVersion>26.7.13.219</AssemblyVersion>
+    <FileVersion>26.7.13.219</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <Authors>Dennis Maidon</Authors>
@@ -50,10 +50,10 @@
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
     <PackageReference Include="LibVLCSharp" Version="3.10.0" />
     <PackageReference Include="QRCoder" Version="1.8.0" />
-    <PackageReference Include="SkiaSharp" Version="4.148.0" />
+    <PackageReference Include="SkiaSharp" Version="4.150.0" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.23.1" />
     <PackageReference Include="WPF-UI" Version="4.3.0" />
-    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="Dapper" Version="2.1.79" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
     <PackageReference Include="WriteableBitmapEx" Version="1.6.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
