@@ -26,9 +26,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.7.13.26</AssemblyVersion>
+		<AssemblyVersion>26.7.13.38</AssemblyVersion>
 
-		<FileVersion>26.7.13.26</FileVersion>
+		<FileVersion>26.7.13.38</FileVersion>
 
 		<Copyright>© 2026 PAROLE Software - All rights reserved.</Copyright>
 
@@ -53,6 +53,9 @@
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+
+		<!-- App logo, also used as the About-popup image (shares the file packed as the NuGet/MSIX icon below) -->
+		<MauiImage Include="Resources\ksr_logo.png" Resize="True" BaseSize="200,200" />
 		
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
@@ -68,9 +71,7 @@
 		<!-- Wildcard so newly-added WPF services are picked up automatically instead of requiring a manual
 		     edit here. Excludes the three services that have MAUI-specific replacements in Shims\WpfShims.cs
 		     (compiling both would be a duplicate-type error). -->
-		<Compile Include="..\KSRotation\Services\*.cs"
-		         Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs"
-		         Link="Services\%(Filename)%(Extension)" />
+		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs" Link="Services\%(Filename)%(Extension)" />
 
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.Requests.cs" Link="ViewModels\MainViewModel.Requests.cs" />

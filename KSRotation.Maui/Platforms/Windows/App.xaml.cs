@@ -16,7 +16,18 @@ public partial class App : MauiWinUIApplication
 	/// </summary>
 	public App()
 	{
+		// Subscribed before InitializeComponent so this runs before the generated
+		// Debugger.Break() hook, printing the real exception to the Output window.
+		this.UnhandledException += OnUnhandledException;
 		this.InitializeComponent();
+	}
+
+	private static void OnUnhandledException(object? sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+	{
+		System.Diagnostics.Debug.WriteLine("=== UNHANDLED EXCEPTION ===");
+		System.Diagnostics.Debug.WriteLine($"Message: {e.Message}");
+		System.Diagnostics.Debug.WriteLine(e.Exception?.ToString() ?? "(no Exception object available)");
+		System.Diagnostics.Debug.WriteLine("=== END UNHANDLED EXCEPTION ===");
 	}
 
 	protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
