@@ -200,6 +200,8 @@
                         <RowDefinition Height="12" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
@@ -227,8 +229,31 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- File Renamer Card -->
+                    <Border Grid.Row="4" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
+                        <StackPanel>
+                            <TextBlock Text="Metadata File Renamer" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Renames karaoke/audio files in a selected folder based on their embedded title tag." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,10" />
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ui:TextBox Grid.Column="0" Text="{Binding RenameFolderPath, Mode=TwoWay}" PlaceholderText="Select a folder..." Height="35" IsReadOnly="True" />
+                                <ui:Button Grid.Column="2" Content="Browse..." Click="OnBrowseRenameFolderClicked" Height="35" Width="90" IsEnabled="{Binding IsRenaming, Converter={StaticResource InvertBoolConverter}}" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*, 10, *">
+                                <ui:Button Grid.Column="0" Content="Rename Files" Icon="{ui:SymbolIcon Edit24}" Command="{Binding RenameFilesCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding CanRename}" />
+                                <ui:Button Grid.Column="2" Content="Cancel" Icon="{ui:SymbolIcon Stop24}" Command="{Binding CancelRenameCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsRenaming}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
                     <!-- Scan Logs -->
-                    <Grid Grid.Row="4">
+                    <Grid Grid.Row="6">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="6" />

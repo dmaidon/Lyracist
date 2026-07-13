@@ -23,6 +23,21 @@ namespace LyracistDbEditor
                 textBox.Dispatcher.BeginInvoke(new Action(() => textBox.SelectAll()));
             }
         }
+
+        private void OnBrowseRenameFolderClicked(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "Select Folder Containing Karaoke Files to Rename"
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                if (DataContext is MainViewModel vm)
+                {
+                    vm.RenameFolderPath = dialog.FolderName;
+                }
+            }
+        }
     }
 
     // ==========================================
