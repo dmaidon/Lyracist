@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSRotation - Remote DJ Board</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0B0F19;
+            --card-bg: #151D2A;
+            --border-color: #243247;
+            --primary: #8B5CF6;
+            --primary-hover: #7C3AED;
+            --text-main: #F8FAFC;
+            --text-muted: #64748B;
+            --gold: #F59E0B;
+            --blue: #3B82F6;
+            --green: #10B981;
+            --red: #EF4444;
+            --orange: #D97706;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #EC4899, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        button.btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button.btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Lock Overlay (Passcode modal) */
+        .lock-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-dark);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .lock-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 32px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .lock-card h2 {
+            margin-bottom: 8px;
+            font-size: 1.4rem;
+        }
+        .lock-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        .lock-card input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: #0F172A;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            letter-spacing: 4px;
+            margin-bottom: 16px;
+            outline: none;
+        }
+        .lock-card input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Layout Grid */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 390px;
+            gap: 16px;
+        }
+
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #C4B5FD;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Performer Row Cards */
+        .singer-card {
+            background-color: #1A2436;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+
+        .singer-card.current {
+            border-color: var(--gold);
+            background-color: #2D1A10;
+        }
+
+        .singer-card.next {
+            border-color: var(--blue);
+            background-color: #151F32;
+        }
+
+        .singer-card.inactive {
+            opacity: 0.45;
+            background-color: #111823;
+        }
+
+        .singer-details {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .singer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .singer-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .singer-song {
+            font-size: 1rem;
+            font-style: italic;
+            color: #A78BFA;
+        }
+
+        .singer-artist {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        /* Badge styles */
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .badge.current {
+            background-color: var(--gold);
+            color: #000;
+        }
+        .badge.next {
+            background-color: var(--blue);
+            color: #FFF;
+        }
+
+        /* Round Checkboxes Row */
+        .rounds-container {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .round-box {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: #111823;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .round-box.completed {
+            border-color: transparent;
+            color: #FFF;
+        }
+        .round-box.r1.completed { background-color: #E74C3C; }
+        .round-box.r2.completed { background-color: #E67E22; }
+        .round-box.r3.completed { background-color: #F1C40F; color: #000; }
+        .round-box.r4.completed { background-color: #2ECC71; }
+        .round-box.r5.completed { background-color: #1ABC9C; }
+        .round-box.r6.completed { background-color: #3498DB; }
+        .round-box.r7.completed { background-color: #9B59B6; }
+        .round-box.r8.completed { background-color: #FF1493; }
+        .round-box.r9.completed { background-color: #00E5FF; color: #000; }
+        .round-box.r10.completed { background-color: #E040FB; }
+
+        /* Row Action buttons */
+        .actions-container {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .btn-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-circle:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .btn-circle.green { border-color: var(--green); color: var(--green); }
+        .btn-circle.green:hover { background-color: rgba(16, 185, 129, 0.1); }
+        .btn-circle.blue { border-color: var(--blue); color: var(--blue); }
+        .btn-circle.blue:hover { background-color: rgba(59, 130, 246, 0.1); }
+        .btn-circle.red { border-color: var(--red); color: var(--red); }
+        .btn-circle.red:hover { background-color: rgba(239, 68, 68, 0.1); }
+
+        .btn-text {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: transparent;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-text.pause { border-color: var(--orange); color: var(--orange); }
+        .btn-text.pause:hover { background-color: rgba(217, 119, 6, 0.1); }
+        .btn-text.resume { border-color: var(--green); color: var(--green); }
+        .btn-text.resume:hover { background-color: rgba(16, 185, 129, 0.1); }
+
+        /* Form styling */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .form-group input {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: #0F172A;
+            color: white;
+            outline: none;
+            font-size: 0.9rem;
+        }
+        .form-group input:focus {
+            border-color: var(--primary);
+        }
+
+        button.btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button.btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Requests column styling */
+        .request-card {
+            background-color: #1A2436;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .request-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .request-name { font-weight: 600; font-size: 0.95rem; }
+        .request-song { font-size: 0.85rem; font-style: italic; color: #A78BFA; }
+        .request-artist { font-size: 0.8rem; color: var(--text-muted); }
+        
+        .request-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .no-data {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 24px 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Lock Overlay (Passcode modal) -->
+    <div id="lock-screen" class="lock-overlay">
+        <div class="lock-card">
+            <h2>Enter DJ PIN</h2>
+            <p>Access requires the configured administrator PIN</p>
+            <input type="password" id="pin-input" placeholder="••••" autofocus onkeydown="checkPinKey(event)">
+            <button class="btn-primary" style="width: 100%" onclick="submitPin()">Authorize Access</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" id="dashboard" style="display: none;">
+        <header>
+            <h1>KSRotation - DJ Console</h1>
+            <div class="header-actions">
+                <button class="btn-outline" onclick="logout()">Lock Screen</button>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            
+            <!-- LEFT PANEL: ACTIVE ROTATION QUEUE -->
+            <div class="panel">
+                <div class="panel-title">Active Rotation Queue</div>
+                <div id="queue-list" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div class="no-data">Loading rotation queue...</div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: ADD PERFORMER & INCOMING REQUESTS -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                
+                <!-- Add Performer Card -->
+                <div class="panel">
+                    <div class="panel-title">Add Performer</div>
+                    <form id="add-singer-form" onsubmit="addPerformer(event)" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="form-group">
+                            <label>Singer Name</label>
+                            <input type="text" id="add-name" required placeholder="e.g. Charlie">
+                        </div>
+                        <div class="form-group">
+                            <label>Song Title</label>
+                            <input type="text" id="add-song" placeholder="e.g. Yesterday">
+                        </div>
+                        <div class="form-group">
+                            <label>Artist Name</label>
+                            <input type="text" id="add-artist" placeholder="e.g. The Beatles">
+                        </div>
+                        <button type="submit" class="btn-primary" style="margin-top: 4px;">Add to Queue</button>
+                    </form>
+                </div>
+
+                <!-- Incoming Requests Card -->
+                <div class="panel">
+                    <div class="panel-title">Incoming Requests</div>
+                    <div id="requests-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div class="no-data">No pending requests</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let pollInterval = null;
+
+        // Auto-check PIN in sessionStorage on page load
+        window.addEventListener('load', () => {
+            const savedPin = sessionStorage.getItem("dj_pin");
+            if (savedPin) {
+                document.getElementById("lock-screen").style.display = "none";
+                document.getElementById("dashboard").style.display = "flex";
+                startPolling();
+            }
+        });
+
+        function checkPinKey(event) {
+            if (event.key === "Enter") {
+                submitPin();
+            }
+        }
+
+        function submitPin() {
+            const pin = document.getElementById("pin-input").value;
+            if (pin) {
+                sessionStorage.setItem("dj_pin", pin);
+                document.getElementById("lock-screen").style.display = "none";
+                document.getElementById("dashboard").style.display = "flex";
+                startPolling();
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem("dj_pin");
+            stopPolling();
+            document.getElementById("pin-input").value = "";
+            document.getElementById("lock-screen").style.display = "flex";
+            document.getElementById("dashboard").style.display = "none";
+        }
+
+        function startPolling() {
+            loadData();
+            pollInterval = setInterval(loadData, 3000);
+        }
+
+        function stopPolling() {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        }
+
+        async function loadData() {
+            const pin = sessionStorage.getItem("dj_pin");
+            const headers = { 'X-DJ-PIN': pin };
+            const querySuffix = `?pin=${encodeURIComponent(pin)}`;
+ 
+            try {
+                // Fetch Rotation Queue
+                const rotResponse = await fetch(`/api/rotation${querySuffix}`, { headers });
+                if (rotResponse.status === 401) {
+                    logout();
+                    alert("Unauthorized PIN. Please log in again.");
+                    return;
+                }
+                const rotation = await rotResponse.json();
+                renderQueue(rotation);
+ 
+                // Fetch Incoming Requests
+                const reqResponse = await fetch(`/api/requests${querySuffix}`, { headers });
+                const requests = await reqResponse.json();
+                renderRequests(requests);
+
+            } catch (err) {
+                console.error("Connection error loading DJ data", err);
+            }
+        }
+
+        function renderQueue(singers) {
+            const listDiv = document.getElementById("queue-list");
+            if (!singers || singers.length === 0) {
+                listDiv.innerHTML = '<div class="no-data">No performers in rotation</div>';
+                return;
+            }
+
+            // Remove no-data element if it exists
+            const noData = listDiv.querySelector('.no-data');
+            if (noData) {
+                listDiv.removeChild(noData);
+            }
+
+            // Keep track of existing cards
+            const existingCards = new Map();
+            Array.from(listDiv.children).forEach(child => {
+                if (child.id && child.id.startsWith('card-')) {
+                    existingCards.set(child.id, child);
+                }
+            });
+
+            // Process each singer in order
+            singers.forEach((s, index) => {
+                const cardId = `card-${s.id}`;
+                let card = existingCards.get(cardId);
+                
+                // Determine card classes
+                let cardClass = 'singer-card';
+                let badges = '';
+                if (s.isCurrent) {
+                    cardClass += ' current';
+                    badges += '<span class="badge current">Now Singing</span>';
+                } else if (s.isNext) {
+                    cardClass += ' next';
+                    badges += '<span class="badge next">Next</span>';
+                }
+                if (s.isInactive) {
+                    cardClass += ' inactive';
+                }
+
+                // Render rounds checkboxes
+                let roundsHtml = '';
+                for (let r = 1; r <= 10; r++) {
+                    const completed = s[`song${r}Completed`] || false;
+                    const rClass = `round-box r${r}` + (completed ? ' completed' : '');
+                    roundsHtml += `<div class="${rClass}" onclick="toggleRound('${s.id}', ${r}, ${completed})">${r}</div>`;
+                }
+
+                // Check for empty song details
+                let detailsText = '';
+                if (s.song) {
+                    detailsText = ` - <span class="singer-song">${escapeHtml(s.song)}</span>`;
+                    if (s.artist) {
+                        detailsText += ` <span class="singer-artist">(${escapeHtml(s.artist)})</span>`;
+                    }
+                }
+
+                // Pause button text and state class
+                const pauseText = s.isInactive ? "👁 Resume" : "👁 Pause";
+                const pauseClass = s.isInactive ? "btn-text resume" : "btn-text pause";
+
+                const innerHTML = `
+                    <div class="singer-details">
+                        <div class="singer-info">
+                            <span class="singer-name">${escapeHtml(s.name)}</span>
+                            ${detailsText}
+                            ${badges}
+                        </div>
+                        <div class="rounds-container">
+                            ${roundsHtml}
+                        </div>
+                    </div>
+                    <div class="actions-container">
+                        <button class="btn-circle green" title="Set Current" onclick="sendAction('set-current', '${s.id}')">🎙</button>
+                        <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
+                        <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
+                        <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>
+                        <button class="${pauseClass}" onclick="sendAction('toggle-inactive', '${s.id}')">${pauseText}</button>
+                        <button class="btn-circle red" title="Delete" onclick="sendAction('delete', '${s.id}')">🗑</button>
+                    </div>
+                `;
+
+                if (!card) {
+                    // Create new card
+                    card = document.createElement('div');
+                    card.id = cardId;
+                    card.className = cardClass;
+                    card.innerHTML = innerHTML;
+                    listDiv.appendChild(card);
+                } else {
+                    // Update existing card properties and content if changed to prevent flashing
+                    if (card.className !== cardClass) {
+                        card.className = cardClass;
+                    }
+                    if (card.innerHTML !== innerHTML) {
+                        card.innerHTML = innerHTML;
+                    }
+                    existingCards.delete(cardId);
+                }
+
+                // Ensure the card is in the correct position in the DOM list
+                if (listDiv.children[index] !== card) {
+                    listDiv.insertBefore(card, listDiv.children[index]);
+                }
+            });
+
+            // Remove any remaining old cards
+            existingCards.forEach(card => {
+                listDiv.removeChild(card);
+            });
+        }
+
+        function renderRequests(requests) {
+            const listDiv = document.getElementById("requests-list");
+            if (!requests || requests.length === 0) {
+                listDiv.innerHTML = '<div class="no-data">No pending requests</div>';
+                return;
+            }
+
+            let html = '';
+            requests.forEach((r) => {
+                html += `
+                    <div class="request-card">
+                        <div class="request-details">
+                            <div class="request-name">${escapeHtml(r.name)}</div>
+                            <div class="request-song">${escapeHtml(r.song)}</div>
+                            <div class="request-artist">${escapeHtml(r.artist || "Unknown Artist")}</div>
+                        </div>
+                        <div class="request-actions">
+                            <button class="btn-outline" style="border-color: var(--green); color: var(--green);" onclick="sendRequestAction('accept', '${escapeJs(r.name)}')">✓ Accept</button>
+                            <button class="btn-outline" style="border-color: var(--red); color: var(--red);" onclick="sendRequestAction('decline', '${escapeJs(r.name)}')">✕ Decline</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listDiv.innerHTML = html;
+        }
+
+        async function sendAction(actionName, targetId, extraData = "") {
+            const pin = sessionStorage.getItem("dj_pin");
+            try {
+                const response = await fetch(`/api/dj/action?pin=${encodeURIComponent(pin)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-DJ-PIN': pin
+                    },
+                    body: JSON.stringify({ action: actionName, targetId, extraData: String(extraData) })
+                });
+
+                if (response.ok) {
+                    loadData();
+                } else if (response.status === 401) {
+                    logout();
+                    alert("Session expired or invalid PIN.");
+                }
+            } catch (err) {
+                console.error("Action error", err);
+            }
+        }
+
+        async function sendRequestAction(action, patronName) {
+            const pin = sessionStorage.getItem("dj_pin");
+            try {
+                const response = await fetch(`/api/dj/action?pin=${encodeURIComponent(pin)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-DJ-PIN': pin
+                    },
+                    body: JSON.stringify({ action, targetId: patronName })
+                });
+
+                if (response.ok) {
+                    loadData();
+                }
+            } catch (err) {
+                console.error("Request action error", err);
+            }
+        }
+
+        function toggleRound(singerId, round, isCompleted) {
+            // Toggles between complete and incomplete for the specific round
+            const action = isCompleted ? "clear-round" : "complete-round";
+            sendAction(action, singerId, round);
+        }
+
+        async function addPerformer(event) {
+            event.preventDefault();
+            const name = document.getElementById("add-name").value;
+            const song = document.getElementById("add-song").value;
+            const artist = document.getElementById("add-artist").value;
+
+            const pin = sessionStorage.getItem("dj_pin");
+            try {
+                const response = await fetch(`/api/dj/action?pin=${encodeURIComponent(pin)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-DJ-PIN': pin
+                    },
+                    body: JSON.stringify({
+                        action: 'add-singer',
+                        name,
+                        song,
+                        artist
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById("add-singer-form").reset();
+                    loadData();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || "Failed to add performer.");
+                }
+            } catch (err) {
+                console.error("Add performer error", err);
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function escapeJs(text) {
+            if (!text) return '';
+            return text
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '\\"');
+        }
+    </script>
+</body>
+</html>

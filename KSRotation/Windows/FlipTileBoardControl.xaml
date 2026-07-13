@@ -1,0 +1,207 @@
+<!-- Last Edit: Jun 25, 2026 07:18 - Increased width bounds to fit 32px character controls. -->
+<UserControl x:Class="KSRotation.Windows.FlipTileBoardControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:KSRotation.ViewModels"
+             xmlns:local="clr-namespace:KSRotation.Windows"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <!-- Flip animation storyboard -->
+        <Storyboard x:Key="FlipInStoryboard">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="90" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="-10" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.38" Value="5" />
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- Item container style with flip trigger and status colors -->
+        <Style x:Key="FlipTileItemStyle" TargetType="Border">
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <RotateTransform Angle="90" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Padding" Value="16,14" />
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.15" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="MinWidth" Value="1500" />
+            <Setter Property="MaxWidth" Value="2000" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+
+            <Style.Triggers>
+                <!-- When the item becomes visible, run flip animation -->
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard Storyboard="{StaticResource FlipInStoryboard}" />
+                </EventTrigger>
+
+                <!-- Highlight Current Singer in rich gold gradient -->
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#FFE082" Offset="0.0" />
+                                <GradientStop Color="#FFB300" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="BorderBrush" Value="#FFA000" />
+                    <Setter Property="BorderThickness" Value="1.5" />
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="3" Color="#FFB300" Opacity="0.5" />
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+
+                <!-- Highlight Next Singer in clean green gradient -->
+                <DataTrigger Binding="{Binding IsNext}" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#C8E6C9" Offset="0.0" />
+                                <GradientStop Color="#81C784" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="BorderBrush" Value="#4CAF50" />
+                    <Setter Property="BorderThickness" Value="1.5" />
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect BlurRadius="8" ShadowDepth="2" Color="#81C784" Opacity="0.3" />
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Shared style for split-flap characters to handle highlights based on row context -->
+        <Style x:Key="SplitFlapStyle" TargetType="{x:Type local:SplitFlapCharControl}">
+            <Setter Property="Foreground" Value="#F8FAFC" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.IsCurrent, RelativeSource={RelativeSource AncestorType=Grid}}" Value="True">
+                    <Setter Property="Foreground" Value="#FFD700" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding DataContext.IsNext, RelativeSource={RelativeSource AncestorType=Grid}}" Value="True">
+                    <Setter Property="Foreground" Value="#A5D6A7" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource MaterialDesignPaper}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0"
+                   Text="TONIGHT'S SINGER ROTATION"
+                   FontSize="26"
+                   FontWeight="Bold"
+                   Margin="20,16,20,8"
+                   Foreground="{DynamicResource PrimaryHueMidBrush}"
+                   TextAlignment="Center"
+                   TextOptions.TextRenderingMode="ClearType" />
+
+        <!-- Flip tile board -->
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Grid.IsSharedSizeScope="True"
+                      Margin="20,8,20,20">
+            <ItemsControl ItemsSource="{Binding FlipTileEntries}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:DisplayFlipTileEntry}">
+                        <Border Style="{StaticResource FlipTileItemStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Position -->
+                                <ItemsControl Grid.Column="0" 
+                                              ItemsSource="{Binding Position}" 
+                                              VerticalAlignment="Center" 
+                                              HorizontalAlignment="Center"
+                                              Margin="8,0">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <local:SplitFlapCharControl TargetChar="{Binding}" Margin="1,0" Style="{StaticResource SplitFlapStyle}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Name -->
+                                <ItemsControl Grid.Column="1" 
+                                              ItemsSource="{Binding Name}" 
+                                              VerticalAlignment="Center" 
+                                              HorizontalAlignment="Left"
+                                              Margin="16,0">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <local:SplitFlapCharControl TargetChar="{Binding}" Margin="1,0" Style="{StaticResource SplitFlapStyle}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Status / Song -->
+                                <ItemsControl Grid.Column="2" 
+                                              ItemsSource="{Binding Status}" 
+                                              VerticalAlignment="Center" 
+                                              HorizontalAlignment="Right"
+                                              Margin="8,0">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <local:SplitFlapCharControl TargetChar="{Binding}" Margin="1,0" Style="{StaticResource SplitFlapStyle}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

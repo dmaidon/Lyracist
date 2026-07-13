@@ -1,0 +1,470 @@
+<!-- Last Edit: Jul 02, 2026 16:54 - Bound display header text to switch between First Performer and Now Performing based on current-singer designation. -->
+<Window
+    x:Class="KSRotation.Windows.SingerDisplayWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:KSRotation.ViewModels"
+    xmlns:local="clr-namespace:KSRotation.Windows"
+    mc:Ignorable="d"
+    Title="Singer Display"
+    Width="450"
+    Height="300"
+    ResizeMode="CanResize"
+    WindowStyle="SingleBorderWindow"
+    Background="{DynamicResource MaterialDesignPaper}"
+    Foreground="{DynamicResource MaterialDesignBody}"
+    WindowStartupLocation="CenterOwner" Icon="/Windows/singer_64.png">
+
+    <Window.DataContext>
+        <vm:DisplayViewModel />
+    </Window.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <!-- scrolling banner -->
+            <RowDefinition Height="*" />
+            <!-- content: normal list OR crawl -->
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Scrolling marquee (always visible) -->
+        <Border Grid.Row="0"
+                x:Name="BannerBorder"
+                Background="#222"
+                Padding="8"
+                Height="80"
+                ClipToBounds="True"
+                SizeChanged="BannerBorder_SizeChanged">
+            <Canvas x:Name="BannerCanvas" ClipToBounds="True">
+                <TextBlock x:Name="BannerTextBlock"
+                           FontSize="40"
+                           Foreground="Cyan"
+                           TextOptions.TextFormattingMode="Display" />
+            </Canvas>
+        </Border>
+
+        <!-- Row 1a: Normal singer list (hidden when crawl is active) -->
+        <Grid Grid.Row="1" x:Name="NormalPanel" Margin="16">
+
+
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled"
+                          Panel.ZIndex="1">
+                <ItemsControl ItemsSource="{Binding RotationEntries}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock FontSize="34" Margin="12,4">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+                                        <Setter Property="FontWeight" Value="Normal" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                <Setter Property="Foreground" Value="Crimson" />
+                                                <Setter Property="FontWeight" Value="Bold" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                                <Run Text="{Binding PrefixAndSinger, Mode=OneWay}" />
+                                <Run Text="{Binding SongSeparatorAndTitle, Mode=OneWay}" />
+                                <Run Text="{Binding ArtistInParentheses, Mode=OneWay}" FontStyle="Italic" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+
+        </Grid>
+
+        <!-- Row 1b: Star Wars crawl panel (replaces list when ShowCrawl=true) -->
+        <!-- Sky uses a fixed near-black space color (not a theme brush) so the white stars stand out. -->
+        <Grid Grid.Row="1" x:Name="CrawlPanel" Background="#FF04060B" Visibility="Collapsed">
+            <!-- The crawl text canvas is NOT in this tree: it is built in code-behind
+                 (_crawlSource) and hosted only as the VisualBrush.Visual on the 3D quad.
+                 Keeping it off-tree avoids a stray rendered copy appearing in this panel. -->
+
+            <!-- Solid near-black backdrop behind the stars and 3D crawl. -->
+            <Rectangle Fill="#FF04060B" />
+
+
+
+            <!-- Stars added by code render above the black fill. -->
+            <Canvas x:Name="CrawlStarCanvas" SizeChanged="CrawlStarCanvas_SizeChanged" Panel.ZIndex="2" />
+
+            <Viewport3D x:Name="CrawlViewport" Panel.ZIndex="3">
+                <Viewport3D.Camera>
+                    <PerspectiveCamera
+                        Position="0,3,-1"
+                        LookDirection="0,-1.2,4"
+                        UpDirection="0,1,0"
+                        FieldOfView="50" />
+                </Viewport3D.Camera>
+                <ModelVisual3D>
+                    <ModelVisual3D.Content>
+                        <GeometryModel3D>
+                            <GeometryModel3D.Geometry>
+                                <MeshGeometry3D
+                                    Positions="-2.2,0,0  2.2,0,0  2.2,0,24  -2.2,0,24"
+                                    TriangleIndices="0,2,1  0,3,2"
+                                    TextureCoordinates="1,1  0,1  0,0  1,0" />
+                            </GeometryModel3D.Geometry>
+                            <!-- EmissiveMaterial: renders the brush at full brightness regardless of
+                                 lighting. DiffuseMaterial requires lights; without them it renders black.
+                                 BackMaterial ensures the quad is visible from both face directions so
+                                 winding order can never hide it. -->
+                            <GeometryModel3D.Material>
+                                <EmissiveMaterial x:Name="CrawlMaterial" Brush="Transparent" />
+                            </GeometryModel3D.Material>
+                            <GeometryModel3D.BackMaterial>
+                                <EmissiveMaterial x:Name="CrawlBackMaterial" Brush="Transparent" />
+                            </GeometryModel3D.BackMaterial>
+                        </GeometryModel3D>
+                    </ModelVisual3D.Content>
+                </ModelVisual3D>
+            </Viewport3D>
+        </Grid>
+
+        <!-- Row 1c: Flip Tile Board panel -->
+        <Grid Grid.Row="1" x:Name="FlipTilePanel" Visibility="Collapsed">
+            <local:FlipTileBoardControl />
+        </Grid>
+
+        <!-- Row 1d: Vegas / Broadway Marquee panel -->
+        <Grid Grid.Row="1" x:Name="MarqueePanel" Visibility="Collapsed">
+            <!-- Deep theatrical backdrop (fixed colors – this is a themed stage scene, not a UI surface). -->
+            <Grid.Background>
+                <RadialGradientBrush GradientOrigin="0.5,0.42" Center="0.5,0.42" RadiusX="0.75" RadiusY="0.75">
+                    <GradientStop Color="#FF3A0A12" Offset="0.0" />
+                    <GradientStop Color="#FF1A040A" Offset="0.55" />
+                    <GradientStop Color="#FF080205" Offset="1.0" />
+                </RadialGradientBrush>
+            </Grid.Background>
+
+            <!-- Brass marquee frame -->
+            <Border x:Name="MarqueeFrame" Margin="54" CornerRadius="20" BorderThickness="5">
+                <Border.BorderBrush>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#FFFFE9A8" Offset="0.0" />
+                        <GradientStop Color="#FFE0A93B" Offset="0.5" />
+                        <GradientStop Color="#FFB9822A" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.BorderBrush>
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#CC15060A" Offset="0.0" />
+                        <GradientStop Color="#CC0A0205" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+
+                <Grid Margin="40,28">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <TextBlock Grid.Row="0"
+                               Text="{Binding PerformerHeaderText}"
+                               HorizontalAlignment="Center"
+                               FontSize="45"
+                               FontWeight="Bold"
+                               Foreground="#FFFFD86B"
+                               TextOptions.TextFormattingMode="Display">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#FFB9822A" BlurRadius="14" ShadowDepth="0" Opacity="0.8" />
+                        </TextBlock.Effect>
+                    </TextBlock>
+
+                    <!-- Current singer name + song (vertically centered) -->
+                    <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentSingerName}"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   FontSize="92"
+                                   FontWeight="Bold"
+                                   Foreground="#FFFFFFFF"
+                                   TextOptions.TextFormattingMode="Ideal">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#FFFFD86B" BlurRadius="28" ShadowDepth="0" Opacity="0.85" />
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        <TextBlock Text="{Binding CurrentSingerSong}"
+                                   HorizontalAlignment="Center"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   Margin="0,12,0,0"
+                                   FontSize="40"
+                                   FontStyle="Italic"
+                                   Foreground="#FFFFD86B" />
+                    </StackPanel>
+
+                    <!-- Divider -->
+                    <Rectangle Grid.Row="2" Height="2" Margin="40,18" Fill="#55E0A93B" />
+
+                    <!-- Up next strip -->
+                    <StackPanel Grid.Row="3" Orientation="Vertical" Margin="0,0,0,4">
+                        <TextBlock Text="UP NEXT"
+                                   HorizontalAlignment="Center"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="#FFE0A93B"
+                                   Margin="0,0,0,8" />
+                        <ItemsControl ItemsSource="{Binding NextSingers}" HorizontalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="6,4"
+                                            Padding="14,6"
+                                            CornerRadius="14"
+                                            Background="#33E0A93B"
+                                            BorderBrush="#66E0A93B"
+                                            BorderThickness="1">
+                                        <TextBlock Text="{Binding}"
+                                                   FontSize="20"
+                                                   Foreground="#FFF7E8C8" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Chasing light bulbs around the frame (built/animated in code-behind). -->
+            <Canvas x:Name="MarqueeBulbCanvas" Margin="54" SizeChanged="MarqueeBulbCanvas_SizeChanged" Panel.ZIndex="5" />
+        </Grid>
+
+        <!-- Row 1e: Vinyl "Now Spinning" turntable panel -->
+        <Grid Grid.Row="1" x:Name="VinylPanel" Visibility="Collapsed">
+            <!-- Warm dark DJ-booth backdrop (fixed colors – themed scene, not a UI surface). -->
+            <Grid.Background>
+                <RadialGradientBrush GradientOrigin="0.35,0.45" Center="0.35,0.45" RadiusX="0.9" RadiusY="0.9">
+                    <GradientStop Color="#FF1E1814" Offset="0.0" />
+                    <GradientStop Color="#FF120D0A" Offset="0.55" />
+                    <GradientStop Color="#FF070504" Offset="1.0" />
+                </RadialGradientBrush>
+            </Grid.Background>
+
+            <Grid Margin="48,32">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Turntable (scales with the column via Viewbox; fixed internal coordinates) -->
+                <Viewbox Grid.Column="0" Stretch="Uniform" Margin="0,0,24,0">
+                    <Canvas Width="520" Height="520">
+                        <!-- Spinning disc group -->
+                        <Grid x:Name="VinylDisc" Width="440" Height="440" Canvas.Left="40" Canvas.Top="40"
+                              RenderTransformOrigin="0.5,0.5">
+                            <Grid.RenderTransform>
+                                <RotateTransform x:Name="VinylRotate" />
+                            </Grid.RenderTransform>
+
+                            <!-- Disc body -->
+                            <Ellipse Width="440" Height="440" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="#FF242424" Offset="0.0" />
+                                        <GradientStop Color="#FF0E0E0E" Offset="0.75" />
+                                        <GradientStop Color="#FF050505" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                                <Ellipse.Stroke>
+                                    <SolidColorBrush Color="#FF333333" />
+                                </Ellipse.Stroke>
+                            </Ellipse>
+
+                            <!-- Rotating sheen so the spin is visible on the plain black disc -->
+                            <Ellipse Width="440" Height="440" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Ellipse.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#30FFFFFF" Offset="0.0" />
+                                        <GradientStop Color="#00FFFFFF" Offset="0.45" />
+                                        <GradientStop Color="#00FFFFFF" Offset="0.55" />
+                                        <GradientStop Color="#14FFFFFF" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+
+                            <!-- Center label (large, like a 45 single) -->
+                            <Ellipse Width="220" Height="220" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="#FFE8BC52" Offset="0.0" />
+                                        <GradientStop Color="#FFCB9533" Offset="0.7" />
+                                        <GradientStop Color="#FFB9822A" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                                <Ellipse.Stroke>
+                                    <SolidColorBrush Color="#FF8A5F1C" />
+                                </Ellipse.Stroke>
+                            </Ellipse>
+
+                            <!-- Singer name on the label, above the big 45 hole -->
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,84"
+                                       Width="184" TextAlignment="Center" TextTrimming="CharacterEllipsis"
+                                       Text="{Binding CurrentSingerName}"
+                                       FontSize="22" FontWeight="Bold" Foreground="#FF2A1A05" />
+
+                            <!-- Song title (no artist) on the label, below the big 45 hole -->
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,86,0,0"
+                                       Width="184" TextAlignment="Center" TextTrimming="CharacterEllipsis"
+                                       Text="{Binding CurrentSongTitle}"
+                                       FontSize="16" FontStyle="Italic" Foreground="#FF3A2608" />
+
+                            <!-- Marker dot near the label edge (rotation cue) -->
+                            <Ellipse Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,116,0,0" Fill="#FF2A1A05" />
+
+                            <!-- Large 45 RPM center hole -->
+                            <Ellipse Width="46" Height="46" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="#FF120D0A" Stroke="#66000000" StrokeThickness="1.5" />
+                        </Grid>
+
+                        <!-- Tonearm (static), pivot at upper-right -->
+                        <Grid Width="60" Height="300" Canvas.Left="392" Canvas.Top="46"
+                              RenderTransformOrigin="0.5,0.12">
+                            <Grid.RenderTransform>
+                                <RotateTransform Angle="-26" />
+                            </Grid.RenderTransform>
+                            <!-- Counterweight -->
+                            <Ellipse Width="44" Height="44" HorizontalAlignment="Center" VerticalAlignment="Top">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="#FF6B6B6B" Offset="0.0" />
+                                        <GradientStop Color="#FF2C2C2C" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <!-- Pivot collar -->
+                            <Ellipse Width="26" Height="26" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,30,0,0" Fill="#FF4A4A4A" />
+                            <!-- Arm tube -->
+                            <Rectangle Width="10" Height="232" RadiusX="5" RadiusY="5" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,40,0,0">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#FF8A8A8A" Offset="0.0" />
+                                        <GradientStop Color="#FFCFCFCF" Offset="0.5" />
+                                        <GradientStop Color="#FF6E6E6E" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <!-- Headshell -->
+                            <Border Width="34" Height="24" CornerRadius="3" Background="#FF1C1C1C" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+                        </Grid>
+                    </Canvas>
+                </Viewbox>
+
+                <!-- Now-playing text -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
+                    <TextBlock Text="♪  NOW SPINNING"
+                               FontSize="26"
+                               FontWeight="Bold"
+                               Foreground="#FFE0A93B"
+                               Margin="0,0,0,10"
+                               TextOptions.TextFormattingMode="Display" />
+
+                    <TextBlock Text="{Binding CurrentSingerName}"
+                               TextWrapping="Wrap"
+                               FontSize="78"
+                               FontWeight="Bold"
+                               Foreground="#FFFFFFFF"
+                               TextOptions.TextFormattingMode="Ideal">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#FFE0A93B" BlurRadius="22" ShadowDepth="0" Opacity="0.6" />
+                        </TextBlock.Effect>
+                    </TextBlock>
+
+                    <TextBlock Text="{Binding CurrentSingerSong}"
+                               TextWrapping="Wrap"
+                               Margin="0,8,0,0"
+                               FontSize="34"
+                               FontStyle="Italic"
+                               Foreground="#FFE8BC52" />
+
+                    <Rectangle Height="2" Margin="0,20,40,16" Fill="#44E0A93B" HorizontalAlignment="Stretch" />
+
+                    <TextBlock Text="ON DECK"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="#FFB98A3A"
+                               Margin="0,0,0,8" />
+                    <ItemsControl ItemsSource="{Binding NextSingers}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           FontSize="22"
+                                           Margin="0,3"
+                                           Foreground="#FFE6D6B8" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- Floating QR Code Overlay for audience scanning (shown on top of all projection panels) -->
+        <Border Grid.Row="1"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Right"
+                Margin="24"
+                Padding="10"
+                Background="#EE1E293B"
+                BorderBrush="#475569"
+                BorderThickness="1.5"
+                CornerRadius="8"
+                Width="130"
+                Height="165"
+                Panel.ZIndex="99">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ConnectionUrl}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ConnectionUrl}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Border Width="110" 
+                        Height="110" 
+                        Background="White" 
+                        CornerRadius="4" 
+                        Padding="3"
+                        HorizontalAlignment="Center">
+                    <Image Source="{Binding QrCodeImage}" 
+                           Stretch="Uniform"/>
+                </Border>
+                <TextBlock Text="SCAN TO REQUEST"
+                           FontWeight="Bold"
+                           FontSize="10"
+                           Foreground="#F8FAFC"
+                           HorizontalAlignment="Center"
+                           Margin="0,6,0,0"/>
+                <TextBlock Text="{Binding ConnectionUrl}"
+                           FontSize="8"
+                           Foreground="#94A3B8"
+                           HorizontalAlignment="Center"
+                           Margin="0,2,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

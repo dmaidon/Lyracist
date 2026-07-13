@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
+             xmlns:models="clr-namespace:KSRotation.Models"
+             x:Class="KSRotation.Maui.MainPage"
+             x:DataType="viewmodels:MainViewModel"
+             Title="KSRotation Console (Master)"
+             BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#12141C}">
+
+    <Grid ColumnDefinitions="*, 280" RowDefinitions="*" Padding="12" ColumnSpacing="12">
+
+        <!-- LEFT COLUMN: ACTIVE ROTATION QUEUE -->
+        <Grid Grid.Column="0" RowDefinitions="Auto, *" RowSpacing="12">
+
+            <!-- Top Panel: Add New Singer -->
+            <Border Grid.Row="0" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="12">
+                <Grid ColumnDefinitions="*, *, *, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                    <Entry x:Name="NameEntry" Placeholder="Singer Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="0" VerticalOptions="Center"/>
+                    <Entry x:Name="SongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="1" VerticalOptions="Center"/>
+                    <Entry x:Name="ArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="2" VerticalOptions="Center"/>
+                    <Button Text="Add Performer" Clicked="OnAddPerformerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" Grid.Column="3" Padding="16,0" HeightRequest="40" VerticalOptions="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- Rotation List View -->
+            <Grid Grid.Row="1" RowDefinitions="Auto, *">
+                <HorizontalStackLayout Spacing="8" Margin="0,0,0,6" VerticalOptions="Center">
+                    <Label Text="ACTIVE ROTATION QUEUE" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" VerticalOptions="Center"/>
+                    <Button Text="Clear Queue" Clicked="OnClearQueueClicked" BackgroundColor="Transparent" TextColor="#F87171" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#F87171" VerticalOptions="Center"/>
+                    <Button Text="Load Test Data" Clicked="OnLoadTestDataClicked" BackgroundColor="Transparent" TextColor="#3B82F6" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#3B82F6" VerticalOptions="Center"/>
+                    <Button x:Name="ThemeBtn" Text="☀️ Light Mode" Clicked="OnThemeToggled" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Singers}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:SingerEntry">
+                                <Border x:Name="ItemBorder" 
+                                        StrokeShape="RoundRectangle 8" 
+                                        StrokeThickness="0"
+                                        BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" 
+                                        Margin="0,0,0,6" 
+                                        Padding="8">
+                                    <Border.Stroke>
+                                        <SolidColorBrush Color="Transparent" />
+                                    </Border.Stroke>
+
+                                    <Border.Triggers>
+                                        <!-- Grey out item if inactive/paused, but keep it in the list layout and position -->
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsInactive}" Value="True">
+                                            <Setter Property="Opacity" Value="0.4" />
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#E2E8F0, Dark=#151722}" />
+                                        </DataTrigger>
+                                        
+                                        <!-- Orange border outline and peach/rust background for current singer -->
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsCurrent}" Value="True">
+                                            <Setter Property="StrokeThickness" Value="2" />
+                                            <Setter Property="Stroke" Value="#F97316" />
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF7ED, Dark=#2D1A10}" />
+                                        </DataTrigger>
+
+                                        <!-- Blue border outline and ice blue/navy background for next singer -->
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsNext}" Value="True">
+                                            <Setter Property="StrokeThickness" Value="2" />
+                                            <Setter Property="Stroke" Value="#3B82F6" />
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#EFF6FF, Dark=#151F32}" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    
+                                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                        
+                                        <!-- Indicator badges (Now Singing [Orange], Next [Blue]) -->
+                                        <HorizontalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
+                                            <Border StrokeShape="RoundRectangle 4" BackgroundColor="#F97316" Padding="4,2" IsVisible="{Binding IsCurrent}" StrokeThickness="0">
+                                                <Label Text="NOW SINGING" TextColor="White" FontSize="9" FontAttributes="Bold"/>
+                                            </Border>
+                                            <Border StrokeShape="RoundRectangle 4" BackgroundColor="#3B82F6" Padding="4,2" IsVisible="{Binding IsNext}" StrokeThickness="0">
+                                                <Label Text="NEXT" TextColor="White" FontSize="9" FontAttributes="Bold"/>
+                                            </Border>
+                                        </HorizontalStackLayout>
+
+                                        <!-- Singer and Song Info (Combined into a single line, uniform size) -->
+                                        <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                                <Label Text="{Binding Name}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                                                
+                                                <Label Text="-" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="13" VerticalOptions="Center">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Song}" Value="">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Song}" Value="{x:Null}">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                                
+                                                <Label Text="{Binding Song}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#A78BFA}" FontSize="13" FontAttributes="Italic" VerticalOptions="Center">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Song}" Value="">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Song}" Value="{x:Null}">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                                
+                                                <Label Text="(" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="13" VerticalOptions="Center">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Artist}" Value="">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Artist}" Value="{x:Null}">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                                
+                                                <Label Text="{Binding Artist}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="13" VerticalOptions="Center">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Artist}" Value="">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Artist}" Value="{x:Null}">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                                
+                                                <Label Text=")" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="13" VerticalOptions="Center">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Artist}" Value="">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Artist}" Value="{x:Null}">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </HorizontalStackLayout>
+
+                                            <!-- 10 Checkboxes for Song Rounds -->
+                                            <HorizontalStackLayout Spacing="0" Margin="0,2,0,0">
+                                                <CheckBox IsChecked="{Binding Song1Completed}" Color="#E74C3C" Scale="0.65" WidthRequest="26" HeightRequest="26"/>
+                                                <CheckBox IsChecked="{Binding Song2Completed}" Color="#E67E22" Scale="0.65" WidthRequest="26" HeightRequest="26"/>
+                                                <CheckBox IsChecked="{Binding Song3Completed}" Color="#F1C40F" Scale="0.65" WidthRequest="26" HeightRequest="26"/>
+                                                <CheckBox IsChecked="{Binding Song4Completed}" Color="#2ECC71" Scale="0.65" WidthRequest="26" HeightRequest="26"/>
+                                                <CheckBox IsChecked="{Binding Song5Completed}" Color="#1ABC9C" Scale="0.65" WidthRequest="26" HeightRequest="26"/>
+                                                <CheckBox IsChecked="{Binding Song6Completed}" Color="#3498DB" Scale="0.65" WidthRequest="26" HeightRequest="26"/>
+                                                <CheckBox IsChecked="{Binding Song7Completed}" Color="#9B59B6" Scale="0.65" WidthRequest="26" HeightRequest="26"/>
+                                                <CheckBox IsChecked="{Binding Song8Completed}" Color="#FF1493" Scale="0.65" WidthRequest="26" HeightRequest="26"/>
+                                                <CheckBox IsChecked="{Binding Song9Completed}" Color="#00E5FF" Scale="0.65" WidthRequest="26" HeightRequest="26"/>
+                                                <CheckBox IsChecked="{Binding Song10Completed}" Color="#E040FB" Scale="0.65" WidthRequest="26" HeightRequest="26"/>
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
+
+                                        <!-- Actions Panel -->
+                                        <HorizontalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center">
+                                            <!-- Highlight as Current -->
+                                            <Button Text="🎙" Clicked="OnSetCurrentSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#10B981" BorderWidth="1" TextColor="#10B981" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0"/>
+                                            
+                                            <!-- Complete current round -->
+                                            <Button Text="✓" Clicked="OnFinishSingerSongClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#3B82F6" BorderWidth="1" TextColor="#3B82F6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0"/>
+                                            
+                                            <!-- Up/Down buttons -->
+                                            <Button Text="▲" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerUpCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0"/>
+                                            <Button Text="▼" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerDownCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0"/>
+                                            
+                                            <!-- Toggle Inactive (Pause/Resume) -->
+                                            <Button Clicked="OnToggleSingerInactiveClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#D97706" BorderWidth="1" TextColor="#D97706" FontSize="10" FontAttributes="Bold" HeightRequest="28" Padding="6,0">
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsInactive}" Value="True">
+                                                        <Setter Property="Text" Value="👁 Resume" />
+                                                        <Setter Property="BorderColor" Value="#10B981" />
+                                                        <Setter Property="TextColor" Value="#10B981" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
+                                            
+                                            <!-- Delete singer row -->
+                                            <Button Text="🗑" Clicked="OnDeleteSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#EF4444" BorderWidth="1" TextColor="#EF4444" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0"/>
+                                        </HorizontalStackLayout>
+                                        
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Grid>
+        </Grid>
+
+        <!-- RIGHT COLUMN: WEB PORTAL SERVER & INCOMING REQUESTS -->
+        <Grid Grid.Column="1" RowDefinitions="Auto, *" RowSpacing="12">
+
+            <!-- Portal Connection Card -->
+            <Border Grid.Row="0" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="8">
+                <VerticalStackLayout Spacing="6">
+                    <!-- Tapping this title toggles DJ mode -->
+                    <Label Text="PATRON REQUEST PORTAL" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1.5" HorizontalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnPortalTitleTapped" />
+                        </Label.GestureRecognizers>
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
+                                <Setter Property="Text" Value="⚠️ DJ CONTROL PORTAL" />
+                                <Setter Property="TextColor" Value="#EF4444" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    
+                    <Border StrokeShape="RoundRectangle 8" BackgroundColor="White" Padding="4" WidthRequest="96" HeightRequest="96" HorizontalOptions="Center">
+                        <Image Source="{Binding QrCodeImage}" Aspect="AspectFit">
+                            <Image.Triggers>
+                                <DataTrigger TargetType="Image" Binding="{Binding IsDjQrVisible}" Value="True">
+                                    <Setter Property="Source" Value="{Binding DjQrCodeImage}" />
+                                </DataTrigger>
+                            </Image.Triggers>
+                        </Image>
+                    </Border>
+                    
+                    <Label Text="{Binding ConnectionUrl}" TextColor="#10B981" FontSize="11" FontAttributes="Bold" HorizontalOptions="Center">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
+                                <Setter Property="Text" Value="{Binding DjConnectionUrl}" />
+                                <Setter Property="TextColor" Value="#EF4444" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    
+                    <Label Text="Singers scan to connect &amp; request songs" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" HorizontalOptions="Center">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
+                                <Setter Property="Text" Value="DJ ONLY: Remote dashboard login URL" />
+                                <Setter Property="TextColor" Value="#EF4444" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+
+                    <Label Text="{Binding DjPin, StringFormat='PIN: {0}'}" TextColor="#EF4444" FontSize="12" FontAttributes="Bold" HorizontalOptions="Center" IsVisible="{Binding IsDjQrVisible}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Incoming Requests List -->
+            <Grid Grid.Row="1" RowDefinitions="Auto, *">
+                <Label Text="INCOMING REQUESTS" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1.5" Margin="0,0,0,4"/>
+                
+                <CollectionView Grid.Row="1" ItemsSource="{Binding IncomingRequests}" SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <Label Text="No pending requests" TextColor="#70768F" FontSize="12" HorizontalOptions="Center" VerticalOptions="Center" Margin="0,32,0,0"/>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:PatronRequest">
+                            <Border StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Margin="0,0,0,6" Padding="8">
+                                <Grid RowDefinitions="Auto, Auto" RowSpacing="6">
+                                    <!-- Request Details -->
+                                    <VerticalStackLayout Grid.Row="0" Spacing="1">
+                                        <Label Text="{Binding Name}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" FontAttributes="Bold"/>
+                                        <Label Text="{Binding Song}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#A78BFA}" FontSize="10" FontAttributes="Italic"/>
+                                        <Label Text="{Binding Artist}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9"/>
+                                    </VerticalStackLayout>
+                                    
+                                    <!-- Action Buttons -->
+                                    <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="6">
+                                        <Button Grid.Column="0" Text="✓ Accept" Clicked="OnAcceptRequestClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#10B981" BorderWidth="1" TextColor="#10B981" FontSize="10" FontAttributes="Bold" HeightRequest="26" Padding="0"/>
+                                        <Button Grid.Column="1" Text="✕ Decline" Clicked="OnDeclineRequestClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#EF4444" BorderWidth="1" TextColor="#EF4444" FontSize="10" FontAttributes="Bold" HeightRequest="26" Padding="0"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

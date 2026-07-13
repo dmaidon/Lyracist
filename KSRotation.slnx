@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="KSRotation.Tests/KSRotation.Tests.csproj">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
+  <Project Path="KSRotation/KSRotation.csproj" />
+  <Project Path="KSRotation.Maui/KSRotation.Maui.csproj" />
+</Solution>

@@ -1,0 +1,111 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net10.0-android;net10.0-windows10.0.19041.0</TargetFrameworks>
+		<OutputType>Exe</OutputType>
+		<RootNamespace>KSRotation.Maui</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<DefineConstants>MAUI;$(DefineConstants)</DefineConstants>
+
+		<!-- Enable XAML source generation for faster build times and improved performance. -->
+		<MauiXamlInflator>SourceGen</MauiXamlInflator>
+
+		<!-- Display name -->
+		<ApplicationTitle>KSRotation.Maui</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>com.companyname.ksrotation.maui</ApplicationId>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+		<WindowsPackageType>None</WindowsPackageType>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+
+		<AssemblyVersion>26.7.13.26</AssemblyVersion>
+
+		<FileVersion>26.7.13.26</FileVersion>
+
+		<Copyright>© 2026 PAROLE Software - All rights reserved.</Copyright>
+
+		<Authors>Dennis Maidon</Authors>
+
+		<Company>PAROLE Software</Company>
+
+		<PackageIcon>ksr_logo.png</PackageIcon>
+
+		<PackageOutputPath>C:\VB26\Release\KSRotation.MAUI</PackageOutputPath>
+
+		<NeutralLanguage>en-US</NeutralLanguage>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+		
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<!-- Shared C# Code Linking from WPF Project -->
+	<ItemGroup>
+		<Compile Include="..\KSRotation\Models\*.cs" Link="Models\%(Filename)%(Extension)" />
+
+		<!-- Wildcard so newly-added WPF services are picked up automatically instead of requiring a manual
+		     edit here. Excludes the three services that have MAUI-specific replacements in Shims\WpfShims.cs
+		     (compiling both would be a duplicate-type error). -->
+		<Compile Include="..\KSRotation\Services\*.cs"
+		         Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs"
+		         Link="Services\%(Filename)%(Extension)" />
+
+		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
+		<Compile Include="..\KSRotation\ViewModels\MainViewModel.Requests.cs" Link="ViewModels\MainViewModel.Requests.cs" />
+		<Compile Include="..\KSRotation\ViewModels\MainViewModel.KnownSingers.cs" Link="ViewModels\MainViewModel.KnownSingers.cs" />
+	</ItemGroup>
+
+	<!-- Shared Embedded Resources (Patron Web Portal HTML) -->
+	<ItemGroup>
+		<EmbeddedResource Include="..\KSRotation\Resources\PatronPortal.html" Link="Resources\PatronPortal.html" />
+		<EmbeddedResource Include="..\KSRotation\Resources\dj.html" Link="Resources\dj.html" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="Resources\ksr_logo.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="QRCoder" Version="1.8.0" />
+	</ItemGroup>
+
+	<!-- Platform-specific compilation adjustments to ensure Windows platform code is not compiled on Android (and vice-versa) -->
+	<ItemGroup Condition="!$(TargetFramework.Contains('-windows'))">
+		<Compile Remove="Platforms\Windows\**" />
+		<None Include="Platforms\Windows\**" />
+		<MauiXaml Remove="Platforms\Windows\**\*.xaml" />
+	</ItemGroup>
+
+	<ItemGroup Condition="!$(TargetFramework.Contains('-android'))">
+		<Compile Remove="Platforms\Android\**" />
+		<None Include="Platforms\Android\**" />
+	</ItemGroup>
+
+</Project>

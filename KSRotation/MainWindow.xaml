@@ -1,0 +1,1444 @@
+<!-- Last Edit: Jul 03, 2026 07:36 - Delayed singer row Name/Song/Artist source updates until textbox focus is exited (LostFocus). -->
+<Window x:Name="FrmMain"
+    x:Class="KSRotation.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:KSRotation.ViewModels"
+        mc:Ignorable="d"
+    Title="{Binding AppTitle}"
+    Width="1500"
+    Height="800"
+    d:DesignWidth="1500"
+    d:DesignHeight="800"
+    Background="{DynamicResource MaterialDesignPaper}"
+    Foreground="{DynamicResource MaterialDesignBody}"
+    Icon="/mic_64.png" WindowStartupLocation="CenterScreen">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!-- Custom text box style inside ListView rows to ensure perfect contrast and theme syncing -->
+        <Style x:Key="GridTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border"
+                                BorderBrush="Transparent"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" VerticalAlignment="Center" Margin="2,0" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="true">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}" />
+                                <Setter TargetName="border" Property="BorderThickness" Value="1" />
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsInactive}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBodyLight}" />
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Gold highlight for the currently-singing row -->
+        <Style x:Key="CurrentSingerRowStyle" TargetType="ListViewItem">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsNext}" Value="True">
+                    <Setter Property="Background" Value="#C8E6C9" />
+                    <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Background" Value="#FFF9C4" />
+                    <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsInactive}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBodyLight}" />
+                    <Setter Property="FontStyle" Value="Italic" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ModernTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+            <Setter Property="Margin" Value="0,4" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+        </Style>
+
+        <Style x:Key="ModernButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="Margin" Value="0,4" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="ModernSecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+            <Setter Property="Margin" Value="0,4" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+
+        <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
+            <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+        </Style>
+
+        <Style x:Key="ModernCheckBoxStyle" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+        </Style>
+
+        <!-- Custom button style inside ListView rows to ensure perfect sizing and selection contrast -->
+        <Style x:Key="GridButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <!-- Custom TabControl style to show borders/outlines around the content panel -->
+        <Style x:Key="BorderedTabControlStyle" TargetType="TabControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid KeyboardNavigation.TabNavigation="Local"
+                              ClipToBounds="true"
+                              SnapsToDevicePixels="true">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition x:Name="ColumnDefinition0" />
+                                <ColumnDefinition x:Name="ColumnDefinition1" Width="0" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition x:Name="RowDefinition0" Height="Auto" />
+                                <RowDefinition x:Name="RowDefinition1" Height="*" />
+                            </Grid.RowDefinitions>
+                            <!-- Tab Headers panel -->
+                            <TabPanel x:Name="HeaderPanel"
+                                      Grid.Row="0"
+                                      Grid.Column="0"
+                                      IsItemsHost="true"
+                                      Panel.ZIndex="1"
+                                      KeyboardNavigation.TabNavigation="Once" />
+                            <!-- Outlined/Bordered Content Area -->
+                            <Border x:Name="ContentPanel"
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="8"
+                                    SnapsToDevicePixels="true">
+                                <ContentPresenter x:Name="PART_SelectedContentHost"
+                                                  ContentSource="SelectedContent"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <TabControl x:Name="Tc" Background="Transparent" BorderThickness="2" BorderBrush="{DynamicResource AppHeaderBrush}" Style="{StaticResource BorderedTabControlStyle}">
+            <TabControl.Resources>
+                <!-- Align the tab headers panel to the left so they sit next to each other without stretching -->
+                <Style TargetType="TabPanel">
+                    <Setter Property="HorizontalAlignment" Value="Left" />
+                </Style>
+            </TabControl.Resources>
+            <TabItem Header="Rotation" Width="80" Height="45">
+                <Grid Margin="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="360" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" Grid.IsSharedSizeScope="True" Margin="0,0,16,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <WrapPanel Margin="0,0,0,12" Orientation="Horizontal">
+                            <CheckBox
+                            Content="Enable Display Window"
+                            IsChecked="{Binding IsDisplayEnabled}"
+                            Style="{StaticResource ModernCheckBoxStyle}"
+                            FontSize="16"
+                            Margin="0,0,24,0" />
+                            <ComboBox
+                            Width="180"
+                            Margin="0,0,24,0"
+                            materialDesign:HintAssist.Hint="Projection View"
+                            Style="{StaticResource ModernComboBoxStyle}"
+                            ItemsSource="{Binding ProjectionViews}"
+                            SelectedItem="{Binding SelectedProjectionView}"
+                            FontSize="14"
+                            VerticalAlignment="Center" />
+                            <TextBlock
+                            Text="Singers in Rotation:"
+                            FontSize="16"
+                            VerticalAlignment="Center"
+                            Margin="24,0,8,0"
+                            Foreground="{DynamicResource MaterialDesignBody}" />
+                            <TextBox
+                            Text="{Binding Singers.Count, Mode=OneWay}"
+                            IsReadOnly="True"
+                            Width="50"
+                            FontSize="16"
+                            TextAlignment="Center"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource ModernTextBoxStyle}"
+                            Focusable="False" />
+                            <TextBlock
+                            Text="Theme:"
+                            FontSize="16"
+                            VerticalAlignment="Center"
+                            Margin="24,0,8,0"
+                            Foreground="{DynamicResource MaterialDesignBody}" />
+                            <ComboBox
+                            Width="110"
+                             ItemsSource="{Binding Themes}"
+                            SelectedItem="{Binding SelectedTheme, UpdateSourceTrigger=PropertyChanged}"
+                            Style="{StaticResource ModernComboBoxStyle}"
+                            FontSize="14"
+                            VerticalAlignment="Center" />
+                        </WrapPanel>
+
+                        <Grid Grid.Row="1" Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col0" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col1" MinWidth="130" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col2" MinWidth="180" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col3" MinWidth="180" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="colFinish" MinWidth="44" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col4" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col5" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col6" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col7" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col8" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col9" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col10" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col11" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col12_cb" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col13_cb" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col12" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col13" MinWidth="34" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="col14" MinWidth="34" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource AppHeaderBrush}" />
+                                </Style>
+                            </Grid.Resources>
+
+                            <TextBlock Text="★" FontWeight="SemiBold" HorizontalAlignment="Center" ToolTip="Set current singer" />
+                            <TextBlock Grid.Column="1" Text="Singer" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="2" Text="Song" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="3" Text="Artist" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="4" Text="Done" FontWeight="SemiBold" HorizontalAlignment="Center" ToolTip="Mark current song finished" />
+                            <TextBlock Grid.Column="5" Text="1" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="6" Text="2" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="7" Text="3" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="8" Text="4" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="9" Text="5" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="10" Text="6" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="11" Text="7" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="12" Text="8" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="13" Text="9" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="14" Text="10" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="15" Text="▲" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="16" Text="▼" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="17" Text="X" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        </Grid>
+
+                        <ListView
+                        x:Name="SingersListView"
+                        Grid.Row="2"
+                        ItemsSource="{Binding Singers}"
+                        ItemContainerStyle="{StaticResource CurrentSingerRowStyle}"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        HorizontalContentAlignment="Stretch"
+                        Margin="0,8,0,8">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col0" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col1" MinWidth="130" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col2" MinWidth="180" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col3" MinWidth="180" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="colFinish" MinWidth="44" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col4" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col5" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col6" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col7" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col8" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col9" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col10" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col11" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col12_cb" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col13_cb" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col12" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col13" MinWidth="34" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col14" MinWidth="34" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Button
+                                        Content="★"
+                                        Style="{StaticResource GridButtonStyle}"
+                                        Command="{Binding DataContext.SetCurrentSingerCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                        CommandParameter="{Binding}"
+                                        Grid.Column="0"
+                                        Margin="2"
+                                        ToolTip="Set as current singer" />
+
+                                        <Grid Grid.Column="1">
+                                            <TextBox
+                                            x:Name="SingerNameInput"
+                                            Text="{Binding Name, UpdateSourceTrigger=LostFocus}"
+                                            Style="{StaticResource GridTextBoxStyle}"
+                                            GotKeyboardFocus="SingerNameTextBox_GotKeyboardFocus"
+                                            PreviewMouseLeftButtonDown="SingerNameTextBox_PreviewMouseLeftButtonDown"
+                                            TextChanged="SingerNameTextBox_TextChanged"
+                                            PreviewKeyDown="SingerNameTextBox_PreviewKeyDown"
+                                            LostFocus="SingerNameTextBox_LostFocus" />
+                                            <Popup
+                                            x:Name="SuggestionsPopup"
+                                            IsOpen="False"
+                                            Placement="Bottom"
+                                            PlacementTarget="{Binding ElementName=SingerNameInput}"
+                                            StaysOpen="False"
+                                            AllowsTransparency="True"
+                                            Focusable="False"
+                                            Width="220"
+                                            PopupAnimation="Slide">
+                                                <Border Background="{DynamicResource MaterialDesignPaper}"
+                                                        BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="4"
+                                                        MaxHeight="200"
+                                                        Effect="{DynamicResource MaterialDesignShadowDepth1}">
+                                                    <ListBox
+                                                    x:Name="SuggestionsList"
+                                                    ItemsSource="{Binding DataContext.FilteredSingers, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    SelectionChanged="SuggestionsList_SelectionChanged"
+                                                    PreviewKeyDown="SuggestionsList_PreviewKeyDown"
+                                                    PreviewMouseLeftButtonDown="SuggestionsList_PreviewMouseLeftButtonDown"
+                                                    Focusable="True"
+                                                    BorderThickness="0">
+                                                        <ListBox.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock Text="{Binding}" Padding="8,4" />
+                                                            </DataTemplate>
+                                                        </ListBox.ItemTemplate>
+                                                    </ListBox>
+                                                </Border>
+                                            </Popup>
+                                        </Grid>
+
+                                        <TextBox Text="{Binding Song, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GridTextBoxStyle}" Grid.Column="2" />
+                                        <TextBox Text="{Binding Artist, UpdateSourceTrigger=LostFocus}" Style="{StaticResource GridTextBoxStyle}" Grid.Column="3" />
+
+                                        <Button
+                                         Content="✓"
+                                         Command="{Binding DataContext.FinishSingerSongCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                         CommandParameter="{Binding}"
+                                         Grid.Column="4"
+                                         Margin="2"
+                                         ToolTip="Finish current song and clear inputs">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource GridButtonStyle}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsInactive}" Value="True">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+
+                                        <CheckBox Grid.Column="5" IsChecked="{Binding Song1Completed}" Foreground="#E74C3C" />
+                                        <CheckBox Grid.Column="6" IsChecked="{Binding Song2Completed}" Foreground="#E67E22" />
+                                        <CheckBox Grid.Column="7" IsChecked="{Binding Song3Completed}" Foreground="#F1C40F" />
+                                        <CheckBox Grid.Column="8" IsChecked="{Binding Song4Completed}" Foreground="#2ECC71" />
+                                        <CheckBox Grid.Column="9" IsChecked="{Binding Song5Completed}" Foreground="#1ABC9C" />
+                                        <CheckBox Grid.Column="10" IsChecked="{Binding Song6Completed}" Foreground="#3498DB" />
+                                        <CheckBox Grid.Column="11" IsChecked="{Binding Song7Completed}" Foreground="#9B59B6" />
+                                        <CheckBox Grid.Column="12" IsChecked="{Binding Song8Completed}" Foreground="#FF1493" />
+                                        <CheckBox Grid.Column="13" IsChecked="{Binding Song9Completed}" Foreground="#00E5FF" />
+                                        <CheckBox Grid.Column="14" IsChecked="{Binding Song10Completed}" Foreground="#E040FB" />
+
+                                        <Button
+                                        Content="▲"
+                                        Style="{StaticResource GridButtonStyle}"
+                                        Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                        CommandParameter="{Binding}"
+                                        Grid.Column="15"
+                                        Margin="4" />
+
+                                        <Button
+                                        Content="▼"
+                                        Style="{StaticResource GridButtonStyle}"
+                                        Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                        CommandParameter="{Binding}"
+                                        Grid.Column="16"
+                                        Margin="4" />
+
+                                        <Button
+                                        Content="X"
+                                        Style="{StaticResource GridButtonStyle}"
+                                        Command="{Binding DataContext.ToggleSingerInactiveCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                        CommandParameter="{Binding}"
+                                        Grid.Column="17"
+                                        Margin="4"
+                                        ToolTip="Mark out for the night (click again to restore)" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button
+                            Content="Add Singer"
+                            Style="{StaticResource ModernButtonStyle}"
+                            Command="{Binding AddSingerCommand}"
+                            Click="AddSingerButton_Click"
+                            Width="120"
+                            Margin="0,0,12,0" />
+                            <Button
+                            Content="Save Rotation"
+                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                            Command="{Binding SaveRotationCommand}"
+                            Width="130"
+                            ToolTip="Save the night's rotation report to file and optionally email it" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Right: Incoming Requests Sidebar -->
+                    <Grid Grid.Column="1" Margin="8,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Header & Connection Info -->
+                        <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="12"
+                                Margin="0,0,0,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="PATRON WEB PORTAL"
+                                               FontWeight="Bold"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource AppHeaderBrush}"
+                                               Margin="0,0,0,4" />
+                                    <TextBlock Text="Connect to local Wi-Fi, then visit:"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                               Margin="0,0,0,4" />
+                                    <TextBox Text="{Binding ConnectionUrl, Mode=OneWay}"
+                                             FontWeight="SemiBold"
+                                             FontSize="15"
+                                             IsReadOnly="True"
+                                             BorderThickness="0"
+                                             Background="Transparent"
+                                             Foreground="{DynamicResource MaterialDesignBody}"
+                                             Padding="0"
+                                             HorizontalAlignment="Left" />
+
+                                    <TextBlock Margin="0,6,0,0"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}">
+                                        <Run Text="DJ PIN (give to DJ only): " />
+                                        <Run Text="{Binding DjPin, Mode=OneWay}"
+                                             FontWeight="Bold"
+                                             FontSize="14" />
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <Border Grid.Column="1"
+                                        Width="80"
+                                        Height="80"
+                                        Margin="12,0,0,0"
+                                        Background="White"
+                                        CornerRadius="4"
+                                        Padding="2"
+                                        VerticalAlignment="Center">
+                                    <Image Source="{Binding QrCodeImage}"
+                                           Stretch="Uniform" />
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Incoming Requests List -->
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Grid Margin="0,4,0,8">
+                                <TextBlock Text="Incoming Requests"
+                                           FontWeight="Bold"
+                                           FontSize="16"
+                                           Foreground="{DynamicResource AppHeaderBrush}"
+                                           VerticalAlignment="Center" />
+                                <materialDesign:Badged Badge="{Binding IncomingRequests.Count}"
+                                                       HorizontalAlignment="Right"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,8,0" />
+                            </Grid>
+
+                            <Border Grid.Row="1"
+                                    Background="{DynamicResource MaterialDesignCardBackground}"
+                                    BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="8">
+                                <Grid>
+                                    <!-- Empty State view -->
+                                    <TextBlock Text="No requests pending."
+                                               FontStyle="Italic"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IncomingRequests.Count}" Value="0">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
+                                    <!-- ListView of Requests -->
+                                    <ListView ItemsSource="{Binding IncomingRequests}"
+                                              HorizontalContentAlignment="Stretch"
+                                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListView.Style>
+                                            <Style TargetType="ListView" BasedOn="{StaticResource {x:Type ListView}}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IncomingRequests.Count}" Value="0">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListView.Style>
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource MaterialDesignBody}" />
+                                                        <TextBlock Text="{Binding Song}" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" TextTrimming="CharacterEllipsis" FontStyle="Italic" />
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                        <Button Content="✓"
+                                                                ToolTip="Accept request and add to rotation"
+                                                                Style="{StaticResource GridButtonStyle}"
+                                                                Command="{Binding DataContext.AcceptRequestCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                                CommandParameter="{Binding}"
+                                                                Foreground="#2ECC71"
+                                                                BorderBrush="#2ECC71"
+                                                                Margin="2" />
+                                                        <Button Content="X"
+                                                                ToolTip="Decline and remove request"
+                                                                Style="{StaticResource GridButtonStyle}"
+                                                                Command="{Binding DataContext.DeclineRequestCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                                CommandParameter="{Binding}"
+                                                                Foreground="#E74C3C"
+                                                                BorderBrush="#E74C3C"
+                                                                Margin="2" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Settings" Width="50" Height="45">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="6,0,-6,0" TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                    <Grid Margin="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="350" />
+                            <ColumnDefinition Width="370" />
+                            <ColumnDefinition Width="350" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="270" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Venue Names in the 1st column -->
+                        <GroupBox Header="Venue Names"
+                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Grid.Row="1"
+                                  Margin="0,0,0,12">
+                            <Grid Margin="0,4,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <ListBox x:Name="LbVenues"
+                                         ItemsSource="{Binding Venues}"
+                                         SelectedItem="{Binding SelectedVenue, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,0,0,8"
+                                         BorderThickness="1"
+                                         BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                         Background="{DynamicResource MaterialDesignCardBackground}"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         Padding="4" IsTabStop="True">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="4,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Path Data="M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2M12,6A3,3 0 0,1 15,9A3,3 0 0,1 12,12A3,3 0 0,1 9,9A3,3 0 0,1 12,6Z"
+                                                      Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                                      Width="14" Height="14"
+                                                      Stretch="Uniform"
+                                                      VerticalAlignment="Center"
+                                                      Margin="0,0,8,0" />
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding}"
+                                                           FontSize="14"
+                                                           FontWeight="Medium"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="8,6" />
+                                            <Setter Property="Margin" Value="0,1" />
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                        <Border x:Name="Bd"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderThickness="0"
+                                                                CornerRadius="6"
+                                                                Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                </ListBox>
+
+                                <TextBox
+                                    Grid.Row="1"
+                                    Text="{Binding NewVenueName, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,0,8"
+                                    ToolTip="Type a new venue name"
+                                    Style="{StaticResource ModernTextBoxStyle}" />
+
+                                <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                    <Button
+                                        Content="Add Venue"
+                                        Command="{Binding AddVenueCommand}"
+                                        Width="110"
+                                        Margin="0,0,8,0"
+                                        Style="{StaticResource ModernButtonStyle}" />
+                                    <Button
+                                        Content="Remove"
+                                        Command="{Binding RemoveVenueCommand}"
+                                        Width="90"
+                                        Style="{StaticResource ModernSecondaryButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- DJ Names in the 3rd column -->
+                        <GroupBox Header="DJ Names"
+                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Grid.Column="2"
+                                  Grid.Row="1"
+                                  Margin="15,0,0,145" Grid.RowSpan="3">
+                            <Grid Margin="0,4,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <ListBox x:Name="LbDjs"
+                                         ItemsSource="{Binding Djs}"
+                                         SelectedItem="{Binding SelectedDj, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,0,0,8"
+                                         BorderThickness="1"
+                                         BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                         Background="{DynamicResource MaterialDesignCardBackground}"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         Padding="4" IsTabStop="True">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="4,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Path Data="M12,2A3,3 0 0,0 9,5V11A3,3 0 0,0 12,14A3,3 0 0,0 15,11V5A3,3 0 0,0 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"
+                                                      Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                                      Width="14" Height="14"
+                                                      Stretch="Uniform"
+                                                      VerticalAlignment="Center"
+                                                      Margin="0,0,8,0" />
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding}"
+                                                           FontSize="14"
+                                                           FontWeight="Medium"
+                                                           VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="8,6" />
+                                            <Setter Property="Margin" Value="0,1" />
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                        <Border x:Name="Bd"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderThickness="0"
+                                                                CornerRadius="6"
+                                                                Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                </ListBox>
+
+                                <TextBox
+                                    Grid.Row="1"
+                                    Text="{Binding NewDjName, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,0,8"
+                                    ToolTip="Type a new DJ name"
+                                    Style="{StaticResource ModernTextBoxStyle}" />
+
+                                <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                    <Button
+                                        Content="Add DJ"
+                                        Command="{Binding AddDjCommand}"
+                                        Width="110"
+                                        Margin="0,0,8,0"
+                                        Style="{StaticResource ModernButtonStyle}" />
+                                    <Button
+                                        Content="Remove"
+                                        Command="{Binding RemoveDjCommand}"
+                                        Width="90"
+                                        Style="{StaticResource ModernSecondaryButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+
+                        <!-- Form Size in the 3rd column under DJ Names -->
+                        <GroupBox Header="Form Size"
+                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Grid.Column="2"
+                                  Grid.Row="3"
+                                  Margin="15,33,0,12">
+                            <Grid Margin="0,4,0,0">
+                                <TextBox
+                                    IsReadOnly="True"
+                                    Style="{StaticResource ModernTextBoxStyle}"
+                                    VerticalAlignment="Center" Margin="-10,8,10,0" HorizontalAlignment="Center" FontWeight="Bold" Height="53" Background="{DynamicResource MaterialDesignPaper}">
+                                    <TextBox.Text>
+                                        <MultiBinding StringFormat="{}{0:F0} x {1:F0}">
+                                            <Binding ElementName="FrmMain" Path="ActualWidth" Mode="OneWay" />
+                                            <Binding ElementName="FrmMain" Path="ActualHeight" Mode="OneWay" />
+                                        </MultiBinding>
+                                    </TextBox.Text>
+                                </TextBox>
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Header="Network IP Setup"
+                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Grid.Column="3"
+                                  Grid.Row="1"
+                                  VerticalAlignment="Top"
+                                  Margin="15,0,0,12">
+                            <StackPanel Margin="0,4,0,0">
+                                <TextBlock Text="Manual Portal IPv4 (Optional)" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBox
+                                    Text="{Binding PreferredHostIp, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,0,8"
+                                    ToolTip="Example: 192.168.50.20"
+                                    Style="{StaticResource ModernTextBoxStyle}" />
+                                <TextBlock Text="Leave blank to auto-detect the local IPv4 address. Use this field when you want a fixed travel-router IP in the displayed URL and QR code."
+                                           TextWrapping="Wrap"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Appearance Settings in the 2nd column -->
+                        <GroupBox Header="Appearance"
+                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Grid.Column="1"
+                                  Grid.Row="1"
+                                  Grid.RowSpan="3"
+                                  Margin="15,0,0,10">
+                            <StackPanel Margin="0,4,0,0">
+                                <!-- Theme -->
+                                <TextBlock Text="Theme" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <ComboBox
+                                    Width="120" HorizontalAlignment="Left"
+                                    ItemsSource="{Binding Themes}"
+                                    SelectedItem="{Binding SelectedTheme, UpdateSourceTrigger=PropertyChanged}"
+                                    Style="{StaticResource ModernComboBoxStyle}"
+                                    Margin="0,0,0,12" />
+
+                                <!-- Banner Text -->
+                                <TextBlock Text="Banner Text" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBox
+                                    Text="{Binding BannerText, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,0,12"
+                                    Style="{StaticResource ModernTextBoxStyle}" />
+
+                                <!-- Star Wars Crawl Text -->
+                                <TextBlock Text="Star Wars Crawl Text" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBox
+                                    Text="{Binding CrawlBannerText, UpdateSourceTrigger=PropertyChanged}"
+                                    TextWrapping="Wrap" Height="120"
+                                    Margin="0,0,0,12"
+                                    Style="{StaticResource ModernTextBoxStyle}" VerticalContentAlignment="Top" HorizontalContentAlignment="Left" />
+
+                                <!-- Marquee Speed -->
+                                <TextBlock Text="Marquee Speed" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="44" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Slow" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <Slider Grid.Column="1"
+                                            Minimum="20" Maximum="200"
+                                            SmallChange="5" LargeChange="20"
+                                            TickFrequency="20" TickPlacement="BottomRight"
+                                            Value="{Binding MarqueeSpeed, UpdateSourceTrigger=PropertyChanged}"
+                                            VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="Fast" VerticalAlignment="Center" Margin="8,0,8,0" />
+                                    <TextBlock Grid.Column="3"
+                                               Text="{Binding MarqueeSpeed, StringFormat={}{0:F0}}"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+
+                                <!-- Watermark Opacity -->
+                                <TextBlock Text="Watermark Opacity" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <Grid Margin="0,0,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="44" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Invisible" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <Slider Grid.Column="1"
+                                            Minimum="0.0" Maximum="1.0"
+                                            SmallChange="0.01" LargeChange="0.1"
+                                            TickFrequency="0.1" TickPlacement="BottomRight"
+                                            Value="{Binding WatermarkOpacity, UpdateSourceTrigger=PropertyChanged}"
+                                            VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="Solid" VerticalAlignment="Center" Margin="8,0,8,0" />
+                                    <TextBlock Grid.Column="3"
+                                               Text="{Binding WatermarkOpacity, StringFormat={}{0:P0}}"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <StackPanel Grid.Row="2" Margin="0,12,0,12">
+                            <CheckBox
+                                 Content="Test Mode (loads sample singers on next startup)"
+                                 IsChecked="{Binding IsTestMode}"
+                                 Style="{StaticResource ModernCheckBoxStyle}"
+                                 Margin="0,0,0,8" />
+                            <Button
+                                 Content="Save Current Rotation as Test List"
+                                 Command="{Binding SaveCurrentAsTestListCommand}"
+                                 HorizontalAlignment="Left"
+                                 Width="260"
+                                 Style="{StaticResource ModernButtonStyle}" />
+                        </StackPanel>
+
+                        <!-- Email settings container panel with shaded background -->
+                        <Border Grid.Row="3"
+                                Background="{DynamicResource MaterialDesignCardBackground}"
+                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="12"
+                                Margin="0,12,0,12">
+                            <StackPanel>
+                                <TextBlock Text="Report Email Recipients" FontWeight="SemiBold" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBlock Text="Separate multiple addresses with  ,  or  ;" FontSize="11" Margin="0,0,0,6"
+                                           Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                <TextBox
+                                    Text="{Binding EmailRecipient, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,0,12"
+                                    ToolTip="One or more email addresses separated by comma or semicolon"
+                                    Style="{StaticResource ModernTextBoxStyle}" />
+                                <CheckBox
+                                    Content="Send email automatically when saving rotation"
+                                    IsChecked="{Binding SendEmailOnSave}"
+                                    Style="{StaticResource ModernCheckBoxStyle}"
+                                    Margin="0,4,0,4" />
+                            </StackPanel>
+                        </Border>
+
+                        <Button
+                            Grid.Row="4"
+                            Content="Save Settings" Height="35"
+                            Command="{Binding SaveSettingsCommand}" Margin="0,12,120,0"
+                            Style="{StaticResource ModernButtonStyle}" />
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Help" Width="50" Height="45">
+
+                <Grid Margin="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Sidebar: Help Topics -->
+                    <Border Grid.Column="0" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,1,0" Margin="0,0,12,0" Padding="0,0,12,0">
+                        <StackPanel>
+                            <TextBlock Text="HELP TOPICS" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="8,0,0,12" />
+                            <ListBox ItemsSource="{Binding HelpTopics}"
+                                     SelectedItem="{Binding SelectedHelpTopic}"
+                                     BorderThickness="0"
+                                     Background="Transparent"
+                                     HorizontalContentAlignment="Stretch">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="8,6" CornerRadius="4">
+                                            <TextBlock Text="{Binding}" FontSize="14" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="BorderThickness" Value="0" />
+                                        <Setter Property="Margin" Value="0,2" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="4">
+                                                        <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
+                                                            <Setter Property="Foreground" Value="White" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Content Panel -->
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="12,0,4,0">
+                        <Grid>
+                            <!-- Topic 1: Getting Started -->
+                            <StackPanel x:Name="GettingStartedPanel">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="🚀 Getting Started">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Getting Started" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="Welcome to KSRotation, the premier Karaoke rotation manager. This app is designed to help hosts maintain a fair, structured, and dynamic singer queue."
+                                           FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="20" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="🚀 Quick Start Guide" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="1. Go to the Settings tab and add or select your current Venue Name." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="2. In the Rotation tab, click 'Add Singer' to enter singers, songs, and artists." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="3. Toggle 'Enable Display Window' to project the rotation onto a second monitor or TV." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="4. Click the '★' button next to a singer to mark them as currently singing." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="5. Check off numbered rounds as singers complete their songs to track stats." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="🛜 Travel Router Field Setup (GL.iNet Slate AX)" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="1. Connect your laptop and all singer phones to the same travel-router Wi-Fi network." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="2. In the router admin page, reserve a fixed IP for the laptop running KSRotation (example: 192.168.50.10)." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="3. In Windows Firewall, allow KSRotation on Private networks and allow port 5000." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="4. Start KSRotation, then verify the portal URL card and QR code are visible on the main screen." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="5. On a phone connected to the same router, open the shown URL (or scan the QR) and submit a test request before the show starts." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource PrimaryHueMidBrush}" BorderThickness="4,0,0,0" Padding="12" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="💡 Tip: Test Mode" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="Enable 'Test Mode' in Settings to automatically pre-populate the queue with 15 sample singers on the next startup. Perfect for practicing or testing screen layouts!" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Topic 2: Rotation Management -->
+                            <StackPanel x:Name="RotationPanel">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="🎤 Rotation Management">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Rotation Management" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="The Rotation grid is the heart of the application. Order is preserved sequentially from top to bottom."
+                                           FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="20" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <TextBlock Text="Key Actions &amp; Controls" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="Add Singer: Appends a new blank entry at the bottom of the list. Typing a name triggers auto-focus." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="★ (Set Current): Designates the singer as active. This highlights their row in gold and updates the projector's 'NOW SINGING' banner." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="▲ / ▼ (Reorder): Moves a singer up or down in the rotation list to adjust the queue manually." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="✓ (Done): Marks the singer's current song as finished, automatically checks the next incomplete round checkbox to log it in history/database, and populates the Song/Artist fields with their next queued song or first pending request if available (otherwise clearing the fields)." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="X (Toggle Inactive): Grays out the singer and excludes them from the display rotation instead of deleting them. Use this if a singer steps out for a bit but will return later." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="✓ (Accept Request): Adds a pending patron request to the rotation. If the singer is already listed, it avoids duplicate entries. If they have no song listed, it fills in their song/artist; if they already have a song, it queues it up as their next song." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </BulletDecorator>
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,16,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="💾 Saving Reports" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,6" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="Clicking 'Save Rotation' writes a text report of the night's performance to the 'Reports' directory. If 'Send email automatically' is enabled in Settings, the report will copy to your clipboard and prompt your default mail client with the rotation report pre-loaded." TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Topic 3: Display Projection -->
+                            <StackPanel x:Name="DisplayPanel">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="📺 Display Projection">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Display Projection" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="The display window is designed to be dragged onto a second monitor or TV to show the audience who is singing and who is up next."
+                                           FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="20" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <TextBlock Text="Projection Views" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <Grid Margin="0,0,0,16">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Normal View" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Column="1" Text="Displays active singers in clean, high-contrast, self-wrapping columns. The active singer is highlighted in crimson." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="1" Text="Vegas Marquee" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="A Vegas/Broadway theater marquee: the current singer's name in giant glowing letters inside a brass frame ringed by purple 'marching ants' light bulbs that chase around the border, with an Up Next strip below. The biggest crowd-pleaser." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="2" Text="Vinyl Turntable" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="A 'Now Spinning' turntable: a continuously spinning 45 single (big center hole) with the current singer's name and song title on the gold label, a tonearm resting on it, and a now-playing side panel listing who's On Deck." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="3" Text="Star Wars Crawl" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="Animates the rotation queue in a 3D perspective scroll, moving up over a gorgeous twinkling starfield with distant galaxies. Ideal for breaks or dramatic rotation reveals!" Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="4" Text="Flip Tile Board" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="Presents the rotation list as a retro mechanical split-flap character board that dynamically cycles through alphabetical/numerical states (flap-flap-flap) with clean golden and green highlight states for current and next singers." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </Grid>
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12">
+                                    <StackPanel>
+                                        <TextBlock Text="⚙️ Customizing the Screen" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="• Marquee Speed: Adjust the slider in the Appearance group in Settings to control how fast the ticker scrolls at the top of the display." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Banner Template: Type custom text in Settings. Use '{venue}' and '{dj}' in the text to automatically substitute the selected venue and DJ names." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Topic 4: Settings & Venues -->
+                            <StackPanel x:Name="SettingsHelpPanel">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="⚙️ Settings &amp; Venues">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Settings &amp; Venues" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="Configure app-wide parameters to suit your venue's style and setup."
+                                           FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="20" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <TextBlock Text="Venues List" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBlock Text="Add all your regular venues to the list. Selecting a venue updates the active venue name instantly. Venue files are saved in 'Settings/venues.json'." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <TextBlock Text="DJs List" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBlock Text="Add all your DJs to the list. Selecting a DJ updates the active DJ name instantly. Use '{dj}' in your banner and crawl text templates to automatically substitute the selected DJ's name. DJ files are saved in 'Settings/djs.json'." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <TextBlock Text="Theme Engine" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBlock Text="Choose between Light, Dark, or System themes. Changing the theme instantly adjusts the main application visual styles dynamically using the Material Design in XAML Toolkit. With System selected, the app also follows live Windows light/dark switches automatically." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <TextBlock Text="Watermark Opacity" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBlock Text="Adjust the background logo's transparency from 0% (Invisible) to 100% (Solid). This affects the centered logo watermarks on both the main dashboard and the audience projection screen in real-time." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <TextBlock Text="Email and Reports" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBlock Text="Configure the Report Email Recipient. Check the box to launch your mail client automatically when 'Save Rotation' is clicked." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource PrimaryHueMidBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="💾 Automatic Debounced Saving" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="You do not need to click 'Save Settings' manually after every minor adjustment! Settings auto-save in the background 500ms after you finish typing or dragging. Clicking the button forces an immediate sync." TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Topic 5: FAQ & Shortcuts -->
+                            <StackPanel x:Name="FAQPanel">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="❓ FAQ &amp; Shortcuts">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="FAQ &amp; Keyboard Shortcuts" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+
+                                <TextBlock Text="Keyboard Shortcuts" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="6" Margin="0,0,0,16">
+                                    <Grid Background="{DynamicResource MaterialDesignCardBackground}" Margin="4">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="200" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,0,1" Padding="8,6">
+                                            <TextBlock Text="Shortcut" FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBody}" />
+                                        </Border>
+                                        <Border Grid.Column="1" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,0,1" Padding="8,6">
+                                            <TextBlock Text="Action" FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBody}" />
+                                        </Border>
+
+                                        <Border Grid.Row="1" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,0,1" Padding="8,6">
+                                            <TextBlock Text="Tab / Shift+Tab" Foreground="{DynamicResource MaterialDesignBody}" />
+                                        </Border>
+                                        <Border Grid.Row="1" Grid.Column="1" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,0,1" Padding="8,6">
+                                            <TextBlock Text="Move focus between singer fields (Name, Song, Artist, Checkboxes)" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        </Border>
+
+                                        <Border Grid.Row="2" Padding="8,6">
+                                            <TextBlock Text="Spacebar" Foreground="{DynamicResource MaterialDesignBody}" />
+                                        </Border>
+                                        <Border Grid.Row="2" Grid.Column="1" Padding="8,6">
+                                            <TextBlock Text="Toggle selected checkboxes or activate buttons" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                                <TextBlock Text="Frequently Asked Questions" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <StackPanel>
+
+                                    <TextBlock Text="Q: Why isn't the projection window opening?" FontWeight="SemiBold" Margin="0,4,0,2" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Text="A: Ensure 'Enable Display Window' is checked in the Rotation tab. The window is programmed to position itself on your second monitor automatically. If no second monitor is found, it will load on your primary monitor." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Text="Q: Where are files saved on my computer?" FontWeight="SemiBold" Margin="0,4,0,2" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Text="A: All settings and reports are saved relative to the application's executable directory in folders labeled 'Settings' and 'Reports' respectively." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Text="Q: What happens when I accept a request for a singer already in the rotation?" FontWeight="SemiBold" Margin="0,4,0,2" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Text="A: The application matches names case-insensitively. If the singer has no song listed, accepting the request automatically fills in their song and artist. If they already have a song, the request is added to their queued songs instead of creating a duplicate entry." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="About" Width="50" Height="45">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Logo at 100% opacity -->
+                    <Border Grid.Column="0"
+                            Background="{DynamicResource MaterialDesignCardBackground}"
+                            BorderBrush="{DynamicResource MaterialDesignDivider}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="16"
+                            Margin="0,0,24,0"
+                            VerticalAlignment="Top"
+                            Width="282"
+                            Height="282">
+                        <Image Source="pack://application:,,,/Resources/KSRotation.png"
+                               Stretch="Uniform"
+                               Opacity="1.0" />
+                    </Border>
+
+                    <!-- Right: Info Details -->
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0,0,16,0">
+                            <!-- Title & Subtitle -->
+                            <TextBlock Text="{Binding AppTitle}"
+                                       FontSize="36"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AppHeaderBrush}"
+                                       Margin="0,0,0,4" />
+                            <TextBlock Text="{Binding AppVersion, StringFormat='Version {0}'}"
+                                       FontSize="14"
+                                       FontWeight="Medium"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                       Margin="0,0,0,12" />
+
+                            <TextBlock Text="A premium, state-of-the-art karaoke rotation manager designed for professional KJs and venue hosts. It combines local networking, offline accessibility, and classic visual boards to deliver a fair and engaging show."
+                                       FontSize="15"
+                                       TextWrapping="Wrap"
+                                       LineHeight="22"
+                                       Foreground="{DynamicResource MaterialDesignBody}"
+                                       Margin="0,0,0,12" />
+
+                            <TextBlock Text="{Binding AppCopyright}"
+                                       FontSize="12"
+                                       FontStyle="Italic"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                       Margin="0,0,0,24" />
+
+                            <!-- Specifications Grid -->
+                            <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                                    BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    Margin="0,0,0,20">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Author -->
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Author:" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding AppAuthor}" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+
+                                    <!-- Company -->
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Company:" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AppCompany}" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+
+                                    <!-- Support Email -->
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Support Email:" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="dmaidon@gmail.com" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+
+                                    <!-- Architecture -->
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Architecture:" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="C# with MVVM Pattern (CommunityToolkit.Mvvm)" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+
+                                    <!-- Frameworks & SDKs -->
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Framework:" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text=".NET 10.0 WPF Application" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+
+                                    <!-- Main components -->
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Key Dependencies:" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="Material Design in XAML Toolkit, PDFsharp, QRCoder" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Features bullet list -->
+                            <TextBlock Text="Core Capabilities" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+
+                            <BulletDecorator Margin="0,4">
+                                <BulletDecorator.Bullet>
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource PrimaryHueMidBrush}" />
+                                </BulletDecorator.Bullet>
+                                <TextBlock Text="Patron Web Portal: Hosts a local server so singers scan a QR code to view the queue and submit song requests." Margin="10,0,0,0" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBody}" />
+                            </BulletDecorator>
+
+                            <BulletDecorator Margin="0,4">
+                                <BulletDecorator.Bullet>
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource PrimaryHueMidBrush}" />
+                                </BulletDecorator.Bullet>
+                                <TextBlock Text="Retro Split-Flap Display: A stunning airport-style mechanical character board that flips tiles to show rotation changes." Margin="10,0,0,0" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBody}" />
+                            </BulletDecorator>
+
+                            <BulletDecorator Margin="0,4">
+                                <BulletDecorator.Bullet>
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource PrimaryHueMidBrush}" />
+                                </BulletDecorator.Bullet>
+                                <TextBlock Text="Star Wars Crawl: A 3D perspective camera viewport rendering active singers crawling into space over a twinkling starfield." Margin="10,0,0,0" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBody}" />
+                            </BulletDecorator>
+
+                            <BulletDecorator Margin="0,4">
+                                <BulletDecorator.Bullet>
+                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource PrimaryHueMidBrush}" />
+                                </BulletDecorator.Bullet>
+                                <TextBlock Text="Session Persistence &amp; PDF Reporting: Automatically saves active sessions and exports professional multi-page PDF performance reports." Margin="10,0,0,0" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBody}" />
+                            </BulletDecorator>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

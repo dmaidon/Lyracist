@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSRotation - Singer Request Board</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0F172A;
+            --card-bg: #1E293B;
+            --primary: #8B5CF6;
+            --primary-hover: #7C3AED;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --gold: #FCD34D;
+            --green: #4ADE80;
+            --success-bg: #065F46;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
+        header {
+            text-align: center;
+            margin: 24px 0;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #8B5CF6, #EC4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+        .tabs {
+            display: flex;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        .panel {
+            display: none;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+        .panel.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        input {
+            width: 100%;
+            background-color: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+        input:focus {
+            border-color: var(--primary);
+        }
+        button.submit-btn {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        button.submit-btn:hover {
+            background-color: var(--primary-hover);
+        }
+        .alert {
+            display: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        .alert.success {
+            display: block;
+            background-color: var(--success-bg);
+            color: #A7F3D0;
+        }
+        .alert.error {
+            display: block;
+            background-color: #991B1B;
+            color: #FECACA;
+        }
+        .singer-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 12px;
+            border-bottom: 1px solid #334155;
+        }
+        .singer-row:last-child {
+            border-bottom: none;
+        }
+        .singer-row.current {
+            background-color: rgba(252, 211, 77, 0.08);
+            border-left: 4px solid var(--gold);
+            border-radius: 4px;
+        }
+        .singer-row.next {
+            background-color: rgba(74, 222, 128, 0.08);
+            border-left: 4px solid var(--green);
+            border-radius: 4px;
+        }
+        .singer-row.inactive {
+            opacity: 0.4;
+        }
+        .singer-num {
+            font-weight: 700;
+            font-size: 0.95rem;
+            width: 32px;
+            color: var(--text-muted);
+        }
+        .singer-details {
+            flex: 1;
+            min-width: 0;
+        }
+        .singer-name {
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .current .singer-name {
+            color: var(--gold);
+        }
+        .next .singer-name {
+            color: var(--green);
+        }
+        .singer-song {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+        .badge.current {
+            background-color: var(--gold);
+            color: #000;
+        }
+        .badge.next {
+            background-color: var(--green);
+            color: #000;
+        }
+        .no-singers {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px 0;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>KSRotation</h1>
+            <p class="subtitle">Karaoke Request Board</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('request')">Request Song</button>
+            <button class="tab-btn" onclick="switchTab('rotation')">View Rotation</button>
+        </div>
+
+        <!-- Request Panel -->
+        <div id="request-panel" class="panel active">
+            <div id="status-alert" class="alert"></div>
+            <form id="request-form" onsubmit="submitForm(event)">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" required placeholder="e.g. Charlie">
+                </div>
+                <div class="form-group">
+                    <label for="song">Song Title</label>
+                    <input type="text" id="song" required placeholder="e.g. Yesterday">
+                </div>
+                <div class="form-group">
+                    <label for="artist">Artist Name</label>
+                    <input type="text" id="artist" required placeholder="e.g. The Beatles">
+                </div>
+                <button type="submit" class="submit-btn">Submit Request</button>
+            </form>
+        </div>
+
+        <!-- Rotation Panel -->
+        <div id="rotation-panel" class="panel">
+            <div id="rotation-list">
+                <div class="no-singers">Loading rotation...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+
+            if (tab === 'request') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('request-panel').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('rotation-panel').classList.add('active');
+                loadRotation();
+            }
+        }
+
+        async function submitForm(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const song = document.getElementById('song').value;
+            const artist = document.getElementById('artist').value;
+            const alertDiv = document.getElementById('status-alert');
+
+            alertDiv.className = 'alert';
+            alertDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, song, artist })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    alertDiv.textContent = "Request submitted successfully! Look at the screens to see when you are up.";
+                    alertDiv.className = 'alert success';
+                    document.getElementById('request-form').reset();
+                } else {
+                    alertDiv.textContent = data.error || "Failed to submit request.";
+                    alertDiv.className = 'alert error';
+                }
+            } catch (err) {
+                alertDiv.textContent = "Error connecting to server.";
+                alertDiv.className = 'alert error';
+            }
+        }
+
+        async function loadRotation() {
+            try {
+                const response = await fetch('/api/rotation');
+                const singers = await response.json();
+                const listDiv = document.getElementById('rotation-list');
+
+                if (singers.length === 0) {
+                    listDiv.innerHTML = '<div class="no-singers">No singers in rotation yet.</div>';
+                    return;
+                }
+
+                let html = '';
+                singers.forEach((singer, index) => {
+                    let cssClass = 'singer-row';
+                    let badge = '';
+                    if (singer.isInactive) {
+                        cssClass += ' inactive';
+                    }
+                    if (singer.isCurrent) {
+                        cssClass += ' current';
+                        badge = '<span class="badge current">Current</span>';
+                    } else if (singer.isNext) {
+                        cssClass += ' next';
+                        badge = '<span class="badge next">Next</span>';
+                    }
+
+                    html += `
+                        <div class="${cssClass}">
+                            <div class="singer-num">${index + 1}</div>
+                            <div class="singer-details">
+                                <div class="singer-name">${escapeHtml(singer.name)}${badge}</div>
+                                <div class="singer-song">${escapeHtml(singer.song)} - ${escapeHtml(singer.artist)}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                listDiv.innerHTML = html;
+            } catch (err) {
+                document.getElementById('rotation-list').innerHTML = '<div class="no-singers">Failed to load rotation.</div>';
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Poll rotation if on that panel
+        setInterval(() => {
+            if (document.getElementById('rotation-panel').classList.contains('active')) {
+                loadRotation();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
