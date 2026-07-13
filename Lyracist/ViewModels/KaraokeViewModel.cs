@@ -995,7 +995,7 @@ public partial class KaraokeViewModel : BaseViewModel
     [RelayCommand]
     private void AddToRotation()
     {
-        string targetSingerName = NewSingerName?.Trim() ?? string.Empty;
+        string targetSingerName = ProperCase(NewSingerName?.Trim() ?? string.Empty);
         if (string.IsNullOrWhiteSpace(targetSingerName))
         {
             if (Rotation.SelectedSinger != null)
@@ -1032,8 +1032,8 @@ public partial class KaraokeViewModel : BaseViewModel
             var parsed = _externalLinkService.ParseUrl(CustomExternalUrl);
             if (parsed != null)
             {
-                string title = string.IsNullOrWhiteSpace(CustomExternalTitle) ? parsed.Title : CustomExternalTitle;
-                string artist = string.IsNullOrWhiteSpace(CustomExternalArtist) ? parsed.Artist : CustomExternalArtist;
+                string title = ProperCase(string.IsNullOrWhiteSpace(CustomExternalTitle) ? parsed.Title : CustomExternalTitle);
+                string artist = ProperCase(string.IsNullOrWhiteSpace(CustomExternalArtist) ? parsed.Artist : CustomExternalArtist);
                 Rotation.AddSinger(targetSingerName, title, artist, NewSingerKey, NewSingerNotes, parsed.Source, CustomExternalUrl, NewDuetPartnerName);
             }
         }
@@ -1498,5 +1498,12 @@ public partial class KaraokeViewModel : BaseViewModel
     public void RaiseSelectedProjectionViewChanged()
     {
         OnPropertyChanged(nameof(SelectedProjectionView));
+    }
+
+    private static string ProperCase(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+        if (input.Equals("None", StringComparison.OrdinalIgnoreCase)) return "None";
+        return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLowerInvariant());
     }
 }
