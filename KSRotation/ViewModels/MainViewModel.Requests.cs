@@ -51,8 +51,16 @@ namespace KSRotation.ViewModels
             var existingSinger = Singers.FirstOrDefault(s => string.Equals(s.Name?.Trim(), request.Name?.Trim(), StringComparison.OrdinalIgnoreCase));
             if (existingSinger != null)
             {
+                // Only reposition if the singer was actually paused — reactivating them needs to move
+                // them back into the active section. An already-active singer (including the one
+                // currently performing) accepting a new request should stay exactly where they are.
+                bool wasInactive = existingSinger.IsInactive;
                 existingSinger.IsInactive = false;
-                EnforceActiveInactiveOrder(existingSinger);
+                if (wasInactive)
+                {
+                    EnforceActiveInactiveOrder(existingSinger);
+                }
+
                 if (string.IsNullOrWhiteSpace(existingSinger.Song))
                 {
                     existingSinger.Song = request.Song;
@@ -268,30 +276,37 @@ namespace KSRotation.ViewModels
             {
                 foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
                 {
-                    if (nic.OperationalStatus != OperationalStatus.Up)
+                    try
                     {
-                        continue;
-                    }
-
-                    if (nic.NetworkInterfaceType == NetworkInterfaceType.Loopback
-                        || nic.NetworkInterfaceType == NetworkInterfaceType.Tunnel)
-                    {
-                        continue;
-                    }
-
-                    IPInterfaceProperties properties = nic.GetIPProperties();
-                    if (properties.GatewayAddresses.Count == 0)
-                    {
-                        continue;
-                    }
-
-                    foreach (UnicastIPAddressInformation unicast in properties.UnicastAddresses)
-                    {
-                        if (unicast.Address.AddressFamily == AddressFamily.InterNetwork
-                            && !IPAddress.IsLoopback(unicast.Address))
+                        if (nic.OperationalStatus != OperationalStatus.Up)
                         {
-                            return unicast.Address.ToString();
+                            continue;
                         }
+
+                        if (nic.NetworkInterfaceType == NetworkInterfaceType.Loopback
+                            || nic.NetworkInterfaceType == NetworkInterfaceType.Tunnel)
+                        {
+                            continue;
+                        }
+
+                        // Deliberately not filtering on IPInterfaceProperties.GatewayAddresses here — it
+                        // throws PlatformNotSupportedException on Android (and potentially other MAUI
+                        // targets), which would abort this whole search on the first interface checked.
+                        IPInterfaceProperties properties = nic.GetIPProperties();
+
+                        foreach (UnicastIPAddressInformation unicast in properties.UnicastAddresses)
+                        {
+                            if (unicast.Address.AddressFamily == AddressFamily.InterNetwork
+                                && !IPAddress.IsLoopback(unicast.Address))
+                            {
+                                return unicast.Address.ToString();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // One unreadable NIC shouldn't stop us from checking the rest.
+                        LoggerService.LogError($"MainViewModel.GetLocalIPAddress nic={nic.Name}", ex);
                     }
                 }
             }
