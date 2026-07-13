@@ -218,8 +218,8 @@ public partial class RotationViewModel : BaseViewModel
 
     public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "", string duetPartner = "")
     {
-        name = ProperCase(name);
-        duetPartner = ProperCase(duetPartner);
+        name = NameFormatting.ProperCase(name);
+        duetPartner = NameFormatting.ProperCase(duetPartner);
 
         // Save to singer song history database
         System.Threading.Tasks.Task.Run(() =>
@@ -367,8 +367,8 @@ public partial class RotationViewModel : BaseViewModel
 
         Rotation.Add(new Singer
         {
-            Name = ProperCase(NewSingerName),
-            DuetPartnerName = ProperCase(NewDuetPartnerName),
+            Name = NameFormatting.ProperCase(NewSingerName),
+            DuetPartnerName = NameFormatting.ProperCase(NewDuetPartnerName),
             Notes = NewSingerNotes,
             Key = NewSingerKey
         });
@@ -383,12 +383,6 @@ public partial class RotationViewModel : BaseViewModel
         RotationStateChanged?.Invoke();
     }
 
-    private static string ProperCase(string? input)
-    {
-        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
-        if (input.Equals("None", StringComparison.OrdinalIgnoreCase)) return "None";
-        return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLowerInvariant());
-    }
 
     [RelayCommand]
     private async Task RemoveSinger()

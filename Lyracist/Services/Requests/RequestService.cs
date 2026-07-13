@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Data;
 using Lyracist.Data.Models;
@@ -39,15 +40,15 @@ public class RequestService : IRequestService
     {
         using var context = new LyracistDbContext();
 
-        string name = ProperCase(string.IsNullOrWhiteSpace(singerName) ? "Anonymous" : singerName.Trim());
+        string name = NameFormatting.ProperCase(string.IsNullOrWhiteSpace(singerName) ? "Anonymous" : singerName.Trim());
         var singer = context.Singers.FirstOrDefault(s => s.Name.ToLower() == name.ToLower())
                      ?? context.Singers.Add(new Data.Models.Singer { Name = name }).Entity;
 
         var request = new MusicRequest
         {
             Singer = singer,
-            Title = ProperCase(title),
-            Artist = ProperCase(artist),
+            Title = NameFormatting.ProperCase(title),
+            Artist = NameFormatting.ProperCase(artist),
             Source = string.IsNullOrWhiteSpace(source) ? "Local" : source,
             RequestType = string.IsNullOrWhiteSpace(requestType) ? "Karaoke" : requestType,
             Key = string.IsNullOrWhiteSpace(key) ? "0" : key,
@@ -60,13 +61,6 @@ public class RequestService : IRequestService
 
         RequestsChanged?.Invoke(this, EventArgs.Empty);
         return Map(request);
-    }
-
-    private static string ProperCase(string? input)
-    {
-        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
-        if (input.Equals("None", StringComparison.OrdinalIgnoreCase)) return "None";
-        return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLowerInvariant());
     }
 
     public void Approve(int requestId) => SetStatus(requestId, "Approved");
