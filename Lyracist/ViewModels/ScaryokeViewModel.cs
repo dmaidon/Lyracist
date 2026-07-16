@@ -1,10 +1,6 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Lyracist.Core.Interfaces;
 using Lyracist.Services.Display;
+using System.Collections.ObjectModel;
 
 namespace Lyracist.ViewModels;
 
@@ -48,19 +44,20 @@ public partial class ScaryokeViewModel : BaseViewModel
 
         for (int i = 0; i < customCategories.Count; i++)
         {
+            string color = segmentColors[i % segmentColors.Length];
             list.Add(new WheelSegment
             {
                 Name = customCategories[i],
-                Color = segmentColors[i % segmentColors.Length],
-                TextColor = "#FFFFFF"
+                Color = color,
+                TextColor = GetContrastingTextColor(color)
             });
         }
 
         var singersChoice = new WheelSegment
         {
             Name = "Singer's Choice",
-            Color = "#FFFFFF",
-            TextColor = "#1E133A"
+            Color = "#228B22",
+            TextColor = GetContrastingTextColor("#228B22")
         };
 
         var leftSliver = new WheelSegment
@@ -111,6 +108,27 @@ public partial class ScaryokeViewModel : BaseViewModel
         {
             WheelSegments.Add(segment);
         }
+    }
+
+    private static string GetContrastingTextColor(string hexColor)
+    {
+        if (string.IsNullOrEmpty(hexColor)) return "#FFFFFF";
+        string hex = hexColor.TrimStart('#');
+        if (hex.Length == 3)
+        {
+            hex = new string([hex[0], hex[0], hex[1], hex[1], hex[2], hex[2]]);
+        }
+        if (hex.Length == 6)
+        {
+            if (int.TryParse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out int r) &&
+                int.TryParse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out int g) &&
+                int.TryParse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out int b))
+            {
+                double brightness = (r * 0.299) + (g * 0.587) + (b * 0.114);
+                return brightness > 130 ? "#1E133A" : "#FFFFFF";
+            }
+        }
+        return "#FFFFFF";
     }
 
     /// <summary>

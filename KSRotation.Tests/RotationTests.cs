@@ -227,3 +227,216 @@ public class ThemeServiceTests
         Assert.IsType<bool>(result);
     }
 }
+
+public class MainViewModelTests
+{
+    [Fact]
+    public void TryAddPerformer_SingerExists_QueuesSongAndDoesNotDuplicate()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel
+        {
+            IsTestMode = true
+        };
+        vm.Singers.Clear();
+
+        // Act
+        bool addedFirst = vm.TryAddPerformer("Dennis Maidon", "Song A", "Artist A");
+        bool addedSecond = vm.TryAddPerformer("Dennis Maidon", "Song B", "Artist B");
+
+        // Assert
+        Assert.True(addedFirst);
+        Assert.True(addedSecond);
+        Assert.Single(vm.Singers);
+        
+        var singer = vm.Singers[0];
+        Assert.Equal("Dennis Maidon", singer.Name);
+        Assert.Equal("Song A", singer.Song);
+        Assert.Equal("Artist A", singer.Artist);
+        
+        Assert.Single(singer.QueuedSongs);
+        Assert.Equal("Song B", singer.QueuedSongs[0].Song);
+        Assert.Equal("Artist B", singer.QueuedSongs[0].Artist);
+    }
+
+    [Fact]
+    public void TryAddPerformer_SingerExistsWithSpacingAnomalies_QueuesSongAndDoesNotDuplicate()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel
+        {
+            IsTestMode = true
+        };
+        vm.Singers.Clear();
+
+        // Act - Dennis Maidon with a non-breaking space (0xA0), tab, leading/trailing space, and double inner spaces
+        bool addedFirst = vm.TryAddPerformer("  Dennis\u00A0Maidon  ", "Song A", "Artist A");
+        bool addedSecond = vm.TryAddPerformer("dennis \t  maidon", "Song B", "Artist B");
+
+        // Assert
+        Assert.True(addedFirst);
+        Assert.True(addedSecond);
+        Assert.Single(vm.Singers);
+
+        var singer = vm.Singers[0];
+        Assert.Equal("Dennis Maidon", singer.Name); // ProperCased
+        Assert.Equal("Song A", singer.Song);
+        
+        Assert.Single(singer.QueuedSongs);
+        Assert.Equal("Song B", singer.QueuedSongs[0].Song);
+    }
+
+    [Fact]
+    public void SingerNameChanged_ToExistingSingerName_MergesSongsAndRemovesDuplicate()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel
+        {
+            IsTestMode = true
+        };
+        vm.Singers.Clear();
+
+        // Add an existing singer with a song
+        vm.TryAddPerformer("Dennis Maidon", "Song A", "Artist A");
+        
+        // Add a new blank row, then set song/artist
+        var duplicateRow = new SingerEntry { Name = "New Singer" };
+        vm.Singers.Add(duplicateRow);
+        duplicateRow.Song = "Song B";
+        duplicateRow.Artist = "Artist B";
+
+        // Act - Simulate the user editing the name from "New Singer" to "Dennis Maidon"
+        duplicateRow.Name = "Dennis Maidon";
+
+        // Assert
+        Assert.Single(vm.Singers); // The duplicate row should be removed/merged!
+        
+        var singer = vm.Singers[0];
+        Assert.Equal("Dennis Maidon", singer.Name);
+        Assert.Equal("Song A", singer.Song);
+        
+        Assert.Single(singer.QueuedSongs);
+        Assert.Equal("Song B", singer.QueuedSongs[0].Song);
+        Assert.Equal("Artist B", singer.QueuedSongs[0].Artist);
+    }
+
+    [Fact]
+    public void AcceptRequest_MultipleSongs_QueuesAllSongsInOrder()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel
+        {
+            IsTestMode = true
+        };
+        vm.Singers.Clear();
+
+        var request = new PatronRequest
+        {
+            Name = "Alice",
+            Songs =
+            [
+                new RequestedSong("Song 1", "Artist 1"),
+                new RequestedSong("Song 2", "Artist 2"),
+                new RequestedSong("Song 3", "Artist 3")
+            ]
+        };
+
+        // Act
+        vm.AcceptRequest(request);
+
+        // Assert
+        Assert.Single(vm.Singers);
+        var singer = vm.Singers[0];
+        Assert.Equal("Alice", singer.Name);
+        Assert.Equal("Song 1", singer.Song);
+        Assert.Equal("Artist 1", singer.Artist);
+
+        Assert.Equal(2, singer.QueuedSongs.Count);
+        Assert.Equal("Song 2", singer.QueuedSongs[0].Song);
+        Assert.Equal("Artist 2", singer.QueuedSongs[0].Artist);
+        Assert.Equal("Song 3", singer.QueuedSongs[1].Song);
+        Assert.Equal("Artist 3", singer.QueuedSongs[1].Artist);
+    }
+
+    [Fact]
+    public void SongCleared_AutoPostsNextSongFromQueue()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel
+        {
+            IsTestMode = true
+        };
+        vm.Singers.Clear();
+
+        var entry = new SingerEntry
+        {
+            Name = "Bob",
+            Song = "Current Song",
+            Artist = "Current Artist",
+            QueuedSongs =
+            [
+                new QueuedSong("Next Song", "Next Artist"),
+                new QueuedSong("Third Song", "Third Artist")
+            ]
+        };
+        vm.Singers.Add(entry);
+
+        // Act - clear the current song
+        entry.Song = string.Empty;
+
+        // Assert - should automatically promote the next song from queue
+        Assert.Equal("Next Song", entry.Song);
+        Assert.Equal("Next Artist", entry.Artist);
+        Assert.Single(entry.QueuedSongs);
+        Assert.Equal("Third Song", entry.QueuedSongs[0].Song);
+    }
+
+    [Fact]
+    public void AcceptRequest_DuplicateSongs_IgnoresDuplicates()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel
+        {
+            IsTestMode = true
+        };
+        vm.Singers.Clear();
+
+        var entry = new SingerEntry
+        {
+            Name = "Alice",
+            Song = "Song 1",
+            Artist = "Artist 1",
+            QueuedSongs =
+            [
+                new QueuedSong("Song 2", "Artist 2")
+            ]
+        };
+        vm.Singers.Add(entry);
+
+        var request = new PatronRequest
+        {
+            Name = "Alice",
+            Songs =
+            [
+                new RequestedSong("Song 1", "Artist 1"), // Duplicate of active song
+                new RequestedSong("Song 2", "Artist 2"), // Duplicate of queued song
+                new RequestedSong("Song 3", "Artist 3"), // Unique song
+                new RequestedSong("Song 3", "Artist 3")  // Duplicate of another song in the request
+            ]
+        };
+
+        // Act
+        vm.AcceptRequest(request);
+
+        // Assert - should only add Song 3 once, ignoring other duplicates
+        Assert.Single(vm.Singers);
+        var singer = vm.Singers[0];
+        Assert.Equal("Alice", singer.Name);
+        Assert.Equal("Song 1", singer.Song);
+
+        Assert.Equal(2, singer.QueuedSongs.Count);
+        Assert.Equal("Song 2", singer.QueuedSongs[0].Song);
+        Assert.Equal("Song 3", singer.QueuedSongs[1].Song);
+    }
+}
+

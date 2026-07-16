@@ -48,7 +48,21 @@ namespace KSRotation.ViewModels
         {
             if (request == null) return;
 
-            var existingSinger = Singers.FirstOrDefault(s => string.Equals(s.Name?.Trim(), request.Name?.Trim(), StringComparison.OrdinalIgnoreCase));
+            string normalizedName = string.Empty;
+            if (!string.IsNullOrWhiteSpace(request.Name))
+            {
+                normalizedName = System.Text.RegularExpressions.Regex.Replace(
+                    request.Name.Replace('\u00A0', ' ').Replace('\t', ' '),
+                    @"\s+",
+                    " "
+                ).Trim();
+            }
+
+            var requestedSongs = request.Songs != null && request.Songs.Count > 0
+                ? request.Songs
+                : new List<RequestedSong> { new RequestedSong(request.Song, request.Artist) };
+
+            var existingSinger = Singers.FirstOrDefault(s => IsSameSingerName(s.Name, normalizedName));
             if (existingSinger != null)
             {
                 // Only reposition if the singer was actually paused — reactivating them needs to move
@@ -61,27 +75,54 @@ namespace KSRotation.ViewModels
                     EnforceActiveInactiveOrder(existingSinger);
                 }
 
-                if (string.IsNullOrWhiteSpace(existingSinger.Song))
+                foreach (var reqSong in requestedSongs)
                 {
-                    existingSinger.Song = request.Song;
-                    existingSinger.Artist = request.Artist;
-                }
-                else
-                {
-                    existingSinger.QueuedSongs.Add(new QueuedSong(request.Song, request.Artist));
+                    if (string.IsNullOrWhiteSpace(reqSong.Song)) continue;
+
+                    if (SingerHasSong(existingSinger, reqSong.Song, reqSong.Artist)) continue;
+
+                    if (string.IsNullOrWhiteSpace(existingSinger.Song))
+                    {
+                        existingSinger.Song = reqSong.Song;
+                        existingSinger.Artist = reqSong.Artist;
+                    }
+                    else
+                    {
+                        existingSinger.QueuedSongs.Add(new QueuedSong(reqSong.Song, reqSong.Artist));
+                    }
                 }
             }
             else
             {
-                AddActiveSinger(new SingerEntry
+                var newSinger = new SingerEntry
                 {
-                    Name = request.Name,
-                    Song = request.Song,
-                    Artist = request.Artist
-                });
-                if (!string.IsNullOrWhiteSpace(request.Name))
+                    Name = normalizedName
+                };
+
+                foreach (var reqSong in requestedSongs)
                 {
-                    AddKnownSinger(request.Name);
+                    if (string.IsNullOrWhiteSpace(reqSong.Song)) continue;
+
+                    if (SingerHasSong(newSinger, reqSong.Song, reqSong.Artist)) continue;
+
+                    if (string.IsNullOrWhiteSpace(newSinger.Song))
+                    {
+                        newSinger.Song = reqSong.Song;
+                        newSinger.Artist = reqSong.Artist;
+                    }
+                    else
+                    {
+                        newSinger.QueuedSongs.Add(new QueuedSong(reqSong.Song, reqSong.Artist));
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(newSinger.Song))
+                {
+                    AddActiveSinger(newSinger);
+                    if (!string.IsNullOrWhiteSpace(normalizedName))
+                    {
+                        AddKnownSinger(normalizedName);
+                    }
                 }
             }
 
@@ -99,10 +140,12 @@ namespace KSRotation.ViewModels
 
         private void StartRequestServer()
         {
-            // Fresh random PIN each app session — shown on-screen to the operator so they can hand it
-            // to the DJ verbally. Replaces the previous hardcoded PIN, which any device on the venue's
-            // Wi-Fi could guess instantly.
-            DjPin = GenerateDjPin();
+            // Use stored PIN if available (to persist logins across accidental app closures), otherwise generate fresh.
+            if (string.IsNullOrWhiteSpace(DjPin))
+            {
+                DjPin = GenerateDjPin();
+                QueueSaveSettings();
+            }
 
             if (IsTestMode)
             {
@@ -135,6 +178,17 @@ namespace KSRotation.ViewModels
                     LoggerService.LogError($"StartRequestServer port {p}", ex);
                     _requestServer = null;
                 }
+            }
+
+            if (!started && System.Windows.Application.Current != null)
+            {
+#if !MAUI
+                System.Windows.MessageBox.Show(
+                    $"Failed to start local web server on ports {ServerPort} to {ServerPort + 2}.\n\nRequests from travel router or phone portal will not be active.",
+                    "Web Server Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+#endif
             }
 
             ConnectionUrl = started
@@ -217,15 +271,17 @@ namespace KSRotation.ViewModels
             }
         }
 
-        private void HandleRequestReceived(string name, string song, string artist)
+        private void HandleRequestReceived(string name, List<RequestedSong> songs)
         {
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
+                var first = songs.FirstOrDefault();
                 IncomingRequests.Add(new PatronRequest
                 {
                     Name = name,
-                    Song = song,
-                    Artist = artist
+                    Song = first?.Song ?? string.Empty,
+                    Artist = first?.Artist ?? string.Empty,
+                    Songs = songs
                 });
             }));
         }

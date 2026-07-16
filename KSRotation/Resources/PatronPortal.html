@@ -147,6 +147,95 @@
             background-color: #991B1B;
             color: #FECACA;
         }
+        .song-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #EF4444;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        button.add-btn {
+            width: 100%;
+            background-color: transparent;
+            border: 2px dashed var(--primary);
+            color: var(--text-main);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+            margin-bottom: 16px;
+        }
+        button.add-btn:hover {
+            background-color: rgba(139, 92, 246, 0.1);
+            border-color: var(--primary-hover);
+        }
+        .song-entry {
+            border-bottom: 1px dashed #334155;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .song-entry:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        .past-songs-section {
+            margin-top: 24px;
+            border-top: 1px solid #334155;
+            padding-top: 20px;
+        }
+        .past-songs-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .past-songs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .past-song-item {
+            background-color: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .past-song-item:hover {
+            border-color: var(--primary);
+            background-color: rgba(139, 92, 246, 0.05);
+        }
+        .past-song-details {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            text-align: left;
+        }
+        .past-song-artist {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .add-past-icon {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
         .singer-row {
             display: flex;
             align-items: center;
@@ -244,16 +333,27 @@
                     <label for="name">Your Name</label>
                     <input type="text" id="name" required placeholder="e.g. Charlie">
                 </div>
-                <div class="form-group">
-                    <label for="song">Song Title</label>
-                    <input type="text" id="song" required placeholder="e.g. Yesterday">
+                <div id="songs-container">
+                    <div class="song-entry" id="song-entry-1">
+                        <div class="song-header">
+                            <label>Song 1</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="song-title-input" required placeholder="e.g. Yesterday">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="song-artist-input" required placeholder="e.g. The Beatles">
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="artist">Artist Name</label>
-                    <input type="text" id="artist" required placeholder="e.g. The Beatles">
-                </div>
+                <button type="button" id="add-song-btn" class="add-btn" onclick="addSongEntry()">➕ Add Another Song</button>
                 <button type="submit" class="submit-btn">Submit Request</button>
             </form>
+            <!-- Past Songs Section -->
+            <div id="past-songs-container" class="past-songs-section" style="display: none;">
+                <h3 class="past-songs-title">Your Past Songs (Tap to request)</h3>
+                <div id="past-songs-list" class="past-songs-list"></div>
+            </div>
         </div>
 
         <!-- Rotation Panel -->
@@ -279,28 +379,122 @@
             }
         }
 
+        let songIndex = 1;
+        function resetSongsContainer() {
+            const container = document.getElementById('songs-container');
+            container.innerHTML = `
+                <div class="song-entry" id="song-entry-1">
+                    <div class="song-header">
+                        <label>Song 1</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="song-title-input" required placeholder="e.g. Yesterday">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="song-artist-input" required placeholder="e.g. The Beatles">
+                    </div>
+                </div>
+            `;
+            songIndex = 1;
+            updateAddButtonVisibility();
+        }
+
+        function addSongEntry() {
+            const container = document.getElementById('songs-container');
+            const entries = container.querySelectorAll('.song-entry');
+            if (entries.length >= 3) return;
+
+            songIndex++;
+            const newIndex = songIndex;
+            const div = document.createElement('div');
+            div.className = 'song-entry';
+            div.id = `song-entry-${newIndex}`;
+            div.innerHTML = `
+                <div class="song-header">
+                    <label>Song ${entries.length + 1}</label>
+                    <button type="button" class="remove-btn" onclick="removeSongEntry(${newIndex})">Remove</button>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="song-title-input" required placeholder="e.g. Yesterday">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="song-artist-input" required placeholder="e.g. The Beatles">
+                </div>
+            `;
+            container.appendChild(div);
+            updateLabels();
+            updateAddButtonVisibility();
+        }
+
+        function removeSongEntry(id) {
+            const el = document.getElementById(`song-entry-${id}`);
+            if (el) el.remove();
+            updateLabels();
+            updateAddButtonVisibility();
+        }
+
+        function updateLabels() {
+            const container = document.getElementById('songs-container');
+            const entries = container.querySelectorAll('.song-entry');
+            entries.forEach((entry, idx) => {
+                const label = entry.querySelector('label');
+                if (label) label.textContent = `Song ${idx + 1}`;
+            });
+        }
+
+        function updateAddButtonVisibility() {
+            const container = document.getElementById('songs-container');
+            const entries = container.querySelectorAll('.song-entry');
+            const btn = document.getElementById('add-song-btn');
+            if (entries.length >= 3) {
+                btn.style.display = 'none';
+            } else {
+                btn.style.display = 'block';
+            }
+        }
+
         async function submitForm(event) {
             event.preventDefault();
             const name = document.getElementById('name').value;
-            const song = document.getElementById('song').value;
-            const artist = document.getElementById('artist').value;
             const alertDiv = document.getElementById('status-alert');
 
             alertDiv.className = 'alert';
             alertDiv.style.display = 'none';
 
+            const songs = [];
+            document.querySelectorAll('.song-entry').forEach(entry => {
+                const song = entry.querySelector('.song-title-input').value.trim();
+                const artist = entry.querySelector('.song-artist-input').value.trim();
+                if (song) {
+                    songs.push({ song, artist });
+                }
+            });
+
+            if (songs.length === 0) {
+                alertDiv.textContent = "Please request at least one song.";
+                alertDiv.className = 'alert error';
+                return;
+            }
+
             try {
                 const response = await fetch('/api/request', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, song, artist })
+                    body: JSON.stringify({ 
+                        name, 
+                        song: songs[0].song, 
+                        artist: songs[0].artist, 
+                        songs: songs 
+                    })
                 });
 
                 const data = await response.json();
                 if (response.ok && data.success) {
                     alertDiv.textContent = "Request submitted successfully! Look at the screens to see when you are up.";
                     alertDiv.className = 'alert success';
-                    document.getElementById('request-form').reset();
+                    saveRequestToLocal(name, songs);
+                    document.getElementById('name').value = '';
+                    resetSongsContainer();
                 } else {
                     alertDiv.textContent = data.error || "Failed to submit request.";
                     alertDiv.className = 'alert error';
@@ -369,6 +563,119 @@
                 loadRotation();
             }
         }, 5000);
+
+        // --- Past Requests local storage database ---
+        function saveRequestToLocal(name, songs) {
+            if (name && name.trim()) {
+                localStorage.setItem('ks_patron_name', name.trim());
+            }
+
+            let pastSongs = [];
+            try {
+                pastSongs = JSON.parse(localStorage.getItem('ks_past_songs')) || [];
+            } catch (e) {
+                pastSongs = [];
+            }
+
+            songs.forEach(item => {
+                if (!item.song || !item.song.trim()) return;
+                // Remove matching item to move it to the front
+                pastSongs = pastSongs.filter(s => !(s.song.toLowerCase() === item.song.toLowerCase() && s.artist.toLowerCase() === item.artist.toLowerCase()));
+                // Add to front of history
+                pastSongs.unshift({ song: item.song.trim(), artist: item.artist.trim() });
+            });
+
+            // Cap at 10 items
+            pastSongs = pastSongs.slice(0, 10);
+
+            localStorage.setItem('ks_past_songs', JSON.stringify(pastSongs));
+            loadPastSongs();
+        }
+
+        function loadPastSongs() {
+            const container = document.getElementById('past-songs-container');
+            if (!container) return;
+
+            let pastSongs = [];
+            try {
+                pastSongs = JSON.parse(localStorage.getItem('ks_past_songs')) || [];
+            } catch (e) {
+                pastSongs = [];
+            }
+
+            if (pastSongs.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+            const listDiv = document.getElementById('past-songs-list');
+            listDiv.innerHTML = '';
+
+            pastSongs.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'past-song-item';
+                div.onclick = () => fillPastSong(item.song, item.artist);
+                div.innerHTML = `
+                    <div class="past-song-details">
+                        <strong>${escapeHtml(item.song)}</strong> <span class="past-song-artist">by ${escapeHtml(item.artist)}</span>
+                    </div>
+                    <div class="add-past-icon">➕</div>
+                `;
+                listDiv.appendChild(div);
+            });
+        }
+
+        function fillPastSong(song, artist) {
+            const container = document.getElementById('songs-container');
+            const entries = container.querySelectorAll('.song-entry');
+            let filled = false;
+
+            // Try to find an empty slot among existing ones
+            for (let i = 0; i < entries.length; i++) {
+                const titleInput = entries[i].querySelector('.song-title-input');
+                const artistInput = entries[i].querySelector('.song-artist-input');
+                if (!titleInput.value.trim()) {
+                    titleInput.value = song;
+                    artistInput.value = artist;
+                    filled = true;
+                    break;
+                }
+            }
+
+            // If no empty slot was found, try to add a new slot (if under the 3 limit)
+            if (!filled && entries.length < 3) {
+                addSongEntry();
+                // Find the newly added entry (which is the last child)
+                const newEntries = container.querySelectorAll('.song-entry');
+                const lastEntry = newEntries[newEntries.length - 1];
+                const titleInput = lastEntry.querySelector('.song-title-input');
+                const artistInput = lastEntry.querySelector('.song-artist-input');
+                titleInput.value = song;
+                artistInput.value = artist;
+                filled = true;
+            }
+
+            if (filled) {
+                const alertDiv = document.getElementById('status-alert');
+                alertDiv.textContent = `Added "${song}" to your request form.`;
+                alertDiv.className = 'alert success';
+                alertDiv.style.display = 'block';
+                setTimeout(() => {
+                    alertDiv.style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        // Initialize from local storage
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedName = localStorage.getItem('ks_patron_name');
+            if (savedName) {
+                const nameInput = document.getElementById('name');
+                if (nameInput) nameInput.value = savedName;
+            }
+            loadPastSongs();
+        });
     </script>
 </body>
 </html>

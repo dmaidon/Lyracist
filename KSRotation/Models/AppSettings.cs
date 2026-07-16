@@ -38,5 +38,8 @@ namespace KSRotation.Models
 
         /// <summary>Optional manual IPv4 host override used when composing the patron portal URL and QR code.</summary>
         public string PreferredHostIp { get; init; } = string.Empty;
+
+        /// <summary>Persistent DJ connection login PIN.</summary>
+        public string DjPin { get; init; } = string.Empty;
     }
 }

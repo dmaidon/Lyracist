@@ -394,6 +394,9 @@ namespace KSRotation.ViewModels
             PreferredHostIp = string.IsNullOrWhiteSpace(settings.PreferredHostIp)
                 ? string.Empty
                 : settings.PreferredHostIp.Trim();
+            DjPin = string.IsNullOrWhiteSpace(settings.DjPin)
+                ? string.Empty
+                : settings.DjPin.Trim();
             _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
             SelectedProjectionView = "Normal List";
             _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
@@ -416,14 +419,14 @@ namespace KSRotation.ViewModels
             }
             else
             {
-                // Start with an empty rotation on app startup.
+                // Load existing rotation from last session
                 try
                 {
-                    NightDatabaseService.Flush();
+                    LoadDatabaseNow();
                 }
                 catch (Exception ex)
                 {
-                    LoggerService.LogError("MainViewModel.Constructor.FlushDatabase", ex);
+                    LoggerService.LogError("MainViewModel.Constructor.LoadDatabase", ex);
                 }
             }
 
@@ -548,6 +551,50 @@ namespace KSRotation.ViewModels
         /// Single implementation shared by every UI entry point that lets an operator add a performer
         /// with song details in one step (DJ web portal, MAUI console) so the insertion rules can't drift.
         /// </remarks>
+        private static bool IsSameSingerName(string? name1, string? name2)
+        {
+            if (name1 == null || name2 == null) return false;
+
+            // Trim and replace any non-breaking spaces or tabs with regular spaces
+            string clean1 = name1.Replace('\u00A0', ' ').Replace('\t', ' ').Trim();
+            string clean2 = name2.Replace('\u00A0', ' ').Replace('\t', ' ').Trim();
+
+            // Collapse multiple spaces into one
+            clean1 = System.Text.RegularExpressions.Regex.Replace(clean1, @"\s+", " ");
+            clean2 = System.Text.RegularExpressions.Regex.Replace(clean2, @"\s+", " ");
+
+            return string.Equals(clean1, clean2, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsSameSong(string? title1, string? artist1, string? title2, string? artist2)
+        {
+            string cleanTitle1 = title1?.Replace('\u00A0', ' ').Replace('\t', ' ').Trim() ?? string.Empty;
+            string cleanArtist1 = artist1?.Replace('\u00A0', ' ').Replace('\t', ' ').Trim() ?? string.Empty;
+            string cleanTitle2 = title2?.Replace('\u00A0', ' ').Replace('\t', ' ').Trim() ?? string.Empty;
+            string cleanArtist2 = artist2?.Replace('\u00A0', ' ').Replace('\t', ' ').Trim() ?? string.Empty;
+
+            // Collapse multiple spaces into one
+            cleanTitle1 = System.Text.RegularExpressions.Regex.Replace(cleanTitle1, @"\s+", " ");
+            cleanArtist1 = System.Text.RegularExpressions.Regex.Replace(cleanArtist1, @"\s+", " ");
+            cleanTitle2 = System.Text.RegularExpressions.Regex.Replace(cleanTitle2, @"\s+", " ");
+            cleanArtist2 = System.Text.RegularExpressions.Regex.Replace(cleanArtist2, @"\s+", " ");
+
+            return string.Equals(cleanTitle1, cleanTitle2, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(cleanArtist1, cleanArtist2, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool SingerHasSong(SingerEntry singer, string? song, string? artist)
+        {
+            if (string.IsNullOrWhiteSpace(song)) return false;
+
+            if (IsSameSong(singer.Song, singer.Artist, song, artist))
+            {
+                return true;
+            }
+
+            return singer.QueuedSongs.Any(qs => IsSameSong(qs.Song, qs.Artist, song, artist));
+        }
+
         public bool TryAddPerformer(string? name, string? song, string? artist)
         {
             string trimmedName = name?.Trim() ?? string.Empty;
@@ -556,14 +603,51 @@ namespace KSRotation.ViewModels
                 return false;
             }
 
-            AddActiveSinger(new SingerEntry
+            // Normalize spaces in the added singer's name to clean up any tabs/non-breaking spaces
+            trimmedName = System.Text.RegularExpressions.Regex.Replace(
+                trimmedName.Replace('\u00A0', ' ').Replace('\t', ' '),
+                @"\s+",
+                " "
+            ).Trim();
+
+            var existingSinger = Singers.FirstOrDefault(s => IsSameSingerName(s.Name, trimmedName));
+            if (existingSinger != null)
             {
-                Name = trimmedName,
-                Song = song?.Trim() ?? string.Empty,
-                Artist = artist?.Trim() ?? string.Empty,
-            });
+                bool wasInactive = existingSinger.IsInactive;
+                existingSinger.IsInactive = false;
+                if (wasInactive)
+                {
+                    EnforceActiveInactiveOrder(existingSinger);
+                }
+
+                string trimmedSong = song?.Trim() ?? string.Empty;
+                string trimmedArtist = artist?.Trim() ?? string.Empty;
+
+                if (!string.IsNullOrWhiteSpace(trimmedSong))
+                {
+                    if (string.IsNullOrWhiteSpace(existingSinger.Song))
+                    {
+                        existingSinger.Song = trimmedSong;
+                        existingSinger.Artist = trimmedArtist;
+                    }
+                    else
+                    {
+                        existingSinger.QueuedSongs.Add(new QueuedSong(trimmedSong, trimmedArtist));
+                    }
+                }
+            }
+            else
+            {
+                AddActiveSinger(new SingerEntry
+                {
+                    Name = trimmedName,
+                    Song = song?.Trim() ?? string.Empty,
+                    Artist = artist?.Trim() ?? string.Empty,
+                });
+            }
 
             AddKnownSinger(trimmedName);
+            QueueSaveDatabase();
             return true;
         }
 
@@ -597,7 +681,18 @@ namespace KSRotation.ViewModels
 
                         if (pendingRequest != null)
                         {
-                            entry.QueuedSongs.Add(new QueuedSong(pendingRequest.Song, pendingRequest.Artist));
+                            var reqSongs = pendingRequest.Songs != null && pendingRequest.Songs.Count > 0
+                                ? pendingRequest.Songs
+                                : new List<RequestedSong> { new RequestedSong(pendingRequest.Song, pendingRequest.Artist) };
+
+                            foreach (var reqSong in reqSongs)
+                            {
+                                if (string.IsNullOrWhiteSpace(reqSong.Song)) continue;
+
+                                if (SingerHasSong(entry, reqSong.Song, reqSong.Artist)) continue;
+
+                                entry.QueuedSongs.Add(new QueuedSong(reqSong.Song, reqSong.Artist));
+                            }
                             IncomingRequests.Remove(pendingRequest);
                             QueueSaveSettings();
                             QueueSaveDatabase();
@@ -605,8 +700,31 @@ namespace KSRotation.ViewModels
                     }
                     else if (pendingRequest != null)
                     {
-                        entry.Song = pendingRequest.Song;
-                        entry.Artist = pendingRequest.Artist;
+                        var reqSongs = pendingRequest.Songs != null && pendingRequest.Songs.Count > 0
+                            ? pendingRequest.Songs
+                            : new List<RequestedSong> { new RequestedSong(pendingRequest.Song, pendingRequest.Artist) };
+
+                        entry.Song = string.Empty;
+                        entry.Artist = string.Empty;
+
+                        bool isFirst = true;
+                        foreach (var reqSong in reqSongs)
+                        {
+                            if (string.IsNullOrWhiteSpace(reqSong.Song)) continue;
+
+                            if (SingerHasSong(entry, reqSong.Song, reqSong.Artist)) continue;
+
+                            if (isFirst)
+                            {
+                                entry.Song = reqSong.Song;
+                                entry.Artist = reqSong.Artist;
+                                isFirst = false;
+                            }
+                            else
+                            {
+                                entry.QueuedSongs.Add(new QueuedSong(reqSong.Song, reqSong.Artist));
+                            }
+                        }
                         IncomingRequests.Remove(pendingRequest);
                         QueueSaveSettings();
                         QueueSaveDatabase();
@@ -1002,12 +1120,144 @@ namespace KSRotation.ViewModels
                 if (!string.IsNullOrWhiteSpace(entry.Name) && !string.Equals(entry.Name, "New Singer", StringComparison.OrdinalIgnoreCase))
                 {
                     AddKnownSinger(entry.Name);
+
+                    // Check if another singer already exists with the same name (ignoring spaces/casing)
+                    var target = Singers.FirstOrDefault(s => s != entry && IsSameSingerName(s.Name, entry.Name));
+                    if (target != null)
+                    {
+                        Action mergeAction = () =>
+                        {
+                            if (Singers.Contains(entry))
+                            {
+                                var existingTarget = Singers.FirstOrDefault(s => s != entry && IsSameSingerName(s.Name, entry.Name));
+                                if (existingTarget != null)
+                                {
+                                    // 1. Reactivate the target singer if they were inactive
+                                    existingTarget.IsInactive = false;
+
+                                    // 2. Merge the current song details from the duplicate row
+                                    if (!string.IsNullOrWhiteSpace(entry.Song))
+                                    {
+                                        if (string.IsNullOrWhiteSpace(existingTarget.Song))
+                                        {
+                                            existingTarget.Song = entry.Song;
+                                            existingTarget.Artist = entry.Artist;
+                                        }
+                                        else
+                                        {
+                                            existingTarget.QueuedSongs.Add(new QueuedSong(entry.Song, entry.Artist));
+                                        }
+                                    }
+
+                                    // 3. Merge any queued songs from the duplicate row
+                                    foreach (var q in entry.QueuedSongs)
+                                    {
+                                        existingTarget.QueuedSongs.Add(q);
+                                    }
+
+                                    // 4. Delete the duplicate row
+                                    Singers.Remove(entry);
+
+                                    // 5. Update lists & database save
+                                    UpdateNextSingerHighlight();
+                                    RebuildRotationJsonCacheNow();
+                                    QueueSaveDatabase();
+                                }
+                            }
+                        };
+
+                        if (IsTestMode)
+                        {
+                            mergeAction();
+                        }
+                        else
+                        {
+                            System.Windows.Application.Current.Dispatcher.BeginInvoke(mergeAction);
+                        }
+                    }
                 }
             }
             else if (e.PropertyName == nameof(SingerEntry.Song) || e.PropertyName == nameof(SingerEntry.Artist))
             {
                 UpdatePerformanceForSinger(entry);
                 databaseChanged = true;
+
+                // Handle song cleared case: automatically post the next song in the performer's queue
+                if (!_isFinishingSong && string.IsNullOrWhiteSpace(entry.Song))
+                {
+                    var pendingRequest = IncomingRequests.FirstOrDefault(r => string.Equals(r.Name?.Trim(), entry.Name?.Trim(), StringComparison.OrdinalIgnoreCase));
+                    if (entry.QueuedSongs.Count > 0)
+                    {
+                        var nextSong = entry.QueuedSongs[0];
+                        entry.QueuedSongs.RemoveAt(0);
+
+                        _isFinishingSong = true;
+                        try
+                        {
+                            entry.Song = nextSong.Song;
+                            entry.Artist = nextSong.Artist;
+
+                            if (pendingRequest != null)
+                            {
+                                var reqSongs = pendingRequest.Songs != null && pendingRequest.Songs.Count > 0
+                                    ? pendingRequest.Songs
+                                    : new List<RequestedSong> { new RequestedSong(pendingRequest.Song, pendingRequest.Artist) };
+
+                                foreach (var reqSong in reqSongs)
+                                {
+                                    if (string.IsNullOrWhiteSpace(reqSong.Song)) continue;
+
+                                    if (SingerHasSong(entry, reqSong.Song, reqSong.Artist)) continue;
+
+                                    entry.QueuedSongs.Add(new QueuedSong(reqSong.Song, reqSong.Artist));
+                                }
+                                IncomingRequests.Remove(pendingRequest);
+                                QueueSaveSettings();
+                                QueueSaveDatabase();
+                            }
+                        }
+                        finally
+                        {
+                            _isFinishingSong = false;
+                        }
+                    }
+                    else if (pendingRequest != null)
+                    {
+                        _isFinishingSong = true;
+                        try
+                        {
+                            var reqSongs = pendingRequest.Songs != null && pendingRequest.Songs.Count > 0
+                                ? pendingRequest.Songs
+                                : new List<RequestedSong> { new RequestedSong(pendingRequest.Song, pendingRequest.Artist) };
+
+                            bool isFirst = true;
+                            foreach (var reqSong in reqSongs)
+                            {
+                                if (string.IsNullOrWhiteSpace(reqSong.Song)) continue;
+
+                                if (SingerHasSong(entry, reqSong.Song, reqSong.Artist)) continue;
+
+                                if (isFirst)
+                                {
+                                    entry.Song = reqSong.Song;
+                                    entry.Artist = reqSong.Artist;
+                                    isFirst = false;
+                                }
+                                else
+                                {
+                                    entry.QueuedSongs.Add(new QueuedSong(reqSong.Song, reqSong.Artist));
+                                }
+                            }
+                            IncomingRequests.Remove(pendingRequest);
+                            QueueSaveSettings();
+                            QueueSaveDatabase();
+                        }
+                        finally
+                        {
+                            _isFinishingSong = false;
+                        }
+                    }
+                }
             }
             else if (e.PropertyName != null && TryGetSongRound(e.PropertyName, out int completionRound))
             {
@@ -1125,6 +1375,39 @@ namespace KSRotation.ViewModels
             NightDatabaseService.Save(Singers, GetPerformanceHistorySnapshot());
         }
 
+        private void LoadDatabaseNow()
+        {
+            if (IsTestMode) return;
+            var state = NightDatabaseService.Load();
+            
+            Singers.Clear();
+            foreach (var singer in state.ActiveQueue)
+            {
+                Singers.Add(singer);
+            }
+
+            lock (_performanceHistoryLock)
+            {
+                _performanceHistory.Clear();
+                _performanceHistory.AddRange(state.PerformanceHistory);
+            }
+        }
+
+        public void ResetEverything()
+        {
+            Singers.Clear();
+            lock (_performanceHistoryLock)
+            {
+                _performanceHistory.Clear();
+            }
+            IncomingRequests.Clear();
+            DjPin = GenerateDjPin();
+            
+            SaveDatabaseNow();
+            SaveSettingsNow();
+            RebuildRotationJsonCacheNow();
+        }
+
         private List<SongPerformance> GetPerformanceHistorySnapshot()
         {
             lock (_performanceHistoryLock)
@@ -1160,7 +1443,8 @@ namespace KSRotation.ViewModels
                 SendEmailOnSave = SendEmailOnSave,
                 ProjectionView = SelectedProjectionView,
                 WatermarkOpacity = WatermarkOpacity,
-                PreferredHostIp = string.IsNullOrWhiteSpace(PreferredHostIp) ? string.Empty : PreferredHostIp.Trim()
+                PreferredHostIp = string.IsNullOrWhiteSpace(PreferredHostIp) ? string.Empty : PreferredHostIp.Trim(),
+                DjPin = string.IsNullOrWhiteSpace(DjPin) ? string.Empty : DjPin.Trim()
             };
 
             try

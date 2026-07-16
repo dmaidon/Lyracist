@@ -90,6 +90,8 @@ public partial class MainPage : ContentPage
         }
     }
 
+
+
     private void OnAboutClicked(object? sender, EventArgs e)
     {
         AboutOverlay.IsVisible = true;
@@ -97,7 +99,40 @@ public partial class MainPage : ContentPage
 
     private void OnCloseAboutClicked(object? sender, EventArgs e)
     {
+        if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            vm.PreferredHostIp = PreferredIpEntry.Text?.Trim() ?? string.Empty;
+        }
         AboutOverlay.IsVisible = false;
+    }
+
+    private void OnPreferredHostIpUnfocused(object? sender, FocusEventArgs e)
+    {
+        if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            vm.PreferredHostIp = entry.Text?.Trim() ?? string.Empty;
+        }
+    }
+
+    private void OnPreferredHostIpCompleted(object? sender, EventArgs e)
+    {
+        if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            vm.PreferredHostIp = entry.Text?.Trim() ?? string.Empty;
+        }
+    }
+
+    private async void OnResetSessionClicked(object? sender, EventArgs e)
+    {
+        bool confirm = await DisplayAlertAsync("Confirm Reset", "Are you sure you want to reset everything? This will clear the active queue, performance history, incoming requests, and generate a new DJ login PIN.", "Yes", "No");
+        if (confirm)
+        {
+            if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
+            {
+                vm.ResetEverything();
+            }
+            AboutOverlay.IsVisible = false;
+        }
     }
 
     private async void OnClearQueueClicked(object? sender, EventArgs e)

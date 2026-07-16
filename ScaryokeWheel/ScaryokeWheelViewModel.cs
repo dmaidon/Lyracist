@@ -120,15 +120,16 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     public void RebuildWheelSegments()
     {
         var list = new List<WheelSegment>();
-        
+
         // Map custom categories to wheel segments with colors
         for (int i = 0; i < CustomCategories.Count; i++)
         {
+            string color = SegmentColors[i % SegmentColors.Length];
             list.Add(new WheelSegment
             {
                 Name = CustomCategories[i],
-                Color = SegmentColors[i % SegmentColors.Length],
-                TextColor = "#FFFFFF"
+                Color = color,
+                TextColor = GetContrastingTextColor(color)
             });
         }
 
@@ -136,8 +137,8 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         var singersChoice = new WheelSegment
         {
             Name = "Singer's Choice",
-            Color = "#FFFFFF",
-            TextColor = "#1E133A"
+            Color = "#228B22",
+            TextColor = GetContrastingTextColor("#228B22")
         };
 
         // DJ's Choice slivers are now the smaller slivers (colored black, text spooky orange)
@@ -192,5 +193,26 @@ public partial class ScaryokeWheelViewModel : ObservableObject
         {
             WheelSegments.Add(segment);
         }
+    }
+
+    private static string GetContrastingTextColor(string hexColor)
+    {
+        if (string.IsNullOrEmpty(hexColor)) return "#FFFFFF";
+        string hex = hexColor.TrimStart('#');
+        if (hex.Length == 3)
+        {
+            hex = new string([hex[0], hex[0], hex[1], hex[1], hex[2], hex[2]]);
+        }
+        if (hex.Length == 6)
+        {
+            if (int.TryParse(hex.AsSpan(0, 2), System.Globalization.NumberStyles.HexNumber, null, out int r) &&
+                int.TryParse(hex.AsSpan(2, 2), System.Globalization.NumberStyles.HexNumber, null, out int g) &&
+                int.TryParse(hex.AsSpan(4, 2), System.Globalization.NumberStyles.HexNumber, null, out int b))
+            {
+                double brightness = (r * 0.299) + (g * 0.587) + (b * 0.114);
+                return brightness > 130 ? "#1E133A" : "#FFFFFF";
+            }
+        }
+        return "#FFFFFF";
     }
 }

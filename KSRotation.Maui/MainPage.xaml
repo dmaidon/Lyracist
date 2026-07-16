@@ -167,10 +167,10 @@
                                             <Button Text="▼" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerDownCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
 
                                             <!-- Toggle Inactive (Pause/Resume) -->
-                                            <Button Text="❚❚" Clicked="OnToggleSingerInactiveClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#D97706" BorderWidth="1" TextColor="#D97706" FontSize="11" FontAttributes="Bold" HeightRequest="28" Padding="6,0">
+                                            <Button Text="❚❚ Pause" Clicked="OnToggleSingerInactiveClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#D97706" BorderWidth="1" TextColor="#D97706" FontSize="11" FontAttributes="Bold" HeightRequest="28" Padding="6,0">
                                                 <Button.Triggers>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsInactive}" Value="True">
-                                                        <Setter Property="Text" Value="👁 Resume" />
+                                                        <Setter Property="Text" Value="▶ Resume" />
                                                         <Setter Property="BorderColor" Value="#10B981" />
                                                         <Setter Property="TextColor" Value="#10B981" />
                                                     </DataTrigger>
@@ -252,12 +252,26 @@
                         <DataTemplate x:DataType="models:PatronRequest">
                             <Border StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Margin="0,0,0,6" Padding="8">
                                 <Grid RowDefinitions="Auto, Auto" RowSpacing="6">
-                                    <!-- Request Details -->
-                                    <VerticalStackLayout Grid.Row="0" Spacing="1">
-                                        <Label Text="{Binding Name}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" FontAttributes="Bold" />
-                                        <Label Text="{Binding Song}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#A78BFA}" FontSize="10" FontAttributes="Italic" />
-                                        <Label Text="{Binding Artist}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" />
-                                    </VerticalStackLayout>
+                                     <!-- Request Details -->
+                                     <VerticalStackLayout Grid.Row="0" Spacing="1">
+                                         <Label Text="{Binding Name}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" FontAttributes="Bold" />
+                                         <StackLayout BindableLayout.ItemsSource="{Binding Songs}" Spacing="0">
+                                             <BindableLayout.ItemTemplate>
+                                                 <DataTemplate x:DataType="models:RequestedSong">
+                                                     <Label FontSize="10" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#A78BFA}">
+                                                         <Label.FormattedText>
+                                                             <FormattedString>
+                                                                 <Span Text="• " />
+                                                                 <Span Text="{Binding Song}" FontAttributes="Italic" />
+                                                                 <Span Text=" - " />
+                                                                 <Span Text="{Binding Artist}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" />
+                                                             </FormattedString>
+                                                         </Label.FormattedText>
+                                                     </Label>
+                                                 </DataTemplate>
+                                             </BindableLayout.ItemTemplate>
+                                         </StackLayout>
+                                     </VerticalStackLayout>
 
                                     <!-- Action Buttons -->
                                     <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="6">
@@ -293,9 +307,10 @@
                     <Label Text="{Binding AppCopyright}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" FontAttributes="Italic" HorizontalOptions="Center" Margin="0,4,0,12" />
 
                     <Label Text="Manual Portal IPv4 (Optional)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" Margin="0,0,0,2" />
-                    <Entry Text="{Binding PreferredHostIp}" Placeholder="e.g. 192.168.50.20" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" FontSize="12" />
+                    <Entry x:Name="PreferredIpEntry" Text="{Binding PreferredHostIp, Mode=OneWay}" Unfocused="OnPreferredHostIpUnfocused" Completed="OnPreferredHostIpCompleted" Placeholder="e.g. 192.168.50.20" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" FontSize="12" />
                     <Label Text="Leave blank to auto-detect. Set this if the app picks the wrong network adapter (e.g. on a travel router)." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,12" />
 
+                    <Button Text="Reset Session (Clear Queue &amp; DJ Pin)" Clicked="OnResetSessionClicked" BackgroundColor="#DC2626" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
                     <Button Text="Close" Clicked="OnCloseAboutClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
                 </VerticalStackLayout>
             </Border>

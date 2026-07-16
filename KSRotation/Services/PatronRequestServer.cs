@@ -1,5 +1,6 @@
-// Last Edit: Jul 01, 2026 16:55 - Marked response handlers static to resolve CA1822 warnings.
+// Last Edit: Jul 16, 2026 10:33 - Added support for multiple songs.
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -8,12 +9,13 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using KSRotation.Models;
 
 namespace KSRotation.Services
 {
     public class PatronRequestServer(
         int port, 
-        Action<string, string, string> onRequestReceived, 
+        Action<string, List<RequestedSong>> onRequestReceived, 
         Func<string> onGetRotationJson,
         Func<string, bool> onVerifyPin,
         Func<string> onGetRequestsJson,
@@ -27,7 +29,7 @@ namespace KSRotation.Services
         private TcpListener? _listener;
         private CancellationTokenSource? _cts;
         private readonly int _port = port;
-        private readonly Action<string, string, string> _onRequestReceived = onRequestReceived;
+        private readonly Action<string, List<RequestedSong>> _onRequestReceived = onRequestReceived;
         private readonly Func<string> _onGetRotationJson = onGetRotationJson;
         private readonly Func<string, bool> _onVerifyPin = onVerifyPin;
         private readonly Func<string> _onGetRequestsJson = onGetRequestsJson;
@@ -43,22 +45,10 @@ namespace KSRotation.Services
 
         public void Start()
         {
-            try
-            {
-                _cts = new CancellationTokenSource();
-                _listener = new TcpListener(IPAddress.Any, _port);
-                _listener.Start();
-                Task.Run(() => AcceptConnectionsAsync(_cts.Token));
-            }
-            catch (Exception ex)
-            {
-                LoggerService.LogError("PatronRequestServer.Start", ex);
-                System.Windows.MessageBox.Show(
-                    $"Failed to start local web server on port {_port}:\n{ex.Message}\n\nRequests from travel router will not be active.",
-                    "Web Server Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Warning);
-            }
+            _cts = new CancellationTokenSource();
+            _listener = new TcpListener(IPAddress.Any, _port);
+            _listener.Start();
+            Task.Run(() => AcceptConnectionsAsync(_cts.Token));
         }
 
         public void Stop()
@@ -221,14 +211,33 @@ namespace KSRotation.Services
                         string song = root.TryGetProperty("song", out var sProp) ? (sProp.GetString() ?? "") : "";
                         string artist = root.TryGetProperty("artist", out var aProp) ? (aProp.GetString() ?? "") : "";
 
-                        if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(song))
+                        var songs = new List<RequestedSong>();
+                        if (root.TryGetProperty("songs", out var songsProp) && songsProp.ValueKind == JsonValueKind.Array)
                         {
-                            _onRequestReceived(name.Trim(), song.Trim(), artist.Trim());
+                            foreach (var songEl in songsProp.EnumerateArray())
+                            {
+                                string sTitle = songEl.TryGetProperty("song", out var stProp) ? (stProp.GetString() ?? "") : "";
+                                string sArtist = songEl.TryGetProperty("artist", out var saProp) ? (saProp.GetString() ?? "") : "";
+                                if (!string.IsNullOrWhiteSpace(sTitle))
+                                {
+                                    songs.Add(new RequestedSong { Song = sTitle.Trim(), Artist = sArtist.Trim() });
+                                }
+                            }
+                        }
+
+                        if (songs.Count == 0 && !string.IsNullOrWhiteSpace(song))
+                        {
+                            songs.Add(new RequestedSong { Song = song.Trim(), Artist = artist.Trim() });
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(name) && songs.Count > 0)
+                        {
+                            _onRequestReceived(name.Trim(), songs);
                             await SendJsonResponseAsync(stream, "{\"success\":true}");
                         }
                         else
                         {
-                            await SendBadRequestAsync(stream, "{\"error\":\"Name and Song title are required.\"}");
+                            await SendBadRequestAsync(stream, "{\"error\":\"Name and at least one Song title are required.\"}");
                         }
                     }
                     else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/dj/action", StringComparison.OrdinalIgnoreCase))

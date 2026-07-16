@@ -18,6 +18,8 @@ namespace KSRotation.Services
     [JsonSerializable(typeof(List<RotationItemDto>))]
     [JsonSerializable(typeof(PatronRequest))]
     [JsonSerializable(typeof(List<PatronRequest>))]
+    [JsonSerializable(typeof(RequestedSong))]
+    [JsonSerializable(typeof(List<RequestedSong>))]
     public partial class AppJsonContext : JsonSerializerContext
     {
     }

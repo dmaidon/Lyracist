@@ -26,9 +26,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.7.13.38</AssemblyVersion>
+		<AssemblyVersion>26.7.16.72</AssemblyVersion>
 
-		<FileVersion>26.7.13.38</FileVersion>
+		<FileVersion>26.7.16.72</FileVersion>
 
 		<Copyright>© 2026 PAROLE Software - All rights reserved.</Copyright>
 
@@ -45,10 +45,15 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#512BD4" />
+	</ItemGroup>
 
-		<!-- Splash Screen -->
+	<!-- Platform-specific Splash Screens -->
+	<ItemGroup Condition="!$(TargetFramework.Contains('-android'))">
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+	</ItemGroup>
+
+	<ItemGroup>
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -72,6 +77,8 @@
 		     edit here. Excludes the three services that have MAUI-specific replacements in Shims\WpfShims.cs
 		     (compiling both would be a duplicate-type error). -->
 		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs" Link="Services\%(Filename)%(Extension)" />
+		<AndroidResource Remove="Platforms\Android\Resources\drawable\splash.png" />
+		<None Remove="Platforms\Android\Resources\drawable\splash.png" />
 
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.Requests.cs" Link="ViewModels\MainViewModel.Requests.cs" />
@@ -82,6 +89,11 @@
 	<ItemGroup>
 		<EmbeddedResource Include="..\KSRotation\Resources\PatronPortal.html" Link="Resources\PatronPortal.html" />
 		<EmbeddedResource Include="..\KSRotation\Resources\dj.html" Link="Resources\dj.html" />
+	</ItemGroup>
+	<ItemGroup>
+	  <MauiAsset Include="Platforms\Android\Resources\drawable\splash.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </MauiAsset>
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="Resources\ksr_logo.png">
@@ -95,6 +107,7 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="QRCoder" Version="1.8.0" />
+		<PackageReference Include="System.Resources.Extensions" Version="9.0.0" />
 	</ItemGroup>
 
 	<!-- Platform-specific compilation adjustments to ensure Windows platform code is not compiled on Android (and vice-versa) -->
@@ -107,6 +120,21 @@
 	<ItemGroup Condition="!$(TargetFramework.Contains('-android'))">
 		<Compile Remove="Platforms\Android\**" />
 		<None Include="Platforms\Android\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Properties\Resources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Properties\Resources.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 </Project>

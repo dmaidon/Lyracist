@@ -570,8 +570,18 @@
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                                         <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource MaterialDesignBody}" />
-                                                        <TextBlock Text="{Binding Song}" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" TextTrimming="CharacterEllipsis" />
-                                                        <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" TextTrimming="CharacterEllipsis" FontStyle="Italic" />
+                                                        <ItemsControl ItemsSource="{Binding Songs}" Margin="4,2,0,0">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" TextTrimming="CharacterEllipsis">
+                                                                        <Run Text="•" />
+                                                                        <Run Text="{Binding Song}" />
+                                                                        <Run Text=" - " />
+                                                                        <Run Text="{Binding Artist}" FontStyle="Italic" />
+                                                                    </TextBlock>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
                                                     </StackPanel>
 
                                                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">

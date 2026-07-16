@@ -655,12 +655,26 @@
 
             let html = '';
             requests.forEach((r) => {
+                let songsHtml = '';
+                if (r.songs && r.songs.length > 0) {
+                    r.songs.forEach(s => {
+                        songsHtml += `
+                            <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; padding-left: 6px;">
+                                • <strong>${escapeHtml(s.song)}</strong> - <em>${escapeHtml(s.artist || "Unknown Artist")}</em>
+                            </div>
+                        `;
+                    });
+                } else {
+                    songsHtml = `
+                        <div class="request-song">${escapeHtml(r.song)}</div>
+                        <div class="request-artist">${escapeHtml(r.artist || "Unknown Artist")}</div>
+                    `;
+                }
                 html += `
                     <div class="request-card">
                         <div class="request-details">
                             <div class="request-name">${escapeHtml(r.name)}</div>
-                            <div class="request-song">${escapeHtml(r.song)}</div>
-                            <div class="request-artist">${escapeHtml(r.artist || "Unknown Artist")}</div>
+                            ${songsHtml}
                         </div>
                         <div class="request-actions">
                             <button class="btn-outline" style="border-color: var(--green); color: var(--green);" onclick="sendRequestAction('accept', '${escapeJs(r.name)}')">✓ Accept</button>
