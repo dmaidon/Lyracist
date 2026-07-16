@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <Company>PAROLE Software</Company>
+    <Copyright>© $([System.DateTime]::UtcNow.ToString('yyyy')) PAROLE Software - All rights reserved.</Copyright>
+  </PropertyGroup>
+</Project>

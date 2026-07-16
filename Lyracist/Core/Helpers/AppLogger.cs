@@ -1,119 +1,58 @@
+using System;
 using System.IO;
 
-namespace Lyracist.Core.Helpers;
-
-public static class AppLogger
+namespace Lyracist.Core.Helpers
 {
-    private static readonly string LogDir;
-
-    static AppLogger()
+    public static class AppLogger
     {
-        string startupFolder = AppDomain.CurrentDomain.BaseDirectory;
-        LogDir = Path.Combine(startupFolder, "Logs");
-        Directory.CreateDirectory(LogDir);
-        PurgeOldLogs();
-    }
-
-    public static void LogAppStart()
-    {
-        string path = Path.Combine(LogDir, $"app_{DateTime.Now:MMMdd}.log");
-        string entry = $"{new string('-', 60)}{Environment.NewLine}App started {DateTime.Now:MMMM d} @ {DateTime.Now:HH:mm:ss}.{Environment.NewLine}{Environment.NewLine}";
-
-        try
+        static AppLogger()
         {
-            File.AppendAllText(path, entry);
+            PurgeOldLogs();
         }
-        catch { }
 
-        try
+        public static void LogAppStart()
         {
-            string errFileName = $"err_{DateTime.Now:MMMdd}.log";
-            string errPath = Path.Combine(LogDir, errFileName);
-            string errEntry = $"{new string('=', 60)}{Environment.NewLine}App started {DateTime.Now:MMMM d} @ {DateTime.Now:HH:mm:ss}.{Environment.NewLine}{new string('=', 60)}{Environment.NewLine}{Environment.NewLine}";
-            File.AppendAllText(errPath, errEntry);
+            Lyracist.Shared.Globals.LogAppStart("Lyracist Pro");
         }
-        catch { }
-    }
 
-    public static void LogError(Exception ex, string? context = null)
-    {
-        string fileName = $"err_{DateTime.Now:MMMdd}.log";
-        string path = Path.Combine(LogDir, fileName);
-
-        string entry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]";
-        if (!string.IsNullOrEmpty(context))
-            entry += $" [{context}]";
-        entry += $" {ex.GetType().Name}: {ex.Message}{Environment.NewLine}{ex.StackTrace}{Environment.NewLine}{Environment.NewLine}";
-
-        try
+        public static void LogError(Exception ex, string? context = null)
         {
-            File.AppendAllText(path, entry);
+            Lyracist.Shared.Globals.LogError("Lyracist Pro", context ?? "", ex);
         }
-        catch
+
+        public static void LogError(string message, string? context = null)
         {
-            // Swallow — can't log a logging failure
+            Lyracist.Shared.Globals.LogError("Lyracist Pro", message, context);
         }
-    }
 
-    public static void LogError(string message, string? context = null)
-    {
-        string fileName = $"err_{DateTime.Now:MMMdd}.log";
-        string path = Path.Combine(LogDir, fileName);
-
-        string entry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]";
-        if (!string.IsNullOrEmpty(context))
-            entry += $" [{context}]";
-        entry += $" {message}{Environment.NewLine}{Environment.NewLine}";
-
-        try
+        public static void LogInfo(string message)
         {
-            File.AppendAllText(path, entry);
+            Lyracist.Shared.Globals.LogInfo("Lyracist Pro", message);
         }
-        catch { }
-    }
 
-    public static void InitializeLibVlc()
-    {
-        try
+        public static void PurgeOldLogs()
         {
-            string arch = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture switch
+            Lyracist.Shared.Globals.PurgeOldLogs(30);
+        }
+
+        public static void InitializeLibVlc()
+        {
+            try
             {
-                System.Runtime.InteropServices.Architecture.X64 => "win-x64",
-                System.Runtime.InteropServices.Architecture.X86 => "win-x86",
-                System.Runtime.InteropServices.Architecture.Arm64 => "win-arm64",
-                _ => "win-x64"
-            };
-            string libvlcPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libvlc", arch);
-            LibVLCSharp.Shared.Core.Initialize(libvlcPath);
-        }
-        catch (Exception ex)
-        {
-            LogError(ex, "InitializeLibVlc");
-        }
-    }
-
-    public static void LogInfo(string message)
-    {
-        string path = Path.Combine(LogDir, "app.log");
-        string entry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [INFO] {message}{Environment.NewLine}";
-        try
-        {
-            File.AppendAllText(path, entry);
-        }
-        catch { }
-    }
-
-    private static void PurgeOldLogs()
-    {
-        try
-        {
-            DateTime cutoff = DateTime.Now.AddDays(-30);
-            foreach (string file in Directory.GetFiles(LogDir, "err_*.log"))
+                string arch = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture switch
+                {
+                    System.Runtime.InteropServices.Architecture.X64 => "win-x64",
+                    System.Runtime.InteropServices.Architecture.X86 => "win-x86",
+                    System.Runtime.InteropServices.Architecture.Arm64 => "win-arm64",
+                    _ => "win-x64"
+                };
+                string libvlcPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libvlc", arch);
+                LibVLCSharp.Shared.Core.Initialize(libvlcPath);
+            }
+            catch (Exception ex)
             {
-                if (File.GetLastWriteTime(file) < cutoff)
-                    File.Delete(file);
+                LogError(ex, "InitializeLibVlc");
             }
         }
-        catch { }
     }
 }

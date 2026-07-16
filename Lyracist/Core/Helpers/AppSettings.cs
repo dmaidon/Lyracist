@@ -9,8 +9,7 @@ namespace Lyracist.Core.Helpers;
 /// </summary>
 public static class AppSettings
 {
-    private static readonly string _settingsDir =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Lyracist");
+    private static readonly string _settingsDir = Lyracist.Shared.Globals.LyracistSettingsDir;
 
     private static readonly string _settingsPath =
         Path.Combine(_settingsDir, "settings.json");

@@ -30,11 +30,7 @@
 
 		<FileVersion>26.7.16.72</FileVersion>
 
-		<Copyright>© 2026 PAROLE Software - All rights reserved.</Copyright>
-
 		<Authors>Dennis Maidon</Authors>
-
-		<Company>PAROLE Software</Company>
 
 		<PackageIcon>ksr_logo.png</PackageIcon>
 
@@ -135,6 +131,8 @@
 	    <Generator>ResXFileCodeGenerator</Generator>
 	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
+	<ItemGroup>
+		<Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
 	</ItemGroup>
 
 </Project>

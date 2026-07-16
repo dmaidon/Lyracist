@@ -5,17 +5,12 @@ namespace KSRotation.Services
 {
     public static class AppPaths
     {
-        public static string BaseDirectoryPath =>
-#if MAUI
-            Microsoft.Maui.Storage.FileSystem.AppDataDirectory;
-#else
-            AppContext.BaseDirectory;
-#endif
+        public static string BaseDirectoryPath => Lyracist.Shared.Globals.StartupPath;
 
-        public static string SettingsDirectoryPath => Path.Combine(BaseDirectoryPath, "Settings");
+        public static string SettingsDirectoryPath => Lyracist.Shared.Globals.KSRotationSettingsDir;
 
-        public static string LogsDirectoryPath => Path.Combine(BaseDirectoryPath, "Logs");
+        public static string LogsDirectoryPath => Lyracist.Shared.Globals.LogDir;
 
-        public static string ReportsDirectoryPath => Path.Combine(BaseDirectoryPath, "Reports");
+        public static string ReportsDirectoryPath => Lyracist.Shared.Globals.KSRotationReportsDir;
     }
 }

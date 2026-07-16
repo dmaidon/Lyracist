@@ -15,6 +15,8 @@ namespace KSRotation
         protected override void OnStartup(StartupEventArgs e)
         {
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            LoggerService.LogAppStart();
+            LoggerService.CleanupLogs();
             DispatcherUnhandledException += OnDispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;

@@ -24,4 +24,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
+  </ItemGroup>
+
 </Project>

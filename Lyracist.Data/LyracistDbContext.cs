@@ -24,8 +24,7 @@ namespace Lyracist.Data
 
         public static string GetConnectionString()
         {
-            string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
-            string dataDir = System.IO.Path.Combine(baseDir, "Data");
+            string dataDir = Lyracist.Shared.Globals.DataDir;
             System.IO.Directory.CreateDirectory(dataDir);
             string dbPath = System.IO.Path.Combine(dataDir, "lyracist.db");
             return $"Data Source={dbPath};Cache=Shared";

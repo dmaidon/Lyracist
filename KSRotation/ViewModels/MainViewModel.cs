@@ -277,8 +277,8 @@ namespace KSRotation.ViewModels
         private static readonly string s_appTitle = ResolveAppTitle();
 
         private static readonly string s_appVersion = typeof(MainViewModel).Assembly.GetName().Version?.ToString() ?? "1.0.0";
-        private static readonly string s_appCompany = typeof(MainViewModel).Assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company ?? "PAROLE Software";
-        private static readonly string s_appCopyright = typeof(MainViewModel).Assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? "";
+        private static readonly string s_appCompany = Lyracist.Shared.Globals.CompanyName;
+        private static readonly string s_appCopyright = Lyracist.Shared.Globals.Copyright;
         private static readonly string s_appAuthor = ResolveAppAuthor(s_appCompany);
 
         public string AppTitle => s_appTitle;

@@ -14,14 +14,11 @@
     <FileVersion>26.7.15.224</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
-    <Authors>Dennis Maidon</Authors>
-    <Company>PAROLE Software</Company>
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <Title>Lyracist Pro</Title>
     <Product>Lyracist Pro</Product>
     <AssemblyTitle>Lyracist Pro</AssemblyTitle>
-    <Copyright>© 2026 PAROLE Software - All rights reserved.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

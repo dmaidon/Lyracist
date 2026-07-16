@@ -14,9 +14,6 @@
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
-    <Authors>Dennis Maidon</Authors>
-    <Company>PAROLE Software</Company>
-    <Copyright>© 2026 PAROLE Software - All rights reserved.</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageIcon>mic_128.png</PackageIcon>
@@ -97,6 +94,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
   </ItemGroup>
 
 </Project>

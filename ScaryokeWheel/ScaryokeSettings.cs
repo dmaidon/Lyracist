@@ -7,11 +7,7 @@ namespace ScaryokeWheel;
 
 public class ScaryokeSettings
 {
-    private static readonly string SettingsFolder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "ParoleSoftware",
-        "ScaryokeWheel"
-    );
+    private static readonly string SettingsFolder = Lyracist.Shared.Globals.ScaryokeWheelSettingsDir;
 
     private static readonly string SettingsPath = Path.Combine(SettingsFolder, "settings.json");
 

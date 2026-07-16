@@ -20,8 +20,7 @@ namespace Lyracist.Services.Database
     {
         private static string GetConnectionString()
         {
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string dbPath = Path.Combine(baseDir, "Data", "lyracist.db");
+            string dbPath = Path.Combine(Lyracist.Shared.Globals.DataDir, "lyracist.db");
             return $"Data Source={dbPath};Cache=Shared";
         }
 

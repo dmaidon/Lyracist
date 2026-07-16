@@ -52,9 +52,8 @@ public partial class ScaryokeWheelViewModel : ObservableObject
     private bool _isSpinning;
 
     public string Version => "Version 26.7.6.106";
-    public string Copyright => "© 2026 PAROLE Software - All rights reserved.";
-    public string Authors => "Dennis Maidon";
-    public string Company => "PAROLE Software";
+    public string Copyright => Lyracist.Shared.Globals.Copyright;
+    public string Company => Lyracist.Shared.Globals.CompanyName;
 
     public ScaryokeWheelViewModel()
     {

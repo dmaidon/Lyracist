@@ -35,5 +35,5 @@ public partial class AboutViewModel : BaseViewModel
 
     public string Description => "A high-performance, modern karaoke player and graphic lyrics projection system built with Fluent UI aesthetics.";
 
-    public string Copyright => _assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? "© 2026 PAROLE Software";
+    public string Copyright => Lyracist.Shared.Globals.Copyright;
 }

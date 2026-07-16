@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
@@ -20,6 +20,10 @@
     </PackageReference>
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
     <PackageReference Include="Dapper" Version="2.1.79" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
   </ItemGroup>
 
 </Project>
