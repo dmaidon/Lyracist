@@ -1,4 +1,4 @@
-<!-- Edited on Jul 17, 2026 @ 09:55:00 -> Enlarge key output container and increase font size to 13 -->
+<!-- Edited on Jul 17, 2026 @ 10:05:00 -> Add ContextMenu to history grid -->
 <Window x:Class="LyracistKeyGen.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -150,6 +150,13 @@
                               Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" RowBackground="#FF13131F" AlternatingRowBackground="#FF181827"
                               Foreground="White" GridLinesVisibility="Horizontal" HeadersVisibility="Column" SelectionMode="Single"
                               ColumnHeaderHeight="32" RowHeight="32">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Resend Email" Click="MenuResendEmail_Click"/>
+                                <MenuItem Header="Copy Key" Click="MenuCopyKey_Click"/>
+                                <MenuItem Header="View Info" Click="MenuViewInfo_Click"/>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
                         <DataGrid.Resources>
                             <Style TargetType="DataGridColumnHeader">
                                 <Setter Property="Background" Value="#FF1E1E2F" />

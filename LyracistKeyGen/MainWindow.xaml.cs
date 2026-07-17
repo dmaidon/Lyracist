@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:58:00 -> Remove redundant license generation success popups
+// Edited on Jul 17, 2026 @ 10:06:00 -> Add ContextMenu actions for resending email, copying keys, and viewing info popup
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -200,6 +200,48 @@ namespace LyracistKeyGen
         private void TabHistory_Selected(object sender, RoutedEventArgs e)
         {
             RefreshHistoryGrid();
+        }
+
+        private void MenuResendEmail_Click(object sender, RoutedEventArgs e)
+        {
+            if (GridHistory.SelectedItem is LicenseRecord record)
+            {
+                try
+                {
+                    var settings = GetSettingsFromUi();
+                    EmailSender.SendLicenseKey(settings, record.Email, $"{record.FirstName} {record.LastName}", record.LicenseKey);
+                    MessageBox.Show($"License key successfully resent to '{record.Email}'!", "Email Sent", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to resend email: {ex.Message}", "Email Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void MenuCopyKey_Click(object sender, RoutedEventArgs e)
+        {
+            if (GridHistory.SelectedItem is LicenseRecord record)
+            {
+                try
+                {
+                    Clipboard.SetText(record.LicenseKey);
+                    MessageBox.Show($"License key for '{record.FirstName} {record.LastName}' copied to clipboard!", "Copied", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to copy to clipboard: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void MenuViewInfo_Click(object sender, RoutedEventArgs e)
+        {
+            if (GridHistory.SelectedItem is LicenseRecord record)
+            {
+                var infoWindow = new LicenseInfoWindow(this, record);
+                infoWindow.ShowDialog();
+            }
         }
 
         private void InputFields_TextChanged(object sender, TextChangedEventArgs e)

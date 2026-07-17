@@ -1,0 +1,102 @@
+<!-- Created on Jul 17, 2026 @ 10:03:00 -> Popup window to display detailed license record details -->
+<Window x:Class="LyracistKeyGen.LicenseInfoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="Registration Info" Height="500" Width="600"
+        WindowStartupLocation="CenterOwner"
+        Background="#FF0B0B11"
+        Foreground="White"
+        FontFamily="Segoe UI Variable"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="📋 REGISTRATION DETAILS" FontSize="18" FontWeight="ExtraBold" Foreground="#FF8E53"/>
+            <TextBlock Text="Detailed database record for this generated license" FontSize="11" Foreground="#FFAAAAAA" Margin="0,4,0,0"/>
+            <Separator Background="#FF212135" Margin="0,12,0,0"/>
+        </StackPanel>
+
+        <!-- Fields -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Record ID:" FontWeight="Bold" Foreground="#FFAAAAAA" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" x:Name="TxtId" IsReadOnly="True" Background="#FF13131F" BorderBrush="#FF212135" Foreground="White" Padding="6" Height="30" VerticalContentAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="First Name:" FontWeight="Bold" Foreground="#FFAAAAAA" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" x:Name="TxtFirstName" IsReadOnly="True" Background="#FF13131F" BorderBrush="#FF212135" Foreground="White" Padding="6" Height="30" VerticalContentAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Last Name:" FontWeight="Bold" Foreground="#FFAAAAAA" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" x:Name="TxtLastName" IsReadOnly="True" Background="#FF13131F" BorderBrush="#FF212135" Foreground="White" Padding="6" Height="30" VerticalContentAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Stage Name:" FontWeight="Bold" Foreground="#FFAAAAAA" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" x:Name="TxtStageName" IsReadOnly="True" Background="#FF13131F" BorderBrush="#FF212135" Foreground="White" Padding="6" Height="30" VerticalContentAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Email Address:" FontWeight="Bold" Foreground="#FFAAAAAA" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" x:Name="TxtEmail" IsReadOnly="True" Background="#FF13131F" BorderBrush="#FF212135" Foreground="White" Padding="6" Height="30" VerticalContentAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Created Date:" FontWeight="Bold" Foreground="#FFAAAAAA" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" x:Name="TxtCreatedAt" IsReadOnly="True" Background="#FF13131F" BorderBrush="#FF212135" Foreground="White" Padding="6" Height="30" VerticalContentAlignment="Center"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="License Key:" FontWeight="Bold" Foreground="#FFAAAAAA" VerticalAlignment="Top" Margin="0,6,0,0"/>
+                    <TextBox Grid.Column="1" x:Name="TxtLicenseKey" IsReadOnly="True" Background="#FF09090F" BorderBrush="#FF212135" Foreground="#FFF5D042" Padding="10" Height="90" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Actions -->
+        <StackPanel Grid.Row="2" Margin="0,16,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+            <ui:Button Content="Copy Key" Icon="{ui:SymbolIcon Copy24}" Margin="0,0,10,0" Click="BtnCopyKey_Click"/>
+            <ui:Button Content="Close" Appearance="Secondary" Width="80" Click="BtnClose_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
