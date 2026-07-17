@@ -178,6 +178,11 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         if (_mediaPlayer != null && _libVLC != null)
         {
             var media = new LibVLCSharp.Shared.Media(_libVLC, new Uri(path));
+            if (_pitchShift != 0)
+            {
+                media.AddOption($":audio-filter=pitch");
+                media.AddOption($":pitch-shift={_pitchShift}");
+            }
             _mediaPlayer.Media = media;
 
             // Re-apply rate, volume, and equalizer settings

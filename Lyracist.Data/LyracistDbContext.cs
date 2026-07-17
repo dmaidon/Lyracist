@@ -56,7 +56,7 @@ namespace Lyracist.Data
             {
                 entity.HasIndex(s => s.Title);
                 entity.HasIndex(s => s.Artist);
-                entity.HasIndex(s => s.FilePath);
+                entity.HasIndex(s => s.FilePath).IsUnique();
             });
 
             // Song <-> SongAudioSettings (1-to-1)

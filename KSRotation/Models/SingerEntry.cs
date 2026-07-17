@@ -7,7 +7,7 @@ namespace KSRotation.Models
 {
     public record QueuedSong(string Song, string Artist);
 
-    public partial class SingerEntry : ObservableObject
+    public partial class SingerEntry : ObservableObject, Lyracist.Shared.IRotationSinger
     {
         /// <summary>Stable identity assigned once at construction; never changes even when Name is edited.
         /// Declared as <c>init</c> so JSON deserialization can round-trip it, while preventing accidental mutation in code.</summary>
@@ -53,6 +53,8 @@ namespace KSRotation.Models
         /// <summary>True when this singer is queued up as the next to sing after the current one finishes.</summary>
         [ObservableProperty]
         public partial bool IsNext { get; set; }
+
+        public bool IsPaused { get; set; } = false;
 
         [ObservableProperty] public partial bool Song1Completed { get; set; }
         [ObservableProperty] public partial bool Song2Completed { get; set; }

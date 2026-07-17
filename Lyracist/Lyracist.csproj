@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.7.15.224</AssemblyVersion>
-    <FileVersion>26.7.15.224</FileVersion>
+    <AssemblyVersion>26.7.17.227</AssemblyVersion>
+    <FileVersion>26.7.17.227</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -74,6 +74,17 @@
     </None>
     <None Include="C:\ffmpeg\bin\ffprobe.exe">
       <Link>ffprobe.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\IRotationSinger.cs" Link="IRotationSinger.cs" />
+    <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TabletClient\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -15,6 +15,8 @@ public class CdgDecoder : ICDGDecoder
     private int _currentPacketIndex;
 
     private WriteableBitmap? _bitmap;
+    private byte[]? _bgraBuffer;
+    public readonly System.Threading.Lock RenderLock = new();
 
     public int TargetWidth { get; set; } = CdgConstants.Width;
     public int TargetHeight { get; set; } = CdgConstants.Height;
@@ -174,6 +176,115 @@ public class CdgDecoder : ICDGDecoder
         }
     }
 
+    public void RenderToBuffer()
+    {
+        lock (RenderLock)
+        {
+            int width = TargetWidth;
+            int height = TargetHeight;
+            int size = width * height * 4;
+
+            if (_bgraBuffer == null || _bgraBuffer.Length != size)
+            {
+                _bgraBuffer = new byte[size];
+            }
+
+            bool noScale = width == CdgConstants.Width && height == CdgConstants.Height;
+            bool chromaEnabled = Lyracist.Core.Helpers.AppSettings.IsCdgChromaKeyEnabled;
+            byte bgIndex = chromaEnabled ? _state.Pixels[0, 0] : (byte)0;
+            int transIndex = _state.Palette.TransparentColorIndex;
+
+            if (noScale)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    int rowOffset = y * width * 4;
+                    for (int x = 0; x < width; x++)
+                    {
+                        byte colorIndex = _state.Pixels[x, y];
+                        
+                        bool isTransparent = colorIndex == transIndex || (chromaEnabled && colorIndex == bgIndex);
+                        byte alpha = isTransparent ? (byte)0 : (byte)255;
+                        Color color = _state.Palette.Colors[colorIndex];
+
+                        byte r = isTransparent ? (byte)0 : color.R;
+                        byte g = isTransparent ? (byte)0 : color.G;
+                        byte b = isTransparent ? (byte)0 : color.B;
+
+                        int colOffset = rowOffset + (x * 4);
+                        _bgraBuffer[colOffset] = b;
+                        _bgraBuffer[colOffset + 1] = g;
+                        _bgraBuffer[colOffset + 2] = r;
+                        _bgraBuffer[colOffset + 3] = alpha;
+                    }
+                }
+            }
+            else
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    int rowOffset = y * width * 4;
+                    int srcY = (y * CdgConstants.Height) / height;
+                    if (srcY >= CdgConstants.Height) srcY = CdgConstants.Height - 1;
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        int srcX = (x * CdgConstants.Width) / width;
+                        if (srcX >= CdgConstants.Width) srcX = CdgConstants.Width - 1;
+
+                        byte colorIndex = _state.Pixels[srcX, srcY];
+                        
+                        bool isTransparent = colorIndex == transIndex || (chromaEnabled && colorIndex == bgIndex);
+                        byte alpha = isTransparent ? (byte)0 : (byte)255;
+                        Color color = _state.Palette.Colors[colorIndex];
+
+                        byte r = isTransparent ? (byte)0 : color.R;
+                        byte g = isTransparent ? (byte)0 : color.G;
+                        byte b = isTransparent ? (byte)0 : color.B;
+
+                        int colOffset = rowOffset + (x * 4);
+                        _bgraBuffer[colOffset] = b;
+                        _bgraBuffer[colOffset + 1] = g;
+                        _bgraBuffer[colOffset + 2] = r;
+                        _bgraBuffer[colOffset + 3] = alpha;
+                    }
+                }
+            }
+        }
+    }
+
+    public void CopyToBitmap(WriteableBitmap bitmap)
+    {
+        if (bitmap == null) return;
+
+        lock (RenderLock)
+        {
+            if (_bgraBuffer == null) return;
+
+            bitmap.Lock();
+            try
+            {
+                unsafe
+                {
+                    byte* backBuffer = (byte*)bitmap.BackBuffer;
+                    int width = bitmap.PixelWidth;
+                    int height = bitmap.PixelHeight;
+                    int size = width * height * 4;
+
+                    fixed (byte* src = _bgraBuffer)
+                    {
+                        Buffer.MemoryCopy(src, backBuffer, size, size);
+                    }
+                }
+                bitmap.AddDirtyRect(new Int32Rect(0, 0, bitmap.PixelWidth, bitmap.PixelHeight));
+            }
+            finally
+            {
+                bitmap.Unlock();
+            }
+        }
+    }
+
     public WriteableBitmap RenderToBitmap()
     {
         int width = TargetWidth;
@@ -184,82 +295,8 @@ public class CdgDecoder : ICDGDecoder
             _bitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Pbgra32, null);
         }
 
-        _bitmap.Lock();
-        try
-        {
-            unsafe
-            {
-                byte* backBuffer = (byte*)_bitmap.BackBuffer;
-                int stride = _bitmap.BackBufferStride;
-
-                bool noScale = width == CdgConstants.Width && height == CdgConstants.Height;
-                bool chromaEnabled = Lyracist.Core.Helpers.AppSettings.IsCdgChromaKeyEnabled;
-                byte bgIndex = chromaEnabled ? _state.Pixels[0, 0] : (byte)0;
-                int transIndex = _state.Palette.TransparentColorIndex;
-
-                if (noScale)
-                {
-                    for (int y = 0; y < height; y++)
-                    {
-                        byte* row = backBuffer + (y * stride);
-                        for (int x = 0; x < width; x++)
-                        {
-                            byte colorIndex = _state.Pixels[x, y];
-                            
-                            bool isTransparent = colorIndex == transIndex || (chromaEnabled && colorIndex == bgIndex);
-                            byte alpha = isTransparent ? (byte)0 : (byte)255;
-                            Color color = _state.Palette.Colors[colorIndex];
-
-                            byte r = isTransparent ? (byte)0 : color.R;
-                            byte g = isTransparent ? (byte)0 : color.G;
-                            byte b = isTransparent ? (byte)0 : color.B;
-
-                            int colOffset = x * 4;
-                            row[colOffset] = b;
-                            row[colOffset + 1] = g;
-                            row[colOffset + 2] = r;
-                            row[colOffset + 3] = alpha;
-                        }
-                    }
-                }
-                else
-                {
-                    for (int y = 0; y < height; y++)
-                    {
-                        byte* row = backBuffer + (y * stride);
-                        int srcY = (y * CdgConstants.Height) / height;
-                        if (srcY >= CdgConstants.Height) srcY = CdgConstants.Height - 1;
-
-                        for (int x = 0; x < width; x++)
-                        {
-                            int srcX = (x * CdgConstants.Width) / width;
-                            if (srcX >= CdgConstants.Width) srcX = CdgConstants.Width - 1;
-
-                            byte colorIndex = _state.Pixels[srcX, srcY];
-                            
-                            bool isTransparent = colorIndex == transIndex || (chromaEnabled && colorIndex == bgIndex);
-                            byte alpha = isTransparent ? (byte)0 : (byte)255;
-                            Color color = _state.Palette.Colors[colorIndex];
-
-                            byte r = isTransparent ? (byte)0 : color.R;
-                            byte g = isTransparent ? (byte)0 : color.G;
-                            byte b = isTransparent ? (byte)0 : color.B;
-
-                            int colOffset = x * 4;
-                            row[colOffset] = b;
-                            row[colOffset + 1] = g;
-                            row[colOffset + 2] = r;
-                            row[colOffset + 3] = alpha;
-                        }
-                    }
-                }
-            }
-            _bitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
-        }
-        finally
-        {
-            _bitmap.Unlock();
-        }
+        RenderToBuffer();
+        CopyToBitmap(_bitmap);
 
         return _bitmap;
     }

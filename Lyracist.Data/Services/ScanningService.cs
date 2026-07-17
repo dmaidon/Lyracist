@@ -301,6 +301,7 @@ namespace Lyracist.Data.Services
 
                 var songsToInsert = new List<Song>();
                 var songsToUpdate = new List<Song>();
+                var songsToProbe = new List<Song>();
 
                 foreach (var file in candidateFiles)
                 {
@@ -354,6 +355,11 @@ namespace Lyracist.Data.Services
                         existing.IsKaraoke = parsed.IsKaraoke;
                         existing.KaraokeType = typeLabel;
                         songsToUpdate.Add(existing);
+
+                        if (existing.Duration <= 0)
+                        {
+                            songsToProbe.Add(existing);
+                        }
                     }
                     else
                     {
@@ -370,7 +376,67 @@ namespace Lyracist.Data.Services
                             DateAdded = DateTime.UtcNow
                         };
                         songsToInsert.Add(newSong);
+                        songsToProbe.Add(newSong);
                     }
+                }
+
+                // Probe durations concurrently before committing to DB (max 8 concurrent probes)
+                if (songsToProbe.Count > 0)
+                {
+                    var semaphore = new System.Threading.SemaphoreSlim(8);
+                    var tasks = songsToProbe.Select(async song =>
+                    {
+                        await semaphore.WaitAsync();
+                        try
+                        {
+                            if (song.KaraokeType == "ZIPCDG")
+                            {
+                                var (isKaraoke, audioEntryName) = CheckZipKaraoke(song.FilePath);
+                                if (isKaraoke && !string.IsNullOrEmpty(audioEntryName))
+                                {
+                                    string tempPath = string.Empty;
+                                    try
+                                    {
+                                        using var archive = ZipFile.OpenRead(song.FilePath);
+                                        var entry = archive.GetEntry(audioEntryName);
+                                        if (entry != null)
+                                        {
+                                            tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntryName));
+                                            entry.ExtractToFile(tempPath);
+
+                                            var probeResult = await FFprobeRunner.ProbeFile(tempPath);
+                                            song.Duration = probeResult.Duration;
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine($"Failed to extract and probe zip entry {audioEntryName} in {song.FilePath}: {ex.Message}");
+                                    }
+                                    finally
+                                    {
+                                        if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
+                                        {
+                                            try { File.Delete(tempPath); } catch { }
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
+                                song.Duration = probeResult.Duration;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Failed to probe file {song.FilePath}: {ex.Message}");
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
+                    });
+                    await Task.WhenAll(tasks);
                 }
 
                 // Save insertion changes to database in a single batch
@@ -398,7 +464,7 @@ namespace Lyracist.Data.Services
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error scanning directories, rolling back transaction: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Directory scanning failed, rolling back transaction", ex);
                 await transaction.RollbackAsync();
                 throw;
             }

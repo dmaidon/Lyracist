@@ -118,38 +118,38 @@ public static class AppSettings
 
     public static string YouTubeApiKey
     {
-        get => _data.YouTubeApiKey;
-        set { _data.YouTubeApiKey = value; Save(); }
+        get => Lyracist.Shared.EncryptionHelper.Decrypt(_data.YouTubeApiKey);
+        set { _data.YouTubeApiKey = Lyracist.Shared.EncryptionHelper.Encrypt(value); Save(); }
     }
 
     public static string SpotifyClientId
     {
-        get => _data.SpotifyClientId;
-        set { _data.SpotifyClientId = value; Save(); }
+        get => Lyracist.Shared.EncryptionHelper.Decrypt(_data.SpotifyClientId);
+        set { _data.SpotifyClientId = Lyracist.Shared.EncryptionHelper.Encrypt(value); Save(); }
     }
 
     public static string SpotifyClientSecret
     {
-        get => _data.SpotifyClientSecret;
-        set { _data.SpotifyClientSecret = value; Save(); }
+        get => Lyracist.Shared.EncryptionHelper.Decrypt(_data.SpotifyClientSecret);
+        set { _data.SpotifyClientSecret = Lyracist.Shared.EncryptionHelper.Encrypt(value); Save(); }
     }
 
     public static string AmazonAccessKey
     {
-        get => _data.AmazonAccessKey;
-        set { _data.AmazonAccessKey = value; Save(); }
+        get => Lyracist.Shared.EncryptionHelper.Decrypt(_data.AmazonAccessKey);
+        set { _data.AmazonAccessKey = Lyracist.Shared.EncryptionHelper.Encrypt(value); Save(); }
     }
 
     public static string AmazonSecretKey
     {
-        get => _data.AmazonSecretKey;
-        set { _data.AmazonSecretKey = value; Save(); }
+        get => Lyracist.Shared.EncryptionHelper.Decrypt(_data.AmazonSecretKey);
+        set { _data.AmazonSecretKey = Lyracist.Shared.EncryptionHelper.Encrypt(value); Save(); }
     }
 
     public static string PartyTymeClientId
     {
-        get => _data.PartyTymeClientId;
-        set { _data.PartyTymeClientId = value; Save(); }
+        get => Lyracist.Shared.EncryptionHelper.Decrypt(_data.PartyTymeClientId);
+        set { _data.PartyTymeClientId = Lyracist.Shared.EncryptionHelper.Encrypt(value); Save(); }
     }
 
     public static bool EnableAutoAdvance
@@ -166,8 +166,8 @@ public static class AppSettings
 
     public static string PartyTymeClientSecret
     {
-        get => _data.PartyTymeClientSecret;
-        set { _data.PartyTymeClientSecret = value; Save(); }
+        get => Lyracist.Shared.EncryptionHelper.Decrypt(_data.PartyTymeClientSecret);
+        set { _data.PartyTymeClientSecret = Lyracist.Shared.EncryptionHelper.Encrypt(value); Save(); }
     }
 
     public static string StaticIPAddress

@@ -311,8 +311,8 @@ public partial class RotationViewModel : BaseViewModel
             InactiveSingers.Remove(inactiveSinger);
             Rotation.Add(inactiveSinger);
 
-            _display.UpdateRotation([.. Rotation]);
             RotationStateChanged?.Invoke();
+            _display.UpdateRotation([.. Rotation]);
             return;
         }
 
@@ -355,8 +355,8 @@ public partial class RotationViewModel : BaseViewModel
             TotalSongsSung = totalSongsSung
         });
 
-        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
     }
 
     [RelayCommand]
@@ -379,8 +379,8 @@ public partial class RotationViewModel : BaseViewModel
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";
 
-        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
     }
 
 
@@ -403,50 +403,7 @@ public partial class RotationViewModel : BaseViewModel
             }
 
             // Log performance history in database
-            _ = System.Threading.Tasks.Task.Run(() =>
-            {
-                try
-                {
-                    using var context = new Lyracist.Data.LyracistDbContext();
-                    var dbSinger = context.Singers.FirstOrDefault(s => s.Name == name);
-                    if (dbSinger != null)
-                    {
-                        dbSinger.TotalSongsSung += 1;
-                        dbSinger.LastSang = System.DateTime.UtcNow;
-                        context.Singers.Update(dbSinger);
-
-                        // Find corresponding song to get SongId, or create a transient one
-                        var dbSong = context.Songs.FirstOrDefault(s => s.Title == title && s.Artist == artist);
-                        if (dbSong == null && !string.IsNullOrEmpty(title))
-                        {
-                            dbSong = new Lyracist.Data.Models.Song
-                            {
-                                Title = title,
-                                Artist = artist,
-                                IsKaraoke = true,
-                                FilePath = "External"
-                            };
-                            context.Songs.Add(dbSong);
-                            context.SaveChanges();
-                        }
-
-                        if (dbSong != null)
-                        {
-                            var entry = new Lyracist.Data.Models.RotationEntry
-                            {
-                                SingerId = dbSinger.SingerId,
-                                SongId = dbSong.SongId,
-                                Status = "Finished",
-                                TimestampAdded = System.DateTime.UtcNow
-                            };
-                            context.RotationEntries.Add(entry);
-                        }
-
-                        context.SaveChanges();
-                    }
-                }
-                catch { }
-            });
+            SavePerformanceHistory(name, title, artist);
 
             // Check if there is a pending song for this singer!
             if (_pendingSingerSongs.TryGetValue(name, out var list) && list.Count > 0)
@@ -472,8 +429,8 @@ public partial class RotationViewModel : BaseViewModel
                 RefreshSelectedSingerQueue();
             }
 
-            _display.UpdateRotation([.. Rotation]);
             RotationStateChanged?.Invoke();
+            _display.UpdateRotation([.. Rotation]);
         }
     }
 
@@ -491,8 +448,8 @@ public partial class RotationViewModel : BaseViewModel
             Rotation.Insert(index - 1, singer);
             SelectedSinger = singer;
 
-            _display.UpdateRotation([.. Rotation]);
             RotationStateChanged?.Invoke();
+            _display.UpdateRotation([.. Rotation]);
         }
     }
 
@@ -510,8 +467,8 @@ public partial class RotationViewModel : BaseViewModel
             Rotation.Insert(index + 1, singer);
             SelectedSinger = singer;
 
-            _display.UpdateRotation([.. Rotation]);
             RotationStateChanged?.Invoke();
+            _display.UpdateRotation([.. Rotation]);
         }
     }
 
@@ -531,8 +488,8 @@ public partial class RotationViewModel : BaseViewModel
         Rotation.Clear();
         SelectedSinger = null;
 
-        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
     }
 
     [RelayCommand]
@@ -541,30 +498,10 @@ public partial class RotationViewModel : BaseViewModel
         if (singer == null)
             return;
 
-        foreach (var s in Rotation)
-        {
-            s.IsCurrent = (s == singer);
-            s.IsNext = false;
-        }
+        Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, singer);
 
-        // Next is always whoever sequentially follows the newly-current singer in the
-        // rotation, wrapping around — matching KSRotation. Computed here (rather than
-        // left for a downstream listener) so every display picks up the correct value
-        // as soon as this command pushes the update out.
-        int currentIndex = Rotation.IndexOf(singer);
-        for (int i = 1; i <= Rotation.Count; i++)
-        {
-            int nextIndex = (currentIndex + i) % Rotation.Count;
-            var candidate = Rotation[nextIndex];
-            if (candidate != singer && !candidate.IsPaused && !candidate.IsInactive)
-            {
-                candidate.IsNext = true;
-                break;
-            }
-        }
-
-        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
     }
 
     [RelayCommand]
@@ -581,48 +518,7 @@ public partial class RotationViewModel : BaseViewModel
         singer.TotalSongsSung++;
 
         // 2. Log performance history in database
-        System.Threading.Tasks.Task.Run(() =>
-        {
-            try
-            {
-                using var context = new Lyracist.Data.LyracistDbContext();
-                var dbSinger = context.Singers.FirstOrDefault(s => s.Name == name);
-                if (dbSinger != null)
-                {
-                    dbSinger.TotalSongsSung += 1;
-                    dbSinger.LastSang = System.DateTime.UtcNow;
-                    context.Singers.Update(dbSinger);
-
-                    var dbSong = context.Songs.FirstOrDefault(s => s.Title == title && s.Artist == artist);
-                    if (dbSong == null && !string.IsNullOrEmpty(title))
-                    {
-                        dbSong = new Lyracist.Data.Models.Song
-                        {
-                            Title = title,
-                            Artist = artist,
-                            IsKaraoke = true,
-                            FilePath = "External"
-                        };
-                        context.Songs.Add(dbSong);
-                        context.SaveChanges();
-                    }
-
-                    if (dbSong != null)
-                    {
-                        var entry = new Lyracist.Data.Models.RotationEntry
-                        {
-                            SingerId = dbSinger.SingerId,
-                            SongId = dbSong.SongId,
-                            Status = "Finished",
-                            TimestampAdded = System.DateTime.UtcNow
-                        };
-                        context.RotationEntries.Add(entry);
-                    }
-                    context.SaveChanges();
-                }
-            }
-            catch { }
-        });
+        SavePerformanceHistory(name, title, artist);
 
         // If the singer being marked Done is the current singer, advance the indicator first
         if (singer.IsCurrent)
@@ -669,8 +565,8 @@ public partial class RotationViewModel : BaseViewModel
             RefreshSelectedSingerQueue();
         }
 
-        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
     }
 
     [RelayCommand]
@@ -685,8 +581,8 @@ public partial class RotationViewModel : BaseViewModel
             await _mediaEngine.Pause();
         }
 
-        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
     }
 
     [RelayCommand]
@@ -713,8 +609,8 @@ public partial class RotationViewModel : BaseViewModel
             }
         }
 
-        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
     }
 
     [RelayCommand]
@@ -722,6 +618,9 @@ public partial class RotationViewModel : BaseViewModel
     {
         if (singer == null) return;
         InactiveSingers.Remove(singer);
+
+        RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
     }
 
     [RelayCommand]
@@ -772,7 +671,57 @@ public partial class RotationViewModel : BaseViewModel
 
     public void NotifyRotationReordered()
     {
-        _display.UpdateRotation([.. Rotation]);
         RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
+    }
+
+    private void SavePerformanceHistory(string name, string title, string artist)
+    {
+        if (string.IsNullOrEmpty(name)) return;
+
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            try
+            {
+                using var context = new Lyracist.Data.LyracistDbContext();
+                var dbSinger = context.Singers.FirstOrDefault(s => s.Name == name);
+                if (dbSinger != null)
+                {
+                    dbSinger.TotalSongsSung += 1;
+                    dbSinger.LastSang = System.DateTime.UtcNow;
+                    context.Singers.Update(dbSinger);
+
+                    // Find corresponding song to get SongId, or create a transient one
+                    var dbSong = context.Songs.FirstOrDefault(s => s.Title == title && s.Artist == artist);
+                    if (dbSong == null && !string.IsNullOrEmpty(title))
+                    {
+                        dbSong = new Lyracist.Data.Models.Song
+                        {
+                            Title = title,
+                            Artist = artist,
+                            IsKaraoke = true,
+                            FilePath = "External"
+                        };
+                        context.Songs.Add(dbSong);
+                        context.SaveChanges();
+                    }
+
+                    if (dbSong != null)
+                    {
+                        var entry = new Lyracist.Data.Models.RotationEntry
+                        {
+                            SingerId = dbSinger.SingerId,
+                            SongId = dbSong.SongId,
+                            Status = "Finished",
+                            TimestampAdded = System.DateTime.UtcNow
+                        };
+                        context.RotationEntries.Add(entry);
+                    }
+
+                    context.SaveChanges();
+                }
+            }
+            catch { }
+        });
     }
 }

@@ -31,7 +31,9 @@ namespace LyracistKeyGen
                 if (File.Exists(SettingsPath))
                 {
                     string json = File.ReadAllText(SettingsPath);
-                    return JsonSerializer.Deserialize<SmtpSettings>(json) ?? new SmtpSettings();
+                    var settings = JsonSerializer.Deserialize<SmtpSettings>(json) ?? new SmtpSettings();
+                    settings.Password = Lyracist.Shared.EncryptionHelper.Decrypt(settings.Password);
+                    return settings;
                 }
             }
             catch (Exception ex)
@@ -51,8 +53,21 @@ namespace LyracistKeyGen
                     Directory.CreateDirectory(dir);
                 }
 
-                string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
-                File.ReadAllText(SettingsPath); // Force write handle check if file exists
+                var clone = new SmtpSettings
+                {
+                    SmtpHost = settings.SmtpHost,
+                    SmtpPort = settings.SmtpPort,
+                    Username = settings.Username,
+                    Password = Lyracist.Shared.EncryptionHelper.Encrypt(settings.Password),
+                    EnableSsl = settings.EnableSsl,
+                    FromAddress = settings.FromAddress
+                };
+
+                string json = JsonSerializer.Serialize(clone, new JsonSerializerOptions { WriteIndented = true });
+                if (File.Exists(SettingsPath))
+                {
+                    File.ReadAllText(SettingsPath); // Force write handle check if file exists
+                }
                 File.WriteAllText(SettingsPath, json);
             }
             catch (Exception ex)

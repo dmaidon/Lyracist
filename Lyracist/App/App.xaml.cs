@@ -26,6 +26,21 @@ public partial class App : System.Windows.Application
     public static IHost? Host { get; private set; }
     public static IHost AppHost => Host!;
 
+    private static Microsoft.Data.Sqlite.SqliteConnection? _keepAliveConnection;
+
+    private static void KeepDatabaseAlive()
+    {
+        try
+        {
+            _keepAliveConnection = new Microsoft.Data.Sqlite.SqliteConnection(Lyracist.Data.LyracistDbContext.GetConnectionString());
+            _keepAliveConnection.Open();
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "Failed to open SQLite keep-alive connection");
+        }
+    }
+
     public App()
     {
         // Initialise logger (creates Logs dir, purges files older than 30 days)
@@ -150,7 +165,16 @@ public partial class App : System.Windows.Application
             using var db = new Lyracist.Data.LyracistDbContext();
             db.Database.Migrate();
             db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+
+            // Deduplicate Songs on FilePath before making index unique
+            db.Database.ExecuteSqlRaw("DELETE FROM Songs WHERE SongId NOT IN (SELECT MIN(SongId) FROM Songs GROUP BY FilePath);");
+            db.Database.ExecuteSqlRaw("DROP INDEX IF EXISTS IX_Songs_FilePath;");
+            db.Database.ExecuteSqlRaw("CREATE UNIQUE INDEX IF NOT EXISTS IX_Songs_FilePath ON Songs (FilePath);");
+
             Lyracist.Services.Database.SingerHistoryService.EnsureTableCreated();
+            
+            // Keep database connection alive to optimize SQLite caching and concurrency
+            KeepDatabaseAlive();
         }
         catch (Exception ex)
         {

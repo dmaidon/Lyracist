@@ -2,17 +2,9 @@
   <Project Path="Lyracist/Lyracist.csproj" />
   <Project Path="KSRotation/KSRotation.csproj" />
   <Project Path="KSRotation.Maui/KSRotation.Maui.csproj" />
-  <Project Path="KSRotation.Tests/KSRotation.Tests.csproj">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
+  <Project Path="KSRotation.Tests/KSRotation.Tests.csproj" />
   <Project Path="Lyracist.Data/Lyracist.Data.csproj" />
-  <Project Path="LyracistDbEditor/LyracistDbEditor.csproj" Id="46565c60-fa0a-4967-b35a-eda261064d4a">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
-  <Project Path="LyracistKeyGen/LyracistKeyGen.csproj" Id="3b473078-0abc-42b3-b298-09409882f529">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
-  <Project Path="ScaryokeWheel/ScaryokeWheel.csproj" Id="2a544b5d-6e94-4b4b-99b5-0978ae21ff2f">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
+  <Project Path="LyracistDbEditor/LyracistDbEditor.csproj" Id="46565c60-fa0a-4967-b35a-eda261064d4a" />
+  <Project Path="LyracistKeyGen/LyracistKeyGen.csproj" Id="3b473078-0abc-42b3-b298-09409882f529" />
+  <Project Path="ScaryokeWheel/ScaryokeWheel.csproj" Id="2a544b5d-6e94-4b4b-99b5-0978ae21ff2f" />
 </Solution>

@@ -204,7 +204,7 @@ public partial class MainPage : ContentPage
             }
             
             // Recalculate next singer based on new active states
-            KSRotation.Services.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
+            Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
         }
     }
 

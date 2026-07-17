@@ -13,8 +13,8 @@
     <Company>PAROLE Software</Company>
     <PackageIcon>Firefly_change name at top of logo from -Lyracist- to -Lyracist Pro- 753182.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.7.13.12</AssemblyVersion>
-    <FileVersion>26.7.13.12</FileVersion>
+    <AssemblyVersion>26.7.17.13</AssemblyVersion>
+    <FileVersion>26.7.17.13</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +32,11 @@
     <PackageReference Include="WPF-UI" Version="4.3.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.9" />
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\EncryptionHelper.cs" Link="EncryptionHelper.cs" />
   </ItemGroup>
 
 </Project>

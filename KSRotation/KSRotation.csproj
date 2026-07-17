@@ -9,8 +9,8 @@
     <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyVersion>26.7.15.289</AssemblyVersion>
-    <FileVersion>26.7.15.289</FileVersion>
+    <AssemblyVersion>26.7.17.292</AssemblyVersion>
+    <FileVersion>26.7.17.292</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -97,6 +97,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
+    <Compile Include="..\Shared\IRotationSinger.cs" Link="IRotationSinger.cs" />
+    <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
   </ItemGroup>
 
 </Project>

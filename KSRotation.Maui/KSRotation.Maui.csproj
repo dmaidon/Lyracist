@@ -131,8 +131,11 @@
 	    <Generator>ResXFileCodeGenerator</Generator>
 	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
+	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
+		<Compile Include="..\Shared\IRotationSinger.cs" Link="IRotationSinger.cs" />
+		<Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
 	</ItemGroup>
 
 </Project>

@@ -234,24 +234,11 @@ public partial class RotationWindowViewModel : BaseViewModel
         NextSingers.Clear();
         if (now != null)
         {
-            var startFrom = next ?? now;
-            if (next != null)
+            var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(singers, now, 5);
+            foreach (var candidate in nextActiveSingers)
             {
-                string display = string.IsNullOrEmpty(next.SongTitle) ? next.Name : $"{next.Name} (\"{next.SongTitle}\")";
+                string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
                 NextSingers.Add(display);
-            }
-
-            int currentIndex = singers.IndexOf(startFrom);
-            int count = singers.Count;
-            for (int i = 1; i <= count && NextSingers.Count < 5; i++)
-            {
-                int idx = (currentIndex + i) % count;
-                var candidate = singers[idx];
-                if (candidate != now && candidate != next && !candidate.IsPaused && !candidate.IsInactive)
-                {
-                    string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
-                    NextSingers.Add(display);
-                }
             }
         }
         else
@@ -288,19 +275,13 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     public void HighlightSinger(Singer singer)
     {
-        foreach (var s in Rotation)
-        {
-            s.IsCurrent = false;
-            s.IsNext = false;
-        }
-
         var currentMatch = Rotation.FirstOrDefault(s => s.Name == singer.Name);
         if (currentMatch != null)
         {
-            currentMatch.IsCurrent = true;
-            CurrentSinger = singer.Name;
-            CurrentSongTitle = singer.SongTitle ?? string.Empty;
-            CurrentSingerSong = string.IsNullOrEmpty(singer.Artist) ? (singer.SongTitle ?? string.Empty) : $"{singer.SongTitle} - {singer.Artist}";
+            Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, currentMatch);
+            CurrentSinger = currentMatch.Name;
+            CurrentSongTitle = currentMatch.SongTitle ?? string.Empty;
+            CurrentSingerSong = string.IsNullOrEmpty(currentMatch.Artist) ? (currentMatch.SongTitle ?? string.Empty) : $"{currentMatch.SongTitle} - {currentMatch.Artist}";
             CurrentSingerScore = currentMatch.Score;
             CurrentSingerAverageRating = currentMatch.AverageRating;
             CurrentSingerRatingCount = currentMatch.RatingCount;
@@ -308,6 +289,11 @@ public partial class RotationWindowViewModel : BaseViewModel
         }
         else
         {
+            foreach (var s in Rotation)
+            {
+                s.IsCurrent = false;
+                s.IsNext = false;
+            }
             CurrentSinger = singer.Name;
             CurrentSongTitle = singer.SongTitle ?? string.Empty;
             CurrentSingerSong = string.IsNullOrEmpty(singer.Artist) ? (singer.SongTitle ?? string.Empty) : $"{singer.SongTitle} - {singer.Artist}";
@@ -317,28 +303,9 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerHasRatings = singer.RatingCount > 0;
         }
 
-        // Find the next active singer sequentially in the static list, starting after the highlighted singer
-        var next = (Singer?)null;
-        if (currentMatch != null)
-        {
-            int currentIndex = Rotation.IndexOf(currentMatch);
-            int count = Rotation.Count;
-            for (int i = 1; i <= count; i++)
-            {
-                int idx = (currentIndex + i) % count;
-                var candidate = Rotation[idx];
-                if (candidate != currentMatch && !candidate.IsPaused && !candidate.IsInactive)
-                {
-                    next = candidate;
-                    break;
-                }
-            }
-        }
-
+        var next = Rotation.FirstOrDefault(s => s.IsNext);
         if (next != null)
         {
-            var nextMatch = Rotation.FirstOrDefault(s => s.Name == next.Name);
-            nextMatch?.IsNext = true;
             NextSinger = next.Name;
         }
         else
@@ -352,17 +319,11 @@ public partial class RotationWindowViewModel : BaseViewModel
         NextSingers.Clear();
         if (currentMatch != null)
         {
-            int currentIndex = Rotation.IndexOf(currentMatch);
-            int count = Rotation.Count;
-            for (int i = 1; i <= count && NextSingers.Count < 5; i++)
+            var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(Rotation.ToList(), currentMatch, 5);
+            foreach (var candidate in nextActiveSingers)
             {
-                int idx = (currentIndex + i) % count;
-                var candidate = Rotation[idx];
-                if (candidate != currentMatch && !candidate.IsPaused && !candidate.IsInactive)
-                {
-                    string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
-                    NextSingers.Add(display);
-                }
+                string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
+                NextSingers.Add(display);
             }
         }
         else

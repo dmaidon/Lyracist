@@ -1,6 +1,7 @@
 // Last Edit: Jun 29, 2026 13:26 - Initial test suite: SingerEntry round helpers, RotationHelpers, ThemeService.
 using KSRotation.Models;
 using KSRotation.Services;
+using Lyracist.Shared;
 using System.Collections.ObjectModel;
 
 namespace KSRotation.Tests;
@@ -201,14 +202,14 @@ public class RotationHelpersTests
     public void MarkNextSinger_ThrowsOnNullSingers()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            RotationHelpers.MarkNextSinger(null!, new SingerEntry()));
+            RotationHelpers.MarkNextSinger<SingerEntry>(null!, new SingerEntry()));
     }
 
     [Fact]
     public void UpdateNextSingerHighlight_ThrowsOnNullSingers()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            RotationHelpers.UpdateNextSingerHighlight(null!));
+            RotationHelpers.UpdateNextSingerHighlight<SingerEntry>(null!));
     }
 }
 

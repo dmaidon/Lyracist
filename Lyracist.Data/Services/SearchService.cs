@@ -17,6 +17,41 @@ namespace Lyracist.Data.Services
     {
         private readonly LyracistDbContext _context = context;
 
+        private static SqliteConnection? _sharedConnection;
+        private static readonly System.Threading.Lock _connectionLock = new();
+        private static readonly System.Threading.SemaphoreSlim _querySemaphore = new(1, 1);
+
+        private static async Task<SqliteConnection> GetSharedConnectionAsync()
+        {
+            lock (_connectionLock)
+            {
+                if (_sharedConnection != null && _sharedConnection.State == System.Data.ConnectionState.Open)
+                {
+                    return _sharedConnection;
+                }
+            }
+
+            var conn = new SqliteConnection(LyracistDbContext.GetConnectionString());
+            await conn.OpenAsync();
+
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            lock (_connectionLock)
+            {
+                if (_sharedConnection != null && _sharedConnection.State == System.Data.ConnectionState.Open)
+                {
+                    conn.Dispose();
+                    return _sharedConnection;
+                }
+                _sharedConnection = conn;
+                return _sharedConnection;
+            }
+        }
+
         // ==========================================
         // TEXT NORMALIZATION
         // ==========================================
@@ -88,16 +123,10 @@ namespace Lyracist.Data.Services
                 return [];
             }
 
+            await _querySemaphore.WaitAsync();
             try
             {
-                using var connection = new SqliteConnection(LyracistDbContext.GetConnectionString());
-                await connection.OpenAsync();
-
-                using (var cmd = connection.CreateCommand())
-                {
-                    cmd.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
-                    await cmd.ExecuteNonQueryAsync();
-                }
+                var connection = await GetSharedConnectionAsync();
 
                 // Query matching songs and join with their respective audio settings, clamping to 150 items max
                 string sql = @"
@@ -132,6 +161,10 @@ namespace Lyracist.Data.Services
                     .Include(s => s.AudioSettings)
                     .Take(150)
                     .ToListAsync();
+            }
+            finally
+            {
+                _querySemaphore.Release();
             }
         }
 

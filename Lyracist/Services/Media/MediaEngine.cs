@@ -33,6 +33,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     private string? _tempDir;
     private string? _loadedAudioPath;
     private CancellationTokenSource? _pitchChangeCts;
+    private bool _isRenderingFrame;
 
     public event Action<ImageSource>? FrameReady;
     public event Action? Started;
@@ -208,17 +209,46 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
 
     private void OnPlaybackTick(object? sender, EventArgs e)
     {
-        if (!_isPlaying || _isMp4Mode) return;
+        if (!_isPlaying || _isMp4Mode || _isRenderingFrame) return;
 
-        // Sync CDG frame scheduler directly using the backend's audio position
         var audioPosition = _video.Position;
-        _scheduler.Update(audioPosition);
-        var frame = _scheduler.GetFrame();
+        _isRenderingFrame = true;
 
-        if (frame != null)
+        Task.Run(() =>
         {
-            FrameReady?.Invoke(frame);
-        }
+            try
+            {
+                if (_cdgDecoder is CdgDecoder cdg)
+                {
+                    _scheduler.UpdateBackground(audioPosition, cdg);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CDG background render error: {ex.Message}");
+            }
+            finally
+            {
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        if (_isPlaying && !_isMp4Mode)
+                        {
+                            var frame = _scheduler.GetFrame();
+                            if (frame != null)
+                            {
+                                FrameReady?.Invoke(frame);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _isRenderingFrame = false;
+                    }
+                }));
+            }
+        });
     }
 
     public async Task LoadSong(string path)

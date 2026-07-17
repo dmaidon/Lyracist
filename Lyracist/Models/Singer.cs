@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Lyracist.Models;
 
-public partial class Singer : ObservableObject
+public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
 {
     [ObservableProperty]
     private string _name = string.Empty;

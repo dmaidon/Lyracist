@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
 using KSRotation.Services;
+using Lyracist.Shared;
 using QRCoder;
 using System.Collections.ObjectModel;
 using System.IO;

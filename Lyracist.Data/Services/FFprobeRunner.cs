@@ -36,12 +36,18 @@ namespace Lyracist.Data.Services
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = FFprobePath,
-                    Arguments = $"-v error -show_format -show_streams -print_format json \"{filePath}\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
+                startInfo.ArgumentList.Add("-v");
+                startInfo.ArgumentList.Add("error");
+                startInfo.ArgumentList.Add("-show_format");
+                startInfo.ArgumentList.Add("-show_streams");
+                startInfo.ArgumentList.Add("-print_format");
+                startInfo.ArgumentList.Add("json");
+                startInfo.ArgumentList.Add(filePath);
 
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();

@@ -55,6 +55,9 @@ public partial class RotationWindow : Window
     private int _crawlGen;   // incremented to invalidate in-flight loops
     private VisualBrush? _crawlBrush;
     private DispatcherTimer? _spaceshipTimer;
+    private DispatcherTimer? _starRegenTimer;
+    private double _lastStarW;
+    private double _lastStarH;
 
     // Off-tree source for the crawl VisualBrush.
     private readonly Canvas _crawlSource = new()
@@ -235,7 +238,26 @@ public partial class RotationWindow : Window
     {
         if (_vm?.SelectedProjectionView == "Star Wars Crawl")
         {
-            RegenerateStars(e.NewSize.Width, e.NewSize.Height);
+            _lastStarW = e.NewSize.Width;
+            _lastStarH = e.NewSize.Height;
+
+            if (_starRegenTimer == null)
+            {
+                _starRegenTimer = new DispatcherTimer(DispatcherPriority.Background)
+                {
+                    Interval = TimeSpan.FromMilliseconds(200)
+                };
+                _starRegenTimer.Tick += (s, ev) =>
+                {
+                    _starRegenTimer.Stop();
+                    RegenerateStars(_lastStarW, _lastStarH);
+                };
+            }
+            else
+            {
+                _starRegenTimer.Stop();
+            }
+            _starRegenTimer.Start();
         }
     }
 

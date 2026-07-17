@@ -9,5 +9,6 @@ public interface ICdgFrameScheduler
     void LoadPackets(List<CdgPacket> packets);
     void Reset();
     void Update(TimeSpan audioPosition);
+    void UpdateBackground(TimeSpan audioPosition, CdgDecoder cdg);
     WriteableBitmap? GetFrame();
 }

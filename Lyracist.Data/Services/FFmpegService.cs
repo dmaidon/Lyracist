@@ -68,16 +68,28 @@ namespace Lyracist.Data.Services
                     Directory.CreateDirectory(outDir);
                 }
 
-                // Command arguments: Combine CDG graphics and MP3 audio into standard H.264 / AAC MP4 video
+                // Command arguments: Combine CDG graphics and MP3 audio into standard H.264 / AAC MP4 video securely via ArgumentList
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = FFmpegPath,
-                    Arguments = $"-y -i \"{cdgPath}\" -i \"{mp3Path}\" -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest \"{outputPath}\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
+                startInfo.ArgumentList.Add("-y");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(cdgPath);
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(mp3Path);
+                startInfo.ArgumentList.Add("-c:v");
+                startInfo.ArgumentList.Add("libx264");
+                startInfo.ArgumentList.Add("-pix_fmt");
+                startInfo.ArgumentList.Add("yuv420p");
+                startInfo.ArgumentList.Add("-c:a");
+                startInfo.ArgumentList.Add("aac");
+                startInfo.ArgumentList.Add("-shortest");
+                startInfo.ArgumentList.Add(outputPath);
 
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();
@@ -197,12 +209,21 @@ namespace Lyracist.Data.Services
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = FFmpegPath,
-                    Arguments = $"-y -i \"{videoPath}\" -ss {startOffset} -vframes 1 -f image2 \"{outputPath}\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
+                startInfo.ArgumentList.Add("-y");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(videoPath);
+                startInfo.ArgumentList.Add("-ss");
+                startInfo.ArgumentList.Add(startOffset);
+                startInfo.ArgumentList.Add("-vframes");
+                startInfo.ArgumentList.Add("1");
+                startInfo.ArgumentList.Add("-f");
+                startInfo.ArgumentList.Add("image2");
+                startInfo.ArgumentList.Add(outputPath);
 
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();

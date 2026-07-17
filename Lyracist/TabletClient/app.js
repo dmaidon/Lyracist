@@ -1,5 +1,5 @@
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5005/lyricsHub")
+    .withUrl("/lyricsHub")
     .withAutomaticReconnect()
     .build();
 

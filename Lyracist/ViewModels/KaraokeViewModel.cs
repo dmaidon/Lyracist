@@ -697,37 +697,16 @@ public partial class KaraokeViewModel : BaseViewModel
             current = activeSingers.FirstOrDefault();
         }
 
-        foreach (var s in rotationList)
-        {
-            s.IsCurrent = false;
-            s.IsNext = false;
-        }
-
         if (current != null)
         {
-            current.IsCurrent = true;
+            Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation.Rotation, current);
+
             NowSingingName = current.Name;
             NowSingingSong = string.IsNullOrEmpty(current.SongTitle) ? "No Song" : $"{current.Artist} - {current.SongTitle}";
 
-            // Next is always whoever sequentially follows the current singer in the
-            // rotation, wrapping around — matching KSRotation. Never reuse a stale
-            // IsNext flag: it may point at someone left over from before Current moved.
-            Singer? next = null;
-            int currentIndex = rotationList.IndexOf(current);
-            for (int i = 1; i <= rotationList.Count; i++)
-            {
-                int nextIndex = (currentIndex + i) % rotationList.Count;
-                var candidate = rotationList[nextIndex];
-                if (candidate != current && !candidate.IsPaused && !candidate.IsInactive)
-                {
-                    next = candidate;
-                    break;
-                }
-            }
-
+            Singer? next = Rotation.Rotation.FirstOrDefault(s => s.IsNext);
             if (next != null)
             {
-                next.IsNext = true;
                 NextUpName = next.Name;
                 NextUpSong = string.IsNullOrEmpty(next.SongTitle) ? "No Song" : $"{next.Artist} - {next.SongTitle}";
             }
@@ -739,6 +718,11 @@ public partial class KaraokeViewModel : BaseViewModel
         }
         else
         {
+            foreach (var s in rotationList)
+            {
+                s.IsCurrent = false;
+                s.IsNext = false;
+            }
             NowSingingName = "None";
             NowSingingSong = "No Song";
             NextUpName = "None";

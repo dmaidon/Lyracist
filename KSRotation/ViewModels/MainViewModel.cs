@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
 using KSRotation.Services;
+using Lyracist.Shared;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;

@@ -6,8 +6,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>26.7.15.23</AssemblyVersion>
-    <FileVersion>26.7.15.23</FileVersion>
+    <AssemblyVersion>26.7.17.27</AssemblyVersion>
+    <FileVersion>26.7.17.27</FileVersion>
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
   </PropertyGroup>
@@ -23,7 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
+    <Compile Include="..\Shared\EncryptionHelper.cs" Link="EncryptionHelper.cs" />
   </ItemGroup>
 
 </Project>
