@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:43:00 -> Avoid UNIQUE constraint error on duplicate key generation using INSERT OR REPLACE
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -51,7 +52,7 @@ namespace LyracistKeyGen
 
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                INSERT INTO Licenses (FirstName, LastName, StageName, Email, LicenseKey)
+                INSERT OR REPLACE INTO Licenses (FirstName, LastName, StageName, Email, LicenseKey)
                 VALUES ($firstName, $lastName, $stageName, $email, $key);";
             
             cmd.Parameters.AddWithValue("$firstName", firstName.Trim());
