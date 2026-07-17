@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <!-- Edited on Jul 17, 2026 @ 10:09:00 -> Update logo reference from Firefly name to Lyracist_Pro.png -->
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -11,10 +12,10 @@
     <Title>Lyracist Key Generator</Title>
     <Authors>Dennis Maidon</Authors>
     <Company>PAROLE Software</Company>
-    <PackageIcon>Firefly_change name at top of logo from -Lyracist- to -Lyracist Pro- 753182.png</PackageIcon>
+    <PackageIcon>Lyracist_Pro.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.7.17.18</AssemblyVersion>
-    <FileVersion>26.7.17.18</FileVersion>
+    <AssemblyVersion>26.7.17.19</AssemblyVersion>
+    <FileVersion>26.7.17.19</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\..\Users\dmaid\Downloads\Firefly_change name at top of logo from -Lyracist- to -Lyracist Pro- 753182.png">
+    <None Include="..\..\..\Users\dmaid\Downloads\Lyracist_Pro.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
