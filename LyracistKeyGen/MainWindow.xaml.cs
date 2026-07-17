@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:58:00 -> Remove redundant license generation success popups
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -121,7 +122,6 @@ namespace LyracistKeyGen
                     {
                         var settings = GetSettingsFromUi();
                         EmailSender.SendLicenseKey(settings, email, $"{firstName} {lastName}", key);
-                        MessageBox.Show($"License key generated, saved to database, and sent to '{email}'!", "License Created", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception mailEx)
                     {
@@ -132,7 +132,6 @@ namespace LyracistKeyGen
                 {
                     // Copy to clipboard
                     Clipboard.SetText(key);
-                    MessageBox.Show($"License key generated, saved to database, and copied to clipboard!\n\nKey: {key}", "License Created", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
                 // Refresh history grid
