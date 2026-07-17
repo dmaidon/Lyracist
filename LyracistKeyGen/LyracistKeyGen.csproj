@@ -13,8 +13,8 @@
     <Company>PAROLE Software</Company>
     <PackageIcon>Firefly_change name at top of logo from -Lyracist- to -Lyracist Pro- 753182.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.7.17.15</AssemblyVersion>
-    <FileVersion>26.7.17.15</FileVersion>
+    <AssemblyVersion>26.7.17.16</AssemblyVersion>
+    <FileVersion>26.7.17.16</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

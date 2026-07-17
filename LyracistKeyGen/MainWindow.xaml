@@ -1,4 +1,4 @@
-<!-- Edited on Jul 17, 2026 @ 09:39:00 -> Update 'How It Works' text to match RSA signature verification -->
+<!-- Edited on Jul 17, 2026 @ 09:50:00 -> Balance right-hand panel cards to equal height and refactor with grids -->
 <Window x:Class="LyracistKeyGen.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -83,20 +83,26 @@
                     <!-- Key Output / Action panel -->
                     <Grid Grid.Column="1">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
                         <!-- Key display -->
-                        <Border Grid.Row="0" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,0,16">
-                            <StackPanel>
-                                <TextBlock Text="License Key Output" FontSize="16" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,16"/>
+                        <Border Grid.Row="0" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,0,16" VerticalAlignment="Stretch">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Grid.Row="0" Text="License Key Output" FontSize="16" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,16"/>
 
-                                <Border Background="#FF09090F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,20">
+                                <Border Grid.Row="1" Background="#FF09090F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,20" VerticalAlignment="Stretch">
                                     <TextBox x:Name="TxtGeneratedKey" Text="XXXXX-XXXXX-XXXXX" FontSize="11" FontWeight="Bold" Foreground="#FFF5D042" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsReadOnly="True" Background="Transparent" BorderThickness="0" TextAlignment="Center" TextWrapping="Wrap"/>
                                 </Border>
 
-                                <Grid>
+                                <Grid Grid.Row="2">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
@@ -104,12 +110,12 @@
                                     <ui:Button Grid.Column="0" Content="Copy Key" Icon="{ui:SymbolIcon Copy24}" Margin="0,0,6,0" Click="BtnCopyKey_Click" HorizontalAlignment="Stretch"/>
                                     <ui:Button Grid.Column="1" x:Name="BtnEmailKey" Content="Email Key" Icon="{ui:SymbolIcon Mail24}" Margin="6,0,0,0" Click="BtnEmailKey_Click" HorizontalAlignment="Stretch" IsEnabled="False"/>
                                 </Grid>
-                            </StackPanel>
+                            </Grid>
                         </Border>
 
                         <!-- Instructions card -->
-                        <Border Grid.Row="1" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="20">
-                            <StackPanel>
+                        <Border Grid.Row="1" Background="#FF13131F" BorderBrush="#FF212135" BorderThickness="1" CornerRadius="12" Padding="20" VerticalAlignment="Stretch">
+                            <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="ℹ️ How It Works" FontSize="14" FontWeight="Bold" Foreground="#FF8E53" Margin="0,0,0,10"/>
                                 <TextBlock Text="The key is cryptographically signed using a secure RSA private key based on the customer's input parameters." TextWrapping="Wrap" FontSize="12" Foreground="#FFAAAAAA" Margin="0,0,0,10"/>
                                 <TextBlock Text="During registration inside Lyracist, the software validates the signature using the embedded public key. If the signature matches the registration details, it activates without needing internet access!" TextWrapping="Wrap" FontSize="12" Foreground="#FFAAAAAA"/>
