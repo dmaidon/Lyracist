@@ -528,8 +528,13 @@ public partial class RotationViewModel : BaseViewModel
             var nextActive = Rotation.FirstOrDefault(s => s.IsNext);
             if (nextActive != null)
             {
-                nextActive.IsCurrent = true;
                 singer.IsCurrent = false;
+                nextActive.IsCurrent = true;
+
+                // nextActive's own IsNext flag is now stale (they're current, not next), and
+                // whoever should follow them hasn't been marked yet — recompute in one pass so
+                // no singer is ever left simultaneously "current" and "next".
+                Lyracist.Shared.RotationHelpers.MarkNextSinger(Rotation, nextActive);
             }
             else
             {

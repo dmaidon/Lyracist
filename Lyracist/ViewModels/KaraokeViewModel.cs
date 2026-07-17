@@ -692,14 +692,33 @@ public partial class KaraokeViewModel : BaseViewModel
         Singer? current = rotationList.FirstOrDefault(s => s.IsCurrent);
 
         // Fallback if current is not set or is no longer active
-        if (current == null || current.IsPaused || current.IsInactive || !rotationList.Contains(current))
+        bool needsPromotion = current == null || current.IsPaused || current.IsInactive || !rotationList.Contains(current);
+        if (needsPromotion)
         {
             current = activeSingers.FirstOrDefault();
         }
 
         if (current != null)
         {
-            Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation.Rotation, current);
+            if (needsPromotion)
+            {
+                // No valid current singer was designated (e.g. first singer of the night, or the
+                // previous current singer became paused/inactive) — promote one and establish next.
+                Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation.Rotation, current);
+            }
+            else
+            {
+                // Current is already correctly designated by whichever command changed it
+                // (RotationViewModel.SetCurrentSinger / DoneSinger). Only recompute "next" if the
+                // existing designation is missing or stale — never clobber a deliberate "next"
+                // that was just set (e.g. a displaced current singer resuming their spot in line).
+                Singer? existingNext = Rotation.Rotation.FirstOrDefault(s => s.IsNext);
+                bool nextIsValid = existingNext != null && existingNext != current && !existingNext.IsPaused && !existingNext.IsInactive;
+                if (!nextIsValid)
+                {
+                    Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation.Rotation);
+                }
+            }
 
             NowSingingName = current.Name;
             NowSingingSong = string.IsNullOrEmpty(current.SongTitle) ? "No Song" : $"{current.Artist} - {current.SongTitle}";
