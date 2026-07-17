@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:00:00 -> Use relative SignalR path
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/lyricsHub")
     .withAutomaticReconnect()

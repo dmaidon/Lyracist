@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:00:00 -> Singer name normalization
 // Last Edit: Jun 30, 2026 08:40 - Replaced per-call bool[10] allocation with an allocation-free GetRoundCompleted switch.
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;

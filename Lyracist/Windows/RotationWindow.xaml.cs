@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:00:00 -> Debounce canvas updates
 using Lyracist.Models;
 using Lyracist.ViewModels;
 using System.Collections.Specialized;

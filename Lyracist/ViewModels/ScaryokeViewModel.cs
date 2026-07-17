@@ -1,3 +1,4 @@
+// Edited on Jul 16, 2026 @ 11:00:00 -> Manage scaryoke modes
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lyracist.Services.Display;
 using System.Collections.ObjectModel;

@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:00:00 -> Rating system configurations
 using System.IO;
 using System.Text.Json;
 

@@ -1,3 +1,4 @@
+// Edited on Jul 16, 2026 @ 12:00:00 -> Relocate application paths
 // Last Edit: Jun 30, 2026 06:47 - Added centralized app-relative directory paths for Settings, Logs, and Reports.
 using System.IO;
 

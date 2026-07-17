@@ -1,3 +1,4 @@
+// Edited on Jul 16, 2026 @ 12:00:00 -> App lifecycle events
 // Last Edit: Jun 29, 2026 13:10 - Added global exception handlers: DispatcherUnhandledException, AppDomain.UnhandledException, TaskScheduler.UnobservedTaskException.
 using KSRotation.Services;
 using System.Windows;

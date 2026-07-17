@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:00:00 -> Support pitch modification filters
 using System;
 using System.IO;
 using System.Runtime.InteropServices;

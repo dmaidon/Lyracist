@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:00:00 -> SQLite keep-alive connection
 using System;
 using System.Windows;
 using System.Threading.Tasks;

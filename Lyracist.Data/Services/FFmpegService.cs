@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:00:00 -> Re-introduce FFprobe metadata parsing
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

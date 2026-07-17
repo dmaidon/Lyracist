@@ -1,3 +1,4 @@
+// Edited on Jul 16, 2026 @ 11:00:00 -> JSON context generation
 // Last Edit: Jun 30, 2026 08:40 - Source-generated JSON metadata for the app's persisted types and the rotation feed.
 using KSRotation.Models;
 using System.Collections.Generic;

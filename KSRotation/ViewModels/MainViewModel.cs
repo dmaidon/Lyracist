@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:00:00 -> Integrate auto-promotion and reset
 // Last Edit: Jul 02, 2026 16:54 - Added SaveCurrentAsTestList command and fixed runtime binding gaps for Settings controls.
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;

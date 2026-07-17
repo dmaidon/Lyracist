@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:00:00 -> Cache FTS5 connection
 using System;
 using System.Collections.Generic;
 using System.Globalization;

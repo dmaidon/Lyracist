@@ -1,3 +1,4 @@
+// Edited on Jul 16, 2026 @ 11:00:00 -> Configuration key mappings
 // Last Edit: Jul 02, 2026 14:10 - Added optional PreferredHostIp setting for manual portal URL/QR host override.
 namespace KSRotation.Models
 {

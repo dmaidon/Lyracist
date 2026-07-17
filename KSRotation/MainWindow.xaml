@@ -1,3 +1,4 @@
+<!-- Edited on Jul 16, 2026 @ 11:00:00 -> Desktop window design updates -->
 <!-- Last Edit: Jul 03, 2026 07:36 - Delayed singer row Name/Song/Artist source updates until textbox focus is exited (LostFocus). -->
 <Window x:Name="FrmMain"
     x:Class="KSRotation.MainWindow"

@@ -1,3 +1,4 @@
+// Edited on Jul 17, 2026 @ 09:00:00 -> Enable testing in Debug
 // Last Edit: Jun 29, 2026 13:26 - Initial test suite: SingerEntry round helpers, RotationHelpers, ThemeService.
 using KSRotation.Models;
 using KSRotation.Services;
