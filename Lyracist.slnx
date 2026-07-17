@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="Lyracist/Lyracist.csproj" />
+  <Project Path="Lyracist.Tests/Lyracist.Tests.csproj" />
   <Project Path="KSRotation/KSRotation.csproj" />
   <Project Path="KSRotation.Maui/KSRotation.Maui.csproj" />
   <Project Path="KSRotation.Tests/KSRotation.Tests.csproj" />

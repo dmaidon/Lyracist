@@ -212,6 +212,86 @@ public class RotationHelpersTests
         Assert.Throws<ArgumentNullException>(() =>
             RotationHelpers.UpdateNextSingerHighlight<SingerEntry>(null!));
     }
+
+    [Fact]
+    public void SetCurrentSinger_PromotesEntryAndMarksPreviousCurrentAsNext()
+    {
+        var singers = new ObservableCollection<SingerEntry>
+        {
+            new() { Name = "Alice", IsCurrent = true },
+            Active("Bob"),
+            Active("Carol")
+        };
+
+        // Promoting Carol (not Bob, who'd be the plain sequential-next after Alice) is the case
+        // that distinguishes "previous current resumes as next" from "sequential next singer".
+        RotationHelpers.SetCurrentSinger(singers, singers[2]);
+
+        Assert.True(singers[2].IsCurrent);
+        Assert.False(singers[0].IsCurrent);
+        Assert.True(singers[0].IsNext);
+        Assert.False(singers[1].IsNext);
+    }
+
+    [Fact]
+    public void SetCurrentSinger_NoPreviousCurrent_FallsBackToSequentialNext()
+    {
+        var singers = new ObservableCollection<SingerEntry>
+        {
+            Active("Alice"),
+            Active("Bob"),
+            Active("Carol")
+        };
+
+        RotationHelpers.SetCurrentSinger(singers, singers[1]);
+
+        Assert.True(singers[1].IsCurrent);
+        Assert.True(singers[2].IsNext);
+        Assert.False(singers[0].IsNext);
+    }
+
+    [Fact]
+    public void SetCurrentSinger_PreviousCurrentInactive_FallsBackToSequentialNext()
+    {
+        var singers = new ObservableCollection<SingerEntry>
+        {
+            new() { Name = "Alice", IsCurrent = true, IsInactive = true },
+            Active("Bob"),
+            Active("Carol")
+        };
+
+        RotationHelpers.SetCurrentSinger(singers, singers[1]);
+
+        Assert.True(singers[1].IsCurrent);
+        Assert.False(singers[0].IsNext);
+        Assert.True(singers[2].IsNext);
+    }
+
+    [Fact]
+    public void SetCurrentSinger_ReactivatesInactiveEntry()
+    {
+        var singers = new ObservableCollection<SingerEntry>
+        {
+            new() { Name = "Alice", IsCurrent = true },
+            new() { Name = "Bob", IsInactive = true }
+        };
+
+        RotationHelpers.SetCurrentSinger(singers, singers[1]);
+
+        Assert.True(singers[1].IsCurrent);
+        Assert.False(singers[1].IsInactive);
+    }
+
+    [Fact]
+    public void SetCurrentSinger_ThrowsOnNullArguments()
+    {
+        var singers = new ObservableCollection<SingerEntry> { Active("Alice") };
+
+        Assert.Throws<ArgumentNullException>(() =>
+            RotationHelpers.SetCurrentSinger(null!, singers[0]));
+        Assert.Throws<ArgumentNullException>(() =>
+            RotationHelpers.SetCurrentSinger(singers, null!));
+    }
 }
 
 // ---------------------------------------------------------------------------
