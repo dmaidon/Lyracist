@@ -121,9 +121,9 @@ public partial class ScaryokeViewModel : BaseViewModel
         }
         if (hex.Length == 6)
         {
-            if (int.TryParse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out int r) &&
-                int.TryParse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out int g) &&
-                int.TryParse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out int b))
+            if (int.TryParse(hex.AsSpan(0, 2), System.Globalization.NumberStyles.HexNumber, null, out int r) &&
+                int.TryParse(hex.AsSpan(2, 2), System.Globalization.NumberStyles.HexNumber, null, out int g) &&
+                int.TryParse(hex.AsSpan(4, 2), System.Globalization.NumberStyles.HexNumber, null, out int b))
             {
                 double brightness = (r * 0.299) + (g * 0.587) + (b * 0.114);
                 return brightness > 130 ? "#1E133A" : "#FFFFFF";

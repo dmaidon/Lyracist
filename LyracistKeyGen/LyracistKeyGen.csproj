@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!-- Edited on Jul 17, 2026 @ 10:12:00 -> Include Lyracist_Pro.png as a Resource in build -->
 
   <PropertyGroup>
@@ -14,8 +14,8 @@
     <Company>PAROLE Software</Company>
     <PackageIcon>Lyracist_Pro.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.7.17.21</AssemblyVersion>
-    <FileVersion>26.7.17.21</FileVersion>
+    <AssemblyVersion>26.7.17.22</AssemblyVersion>
+    <FileVersion>26.7.17.22</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
