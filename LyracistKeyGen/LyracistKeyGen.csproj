@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Edited on Jul 17, 2026 @ 10:09:00 -> Update logo reference from Firefly name to Lyracist_Pro.png -->
+  <!-- Edited on Jul 17, 2026 @ 10:12:00 -> Include Lyracist_Pro.png as a Resource in build -->
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -14,8 +14,8 @@
     <Company>PAROLE Software</Company>
     <PackageIcon>Lyracist_Pro.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.7.17.19</AssemblyVersion>
-    <FileVersion>26.7.17.19</FileVersion>
+    <AssemblyVersion>26.7.17.21</AssemblyVersion>
+    <FileVersion>26.7.17.21</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,10 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\..\Users\dmaid\Downloads\Lyracist_Pro.png">
+    <Resource Include="Lyracist_Pro.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
-    </None>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
