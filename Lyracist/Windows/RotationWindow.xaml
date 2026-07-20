@@ -305,7 +305,7 @@
         </Grid>
 
         <!-- Star Wars crawl panel (replaces list when SelectedProjectionView='Star Wars Crawl') -->
-        <Grid Grid.Row="1" x:Name="CrawlPanel" Background="#FF04060B" Visibility="Collapsed">
+        <Grid Grid.Row="2" x:Name="CrawlPanel" Background="#FF04060B" Visibility="Collapsed">
             <Rectangle Fill="#FF04060B" />
             <Canvas x:Name="CrawlStarCanvas" SizeChanged="CrawlStarCanvas_SizeChanged" Panel.ZIndex="2" />
             <Viewport3D x:Name="CrawlViewport" Panel.ZIndex="3">
@@ -334,7 +334,7 @@
         </Grid>
 
         <!-- Vegas / Broadway Marquee panel -->
-        <Grid Grid.Row="1" x:Name="MarqueePanel" Visibility="Collapsed">
+        <Grid Grid.Row="2" x:Name="MarqueePanel" Visibility="Collapsed">
             <!-- Deep theatrical backdrop -->
             <Grid.Background>
                 <RadialGradientBrush GradientOrigin="0.5,0.42" Center="0.5,0.42" RadiusX="0.75" RadiusY="0.75">
@@ -456,7 +456,7 @@
         </Grid>
 
         <!-- Vinyl "Now Spinning" turntable panel -->
-        <Grid Grid.Row="1" x:Name="VinylPanel" Visibility="Collapsed">
+        <Grid Grid.Row="2" x:Name="VinylPanel" Visibility="Collapsed">
             <!-- Warm dark DJ-booth backdrop -->
             <Grid.Background>
                 <RadialGradientBrush GradientOrigin="0.35,0.45" Center="0.35,0.45" RadiusX="0.9" RadiusY="0.9">
