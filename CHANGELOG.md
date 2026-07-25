@@ -7,6 +7,9 @@ All notable changes to the Lyracist project are documented here. The format is b
 ### Fixed
 - **Pending Model Changes EF Exception**: Generated the missing `MakeSongFilePathIndexUnique` migration to resolve the `PendingModelChangesWarning` exception that blocked new database schema migrations on fresh installations.
 
+### Changed
+- **Build Output Cleanup**: Configured the build system to target English resources exclusively (`<SatelliteResourceLanguages>en</SatelliteResourceLanguages>` in `Directory.Build.props`), completely removing foreign language satellite folders (`cs`, `de`, `es`, etc.) from the build output directory.
+
 ## [26.7.10.1] - 2026-07-10
 
 ### Added
