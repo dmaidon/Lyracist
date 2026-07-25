@@ -1,3 +1,4 @@
+// Edited on Jul 19, 2026 @ 09:40:00 -> Add external mixer setup guide to HelpPage
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -107,6 +108,13 @@ public partial class HelpViewModel : BaseViewModel
                 AccentColor = "#FF8E53",
                 DescriptionHeader = "Customizing Wheel Segments & Genres",
                 DescriptionContent = "• Wheel Categories: View and edit the list of segments displayed on the Scaryoke wheel. You can customize the name of each category (e.g., '90s Pop', 'Metallica', 'Dolly Parton').\n\n• Category Bounds: Enforces a maximum of 8 categories (for wheel design formatting) and a minimum of 2 categories (to ensure a valid choice is selectable).\n\n• Performer Portal Synchronization: The Scaryoke wheel is completely synchronized over Wi-Fi with connected tablets and mobile phones. When spun, the canvas-based wheel on the performer's device spins and lands on the exact same category as the DJ's screen.\n\n• Remote Spin Request: Performers can trigger the Scaryoke wheel directly from their mobile portal by clicking 'SPIN WHEEL', launching the wheel animation on the DJ's monitor in real time."
+            },
+            new() {
+                Title = "13. External Mixer Setup (e.g. Pyle PMXU88BT)",
+                Icon = "Settings24",
+                AccentColor = "#DFB900",
+                DescriptionHeader = "Integrating Hardware Audio Mixers",
+                DescriptionContent = "• Hardware Mixing Philosophy: When using a hardware mixer like the Pyle PMXU88BT, the singers' microphones are connected directly to the mixer's physical inputs (XLR Channels 1-4). Sound levels, microphone EQ (High/Mid/Low knobs), and microphone effects (Delay/Repeat) must be adjusted physically on the mixer, not in Lyracist software.\n\n• Hardware Mixer Mode: Toggle 'Enable Hardware Mixer Mode' in settings to flatten Lyracist's software equalizer, limiter, and compressor, and output at 100% volume. This prevents 'double-equalizing' or 'double-compressing' your music, giving you a clean, unprocessed output from your PC to mix physically.\n\n• Separate Karaoke & BGM Buses: Route Karaoke output and BGM (Background Music) to separate channels on your mixer (e.g. Karaoke to USB/Line-In 5/6 and BGM to Bluetooth 7/8). This allows you to crossfade and EQ them independently using physical mixer faders.\n\n• Live Recording: The Pyle's USB connection is primarily for flash drives. To record performances, route the mixer's 'Main Out' or 'Phones Out' back into your PC's Line-In or a USB audio capture adapter, and capture using a local recording device."
             }
         ];
 

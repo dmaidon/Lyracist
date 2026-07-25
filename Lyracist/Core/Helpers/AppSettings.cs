@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Rating system configurations
+// Edited on Jul 19, 2026 @ 09:40:00 -> Add audio routing and hardware mixer settings
 using System.IO;
 using System.Text.Json;
 
@@ -704,6 +704,26 @@ public static class AppSettings
         set { _data.EnableKillVocal = value; Save(); }
     }
 
+    // ─── Audio Output Settings ─────────────────────────────────────────────
+
+    public static string SelectedKaraokeAudioDevice
+    {
+        get => _data.SelectedKaraokeAudioDevice;
+        set { _data.SelectedKaraokeAudioDevice = value; Save(); }
+    }
+
+    public static string SelectedBgmAudioDevice
+    {
+        get => _data.SelectedBgmAudioDevice;
+        set { _data.SelectedBgmAudioDevice = value; Save(); }
+    }
+
+    public static bool IsHardwareMixerMode
+    {
+        get => _data.IsHardwareMixerMode;
+        set { _data.IsHardwareMixerMode = value; Save(); }
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
@@ -801,5 +821,8 @@ public static class AppSettings
         public Dictionary<string, List<string>> VenueGraphics { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public bool EnableAutoAdvance { get; set; } = true;
         public int AutoAdvanceCountdownSeconds { get; set; } = 10;
+        public string SelectedKaraokeAudioDevice { get; set; } = string.Empty;
+        public string SelectedBgmAudioDevice { get; set; } = string.Empty;
+        public bool IsHardwareMixerMode { get; set; } = false;
     }
 }

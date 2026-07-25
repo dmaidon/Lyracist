@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Support pitch modification filters
+// Edited on Jul 19, 2026 @ 09:40:00 -> Implement AudioDeviceId routing and Hardware Mixer Mode EQ bypass
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -47,6 +47,24 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
 
     public event EventHandler<VideoFrame>? FrameReady;
 
+    private string? _audioDeviceId;
+    public string? AudioDeviceId
+    {
+        get => _audioDeviceId;
+        set
+        {
+            _audioDeviceId = value;
+            if (_mediaPlayer != null)
+            {
+                if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
+                {
+                    _mediaPlayer.SetAudioOutput("mmdevice");
+                    _mediaPlayer.SetOutputDevice(_audioDeviceId);
+                }
+            }
+        }
+    }
+
     public TimeSpan Position => _mediaPlayer != null ? TimeSpan.FromMilliseconds(_mediaPlayer.Time) : TimeSpan.Zero;
     public bool IsPlaying => _mediaPlayer != null && _mediaPlayer.IsPlaying;
 
@@ -80,7 +98,15 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
     {
         if (_equalizer == null) return;
 
-        if (_enableKillVocal)
+        if (Lyracist.Core.Helpers.AppSettings.IsHardwareMixerMode)
+        {
+            _equalizer.SetPreamp(0.0f);
+            for (uint i = 0; i < 10; i++)
+            {
+                _equalizer.SetAmp(0.0f, i);
+            }
+        }
+        else if (_enableKillVocal)
         {
             // Cut vocal bands completely (-20dB represents complete suppression in LibVLC)
             foreach (uint band in MidBands) _equalizer.SetAmp(-20.0f, band);
@@ -185,6 +211,13 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
                 media.AddOption($":pitch-shift={_pitchShift}");
             }
             _mediaPlayer.Media = media;
+
+            // Apply selected audio device
+            if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
+            {
+                _mediaPlayer.SetAudioOutput("mmdevice");
+                _mediaPlayer.SetOutputDevice(_audioDeviceId);
+            }
 
             // Re-apply rate, volume, and equalizer settings
             _mediaPlayer.Volume = (int)_volume;

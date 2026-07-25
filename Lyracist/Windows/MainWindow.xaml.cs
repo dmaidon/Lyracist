@@ -1,3 +1,4 @@
+// Edited on Jul 19, 2026 @ 09:50:00 -> Add drive connection status indicator
 using System;
 using System.Windows;
 using System.Windows.Media;
@@ -11,8 +12,11 @@ using Lyracist.Views.Pages;
 
 namespace Lyracist.Windows;
 
-public partial class MainWindow : FluentWindow
+public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPropertyChanged
 {
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(name));
+
     private readonly INavigationService _navigationService;
     private readonly IDisplayService _displayService;
 
@@ -29,6 +33,37 @@ public partial class MainWindow : FluentWindow
     public IRelayCommand ShowLyricsCommand { get; }
     public IRelayCommand<int> MoveRotationToScreenCommand { get; }
     public IRelayCommand<int> MoveLyricsToScreenCommand { get; }
+
+    // Drive Status Monitoring
+    private System.Windows.Threading.DispatcherTimer? _driveCheckTimer;
+    private string _driveStatusText = "Checking Drives...";
+    private System.Windows.Media.Brush _driveStatusBrush = System.Windows.Media.Brushes.Gray;
+
+    public string DriveStatusText
+    {
+        get => _driveStatusText;
+        set
+        {
+            if (_driveStatusText != value)
+            {
+                _driveStatusText = value;
+                OnPropertyChanged(nameof(DriveStatusText));
+            }
+        }
+    }
+
+    public System.Windows.Media.Brush DriveStatusBrush
+    {
+        get => _driveStatusBrush;
+        set
+        {
+            if (_driveStatusBrush != value)
+            {
+                _driveStatusBrush = value;
+                OnPropertyChanged(nameof(DriveStatusBrush));
+            }
+        }
+    }
 
     public MainWindow(
         INavigationService navigationService,
@@ -67,6 +102,9 @@ public partial class MainWindow : FluentWindow
 
         Loaded += OnMainWindowLoaded;
         PreviewKeyDown += OnMainWindowPreviewKeyDown;
+
+        Closed += (s, ev) => _driveCheckTimer?.Stop();
+        StartDriveStatusMonitor();
     }
 
     private void OnMainWindowPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -196,5 +234,66 @@ public partial class MainWindow : FluentWindow
             }
         }
         return null;
+    }
+
+    private void StartDriveStatusMonitor()
+    {
+        _driveCheckTimer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(5)
+        };
+        _driveCheckTimer.Tick += (s, e) => CheckDrivesAsync();
+        _driveCheckTimer.Start();
+
+        // Run initial check
+        CheckDrivesAsync();
+    }
+
+    private void CheckDrivesAsync()
+    {
+        var dirs = Core.Helpers.AppSettings.LibraryDirectories;
+        if (dirs.Count == 0)
+        {
+            DriveStatusText = "No Library Folders";
+            DriveStatusBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(223, 185, 0)); // Yellow/Gold
+            return;
+        }
+
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            int existCount = 0;
+            int totalCount = dirs.Count;
+
+            foreach (var dir in dirs)
+            {
+                try
+                {
+                    if (System.IO.Directory.Exists(dir))
+                    {
+                        existCount++;
+                    }
+                }
+                catch { }
+            }
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (existCount == totalCount)
+                {
+                    DriveStatusText = "Drives Online";
+                    DriveStatusBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(56, 239, 125)); // Green
+                }
+                else if (existCount > 0)
+                {
+                    DriveStatusText = $"{existCount}/{totalCount} Drives Online";
+                    DriveStatusBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(223, 185, 0)); // Yellow/Gold
+                }
+                else
+                {
+                    DriveStatusText = "Drives Offline";
+                    DriveStatusBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 77, 77)); // Red
+                }
+            }));
+        });
     }
 }

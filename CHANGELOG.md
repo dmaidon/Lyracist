@@ -2,6 +2,11 @@
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [26.7.25.0] - 2026-07-25
+
+### Fixed
+- **Pending Model Changes EF Exception**: Generated the missing `MakeSongFilePathIndexUnique` migration to resolve the `PendingModelChangesWarning` exception that blocked new database schema migrations on fresh installations.
+
 ## [26.7.10.1] - 2026-07-10
 
 ### Added

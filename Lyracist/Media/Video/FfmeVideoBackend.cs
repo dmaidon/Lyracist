@@ -1,3 +1,4 @@
+// Edited on Jul 19, 2026 @ 09:40:00 -> Add AudioDeviceId stub and Hardware Mixer Mode EQ bypass
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
     private int _pitchShift = 0;
 
     public event EventHandler<VideoFrame>? FrameReady;
+    public string? AudioDeviceId { get; set; }
 
     public TimeSpan Position => _mediaElement != null ? _mediaElement.Position : TimeSpan.Zero;
     public bool IsPlaying => _mediaElement != null && _mediaElement.IsPlaying;
@@ -77,16 +79,26 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
             {
                 try
                 {
-                    string filters = Lyracist.Data.Services.FFmpegService.BuildAudioFilterString(
-                        Treble,
-                        Mid,
-                        Bass,
-                        0.0,
-                        Pitch,
-                        1.0,
-                        Compressor / 100.0,
-                        Limiter
-                    );
+                    string filters;
+                    if (Lyracist.Core.Helpers.AppSettings.IsHardwareMixerMode)
+                    {
+                        filters = Lyracist.Data.Services.FFmpegService.BuildAudioFilterString(
+                            0.0, 0.0, 0.0, 0.0, Pitch, 1.0, 0.0, 0.0
+                        );
+                    }
+                    else
+                    {
+                        filters = Lyracist.Data.Services.FFmpegService.BuildAudioFilterString(
+                            Treble,
+                            Mid,
+                            Bass,
+                            0.0,
+                            Pitch,
+                            1.0,
+                            Compressor / 100.0,
+                            Limiter
+                        );
+                    }
 
                     if (!string.IsNullOrEmpty(filters))
                     {

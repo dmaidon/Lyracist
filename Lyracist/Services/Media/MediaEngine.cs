@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Use background frame scheduler
+// Edited on Jul 19, 2026 @ 09:40:00 -> Apply AudioDeviceId routing and bypass EQ/volume when Hardware Mixer Mode is active
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -502,14 +502,30 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         }
 
         // Apply merged results to the unmanaged player backend
-        _video.Volume = mergedVolume;
-        _video.Speed = mergedSpeed;
-        _video.Pitch = mergedPitch;
-        _video.Treble = mergedTreble;
-        _video.Mid = mergedMid;
-        _video.Bass = mergedBass;
-        _video.Compressor = mergedCompressor;
-        _video.Limiter = mergedLimiter;
-        _video.EnableKillVocal = AppSettings.EnableKillVocal;
+        _video.AudioDeviceId = AppSettings.SelectedKaraokeAudioDevice;
+        if (AppSettings.IsHardwareMixerMode)
+        {
+            _video.Volume = 100.0;
+            _video.Speed = mergedSpeed;
+            _video.Pitch = mergedPitch;
+            _video.Treble = 0.0;
+            _video.Mid = 0.0;
+            _video.Bass = 0.0;
+            _video.Compressor = 0.0;
+            _video.Limiter = 0.0;
+            _video.EnableKillVocal = false;
+        }
+        else
+        {
+            _video.Volume = mergedVolume;
+            _video.Speed = mergedSpeed;
+            _video.Pitch = mergedPitch;
+            _video.Treble = mergedTreble;
+            _video.Mid = mergedMid;
+            _video.Bass = mergedBass;
+            _video.Compressor = mergedCompressor;
+            _video.Limiter = mergedLimiter;
+            _video.EnableKillVocal = AppSettings.EnableKillVocal;
+        }
     }
 }

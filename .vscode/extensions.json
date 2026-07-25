@@ -1,0 +1,18 @@
+// Created on Jul 19, 2026 @ 10:28:00 -> Add VS Code workspace extension recommendations
+{
+  "recommendations": [
+    "nromanov.dotrush",                     // C# Language Server (Roslyn)
+    "microsoft.vb",                         // Visual Basic Language Support (OpenVSX mirror)
+    "redhat.vscode-xml",                    // XML Tools
+    "redhat.vscode-yaml",                   // YAML Tools
+    "dotnettools.vscode-dotnet-runtime",    // .NET Install Tool
+    "gitlens.gitlens",                      // GitLens
+    "maui-community.maui-toolkit",          // MAUI Extension Pack (OpenVSX)
+    "ms-vscode.xaml",                       // XAML Language Support (OpenVSX mirror)
+    "editorconfig.editorconfig",            // EditorConfig Support
+    "christian-kohler.path-intellisense",   // Path IntelliSense
+    "coenraads.bracket-pair-colorizer-2",   // Bracket Pair Colorizer
+    "pkief.material-icon-theme",            // Material Icon Theme
+    "nuget.nuget-package-manager"           // NuGet Package Manager GUI
+  ]
+}

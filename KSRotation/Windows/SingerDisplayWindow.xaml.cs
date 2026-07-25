@@ -1,6 +1,7 @@
-// Last Edit: Jul 01, 2026 16:55 - Resolved culture-specific string warning in BuildCrawlTextPanel.
+// Edited on Jul 20, 2026 @ 06:50:00 -> Bind off-tree visual source to XAML CrawlSourceCanvas in clipped Grid to fix Star Wars crawl text rendering
 using KSRotation.Models;
 using KSRotation.ViewModels;
+using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
@@ -66,16 +67,9 @@ namespace KSRotation.Windows
         private const int MarqueeLitPeriod = 3;   // every Nth bulb is lit at any moment
         private const double MarqueeDimOpacity = 0.18;
 
-        // Off-tree source for the crawl VisualBrush. Lives outside the visual tree so it
-        // never renders a stray copy in CrawlPanel; we Measure/Arrange it manually.
-        private readonly Canvas _crawlSource = new()
-        {
-            Width = PanelWidth,
-            Height = ViewH,
-            // Transparent so the 3D crawl quad shows only text over the starfield backdrop,
-            // not a tinted surface (the emissive material would otherwise brighten a solid fill).
-            Background = System.Windows.Media.Brushes.Transparent
-        };
+        // VisualBrush source canvas declared in XAML (CrawlSourceCanvas) wrapped in a 0x0 clipped Grid
+        // to keep layout and render passes active during animations while remaining invisible on screen.
+        private Canvas _crawlSource => CrawlSourceCanvas;
 
         public SingerDisplayWindow()
         {
@@ -619,7 +613,6 @@ namespace KSRotation.Windows
                     Viewbox = new Rect(0, 0, PanelWidth, ViewH),
                     Stretch = Stretch.Fill
                 };
-                RenderOptions.SetCachingHint(_crawlBrush, CachingHint.Cache);
                 CrawlMaterial.Brush = _crawlBrush;
                 CrawlBackMaterial.Brush = _crawlBrush;
             }

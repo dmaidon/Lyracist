@@ -1,3 +1,4 @@
+// Edited on Jul 19, 2026 @ 09:40:00 -> Implement SetBgmAudioDevice and route to background players
 using System;
 using System.Linq;
 using System.Threading;
@@ -96,6 +97,8 @@ public class ShowFlowService : IShowFlowService
             _fillIn.Resume();
             _fillIn.Unduck();
         };
+
+        SetBgmAudioDevice(Lyracist.Core.Helpers.AppSettings.SelectedBgmAudioDevice);
     }
 
     public void RefreshPlaylists()
@@ -177,6 +180,14 @@ public class ShowFlowService : IShowFlowService
         _occasion.Stop();
         _display.SetRotationAnnouncement(string.Empty, false);
         _fillIn.Resume();
+    }
+
+    public void SetBgmAudioDevice(string deviceId)
+    {
+        _opening.AudioDeviceId = deviceId;
+        _fillIn.AudioDeviceId = deviceId;
+        _endRotation.AudioDeviceId = deviceId;
+        _occasion.AudioDeviceId = deviceId;
     }
 
     public void SetOpeningVolume(double volume) => _opening.Volume = volume;

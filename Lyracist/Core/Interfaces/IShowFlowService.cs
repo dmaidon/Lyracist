@@ -1,7 +1,9 @@
+// Edited on Jul 19, 2026 @ 09:40:00 -> Add SetBgmAudioDevice method
 namespace Lyracist.Core.Interfaces;
 
 public interface IShowFlowService
 {
+    void SetBgmAudioDevice(string deviceId);
     bool IsOpeningPlaying { get; }
     bool IsFillInPlaying { get; }
     bool IsFillInDucked { get; }

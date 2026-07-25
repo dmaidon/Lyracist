@@ -1,4 +1,4 @@
-<!-- Last Edit: Jul 02, 2026 16:54 - Bound display header text to switch between First Performer and Now Performing based on current-singer designation. -->
+<!-- Edited on Jul 20, 2026 @ 06:48:00 -> Add hidden wrapper and Canvas for Star Wars crawl VisualBrush rendering -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -88,9 +88,13 @@
         <!-- Row 1b: Star Wars crawl panel (replaces list when ShowCrawl=true) -->
         <!-- Sky uses a fixed near-black space color (not a theme brush) so the white stars stand out. -->
         <Grid Grid.Row="1" x:Name="CrawlPanel" Background="#FF04060B" Visibility="Collapsed">
-            <!-- The crawl text canvas is NOT in this tree: it is built in code-behind
-                 (_crawlSource) and hosted only as the VisualBrush.Visual on the 3D quad.
-                 Keeping it off-tree avoids a stray rendered copy appearing in this panel. -->
+            <!-- Hidden wrapper container to keep the visual brush source canvas rendering active without displaying it on the screen -->
+            <Grid Width="0" Height="0" HorizontalAlignment="Left" VerticalAlignment="Top" ClipToBounds="True">
+                <Canvas x:Name="CrawlSourceCanvas" Width="800" Height="1200" Background="Transparent" />
+            </Grid>
+
+            <!-- The crawl text canvas is built in XAML and hosted as the VisualBrush.Visual on the 3D quad.
+                 Wrapping it in a 0x0 clipped grid keeps layout and render passes active. -->
 
             <!-- Solid near-black backdrop behind the stars and 3D crawl. -->
             <Rectangle Fill="#FF04060B" />

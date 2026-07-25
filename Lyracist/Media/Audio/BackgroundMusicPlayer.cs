@@ -1,3 +1,4 @@
+// Edited on Jul 19, 2026 @ 09:40:00 -> Add AudioDeviceId routing and Hardware Mixer Mode EQ bypass
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -44,6 +45,28 @@ public class BackgroundMusicPlayer : IDisposable
 
     public bool IsPlaying { get; private set; }
     public bool IsDucked => _duckMultiplier < 1.0;
+
+    private string? _audioDeviceId;
+    public string? AudioDeviceId
+    {
+        get => _audioDeviceId;
+        set
+        {
+            _audioDeviceId = value;
+            ApplyAudioDevice();
+        }
+    }
+
+    private void ApplyAudioDevice()
+    {
+        if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
+        {
+            _playerA.SetAudioOutput("mmdevice");
+            _playerA.SetOutputDevice(_audioDeviceId);
+            _playerB.SetAudioOutput("mmdevice");
+            _playerB.SetOutputDevice(_audioDeviceId);
+        }
+    }
 
     /// <summary>
     /// When true (default) the playlist wraps around forever. When false,
@@ -238,6 +261,11 @@ public class BackgroundMusicPlayer : IDisposable
     {
         var media = new LibVLCSharp.Shared.Media(_libVLC, new Uri(path));
         player.Media = media;
+        if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
+        {
+            player.SetAudioOutput("mmdevice");
+            player.SetOutputDevice(_audioDeviceId);
+        }
         player.Play();
         // Re-applied per track: LibVLC associates the equalizer with the
         // player's current media, so a fresh load can drop the last setting.
@@ -246,9 +274,20 @@ public class BackgroundMusicPlayer : IDisposable
 
     private void ApplyEqualizer()
     {
-        _equalizer.SetPreamp((float)_preampDb);
-        foreach (uint band in BassBands) _equalizer.SetAmp((float)_bassDb, band);
-        foreach (uint band in TrebleBands) _equalizer.SetAmp((float)_trebleDb, band);
+        if (Lyracist.Core.Helpers.AppSettings.IsHardwareMixerMode)
+        {
+            _equalizer.SetPreamp(0.0f);
+            for (uint i = 0; i < 10; i++)
+            {
+                _equalizer.SetAmp(0.0f, i);
+            }
+        }
+        else
+        {
+            _equalizer.SetPreamp((float)_preampDb);
+            foreach (uint band in BassBands) _equalizer.SetAmp((float)_bassDb, band);
+            foreach (uint band in TrebleBands) _equalizer.SetAmp((float)_trebleDb, band);
+        }
 
         _playerA.SetEqualizer(_equalizer);
         _playerB.SetEqualizer(_equalizer);

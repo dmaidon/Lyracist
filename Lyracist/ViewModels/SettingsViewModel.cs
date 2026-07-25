@@ -1,3 +1,4 @@
+// Edited on Jul 19, 2026 @ 09:40:00 -> Add dynamic audio device enumeration, BGM device selection, and Hardware Mixer Mode
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -40,10 +41,7 @@ public partial class SettingsViewModel : BaseViewModel
 
     // Audio
     [ObservableProperty]
-    private List<string> _audioDevices = [];
-
-    [ObservableProperty]
-    private string _selectedAudioDevice = string.Empty;
+    private List<AudioDeviceItem> _audioDevices = [];
 
     [ObservableProperty]
     private int _volume = 80;
@@ -299,12 +297,54 @@ public partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     private int _selectedBufferSize = AppSettings.SelectedBufferSize;
 
-    public List<string> AsioDevices => AudioDevices;
-
-    public string SelectedAsioDevice
+    public string SelectedKaraokeAudioDevice
     {
-        get => SelectedAudioDevice;
-        set => SelectedAudioDevice = value;
+        get => AppSettings.SelectedKaraokeAudioDevice;
+        set
+        {
+            if (AppSettings.SelectedKaraokeAudioDevice != value)
+            {
+                AppSettings.SelectedKaraokeAudioDevice = value;
+                OnPropertyChanged(nameof(SelectedKaraokeAudioDevice));
+
+                var mediaEngine = App.AppHost.Services.GetService(typeof(IMediaEngine)) as IMediaEngine;
+                mediaEngine?.UpdateAudioParameters();
+            }
+        }
+    }
+
+    public string SelectedBgmAudioDevice
+    {
+        get => AppSettings.SelectedBgmAudioDevice;
+        set
+        {
+            if (AppSettings.SelectedBgmAudioDevice != value)
+            {
+                AppSettings.SelectedBgmAudioDevice = value;
+                OnPropertyChanged(nameof(SelectedBgmAudioDevice));
+                _showFlow.SetBgmAudioDevice(value);
+            }
+        }
+    }
+
+    public bool IsHardwareMixerMode
+    {
+        get => AppSettings.IsHardwareMixerMode;
+        set
+        {
+            if (AppSettings.IsHardwareMixerMode != value)
+            {
+                AppSettings.IsHardwareMixerMode = value;
+                OnPropertyChanged(nameof(IsHardwareMixerMode));
+
+                var mediaEngine = App.AppHost.Services.GetService(typeof(IMediaEngine)) as IMediaEngine;
+                mediaEngine?.UpdateAudioParameters();
+
+                _showFlow.SetFillInTone(FillInBass, FillInTreble, 0);
+                _showFlow.SetOpeningTone(OpeningBass, OpeningTreble, 0);
+                _showFlow.SetEndRotationTone(EndRotationBass, EndRotationTreble, 0);
+            }
+        }
     }
 
     partial void OnEnableHardwareAccelerationChanged(bool value) => AppSettings.EnableHardwareAcceleration = value;
@@ -317,11 +357,6 @@ public partial class SettingsViewModel : BaseViewModel
         AppSettings.CdgBackdropMode = value;
         var lyricsVm = App.AppHost.Services.GetService(typeof(LyricsWindowViewModel)) as LyricsWindowViewModel;
         lyricsVm?.NotifyBackdropChanged();
-    }
-
-    partial void OnSelectedAudioDeviceChanged(string value)
-    {
-        OnPropertyChanged(nameof(SelectedAsioDevice));
     }
 
 
@@ -515,15 +550,50 @@ public partial class SettingsViewModel : BaseViewModel
         _isLyricsMirrored = prefs.IsLyricsMirrored;
         _selectedProjectionView = prefs.RotationViewMode ?? "Normal List";
 
-        // Seed available devices
-        AudioDevices =
-        [
-            "Default System Device",
-            "Speakers (Realtek High Definition Audio)",
-            "Headphones (USB Audio Device)",
-            "Digital Output (HDMI)"
-        ];
-        SelectedAudioDevice = AudioDevices[0];
+        // Dynamic audio device list using LibVLC
+        var devList = new List<AudioDeviceItem>
+        {
+            new() { DeviceIdentifier = "Default System Device", Description = "Default System Device" }
+        };
+
+        try
+        {
+            using var tempLib = new LibVLCSharp.Shared.LibVLC();
+            using var tempPlayer = new LibVLCSharp.Shared.MediaPlayer(tempLib);
+            var vlcDevices = tempPlayer.AudioOutputDeviceEnum;
+            if (vlcDevices != null)
+            {
+                foreach (var d in vlcDevices)
+                {
+                    if (!string.IsNullOrEmpty(d.DeviceIdentifier))
+                    {
+                        devList.Add(new AudioDeviceItem
+                        {
+                            DeviceIdentifier = d.DeviceIdentifier,
+                            Description = d.Description ?? d.DeviceIdentifier
+                        });
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error enumerating LibVLC audio devices: {ex.Message}");
+            devList.Add(new() { DeviceIdentifier = "Speakers", Description = "Speakers (Realtek High Definition Audio)" });
+            devList.Add(new() { DeviceIdentifier = "Headphones", Description = "Headphones (USB Audio Device)" });
+            devList.Add(new() { DeviceIdentifier = "HDMI", Description = "Digital Output (HDMI)" });
+        }
+
+        AudioDevices = devList;
+
+        if (string.IsNullOrEmpty(Lyracist.Core.Helpers.AppSettings.SelectedKaraokeAudioDevice))
+        {
+            Lyracist.Core.Helpers.AppSettings.SelectedKaraokeAudioDevice = "Default System Device";
+        }
+        if (string.IsNullOrEmpty(Lyracist.Core.Helpers.AppSettings.SelectedBgmAudioDevice))
+        {
+            Lyracist.Core.Helpers.AppSettings.SelectedBgmAudioDevice = "Default System Device";
+        }
 
         // Seed list values
         CdgScalingModes = ["Nearest", "Linear"];
@@ -1448,4 +1518,12 @@ public partial class SettingsViewModel : BaseViewModel
             SimulationLogText += $"{DateTime.Now:HH:mm:ss} {message}\n";
         }));
     }
+}
+
+public class AudioDeviceItem
+{
+    public string DeviceIdentifier { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+
+    public override string ToString() => Description;
 }

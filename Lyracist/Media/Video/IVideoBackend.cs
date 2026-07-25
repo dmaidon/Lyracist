@@ -1,3 +1,4 @@
+// Edited on Jul 19, 2026 @ 09:40:00 -> Add AudioDeviceId property
 using System;
 using System.Threading.Tasks;
 
@@ -26,4 +27,5 @@ public interface IVideoBackend
     double Compressor { get; set; }
     double Limiter { get; set; }
     bool EnableKillVocal { get; set; }
+    string? AudioDeviceId { get; set; }
 }
