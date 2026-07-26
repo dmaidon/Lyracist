@@ -11,6 +11,10 @@ public partial class MainPage : ContentPage
         InitializeComponent();
         BindingContext = vm;
 
+        // The patron request server runs on this device for the whole session — keep the screen
+        // awake so Android doesn't dim/lock and throttle it mid-show.
+        Microsoft.Maui.Devices.DeviceDisplay.Current.KeepScreenOn = true;
+
         if (Application.Current != null)
         {
             ThemeBtn.Text = Application.Current.UserAppTheme == AppTheme.Light ? "🌙 Dark Mode" : "☀️ Light Mode";
