@@ -1,0 +1,19 @@
+Lyracist Pro & KSRotation - Performer Portal Update (July 2026)
+
+Section: Singer Request Board / Patron Request Portal
+
+[Update Details]
+A new online search capability has been added directly to the patron request portal.
+
+1. Online Song & Artist Lookup:
+   - When users access the Patron Request Portal via QR Code, they will see a new field labeled "Search Songs & Artists (Online)".
+   - Type query keywords (such as the song name or artist) to query the iTunes search index in real-time.
+   - Tap any suggestion from the search results list to automatically populate the "Song Title" and "Artist Name" fields in the form.
+
+2. Connection Dependency:
+   - This feature runs on the patron's mobile browser, using the patron's own internet connection (via mobile data or internet-enabled Wi-Fi).
+   - The host system (main KJ laptop/tablet) does NOT require internet or external drives connected for this search to function.
+
+3. Graceful Offline Fallback:
+   - If the patron's phone has no internet connection (e.g. no cellular signal or local-only hotspot), the search bar will gracefully show a "Search unavailable (offline)" message.
+   - The manual entry form remains fully functional under all network conditions.

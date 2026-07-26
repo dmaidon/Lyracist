@@ -1,4 +1,4 @@
-<!-- Edited on Jul 16, 2026 @ 11:00:00 -> Web performer portal pages -->
+<!-- Edited on Jul 26, 2026 @ 08:30:00 -> Add client-side iTunes song search with graceful offline fallback -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -312,6 +312,50 @@
             padding: 20px 0;
             font-style: italic;
         }
+        .search-results {
+            background-color: var(--card-bg);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            margin-top: 4px;
+            max-height: 220px;
+            overflow-y: auto;
+            display: none;
+            position: absolute;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .search-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #0F172A;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+        .search-item:last-child {
+            border-bottom: none;
+        }
+        .search-item:hover {
+            background-color: rgba(139, 92, 246, 0.15);
+        }
+        .search-item-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+        .search-item-artist {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            display: block;
+            margin-top: 2px;
+        }
+        .search-status {
+            padding: 12px 16px;
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.9rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -333,6 +377,11 @@
                 <div class="form-group">
                     <label for="name">Your Name</label>
                     <input type="text" id="name" required placeholder="e.g. Charlie">
+                </div>
+                <div class="form-group" style="position: relative;">
+                    <label for="online-search">Search Songs &amp; Artists (Online)</label>
+                    <input type="text" id="online-search" placeholder="Search by title, artist, or both..." oninput="handleSearchInput(event)">
+                    <div id="search-results-dropdown" class="search-results"></div>
                 </div>
                 <div id="songs-container">
                     <div class="song-entry" id="song-entry-1">
@@ -667,6 +716,100 @@
                 }, 2000);
             }
         }
+
+        // --- Online Song Search (iTunes API) with graceful fallback ---
+        let searchTimeout = null;
+
+        function handleSearchInput(event) {
+            const query = event.target.value.trim();
+            const dropdown = document.getElementById('search-results-dropdown');
+
+            if (searchTimeout) clearTimeout(searchTimeout);
+
+            if (!query) {
+                dropdown.style.display = 'none';
+                dropdown.innerHTML = '';
+                return;
+            }
+
+            // Debounce to avoid querying API on every keystroke
+            searchTimeout = setTimeout(() => {
+                performOnlineSearch(query);
+            }, 300);
+        }
+
+        async function performOnlineSearch(query) {
+            const dropdown = document.getElementById('search-results-dropdown');
+            dropdown.innerHTML = '<div class="search-status">Searching online catalog...</div>';
+            dropdown.style.display = 'block';
+
+            try {
+                // Set a timeout of 4 seconds for the fetch request so it falls back quickly if offline
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+                const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=10`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error('Search request failed');
+                }
+
+                const data = await response.json();
+                displaySearchResults(data.results);
+            } catch (err) {
+                console.error("Online search failed or timed out:", err);
+                dropdown.innerHTML = '<div class="search-status">Search unavailable (offline). Enter details below.</div>';
+                // Automatically hide status after 3 seconds
+                setTimeout(() => {
+                    if (dropdown.querySelector('.search-status') && dropdown.innerHTML.includes('offline')) {
+                        dropdown.style.display = 'none';
+                    }
+                }, 3000);
+            }
+        }
+
+        function displaySearchResults(results) {
+            const dropdown = document.getElementById('search-results-dropdown');
+            if (!results || results.length === 0) {
+                dropdown.innerHTML = '<div class="search-status">No results found.</div>';
+                return;
+            }
+
+            dropdown.innerHTML = '';
+            results.forEach(item => {
+                const title = item.trackName || 'Unknown Title';
+                const artist = item.artistName || 'Unknown Artist';
+
+                const div = document.createElement('div');
+                div.className = 'search-item';
+                div.onclick = () => selectSearchResult(title, artist);
+                div.innerHTML = `
+                    <span class="search-item-title">${escapeHtml(title)}</span>
+                    <span class="search-item-artist">by ${escapeHtml(artist)}</span>
+                `;
+                dropdown.appendChild(div);
+            });
+        }
+
+        function selectSearchResult(title, artist) {
+            const dropdown = document.getElementById('search-results-dropdown');
+            dropdown.style.display = 'none';
+            document.getElementById('online-search').value = '';
+
+            fillPastSong(title, artist);
+        }
+
+        // Close search dropdown when clicking outside
+        document.addEventListener('click', (event) => {
+            const searchBox = document.getElementById('online-search');
+            const dropdown = document.getElementById('search-results-dropdown');
+            if (searchBox && dropdown && !searchBox.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
 
         // Initialize from local storage
         document.addEventListener("DOMContentLoaded", () => {
