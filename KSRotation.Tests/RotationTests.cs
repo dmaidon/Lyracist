@@ -520,5 +520,65 @@ public class MainViewModelTests
         Assert.Equal("Song 2", singer.QueuedSongs[0].Song);
         Assert.Equal("Song 3", singer.QueuedSongs[1].Song);
     }
+
+    // ExecuteDjActionOnUi is private (invoked normally via HandleDjAction, which requires a live
+    // System.Windows.Application.Current for its Dispatcher marshaling and so isn't testable
+    // headlessly). It has no such dependency itself, so call it directly via reflection.
+    private static string InvokeDjAction(KSRotation.ViewModels.MainViewModel vm, string action, string targetId)
+    {
+        var method = typeof(KSRotation.ViewModels.MainViewModel).GetMethod(
+            "ExecuteDjActionOnUi",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        return (string)method.Invoke(vm, [action, targetId, "", "", "", ""])!;
+    }
+
+    [Fact]
+    public void DjDeleteAction_DeletingCurrentSinger_PromotesFlaggedNextSinger()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var current = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var next = new SingerEntry { Name = "Bob", IsNext = true };
+        var after = new SingerEntry { Name = "Carol" };
+        vm.Singers.Add(current);
+        vm.Singers.Add(next);
+        vm.Singers.Add(after);
+
+        // Act - delete the current singer via the DJ web console's delete action
+        string result = InvokeDjAction(vm, "delete", current.Id.ToString());
+
+        // Assert
+        Assert.Equal("", result);
+        Assert.Equal(2, vm.Singers.Count);
+        Assert.True(next.IsCurrent);
+        Assert.False(next.IsNext);
+        Assert.True(after.IsNext);
+    }
+
+    [Fact]
+    public void DjDeleteAction_DeletingCurrentSingerWithNoNextFlag_FallsBackToIndexOrder()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var current = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var after = new SingerEntry { Name = "Bob" };
+        var last = new SingerEntry { Name = "Carol" };
+        vm.Singers.Add(current);
+        vm.Singers.Add(after);
+        vm.Singers.Add(last);
+
+        // Act - no one is flagged IsNext, so deletion should fall back to standard rotation order
+        string result = InvokeDjAction(vm, "delete", current.Id.ToString());
+
+        // Assert
+        Assert.Equal("", result);
+        Assert.Equal(2, vm.Singers.Count);
+        Assert.True(after.IsCurrent);
+        Assert.True(last.IsNext);
+    }
 }
 

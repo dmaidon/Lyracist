@@ -1,5 +1,6 @@
 // Edited on Jul 16, 2026 @ 11:00:00 -> Integrations for mobile rotation
 using System;
+using System.Linq;
 using Microsoft.Maui.Controls;
 
 namespace KSRotation.Maui;
@@ -58,7 +59,43 @@ public partial class MainPage : ContentPage
         if (sender is Button button && button.CommandParameter is KSRotation.Models.SingerEntry entry)
         {
             var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
+
+            bool wasCurrent = entry.IsCurrent;
+            KSRotation.Models.SingerEntry? nextCurrent = null;
+
+            if (wasCurrent)
+            {
+                // 1. Try the singer already flagged as Next (manual next-singer override)
+                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive);
+
+                if (nextCurrent == null)
+                {
+                    // 2. Fall back to standard index-based rotation
+                    int currentIndex = vm.Singers.IndexOf(entry);
+                    int count = vm.Singers.Count;
+                    for (int i = 1; i < count; i++)
+                    {
+                        var candidate = vm.Singers[(currentIndex + i) % count];
+                        if (candidate != entry && !candidate.IsInactive)
+                        {
+                            nextCurrent = candidate;
+                            break;
+                        }
+                    }
+                }
+            }
+
             vm.Singers.Remove(entry);
+
+            if (wasCurrent)
+            {
+                if (nextCurrent != null)
+                {
+                    nextCurrent.IsCurrent = true;
+                    nextCurrent.IsNext = false;
+                }
+                Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
+            }
         }
     }
 

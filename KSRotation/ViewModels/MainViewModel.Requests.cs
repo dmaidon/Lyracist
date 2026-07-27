@@ -494,14 +494,44 @@ namespace KSRotation.ViewModels
                     {
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
                         if (singer == null) return "Singer not found.";
-                        
-                        var isCurrent = singer.IsCurrent;
-                        Singers.Remove(singer);
-                        if (isCurrent)
+
+                        bool wasCurrent = singer.IsCurrent;
+                        SingerEntry? nextCurrent = null;
+
+                        if (wasCurrent)
                         {
+                            // 1. Try the singer already flagged as Next (manual next-singer override)
+                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive);
+
+                            if (nextCurrent == null)
+                            {
+                                // 2. Fall back to standard index-based rotation
+                                int currentIndex = Singers.IndexOf(singer);
+                                int count = Singers.Count;
+                                for (int i = 1; i < count; i++)
+                                {
+                                    SingerEntry candidate = Singers[(currentIndex + i) % count];
+                                    if (candidate != singer && !candidate.IsInactive)
+                                    {
+                                        nextCurrent = candidate;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        Singers.Remove(singer);
+
+                        if (wasCurrent)
+                        {
+                            if (nextCurrent != null)
+                            {
+                                nextCurrent.IsCurrent = true;
+                                nextCurrent.IsNext = false;
+                            }
                             RotationHelpers.UpdateNextSingerHighlight(Singers);
                         }
-                        
+
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();
                         return "";
