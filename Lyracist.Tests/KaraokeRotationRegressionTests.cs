@@ -161,4 +161,58 @@ public class KaraokeRotationRegressionTests
         Assert.False(alice.IsCurrent);
         Assert.False(alice.IsNext);
     }
+
+    [Fact]
+    public async Task RemoveSinger_DeletingCurrentSingerWithNoDesignatedNext_PromotesRotationOrder()
+    {
+        // Isolates RotationViewModel.RemoveSinger's own bookkeeping (no KaraokeViewModel resync
+        // involved), matching the DoneSinger fallback test above.
+        var rotationVm = CreateRotationViewModel();
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        var carol = MakeSinger("Carol");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+        rotationVm.Rotation.Add(carol);
+        alice.IsCurrent = true;
+
+        rotationVm.SelectedSinger = alice;
+        await rotationVm.RemoveSingerCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, rotationVm.Rotation.Count);
+        Assert.True(bob.IsCurrent);
+        Assert.True(carol.IsNext);
+    }
+
+    [Fact]
+    public async Task RemoveSinger_DeletingCurrentSingerWithDesignatedNext_PromotesDesignatedNextSinger()
+    {
+        // With KaraokeViewModel wired up (as in the real app), its RotationStateChanged-driven
+        // resync must not clobber the deleted singer's designated Next with a plain
+        // first-active-in-list-order fallback.
+        var rotationVm = CreateRotationViewModel();
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        var carol = MakeSinger("Carol");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+        rotationVm.Rotation.Add(carol);
+
+        CreateKaraokeViewModel(rotationVm, out _);
+        Assert.True(alice.IsCurrent);
+        Assert.True(bob.IsNext);
+
+        // DJ manually promotes Carol to Next (displacing Bob's sequential slot), then deletes Alice.
+        rotationVm.SetCurrentSingerCommand.Execute(carol);
+        rotationVm.SetCurrentSingerCommand.Execute(alice);
+        Assert.True(carol.IsNext);
+
+        rotationVm.SelectedSinger = alice;
+        await rotationVm.RemoveSingerCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, rotationVm.Rotation.Count);
+        Assert.True(carol.IsCurrent);
+        Assert.False(carol.IsNext);
+        Assert.True(bob.IsNext);
+    }
 }

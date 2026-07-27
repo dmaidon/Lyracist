@@ -391,12 +391,54 @@ public partial class RotationViewModel : BaseViewModel
     {
         if (SelectedSinger != null)
         {
-            string name = SelectedSinger.Name;
-            string title = SelectedSinger.SongTitle;
-            string artist = SelectedSinger.Artist;
+            var removed = SelectedSinger;
+            string name = removed.Name;
+            string title = removed.SongTitle;
+            string artist = removed.Artist;
 
-            Rotation.Remove(SelectedSinger);
+            bool wasCurrent = removed.IsCurrent;
+            Singer? nextCurrent = null;
+
+            if (wasCurrent)
+            {
+                // 1. Try the singer already flagged as Next (manual next-singer override)
+                nextCurrent = Rotation.FirstOrDefault(s => s != removed && s.IsNext && !s.IsInactive);
+
+                if (nextCurrent == null)
+                {
+                    // 2. Fall back to standard index-based rotation
+                    int currentIndex = Rotation.IndexOf(removed);
+                    int count = Rotation.Count;
+                    for (int i = 1; i < count; i++)
+                    {
+                        var candidate = Rotation[(currentIndex + i) % count];
+                        if (candidate != removed && !candidate.IsInactive)
+                        {
+                            nextCurrent = candidate;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Promote before removing: Rotation.Remove below fires CollectionChanged synchronously,
+            // which KaraokeViewModel resyncs off of. If nobody were IsCurrent yet at that instant, its
+            // resync would race our own promotion and pick a different singer (first-in-list-order)
+            // before this method's own UpdateNextSingerHighlight call ran, leaving two singers
+            // simultaneously flagged current.
+            if (wasCurrent && nextCurrent != null)
+            {
+                nextCurrent.IsCurrent = true;
+                nextCurrent.IsNext = false;
+            }
+
+            Rotation.Remove(removed);
             SelectedSinger = null;
+
+            if (wasCurrent)
+            {
+                Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation);
+            }
 
             // If this performer is currently singing, stop playback
             if (string.Equals(name, _mediaEngine.ActiveSingerName, StringComparison.OrdinalIgnoreCase))
