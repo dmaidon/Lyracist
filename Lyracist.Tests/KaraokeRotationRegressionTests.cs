@@ -215,4 +215,59 @@ public class KaraokeRotationRegressionTests
         Assert.False(carol.IsNext);
         Assert.True(bob.IsNext);
     }
+
+    [Fact]
+    public async Task ToggleInactiveSinger_MarkingCurrentSingerAway_PromotesRotationOrder()
+    {
+        // "Inactive" is Lyracist's away-from-the-mic/skip-until-they-return marker (distinct from
+        // TogglePauseSinger, which just pauses the music without leaving the current slot). Isolates
+        // RotationViewModel's own bookkeeping, matching the RemoveSinger fallback test above.
+        var rotationVm = CreateRotationViewModel();
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        var carol = MakeSinger("Carol");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+        rotationVm.Rotation.Add(carol);
+        alice.IsCurrent = true;
+
+        await rotationVm.ToggleInactiveSingerCommand.ExecuteAsync(alice);
+
+        Assert.Contains(alice, rotationVm.InactiveSingers);
+        Assert.DoesNotContain(alice, rotationVm.Rotation);
+        Assert.False(alice.IsCurrent);
+        Assert.Equal(2, rotationVm.Rotation.Count);
+        Assert.True(bob.IsCurrent);
+        Assert.True(carol.IsNext);
+    }
+
+    [Fact]
+    public async Task ToggleInactiveSinger_MarkingCurrentSingerAwayWithDesignatedNext_PromotesDesignatedNextSinger()
+    {
+        // With KaraokeViewModel wired up, its resync must not clobber the designated Next with a
+        // plain first-active-in-list-order fallback (same ordering hazard as RemoveSinger).
+        var rotationVm = CreateRotationViewModel();
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        var carol = MakeSinger("Carol");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+        rotationVm.Rotation.Add(carol);
+
+        CreateKaraokeViewModel(rotationVm, out _);
+        Assert.True(alice.IsCurrent);
+        Assert.True(bob.IsNext);
+
+        // DJ manually promotes Carol to Next (displacing Bob's sequential slot), then steps Alice away.
+        rotationVm.SetCurrentSingerCommand.Execute(carol);
+        rotationVm.SetCurrentSingerCommand.Execute(alice);
+        Assert.True(carol.IsNext);
+
+        await rotationVm.ToggleInactiveSingerCommand.ExecuteAsync(alice);
+
+        Assert.Equal(2, rotationVm.Rotation.Count);
+        Assert.True(carol.IsCurrent);
+        Assert.False(carol.IsNext);
+        Assert.True(bob.IsNext);
+    }
 }

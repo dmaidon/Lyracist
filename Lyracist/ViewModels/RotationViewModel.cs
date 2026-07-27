@@ -672,7 +672,45 @@ public partial class RotationViewModel : BaseViewModel
         }
         else
         {
+            bool wasCurrent = singer.IsCurrent;
+            Singer? nextCurrent = null;
+
+            if (wasCurrent)
+            {
+                // 1. Try the singer already flagged as Next (manual next-singer override)
+                nextCurrent = Rotation.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive);
+
+                if (nextCurrent == null)
+                {
+                    // 2. Fall back to standard index-based rotation
+                    int currentIndex = Rotation.IndexOf(singer);
+                    int count = Rotation.Count;
+                    for (int i = 1; i < count; i++)
+                    {
+                        var candidate = Rotation[(currentIndex + i) % count];
+                        if (candidate != singer && !candidate.IsInactive)
+                        {
+                            nextCurrent = candidate;
+                            break;
+                        }
+                    }
+                }
+            }
+
             singer.IsInactive = true;
+
+            // Promote before removing from Rotation below (which fires CollectionChanged
+            // synchronously, resynced by KaraokeViewModel) — see RemoveSinger for why the order matters.
+            if (wasCurrent)
+            {
+                singer.IsCurrent = false;
+                if (nextCurrent != null)
+                {
+                    nextCurrent.IsCurrent = true;
+                    nextCurrent.IsNext = false;
+                }
+            }
+
             Rotation.Remove(singer);
             InactiveSingers.Add(singer);
 
@@ -680,6 +718,11 @@ public partial class RotationViewModel : BaseViewModel
             if (string.Equals(singer.Name, _mediaEngine.ActiveSingerName, StringComparison.OrdinalIgnoreCase))
             {
                 await _mediaEngine.Stop();
+            }
+
+            if (wasCurrent)
+            {
+                Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation);
             }
         }
 
