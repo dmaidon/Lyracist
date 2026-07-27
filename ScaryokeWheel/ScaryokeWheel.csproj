@@ -9,8 +9,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.7.27.33</AssemblyVersion>
-    <FileVersion>26.7.27.33</FileVersion>
+    <AssemblyVersion>26.7.27.39</AssemblyVersion>
+    <FileVersion>26.7.27.39</FileVersion>
+    <ApplicationIcon>scaryoke.ico</ApplicationIcon>
+    <PackageIcon>scaryoke.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +28,17 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="scaryoke.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\Users\dmaid\Downloads\scaryoke.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

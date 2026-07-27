@@ -1,3 +1,4 @@
+// Created on Jul 27, 2026 @ 13:50:00 -> Update MessageBox shim to support YesNo buttons and MessageBoxResult for compilation compatibility
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -39,7 +40,7 @@ namespace System.Windows
 {
     public static class MessageBox
     {
-        public static void Show(string messageBoxText, string caption, MessageBoxButton button, MessageBoxImage icon)
+        public static MessageBoxResult Show(string messageBoxText, string caption, MessageBoxButton button, MessageBoxImage icon)
         {
             Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(async () =>
             {
@@ -48,19 +49,31 @@ namespace System.Windows
                     await Microsoft.Maui.Controls.Shell.Current.CurrentPage.DisplayAlertAsync(caption, messageBoxText, "OK");
                 }
             });
+            return MessageBoxResult.Yes;
         }
     }
 
     public enum MessageBoxButton
     {
-        OK
+        OK,
+        YesNo
     }
 
     public enum MessageBoxImage
     {
         Information,
         Warning,
-        Error
+        Error,
+        Question
+    }
+
+    public enum MessageBoxResult
+    {
+        None,
+        OK,
+        Cancel,
+        Yes,
+        No
     }
 
     public class Application

@@ -1,3 +1,4 @@
+// Edited on Jul 27, 2026 @ 13:35:00 -> Add tick sound buffering and throttling to prevent laptop audio driver choke
 using System;
 using System.Collections.Specialized;
 using System.IO;
@@ -29,6 +30,7 @@ public partial class MainWindow : Window
     private static readonly SoundPlayer LaughPlayer = new(LaughStream);
 
     private int _lastTickIndex = -1;
+    private long _lastTickTimestamp;
     private System.Windows.Media.MediaPlayer? _laughMediaPlayer;
 
     public MainWindow()
@@ -41,6 +43,12 @@ public partial class MainWindow : Window
 
         // Rebuild wheel dynamically when categories change
         _vm.CustomCategories.CollectionChanged += OnCategoriesChanged;
+
+        try
+        {
+            TickPlayer.Load();
+        }
+        catch { }
     }
 
     private void OnCategoriesChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -145,12 +153,16 @@ public partial class MainWindow : Window
         }
         else if (currentTickIndex != _lastTickIndex)
         {
-            try
+            long now = Environment.TickCount64;
+            if (now - _lastTickTimestamp >= 50)
             {
-                TickStream.Position = 0;
-                TickPlayer.Play();
+                try
+                {
+                    TickPlayer.Play();
+                    _lastTickTimestamp = now;
+                }
+                catch { /* Best-effort */ }
             }
-            catch { /* Best-effort */ }
             _lastTickIndex = currentTickIndex;
         }
     }
@@ -171,6 +183,7 @@ public partial class MainWindow : Window
         catch { }
 
         _lastTickIndex = -1;
+        _lastTickTimestamp = 0;
         CompositionTarget.Rendering += OnRendering;
 
         // Rebuild segments on start spin to place "DJ's Choice" in a fresh random index

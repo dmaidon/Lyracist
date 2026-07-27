@@ -26,13 +26,13 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.7.27.83</AssemblyVersion>
+		<AssemblyVersion>26.7.27.90</AssemblyVersion>
 
-		<FileVersion>26.7.27.83</FileVersion>
+		<FileVersion>26.7.27.90</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
-		<PackageIcon>ksr_logo.png</PackageIcon>
+		<PackageIcon>rotation_m.png</PackageIcon>
 
 		<PackageOutputPath>C:\VB26\Release\KSRotation.MAUI</PackageOutputPath>
 
@@ -92,6 +92,10 @@
 	  </MauiAsset>
 	</ItemGroup>
 	<ItemGroup>
+	  <None Include="..\..\..\Users\dmaid\Downloads\rotation_m.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	  <None Include="Resources\ksr_logo.png">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>

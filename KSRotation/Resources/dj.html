@@ -1,4 +1,4 @@
-<!-- Edited on Jul 27, 2026 @ 09:00:00 -> Add light/dark theme toggle -->
+<!-- Edited on Jul 27, 2026 @ 12:30:00 -> Add confirmation dialog for locking screen in DJ console -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -445,7 +445,7 @@
             <h1>KSRotation - DJ Console</h1>
             <div class="header-actions">
                 <button class="btn-outline" id="theme-toggle-btn" onclick="toggleTheme()">☀️ Light Mode</button>
-                <button class="btn-outline" onclick="logout()">Lock Screen</button>
+                <button class="btn-outline" onclick="confirmLogout()">Lock Screen</button>
             </div>
         </header>
 
@@ -542,6 +542,12 @@
                 document.getElementById("lock-screen").style.display = "none";
                 document.getElementById("dashboard").style.display = "flex";
                 startPolling();
+            }
+        }
+
+        function confirmLogout() {
+            if (confirm("Are you sure you want to lock the screen?")) {
+                logout();
             }
         }
 

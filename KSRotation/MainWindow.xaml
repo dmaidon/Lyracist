@@ -1,4 +1,4 @@
-<!-- Edited on Jul 16, 2026 @ 11:00:00 -> Desktop window design updates -->
+<!-- Edited on Jul 27, 2026 @ 14:05:00 -> Override ListViewItem Template to strip default selection styling (no blue highlights) -->
 <!-- Last Edit: Jul 03, 2026 07:36 - Delayed singer row Name/Song/Artist source updates until textbox focus is exited (LostFocus). -->
 <Window x:Name="FrmMain"
     x:Class="KSRotation.MainWindow"
@@ -55,6 +55,9 @@
                 <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                     <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
                 </DataTrigger>
+                <DataTrigger Binding="{Binding IsNext}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                </DataTrigger>
                 <DataTrigger Binding="{Binding IsInactive}" Value="True">
                     <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBodyLight}" />
                     <Setter Property="IsEnabled" Value="False" />
@@ -62,16 +65,56 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Gold highlight for the currently-singing row -->
+        <!-- Gold highlight for the currently-singing row and context menu -->
         <Style x:Key="CurrentSingerRowStyle" TargetType="ListViewItem">
+            <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListView}}" />
+            <Setter Property="ContextMenu">
+                <Setter.Value>
+                    <ContextMenu>
+                        <MenuItem Header="Toggle Active/Inactive"
+                                  Command="{Binding Path=PlacementTarget.Tag.ToggleSingerInactiveCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <Separator />
+                        <MenuItem Header="Set as Current Singer"
+                                  Command="{Binding Path=PlacementTarget.Tag.SetCurrentSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Header="Finish Current Song"
+                                  Command="{Binding Path=PlacementTarget.Tag.FinishSingerSongCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <Separator />
+                        <MenuItem Header="Move Up"
+                                  Command="{Binding Path=PlacementTarget.Tag.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Header="Move Down"
+                                  Command="{Binding Path=PlacementTarget.Tag.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    </ContextMenu>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="true">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsNext}" Value="True">
-                    <Setter Property="Background" Value="#C8E6C9" />
+                    <Setter Property="Background" Value="{DynamicResource AppNextSingerBackgroundBrush}" />
                     <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
                     <Setter Property="FontWeight" Value="SemiBold" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                    <Setter Property="Background" Value="#FFF9C4" />
+                    <Setter Property="Background" Value="{DynamicResource AppCurrentSingerBackgroundBrush}" />
                     <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
                     <Setter Property="FontWeight" Value="SemiBold" />
                 </DataTrigger>
@@ -249,7 +292,6 @@
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="col13_cb" MinWidth="34" />
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="col12" MinWidth="34" />
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="col13" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col14" MinWidth="34" />
                             </Grid.ColumnDefinitions>
 
                             <Grid.Resources>
@@ -275,7 +317,6 @@
                             <TextBlock Grid.Column="14" Text="10" FontWeight="SemiBold" HorizontalAlignment="Center" />
                             <TextBlock Grid.Column="15" Text="▲" FontWeight="SemiBold" HorizontalAlignment="Center" />
                             <TextBlock Grid.Column="16" Text="▼" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="17" Text="X" FontWeight="SemiBold" HorizontalAlignment="Center" />
                         </Grid>
 
                         <ListView
@@ -307,7 +348,6 @@
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="col13_cb" MinWidth="34" />
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="col12" MinWidth="34" />
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="col13" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col14" MinWidth="34" />
                                         </Grid.ColumnDefinitions>
 
                                         <Button
@@ -410,15 +450,6 @@
                                         CommandParameter="{Binding}"
                                         Grid.Column="16"
                                         Margin="4" />
-
-                                        <Button
-                                        Content="X"
-                                        Style="{StaticResource GridButtonStyle}"
-                                        Command="{Binding DataContext.ToggleSingerInactiveCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                        CommandParameter="{Binding}"
-                                        Grid.Column="17"
-                                        Margin="4"
-                                        ToolTip="Mark out for the night (click again to restore)" />
                                     </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
@@ -438,6 +469,13 @@
                             Command="{Binding SaveRotationCommand}"
                             Width="130"
                             ToolTip="Save the night's rotation report to file and optionally email it" />
+                            <Button
+                            Content="Clear Rotation"
+                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                            Command="{Binding ClearRotationCommand}"
+                            Width="130"
+                            Margin="12,0,0,0"
+                            ToolTip="Clear the entire rotation list" />
                         </StackPanel>
                     </Grid>
 
@@ -462,46 +500,102 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                    <TextBlock Text="PATRON WEB PORTAL"
-                                               FontWeight="Bold"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource AppHeaderBrush}"
-                                               Margin="0,0,0,4" />
-                                    <TextBlock Text="Connect to local Wi-Fi, then visit:"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                               Margin="0,0,0,4" />
-                                    <TextBox Text="{Binding ConnectionUrl, Mode=OneWay}"
-                                             FontWeight="SemiBold"
-                                             FontSize="15"
-                                             IsReadOnly="True"
-                                             BorderThickness="0"
-                                             Background="Transparent"
-                                             Foreground="{DynamicResource MaterialDesignBody}"
-                                             Padding="0"
-                                             HorizontalAlignment="Left" />
+                                     <TextBlock FontWeight="Bold"
+                                                FontSize="11"
+                                                Margin="0,0,0,4"
+                                                Cursor="Hand"
+                                                ToolTip="Click to toggle DJ/Patron QR code mode"
+                                                PreviewMouseLeftButtonDown="OnPortalTitleClicked">
+                                         <TextBlock.Style>
+                                             <Style TargetType="TextBlock">
+                                                 <Setter Property="Text" Value="PATRON WEB PORTAL" />
+                                                 <Setter Property="Foreground" Value="{DynamicResource AppHeaderBrush}" />
+                                                 <Style.Triggers>
+                                                     <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                         <Setter Property="Text" Value="⚠️ DJ CONTROL PORTAL" />
+                                                         <Setter Property="Foreground" Value="#EF4444" />
+                                                     </DataTrigger>
+                                                 </Style.Triggers>
+                                             </Style>
+                                         </TextBlock.Style>
+                                     </TextBlock>
+                                     <TextBlock FontSize="11"
+                                                Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                Margin="0,0,0,4">
+                                         <TextBlock.Style>
+                                             <Style TargetType="TextBlock">
+                                                 <Setter Property="Text" Value="Connect to local Wi-Fi, then visit:" />
+                                                 <Style.Triggers>
+                                                     <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                         <Setter Property="Text" Value="DJ ONLY: Remote dashboard login URL" />
+                                                     </DataTrigger>
+                                                 </Style.Triggers>
+                                             </Style>
+                                         </TextBlock.Style>
+                                     </TextBlock>
+                                     <TextBox FontWeight="SemiBold"
+                                              FontSize="15"
+                                              IsReadOnly="True"
+                                              BorderThickness="0"
+                                              Background="Transparent"
+                                              Padding="0"
+                                              HorizontalAlignment="Left">
+                                         <TextBox.Style>
+                                             <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                                 <Setter Property="Text" Value="{Binding ConnectionUrl, Mode=OneWay}" />
+                                                 <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+                                                 <Style.Triggers>
+                                                     <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                         <Setter Property="Text" Value="{Binding DjConnectionUrl, Mode=OneWay}" />
+                                                         <Setter Property="Foreground" Value="#EF4444" />
+                                                     </DataTrigger>
+                                                 </Style.Triggers>
+                                             </Style>
+                                         </TextBox.Style>
+                                     </TextBox>
 
-                                    <TextBlock Margin="0,6,0,0"
-                                               FontSize="11"
-                                               Foreground="{DynamicResource MaterialDesignBodyLight}">
-                                        <Run Text="DJ PIN (give to DJ only): " />
-                                        <Run Text="{Binding DjPin, Mode=OneWay}"
-                                             FontWeight="Bold"
-                                             FontSize="14" />
-                                    </TextBlock>
-                                </StackPanel>
+                                     <TextBlock Margin="0,6,0,0"
+                                                FontSize="11"
+                                                Foreground="{DynamicResource MaterialDesignBodyLight}">
+                                         <TextBlock.Style>
+                                             <Style TargetType="TextBlock">
+                                                 <Setter Property="Visibility" Value="Collapsed" />
+                                                 <Style.Triggers>
+                                                     <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                         <Setter Property="Visibility" Value="Visible" />
+                                                     </DataTrigger>
+                                                 </Style.Triggers>
+                                             </Style>
+                                         </TextBlock.Style>
+                                         <Run Text="DJ PIN (give to DJ only): " />
+                                         <Run Text="{Binding DjPin, Mode=OneWay}"
+                                              FontWeight="Bold"
+                                              FontSize="14"
+                                              Foreground="#EF4444" />
+                                     </TextBlock>
+                                 </StackPanel>
 
-                                <Border Grid.Column="1"
-                                        Width="80"
-                                        Height="80"
-                                        Margin="12,0,0,0"
-                                        Background="White"
-                                        CornerRadius="4"
-                                        Padding="2"
-                                        VerticalAlignment="Center">
-                                    <Image Source="{Binding QrCodeImage}"
-                                           Stretch="Uniform" />
-                                </Border>
+                                 <Border Grid.Column="1"
+                                         Width="80"
+                                         Height="80"
+                                         Margin="12,0,0,0"
+                                         Background="White"
+                                         CornerRadius="4"
+                                         Padding="2"
+                                         VerticalAlignment="Center">
+                                     <Image Stretch="Uniform">
+                                         <Image.Style>
+                                             <Style TargetType="Image">
+                                                 <Setter Property="Source" Value="{Binding QrCodeImage}" />
+                                                 <Style.Triggers>
+                                                     <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                         <Setter Property="Source" Value="{Binding DjQrCodeImage}" />
+                                                     </DataTrigger>
+                                                 </Style.Triggers>
+                                             </Style>
+                                         </Image.Style>
+                                     </Image>
+                                 </Border>
                             </Grid>
                         </Border>
 

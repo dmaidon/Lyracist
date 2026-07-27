@@ -1,4 +1,4 @@
-// Last Edit: Jul 01, 2026 16:55 - Marked FindParent static to resolve CA1822 warning.
+// Edited on Jul 27, 2026 @ 13:15:00 -> Add OnPortalTitleClicked mouse event handler to toggle DJ PIN and QR code visibility
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -28,6 +28,14 @@ namespace KSRotation
             if (DataContext is ViewModels.MainViewModel vm)
             {
                 vm.Shutdown();
+            }
+        }
+
+        private void OnPortalTitleClicked(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is ViewModels.MainViewModel vm)
+            {
+                vm.IsDjQrVisible = !vm.IsDjQrVisible;
             }
         }
 

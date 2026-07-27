@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Integrate auto-promotion and reset
+// Edited on Jul 27, 2026 @ 13:50:00 -> Add ClearRotation command and prompt logic
 // Last Edit: Jul 02, 2026 16:54 - Added SaveCurrentAsTestList command and fixed runtime binding gaps for Settings controls.
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -542,6 +542,25 @@ namespace KSRotation.ViewModels
                 Song = string.Empty,
                 Artist = string.Empty,
             });
+        }
+
+        [RelayCommand]
+        private void ClearRotation()
+        {
+            var result = System.Windows.MessageBox.Show(
+                "Are you sure you want to clear the entire rotation list? This cannot be undone.",
+                "Confirm Clear",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question);
+
+            if (result == System.Windows.MessageBoxResult.Yes)
+            {
+                Singers.Clear();
+                if (IsDisplayEnabled)
+                {
+                    _displayWindowService.Update(Singers);
+                }
+            }
         }
 
         /// <summary>

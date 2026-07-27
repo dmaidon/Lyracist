@@ -9,16 +9,16 @@
     <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyVersion>26.7.27.300</AssemblyVersion>
-    <FileVersion>26.7.27.300</FileVersion>
+    <AssemblyVersion>26.7.27.306</AssemblyVersion>
+    <FileVersion>26.7.27.306</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <PackageIcon>mic_128.png</PackageIcon>
-    <ApplicationIcon>mic.ico</ApplicationIcon>
-    <BaseOutputPath>C:\VB26\Release\KSRotation</BaseOutputPath>
+    <PackageIcon>rotation.png</PackageIcon>
+    <ApplicationIcon>rotation.ico</ApplicationIcon>
+    <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
   </PropertyGroup>
 
@@ -36,10 +36,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="mic.ico" />
+    <Content Include="rotation.ico" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\..\..\Users\dmaid\Downloads\rotation.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\.editorconfig" Link=".editorconfig" />
     <None Include="mic_128.png">
       <Pack>True</Pack>

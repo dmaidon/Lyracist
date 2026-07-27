@@ -1,3 +1,4 @@
+// Edited on Jul 27, 2026 @ 13:35:00 -> Add tick sound buffering and throttling to prevent laptop audio driver choke
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -35,6 +36,7 @@ public partial class ScaryokeWindow : Window
     private static readonly System.IO.MemoryStream TickStream = CreateTickStream();
     private static readonly System.Media.SoundPlayer TickPlayer = new(TickStream);
     private int _lastTickIndex = -1;
+    private long _lastTickTimestamp;
 
     private static System.IO.MemoryStream CreateTickStream()
     {
@@ -98,12 +100,16 @@ public partial class ScaryokeWindow : Window
         }
         else if (currentTickIndex != _lastTickIndex)
         {
-            try
+            long now = Environment.TickCount64;
+            if (now - _lastTickTimestamp >= 50)
             {
-                TickStream.Position = 0;
-                TickPlayer.Play();
+                try
+                {
+                    TickPlayer.Play();
+                    _lastTickTimestamp = now;
+                }
+                catch { /* Best-effort */ }
             }
-            catch { /* Best-effort */ }
             _lastTickIndex = currentTickIndex;
         }
     }
@@ -122,6 +128,12 @@ public partial class ScaryokeWindow : Window
         DataContext = vm;
         _vm.RebuildWheelSegments();
         BuildWheel();
+
+        try
+        {
+            TickPlayer.Load();
+        }
+        catch { }
     }
 
     public void RebuildWheel()
@@ -228,6 +240,7 @@ public partial class ScaryokeWindow : Window
         SpinButton.IsEnabled = false;
 
         _lastTickIndex = -1;
+        _lastTickTimestamp = 0;
         CompositionTarget.Rendering += OnRendering;
 
         // Rebuild segments on start spin to place "DJ's Choice" in a fresh random index
