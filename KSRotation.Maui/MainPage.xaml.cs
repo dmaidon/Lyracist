@@ -141,6 +141,15 @@ public partial class MainPage : ContentPage
         AboutOverlay.IsVisible = true;
     }
 
+    private async void OnScaryokeWheelClicked(object? sender, EventArgs e)
+    {
+        if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            var page = new Views.ScaryokeWheelPage(new KSRotation.Maui.ViewModels.ScaryokeWheelViewModel(vm));
+            await Shell.Current.Navigation.PushAsync(page);
+        }
+    }
+
     private void OnCloseAboutClicked(object? sender, EventArgs e)
     {
         if (BindingContext is KSRotation.ViewModels.MainViewModel vm)

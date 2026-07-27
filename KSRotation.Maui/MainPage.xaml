@@ -31,6 +31,7 @@
                     <Button Text="Clear Queue" Clicked="OnClearQueueClicked" BackgroundColor="Transparent" TextColor="#F87171" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#F87171" VerticalOptions="Center" />
                     <Button x:Name="LoadTestDataBtn" Text="Load Test Data" Clicked="OnLoadTestDataClicked" BackgroundColor="Transparent" TextColor="#3B82F6" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#3B82F6" VerticalOptions="Center" />
                     <Button x:Name="ThemeBtn" Text="☀️ Light Mode" Clicked="OnThemeToggled" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
+                    <Button Text="🎃 Scaryoke" Clicked="OnScaryokeWheelClicked" BackgroundColor="Transparent" BorderColor="#F97316" TextColor="#F97316" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
                     <Button Text="ⓘ About" Clicked="OnAboutClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
                 </HorizontalStackLayout>
                 <ScrollView Grid.Row="1">

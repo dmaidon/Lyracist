@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:KSRotation.Maui.ViewModels"
+             x:Class="KSRotation.Maui.Views.ScaryokeWheelPage"
+             x:DataType="viewmodels:ScaryokeWheelViewModel"
+             Title="Scaryoke Wheel"
+             BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#12141C}">
+
+    <ScrollView>
+        <Grid Padding="16" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="16">
+
+            <!-- Wheel + fixed pointer -->
+            <Grid Grid.Row="0" HeightRequest="340" HorizontalOptions="Center">
+                <GraphicsView x:Name="WheelView" WidthRequest="320" HeightRequest="320" VerticalOptions="End" />
+                <Label Text="▼" FontSize="30" TextColor="#EF4444" HorizontalOptions="Center" VerticalOptions="Start" />
+            </Grid>
+
+            <Label Grid.Row="1" Text="{Binding ResultText}" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" />
+
+            <Button Grid.Row="2" x:Name="SpinButton" Text="🎃 SPIN" Clicked="OnSpinClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="48" WidthRequest="160" HorizontalOptions="Center" />
+
+            <!-- Category management -->
+            <Border Grid.Row="3" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="12">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Categories" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" />
+
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding CustomCategories}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,2">
+                                    <Label Text="{Binding .}" VerticalOptions="Center" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="13" />
+                                    <Button Grid.Column="1"
+                                            Text="✕"
+                                            Command="{Binding BindingContext.RemoveCategoryCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#EF4444"
+                                            WidthRequest="32" HeightRequest="32" Padding="0" FontSize="12" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6" Margin="0,8,0,0">
+                        <Entry Grid.Column="0" Text="{Binding NewCategoryName}" Placeholder="Add a category..." TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                        <Button Grid.Column="1" Text="Add" Command="{Binding AddCategoryCommand}" BackgroundColor="#6D28D9" TextColor="White" />
+                    </Grid>
+
+                    <Label Text="{Binding ValidationError}" TextColor="#EF4444" FontSize="11">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ValidationError}" Value="">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+
+                    <Label Text="Up to 11 categories. The wheel also always includes a Singer's Choice segment and two small DJ's Choice slivers." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,4,0,0" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </ScrollView>
+</ContentPage>
