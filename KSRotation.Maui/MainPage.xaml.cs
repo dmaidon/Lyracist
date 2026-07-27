@@ -6,6 +6,8 @@ namespace KSRotation.Maui;
 
 public partial class MainPage : ContentPage
 {
+    private KSRotation.Models.SingerEntry? _editingSinger;
+
     public MainPage(KSRotation.ViewModels.MainViewModel vm)
     {
         InitializeComponent();
@@ -183,6 +185,46 @@ public partial class MainPage : ContentPage
 				Artist = artist
             });
         }
+    }
+
+    private void OnEditSingerClicked(object? sender, EventArgs e)
+    {
+        if (sender is Button button && button.CommandParameter is KSRotation.Models.SingerEntry entry)
+        {
+            _editingSinger = entry;
+            EditNameEntry.Text = entry.Name;
+            EditSongEntry.Text = entry.Song;
+            EditArtistEntry.Text = entry.Artist;
+            EditSingerOverlay.IsVisible = true;
+        }
+    }
+
+    private async void OnSaveEditSingerClicked(object? sender, EventArgs e)
+    {
+        if (_editingSinger == null)
+        {
+            return;
+        }
+
+        string name = EditNameEntry.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            await DisplayAlertAsync("Required", "Singer name is required.", "OK");
+            return;
+        }
+
+        _editingSinger.Name = name;
+        _editingSinger.Song = EditSongEntry.Text?.Trim() ?? string.Empty;
+        _editingSinger.Artist = EditArtistEntry.Text?.Trim() ?? string.Empty;
+
+        _editingSinger = null;
+        EditSingerOverlay.IsVisible = false;
+    }
+
+    private void OnCancelEditSingerClicked(object? sender, EventArgs e)
+    {
+        _editingSinger = null;
+        EditSingerOverlay.IsVisible = false;
     }
 
     private void OnSetCurrentSingerClicked(object? sender, EventArgs e)

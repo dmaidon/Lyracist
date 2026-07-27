@@ -157,6 +157,9 @@
 
                                         <!-- Actions Panel -->
                                         <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                            <!-- Edit Name/Song/Artist -->
+                                            <Button Text="✏" Clicked="OnEditSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#8B5CF6" BorderWidth="1" TextColor="#8B5CF6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
+
                                             <!-- Highlight as Current -->
                                             <Button Text="🎙" Clicked="OnSetCurrentSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#10B981" BorderWidth="1" TextColor="#10B981" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
 
@@ -313,6 +316,28 @@
 
                     <Button Text="Reset Session (Clear Queue &amp; DJ Pin)" Clicked="OnResetSessionClicked" BackgroundColor="#DC2626" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
                     <Button Text="Close" Clicked="OnCloseAboutClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- Edit Singer overlay: lets the DJ fix a typo'd name or add/change the song & artist
+             (e.g. a singer added with no song yet) without deleting and re-adding the row. -->
+        <Grid x:Name="EditSingerOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False">
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="320" HorizontalOptions="Center" VerticalOptions="Center">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Edit Singer" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,12" />
+
+                    <Label Text="Name" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                    <Entry x:Name="EditNameEntry" Placeholder="Singer Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
+
+                    <Label Text="Song" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                    <Entry x:Name="EditSongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
+
+                    <Label Text="Artist" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                    <Entry x:Name="EditArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,14" />
+
+                    <Button Text="Save" Clicked="OnSaveEditSingerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
+                    <Button Text="Cancel" Clicked="OnCancelEditSingerClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" HeightRequest="36" />
                 </VerticalStackLayout>
             </Border>
         </Grid>
