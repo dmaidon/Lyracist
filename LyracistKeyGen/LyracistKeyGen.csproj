@@ -14,8 +14,8 @@
     <Company>PAROLE Software</Company>
     <PackageIcon>Lyracist_Pro.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.7.27.28</AssemblyVersion>
-    <FileVersion>26.7.27.28</FileVersion>
+    <AssemblyVersion>26.7.27.29</AssemblyVersion>
+    <FileVersion>26.7.27.29</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -294,7 +294,9 @@
         <!-- About overlay: hidden by default, toggled by the ⓘ About button above. Placed last so it
              renders on top of both columns without affecting their layout. -->
         <Grid x:Name="AboutOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False">
-            <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="360" HorizontalOptions="Center" VerticalOptions="Center">
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="360" MaximumHeightRequest="620" HorizontalOptions="Center" VerticalOptions="Center">
+              <Grid RowDefinitions="*,Auto" RowSpacing="10">
+                <ScrollView Grid.Row="0">
                 <VerticalStackLayout Spacing="4">
                     <Image Source="ksr_logo.png" HeightRequest="96" WidthRequest="96" Aspect="AspectFit" HorizontalOptions="Center" Margin="0,0,0,8" />
 
@@ -321,12 +323,16 @@
                         <CheckBox IsChecked="{Binding SendEmailOnSave}" Scale="0.85" />
                         <Label Text="Email the report when the night is saved" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
                     </HorizontalStackLayout>
-                    <Label Text="Save &amp; Email below also clears the active queue and performance history, like Reset Session does." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,12" />
+                    <Label Text="Save &amp; Email below also clears the active queue and performance history, like Reset Session does." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,0" />
+                </VerticalStackLayout>
+                </ScrollView>
 
-                    <Button Text="💾 Save &amp; Email Night's Report" Clicked="OnSaveRotationClicked" BackgroundColor="#0EA5E9" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
-                    <Button Text="Reset Session (Clear Queue &amp; DJ Pin)" Clicked="OnResetSessionClicked" BackgroundColor="#DC2626" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
+                <VerticalStackLayout Grid.Row="1" Spacing="8">
+                    <Button Text="💾 Save &amp; Email Night's Report" Clicked="OnSaveRotationClicked" BackgroundColor="#0EA5E9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
+                    <Button Text="Reset Session (Clear Queue &amp; DJ Pin)" Clicked="OnResetSessionClicked" BackgroundColor="#DC2626" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
                     <Button Text="Close" Clicked="OnCloseAboutClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
                 </VerticalStackLayout>
+              </Grid>
             </Border>
         </Grid>
 
