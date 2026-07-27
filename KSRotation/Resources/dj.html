@@ -1,25 +1,59 @@
-<!-- Edited on Jul 16, 2026 @ 11:00:00 -> Administrator control pages -->
+<!-- Edited on Jul 27, 2026 @ 09:00:00 -> Add light/dark theme toggle -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KSRotation - Remote DJ Board</title>
+    <script>
+        // Applied before first paint (and before the stylesheet below) to avoid a flash of the
+        // wrong theme on load.
+        (function () {
+            var saved = localStorage.getItem('ks_dj_theme');
+            if (saved === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #0B0F19;
             --card-bg: #151D2A;
+            --row-bg: #1A2436;
+            --row-current-bg: #2D1A10;
+            --row-next-bg: #151F32;
+            --row-inactive-bg: #111823;
+            --input-bg: #0F172A;
             --border-color: #243247;
             --primary: #8B5CF6;
             --primary-hover: #7C3AED;
             --text-main: #F8FAFC;
             --text-muted: #64748B;
+            --accent-text: #A78BFA;
+            --panel-title-color: #C4B5FD;
             --gold: #F59E0B;
             --blue: #3B82F6;
             --green: #10B981;
             --red: #EF4444;
             --orange: #D97706;
+        }
+
+        :root[data-theme="light"] {
+            --bg-dark: #F1F5F9;
+            --card-bg: #FFFFFF;
+            --row-bg: #F8FAFC;
+            --row-current-bg: #FFF7ED;
+            --row-next-bg: #EFF6FF;
+            --row-inactive-bg: #E2E8F0;
+            --input-bg: #F1F5F9;
+            --border-color: #E2E8F0;
+            --primary: #7C3AED;
+            --primary-hover: #6D28D9;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --accent-text: #7C3AED;
+            --panel-title-color: #7C3AED;
         }
 
         * {
@@ -119,8 +153,8 @@
             padding: 12px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
-            background-color: #0F172A;
-            color: white;
+            background-color: var(--input-bg);
+            color: var(--text-main);
             font-size: 1.1rem;
             text-align: center;
             letter-spacing: 4px;
@@ -157,14 +191,14 @@
         .panel-title {
             font-size: 0.95rem;
             font-weight: 600;
-            color: #C4B5FD;
+            color: var(--panel-title-color);
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
         /* Performer Row Cards */
         .singer-card {
-            background-color: #1A2436;
+            background-color: var(--row-bg);
             border-radius: 8px;
             border: 2px solid transparent;
             padding: 10px;
@@ -176,17 +210,17 @@
 
         .singer-card.current {
             border-color: var(--gold);
-            background-color: #2D1A10;
+            background-color: var(--row-current-bg);
         }
 
         .singer-card.next {
             border-color: var(--blue);
-            background-color: #151F32;
+            background-color: var(--row-next-bg);
         }
 
         .singer-card.inactive {
             opacity: 0.45;
-            background-color: #111823;
+            background-color: var(--row-inactive-bg);
         }
 
         .singer-details {
@@ -212,7 +246,7 @@
         .singer-song {
             font-size: 1rem;
             font-style: italic;
-            color: #A78BFA;
+            color: var(--accent-text);
         }
 
         .singer-artist {
@@ -248,7 +282,7 @@
             height: 24px;
             border-radius: 4px;
             border: 1px solid var(--border-color);
-            background-color: #111823;
+            background-color: var(--row-inactive-bg);
             color: var(--text-muted);
             font-size: 0.7rem;
             font-weight: 600;
@@ -336,8 +370,8 @@
             padding: 8px 12px;
             border-radius: 6px;
             border: 1px solid var(--border-color);
-            background-color: #0F172A;
-            color: white;
+            background-color: var(--input-bg);
+            color: var(--text-main);
             outline: none;
             font-size: 0.9rem;
         }
@@ -362,7 +396,7 @@
 
         /* Requests column styling */
         .request-card {
-            background-color: #1A2436;
+            background-color: var(--row-bg);
             border-radius: 8px;
             border: 1px solid var(--border-color);
             padding: 12px;
@@ -376,7 +410,7 @@
             gap: 2px;
         }
         .request-name { font-weight: 600; font-size: 0.95rem; }
-        .request-song { font-size: 0.85rem; font-style: italic; color: #A78BFA; }
+        .request-song { font-size: 0.85rem; font-style: italic; color: var(--accent-text); }
         .request-artist { font-size: 0.8rem; color: var(--text-muted); }
         
         .request-actions {
@@ -410,6 +444,7 @@
         <header>
             <h1>KSRotation - DJ Console</h1>
             <div class="header-actions">
+                <button class="btn-outline" id="theme-toggle-btn" onclick="toggleTheme()">☀️ Light Mode</button>
                 <button class="btn-outline" onclick="logout()">Lock Screen</button>
             </div>
         </header>
@@ -465,6 +500,8 @@
 
         // Auto-check PIN in sessionStorage on page load
         window.addEventListener('load', () => {
+            updateThemeToggleLabel();
+
             const savedPin = sessionStorage.getItem("dj_pin");
             if (savedPin) {
                 document.getElementById("lock-screen").style.display = "none";
@@ -472,6 +509,25 @@
                 startPolling();
             }
         });
+
+        function toggleTheme() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('ks_dj_theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('ks_dj_theme', 'light');
+            }
+            updateThemeToggleLabel();
+        }
+
+        function updateThemeToggleLabel() {
+            const btn = document.getElementById('theme-toggle-btn');
+            if (!btn) return;
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            btn.textContent = isLight ? '🌙 Dark Mode' : '☀️ Light Mode';
+        }
 
         function checkPinKey(event) {
             if (event.key === "Enter") {
