@@ -110,20 +110,4 @@ namespace KSRotation.Services
             // Optional: Map dynamic app theme mapping if needed.
         }
     }
-
-    public static class RotationReportService
-    {
-        // Not implemented on this platform yet. Throwing (rather than returning fake success paths)
-        // means SaveRotation()'s existing catch block reports a clear error instead of telling the
-        // operator their PDF/CSV report was saved when nothing was written.
-        public static Task<(string pdfPath, string csvPath)> SaveAsync(
-            System.Collections.Generic.List<SingerEntry> singers,
-            System.Collections.Generic.List<SongPerformance> history,
-            string venueName,
-            string emailRecipient,
-            bool sendEmail)
-        {
-            throw new PlatformNotSupportedException("Saving rotation reports (PDF/CSV) is not yet implemented on this platform.");
-        }
-    }
 }

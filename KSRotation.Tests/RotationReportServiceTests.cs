@@ -19,7 +19,7 @@ public class BuildReportRowsTests
             Perf(singer.Id, "Alice", 2),
         };
 
-        var rows = RotationReportService.BuildReportRows([singer], history);
+        var rows = RotationReportGenerator.BuildReportRows([singer], history);
 
         Assert.Single(rows);
         Assert.Equal("Alice", rows[0].SingerName);
@@ -38,7 +38,7 @@ public class BuildReportRowsTests
             Perf(Guid.Empty, "bob", 1), // legacy entry, case-insensitive name match
         };
 
-        var rows = RotationReportService.BuildReportRows([singer], history);
+        var rows = RotationReportGenerator.BuildReportRows([singer], history);
 
         Assert.Single(rows);
         Assert.Equal("Bob", rows[0].SingerName);
@@ -56,7 +56,7 @@ public class BuildReportRowsTests
             Perf(goneId, "Carol", 1),
         };
 
-        var rows = RotationReportService.BuildReportRows([queued], history);
+        var rows = RotationReportGenerator.BuildReportRows([queued], history);
 
         Assert.Equal(2, rows.Count);
         Assert.Equal("Alice", rows[0].SingerName); // queue order first
@@ -70,7 +70,7 @@ public class BuildReportRowsTests
         var a = new SingerEntry { Name = "Alice" };
         var b = new SingerEntry { Name = "Bob", IsInactive = true };
 
-        var rows = RotationReportService.BuildReportRows([a, b], []);
+        var rows = RotationReportGenerator.BuildReportRows([a, b], []);
 
         Assert.Equal(2, rows.Count);
         Assert.Equal("Alice", rows[0].SingerName);
@@ -90,26 +90,26 @@ public class EscapeCsvTests
     [InlineData("@cmd")]
     public void PrefixesFormulaTriggerCharacters(string dangerous)
     {
-        string result = RotationReportService.EscapeCsv(dangerous);
+        string result = RotationReportGenerator.EscapeCsv(dangerous);
         Assert.StartsWith("'", result);
     }
 
     [Fact]
     public void LeavesOrdinaryTextUnchanged()
     {
-        Assert.Equal("Bob Jones", RotationReportService.EscapeCsv("Bob Jones"));
+        Assert.Equal("Bob Jones", RotationReportGenerator.EscapeCsv("Bob Jones"));
     }
 
     [Fact]
     public void DoublesEmbeddedQuotes()
     {
-        Assert.Equal("a\"\"b", RotationReportService.EscapeCsv("a\"b"));
+        Assert.Equal("a\"\"b", RotationReportGenerator.EscapeCsv("a\"b"));
     }
 
     [Fact]
     public void ReturnsEmptyForNullOrEmpty()
     {
-        Assert.Equal(string.Empty, RotationReportService.EscapeCsv(""));
-        Assert.Equal(string.Empty, RotationReportService.EscapeCsv(null!));
+        Assert.Equal(string.Empty, RotationReportGenerator.EscapeCsv(""));
+        Assert.Equal(string.Empty, RotationReportGenerator.EscapeCsv(null!));
     }
 }

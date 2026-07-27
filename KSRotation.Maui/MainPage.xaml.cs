@@ -146,6 +146,7 @@ public partial class MainPage : ContentPage
         if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
         {
             vm.PreferredHostIp = PreferredIpEntry.Text?.Trim() ?? string.Empty;
+            vm.EmailRecipient = EmailRecipientEntry.Text?.Trim() ?? string.Empty;
         }
         AboutOverlay.IsVisible = false;
     }
@@ -164,6 +165,47 @@ public partial class MainPage : ContentPage
         {
             vm.PreferredHostIp = entry.Text?.Trim() ?? string.Empty;
         }
+    }
+
+    private void OnEmailRecipientUnfocused(object? sender, FocusEventArgs e)
+    {
+        if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            vm.EmailRecipient = entry.Text?.Trim() ?? string.Empty;
+        }
+    }
+
+    private void OnEmailRecipientCompleted(object? sender, EventArgs e)
+    {
+        if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            vm.EmailRecipient = entry.Text?.Trim() ?? string.Empty;
+        }
+    }
+
+    private async void OnSaveRotationClicked(object? sender, EventArgs e)
+    {
+        if (BindingContext is not KSRotation.ViewModels.MainViewModel vm)
+        {
+            return;
+        }
+
+        vm.EmailRecipient = EmailRecipientEntry.Text?.Trim() ?? string.Empty;
+
+        bool confirm = await DisplayAlertAsync(
+            "Save & Email Night's Report",
+            "This saves a PDF/CSV report of tonight's rotation" +
+            (vm.SendEmailOnSave && !string.IsNullOrWhiteSpace(vm.EmailRecipient) ? " and opens an email with it attached, " : ", ") +
+            "then clears the active queue and performance history so you're ready for the next night. Continue?",
+            "Yes", "No");
+
+        if (!confirm)
+        {
+            return;
+        }
+
+        await vm.SaveRotationCommand.ExecuteAsync(null);
+        AboutOverlay.IsVisible = false;
     }
 
     private async void OnResetSessionClicked(object? sender, EventArgs e)

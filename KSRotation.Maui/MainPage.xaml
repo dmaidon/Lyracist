@@ -314,6 +314,15 @@
                     <Entry x:Name="PreferredIpEntry" Text="{Binding PreferredHostIp, Mode=OneWay}" Unfocused="OnPreferredHostIpUnfocused" Completed="OnPreferredHostIpCompleted" Placeholder="e.g. 192.168.50.20" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" FontSize="12" />
                     <Label Text="Leave blank to auto-detect. Set this if the app picks the wrong network adapter (e.g. on a travel router)." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,12" />
 
+                    <Label Text="Report Email Recipient (Optional)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" Margin="0,0,0,2" />
+                    <Entry x:Name="EmailRecipientEntry" Text="{Binding EmailRecipient, Mode=OneWay}" Unfocused="OnEmailRecipientUnfocused" Completed="OnEmailRecipientCompleted" Placeholder="e.g. dj@venue.com" Keyboard="Email" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" FontSize="12" />
+                    <HorizontalStackLayout Spacing="6" Margin="0,4,0,2">
+                        <CheckBox IsChecked="{Binding SendEmailOnSave}" Scale="0.85" />
+                        <Label Text="Email the report when the night is saved" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <Label Text="Save &amp; Email below also clears the active queue and performance history, like Reset Session does." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,12" />
+
+                    <Button Text="💾 Save &amp; Email Night's Report" Clicked="OnSaveRotationClicked" BackgroundColor="#0EA5E9" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
                     <Button Text="Reset Session (Clear Queue &amp; DJ Pin)" Clicked="OnResetSessionClicked" BackgroundColor="#DC2626" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
                     <Button Text="Close" Clicked="OnCloseAboutClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
                 </VerticalStackLayout>
