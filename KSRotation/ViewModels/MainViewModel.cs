@@ -816,11 +816,42 @@ namespace KSRotation.ViewModels
             _isFinishingSong = true;
             try
             {
+                bool pausing = !entry.IsInactive && entry.IsCurrent;
+                SingerEntry? nextCurrent = null;
+
+                if (pausing)
+                {
+                    // 1. Try the singer already flagged as Next (manual next-singer override)
+                    nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive);
+
+                    if (nextCurrent == null)
+                    {
+                        // 2. Fall back to standard index-based rotation
+                        int currentIndex = Singers.IndexOf(entry);
+                        int count = Singers.Count;
+                        for (int i = 1; i < count; i++)
+                        {
+                            SingerEntry candidate = Singers[(currentIndex + i) % count];
+                            if (candidate != entry && !candidate.IsInactive)
+                            {
+                                nextCurrent = candidate;
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 entry.IsInactive = !entry.IsInactive;
 
                 if (entry.IsInactive && entry.IsCurrent)
                 {
                     entry.IsCurrent = false;
+                }
+
+                if (pausing && nextCurrent != null)
+                {
+                    nextCurrent.IsCurrent = true;
+                    nextCurrent.IsNext = false;
                 }
 
                 EnforceActiveInactiveOrder(entry);

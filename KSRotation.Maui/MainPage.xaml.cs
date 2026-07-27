@@ -278,15 +278,46 @@ public partial class MainPage : ContentPage
         if (sender is Button button && button.CommandParameter is KSRotation.Models.SingerEntry entry)
         {
             var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
-            
+
+            bool pausing = !entry.IsInactive && entry.IsCurrent;
+            KSRotation.Models.SingerEntry? nextCurrent = null;
+
+            if (pausing)
+            {
+                // 1. Try the singer already flagged as Next (manual next-singer override)
+                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive);
+
+                if (nextCurrent == null)
+                {
+                    // 2. Fall back to standard index-based rotation
+                    int currentIndex = vm.Singers.IndexOf(entry);
+                    int count = vm.Singers.Count;
+                    for (int i = 1; i < count; i++)
+                    {
+                        var candidate = vm.Singers[(currentIndex + i) % count];
+                        if (candidate != entry && !candidate.IsInactive)
+                        {
+                            nextCurrent = candidate;
+                            break;
+                        }
+                    }
+                }
+            }
+
             // Toggle the inactive flag directly without triggering EnforceActiveInactiveOrder (which reorders the collection)
             entry.IsInactive = !entry.IsInactive;
-            
+
             if (entry.IsInactive && entry.IsCurrent)
             {
                 entry.IsCurrent = false;
             }
-            
+
+            if (pausing && nextCurrent != null)
+            {
+                nextCurrent.IsCurrent = true;
+                nextCurrent.IsNext = false;
+            }
+
             // Recalculate next singer based on new active states
             Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
         }

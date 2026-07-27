@@ -580,5 +580,55 @@ public class MainViewModelTests
         Assert.True(after.IsCurrent);
         Assert.True(last.IsNext);
     }
+
+    [Fact]
+    public void DjToggleInactiveAction_PausingCurrentSingerWithNoNextFlag_FallsBackToIndexOrder()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var current = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var after = new SingerEntry { Name = "Bob" };
+        var last = new SingerEntry { Name = "Carol" };
+        vm.Singers.Add(current);
+        vm.Singers.Add(after);
+        vm.Singers.Add(last);
+
+        // Act - pause the current singer (no one flagged IsNext) via the DJ web console
+        string result = InvokeDjAction(vm, "toggle-inactive", current.Id.ToString());
+
+        // Assert
+        Assert.Equal("", result);
+        Assert.True(current.IsInactive);
+        Assert.False(current.IsCurrent);
+        Assert.True(after.IsCurrent);
+        Assert.True(last.IsNext);
+    }
+
+    [Fact]
+    public void ToggleSingerInactiveCommand_PausingCurrentSinger_PromotesFlaggedNextSinger()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var current = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var next = new SingerEntry { Name = "Bob", IsNext = true };
+        var after = new SingerEntry { Name = "Carol" };
+        vm.Singers.Add(current);
+        vm.Singers.Add(next);
+        vm.Singers.Add(after);
+
+        // Act - pause the current singer via the WPF grid's pause button
+        vm.ToggleSingerInactiveCommand.Execute(current);
+
+        // Assert
+        Assert.True(current.IsInactive);
+        Assert.False(current.IsCurrent);
+        Assert.True(next.IsCurrent);
+        Assert.False(next.IsNext);
+        Assert.True(after.IsNext);
+    }
 }
 
