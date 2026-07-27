@@ -9,6 +9,7 @@ using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.Services.Display;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Lyracist.ViewModels;
 
@@ -567,6 +568,31 @@ public partial class RotationViewModel : BaseViewModel
         }
 
         if (SelectedSinger != null && SelectedSinger.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+        {
+            RefreshSelectedSingerQueue();
+        }
+
+        RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
+    }
+
+    [RelayCommand]
+    private void EditSinger(Singer singer)
+    {
+        if (singer == null) return;
+
+        string oldName = singer.Name;
+
+        var window = App.AppHost.Services.GetRequiredService<Lyracist.Windows.EditSingerWindow>();
+        window.ViewModel.Load(singer);
+        window.Owner = System.Windows.Application.Current.MainWindow;
+        if (window.ShowDialog() != true)
+        {
+            return;
+        }
+
+        if (!singer.Name.Equals(oldName, StringComparison.OrdinalIgnoreCase)
+            && SelectedSinger != null && SelectedSinger.Name.Equals(oldName, StringComparison.OrdinalIgnoreCase))
         {
             RefreshSelectedSingerQueue();
         }

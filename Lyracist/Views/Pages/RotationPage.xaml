@@ -252,12 +252,21 @@
                                                 <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
                                             </Border>
                                             
+                                            <!-- Edit Button -->
+                                            <ui:Button Icon="{ui:SymbolIcon Edit20}"
+                                                       Command="{Binding DataContext.EditSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                       CommandParameter="{Binding}"
+                                                       Appearance="Secondary"
+                                                       Margin="0,0,2,0"
+                                                       Padding="4"
+                                                       ToolTip="Edit singer name, song, artist, key, or notes"/>
+
                                             <!-- Done Button -->
-                                            <ui:Button Icon="{ui:SymbolIcon Checkmark20}" 
-                                                       Command="{Binding DataContext.DoneSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
-                                                       CommandParameter="{Binding}" 
-                                                       Appearance="Success" 
-                                                       Margin="0,0,2,0" 
+                                            <ui:Button Icon="{ui:SymbolIcon Checkmark20}"
+                                                       Command="{Binding DataContext.DoneSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                       CommandParameter="{Binding}"
+                                                       Appearance="Success"
+                                                       Margin="0,0,2,0"
                                                        Padding="4"
                                                        ToolTip="Mark current song as completed (updates song request and advances active indicator)"/>
                                             

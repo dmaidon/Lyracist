@@ -109,6 +109,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<AboutViewModel>();
                 services.AddTransient<SongSettingsViewModel>();
                 services.AddTransient<SingerSettingsViewModel>();
+                services.AddTransient<EditSingerViewModel>();
 
                 // Windows
                 services.AddSingleton<SplashWindow>();
@@ -119,6 +120,7 @@ public partial class App : System.Windows.Application
                 services.AddTransient<SongSettingsWindow>();
                 services.AddTransient<SingerSettingsWindow>();
                 services.AddTransient<AboutWindow>();
+                services.AddTransient<EditSingerWindow>();
 
                 // Pages
                 services.AddSingleton<KaraokePage>();
