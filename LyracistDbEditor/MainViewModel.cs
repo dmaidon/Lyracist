@@ -606,6 +606,16 @@ public partial class MainViewModel : ObservableObject
                     RefreshStats();
                     Search();
                     AppendLog("Metadata fill-in complete.");
+
+                    // Chain into the Slow Metadata Extractor automatically now that the folder
+                    // scan and duration/genre fill-in are both done — but only if the app is
+                    // actually idle (not already scanning or mid-rename), so this never steals
+                    // a run the user started themselves.
+                    if (!IsScanning && !IsRenaming)
+                    {
+                        AppendLog("Starting slow metadata scan for songs with an unknown artist...");
+                        StartScan();
+                    }
                 });
             }
             catch (Exception ex)
