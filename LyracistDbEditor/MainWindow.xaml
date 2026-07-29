@@ -8,7 +8,7 @@
         xmlns:local="clr-namespace:LyracistDbEditor"
         mc:Ignorable="d"
         Title="Lyracist Database Editor &amp; Metadata Scanner"
-        Height="920" Width="1180" MinHeight="760" MinWidth="1050"
+        Height="1020" Width="1180" MinHeight="760" MinWidth="1050"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource ApplicationBackgroundBrush}">
 

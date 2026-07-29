@@ -470,7 +470,8 @@ public partial class MainViewModel : ObservableObject
             LibraryDirectoryStore.Save(LibraryDirectories.ToList());
         }
 
-        RunLibraryScan([path]);
+        // Only adds to the list — scanning starts when the user clicks Rescan/Scan All,
+        // so adding multiple directories in a row doesn't get blocked by an in-progress scan.
     }
 
     [RelayCommand]
