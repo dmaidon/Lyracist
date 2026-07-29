@@ -1,3 +1,4 @@
+// Edited on Jul 28, 2026 @ 13:02:00 -> Disable UpdatePerformanceForSinger call on song/artist property change to prevent overwriting past performance history
 // Edited on Jul 27, 2026 @ 13:50:00 -> Add ClearRotation command and prompt logic
 // Last Edit: Jul 02, 2026 16:54 - Added SaveCurrentAsTestList command and fixed runtime binding gaps for Settings controls.
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -93,6 +94,7 @@ namespace KSRotation.ViewModels
                     {
                         _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
                         _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
+                        _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
                         _displayWindowService.Show(Singers);
                         _displayWindowService.SetProjectionView(SelectedProjectionView);
                         _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
@@ -101,6 +103,15 @@ namespace KSRotation.ViewModels
                     else
                     {
                         _displayWindowService.Hide();
+                    }
+                    QueueSaveSettings();
+                    break;
+
+                case nameof(SelectedMonitorDevice):
+                    _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
+                    if (IsDisplayEnabled)
+                    {
+                        _displayWindowService.RepositionWindow();
                     }
                     QueueSaveSettings();
                     break;
@@ -244,6 +255,11 @@ namespace KSRotation.ViewModels
             get => _preferredHostIp;
             set => SetProperty(ref _preferredHostIp, value);
         }
+
+        public ObservableCollection<MonitorItem> AvailableMonitors { get; } = [];
+
+        [ObservableProperty]
+        public partial string SelectedMonitorDevice { get; set; } = string.Empty;
 
         [ObservableProperty]
         public partial string SelectedHelpTopic { get; set; } = "🚀 Getting Started";
@@ -405,6 +421,11 @@ namespace KSRotation.ViewModels
             _displayWindowService.SetCrawlBannerText(CrawlBannerText, VenueName, DjName);
             _displayWindowService.SetMarqueeSpeed(MarqueeSpeed);
             _displayWindowService.SetProjectionView(SelectedProjectionView);
+            
+            SelectedMonitorDevice = settings.SelectedMonitorDevice ?? string.Empty;
+            _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
+            RefreshAvailableMonitors();
+
             IsDisplayEnabled = false;
 
             ThemeService.Apply(SelectedTheme);
@@ -1231,7 +1252,8 @@ namespace KSRotation.ViewModels
             }
             else if (e.PropertyName == nameof(SingerEntry.Song) || e.PropertyName == nameof(SingerEntry.Artist))
             {
-                UpdatePerformanceForSinger(entry);
+                // Disabled to prevent overwriting past performance history when current song/artist changes
+                // UpdatePerformanceForSinger(entry);
                 databaseChanged = true;
 
                 // Handle song cleared case: automatically post the next song in the performer's queue
@@ -1496,7 +1518,8 @@ namespace KSRotation.ViewModels
                 ProjectionView = SelectedProjectionView,
                 WatermarkOpacity = WatermarkOpacity,
                 PreferredHostIp = string.IsNullOrWhiteSpace(PreferredHostIp) ? string.Empty : PreferredHostIp.Trim(),
-                DjPin = string.IsNullOrWhiteSpace(DjPin) ? string.Empty : DjPin.Trim()
+                DjPin = string.IsNullOrWhiteSpace(DjPin) ? string.Empty : DjPin.Trim(),
+                SelectedMonitorDevice = SelectedMonitorDevice
             };
 
             try
@@ -1513,6 +1536,54 @@ namespace KSRotation.ViewModels
         {
             _saveDebounceTimer.Stop();
             _saveDebounceTimer.Start();
+        }
+
+        [RelayCommand]
+        private void RefreshMonitors()
+        {
+            RefreshAvailableMonitors();
+        }
+
+        private void RefreshAvailableMonitors()
+        {
+#if WPF
+            var screens = System.Windows.Forms.Screen.AllScreens;
+            string currentSelection = SelectedMonitorDevice;
+
+            AvailableMonitors.Clear();
+            for (int i = 0; i < screens.Length; i++)
+            {
+                var screen = screens[i];
+                string friendly = $"Monitor {i + 1} ({screen.Bounds.Width}x{screen.Bounds.Height}){(screen.Primary ? " [Primary]" : "")}";
+                AvailableMonitors.Add(new MonitorItem
+                {
+                    DeviceName = screen.DeviceName,
+                    FriendlyName = friendly
+                });
+            }
+
+            if (!string.IsNullOrEmpty(currentSelection) && AvailableMonitors.Any(m => string.Equals(m.DeviceName, currentSelection, StringComparison.OrdinalIgnoreCase)))
+            {
+                SelectedMonitorDevice = currentSelection;
+            }
+            else
+            {
+                if (screens.Length > 1)
+                {
+                    SelectedMonitorDevice = screens[1].DeviceName;
+                }
+                else if (screens.Length > 0)
+                {
+                    SelectedMonitorDevice = screens[0].DeviceName;
+                }
+                else
+                {
+                    SelectedMonitorDevice = string.Empty;
+                }
+            }
+#else
+            AvailableMonitors.Clear();
+#endif
         }
 
         [RelayCommand]

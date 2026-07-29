@@ -1,5 +1,4 @@
-// Created on Jul 27, 2026 @ 10:00:00 -> Split out of RotationReportService so KSRotation.Maui can
-// reuse the PDF/CSV generation without the desktop-only .eml-draft delivery mechanism.
+// Edited on Jul 28, 2026 @ 12:53:00 -> Register PDFsharp platform/fallback font resolver in static constructor
 using KSRotation.Models;
 using PdfSharp;
 using PdfSharp.Drawing;
@@ -16,6 +15,21 @@ namespace KSRotation.Services
     /// </summary>
     public static class RotationReportGenerator
     {
+        static RotationReportGenerator()
+        {
+            try
+            {
+                if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                {
+                    PdfSharp.Fonts.GlobalFontSettings.UseWindowsFontsUnderWindows = true;
+                }
+            }
+            catch
+            {
+                // Guard against multiple initialization attempts or platform errors
+            }
+        }
+
         private static string ReportDirectoryPath => AppPaths.ReportsDirectoryPath;
 
         /// <summary>A single singer's report line: their display name, completed performances (round-ordered),

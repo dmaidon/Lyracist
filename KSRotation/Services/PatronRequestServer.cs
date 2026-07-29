@@ -1,5 +1,5 @@
-// Edited on Jul 16, 2026 @ 11:00:00 -> REST backend web API server
-// Last Edit: Jul 16, 2026 10:33 - Added support for multiple songs.
+// Edited on Jul 28, 2026 @ 18:39:00 -> Add support for requestType parameter in REST web API requests
+// Last Edit: Jul 16, 2026 11:00 - REST backend web API server
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +16,7 @@ namespace KSRotation.Services
 {
     public class PatronRequestServer(
         int port, 
-        Action<string, List<RequestedSong>> onRequestReceived, 
+        Action<string, List<RequestedSong>, string> onRequestReceived, 
         Func<string> onGetRotationJson,
         Func<string, bool> onVerifyPin,
         Func<string> onGetRequestsJson,
@@ -30,7 +30,7 @@ namespace KSRotation.Services
         private TcpListener? _listener;
         private CancellationTokenSource? _cts;
         private readonly int _port = port;
-        private readonly Action<string, List<RequestedSong>> _onRequestReceived = onRequestReceived;
+        private readonly Action<string, List<RequestedSong>, string> _onRequestReceived = onRequestReceived;
         private readonly Func<string> _onGetRotationJson = onGetRotationJson;
         private readonly Func<string, bool> _onVerifyPin = onVerifyPin;
         private readonly Func<string> _onGetRequestsJson = onGetRequestsJson;
@@ -211,6 +211,7 @@ namespace KSRotation.Services
                         string name = root.TryGetProperty("name", out var nProp) ? (nProp.GetString() ?? "") : "";
                         string song = root.TryGetProperty("song", out var sProp) ? (sProp.GetString() ?? "") : "";
                         string artist = root.TryGetProperty("artist", out var aProp) ? (aProp.GetString() ?? "") : "";
+                        string requestType = root.TryGetProperty("requestType", out var rtProp) ? (rtProp.GetString() ?? "Karaoke") : "Karaoke";
 
                         var songs = new List<RequestedSong>();
                         if (root.TryGetProperty("songs", out var songsProp) && songsProp.ValueKind == JsonValueKind.Array)
@@ -233,7 +234,7 @@ namespace KSRotation.Services
 
                         if (!string.IsNullOrWhiteSpace(name) && songs.Count > 0)
                         {
-                            _onRequestReceived(name.Trim(), songs);
+                            _onRequestReceived(name.Trim(), songs, requestType);
                             await SendJsonResponseAsync(stream, "{\"success\":true}");
                         }
                         else

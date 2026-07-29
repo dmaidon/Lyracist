@@ -1,5 +1,5 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Multi-song requests support
-// Last Edit: Jul 02, 2026 14:10 - Added manual PreferredHostIp override support for patron portal URL and QR generation.
+// Edited on Jul 28, 2026 @ 18:40:00 -> Add support for processing patron music requests and mapping isMusic
+// Last Edit: Jul 28, 2026 12:44 - Serialize isPaused and implement paused/deleted/restore API actions
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -64,7 +64,7 @@ namespace KSRotation.ViewModels
                 ? request.Songs
                 : new List<RequestedSong> { new RequestedSong(request.Song, request.Artist) };
 
-            var existingSinger = Singers.FirstOrDefault(s => IsSameSingerName(s.Name, normalizedName));
+            var existingSinger = Singers.FirstOrDefault(s => IsSameSingerName(s.Name, normalizedName) && s.IsMusic == (request.RequestType == "Music"));
             if (existingSinger != null)
             {
                 // Only reposition if the singer was actually paused — reactivating them needs to move
@@ -98,7 +98,8 @@ namespace KSRotation.ViewModels
             {
                 var newSinger = new SingerEntry
                 {
-                    Name = normalizedName
+                    Name = normalizedName,
+                    IsMusic = request.RequestType == "Music"
                 };
 
                 foreach (var reqSong in requestedSongs)
@@ -151,9 +152,9 @@ namespace KSRotation.ViewModels
 
             if (IsTestMode)
             {
-                IncomingRequests.Add(new PatronRequest { Name = "Charlie Miller", Song = "Let It Be", Artist = "The Beatles" });
-                IncomingRequests.Add(new PatronRequest { Name = "Dana Scully", Song = "X-Files Theme", Artist = "Mark Snow" });
-                IncomingRequests.Add(new PatronRequest { Name = "Fox Mulder", Song = "I Want to Believe", Artist = "Aliens" });
+                IncomingRequests.Add(new PatronRequest { Name = "Charlie Miller", Song = "Let It Be", Artist = "The Beatles", RequestType = "Karaoke" });
+                IncomingRequests.Add(new PatronRequest { Name = "Dana Scully", Song = "X-Files Theme", Artist = "Mark Snow", RequestType = "Music" });
+                IncomingRequests.Add(new PatronRequest { Name = "Fox Mulder", Song = "I Want to Believe", Artist = "Aliens", RequestType = "Karaoke" });
             }
 
             string host = ResolveConnectionHost();
@@ -273,7 +274,7 @@ namespace KSRotation.ViewModels
             }
         }
 
-        private void HandleRequestReceived(string name, List<RequestedSong> songs)
+        private void HandleRequestReceived(string name, List<RequestedSong> songs, string requestType)
         {
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -283,7 +284,8 @@ namespace KSRotation.ViewModels
                     Name = name,
                     Song = first?.Song ?? string.Empty,
                     Artist = first?.Artist ?? string.Empty,
-                    Songs = songs
+                    Songs = songs,
+                    RequestType = requestType
                 });
             }));
         }
@@ -312,6 +314,8 @@ namespace KSRotation.ViewModels
                 isCurrent = s.IsCurrent,
                 isNext = s.IsNext,
                 isInactive = s.IsInactive,
+                isPaused = s.IsPaused,
+                isMusic = s.IsMusic,
                 song1Completed = s.Song1Completed,
                 song2Completed = s.Song2Completed,
                 song3Completed = s.Song3Completed,
@@ -447,6 +451,8 @@ namespace KSRotation.ViewModels
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
                         if (singer == null) return "Singer not found.";
 
+                        if (singer.IsPaused || singer.IsInactive) return "Singer is paused or inactive.";
+
                         RotationHelpers.SetCurrentSinger(Singers, singer);
 
                         RebuildRotationJsonCacheNow();
@@ -479,13 +485,15 @@ namespace KSRotation.ViewModels
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
                         if (singer == null) return "Singer not found.";
 
-                        bool pausing = !singer.IsInactive && singer.IsCurrent;
+                        if (singer.IsInactive) return "Cannot pause a deleted singer.";
+
+                        bool pausing = !singer.IsPaused && singer.IsCurrent;
                         SingerEntry? nextCurrent = null;
 
                         if (pausing)
                         {
                             // 1. Try the singer already flagged as Next (manual next-singer override)
-                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive);
+                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive && !s.IsPaused);
 
                             if (nextCurrent == null)
                             {
@@ -495,7 +503,7 @@ namespace KSRotation.ViewModels
                                 for (int i = 1; i < count; i++)
                                 {
                                     SingerEntry candidate = Singers[(currentIndex + i) % count];
-                                    if (candidate != singer && !candidate.IsInactive)
+                                    if (candidate != singer && !candidate.IsInactive && !candidate.IsPaused)
                                     {
                                         nextCurrent = candidate;
                                         break;
@@ -504,8 +512,8 @@ namespace KSRotation.ViewModels
                             }
                         }
 
-                        singer.IsInactive = !singer.IsInactive;
-                        if (singer.IsInactive && singer.IsCurrent)
+                        singer.IsPaused = !singer.IsPaused;
+                        if (singer.IsPaused && singer.IsCurrent)
                         {
                             singer.IsCurrent = false;
                         }
@@ -532,7 +540,7 @@ namespace KSRotation.ViewModels
                         if (wasCurrent)
                         {
                             // 1. Try the singer already flagged as Next (manual next-singer override)
-                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive);
+                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive && !s.IsPaused);
 
                             if (nextCurrent == null)
                             {
@@ -542,7 +550,7 @@ namespace KSRotation.ViewModels
                                 for (int i = 1; i < count; i++)
                                 {
                                     SingerEntry candidate = Singers[(currentIndex + i) % count];
-                                    if (candidate != singer && !candidate.IsInactive)
+                                    if (candidate != singer && !candidate.IsInactive && !candidate.IsPaused)
                                     {
                                         nextCurrent = candidate;
                                         break;
@@ -551,7 +559,16 @@ namespace KSRotation.ViewModels
                             }
                         }
 
-                        Singers.Remove(singer);
+                        singer.IsInactive = true;
+                        singer.IsCurrent = false;
+                        singer.IsNext = false;
+
+                        // Move to the very end of the list
+                        int oldIdx = Singers.IndexOf(singer);
+                        if (oldIdx != -1)
+                        {
+                            Singers.Move(oldIdx, Singers.Count - 1);
+                        }
 
                         if (wasCurrent)
                         {
@@ -560,11 +577,38 @@ namespace KSRotation.ViewModels
                                 nextCurrent.IsCurrent = true;
                                 nextCurrent.IsNext = false;
                             }
-                            RotationHelpers.UpdateNextSingerHighlight(Singers);
                         }
 
+                        RotationHelpers.UpdateNextSingerHighlight(Singers);
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();
+                        return "";
+                    }
+                case "restore":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        if (singer == null) return "Singer not found.";
+
+                        if (singer.IsInactive)
+                        {
+                            singer.IsInactive = false;
+                            int oldIndex = Singers.IndexOf(singer);
+                            if (oldIndex != -1)
+                            {
+                                int activeCount = 0;
+                                for (int i = 0; i < Singers.Count; i++)
+                                {
+                                    if (!Singers[i].IsInactive && Singers[i] != singer)
+                                    {
+                                        activeCount++;
+                                    }
+                                }
+                                Singers.Move(oldIndex, activeCount);
+                            }
+                            RotationHelpers.UpdateNextSingerHighlight(Singers);
+                            RebuildRotationJsonCacheNow();
+                            QueueSaveDatabase();
+                        }
                         return "";
                     }
                 case "add-singer":

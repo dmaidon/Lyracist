@@ -1,3 +1,4 @@
+// Edited on Jul 27, 2026 @ 22:38:00 -> Add SelectedMonitorDevice property
 // Edited on Jul 16, 2026 @ 11:00:00 -> Configuration key mappings
 // Last Edit: Jul 02, 2026 14:10 - Added optional PreferredHostIp setting for manual portal URL/QR host override.
 namespace KSRotation.Models
@@ -42,5 +43,8 @@ namespace KSRotation.Models
 
         /// <summary>Persistent DJ connection login PIN.</summary>
         public string DjPin { get; init; } = string.Empty;
+
+        /// <summary>The DeviceName of the selected monitor for the rotation display.</summary>
+        public string SelectedMonitorDevice { get; init; } = string.Empty;
     }
 }

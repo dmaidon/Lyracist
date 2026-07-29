@@ -1,3 +1,4 @@
+// Edited on Jul 27, 2026 @ 22:45:00 -> Add SetSelectedMonitor and RepositionWindow shims to DisplayWindowService
 // Created on Jul 27, 2026 @ 13:50:00 -> Update MessageBox shim to support YesNo buttons and MessageBoxResult for compilation compatibility
 using System;
 using System.Collections.ObjectModel;
@@ -114,6 +115,8 @@ namespace KSRotation.Services
         public void SetWatermarkOpacity(double value) { }
         public void SetBannerText(string template, string venueName, string djName) { }
         public void SetCrawlBannerText(string template, string venueName, string djName) { }
+        public void SetSelectedMonitor(string deviceName) { }
+        public void RepositionWindow() { }
     }
 
     public static class ThemeService

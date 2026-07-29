@@ -204,7 +204,7 @@
                                                 <ColumnDefinition Width="8" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <ui:TextBox Grid.Column="0" Text="{Binding NewVenueName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Venue Name..." Height="26" FontSize="11" />
+                                            <ui:TextBox Grid.Column="0" Text="{Binding NewVenueName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Venue Name..." Height="35" FontSize="11" />
                                             <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddVenueCommand}" Appearance="Primary" Height="26" FontSize="11" />
                                         </Grid>
                                         <ui:Button Content="Remove Selected Venue" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveVenueCommand}" Appearance="Danger" HorizontalAlignment="Stretch" />

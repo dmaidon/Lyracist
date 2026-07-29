@@ -1,3 +1,4 @@
+// Edited on Jul 28, 2026 @ 19:16:00 -> Fix singer match logic by including isMusic filter in KSRotationSyncService
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -157,10 +158,10 @@ namespace Lyracist.Services.Integration
 
                 foreach (var item in syncedItems)
                 {
-                    var singer = currentRotation.FirstOrDefault(s => s.Name.Equals(item.name, StringComparison.OrdinalIgnoreCase));
+                    var singer = currentRotation.FirstOrDefault(s => s.Name.Equals(item.name, StringComparison.OrdinalIgnoreCase) && s.IsMusic == item.isMusic);
                     if (singer == null)
                     {
-                        singer = new Singer { Name = item.name };
+                        singer = new Singer { Name = item.name, IsMusic = item.isMusic };
                         LoadSingerDbMetadata(singer);
                     }
 
@@ -169,6 +170,7 @@ namespace Lyracist.Services.Integration
                     singer.IsCurrent = item.isCurrent;
                     singer.IsNext = item.isNext;
                     singer.IsInactive = item.isInactive;
+                    singer.IsMusic = item.isMusic;
 
                     newRotation.Add(singer);
                 }
@@ -215,7 +217,8 @@ namespace Lyracist.Services.Integration
                     !string.Equals(s.artist, c.Artist, StringComparison.OrdinalIgnoreCase) ||
                     s.isCurrent != c.IsCurrent ||
                     s.isNext != c.IsNext ||
-                    s.isInactive != c.IsInactive)
+                    s.isInactive != c.IsInactive ||
+                    s.isMusic != c.IsMusic)
                 {
                     return false;
                 }
@@ -231,6 +234,7 @@ namespace Lyracist.Services.Integration
             public bool isCurrent { get; set; }
             public bool isNext { get; set; }
             public bool isInactive { get; set; }
+            public bool isMusic { get; set; }
         }
     }
 }

@@ -1,3 +1,4 @@
+// Edited on Jul 28, 2026 @ 18:34:00 -> Implement IsMusic property for compilation compatibility
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Lyracist.Models;
@@ -44,6 +45,9 @@ public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
 
     [ObservableProperty]
     private bool _isNext = false;
+
+    [ObservableProperty]
+    private bool _isMusic = false;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(XP))]

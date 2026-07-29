@@ -1,4 +1,4 @@
-<!-- Edited on Jul 26, 2026 @ 08:30:00 -> Add client-side iTunes song search with graceful offline fallback -->
+<!-- Edited on Jul 28, 2026 @ 18:47:00 -> Add request type options (Karaoke/Music), distinct visual styles, and optimize mobile layouts -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -356,6 +356,36 @@
             font-size: 0.9rem;
             text-align: center;
         }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            .panel {
+                padding: 16px 12px;
+                border-radius: 12px;
+            }
+            h1 {
+                font-size: 1.6rem;
+            }
+            input, button.submit-btn, button.add-btn {
+                padding: 14px 12px;
+                font-size: 1.05rem; /* Large enough to prevent auto-zoom on iOS */
+            }
+            .tab-btn {
+                padding: 12px 8px;
+                font-size: 0.95rem;
+            }
+            .singer-name {
+                font-size: 1.1rem;
+            }
+            .singer-song {
+                font-size: 0.95rem;
+            }
+            label {
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -377,6 +407,13 @@
                 <div class="form-group">
                     <label for="name">Your Name</label>
                     <input type="text" id="name" required placeholder="e.g. Charlie">
+                </div>
+                <div class="form-group">
+                    <label>Request Type</label>
+                    <div class="tabs" style="margin-bottom: 0px; padding: 2px; border-radius: 8px;">
+                        <button type="button" class="tab-btn active" id="type-karaoke" onclick="setRequestType('Karaoke')" style="padding: 8px; font-size: 0.85rem;">Karaoke (Sing)</button>
+                        <button type="button" class="tab-btn" id="type-music" onclick="setRequestType('Music')" style="padding: 8px; font-size: 0.85rem;">Music (Play)</button>
+                    </div>
                 </div>
                 <div class="form-group" style="position: relative;">
                     <label for="online-search">Search Songs &amp; Artists (Online)</label>
@@ -415,15 +452,38 @@
     </div>
 
     <script>
+        let currentRequestType = 'Karaoke';
+        function setRequestType(type) {
+            currentRequestType = type;
+            document.getElementById('type-karaoke').classList.toggle('active', type === 'Karaoke');
+            document.getElementById('type-music').classList.toggle('active', type === 'Music');
+            
+            const titleLabel = document.querySelector('#songs-container .song-entry label');
+            if (titleLabel) {
+                titleLabel.textContent = type === 'Karaoke' ? 'Song 1' : 'Track Details';
+            }
+            const addBtn = document.getElementById('add-song-btn');
+            if (type === 'Music') {
+                if (addBtn) addBtn.style.display = 'none';
+                const container = document.getElementById('songs-container');
+                while (container.children.length > 1) {
+                    container.removeChild(container.lastChild);
+                }
+                updateLabels();
+            } else {
+                updateAddButtonVisibility();
+            }
+        }
+
         function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-btn:not(#type-karaoke):not(#type-music)').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
 
             if (tab === 'request') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.querySelectorAll('.tab-btn:not(#type-karaoke):not(#type-music)')[0].classList.add('active');
                 document.getElementById('request-panel').classList.add('active');
             } else {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.querySelectorAll('.tab-btn:not(#type-karaoke):not(#type-music)')[1].classList.add('active');
                 document.getElementById('rotation-panel').classList.add('active');
                 loadRotation();
             }
@@ -534,7 +594,8 @@
                         name, 
                         song: songs[0].song, 
                         artist: songs[0].artist, 
-                        songs: songs 
+                        songs: songs,
+                        requestType: currentRequestType
                     })
                 });
 
@@ -570,23 +631,50 @@
                 singers.forEach((singer, index) => {
                     let cssClass = 'singer-row';
                     let badge = '';
-                    if (singer.isInactive) {
+                    if (singer.isInactive || singer.isPaused) {
                         cssClass += ' inactive';
                     }
+                    
+                    let nameHtml = escapeHtml(singer.name);
+                    let songHtml = `${escapeHtml(singer.song)} - ${escapeHtml(singer.artist)}`;
+
+                    if (singer.isMusic) {
+                        const musicBadge = '<span class="badge" style="background-color: var(--green); color: black; margin-left: 8px;">Music</span>';
+                        nameHtml = `${escapeHtml(singer.song)} ${musicBadge}`;
+                        songHtml = `Background track requested by ${escapeHtml(singer.name)}`;
+                        if (singer.artist) {
+                            songHtml = `by ${escapeHtml(singer.artist)} • Requested by ${escapeHtml(singer.name)}`;
+                        }
+                    }
+
                     if (singer.isCurrent) {
                         cssClass += ' current';
-                        badge = '<span class="badge current">Current</span>';
+                        badge = singer.isMusic 
+                            ? '<span class="badge current">Playing</span>'
+                            : '<span class="badge current">Current</span>';
                     } else if (singer.isNext) {
                         cssClass += ' next';
-                        badge = '<span class="badge next">Next</span>';
+                        badge = singer.isMusic
+                            ? '<span class="badge next">Up Next</span>'
+                            : '<span class="badge next">Next</span>';
+                    }
+
+                    if (singer.isMusic) {
+                        if (singer.isCurrent) {
+                            nameHtml = `${escapeHtml(singer.song)} <span class="badge current">Playing</span>`;
+                        } else if (singer.isNext) {
+                            nameHtml = `${escapeHtml(singer.song)} <span class="badge next">Up Next</span>`;
+                        }
+                    } else {
+                        nameHtml += badge;
                     }
 
                     html += `
                         <div class="${cssClass}">
                             <div class="singer-num">${index + 1}</div>
                             <div class="singer-details">
-                                <div class="singer-name">${escapeHtml(singer.name)}${badge}</div>
-                                <div class="singer-song">${escapeHtml(singer.song)} - ${escapeHtml(singer.artist)}</div>
+                                <div class="singer-name">${nameHtml}</div>
+                                <div class="singer-song">${songHtml}</div>
                             </div>
                         </div>
                     `;

@@ -1,5 +1,5 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Singer name normalization
-// Last Edit: Jun 30, 2026 08:40 - Replaced per-call bool[10] allocation with an allocation-free GetRoundCompleted switch.
+// Edited on Jul 28, 2026 @ 18:36:00 -> Add IsMusic property to track background music tracks
+// Last Edit: Jul 28, 2026 12:40 - Make IsPaused observable
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -55,7 +55,11 @@ namespace KSRotation.Models
         [ObservableProperty]
         public partial bool IsNext { get; set; }
 
-        public bool IsPaused { get; set; } = false;
+        [ObservableProperty]
+        public partial bool IsPaused { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsMusic { get; set; }
 
         [ObservableProperty] public partial bool Song1Completed { get; set; }
         [ObservableProperty] public partial bool Song2Completed { get; set; }

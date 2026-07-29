@@ -1,4 +1,4 @@
-// Edited on Jul 16, 2026 @ 11:00:00 -> Integrations for mobile rotation
+// Edited on Jul 28, 2026 @ 12:48:00 -> Implement delete/restore logic and paused state transitions
 using System;
 using System.Linq;
 using Microsoft.Maui.Controls;
@@ -60,13 +60,34 @@ public partial class MainPage : ContentPage
         {
             var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
 
+            if (entry.IsInactive)
+            {
+                // Restore singer
+                entry.IsInactive = false;
+                int oldIndex = vm.Singers.IndexOf(entry);
+                if (oldIndex != -1)
+                {
+                    int activeCount = 0;
+                    for (int i = 0; i < vm.Singers.Count; i++)
+                    {
+                        if (!vm.Singers[i].IsInactive && vm.Singers[i] != entry)
+                        {
+                            activeCount++;
+                        }
+                    }
+                    vm.Singers.Move(oldIndex, activeCount);
+                }
+                Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
+                return;
+            }
+
             bool wasCurrent = entry.IsCurrent;
             KSRotation.Models.SingerEntry? nextCurrent = null;
 
             if (wasCurrent)
             {
                 // 1. Try the singer already flagged as Next (manual next-singer override)
-                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive);
+                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused);
 
                 if (nextCurrent == null)
                 {
@@ -76,7 +97,7 @@ public partial class MainPage : ContentPage
                     for (int i = 1; i < count; i++)
                     {
                         var candidate = vm.Singers[(currentIndex + i) % count];
-                        if (candidate != entry && !candidate.IsInactive)
+                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused)
                         {
                             nextCurrent = candidate;
                             break;
@@ -85,7 +106,16 @@ public partial class MainPage : ContentPage
                 }
             }
 
-            vm.Singers.Remove(entry);
+            entry.IsInactive = true;
+            entry.IsCurrent = false;
+            entry.IsNext = false;
+
+            // Move to the very end of the list
+            int oldIdx = vm.Singers.IndexOf(entry);
+            if (oldIdx != -1)
+            {
+                vm.Singers.Move(oldIdx, vm.Singers.Count - 1);
+            }
 
             if (wasCurrent)
             {
@@ -94,8 +124,8 @@ public partial class MainPage : ContentPage
                     nextCurrent.IsCurrent = true;
                     nextCurrent.IsNext = false;
                 }
-                Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
             }
+            Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
         }
     }
 
@@ -319,24 +349,27 @@ public partial class MainPage : ContentPage
     {
         if (sender is Button button && button.CommandParameter is KSRotation.Models.SingerEntry entry)
         {
+            if (entry.IsPaused || entry.IsInactive) return;
             var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
             vm.SetCurrentSingerCommand.Execute(entry);
         }
     }
 
-    private void OnToggleSingerInactiveClicked(object? sender, EventArgs e)
+    private void OnToggleSingerPausedClicked(object? sender, EventArgs e)
     {
         if (sender is Button button && button.CommandParameter is KSRotation.Models.SingerEntry entry)
         {
             var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
 
-            bool pausing = !entry.IsInactive && entry.IsCurrent;
+            if (entry.IsInactive) return;
+
+            bool pausing = !entry.IsPaused && entry.IsCurrent;
             KSRotation.Models.SingerEntry? nextCurrent = null;
 
             if (pausing)
             {
                 // 1. Try the singer already flagged as Next (manual next-singer override)
-                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive);
+                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused);
 
                 if (nextCurrent == null)
                 {
@@ -346,7 +379,7 @@ public partial class MainPage : ContentPage
                     for (int i = 1; i < count; i++)
                     {
                         var candidate = vm.Singers[(currentIndex + i) % count];
-                        if (candidate != entry && !candidate.IsInactive)
+                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused)
                         {
                             nextCurrent = candidate;
                             break;
@@ -355,10 +388,10 @@ public partial class MainPage : ContentPage
                 }
             }
 
-            // Toggle the inactive flag directly without triggering EnforceActiveInactiveOrder (which reorders the collection)
-            entry.IsInactive = !entry.IsInactive;
+            // Toggle the paused flag (retains spot in rotation)
+            entry.IsPaused = !entry.IsPaused;
 
-            if (entry.IsInactive && entry.IsCurrent)
+            if (entry.IsPaused && entry.IsCurrent)
             {
                 entry.IsCurrent = false;
             }
@@ -369,7 +402,7 @@ public partial class MainPage : ContentPage
                 nextCurrent.IsNext = false;
             }
 
-            // Recalculate next singer based on new active states
+            // Recalculate next singer based on new active/paused states
             Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
         }
     }

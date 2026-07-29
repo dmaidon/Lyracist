@@ -1,5 +1,5 @@
-// Edited on Jul 16, 2026 @ 11:00:00 -> Patron model request data
-// Last Edit: Jul 16, 2026 10:33 - Updated PatronRequest to support up to 3 songs.
+// Edited on Jul 28, 2026 @ 18:37:00 -> Add RequestType property to distinguish Karaoke vs Music requests
+// Last Edit: Jul 16, 2026 11:00 - Patron model request data
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,6 +63,7 @@ namespace KSRotation.Models
         }
 
         public DateTime Timestamp { get; set; } = DateTime.Now;
+        public string RequestType { get; set; } = "Karaoke";
 
         private void UpdateSongsListIfSingle()
         {

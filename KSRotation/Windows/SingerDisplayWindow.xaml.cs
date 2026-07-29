@@ -1,4 +1,5 @@
-// Edited on Jul 20, 2026 @ 06:50:00 -> Bind off-tree visual source to XAML CrawlSourceCanvas in clipped Grid to fix Star Wars crawl text rendering
+// Edited on Jul 28, 2026 @ 18:44:00 -> Support background music requests in Star Wars crawl and rotation listings
+// Last Edit: Jul 20, 2026 06:50 - Bind off-tree visual source to XAML CrawlSourceCanvas in clipped Grid to fix Star Wars crawl text rendering
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using System;
@@ -673,48 +674,36 @@ namespace KSRotation.Windows
                 SingerEntry entry = rotation[i];
                 bool isCurrent = i == 0;
 
-                string posLabel;
-                if (isCurrent)
-                {
-                    posLabel = hasDesignatedCurrentSinger ? "NOW SINGING" : "FIRST PERFORMER";
-                }
-                else
-                {
-                    posLabel = i <= ordinals.Length ? ordinals[i - 1] : $"#{i + 1}";
-                }
-
-                panel.Children.Add(new TextBlock
-                {
-                    Text = posLabel,
-                    FontSize = isCurrent ? 20 : 15,
-                    FontStyle = FontStyles.Italic,
-                    Foreground = isCurrent ? white : dimGold,
-                    TextAlignment = TextAlignment.Center,
-                    Margin = new Thickness(0, 0, 0, 6)
-                });
-
-                panel.Children.Add(new TextBlock
-                {
-                    Text = entry.Name,
-                    FontSize = isCurrent ? 52 : 36,
-                    FontWeight = isCurrent ? FontWeights.Bold : FontWeights.Normal,
-                    Foreground = isCurrent ? white : gold,
-                    TextAlignment = TextAlignment.Center,
-                    TextWrapping = TextWrapping.Wrap,
-                    Margin = new Thickness(20, 0, 20, 4)
-                });
-
-                string songLine = entry.Song ?? string.Empty;
-                if (!string.IsNullOrWhiteSpace(entry.Artist))
-                    songLine += string.IsNullOrWhiteSpace(songLine)
-                        ? entry.Artist
-                        : $"  –  {entry.Artist}";
-
-                if (!string.IsNullOrWhiteSpace(songLine))
+                if (entry.IsMusic)
                 {
                     panel.Children.Add(new TextBlock
                     {
-                        Text = songLine,
+                        Text = isCurrent ? "NOW PLAYING" : "BACKGROUND MUSIC",
+                        FontSize = isCurrent ? 20 : 15,
+                        FontStyle = FontStyles.Italic,
+                        Foreground = isCurrent ? white : dimGold,
+                        TextAlignment = TextAlignment.Center,
+                        Margin = new Thickness(0, 0, 0, 6)
+                    });
+
+                    panel.Children.Add(new TextBlock
+                    {
+                        Text = entry.Song,
+                        FontSize = isCurrent ? 52 : 36,
+                        FontWeight = isCurrent ? FontWeights.Bold : FontWeights.Normal,
+                        Foreground = isCurrent ? white : gold,
+                        TextAlignment = TextAlignment.Center,
+                        TextWrapping = TextWrapping.Wrap,
+                        Margin = new Thickness(20, 0, 20, 4)
+                    });
+
+                    string details = string.IsNullOrWhiteSpace(entry.Artist)
+                        ? $"Requested by {entry.Name}"
+                        : $"by {entry.Artist}   •   Requested by {entry.Name}";
+
+                    panel.Children.Add(new TextBlock
+                    {
+                        Text = details,
                         FontSize = isCurrent ? 24 : 18,
                         Foreground = dimGold,
                         TextAlignment = TextAlignment.Center,
@@ -724,7 +713,59 @@ namespace KSRotation.Windows
                 }
                 else
                 {
-                    panel.Children.Add(new Border { Height = isCurrent ? 70 : 48 });
+                    string posLabel;
+                    if (isCurrent)
+                    {
+                        posLabel = hasDesignatedCurrentSinger ? "NOW SINGING" : "FIRST PERFORMER";
+                    }
+                    else
+                    {
+                        posLabel = i <= ordinals.Length ? ordinals[i - 1] : $"#{i + 1}";
+                    }
+
+                    panel.Children.Add(new TextBlock
+                    {
+                        Text = posLabel,
+                        FontSize = isCurrent ? 20 : 15,
+                        FontStyle = FontStyles.Italic,
+                        Foreground = isCurrent ? white : dimGold,
+                        TextAlignment = TextAlignment.Center,
+                        Margin = new Thickness(0, 0, 0, 6)
+                    });
+
+                    panel.Children.Add(new TextBlock
+                    {
+                        Text = entry.Name,
+                        FontSize = isCurrent ? 52 : 36,
+                        FontWeight = isCurrent ? FontWeights.Bold : FontWeights.Normal,
+                        Foreground = isCurrent ? white : gold,
+                        TextAlignment = TextAlignment.Center,
+                        TextWrapping = TextWrapping.Wrap,
+                        Margin = new Thickness(20, 0, 20, 4)
+                    });
+
+                    string songLine = entry.Song ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(entry.Artist))
+                        songLine += string.IsNullOrWhiteSpace(songLine)
+                            ? entry.Artist
+                            : $"  –  {entry.Artist}";
+
+                    if (!string.IsNullOrWhiteSpace(songLine))
+                    {
+                        panel.Children.Add(new TextBlock
+                        {
+                            Text = songLine,
+                            FontSize = isCurrent ? 24 : 18,
+                            Foreground = dimGold,
+                            TextAlignment = TextAlignment.Center,
+                            TextWrapping = TextWrapping.Wrap,
+                            Margin = new Thickness(20, 0, 20, isCurrent ? 70 : 48)
+                        });
+                    }
+                    else
+                    {
+                        panel.Children.Add(new Border { Height = isCurrent ? 70 : 48 });
+                    }
                 }
             }
 

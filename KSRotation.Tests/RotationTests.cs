@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Enable testing in Debug
+// Edited on Jul 28, 2026 @ 12:51:00 -> Add unit tests for pause, delete, restore, and set-current validation
 // Last Edit: Jun 29, 2026 13:26 - Initial test suite: SingerEntry round helpers, RotationHelpers, ThemeService.
 using KSRotation.Models;
 using KSRotation.Services;
@@ -551,7 +551,9 @@ public class MainViewModelTests
 
         // Assert
         Assert.Equal("", result);
-        Assert.Equal(2, vm.Singers.Count);
+        Assert.Equal(3, vm.Singers.Count);
+        Assert.True(current.IsInactive);
+        Assert.Equal(current.Id, vm.Singers[2].Id); // Moved to end
         Assert.True(next.IsCurrent);
         Assert.False(next.IsNext);
         Assert.True(after.IsNext);
@@ -576,7 +578,9 @@ public class MainViewModelTests
 
         // Assert
         Assert.Equal("", result);
-        Assert.Equal(2, vm.Singers.Count);
+        Assert.Equal(3, vm.Singers.Count);
+        Assert.True(current.IsInactive);
+        Assert.Equal(current.Id, vm.Singers[2].Id); // Moved to end
         Assert.True(after.IsCurrent);
         Assert.True(last.IsNext);
     }
@@ -600,7 +604,7 @@ public class MainViewModelTests
 
         // Assert
         Assert.Equal("", result);
-        Assert.True(current.IsInactive);
+        Assert.True(current.IsPaused);
         Assert.False(current.IsCurrent);
         Assert.True(after.IsCurrent);
         Assert.True(last.IsNext);
@@ -629,6 +633,51 @@ public class MainViewModelTests
         Assert.True(next.IsCurrent);
         Assert.False(next.IsNext);
         Assert.True(after.IsNext);
+    }
+
+    [Fact]
+    public void DjRestoreAction_RestoresInactiveSingerAndMovesToActiveEnd()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var active1 = new SingerEntry { Name = "Alice" };
+        var active2 = new SingerEntry { Name = "Bob" };
+        var inactive = new SingerEntry { Name = "Carol", IsInactive = true };
+        vm.Singers.Add(active1);
+        vm.Singers.Add(inactive);
+        vm.Singers.Add(active2);
+
+        // Act
+        string result = InvokeDjAction(vm, "restore", inactive.Id.ToString());
+
+        // Assert
+        Assert.Equal("", result);
+        Assert.False(inactive.IsInactive);
+        // Carol is restored and moved to the end of the active section (index 2 since she is active now)
+        Assert.Equal(inactive.Id, vm.Singers[2].Id);
+    }
+
+    [Fact]
+    public void DjSetCurrentAction_FailsOnPausedOrInactiveSinger()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var paused = new SingerEntry { Name = "Alice", IsPaused = true };
+        var inactive = new SingerEntry { Name = "Bob", IsInactive = true };
+        vm.Singers.Add(paused);
+        vm.Singers.Add(inactive);
+
+        // Act
+        string resultPaused = InvokeDjAction(vm, "set-current", paused.Id.ToString());
+        string resultInactive = InvokeDjAction(vm, "set-current", inactive.Id.ToString());
+
+        // Assert
+        Assert.Equal("Singer is paused or inactive.", resultPaused);
+        Assert.Equal("Singer is paused or inactive.", resultInactive);
     }
 }
 

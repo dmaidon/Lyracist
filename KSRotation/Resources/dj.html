@@ -1,4 +1,4 @@
-<!-- Edited on Jul 27, 2026 @ 12:30:00 -> Add confirmation dialog for locking screen in DJ console -->
+<!-- Edited on Jul 28, 2026 @ 18:47:00 -> Add pause state triggers, support background music requests, and optimize mobile layouts -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -218,7 +218,7 @@
             background-color: var(--row-next-bg);
         }
 
-        .singer-card.inactive {
+        .singer-card.inactive, .singer-card.paused {
             opacity: 0.45;
             background-color: var(--row-inactive-bg);
         }
@@ -426,6 +426,39 @@
             padding: 24px 0;
             font-size: 0.9rem;
         }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+            }
+            .panel {
+                padding: 12px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            .singer-name {
+                font-size: 1.1rem;
+            }
+            .singer-song {
+                font-size: 1.05rem;
+            }
+            .round-box {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+            button.btn-outline {
+                padding: 8px 16px;
+                font-size: 0.95rem;
+            }
+            .request-card {
+                padding: 12px;
+            }
+            .request-name {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -628,40 +661,66 @@
                 let badges = '';
                 if (s.isCurrent) {
                     cardClass += ' current';
-                    badges += '<span class="badge current">Now Singing</span>';
+                    badges += s.isMusic 
+                        ? '<span class="badge current" style="background-color: var(--green); color: black;">Now Playing</span>'
+                        : '<span class="badge current">Now Singing</span>';
                 } else if (s.isNext) {
                     cardClass += ' next';
-                    badges += '<span class="badge next">Next</span>';
+                    badges += s.isMusic
+                        ? '<span class="badge next" style="background-color: var(--green); color: white;">Next Track</span>'
+                        : '<span class="badge next">Next</span>';
+                }
+                if (s.isMusic && !s.isCurrent && !s.isNext) {
+                    badges += '<span class="badge" style="background-color: var(--border-color); color: var(--text-muted); border: 1px solid var(--text-muted); margin-left: 4px;">Music</span>';
                 }
                 if (s.isInactive) {
                     cardClass += ' inactive';
                 }
+                if (s.isPaused) {
+                    cardClass += ' paused';
+                }
 
                 // Render rounds checkboxes
                 let roundsHtml = '';
-                for (let r = 1; r <= 10; r++) {
-                    const completed = s[`song${r}Completed`] || false;
-                    const rClass = `round-box r${r}` + (completed ? ' completed' : '');
-                    roundsHtml += `<div class="${rClass}" onclick="toggleRound('${s.id}', ${r}, ${completed})">${r}</div>`;
+                if (s.isMusic) {
+                    roundsHtml = `<div style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">♪ Background Music Track</div>`;
+                } else {
+                    for (let r = 1; r <= 10; r++) {
+                        const completed = s[`song${r}Completed`] || false;
+                        const rClass = `round-box r${r}` + (completed ? ' completed' : '');
+                        roundsHtml += `<div class="${rClass}" onclick="toggleRound('${s.id}', ${r}, ${completed})">${r}</div>`;
+                    }
                 }
 
                 // Check for empty song details
                 let detailsText = '';
                 if (s.song) {
-                    detailsText = ` - <span class="singer-song">${escapeHtml(s.song)}</span>`;
+                    const songStyle = s.isMusic ? 'style="color: var(--green); font-weight: bold;"' : '';
+                    detailsText = ` - <span class="singer-song" ${songStyle}>${escapeHtml(s.song)}</span>`;
                     if (s.artist) {
                         detailsText += ` <span class="singer-artist">(${escapeHtml(s.artist)})</span>`;
                     }
                 }
 
                 // Pause button text and state class
-                const pauseText = s.isInactive ? "👁 Resume" : "👁 Pause";
-                const pauseClass = s.isInactive ? "btn-text resume" : "btn-text pause";
+                const pauseTextStr = s.isPaused ? "👁 Resume" : "👁 Pause";
+                const pauseClass = s.isPaused ? "btn-text resume" : "btn-text pause";
+
+                const pauseHtml = s.isInactive ? '' : `<button class="${pauseClass}" onclick="sendAction('toggle-inactive', '${s.id}')">${pauseTextStr}</button>`;
+
+                const setClicked = (s.isInactive || s.isPaused) ? '' : `onclick="sendAction('set-current', '${s.id}')"`;
+                const setStyle = (s.isInactive || s.isPaused) ? 'style="opacity:0.4; cursor:not-allowed;"' : '';
+
+                const deleteHtml = s.isInactive 
+                    ? `<button class="btn-text resume" title="Restore" onclick="sendAction('restore', '${s.id}')">↺ Restore</button>`
+                    : `<button class="btn-circle red" title="Delete" onclick="sendAction('delete', '${s.id}')">🗑</button>`;
+
+                const nameStyle = s.isMusic ? 'style="color: var(--green); font-weight: bold;"' : '';
 
                 const innerHTML = `
                     <div class="singer-details">
                         <div class="singer-info">
-                            <span class="singer-name">${escapeHtml(s.name)}</span>
+                            <span class="singer-name" ${nameStyle}>${escapeHtml(s.name)}</span>
                             ${detailsText}
                             ${badges}
                         </div>
@@ -670,12 +729,12 @@
                         </div>
                     </div>
                     <div class="actions-container">
-                        <button class="btn-circle green" title="Set Current" onclick="sendAction('set-current', '${s.id}')">🎙</button>
+                        <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
                         <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
                         <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
                         <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>
-                        <button class="${pauseClass}" onclick="sendAction('toggle-inactive', '${s.id}')">${pauseText}</button>
-                        <button class="btn-circle red" title="Delete" onclick="sendAction('delete', '${s.id}')">🗑</button>
+                        ${pauseHtml}
+                        ${deleteHtml}
                     </div>
                 `;
 
@@ -733,10 +792,16 @@
                         <div class="request-artist">${escapeHtml(r.artist || "Unknown Artist")}</div>
                     `;
                 }
+
+                const isMusic = r.requestType === "Music";
+                const badgeColor = isMusic ? "var(--green)" : "var(--primary)";
+                const badgeText = isMusic ? "Music" : "Karaoke";
+                const badgeHtml = `<span class="badge" style="background-color: ${badgeColor}; color: white; margin-left: 8px; font-size: 0.65rem; vertical-align: middle;">${badgeText}</span>`;
+
                 html += `
                     <div class="request-card">
                         <div class="request-details">
-                            <div class="request-name">${escapeHtml(r.name)}</div>
+                            <div class="request-name">${escapeHtml(r.name)}${badgeHtml}</div>
                             ${songsHtml}
                         </div>
                         <div class="request-actions">

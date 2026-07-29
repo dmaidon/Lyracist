@@ -1,8 +1,10 @@
+// Edited on Jul 27, 2026 @ 22:39:00 -> Update display window positioning to support target monitor selection and repositioning
 // Last Edit: Jul 02, 2026 11:50 - Reused shared default crawl banner text constant for template fallback.
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using Screen = System.Windows.Forms.Screen;
@@ -15,6 +17,25 @@ namespace KSRotation.Services
         private readonly DisplayViewModel _viewModel = new();
         private string _connectionUrl = string.Empty;
         private ImageSource? _qrCodeImage;
+        private string _selectedMonitorDevice = string.Empty;
+
+        public void SetSelectedMonitor(string deviceName)
+        {
+            _selectedMonitorDevice = deviceName ?? string.Empty;
+        }
+
+        public void RepositionWindow()
+        {
+            if (_window == null)
+            {
+                return;
+            }
+
+            var previousState = _window.WindowState;
+            _window.WindowState = WindowState.Normal;
+            PositionWindowOnTargetMonitor(_window);
+            _window.WindowState = previousState;
+        }
 
         /// <summary>
         /// Opens the singer display popup and initializes its data.
@@ -41,7 +62,7 @@ namespace KSRotation.Services
             _viewModel.ConnectionUrl = _connectionUrl;
             _viewModel.QrCodeImage = _qrCodeImage;
             _viewModel.UpdateFromRotation(rotation);
-            PositionWindowOnSecondMonitor(_window);
+            PositionWindowOnTargetMonitor(_window);
             _window.Show();
             _window.WindowState = WindowState.Maximized;
             _window.Activate();
@@ -162,7 +183,7 @@ namespace KSRotation.Services
             _window = null;
         }
 
-        private static bool PositionWindowOnSecondMonitor(Window window)
+        private bool PositionWindowOnTargetMonitor(Window window)
         {
             ArgumentNullException.ThrowIfNull(window);
 
@@ -172,8 +193,26 @@ namespace KSRotation.Services
                 return false;
             }
 
-            bool isSecondMonitor = screens.Length > 1;
-            Screen targetScreen = isSecondMonitor ? screens[1] : screens[0];
+            Screen targetScreen = screens[0];
+            if (!string.IsNullOrEmpty(_selectedMonitorDevice))
+            {
+                var matched = screens.FirstOrDefault(s => string.Equals(s.DeviceName, _selectedMonitorDevice, StringComparison.OrdinalIgnoreCase));
+                if (matched != null)
+                {
+                    targetScreen = matched;
+                }
+                else
+                {
+                    bool isSecondMonitor = screens.Length > 1;
+                    targetScreen = isSecondMonitor ? screens[1] : screens[0];
+                }
+            }
+            else
+            {
+                bool isSecondMonitor = screens.Length > 1;
+                targetScreen = isSecondMonitor ? screens[1] : screens[0];
+            }
+
             System.Drawing.Rectangle workArea = targetScreen.WorkingArea;
 
             DpiScale dpi = VisualTreeHelper.GetDpi(window);
@@ -191,7 +230,7 @@ namespace KSRotation.Services
             window.Left = workAreaLeft + ((workAreaWidth - windowWidth) / 2);
             window.Top = workAreaTop + ((workAreaHeight - windowHeight) / 2);
 
-            return isSecondMonitor;
+            return screens.Length > 1;
         }
     }
 }

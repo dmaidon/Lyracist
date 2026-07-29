@@ -1,4 +1,4 @@
-<!-- Last Edit: Jun 30, 2026 08:29 - Moved mic_128.png into the project (was an absolute Downloads path) so packaging is portable; retained WinForms usage because DisplayWindowService uses Screen APIs. -->
+﻿<!-- Last Edit: Jun 30, 2026 08:29 - Moved mic_128.png into the project (was an absolute Downloads path) so packaging is portable; retained WinForms usage because DisplayWindowService uses Screen APIs. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -9,8 +9,9 @@
     <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyVersion>26.7.27.306</AssemblyVersion>
-    <FileVersion>26.7.27.306</FileVersion>
+    <DefineConstants>$(DefineConstants);WPF</DefineConstants>
+    <AssemblyVersion>26.7.28.318</AssemblyVersion>
+    <FileVersion>26.7.28.318</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>

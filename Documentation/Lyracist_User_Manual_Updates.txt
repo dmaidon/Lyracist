@@ -17,3 +17,85 @@ A new online search capability has been added directly to the patron request por
 3. Graceful Offline Fallback:
    - If the patron's phone has no internet connection (e.g. no cellular signal or local-only hotspot), the search bar will gracefully show a "Search unavailable (offline)" message.
    - The manual entry form remains fully functional under all network conditions.
+
+Section: Display Projection Window / Display Monitor Selection
+
+[Update Details]
+Operators can now select a specific monitor for displaying the rotation projection window (Singer Display Window) from a dropdown list of available system screens.
+
+1. Target Monitor Dropdown:
+   - Located in the "Settings" tab under a new group titled "Display Monitor".
+   - Displays all connected monitors with their indices, bounds, and whether they are primary.
+   - When selected, the display window is repositioned on that specific screen.
+   - If the selected monitor is unplugged or unavailable, the application falls back automatically to the secondary screen if available, or the primary screen.
+
+2. Dynamic Window Relocation:
+   - Selecting a different monitor dynamically moves the active, maximized display window to the target screen immediately without needing to close and re-enable it.
+
+3. Refresh Monitors List:
+   - If a new monitor is connected while the application is running, operators can click the "Refresh" button next to the dropdown to scan and reload the system's screen configuration.
+
+Section: Rotation Management / Paused and Inactive Singer Controls
+
+[Update Details]
+Updates have been made to both the main console and the DJ web portal to manage paused and deleted (inactive) singers more effectively.
+
+1. Paused Singers:
+   - Operators can pause a singer using the Pause button in the console or the remote DJ portal.
+   - Paused singers retain their index/position in the rotation list, but their row is grayed out.
+   - Paused singers cannot be marked as the current singer or next singer until they are explicitly unpaused (resumed). They are automatically skipped in the rotation.
+
+2. Deleted/Inactive Singers:
+   - Clicking the Delete (trash can) button no longer deletes a singer from the database. Instead, it marks them as inactive (deleted) and moves them to the end of the rotation list.
+   - Inactive singers' rows are grayed out.
+   - When a singer is inactive, their delete button icon changes to a "↺" (Restore) button in the console and "Restore" button in the DJ portal.
+   - Clicking Restore reactivates the singer and moves them back to the end of the active section in the rotation.
+
+Section: Patron Portal / Background Music & Song Requests
+
+[Update Details]
+Patrons can now request background music/song tracks to be played in between karaoke performances directly from the web portal.
+
+1. Karaoke vs. Music Selection:
+   - On the Patron Request Portal, users will see a new selector under their name: "Karaoke (Sing)" and "Music (Play)".
+   - Selecting "Music" limits the submission to one song, hides the "Add another song" option, and marks the request category as Music.
+   
+2. DJ Incoming Requests Queue:
+   - On the DJ screen and the remote DJ portal web interface, incoming music requests are labeled with a green [MUSIC] badge, distinguishing them from standard purple [KARAOKE] requests.
+   - Standard duplicate logic is updated so a singer can have one active karaoke slot and one background music slot simultaneously.
+
+3. Rotation List Layout:
+   - Accepting a music request places it in the active rotation queue.
+   - For music entries in the queue, the 10 round checkboxes are automatically hidden and replaced by a "♪ Background Music Track" label.
+   - On the DJ screen, the name, song, and artist fields of music tracks are highlighted in bold green for easier identification.
+
+4. Projection Display Support:
+   - Music requests show up with a "[MUSIC]" prefix in the active list and flip tile board.
+   - When a music request is active/next:
+     - The projection window's Vegas Marquee style shows "★ BACKGROUND MUSIC ★".
+     - The Vinyl Turntable style displays "♪ NOW PLAYING".
+     - The Star Wars Crawl renders the entry with a "NOW PLAYING" header, displaying the song title as the primary text, followed by the artist and requester details below.
+
+
+Section: Database Manager / Catalog Book Exporter
+
+[Update Details]
+Operators can now export the entire song database (Karaoke or Music) into Word (.docx) or PDF format directly from the Lyracist Database Manager.
+
+1. Exporter Panel:
+   - Located in the right pane of the Lyracist Database Manager under "Catalog Book Generator".
+   - Provides two dropdown selectors:
+     - Catalog: Choose between the "Karaoke Catalog" (tracks marked as karaoke) and the "Music Catalog" (standard audio tracks).
+     - Format: Choose between "Word Document (.docx)" and "PDF Document (.pdf)".
+     
+2. Generated Fields & Formatting:
+   - The generated books are structured as clean, professionally styled tables showing:
+     - Artist: Alphabetically ordered performer names.
+     - Title: Song titles.
+     - Length: Formatted track durations (MM:SS).
+     - Genre: The embedded audio genre (automatically populated during metadata scans).
+     
+3. Pagination & Output:
+   - The document is fully paginated, displaying "Page X" or "Page X of Y" in the bottom footer.
+   - For Word (.docx) books, a repeating header row is defined so column titles automatically reappear on the top of each page.
+   - When generation completes, Lyracist automatically launches the default system viewer to open and print the document, which is saved in the "Reports" directory.

@@ -1,3 +1,4 @@
+// Edited on Jul 28, 2026 @ 19:04:00 -> Update PlayPerformerRequest to resolve non-karaoke background music requests
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -1342,10 +1343,10 @@ public partial class KaraokeViewModel : BaseViewModel
         }
         else
         {
-            var localMatch = _libraryService.Search($"{singer.SongTitle} {singer.Artist}").FirstOrDefault();
+            var localMatch = _libraryService.Search($"{singer.SongTitle} {singer.Artist}", singer.IsMusic).FirstOrDefault();
             if (localMatch == null && !string.IsNullOrWhiteSpace(singer.SongTitle))
             {
-                localMatch = _libraryService.Search(singer.SongTitle).FirstOrDefault();
+                localMatch = _libraryService.Search(singer.SongTitle, singer.IsMusic).FirstOrDefault();
             }
 
             if (localMatch != null)

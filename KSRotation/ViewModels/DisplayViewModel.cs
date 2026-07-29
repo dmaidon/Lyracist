@@ -1,3 +1,4 @@
+// Edited on Jul 28, 2026 @ 18:41:00 -> Add support for formatting music requests differently on master screens
 // Last Edit: Jul 02, 2026 16:54 - Added designated-current state tracking to support First Performer labels before a current singer is set.
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
@@ -62,13 +63,29 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool HasDesignatedCurrentSinger { get; set; }
 
-        public string PerformerHeaderText => HasDesignatedCurrentSinger
-            ? "★  NOW PERFORMING  ★"
-            : "★  FIRST PERFORMER  ★";
+        [ObservableProperty]
+        public partial bool IsCurrentMusic { get; set; }
+
+        public string PerformerHeaderText
+        {
+            get
+            {
+                if (IsCurrentMusic) return "★  BACKGROUND MUSIC  ★";
+                return HasDesignatedCurrentSinger ? "★  NOW PERFORMING  ★" : "★  FIRST PERFORMER  ★";
+            }
+        }
+
+        public string NowSpinningText => IsCurrentMusic ? "♪  NOW PLAYING" : "♪  NOW SPINNING";
 
         partial void OnHasDesignatedCurrentSingerChanged(bool value)
         {
             OnPropertyChanged(nameof(PerformerHeaderText));
+        }
+
+        partial void OnIsCurrentMusicChanged(bool value)
+        {
+            OnPropertyChanged(nameof(PerformerHeaderText));
+            OnPropertyChanged(nameof(NowSpinningText));
         }
 
         public void UpdateFromRotation(ObservableCollection<SingerEntry> rotation)
@@ -102,6 +119,7 @@ namespace KSRotation.ViewModels
                 CurrentSingerSong = string.Empty;
                 CurrentSongTitle = string.Empty;
                 HasDesignatedCurrentSinger = false;
+                IsCurrentMusic = false;
                 NextSingers.Clear();
                 FullRotation.Clear();
                 RotationEntries.Clear();
@@ -110,17 +128,32 @@ namespace KSRotation.ViewModels
             }
             else
             {
-                CurrentSinger = string.IsNullOrWhiteSpace(current.Song)
-                    ? current.Name
-                    : $"{current.Name} - {current.Song}";
+                IsCurrentMusic = current.IsMusic;
+                if (current.IsMusic)
+                {
+                    CurrentSinger = $"[MUSIC] {current.Song} (Req. by {current.Name})";
+                    CurrentSingerName = $"[MUSIC] {current.Name}";
+                    CurrentSongTitle = current.Song ?? string.Empty;
+                    CurrentSingerSong = string.IsNullOrWhiteSpace(current.Song)
+                        ? string.Empty
+                        : (string.IsNullOrWhiteSpace(current.Artist)
+                            ? current.Song
+                            : $"{current.Song} – {current.Artist}");
+                }
+                else
+                {
+                    CurrentSinger = string.IsNullOrWhiteSpace(current.Song)
+                        ? current.Name
+                        : $"{current.Name} - {current.Song}";
 
-                CurrentSingerName = current.Name;
-                CurrentSongTitle = current.Song ?? string.Empty;
-                CurrentSingerSong = string.IsNullOrWhiteSpace(current.Song)
-                    ? string.Empty
-                    : (string.IsNullOrWhiteSpace(current.Artist)
-                        ? current.Song
-                        : $"{current.Song} – {current.Artist}");
+                    CurrentSingerName = current.Name;
+                    CurrentSongTitle = current.Song ?? string.Empty;
+                    CurrentSingerSong = string.IsNullOrWhiteSpace(current.Song)
+                        ? string.Empty
+                        : (string.IsNullOrWhiteSpace(current.Artist)
+                            ? current.Song
+                            : $"{current.Song} – {current.Artist}");
+                }
             }
 
             // Build the next-up list in true rotation order:
@@ -136,18 +169,38 @@ namespace KSRotation.ViewModels
                 {
                     SingerEntry singer = activeRotation[(currentIndex + offset) % count];
 
-                    NextSingers.Add(string.IsNullOrWhiteSpace(singer.Song)
-                        ? singer.Name
-                        : $"{singer.Name} - {singer.Song}");
+                    if (singer.IsMusic)
+                    {
+                        string songText = string.IsNullOrWhiteSpace(singer.Artist)
+                            ? singer.Song
+                            : $"{singer.Song} – {singer.Artist}";
+                        NextSingers.Add($"[MUSIC] {songText}");
+                    }
+                    else
+                    {
+                        NextSingers.Add(string.IsNullOrWhiteSpace(singer.Song)
+                            ? singer.Name
+                            : $"{singer.Name} - {singer.Song}");
+                    }
                 }
             }
             else
             {
                 foreach (SingerEntry singer in rotation.Where(s => !s.IsInactive).Take(5))
                 {
-                    NextSingers.Add(string.IsNullOrWhiteSpace(singer.Song)
-                        ? singer.Name
-                        : $"{singer.Name} - {singer.Song}");
+                    if (singer.IsMusic)
+                    {
+                        string songText = string.IsNullOrWhiteSpace(singer.Artist)
+                            ? singer.Song
+                            : $"{singer.Song} – {singer.Artist}";
+                        NextSingers.Add($"[MUSIC] {songText}");
+                    }
+                    else
+                    {
+                        NextSingers.Add(string.IsNullOrWhiteSpace(singer.Song)
+                            ? singer.Name
+                            : $"{singer.Name} - {singer.Song}");
+                    }
                 }
             }
 
@@ -169,10 +222,14 @@ namespace KSRotation.ViewModels
                     SingerEntry singer = activeRotation[(currentIndex + offset) % count];
                     FullRotation.Add(singer);
 
-                    string prefixAndSinger = $"{offset + 1}. {singer.Name}";
+                    string prefixAndSinger = singer.IsMusic 
+                        ? $"{(offset == 0 ? "★" : $"{offset + 1}")}. [MUSIC]"
+                        : $"{(offset == 0 ? "★" : $"{offset + 1}")}. {singer.Name}";
+
                     string songSeparatorAndTitle = string.IsNullOrWhiteSpace(singer.Song)
                         ? string.Empty
-                        : $" - {singer.Song}";
+                        : (singer.IsMusic ? $" {singer.Song} (Req. by {singer.Name})" : $" - {singer.Song}");
+
                     string artistInParentheses = string.IsNullOrWhiteSpace(singer.Artist)
                         ? string.Empty
                         : $" ({singer.Artist})";
@@ -195,10 +252,12 @@ namespace KSRotation.ViewModels
                                         : offset == 1 ? "Next"
                                         : $"{offset + 1}";
 
+                        string displayName = singer.IsMusic ? $"[M] {singer.Name}" : singer.Name;
+
                         FlipTileEntries.Add(new DisplayFlipTileEntry
                         {
                             Position = CleanAndPad(posLabel, 4),
-                            Name = CleanAndPad(singer.Name, 20),
+                            Name = CleanAndPad(displayName, 20),
                             Status = CleanAndPad(statusText, 36),
                             IsCurrent = offset == 0,
                             IsNext = offset == 1
@@ -213,10 +272,14 @@ namespace KSRotation.ViewModels
                 {
                     FullRotation.Add(singer);
 
-                    string prefixAndSinger = $"{index}. {singer.Name}";
+                    string prefixAndSinger = singer.IsMusic
+                        ? $"{index}. [MUSIC]"
+                        : $"{index}. {singer.Name}";
+
                     string songSeparatorAndTitle = string.IsNullOrWhiteSpace(singer.Song)
                         ? string.Empty
-                        : $" - {singer.Song}";
+                        : (singer.IsMusic ? $" {singer.Song} (Req. by {singer.Name})" : $" - {singer.Song}");
+
                     string artistInParentheses = string.IsNullOrWhiteSpace(singer.Artist)
                         ? string.Empty
                         : $" ({singer.Artist})";
@@ -235,10 +298,12 @@ namespace KSRotation.ViewModels
                             statusText += $" – {singer.Artist}";
                         }
 
+                        string displayName = singer.IsMusic ? $"[M] {singer.Name}" : singer.Name;
+
                         FlipTileEntries.Add(new DisplayFlipTileEntry
                         {
                             Position = CleanAndPad($"{index}", 4),
-                            Name = CleanAndPad(singer.Name, 20),
+                            Name = CleanAndPad(displayName, 20),
                             Status = CleanAndPad(statusText, 36),
                             IsCurrent = false,
                             IsNext = false
