@@ -9,8 +9,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.7.29.48</AssemblyVersion>
-    <FileVersion>26.7.29.48</FileVersion>
+    <AssemblyVersion>26.7.29.49</AssemblyVersion>
+    <FileVersion>26.7.29.49</FileVersion>
   </PropertyGroup>  
 
   <ItemGroup>
