@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Restore FFmpeg/FFprobe parsing
+// Edited on Jul 29, 2026 @ 00:35:00 -> Add robust recursive directory crawling supporting system/hidden folder skips and permission exceptions
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -234,13 +234,7 @@ namespace Lyracist.Data.Services
 
                 try
                 {
-                    var files = Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories)
-                        .Where(f =>
-                        {
-                            string ext = Path.GetExtension(f).ToLowerInvariant();
-                            return ext == ".mp3" || ext == ".cdg" || ext == ".mp4" || ext == ".zip";
-                        });
-
+                    var files = SafeEnumerateFiles(path);
                     candidateFiles.AddRange(files);
                 }
                 catch (Exception ex)
@@ -260,63 +254,58 @@ namespace Lyracist.Data.Services
             var searchService = new SearchService(_context);
             int processed = 0;
 
-            // Query existing song paths in this transaction for fast local duplicate checks
+            // Query existing song paths for fast local duplicate checks
             var existingSongsMap = await _context.Songs
                 .ToDictionaryAsync(s => s.FilePath, s => s, StringComparer.OrdinalIgnoreCase);
 
-            // Start a single database transaction to maximize SQLite performance
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            // Clean up dead records for files that no longer exist under the scanned directory paths.
+            // Committed immediately (not batched with the scan below) since this list is normally small.
+            var songsToRemove = new List<Song>();
+            foreach (var kvp in existingSongsMap)
             {
-                // Clean up dead records for files that no longer exist under the scanned directory paths
-                var songsToRemove = new List<Song>();
-                foreach (var kvp in existingSongsMap)
+                var s = kvp.Value;
+                bool isInScannedPath = false;
+                foreach (var path in paths)
                 {
-                    var s = kvp.Value;
-                    bool isInScannedPath = false;
-                    foreach (var path in paths)
+                    if (s.FilePath.StartsWith(path, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (s.FilePath.StartsWith(path, StringComparison.OrdinalIgnoreCase))
-                        {
-                            isInScannedPath = true;
-                            break;
-                        }
-                    }
-
-                    if (isInScannedPath && !File.Exists(s.FilePath))
-                    {
-                        songsToRemove.Add(s);
+                        isInScannedPath = true;
+                        break;
                     }
                 }
 
-                if (songsToRemove.Count > 0)
+                if (isInScannedPath && !File.Exists(s.FilePath))
                 {
-                    _context.Songs.RemoveRange(songsToRemove);
-                    await _context.SaveChangesAsync();
-                    foreach (var s in songsToRemove)
-                    {
-                        await searchService.RemoveSongFromIndex(s.SongId);
-                        existingSongsMap.Remove(s.FilePath);
-                    }
+                    songsToRemove.Add(s);
                 }
+            }
 
+            if (songsToRemove.Count > 0)
+            {
+                _context.Songs.RemoveRange(songsToRemove);
+                await _context.SaveChangesAsync();
+                foreach (var s in songsToRemove)
+                {
+                    await searchService.RemoveSongFromIndex(s.SongId);
+                    existingSongsMap.Remove(s.FilePath);
+                }
+            }
+
+            // Process and commit in batches rather than one giant transaction spanning the
+            // entire (potentially huge, multi-drive) scan. A large real-world library can take
+            // a very long time to probe (one external ffprobe process per file); batching means
+            // an interruption partway through (crash, closed app, one bad file) only loses the
+            // in-flight batch instead of rolling back every song found so far.
+            const int batchSize = 200;
+            var batch = new List<string>(batchSize);
+
+            async Task ProcessBatchAsync(List<string> filesBatch)
+            {
                 var songsToInsert = new List<Song>();
                 var songsToUpdate = new List<Song>();
-                var songsToProbe = new List<Song>();
 
-                foreach (var file in candidateFiles)
+                foreach (var file in filesBatch)
                 {
-                    processed++;
-                    if (processed % 250 == 0 || processed == totalFiles)
-                    {
-                        progress?.Report(new ScanProgress
-                        {
-                            TotalFilesFound = totalFiles,
-                            FilesProcessed = processed,
-                            CurrentFile = Path.GetFileName(file)
-                        });
-                    }
-
                     string ext = Path.GetExtension(file).ToLowerInvariant();
 
                     // Standalone CDGs are skipped since they are processed in tandem with MP3 files
@@ -356,14 +345,12 @@ namespace Lyracist.Data.Services
                         existing.IsKaraoke = parsed.IsKaraoke;
                         existing.KaraokeType = typeLabel;
                         songsToUpdate.Add(existing);
-
-                        if (existing.Duration <= 0)
-                        {
-                            songsToProbe.Add(existing);
-                        }
                     }
                     else
                     {
+                        // Duration/Genre are left at defaults here so the scan itself stays fast
+                        // (no external ffprobe process per file). ProbeMissingMetadataAsync fills
+                        // these in afterward as a separate low-priority background pass.
                         var newSong = new Song
                         {
                             Title = parsed.Title,
@@ -377,76 +364,15 @@ namespace Lyracist.Data.Services
                             DateAdded = DateTime.UtcNow
                         };
                         songsToInsert.Add(newSong);
-                        songsToProbe.Add(newSong);
+                        existingSongsMap[file] = newSong;
                     }
                 }
 
-                // Probe durations concurrently before committing to DB (max 8 concurrent probes)
-                if (songsToProbe.Count > 0)
-                {
-                    var semaphore = new System.Threading.SemaphoreSlim(8);
-                    var tasks = songsToProbe.Select(async song =>
-                    {
-                        await semaphore.WaitAsync();
-                        try
-                        {
-                            if (song.KaraokeType == "ZIPCDG")
-                            {
-                                var (isKaraoke, audioEntryName) = CheckZipKaraoke(song.FilePath);
-                                if (isKaraoke && !string.IsNullOrEmpty(audioEntryName))
-                                {
-                                    string tempPath = string.Empty;
-                                    try
-                                    {
-                                        using var archive = ZipFile.OpenRead(song.FilePath);
-                                        var entry = archive.GetEntry(audioEntryName);
-                                        if (entry != null)
-                                        {
-                                            tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntryName));
-                                            entry.ExtractToFile(tempPath);
-
-                                            var probeResult = await FFprobeRunner.ProbeFile(tempPath);
-                                            song.Duration = probeResult.Duration;
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Debug.WriteLine($"Failed to extract and probe zip entry {audioEntryName} in {song.FilePath}: {ex.Message}");
-                                    }
-                                    finally
-                                    {
-                                        if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
-                                        {
-                                            try { File.Delete(tempPath); } catch { }
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
-                                song.Duration = probeResult.Duration;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine($"Failed to probe file {song.FilePath}: {ex.Message}");
-                        }
-                        finally
-                        {
-                            semaphore.Release();
-                        }
-                    });
-                    await Task.WhenAll(tasks);
-                }
-
-                // Save insertion changes to database in a single batch
                 if (songsToInsert.Count > 0)
                 {
                     _context.Songs.AddRange(songsToInsert);
                 }
 
-                // Save update changes to database in a single batch
                 if (songsToUpdate.Count > 0)
                 {
                     _context.Songs.UpdateRange(songsToUpdate);
@@ -460,15 +386,194 @@ namespace Lyracist.Data.Services
                     var allChangedSongs = songsToInsert.Concat(songsToUpdate);
                     await searchService.IndexSongsBatch(allChangedSongs);
                 }
+            }
 
-                await transaction.CommitAsync();
-            }
-            catch (Exception ex)
+            foreach (var file in candidateFiles)
             {
-                Lyracist.Shared.Globals.LogError("Lyracist", "Directory scanning failed, rolling back transaction", ex);
-                await transaction.RollbackAsync();
-                throw;
+                batch.Add(file);
+                processed++;
+
+                bool isLastFile = processed == totalFiles;
+                if (batch.Count >= batchSize || isLastFile)
+                {
+                    try
+                    {
+                        await ProcessBatchAsync(batch);
+                    }
+                    catch (Exception ex)
+                    {
+                        Lyracist.Shared.Globals.LogError("Lyracist", $"Directory scanning failed at file {processed}/{totalFiles} ({file})", ex);
+                        throw;
+                    }
+                    finally
+                    {
+                        batch.Clear();
+                    }
+
+                    progress?.Report(new ScanProgress
+                    {
+                        TotalFilesFound = totalFiles,
+                        FilesProcessed = processed,
+                        CurrentFile = Path.GetFileName(file)
+                    });
+                }
             }
+        }
+
+        // ==========================================
+        // BACKGROUND METADATA FILL-IN (DURATION / GENRE)
+        // ==========================================
+
+        // Probes duration/genre for any song still missing it (Duration <= 0). Kept separate
+        // from ScanDirectories so folder scans stay fast — this is meant to be run afterward as
+        // a low-priority background pass. It always re-queries songs with Duration <= 0 from the
+        // database, so it naturally resumes wherever it left off if interrupted (app closed,
+        // crash) or run again later, without needing any separate state to track progress.
+        public async Task ProbeMissingMetadataAsync(IProgress<ScanProgress>? progress = null)
+        {
+            var songsNeedingProbe = await _context.Songs
+                .Where(s => s.Duration <= 0)
+                .ToListAsync();
+
+            int totalFiles = songsNeedingProbe.Count;
+            if (totalFiles == 0) return;
+
+            const int batchSize = 100;
+            int processed = 0;
+
+            for (int i = 0; i < songsNeedingProbe.Count; i += batchSize)
+            {
+                var batch = songsNeedingProbe.Skip(i).Take(batchSize).ToList();
+
+                // Lower concurrency than the scan-time probing used to have — this now runs
+                // unattended in the background, potentially while the app is actively being used
+                // for a live show, so it should be gentle on disk I/O rather than maximize throughput.
+                var semaphore = new System.Threading.SemaphoreSlim(3);
+                var tasks = batch.Select(async song =>
+                {
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        if (!File.Exists(song.FilePath)) return;
+
+                        if (song.KaraokeType == "ZIPCDG")
+                        {
+                            var (isKaraoke, audioEntryName) = CheckZipKaraoke(song.FilePath);
+                            if (isKaraoke && !string.IsNullOrEmpty(audioEntryName))
+                            {
+                                string tempPath = string.Empty;
+                                try
+                                {
+                                    using var archive = ZipFile.OpenRead(song.FilePath);
+                                    var entry = archive.GetEntry(audioEntryName);
+                                    if (entry != null)
+                                    {
+                                        tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntryName));
+                                        entry.ExtractToFile(tempPath);
+
+                                        var probeResult = await FFprobeRunner.ProbeFile(tempPath);
+                                        song.Duration = probeResult.Duration;
+                                        song.Genre = probeResult.GenreTag;
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"Failed to extract and probe zip entry {audioEntryName} in {song.FilePath}: {ex.Message}");
+                                }
+                                finally
+                                {
+                                    if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
+                                    {
+                                        try { File.Delete(tempPath); } catch { }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
+                            song.Duration = probeResult.Duration;
+                            song.Genre = probeResult.GenreTag;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Failed to probe file {song.FilePath}: {ex.Message}");
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                });
+                await Task.WhenAll(tasks);
+
+                _context.Songs.UpdateRange(batch);
+                await _context.SaveChangesAsync();
+
+                processed += batch.Count;
+                progress?.Report(new ScanProgress
+                {
+                    TotalFilesFound = totalFiles,
+                    FilesProcessed = processed,
+                    CurrentFile = batch.Count > 0 ? Path.GetFileName(batch[^1].FilePath) : string.Empty
+                });
+            }
+        }
+
+        private static List<string> SafeEnumerateFiles(string path)
+        {
+            var files = new List<string>();
+            var dirs = new Queue<string>();
+            dirs.Enqueue(path);
+
+            while (dirs.Count > 0)
+            {
+                string currentDir = dirs.Dequeue();
+                try
+                {
+                    foreach (var f in Directory.EnumerateFiles(currentDir))
+                    {
+                        string ext = Path.GetExtension(f).ToLowerInvariant();
+                        if (ext == ".mp3" || ext == ".cdg" || ext == ".mp4" || ext == ".zip")
+                        {
+                            files.Add(f);
+                        }
+                    }
+
+                    foreach (var d in Directory.EnumerateDirectories(currentDir))
+                    {
+                        try
+                        {
+                            var di = new DirectoryInfo(d);
+                            // Skip hidden or system directories to avoid permissions issues/recycle bin/system volume info
+                            if ((di.Attributes & FileAttributes.Hidden) != 0 || 
+                                (di.Attributes & FileAttributes.System) != 0)
+                            {
+                                continue;
+                            }
+                            dirs.Enqueue(d);
+                        }
+                        catch
+                        {
+                            // Skip directories we cannot read attributes for
+                        }
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Skip folders we do not have permission to read
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    // Skip folders deleted during the scan
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Failed to enumerate directory {currentDir}: {ex.Message}");
+                }
+            }
+
+            return files;
         }
     }
 }

@@ -523,6 +523,35 @@ public partial class SettingsViewModel : BaseViewModel
             });
         };
 
+        _library.ScanProgressChanged += (_, progress) =>
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                LibraryStatus = $"Scanning… {progress.FilesProcessed:N0} / {progress.TotalFilesFound:N0} files ({progress.Percentage:F0}%)";
+            });
+        };
+
+        _library.ScanFailed += (_, message) =>
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                LibraryStatus = $"Scan failed: {message}";
+            });
+        };
+
+        _library.MetadataProbeProgressChanged += (_, progress) =>
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                LibraryStatus = $"Filling in song details… {progress.FilesProcessed:N0} / {progress.TotalFilesFound:N0} ({progress.Percentage:F0}%)";
+            });
+        };
+
+        _library.MetadataProbeCompleted += (_, _) =>
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(RefreshLibraryStatus);
+        };
+
         // Apply persisted channel settings to the show flow service on load
         _showFlow.SetOpeningVolume(OpeningVolume);
         _showFlow.SetFillInVolume(FillInVolume);

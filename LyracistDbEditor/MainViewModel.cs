@@ -1,3 +1,4 @@
+// Edited on Jul 29, 2026 @ 00:35:00 -> Run EF database migration in constructor
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -50,13 +51,48 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private int _missingArtistCount = 0;
 
+    [ObservableProperty]
+    private int _exportCatalogIndex = 0;
+
+    [ObservableProperty]
+    private int _exportFormatIndex = 0;
+
+    [ObservableProperty]
+    private string? _selectedLibraryDirectory;
+
+    [ObservableProperty]
+    private bool _isLibraryScanning = false;
+
+    [ObservableProperty]
+    private double _libraryScanProgressPercent = 0;
+
+    [ObservableProperty]
+    private string _libraryScanStatusText = "Idle";
+
     public ObservableCollection<Song> Songs { get; } = [];
     public ObservableCollection<string> ScanLog { get; } = [];
+    public ObservableCollection<string> LibraryDirectories { get; } = [];
 
     public MainViewModel()
     {
         // Resolve FFmpeg/FFprobe paths for metadata parsing
         FFmpegService.ResolvePaths();
+
+        // Ensure database is created and up to date
+        try
+        {
+            using var context = new LyracistDbContext();
+            context.Database.Migrate();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to migrate database: {ex.Message}");
+        }
+
+        foreach (var dir in LibraryDirectoryStore.Load())
+        {
+            LibraryDirectories.Add(dir);
+        }
 
         RefreshStats();
         Search();
@@ -159,6 +195,7 @@ public partial class MainViewModel : ObservableObject
             string ext = Path.GetExtension(song.FilePath).ToLowerInvariant();
             string resolvedArtist = string.Empty;
             string resolvedTitle = string.Empty;
+            string resolvedGenre = string.Empty;
 
             if (ext == ".zip")
             {
@@ -175,6 +212,7 @@ public partial class MainViewModel : ObservableObject
                     var probeResult = await FFprobeRunner.ProbeFile(tempFile);
                     resolvedArtist = probeResult.ArtistTag;
                     resolvedTitle = probeResult.TitleTag;
+                    resolvedGenre = probeResult.GenreTag;
                     
                     try { File.Delete(tempFile); } catch {}
                 }
@@ -184,6 +222,7 @@ public partial class MainViewModel : ObservableObject
                 var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
                 resolvedArtist = probeResult.ArtistTag;
                 resolvedTitle = probeResult.TitleTag;
+                resolvedGenre = probeResult.GenreTag;
             }
 
             if (!string.IsNullOrWhiteSpace(resolvedArtist))
@@ -197,6 +236,7 @@ public partial class MainViewModel : ObservableObject
                     {
                         dbSong.Title = resolvedTitle.Trim();
                     }
+                    dbSong.Genre = resolvedGenre;
 
                     await context.SaveChangesAsync();
 
@@ -296,6 +336,7 @@ public partial class MainViewModel : ObservableObject
                 string ext = Path.GetExtension(song.FilePath).ToLowerInvariant();
                 string resolvedArtist = string.Empty;
                 string resolvedTitle = string.Empty;
+                string resolvedGenre = string.Empty;
 
                 if (ext == ".zip")
                 {
@@ -314,6 +355,7 @@ public partial class MainViewModel : ObservableObject
                             var probeResult = await FFprobeRunner.ProbeFile(tempFile);
                             resolvedArtist = probeResult.ArtistTag;
                             resolvedTitle = probeResult.TitleTag;
+                            resolvedGenre = probeResult.GenreTag;
                             
                             try { File.Delete(tempFile); } catch {}
                         }
@@ -328,6 +370,7 @@ public partial class MainViewModel : ObservableObject
                     var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
                     resolvedArtist = probeResult.ArtistTag;
                     resolvedTitle = probeResult.TitleTag;
+                    resolvedGenre = probeResult.GenreTag;
                 }
 
                 // If tags resolved a valid artist name, update the DB record
@@ -339,6 +382,7 @@ public partial class MainViewModel : ObservableObject
                     {
                         song.Title = resolvedTitle.Trim();
                     }
+                    song.Genre = resolvedGenre;
 
                     // Save immediately in small transactions
                     await context.SaveChangesAsync(token);
@@ -395,6 +439,184 @@ public partial class MainViewModel : ObservableObject
         {
             Debug.WriteLine($"Failed to query database stats: {ex.Message}");
         }
+    }
+
+    // ==========================================
+    // LIBRARY DIRECTORY SCANNER
+    // ==========================================
+    // Uses the same ScanningService engine as Lyracist itself: an initial fast pass that
+    // walks the folder(s) and inserts/updates songs, followed by a separate low-priority
+    // background pass that fills in duration/genre via FFprobe. See ScanningService.cs.
+
+    private void AppendLog(string message)
+    {
+        ScanLog.Insert(0, $"[{DateTime.Now:HH:mm:ss}] {message}");
+        if (ScanLog.Count > 100) ScanLog.RemoveAt(ScanLog.Count - 1);
+    }
+
+    [RelayCommand]
+    private void AddLibraryDirectory()
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Select Music/Karaoke Folder or Drive to Scan"
+        };
+        if (dialog.ShowDialog() != true) return;
+
+        string path = dialog.FolderName;
+        if (!LibraryDirectories.Contains(path, StringComparer.OrdinalIgnoreCase))
+        {
+            LibraryDirectories.Add(path);
+            LibraryDirectoryStore.Save(LibraryDirectories.ToList());
+        }
+
+        RunLibraryScan([path]);
+    }
+
+    [RelayCommand]
+    private async Task RemoveLibraryDirectory()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedLibraryDirectory)) return;
+        string path = SelectedLibraryDirectory;
+
+        var confirm = System.Windows.MessageBox.Show(
+            $"Remove '{path}' from the scan list? Songs already indexed from this folder will also be removed from the database.",
+            "Confirm Remove Directory",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        try
+        {
+            // Normalize so "C:\Music" also matches "C:\Music\" prefixed paths.
+            string prefix = path.TrimEnd('\\', '/') + Path.DirectorySeparatorChar;
+
+            using var context = new LyracistDbContext();
+            var orphaned = await context.Songs.Where(s => s.FilePath.StartsWith(prefix)).ToListAsync();
+
+            if (orphaned.Count > 0)
+            {
+                var searchService = new SearchService(context);
+                context.Songs.RemoveRange(orphaned);
+                await context.SaveChangesAsync();
+                foreach (var s in orphaned)
+                {
+                    await searchService.RemoveSongFromIndex(s.SongId);
+                }
+            }
+
+            LibraryDirectories.Remove(path);
+            LibraryDirectoryStore.Save(LibraryDirectories.ToList());
+            SelectedLibraryDirectory = null;
+
+            RefreshStats();
+            Search();
+
+            AppendLog($"Removed directory '{path}' and {orphaned.Count} associated song(s).");
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Failed to remove directory: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
+    private void RescanSelectedDirectory()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedLibraryDirectory)) return;
+        RunLibraryScan([SelectedLibraryDirectory]);
+    }
+
+    [RelayCommand]
+    private void RescanAllLibraryDirectories()
+    {
+        if (LibraryDirectories.Count == 0) return;
+        RunLibraryScan(LibraryDirectories.ToList());
+    }
+
+    private void RunLibraryScan(IEnumerable<string> dirs)
+    {
+        if (IsLibraryScanning) return;
+
+        var dirList = dirs.ToList();
+        IsLibraryScanning = true;
+        LibraryScanProgressPercent = 0;
+        LibraryScanStatusText = "Scanning folders...";
+        AppendLog($"Starting scan of {dirList.Count} folder(s)...");
+
+        Task.Run(async () =>
+        {
+            using var context = new LyracistDbContext();
+            var scanner = new ScanningService(context);
+
+            try
+            {
+                var scanProgress = new Progress<ScanProgress>(p =>
+                {
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        LibraryScanProgressPercent = p.Percentage;
+                        LibraryScanStatusText = $"Scanning… {p.FilesProcessed:N0} / {p.TotalFilesFound:N0} files";
+                    });
+                });
+
+                await scanner.ScanDirectories(dirList, scanProgress);
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor library scan failed", ex);
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    LibraryScanStatusText = $"Scan failed: {ex.Message}";
+                    IsLibraryScanning = false;
+                    AppendLog($"Scan failed: {ex.Message}");
+                });
+                return;
+            }
+
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                IsLibraryScanning = false;
+                LibraryScanStatusText = "Scan complete. Filling in song details in the background...";
+                RefreshStats();
+                Search();
+                AppendLog("Folder scan complete.");
+            });
+
+            // Duration/genre fill-in runs afterward, separately, so a large drive doesn't hold
+            // up the scan itself — mirrors Lyracist's own approach (see ScanningService.cs).
+            try
+            {
+                var probeProgress = new Progress<ScanProgress>(p =>
+                {
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        LibraryScanProgressPercent = p.Percentage;
+                        LibraryScanStatusText = $"Filling in song details… {p.FilesProcessed:N0} / {p.TotalFilesFound:N0}";
+                    });
+                });
+
+                await scanner.ProbeMissingMetadataAsync(probeProgress);
+
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    LibraryScanStatusText = "Metadata fill-in complete.";
+                    RefreshStats();
+                    Search();
+                    AppendLog("Metadata fill-in complete.");
+                });
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor metadata probe failed", ex);
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    LibraryScanStatusText = $"Metadata fill-in error: {ex.Message}";
+                    AppendLog($"Metadata fill-in error: {ex.Message}");
+                });
+            }
+        });
     }
 
     // ==========================================
@@ -586,6 +808,41 @@ public partial class MainViewModel : ObservableObject
     private void CancelRename()
     {
         _renameCts?.Cancel();
+    }
+
+    [RelayCommand]
+    private async Task GenerateBook()
+    {
+        try
+        {
+            bool isKaraoke = ExportCatalogIndex == 0;
+            bool isPdf = ExportFormatIndex == 1;
+
+            string filePath;
+            if (isPdf)
+            {
+                filePath = Lyracist.Data.Services.CatalogBookGenerator.GeneratePdf(isKaraoke);
+            }
+            else
+            {
+                filePath = Lyracist.Data.Services.CatalogBookGenerator.GenerateDocx(isKaraoke);
+            }
+
+            System.Windows.MessageBox.Show($"Catalog book generated successfully!\nSaved to: {filePath}", "Export Complete", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
+                }
+                catch { }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Failed to generate catalog book: {ex.Message}", "Export Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
     }
 
     private static string SanitizeFileName(string fileName)

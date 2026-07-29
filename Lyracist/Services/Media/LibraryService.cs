@@ -1,3 +1,4 @@
+// Edited on Jul 28, 2026 @ 19:04:00 -> Support isMusic search filter in Search and SearchAsync
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,6 +17,10 @@ namespace Lyracist.Services.Media;
 public class LibraryService : ILibraryService
 {
     public event EventHandler? LibraryUpdated;
+    public event EventHandler<ScanProgress>? ScanProgressChanged;
+    public event EventHandler<string>? ScanFailed;
+    public event EventHandler<ScanProgress>? MetadataProbeProgressChanged;
+    public event EventHandler? MetadataProbeCompleted;
 
     public void ScanDirectory(string path)
     {
@@ -25,20 +30,7 @@ public class LibraryService : ILibraryService
         // Persist so this directory survives app restarts and can be rescanned.
         AppSettings.AddLibraryDirectory(path);
 
-        Task.Run(async () =>
-        {
-            try
-            {
-                using var context = new LyracistDbContext();
-                var scanningService = new ScanningService(context);
-                await scanningService.ScanDirectories(new[] { path });
-                LibraryUpdated?.Invoke(this, EventArgs.Empty);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to scan library directory: {ex.Message}");
-            }
-        });
+        RunScan(new[] { path });
     }
 
     public void RescanAllDirectories()
@@ -46,18 +38,47 @@ public class LibraryService : ILibraryService
         var dirs = AppSettings.LibraryDirectories.ToList();
         if (dirs.Count == 0) return;
 
+        RunScan(dirs);
+    }
+
+    private void RunScan(IEnumerable<string> dirs)
+    {
         Task.Run(async () =>
         {
+            using var context = new LyracistDbContext();
+            var scanningService = new ScanningService(context);
+
             try
             {
-                using var context = new LyracistDbContext();
-                var scanningService = new ScanningService(context);
-                await scanningService.ScanDirectories(dirs);
-                LibraryUpdated?.Invoke(this, EventArgs.Empty);
+                var scanProgress = new Progress<ScanProgress>(p => ScanProgressChanged?.Invoke(this, p));
+                await scanningService.ScanDirectories(dirs, scanProgress);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to rescan library directories: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Library scan failed", ex);
+                ScanFailed?.Invoke(this, ex.Message);
+                // Always notify so the UI can clear its "Scanning…" state, even on failure.
+                LibraryUpdated?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+
+            // The scan itself is fast (no metadata probing) — songs are already inserted and
+            // usable at this point, so let the UI drop out of "Scanning…" now.
+            LibraryUpdated?.Invoke(this, EventArgs.Empty);
+
+            // Fill in duration/genre afterward as a separate, low-priority background pass so a
+            // large library doesn't hold up the scan. Safe to interrupt — it just picks back up
+            // with whatever songs are still missing metadata next time a scan runs.
+            try
+            {
+                var probeProgress = new Progress<ScanProgress>(p => MetadataProbeProgressChanged?.Invoke(this, p));
+                await scanningService.ProbeMissingMetadataAsync(probeProgress);
+                MetadataProbeCompleted?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", "Background metadata probing failed", ex);
+                ScanFailed?.Invoke(this, $"Metadata fill-in error: {ex.Message}");
             }
         });
     }
@@ -102,7 +123,7 @@ public class LibraryService : ILibraryService
         }
     }
 
-    public IEnumerable<KaraokeSong> Search(string query)
+    public IEnumerable<KaraokeSong> Search(string query, bool isMusic = false)
     {
         try
         {
@@ -110,13 +131,13 @@ public class LibraryService : ILibraryService
 
             if (string.IsNullOrWhiteSpace(query))
             {
-                return context.Songs.AsNoTracking().Where(s => s.IsKaraoke).Take(150).ToList().Select(MapToKaraokeSong);
+                return context.Songs.AsNoTracking().Where(s => s.IsKaraoke == !isMusic).Take(150).ToList().Select(MapToKaraokeSong);
             }
 
             var searchService = new SearchService(context);
             // Run matching search synchronously on SQLite FTS5 table
             var results = searchService.SearchSync(query);
-            return results.Where(s => s.IsKaraoke).Select(MapToKaraokeSong);
+            return results.Where(s => s.IsKaraoke == !isMusic).Select(MapToKaraokeSong);
         }
         catch (Exception ex)
         {
@@ -125,7 +146,7 @@ public class LibraryService : ILibraryService
         }
     }
 
-    public async Task<IEnumerable<KaraokeSong>> SearchAsync(string query)
+    public async Task<IEnumerable<KaraokeSong>> SearchAsync(string query, bool isMusic = false)
     {
         try
         {
@@ -133,13 +154,13 @@ public class LibraryService : ILibraryService
 
             if (string.IsNullOrWhiteSpace(query))
             {
-                var all = await context.Songs.AsNoTracking().Where(s => s.IsKaraoke).Take(150).ToListAsync();
+                var all = await context.Songs.AsNoTracking().Where(s => s.IsKaraoke == !isMusic).Take(150).ToListAsync();
                 return all.Select(MapToKaraokeSong);
             }
 
             var searchService = new SearchService(context);
             var results = await searchService.Search(query);
-            return results.Where(s => s.IsKaraoke).Select(MapToKaraokeSong);
+            return results.Where(s => s.IsKaraoke == !isMusic).Select(MapToKaraokeSong);
         }
         catch (Exception ex)
         {

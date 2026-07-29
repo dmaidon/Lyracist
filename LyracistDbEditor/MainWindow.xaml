@@ -1,3 +1,4 @@
+<!-- Edited on Jul 28, 2026 @ 19:31:00 -> Add Catalog Book Generator UI card -->
 <Window x:Class="LyracistDbEditor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -7,7 +8,7 @@
         xmlns:local="clr-namespace:LyracistDbEditor"
         mc:Ignorable="d"
         Title="Lyracist Database Editor &amp; Metadata Scanner"
-        Height="700" Width="1100"
+        Height="920" Width="1180" MinHeight="760" MinWidth="1050"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource ApplicationBackgroundBrush}">
 
@@ -202,16 +203,45 @@
                         <RowDefinition Height="12" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0">
+                        <TextBlock Text="Library Directory Scanner" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Scan folders or entire drives into the database — the same fast-scan engine Lyracist itself uses. Duration/genre fill in automatically afterward in the background." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                    </StackPanel>
+
+                    <!-- Library Directory Scanner Card -->
+                    <Border Grid.Row="2" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
+                        <StackPanel>
+                            <ListBox ItemsSource="{Binding LibraryDirectories}" SelectedItem="{Binding SelectedLibraryDirectory, Mode=TwoWay}" MaxHeight="90" Height="90" Margin="0,0,0,10" ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+
+                            <Grid Margin="0,0,0,10" ColumnDefinitions="1.2*, 8, *, 8, 1.1*">
+                                <ui:Button Grid.Column="0" Content="Add Folder..." Icon="{ui:SymbolIcon FolderAdd24}" Command="{Binding AddLibraryDirectoryCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding IsLibraryScanning, Converter={StaticResource InvertBoolConverter}}" />
+                                <ui:Button Grid.Column="2" Content="Remove" Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveLibraryDirectoryCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding SelectedLibraryDirectory, Converter={StaticResource NullToBoolConverter}}" />
+                                <ui:Button Grid.Column="4" Content="Rescan" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding RescanSelectedDirectoryCommand}" Appearance="Secondary" Height="35" HorizontalAlignment="Stretch" IsEnabled="{Binding SelectedLibraryDirectory, Converter={StaticResource NullToBoolConverter}}" ToolTip="Rescan the selected directory" />
+                            </Grid>
+
+                            <ui:Button Content="Scan / Rescan All Directories" Icon="{ui:SymbolIcon Play24}" Command="{Binding RescanAllLibraryDirectoriesCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" Margin="0,0,0,10" IsEnabled="{Binding IsLibraryScanning, Converter={StaticResource InvertBoolConverter}}" />
+
+                            <TextBlock Text="{Binding LibraryScanStatusText}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,0,0,6" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <ProgressBar Value="{Binding LibraryScanProgressPercent}" Height="6" Maximum="100" Foreground="{DynamicResource SystemAccentColorSecondaryBrush}" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Grid.Row="4">
                         <TextBlock Text="Slow Metadata Extractor" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                         <TextBlock Text="Scans files missing an artist and extracts metadata tags using FFprobe. Safe to run while hosting." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" />
                     </StackPanel>
 
                     <!-- Progress and Controls -->
-                    <Border Grid.Row="2" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
+                    <Border Grid.Row="6" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
                         <StackPanel>
                             <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
@@ -230,7 +260,7 @@
                     </Border>
 
                     <!-- File Renamer Card -->
-                    <Border Grid.Row="4" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
+                    <Border Grid.Row="8" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
                         <StackPanel>
                             <TextBlock Text="Metadata File Renamer" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                             <TextBlock Text="Renames karaoke/audio files in a selected folder based on their embedded title tag." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,10" />
@@ -252,8 +282,34 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- Catalog Book Generator Card -->
+                    <Border Grid.Row="10" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
+                        <StackPanel>
+                            <TextBlock Text="Catalog Book Generator" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Create a Word (.docx) or PDF book of the Karaoke or Music databases." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,10" />
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0" SelectedIndex="{Binding ExportCatalogIndex, Mode=TwoWay}" Height="35">
+                                    <ComboBoxItem Content="Karaoke Catalog" />
+                                    <ComboBoxItem Content="Music Catalog" />
+                                </ComboBox>
+                                <ComboBox Grid.Column="2" SelectedIndex="{Binding ExportFormatIndex, Mode=TwoWay}" Height="35">
+                                    <ComboBoxItem Content="Word Document (.docx)" />
+                                    <ComboBoxItem Content="PDF Document (.pdf)" />
+                                </ComboBox>
+                            </Grid>
+
+                            <ui:Button Content="Generate Book" Icon="{ui:SymbolIcon DocumentPrint24}" Command="{Binding GenerateBookCommand}" Appearance="Primary" Height="35" HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                    </Border>
+
                     <!-- Scan Logs -->
-                    <Grid Grid.Row="6">
+                    <Grid Grid.Row="12">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="6" />
