@@ -1,3 +1,5 @@
+// Edited on Jul 30, 2026 @ 07:55:00 -> Add WindowTitle dynamic property to display active Venue/DJ name in the window title bar
+// Edited on Jul 30, 2026 @ 07:50:00 -> Remove Flip Tile Board option from ProjectionViews list
 // Edited on Jul 28, 2026 @ 13:02:00 -> Disable UpdatePerformanceForSinger call on song/artist property change to prevent overwriting past performance history
 // Edited on Jul 27, 2026 @ 13:50:00 -> Add ClearRotation command and prompt logic
 // Last Edit: Jul 02, 2026 16:54 - Added SaveCurrentAsTestList command and fixed runtime binding gaps for Settings controls.
@@ -198,8 +200,7 @@ namespace KSRotation.ViewModels
             "Normal List",
             "Star Wars Crawl",
             "Vegas Marquee",
-            "Vinyl Turntable",
-            "Flip Tile Board"
+            "Vinyl Turntable"
             // TODO (future): "Jumbotron" — full-bleed stadium scoreboard style with huge singer name
             //                on a bright LED matrix background, scrolling ticker at the bottom.
             // TODO (future): "Neon Bar Sign" — dark brick-wall backdrop with a glowing neon-tube
@@ -210,6 +211,7 @@ namespace KSRotation.ViewModels
         public partial string SelectedProjectionView { get; set; } = "Normal List";
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(WindowTitle))]
         public partial string VenueName { get; set; } = "Karaoke Night";
 
         [ObservableProperty]
@@ -219,6 +221,7 @@ namespace KSRotation.ViewModels
         public partial string NewVenueName { get; set; } = string.Empty;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(WindowTitle))]
         public partial string DjName { get; set; } = "Guest DJ";
 
         [ObservableProperty]
@@ -300,6 +303,7 @@ namespace KSRotation.ViewModels
         private static readonly string s_appAuthor = ResolveAppAuthor(s_appCompany);
 
         public string AppTitle => s_appTitle;
+        public string WindowTitle => $"{AppTitle} - Venue: {VenueName} | DJ: {DjName}";
         public string AppVersion => s_appVersion;
         public string AppCompany => s_appCompany;
         public string AppCopyright => s_appCopyright;
@@ -421,7 +425,7 @@ namespace KSRotation.ViewModels
             _displayWindowService.SetCrawlBannerText(CrawlBannerText, VenueName, DjName);
             _displayWindowService.SetMarqueeSpeed(MarqueeSpeed);
             _displayWindowService.SetProjectionView(SelectedProjectionView);
-            
+
             SelectedMonitorDevice = settings.SelectedMonitorDevice ?? string.Empty;
             _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
             RefreshAvailableMonitors();
@@ -1453,7 +1457,7 @@ namespace KSRotation.ViewModels
         {
             if (IsTestMode) return;
             var state = NightDatabaseService.Load();
-            
+
             Singers.Clear();
             foreach (var singer in state.ActiveQueue)
             {
@@ -1476,7 +1480,7 @@ namespace KSRotation.ViewModels
             }
             IncomingRequests.Clear();
             DjPin = GenerateDjPin();
-            
+
             SaveDatabaseNow();
             SaveSettingsNow();
             RebuildRotationJsonCacheNow();
@@ -1642,7 +1646,7 @@ namespace KSRotation.ViewModels
                 ("Todd Stowe",    "Dancing Queen",              "ABBA"),
                 ("Wendy Stowe",      "Africa",                     "Toto"),
                 ("Wendy Tart",    "Take It to the Limit",    "Eagles"),
-                ("Celeste Newsome",     "Somebody That I Used to Know", "Gotye"),
+                ("Sandra Moore",     "Somebody That I Used to Know", "Gotye"),
                 ("Artie Davis",    "Wonderwall",                 "Oasis"),
             ];
 

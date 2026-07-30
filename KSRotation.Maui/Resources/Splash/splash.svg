@@ -1,46 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg"
-	 width="1900" height="1200"
-	 viewBox="0 0 1900 1200">
+<!-- Edited on Jul 30, 2026 @ 07:58:00 -> Simplified vector logo for MAUI splash screen compatibility -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-200 -250 400 450">
+	<!-- Purple top arc -->
+	<path d="M -150 0 A 150 150 0 0 1 150 0"
+		  fill="none" stroke="#A855F7" stroke-width="22" stroke-linecap="round" />
 
-	<!-- Full faded yellow background -->
-	<rect width="1900" height="1200" fill="#FFF9C4" />
+	<!-- Orange bottom arc -->
+	<path d="M 150 0 A 150 150 0 0 1 -150 0"
+		  fill="none" stroke="#F97316" stroke-width="22" stroke-linecap="round" />
 
-	<!-- CENTERPIECE: mic perfect, arcs corrected -->
-	<g transform="translate(950, 520) scale(2.0)">
-
-		<!-- Microphone (unchanged) -->
-		<g transform="scale(0.55)">
-			<circle cx="0" cy="-160" r="55" fill="#000000" />
-			<rect x="-40" y="-120" width="80" height="160" rx="20" fill="#000000" />
-			<rect x="-15" y="40" width="30" height="80" fill="#000000" />
-			<rect x="-45" y="120" width="90" height="20" rx="10" fill="#000000" />
-		</g>
-
-		<!-- PURPLE ARC — TOP HALF (180°) -->
-		<path d="M -150 0 A 150 150 0 0 1 150 0"
-			  fill="none" stroke="#8000FF" stroke-width="22" />
-
-		<!-- ORANGE ARC — BOTTOM HALF (180°) -->
-		<path d="M 150 0 A 150 150 0 0 1 -150 0"
-			  fill="none" stroke="#FF8C00" stroke-width="22" />
+	<!-- Microphone (High Contrast White) -->
+	<g transform="scale(0.85)">
+		<!-- Mic Head -->
+		<circle cx="0" cy="-160" r="55" fill="#F8FAFC" />
+		<!-- Mic Body -->
+		<rect x="-40" y="-120" width="80" height="160" rx="20" fill="#F8FAFC" />
+		<!-- Connection stem -->
+		<rect x="-15" y="40" width="30" height="80" fill="#F8FAFC" />
+		<!-- Weighted base -->
+		<rect x="-45" y="120" width="90" height="20" rx="10" fill="#F8FAFC" />
 	</g>
-
-	<!-- Title -->
-	<text x="950" y="1080"
-		  font-size="100"
-		  font-family="Arial"
-		  font-weight="700"
-		  text-anchor="middle"
-		  fill="#8000FF">
-		KARAOKE SINGER ROTATION
-	</text>
-
-	<!-- Copyright -->
-	<text x="950" y="1160"
-		  font-size="42"
-		  font-family="Arial"
-		  text-anchor="middle"
-		  fill="#444444">
-		© 2026 PAROLE Software - All rights reserved.
-	</text>
 </svg>

@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Edited on Jul 30, 2026 @ 08:00:00 -> Remove custom Maui.SplashTheme to allow standard MAUI splash screen generation -->
 <resources>
     <!-- Custom Main Theme to hide the status bar (full-screen mode) -->
     <style name="MainTheme" parent="Maui.MainTheme.NoActionBar">
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-
-    <style name="Maui.SplashTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash</item>
-        <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>

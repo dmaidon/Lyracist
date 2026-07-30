@@ -1,4 +1,4 @@
-<!-- Edited on Jul 20, 2026 @ 06:48:00 -> Add hidden wrapper and Canvas for Star Wars crawl VisualBrush rendering -->
+<!-- Edited on Jul 30, 2026 @ 07:50:00 -> Remove FlipTilePanel projection panel -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -137,10 +137,7 @@
             </Viewport3D>
         </Grid>
 
-        <!-- Row 1c: Flip Tile Board panel -->
-        <Grid Grid.Row="1" x:Name="FlipTilePanel" Visibility="Collapsed">
-            <local:FlipTileBoardControl />
-        </Grid>
+
 
         <!-- Row 1d: Vegas / Broadway Marquee panel -->
         <Grid Grid.Row="1" x:Name="MarqueePanel" Visibility="Collapsed">
@@ -431,8 +428,8 @@
                 BorderBrush="#475569"
                 BorderThickness="1.5"
                 CornerRadius="8"
-                Width="130"
-                Height="165"
+                Width="180"
+                Height="235"
                 Panel.ZIndex="99">
             <Border.Style>
                 <Style TargetType="Border">
@@ -448,8 +445,8 @@
                 </Style>
             </Border.Style>
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Border Width="110" 
-                        Height="110" 
+                <Border Width="160" 
+                        Height="160" 
                         Background="White" 
                         CornerRadius="4" 
                         Padding="3"
@@ -459,15 +456,15 @@
                 </Border>
                 <TextBlock Text="SCAN TO REQUEST"
                            FontWeight="Bold"
-                           FontSize="10"
+                           FontSize="12"
                            Foreground="#F8FAFC"
                            HorizontalAlignment="Center"
-                           Margin="0,6,0,0"/>
+                           Margin="0,10,0,0"/>
                 <TextBlock Text="{Binding ConnectionUrl}"
-                           FontSize="8"
+                           FontSize="10"
                            Foreground="#94A3B8"
                            HorizontalAlignment="Center"
-                           Margin="0,2,0,0"/>
+                           Margin="0,4,0,0"/>
             </StackPanel>
         </Border>
     </Grid>

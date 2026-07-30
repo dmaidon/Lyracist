@@ -1,3 +1,5 @@
+﻿<!-- Edited on Jul 30, 2026 @ 08:00:00 -> Enable cross-platform MauiSplashScreen for Android and Windows and update comments -->
+<!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -26,9 +28,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.7.29.99</AssemblyVersion>
+		<AssemblyVersion>26.7.30.118</AssemblyVersion>
 
-		<FileVersion>26.7.29.99</FileVersion>
+		<FileVersion>26.7.30.118</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
@@ -37,6 +39,8 @@
 		<PackageOutputPath>C:\VB26\Release\KSRotation.MAUI</PackageOutputPath>
 
 		<NeutralLanguage>en-US</NeutralLanguage>
+
+		<Title>Karaoke Singer Rotation</Title>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -45,8 +49,8 @@
 	</ItemGroup>
 
 	<!-- Platform-specific Splash Screens -->
-	<ItemGroup Condition="!$(TargetFramework.Contains('-android'))">
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+	<ItemGroup>
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#12091a" BaseSize="128,128" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -73,8 +77,6 @@
 		     edit here. Excludes the three services that have MAUI-specific replacements in Shims\WpfShims.cs
 		     (compiling both would be a duplicate-type error). -->
 		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs" Link="Services\%(Filename)%(Extension)" />
-		<AndroidResource Remove="Platforms\Android\Resources\drawable\splash.png" />
-		<None Remove="Platforms\Android\Resources\drawable\splash.png" />
 
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.Requests.cs" Link="ViewModels\MainViewModel.Requests.cs" />
@@ -87,12 +89,7 @@
 		<EmbeddedResource Include="..\KSRotation\Resources\dj.html" Link="Resources\dj.html" />
 	</ItemGroup>
 	<ItemGroup>
-	  <MauiAsset Include="Platforms\Android\Resources\drawable\splash.png">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </MauiAsset>
-	</ItemGroup>
-	<ItemGroup>
-	  <None Include="..\..\..\Users\dmaid\Downloads\rotation_m.png">
+	  <None Include="..\Lyracist\Assets\rotation_m.png" Link="rotation_m.png">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>

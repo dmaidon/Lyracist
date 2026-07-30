@@ -1,5 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <!-- Edited on Jul 17, 2026 @ 10:12:00 -> Include Lyracist_Pro.png as a Resource in build -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>Sonya-Swarm-Microphone.ico</ApplicationIcon>
+    <ApplicationIcon>..\Lyracist\Assets\Sonya-Swarm-Microphone.ico</ApplicationIcon>
     <BaseOutputPath>C:\VB26\Release\LyracistKeyGen</BaseOutputPath>
     <Title>Lyracist Key Generator</Title>
     <Authors>Dennis Maidon</Authors>
@@ -19,11 +19,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Sonya-Swarm-Microphone.ico" />
+    <Content Include="..\Lyracist\Assets\Sonya-Swarm-Microphone.ico" Link="Sonya-Swarm-Microphone.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Lyracist_Pro.png">
+    <Resource Include="..\Lyracist\Assets\Lyracist_Pro.png" Link="Lyracist_Pro.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </Resource>

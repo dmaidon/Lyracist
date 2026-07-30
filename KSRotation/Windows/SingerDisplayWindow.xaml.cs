@@ -1,3 +1,4 @@
+// Edited on Jul 30, 2026 @ 07:50:00 -> Remove Flip Tile Board visibility toggling and case
 // Edited on Jul 28, 2026 @ 18:44:00 -> Support background music requests in Star Wars crawl and rotation listings
 // Last Edit: Jul 20, 2026 06:50 - Bind off-tree visual source to XAML CrawlSourceCanvas in clipped Grid to fix Star Wars crawl text rendering
 using KSRotation.Models;
@@ -236,7 +237,6 @@ namespace KSRotation.Windows
 
             NormalPanel.Visibility = Visibility.Collapsed;
             CrawlPanel.Visibility = Visibility.Collapsed;
-            FlipTilePanel.Visibility = Visibility.Collapsed;
             MarqueePanel.Visibility = Visibility.Collapsed;
             VinylPanel.Visibility = Visibility.Collapsed;
 
@@ -247,9 +247,7 @@ namespace KSRotation.Windows
                     Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)StartCrawl);
                     break;
 
-                case "Flip Tile Board":
-                    FlipTilePanel.Visibility = Visibility.Visible;
-                    break;
+
 
                 case "Vegas Marquee":
                     MarqueePanel.Visibility = Visibility.Visible;

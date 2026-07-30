@@ -248,7 +248,7 @@ namespace Lyracist.Data.Services
 
         public class SimpleFontResolver : PdfSharp.Fonts.IFontResolver
         {
-            public byte[] GetFont(string faceName)
+            public byte[]? GetFont(string faceName)
             {
                 string fontFile = faceName switch
                 {

@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<!-- Edited on Jul 30, 2026 @ 06:15:00 -> Consolidated icons to Assets/ folder and resolved Downloads folder reference -->
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -10,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.7.29.262</AssemblyVersion>
-    <FileVersion>26.7.29.262</FileVersion>
+    <AssemblyVersion>26.7.30.275</AssemblyVersion>
+    <FileVersion>26.7.30.275</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -26,11 +27,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Sonya-Swarm-Microphone.ico" />
+    <Content Include="Assets\lyracist_mic.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\..\Users\dmaid\Downloads\mic_128.png">
+    <None Include="Assets\mic_128.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

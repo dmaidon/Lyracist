@@ -1,4 +1,4 @@
-﻿<!-- Last Edit: Jun 30, 2026 08:29 - Moved mic_128.png into the project (was an absolute Downloads path) so packaging is portable; retained WinForms usage because DisplayWindowService uses Screen APIs. -->
+<!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,15 +10,15 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.7.29.321</AssemblyVersion>
-    <FileVersion>26.7.29.321</FileVersion>
+    <AssemblyVersion>26.7.30.335</AssemblyVersion>
+    <FileVersion>26.7.30.335</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageIcon>rotation.png</PackageIcon>
-    <ApplicationIcon>rotation.ico</ApplicationIcon>
+    <ApplicationIcon>..\Lyracist\Assets\rotation.ico</ApplicationIcon>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
   </PropertyGroup>
@@ -37,16 +37,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="rotation.ico" />
+    <Content Include="..\Lyracist\Assets\rotation.ico" Link="rotation.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\..\Users\dmaid\Downloads\rotation.png">
+    <None Include="..\Lyracist\Assets\rotation.png" Link="rotation.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
     <None Include="..\.editorconfig" Link=".editorconfig" />
-    <None Include="mic_128.png">
+    <None Include="..\Lyracist\Assets\mic_128.png" Link="mic_128.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
@@ -64,7 +64,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="mic_64.png" />
+    <Resource Include="..\Lyracist\Assets\mic_64.png" Link="mic_64.png" />
     <Resource Include="Windows\singer_64.png" />
     <Resource Include="Resources\KSRotation.png" />
   </ItemGroup>

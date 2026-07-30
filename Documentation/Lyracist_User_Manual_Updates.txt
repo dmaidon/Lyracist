@@ -99,3 +99,36 @@ Operators can now export the entire song database (Karaoke or Music) into Word (
    - The document is fully paginated, displaying "Page X" or "Page X of Y" in the bottom footer.
    - For Word (.docx) books, a repeating header row is defined so column titles automatically reappear on the top of each page.
    - When generation completes, Lyracist automatically launches the default system viewer to open and print the document, which is saved in the "Reports" directory.
+
+Section: Rotation Management / FlipTile Board View Removal
+
+[Update Details]
+The obsolete "Flip Tile Board" view option has been removed from all applications (including KSRotation and Lyracist).
+
+1. Interface Clean-up:
+   - The "Flip Tile Board" selection option has been removed from the Projection View dropdown menus.
+   - All underlying split-flap character structures and visual board panels have been completely removed from the singer display screen to simplify the interface and optimize performance.
+
+Section: Main Console / Active Venue & DJ Title Bar Integration
+
+[Update Details]
+To resolve screen space and layout wrapping issues on 1920x1080 laptop screens, the active Venue and DJ name displays have been integrated into the standard window title bar.
+
+1. Dynamic Title Bar Display:
+   - The active Venue and DJ name are now visible in the title bar of the main console window, e.g. "Karaoke Singer Rotation - Venue: [VenueName] | DJ: [DjName]".
+   - The title updates dynamically in real-time when selecting or updating the active Venue or DJ under Settings.
+   
+2. Unwrapped Control Bar:
+   - The status badge has been removed from the main rotation tab toolbar, ensuring that other controls (such as checkboxes and view selectors) have maximum screen width and do not wrap layout rows.
+
+Section: Mobile & Desktop App / Standardized Splash Screen
+
+[Update Details]
+The splash screen for the mobile and desktop versions of Karaoke Singer Rotation (KSRotation.Maui) has been redesigned and standardized using cross-platform vector assets.
+
+1. Vector Centerpiece Logo:
+   - Features a clean, high-contrast microphone centerpiece surrounded by vibrant purple and orange rotating orbital paths.
+   - Simplified to ensure 100% compatibility with standard .NET MAUI Resizetizer compilation tools on both Android and Windows.
+
+2. Obsidian Dark Theme Background:
+   - The launch background has been updated to a deep premium obsidian color (#12091A) on both platforms, providing a seamless visual transition during startup.

@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -9,9 +10,23 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.7.29.49</AssemblyVersion>
-    <FileVersion>26.7.29.49</FileVersion>
-  </PropertyGroup>  
+    <AssemblyVersion>26.7.30.63</AssemblyVersion>
+    <FileVersion>26.7.30.63</FileVersion>
+    <ApplicationIcon>..\Lyracist\Assets\db_manager_tp.ico</ApplicationIcon>
+    <PackageIcon>db_manager_tp.png</PackageIcon>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\Lyracist\Assets\db_manager_tp.ico" Link="db_manager_tp.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Lyracist\Assets\db_manager_tp.png" Link="db_manager_tp.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>  
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />

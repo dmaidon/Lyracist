@@ -164,8 +164,6 @@ public partial class MainPage : ContentPage
         }
     }
 
-
-
     private void OnAboutClicked(object? sender, EventArgs e)
     {
         AboutOverlay.IsVisible = true;
@@ -278,7 +276,7 @@ public partial class MainPage : ContentPage
         (string Name, string Song, string Artist)[] testData =
         [
             ("Dennis Maidon",    "I will Be Alright", "Dennis Maidon"),
-            ("Marie Carter",     "Livin' on a Prayer",         "Bon Jovi"),
+            ("Marie Hatton",     "Livin' on a Prayer",         "Bon Jovi"),
             ("Brenda Maidon",   "End of the World",     "Ann Murray"),
             ("Carlos Watson",   "Rap God",             "Eminem"),
             ("Amy Banks",     "Don't Stop Believin'",       "Journey"),
@@ -290,7 +288,7 @@ public partial class MainPage : ContentPage
             ("Todd Stowe",    "Dancing Queen",              "ABBA"),
             ("Wendy Stowe",      "Africa",                     "Toto"),
             ("Wendy Tart",    "Take It to the Limit",    "Eagles"),
-            ("Celeste Newsome",     "Somebody That I Used to Know", "Gotye"),
+            ("Sandra Moore",     "Somebody That I Used to Know", "Gotye"),
             ("Artie Davis",    "Wonderwall",                 "Oasis"),
         ];
 
@@ -299,8 +297,8 @@ public partial class MainPage : ContentPage
             vm.Singers.Add(new KSRotation.Models.SingerEntry
             {
                 Name = name,
-				Song = song,
-				Artist = artist
+                Song = song,
+                Artist = artist
             });
         }
     }

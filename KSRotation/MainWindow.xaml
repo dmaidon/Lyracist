@@ -1,8 +1,9 @@
+<!-- Edited on Jul 30, 2026 @ 07:55:00 -> Move active Venue/DJ name to window title bar and remove status card from WrapPanel to resolve layout wrapping -->
+<!-- Edited on Jul 30, 2026 @ 07:45:00 -> Add active Venue/DJ display status card and visual selection indicators -->
 <!-- Edited on Jul 28, 2026 @ 18:45:00 -> Add music request badges and overlay background music labels to queue list -->
 <!-- Edited on Jul 27, 2026 @ 22:56:00 -> Set all settings columns to equal star widths -->
 <!-- Edited on Jul 27, 2026 @ 22:55:00 -> Move Test Mode, Email settings, and Save button to correct columns to prevent overlapping -->
 <!-- Edited on Jul 27, 2026 @ 22:50:00 -> Adjust column widths and row spans for Venue Names and DJ Names settings group boxes -->
-<!-- Last Edit: Jul 03, 2026 07:36 - Delayed singer row Name/Song/Artist source updates until textbox focus is exited (LostFocus). -->
 <Window x:Name="FrmMain"
     x:Class="KSRotation.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -12,7 +13,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:KSRotation.ViewModels"
         mc:Ignorable="d"
-    Title="{Binding AppTitle}"
+    Title="{Binding WindowTitle}"
     Width="1500"
     Height="800"
     d:DesignWidth="1500"
@@ -812,14 +813,22 @@
                                   Grid.Row="1"
                                   Grid.RowSpan="5"
                                   Margin="0,0,0,12">
-                            <Grid Margin="0,4,0,0">
+                             <Grid Margin="0,4,0,0">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
+                                <!-- Active Venue Label -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,0,0,8">
+                                    <TextBlock Text="Active Venue: " FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBodyLight}" FontSize="13"/>
+                                    <TextBlock Text="{Binding VenueName}" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueMidBrush}" FontSize="13"/>
+                                </StackPanel>
+
                                 <ListBox x:Name="LbVenues"
+                                         Grid.Row="1"
                                          ItemsSource="{Binding Venues}"
                                          SelectedItem="{Binding SelectedVenue, UpdateSourceTrigger=PropertyChanged}"
                                          Margin="0,0,0,8"
@@ -828,79 +837,109 @@
                                          Background="{DynamicResource MaterialDesignCardBackground}"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                          Padding="4" IsTabStop="True">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="4,2">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <Path Data="M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2M12,6A3,3 0 0,1 15,9A3,3 0 0,1 12,12A3,3 0 0,1 9,9A3,3 0 0,1 12,6Z"
-                                                      Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
-                                                      Width="14" Height="14"
-                                                      Stretch="Uniform"
-                                                      VerticalAlignment="Center"
-                                                      Margin="0,0,8,0" />
-                                                <TextBlock Grid.Column="1"
-                                                           Text="{Binding}"
-                                                           FontSize="14"
-                                                           FontWeight="Medium"
-                                                           VerticalAlignment="Center" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                    <ListBox.ItemContainerStyle>
-                                        <Style TargetType="ListBoxItem">
-                                            <Setter Property="Padding" Value="8,6" />
-                                            <Setter Property="Margin" Value="0,1" />
-                                            <Setter Property="Background" Value="Transparent" />
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="ListBoxItem">
-                                                        <Border x:Name="Bd"
-                                                                Background="{TemplateBinding Background}"
-                                                                BorderThickness="0"
-                                                                CornerRadius="6"
-                                                                Padding="{TemplateBinding Padding}">
-                                                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-                                                        </Border>
-                                                        <ControlTemplate.Triggers>
-                                                            <Trigger Property="IsSelected" Value="True">
-                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
-                                                                <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
-                                                            </Trigger>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
-                                                            </Trigger>
-                                                        </ControlTemplate.Triggers>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </ListBox.ItemContainerStyle>
-                                </ListBox>
+                                     <ListBox.ItemTemplate>
+                                         <DataTemplate>
+                                             <Grid Margin="4,2">
+                                                 <Grid.ColumnDefinitions>
+                                                     <ColumnDefinition Width="Auto" />
+                                                     <ColumnDefinition Width="*" />
+                                                     <ColumnDefinition Width="Auto" />
+                                                 </Grid.ColumnDefinitions>
+                                                 <Path Data="M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2M12,6A3,3 0 0,1 15,9A3,3 0 0,1 12,12A3,3 0 0,1 9,9A3,3 0 0,1 12,6Z"
+                                                       Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                                       Width="14" Height="14"
+                                                       Stretch="Uniform"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,8,0" />
+                                                 <TextBlock Grid.Column="1"
+                                                            Text="{Binding}"
+                                                            FontSize="14"
+                                                            VerticalAlignment="Center">
+                                                     <TextBlock.Style>
+                                                         <Style TargetType="TextBlock">
+                                                             <Setter Property="FontWeight" Value="Medium" />
+                                                             <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                                                             <Style.Triggers>
+                                                                 <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                     <Setter Property="FontWeight" Value="Bold" />
+                                                                 </DataTrigger>
+                                                             </Style.Triggers>
+                                                         </Style>
+                                                     </TextBlock.Style>
+                                                 </TextBlock>
+                                                 <Path Grid.Column="2"
+                                                       Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"
+                                                       Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                                       Width="14" Height="14"
+                                                       Stretch="Uniform"
+                                                       VerticalAlignment="Center"
+                                                       Margin="8,0,4,0">
+                                                     <Path.Style>
+                                                         <Style TargetType="Path">
+                                                             <Setter Property="Visibility" Value="Collapsed" />
+                                                             <Style.Triggers>
+                                                                 <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                     <Setter Property="Visibility" Value="Visible" />
+                                                                 </DataTrigger>
+                                                             </Style.Triggers>
+                                                         </Style>
+                                                     </Path.Style>
+                                                 </Path>
+                                             </Grid>
+                                         </DataTemplate>
+                                     </ListBox.ItemTemplate>
+                                     <ListBox.ItemContainerStyle>
+                                         <Style TargetType="ListBoxItem">
+                                             <Setter Property="Padding" Value="8,6" />
+                                             <Setter Property="Margin" Value="0,1" />
+                                             <Setter Property="Background" Value="Transparent" />
+                                             <Setter Property="Template">
+                                                 <Setter.Value>
+                                                     <ControlTemplate TargetType="ListBoxItem">
+                                                         <Border x:Name="Bd"
+                                                                 Background="{TemplateBinding Background}"
+                                                                 BorderThickness="0"
+                                                                 CornerRadius="6"
+                                                                 Padding="{TemplateBinding Padding}">
+                                                             <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                                         </Border>
+                                                         <ControlTemplate.Triggers>
+                                                             <Trigger Property="IsSelected" Value="True">
+                                                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
+                                                                 <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                             </Trigger>
+                                                             <Trigger Property="IsMouseOver" Value="True">
+                                                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+                                                             </Trigger>
+                                                         </ControlTemplate.Triggers>
+                                                     </ControlTemplate>
+                                                 </Setter.Value>
+                                             </Setter>
+                                         </Style>
+                                     </ListBox.ItemContainerStyle>
+                                 </ListBox>
 
-                                <TextBox
-                                    Grid.Row="1"
-                                    Text="{Binding NewVenueName, UpdateSourceTrigger=PropertyChanged}"
-                                    Margin="0,0,0,8"
-                                    ToolTip="Type a new venue name"
-                                    Style="{StaticResource ModernTextBoxStyle}" />
+                                 <TextBox
+                                     Grid.Row="2"
+                                     Text="{Binding NewVenueName, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,0,8"
+                                     ToolTip="Type a new venue name"
+                                     Style="{StaticResource ModernTextBoxStyle}" />
 
-                                <StackPanel Grid.Row="2" Orientation="Horizontal">
-                                    <Button
-                                        Content="Add Venue"
-                                        Command="{Binding AddVenueCommand}"
-                                        Width="110"
-                                        Margin="0,0,8,0"
-                                        Style="{StaticResource ModernButtonStyle}" />
-                                    <Button
-                                        Content="Remove"
-                                        Command="{Binding RemoveVenueCommand}"
-                                        Width="90"
-                                        Style="{StaticResource ModernSecondaryButtonStyle}" />
-                                </StackPanel>
-                            </Grid>
+                                 <StackPanel Grid.Row="3" Orientation="Horizontal">
+                                     <Button
+                                         Content="Add Venue"
+                                         Command="{Binding AddVenueCommand}"
+                                         Width="110"
+                                         Margin="0,0,8,0"
+                                         Style="{StaticResource ModernButtonStyle}" />
+                                     <Button
+                                         Content="Remove"
+                                         Command="{Binding RemoveVenueCommand}"
+                                         Width="90"
+                                         Style="{StaticResource ModernSecondaryButtonStyle}" />
+                                 </StackPanel>
+                             </Grid>
                         </GroupBox>
 
                         <!-- DJ Names in the 3rd column -->
@@ -909,14 +948,22 @@
                                   Grid.Column="2"
                                   Grid.Row="1"
                                   Margin="15,0,0,12">
-                            <Grid Margin="0,4,0,0">
+                             <Grid Margin="0,4,0,0">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
+                                <!-- Active DJ Label -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,0,0,8">
+                                    <TextBlock Text="Active DJ: " FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBodyLight}" FontSize="13"/>
+                                    <TextBlock Text="{Binding DjName}" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueMidBrush}" FontSize="13"/>
+                                </StackPanel>
+
                                 <ListBox x:Name="LbDjs"
+                                         Grid.Row="1"
                                          ItemsSource="{Binding Djs}"
                                          SelectedItem="{Binding SelectedDj, UpdateSourceTrigger=PropertyChanged}"
                                          Margin="0,0,0,8"
@@ -925,79 +972,109 @@
                                          Background="{DynamicResource MaterialDesignCardBackground}"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                          Padding="4" IsTabStop="True">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="4,2">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <Path Data="M12,2A3,3 0 0,0 9,5V11A3,3 0 0,0 12,14A3,3 0 0,0 15,11V5A3,3 0 0,0 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"
-                                                      Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
-                                                      Width="14" Height="14"
-                                                      Stretch="Uniform"
-                                                      VerticalAlignment="Center"
-                                                      Margin="0,0,8,0" />
-                                                <TextBlock Grid.Column="1"
-                                                           Text="{Binding}"
-                                                           FontSize="14"
-                                                           FontWeight="Medium"
-                                                           VerticalAlignment="Center" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                    <ListBox.ItemContainerStyle>
-                                        <Style TargetType="ListBoxItem">
-                                            <Setter Property="Padding" Value="8,6" />
-                                            <Setter Property="Margin" Value="0,1" />
-                                            <Setter Property="Background" Value="Transparent" />
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="ListBoxItem">
-                                                        <Border x:Name="Bd"
-                                                                Background="{TemplateBinding Background}"
-                                                                BorderThickness="0"
-                                                                CornerRadius="6"
-                                                                Padding="{TemplateBinding Padding}">
-                                                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-                                                        </Border>
-                                                        <ControlTemplate.Triggers>
-                                                            <Trigger Property="IsSelected" Value="True">
-                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
-                                                                <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
-                                                            </Trigger>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
-                                                            </Trigger>
-                                                        </ControlTemplate.Triggers>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </ListBox.ItemContainerStyle>
-                                </ListBox>
+                                     <ListBox.ItemTemplate>
+                                         <DataTemplate>
+                                             <Grid Margin="4,2">
+                                                 <Grid.ColumnDefinitions>
+                                                     <ColumnDefinition Width="Auto" />
+                                                     <ColumnDefinition Width="*" />
+                                                     <ColumnDefinition Width="Auto" />
+                                                 </Grid.ColumnDefinitions>
+                                                 <Path Data="M12,2A3,3 0 0,0 9,5V11A3,3 0 0,0 12,14A3,3 0 0,0 15,11V5A3,3 0 0,0 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"
+                                                       Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                                       Width="14" Height="14"
+                                                       Stretch="Uniform"
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,8,0" />
+                                                 <TextBlock Grid.Column="1"
+                                                            Text="{Binding}"
+                                                            FontSize="14"
+                                                            VerticalAlignment="Center">
+                                                     <TextBlock.Style>
+                                                         <Style TargetType="TextBlock">
+                                                             <Setter Property="FontWeight" Value="Medium" />
+                                                             <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                                                             <Style.Triggers>
+                                                                 <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                     <Setter Property="FontWeight" Value="Bold" />
+                                                                 </DataTrigger>
+                                                             </Style.Triggers>
+                                                         </Style>
+                                                     </TextBlock.Style>
+                                                 </TextBlock>
+                                                 <Path Grid.Column="2"
+                                                       Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"
+                                                       Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                                       Width="14" Height="14"
+                                                       Stretch="Uniform"
+                                                       VerticalAlignment="Center"
+                                                       Margin="8,0,4,0">
+                                                     <Path.Style>
+                                                         <Style TargetType="Path">
+                                                             <Setter Property="Visibility" Value="Collapsed" />
+                                                             <Style.Triggers>
+                                                                 <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                     <Setter Property="Visibility" Value="Visible" />
+                                                                 </DataTrigger>
+                                                             </Style.Triggers>
+                                                         </Style>
+                                                     </Path.Style>
+                                                 </Path>
+                                             </Grid>
+                                         </DataTemplate>
+                                     </ListBox.ItemTemplate>
+                                     <ListBox.ItemContainerStyle>
+                                         <Style TargetType="ListBoxItem">
+                                             <Setter Property="Padding" Value="8,6" />
+                                             <Setter Property="Margin" Value="0,1" />
+                                             <Setter Property="Background" Value="Transparent" />
+                                             <Setter Property="Template">
+                                                 <Setter.Value>
+                                                     <ControlTemplate TargetType="ListBoxItem">
+                                                         <Border x:Name="Bd"
+                                                                 Background="{TemplateBinding Background}"
+                                                                 BorderThickness="0"
+                                                                 CornerRadius="6"
+                                                                 Padding="{TemplateBinding Padding}">
+                                                             <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                                         </Border>
+                                                         <ControlTemplate.Triggers>
+                                                             <Trigger Property="IsSelected" Value="True">
+                                                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
+                                                                 <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                             </Trigger>
+                                                             <Trigger Property="IsMouseOver" Value="True">
+                                                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+                                                             </Trigger>
+                                                         </ControlTemplate.Triggers>
+                                                     </ControlTemplate>
+                                                 </Setter.Value>
+                                             </Setter>
+                                         </Style>
+                                     </ListBox.ItemContainerStyle>
+                                 </ListBox>
 
-                                <TextBox
-                                    Grid.Row="1"
-                                    Text="{Binding NewDjName, UpdateSourceTrigger=PropertyChanged}"
-                                    Margin="0,0,0,8"
-                                    ToolTip="Type a new DJ name"
-                                    Style="{StaticResource ModernTextBoxStyle}" />
+                                 <TextBox
+                                     Grid.Row="2"
+                                     Text="{Binding NewDjName, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,0,8"
+                                     ToolTip="Type a new DJ name"
+                                     Style="{StaticResource ModernTextBoxStyle}" />
 
-                                <StackPanel Grid.Row="2" Orientation="Horizontal">
-                                    <Button
-                                        Content="Add DJ"
-                                        Command="{Binding AddDjCommand}"
-                                        Width="110"
-                                        Margin="0,0,8,0"
-                                        Style="{StaticResource ModernButtonStyle}" />
-                                    <Button
-                                        Content="Remove"
-                                        Command="{Binding RemoveDjCommand}"
-                                        Width="90"
-                                        Style="{StaticResource ModernSecondaryButtonStyle}" />
-                                </StackPanel>
-                            </Grid>
+                                 <StackPanel Grid.Row="3" Orientation="Horizontal">
+                                     <Button
+                                         Content="Add DJ"
+                                         Command="{Binding AddDjCommand}"
+                                         Width="110"
+                                         Margin="0,0,8,0"
+                                         Style="{StaticResource ModernButtonStyle}" />
+                                     <Button
+                                         Content="Remove"
+                                         Command="{Binding RemoveDjCommand}"
+                                         Width="90"
+                                         Style="{StaticResource ModernSecondaryButtonStyle}" />
+                                 </StackPanel>
+                             </Grid>
                         </GroupBox>
 
                         <!-- Form Size in the 3rd column under DJ Names -->

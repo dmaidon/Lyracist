@@ -1,3 +1,4 @@
+// Edited on Jul 30, 2026 @ 07:50:00 -> Remove FlipTileEntries observable collection, populate logic, and DisplayFlipTileEntry class
 // Edited on Jul 28, 2026 @ 18:41:00 -> Add support for formatting music requests differently on master screens
 // Last Edit: Jul 02, 2026 16:54 - Added designated-current state tracking to support First Performer labels before a current singer is set.
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -43,9 +44,6 @@ namespace KSRotation.ViewModels
 
         // Full ordered rotation – used by the Star Wars crawl.
         public List<SingerEntry> FullRotation { get; } = [];
-
-        // Full ordered rotation entries for the Flip Tile board view.
-        public ObservableCollection<DisplayFlipTileEntry> FlipTileEntries { get; } = [];
 
         // Used only by the SingerDisplayWindow popup banner.
         [ObservableProperty]
@@ -100,7 +98,6 @@ namespace KSRotation.ViewModels
                 NextSingers.Clear();
                 RotationEntries.Clear();
                 FullRotation.Clear();
-                FlipTileEntries.Clear();
                 return;
             }
 
@@ -123,7 +120,6 @@ namespace KSRotation.ViewModels
                 NextSingers.Clear();
                 FullRotation.Clear();
                 RotationEntries.Clear();
-                FlipTileEntries.Clear();
                 return;
             }
             else
@@ -206,7 +202,6 @@ namespace KSRotation.ViewModels
 
             // Reorder so current singer is always index 0 (crawl treats i==0 as "NOW SINGING").
             FullRotation.Clear();
-            FlipTileEntries.Clear();
 
             // Build new entries into a local list, then sync RotationEntries in-place to minimise
             // CollectionChanged events — typically only 1-2 items change per singer property update.
@@ -236,33 +231,6 @@ namespace KSRotation.ViewModels
 
                     newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, offset == 0));
 
-                    // Populate Flip Tile Entry (limit to at most 10 displayed singers)
-                    if (offset < 10)
-                    {
-                        string statusText = string.IsNullOrWhiteSpace(singer.Song)
-                            ? "No Song Selected"
-                            : singer.Song;
-
-                        if (!string.IsNullOrWhiteSpace(singer.Artist))
-                        {
-                            statusText += $" – {singer.Artist}";
-                        }
-
-                        string posLabel = offset == 0 ? "★"
-                                        : offset == 1 ? "Next"
-                                        : $"{offset + 1}";
-
-                        string displayName = singer.IsMusic ? $"[M] {singer.Name}" : singer.Name;
-
-                        FlipTileEntries.Add(new DisplayFlipTileEntry
-                        {
-                            Position = CleanAndPad(posLabel, 4),
-                            Name = CleanAndPad(displayName, 20),
-                            Status = CleanAndPad(statusText, 36),
-                            IsCurrent = offset == 0,
-                            IsNext = offset == 1
-                        });
-                    }
                 }
             }
             else
@@ -285,30 +253,6 @@ namespace KSRotation.ViewModels
                         : $" ({singer.Artist})";
 
                     newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, false));
-
-                    // Populate Flip Tile Entry (limit to at most 10 displayed singers)
-                    if (index <= 10)
-                    {
-                        string statusText = string.IsNullOrWhiteSpace(singer.Song)
-                            ? "No Song Selected"
-                            : singer.Song;
-
-                        if (!string.IsNullOrWhiteSpace(singer.Artist))
-                        {
-                            statusText += $" – {singer.Artist}";
-                        }
-
-                        string displayName = singer.IsMusic ? $"[M] {singer.Name}" : singer.Name;
-
-                        FlipTileEntries.Add(new DisplayFlipTileEntry
-                        {
-                            Position = CleanAndPad($"{index}", 4),
-                            Name = CleanAndPad(displayName, 20),
-                            Status = CleanAndPad(statusText, 36),
-                            IsCurrent = false,
-                            IsNext = false
-                        });
-                    }
 
                     index++;
                 }
@@ -349,12 +293,4 @@ namespace KSRotation.ViewModels
             bool IsCurrent);
     }
 
-    public class DisplayFlipTileEntry
-    {
-        public string Position { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-        public bool IsCurrent { get; set; }
-        public bool IsNext { get; set; }
-    }
 }

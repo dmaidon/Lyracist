@@ -1,3 +1,4 @@
+<!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -9,9 +10,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.7.29.47</AssemblyVersion>
-    <FileVersion>26.7.29.47</FileVersion>
-    <ApplicationIcon>scaryoke.ico</ApplicationIcon>
+    <AssemblyVersion>26.7.30.59</AssemblyVersion>
+    <FileVersion>26.7.30.59</FileVersion>
+    <ApplicationIcon>..\Lyracist\Assets\scaryoke.ico</ApplicationIcon>
     <PackageIcon>scaryoke.png</PackageIcon>
   </PropertyGroup>
 
@@ -31,11 +32,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="scaryoke.ico" />
+    <Content Include="..\Lyracist\Assets\scaryoke.ico" Link="scaryoke.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\..\Users\dmaid\Downloads\scaryoke.png">
+    <None Include="..\Lyracist\Assets\scaryoke.png" Link="scaryoke.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
