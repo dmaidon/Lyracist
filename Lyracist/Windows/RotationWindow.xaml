@@ -1,4 +1,4 @@
-<!-- Edited on Jul 30, 2026 @ 07:35:00 -> Increased QR Code overlay size and font sizes on public billboard screen -->
+<!-- Edited on Jul 31, 2026 @ 12:31:08 -> Increased Vegas Marquee font sizes for 1440p displays -->
 <Window x:Class="Lyracist.Windows.RotationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -373,7 +373,7 @@
                     <TextBlock Grid.Row="0"
                                Text="{Binding PerformerHeaderText}"
                                HorizontalAlignment="Center"
-                               FontSize="45"
+                               FontSize="64"
                                FontWeight="Bold"
                                Foreground="#FFFFD86B"
                                TextOptions.TextFormattingMode="Display">
@@ -388,7 +388,7 @@
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
                                    TextWrapping="Wrap"
-                                   FontSize="82"
+                                   FontSize="144"
                                    FontWeight="Bold"
                                    Foreground="#FFFFFFFF"
                                    TextOptions.TextFormattingMode="Ideal">
@@ -401,7 +401,7 @@
                                    TextAlignment="Center"
                                    TextWrapping="Wrap"
                                    Margin="0,12,0,0"
-                                   FontSize="36"
+                                   FontSize="56"
                                    FontStyle="Italic"
                                    Foreground="#FFFFD86B" />
                         

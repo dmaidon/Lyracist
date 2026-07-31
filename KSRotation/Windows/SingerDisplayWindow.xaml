@@ -1,4 +1,4 @@
-<!-- Edited on Jul 30, 2026 @ 07:50:00 -> Remove FlipTilePanel projection panel -->
+<!-- Edited on Jul 31, 2026 @ 12:31:08 -> Increased Vegas Marquee font sizes for 1440p displays -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -178,7 +178,7 @@
                     <TextBlock Grid.Row="0"
                                Text="{Binding PerformerHeaderText}"
                                HorizontalAlignment="Center"
-                               FontSize="45"
+                               FontSize="64"
                                FontWeight="Bold"
                                Foreground="#FFFFD86B"
                                TextOptions.TextFormattingMode="Display">
@@ -193,7 +193,7 @@
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
                                    TextWrapping="Wrap"
-                                   FontSize="92"
+                                   FontSize="144"
                                    FontWeight="Bold"
                                    Foreground="#FFFFFFFF"
                                    TextOptions.TextFormattingMode="Ideal">
@@ -206,7 +206,7 @@
                                    TextAlignment="Center"
                                    TextWrapping="Wrap"
                                    Margin="0,12,0,0"
-                                   FontSize="40"
+                                   FontSize="56"
                                    FontStyle="Italic"
                                    Foreground="#FFFFD86B" />
                     </StackPanel>
