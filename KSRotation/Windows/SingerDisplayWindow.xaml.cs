@@ -1,4 +1,4 @@
-// Edited on Jul 30, 2026 @ 07:50:00 -> Remove Flip Tile Board visibility toggling and case
+// Edited on Jul 31, 2026 @ 12:35:55 -> Dynamically scale Vegas Marquee font sizes based on window resolution
 // Edited on Jul 28, 2026 @ 18:44:00 -> Support background music requests in Star Wars crawl and rotation listings
 // Last Edit: Jul 20, 2026 06:50 - Bind off-tree visual source to XAML CrawlSourceCanvas in clipped Grid to fix Star Wars crawl text rendering
 using KSRotation.Models;
@@ -79,6 +79,7 @@ namespace KSRotation.Windows
             Loaded += OnLoaded;
             Closed += OnClosed;
             DataContextChanged += OnDataContextChanged;
+            SizeChanged += OnSizeChanged;
         }
 
         private void OnClosed(object? sender, EventArgs e)
@@ -86,9 +87,28 @@ namespace KSRotation.Windows
             Loaded -= OnLoaded;
             Closed -= OnClosed;
             DataContextChanged -= OnDataContextChanged;
+            SizeChanged -= OnSizeChanged;
             StopMarqueeChase();
             StopVinylSpin();
             HookViewModel(null);
+        }
+
+        private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateMarqueeFontSizes();
+        }
+
+        private void UpdateMarqueeFontSizes()
+        {
+            if (MarqueeHeader == null || MarqueeSingerName == null || MarqueeSingerSong == null)
+                return;
+
+            double ratio = ActualHeight / 1080.0;
+            if (ratio <= 0) ratio = 1.0;
+
+            MarqueeHeader.FontSize = Math.Max(24, Math.Round(48 * ratio));
+            MarqueeSingerName.FontSize = Math.Max(40, Math.Round(108 * ratio));
+            MarqueeSingerSong.FontSize = Math.Max(20, Math.Round(42 * ratio));
         }
 
         // ── ViewModel wiring ──────────────────────────────────────────────────

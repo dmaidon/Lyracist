@@ -370,10 +370,10 @@
                     </Grid.RowDefinitions>
 
                     <!-- Header -->
-                    <TextBlock Grid.Row="0"
+                    <TextBlock Grid.Row="0" x:Name="MarqueeHeader"
                                Text="{Binding PerformerHeaderText}"
                                HorizontalAlignment="Center"
-                               FontSize="64"
+                               FontSize="48"
                                FontWeight="Bold"
                                Foreground="#FFFFD86B"
                                TextOptions.TextFormattingMode="Display">
@@ -384,11 +384,11 @@
 
                     <!-- Current singer name + song (vertically centered) -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding CurrentSinger}"
+                        <TextBlock x:Name="MarqueeSingerName" Text="{Binding CurrentSinger}"
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
                                    TextWrapping="Wrap"
-                                   FontSize="144"
+                                   FontSize="108"
                                    FontWeight="Bold"
                                    Foreground="#FFFFFFFF"
                                    TextOptions.TextFormattingMode="Ideal">
@@ -396,12 +396,12 @@
                                 <DropShadowEffect Color="#FFFFD86B" BlurRadius="28" ShadowDepth="0" Opacity="0.85" />
                             </TextBlock.Effect>
                         </TextBlock>
-                        <TextBlock Text="{Binding CurrentSingerSong}"
+                        <TextBlock x:Name="MarqueeSingerSong" Text="{Binding CurrentSingerSong}"
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
                                    TextWrapping="Wrap"
                                    Margin="0,12,0,0"
-                                   FontSize="56"
+                                   FontSize="42"
                                    FontStyle="Italic"
                                    Foreground="#FFFFD86B" />
                         

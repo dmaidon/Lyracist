@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Debounce canvas updates
+// Edited on Jul 31, 2026 @ 12:35:55 -> Dynamically scale Vegas Marquee font sizes based on window resolution
 using Lyracist.Models;
 using Lyracist.ViewModels;
 using System.Collections.Specialized;
@@ -77,6 +77,7 @@ public partial class RotationWindow : Window
         Closed += OnClosed;
         DataContextChanged += OnDataContextChanged;
         IsVisibleChanged += RotationWindow_IsVisibleChanged;
+        SizeChanged += OnSizeChanged;
 
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived += OnReactionReceived;
     }
@@ -87,6 +88,7 @@ public partial class RotationWindow : Window
         Closed -= OnClosed;
         DataContextChanged -= OnDataContextChanged;
         IsVisibleChanged -= RotationWindow_IsVisibleChanged;
+        SizeChanged -= OnSizeChanged;
         HookViewModel(null);
         StopSpaceshipTimer();
 
@@ -99,6 +101,24 @@ public partial class RotationWindow : Window
             scaryokeWindow.SpinCompleted -= ScaryokeWindow_SpinCompleted;
             scaryokeWindow.IsVisibleChanged -= ScaryokeWindow_IsVisibleChanged;
         }
+    }
+
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        UpdateMarqueeFontSizes();
+    }
+
+    private void UpdateMarqueeFontSizes()
+    {
+        if (MarqueeHeader == null || MarqueeSingerName == null || MarqueeSingerSong == null)
+            return;
+
+        double ratio = ActualHeight / 1080.0;
+        if (ratio <= 0) ratio = 1.0;
+
+        MarqueeHeader.FontSize = Math.Max(24, Math.Round(48 * ratio));
+        MarqueeSingerName.FontSize = Math.Max(40, Math.Round(108 * ratio));
+        MarqueeSingerSong.FontSize = Math.Max(20, Math.Round(42 * ratio));
     }
 
     private void RotationWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
