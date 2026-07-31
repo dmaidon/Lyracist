@@ -597,7 +597,7 @@ namespace KSRotation.ViewModels
             if (entry.IsCurrent)
             {
                 // 1. Try the singer already flagged as Next (manual next-singer override)
-                SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive);
+                SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused);
 
                 if (nextCurrent == null)
                 {
@@ -607,7 +607,7 @@ namespace KSRotation.ViewModels
                     for (int i = 1; i < count; i++)
                     {
                         SingerEntry candidate = Singers[(currentIndex + i) % count];
-                        if (candidate != entry && !candidate.IsInactive)
+                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused)
                         {
                             nextCurrent = candidate;
                             break;
@@ -866,7 +866,7 @@ namespace KSRotation.ViewModels
                     if (entry.IsCurrent)
                     {
                         // 1. Try to find a singer explicitly flagged as Next (manual next-singer override)
-                        SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s.IsNext && !s.IsInactive);
+                        SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s.IsNext && !s.IsInactive && !s.IsPaused);
 
                         if (nextCurrent == null)
                         {
@@ -877,7 +877,7 @@ namespace KSRotation.ViewModels
                             for (int i = 1; i < count; i++)
                             {
                                 SingerEntry candidate = Singers[(currentIndex + i) % count];
-                                if (!candidate.IsInactive)
+                                if (!candidate.IsInactive && !candidate.IsPaused)
                                 {
                                     nextCurrent = candidate;
                                     break;
@@ -941,7 +941,7 @@ namespace KSRotation.ViewModels
                 if (pausing)
                 {
                     // 1. Try the singer already flagged as Next (manual next-singer override)
-                    nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive);
+                    nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused);
 
                     if (nextCurrent == null)
                     {
@@ -951,7 +951,7 @@ namespace KSRotation.ViewModels
                         for (int i = 1; i < count; i++)
                         {
                             SingerEntry candidate = Singers[(currentIndex + i) % count];
-                            if (candidate != entry && !candidate.IsInactive)
+                            if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused)
                             {
                                 nextCurrent = candidate;
                                 break;
