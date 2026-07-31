@@ -254,7 +254,7 @@
                             Margin="24,0,8,0"
                             Foreground="{DynamicResource MaterialDesignBody}" />
                             <TextBox
-                            Text="{Binding Singers.Count, Mode=OneWay}"
+                            Text="{Binding SingersInRotationCount, Mode=OneWay}"
                             IsReadOnly="True"
                             Width="50"
                             FontSize="16"

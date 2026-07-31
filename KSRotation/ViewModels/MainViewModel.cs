@@ -289,6 +289,9 @@ namespace KSRotation.ViewModels
 
         public ObservableCollection<SingerEntry> Singers { get; } = [];
 
+        /// <summary>Count of karaoke singers in the rotation, excluding background music entries (<see cref="SingerEntry.IsMusic"/>).</summary>
+        public int SingersInRotationCount => Singers.Count(s => !s.IsMusic);
+
         public ObservableCollection<string> KnownSingers { get; } = [];
         public ObservableCollection<string> FilteredSingers { get; } = [];
 
@@ -716,7 +719,9 @@ namespace KSRotation.ViewModels
                 _isFinishingSong = true;
                 try
                 {
-                    var pendingRequest = IncomingRequests.FirstOrDefault(r => string.Equals(r.Name?.Trim(), entry.Name?.Trim(), StringComparison.OrdinalIgnoreCase));
+                    var pendingRequest = IncomingRequests.FirstOrDefault(r =>
+                        string.Equals(r.Name?.Trim(), entry.Name?.Trim(), StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(r.RequestType, "Music", StringComparison.OrdinalIgnoreCase) == entry.IsMusic);
 
                     if (entry.QueuedSongs.Count > 0)
                     {
@@ -775,7 +780,7 @@ namespace KSRotation.ViewModels
                         QueueSaveSettings();
                         QueueSaveDatabase();
                     }
-                    else if (IsTestMode)
+                    else if (!entry.IsMusic && IsTestMode)
                     {
                         var choices = TestPool.Where(p => p.Song != entry.Song).ToArray();
                         if (choices.Length > 0)
@@ -832,6 +837,15 @@ namespace KSRotation.ViewModels
                     }
 
                     UpdateNextSingerHighlight();
+
+                    // A music request with nothing left queued (and no further pending request merged in above)
+                    // has been fully played — unlike a karaoke singer, it doesn't wait around in the rotation for
+                    // another turn, so remove it now. The completed performance(s) were already recorded above via
+                    // MarkRoundCompleted and remain in history/report independent of Singers membership.
+                    if (entry.IsMusic && string.IsNullOrWhiteSpace(entry.Song))
+                    {
+                        Singers.Remove(entry);
+                    }
                 }
                 finally
                 {
@@ -1171,6 +1185,7 @@ namespace KSRotation.ViewModels
             }
 
             RebuildRotationJsonCacheNow();
+            OnPropertyChanged(nameof(SingersInRotationCount));
         }
 
         private void OnSingerEntryPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -1263,7 +1278,9 @@ namespace KSRotation.ViewModels
                 // Handle song cleared case: automatically post the next song in the performer's queue
                 if (!_isFinishingSong && string.IsNullOrWhiteSpace(entry.Song))
                 {
-                    var pendingRequest = IncomingRequests.FirstOrDefault(r => string.Equals(r.Name?.Trim(), entry.Name?.Trim(), StringComparison.OrdinalIgnoreCase));
+                    var pendingRequest = IncomingRequests.FirstOrDefault(r =>
+                        string.Equals(r.Name?.Trim(), entry.Name?.Trim(), StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(r.RequestType, "Music", StringComparison.OrdinalIgnoreCase) == entry.IsMusic);
                     if (entry.QueuedSongs.Count > 0)
                     {
                         var nextSong = entry.QueuedSongs[0];
