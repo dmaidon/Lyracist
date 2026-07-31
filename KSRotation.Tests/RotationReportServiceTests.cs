@@ -1,13 +1,16 @@
-// Last Edit: Jun 30, 2026 08:40 - Tests for the shared report-row grouping and CSV formula-injection hardening.
+// Edited on Jul 31, 2026 @ 12:08:52 -> Update tests for separate Karaoke vs Music report rows
 using KSRotation.Models;
 using KSRotation.Services;
+using System;
+using System.Collections.Generic;
+using Xunit;
 
 namespace KSRotation.Tests;
 
 public class BuildReportRowsTests
 {
-    private static SongPerformance Perf(Guid singerId, string name, int round, string song = "Song", string artist = "Artist") =>
-        new() { SingerId = singerId, SingerName = name, Round = round, SongTitle = song, ArtistName = artist, Timestamp = DateTime.Now };
+    private static SongPerformance Perf(Guid singerId, string name, int round, string song = "Song", string artist = "Artist", bool isMusic = false) =>
+        new() { SingerId = singerId, SingerName = name, Round = round, SongTitle = song, ArtistName = artist, Timestamp = DateTime.Now, IsMusic = isMusic };
 
     [Fact]
     public void MatchesPerformancesToQueuedSingerById()
@@ -78,6 +81,28 @@ public class BuildReportRowsTests
         Assert.Equal("Bob", rows[1].SingerName);
         Assert.True(rows[1].IsInactive);
         Assert.Empty(rows[0].Performances);
+    }
+
+    [Fact]
+    public void SeparatesKaraokeAndMusicRowsCorrectly()
+    {
+        var singer = new SingerEntry { Name = "Alice", IsMusic = false };
+        var musicReq = new SingerEntry { Name = "Bob", IsMusic = true };
+
+        var history = new List<SongPerformance>
+        {
+            Perf(singer.Id, "Alice", 1, isMusic: false),
+            Perf(musicReq.Id, "Bob", 1, isMusic: true),
+        };
+
+        var rows = RotationReportGenerator.BuildReportRows([singer, musicReq], history);
+
+        Assert.Equal(2, rows.Count);
+        Assert.False(rows[0].IsMusic);
+        Assert.True(rows[1].IsMusic);
+
+        Assert.Equal("Alice", rows[0].SingerName);
+        Assert.Equal("Bob", rows[1].SingerName);
     }
 }
 

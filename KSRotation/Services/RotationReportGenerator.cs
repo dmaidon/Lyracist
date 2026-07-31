@@ -1,10 +1,13 @@
-// Edited on Jul 28, 2026 @ 12:53:00 -> Register PDFsharp platform/fallback font resolver in static constructor
+// Edited on Jul 31, 2026 @ 12:08:52 -> Separate Karaoke and Music in reports and count totals separately
 using KSRotation.Models;
 using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace KSRotation.Services
@@ -34,7 +37,7 @@ namespace KSRotation.Services
 
         /// <summary>A single singer's report line: their display name, completed performances (round-ordered),
         /// and whether they are marked inactive in the queue. Built once and shared by both the CSV and PDF writers.</summary>
-        internal sealed record ReportRow(string SingerName, List<SongPerformance> Performances, bool IsInactive);
+        internal sealed record ReportRow(string SingerName, List<SongPerformance> Performances, bool IsInactive, bool IsMusic);
 
         /// <summary>
         /// Builds the ordered set of report rows from the queue and history. Performances are matched to singers by
@@ -43,52 +46,49 @@ namespace KSRotation.Services
         /// </summary>
         internal static List<ReportRow> BuildReportRows(List<SingerEntry> singers, List<SongPerformance> history)
         {
-            var performanceGroupsBySingerId = history
-                .Where(h => h.SingerId != Guid.Empty)
-                .GroupBy(h => h.SingerId)
-                .ToDictionary(g => g.Key, g => g.OrderBy(p => p.Round).ToList());
+            var rows = new List<ReportRow>();
 
-            var legacyPerformanceGroupsByName = history
-                .Where(h => h.SingerId == Guid.Empty)
-                .GroupBy(h => h.SingerName, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.OrderBy(p => p.Round).ToList(), StringComparer.OrdinalIgnoreCase);
-
-            var rows = new List<ReportRow>(singers.Count);
-
-            // Singers currently in the queue (preserve queue order).
+            // 1. Process active queue singers (preserving queue order)
             foreach (var singer in singers)
             {
-                List<SongPerformance> perfs = [];
-                if (performanceGroupsBySingerId.TryGetValue(singer.Id, out var byIdPerfs))
-                {
-                    perfs = byIdPerfs;
-                }
-                else if (legacyPerformanceGroupsByName.TryGetValue(singer.Name, out var byNamePerfs))
-                {
-                    perfs = byNamePerfs;
-                }
+                var perfs = history
+                    .Where(h => (h.SingerId == singer.Id || (h.SingerId == Guid.Empty && string.Equals(h.SingerName, singer.Name, StringComparison.OrdinalIgnoreCase))) && h.IsMusic == singer.IsMusic)
+                    .OrderBy(p => p.Round)
+                    .ToList();
 
-                rows.Add(new ReportRow(singer.Name, perfs, singer.IsInactive));
+                rows.Add(new ReportRow(singer.Name, perfs, singer.IsInactive, singer.IsMusic));
             }
 
-            // Singers who have performances but are no longer in the queue (counted as active).
-            var queueSingerIds = new HashSet<Guid>(singers.Select(s => s.Id));
-            var queueNames = new HashSet<string>(singers.Select(s => s.Name), StringComparer.OrdinalIgnoreCase);
+            // 2. Process historical performances for singers who are no longer in the active queue
+            // Group history by SingerId (stable identity) and IsMusic
+            var historicalById = history
+                .Where(h => h.SingerId != Guid.Empty)
+                .GroupBy(h => new { h.SingerId, h.IsMusic });
 
-            foreach (var group in performanceGroupsBySingerId)
+            foreach (var group in historicalById)
             {
-                if (!queueSingerIds.Contains(group.Key))
+                // If not in the queue
+                if (!singers.Any(s => s.Id == group.Key.SingerId && s.IsMusic == group.Key.IsMusic))
                 {
-                    string singerName = group.Value.FirstOrDefault()?.SingerName ?? "Unknown Singer";
-                    rows.Add(new ReportRow(singerName, group.Value, IsInactive: false));
+                    string singerName = group.FirstOrDefault()?.SingerName ?? "Unknown Singer";
+                    var perfs = group.OrderBy(p => p.Round).ToList();
+                    rows.Add(new ReportRow(singerName, perfs, IsInactive: false, IsMusic: group.Key.IsMusic));
                 }
             }
 
-            foreach (var group in legacyPerformanceGroupsByName)
+            // Group legacy history (SingerId == Guid.Empty) by name and IsMusic
+            var historicalByName = history
+                .Where(h => h.SingerId == Guid.Empty)
+                .GroupBy(h => new { h.SingerName, h.IsMusic });
+
+            foreach (var group in historicalByName)
             {
-                if (!queueNames.Contains(group.Key))
+                // If not in the queue by name and IsMusic
+                if (!singers.Any(s => string.Equals(s.Name, group.Key.SingerName, StringComparison.OrdinalIgnoreCase) && s.IsMusic == group.Key.IsMusic)
+                    && !rows.Any(r => string.Equals(r.SingerName, group.Key.SingerName, StringComparison.OrdinalIgnoreCase) && r.IsMusic == group.Key.IsMusic))
                 {
-                    rows.Add(new ReportRow(group.Key, group.Value, IsInactive: false));
+                    var perfs = group.OrderBy(p => p.Round).ToList();
+                    rows.Add(new ReportRow(group.Key.SingerName, perfs, IsInactive: false, IsMusic: group.Key.IsMusic));
                 }
             }
 
@@ -100,20 +100,39 @@ namespace KSRotation.Services
             List<SongPerformance> history)
         {
             StringBuilder sb = new();
-            sb.AppendLine("Singer,Total Completed Songs,Round,Song Title,Artist,Timestamp");
+            sb.AppendLine("Singer,Type,Total Completed Songs,Round,Song Title,Artist,Timestamp");
 
-            foreach (var row in BuildReportRows(singers, history))
+            var rows = BuildReportRows(singers, history);
+
+            // Write Karaoke rows
+            foreach (var row in rows.Where(r => !r.IsMusic))
             {
                 if (row.Performances.Count > 0)
                 {
                     foreach (var perf in row.Performances)
                     {
-                        sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",{row.Performances.Count},{perf.Round},\"{EscapeCsv(perf.SongTitle)}\",\"{EscapeCsv(perf.ArtistName)}\",\"{perf.Timestamp:yyyy-MM-dd HH:mm:ss}\"");
+                        sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"Karaoke\",{row.Performances.Count},{perf.Round},\"{EscapeCsv(perf.SongTitle)}\",\"{EscapeCsv(perf.ArtistName)}\",\"{perf.Timestamp:yyyy-MM-dd HH:mm:ss}\"");
                     }
                 }
                 else
                 {
-                    sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",0,,,");
+                    sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"Karaoke\",0,,,");
+                }
+            }
+
+            // Write Music rows
+            foreach (var row in rows.Where(r => r.IsMusic))
+            {
+                if (row.Performances.Count > 0)
+                {
+                    foreach (var perf in row.Performances)
+                    {
+                        sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"Music\",{row.Performances.Count},{perf.Round},\"{EscapeCsv(perf.SongTitle)}\",\"{EscapeCsv(perf.ArtistName)}\",\"{perf.Timestamp:yyyy-MM-dd HH:mm:ss}\"");
+                    }
+                }
+                else
+                {
+                    sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"Music\",0,,,");
                 }
             }
 
@@ -140,17 +159,50 @@ namespace KSRotation.Services
 
             List<ReportRow> rows = BuildReportRows(singers, history);
 
-            int totalSingers = rows.Count;
-            int inactiveSingers = rows.Count(r => r.IsInactive);
-            int activeSingers = totalSingers - inactiveSingers;
-            int totalSongs = history.Count;
+            var karaokeRows = rows.Where(r => !r.IsMusic).ToList();
+            var musicRows = rows.Where(r => r.IsMusic).ToList();
 
-            foreach (var row in rows)
+            // Draw Karaoke section
+            layout.DrawSectionHeader("Karaoke Rotation");
+            if (karaokeRows.Count > 0)
             {
-                layout.DrawRow(row.SingerName, row.Performances.Count, row.Performances);
+                foreach (var row in karaokeRows)
+                {
+                    layout.DrawRow(row.SingerName, row.Performances.Count, row.Performances);
+                }
+            }
+            else
+            {
+                layout.DrawEmptySectionMessage("No karaoke performances recorded.");
             }
 
-            layout.DrawSummary(totalSingers, activeSingers, inactiveSingers, totalSongs);
+            // Draw Music section
+            layout.DrawSectionHeader("Background Music Requests");
+            if (musicRows.Count > 0)
+            {
+                foreach (var row in musicRows)
+                {
+                    layout.DrawRow(row.SingerName, row.Performances.Count, row.Performances);
+                }
+            }
+            else
+            {
+                layout.DrawEmptySectionMessage("No music requests played.");
+            }
+
+            // Calculate separate totals
+            int totalKaraokeSingers = karaokeRows.Count;
+            int inactiveKaraokeSingers = karaokeRows.Count(r => r.IsInactive);
+            int activeKaraokeSingers = totalKaraokeSingers - inactiveKaraokeSingers;
+            int totalKaraokeSongs = karaokeRows.Sum(r => r.Performances.Count);
+
+            int totalMusicRequesters = musicRows.Count;
+            int totalMusicTracks = musicRows.Sum(r => r.Performances.Count);
+
+            layout.DrawSummary(
+                totalKaraokeSingers, activeKaraokeSingers, inactiveKaraokeSingers, totalKaraokeSongs,
+                totalMusicRequesters, totalMusicTracks
+            );
 
             Directory.CreateDirectory(ReportDirectoryPath);
             string fileName = $"Rotation_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
@@ -191,10 +243,10 @@ namespace KSRotation.Services
             private readonly double _pageHeight;
 
             private readonly XStringFormat _leftAlign = new() { Alignment = XStringAlignment.Near, LineAlignment = XLineAlignment.Near };
-            private readonly XStringFormat _rightAlign = new() { Alignment = XStringAlignment.Far, LineAlignment = XLineAlignment.Near };
 
             // Fonts are immutable and reused across every page/row; build them once instead of per-row.
             private static readonly XFont TitleFont = new("Arial", 18, XFontStyleEx.Bold);
+            private static readonly XFont SectionFont = new("Arial", 14, XFontStyleEx.Bold);
             private static readonly XFont MetaFont = new("Arial", 10, XFontStyleEx.Regular);
             private static readonly XFont SingerFont = new("Arial", 11, XFontStyleEx.Bold);
             private static readonly XFont SongFont = new("Arial", 9, XFontStyleEx.Regular);
@@ -227,9 +279,31 @@ namespace KSRotation.Services
 
                 // Draw metadata
                 _gfx.DrawString($"Generated: {date} {time}", MetaFont, XBrushes.DimGray, new XRect(_margin + 15, _yPos + 33, _pageWidth - (2 * _margin) - 30, 15), _leftAlign);
-                _gfx.DrawString($"Venue: {venue}", MetaFont, XBrushes.DimGray, new XRect(_pageWidth - _margin - 215, _yPos + 33, 200, 15), _rightAlign);
+                _gfx.DrawString($"Venue: {venue}", MetaFont, XBrushes.DimGray, new XRect(_pageWidth - _margin - 215, _yPos + 33, 200, 15), new XStringFormat { Alignment = XStringAlignment.Far, LineAlignment = XLineAlignment.Near });
 
                 _yPos += 75;
+            }
+
+            public void DrawSectionHeader(string title)
+            {
+                if (_yPos + 35 > _pageHeight - _margin)
+                {
+                    AddNewPage();
+                }
+                _gfx.DrawString(title, SectionFont, XBrushes.DarkSlateGray, _margin, _yPos, _leftAlign);
+                _yPos += 18;
+                _gfx.DrawLine(XPens.LightGray, _margin, _yPos, _pageWidth - _margin, _yPos);
+                _yPos += 10;
+            }
+
+            public void DrawEmptySectionMessage(string message)
+            {
+                if (_yPos + 20 > _pageHeight - _margin)
+                {
+                    AddNewPage();
+                }
+                _gfx.DrawString(message, SongFont, XBrushes.Gray, _margin + 15, _yPos, _leftAlign);
+                _yPos += 22;
             }
 
             public void DrawRow(string singer, int songCount, List<SongPerformance> songs)
@@ -255,9 +329,11 @@ namespace KSRotation.Services
                 _yPos += 8;
             }
 
-            public void DrawSummary(int totalSingers, int activeSingers, int inactiveSingers, int totalSongs)
+            public void DrawSummary(
+                int totalKaraokeSingers, int activeKaraokeSingers, int inactiveKaraokeSingers, int totalKaraokeSongs,
+                int totalMusicRequesters, int totalMusicTracks)
             {
-                double height = 50;
+                double height = 60;
                 if (_yPos + height > _pageHeight - _margin)
                 {
                     AddNewPage();
@@ -266,8 +342,12 @@ namespace KSRotation.Services
                 _gfx.DrawLine(XPens.DarkGray, _margin, _yPos, _pageWidth - _margin, _yPos);
                 _yPos += 10;
 
-                string summary = $"Total Singers: {totalSingers}  |  Active: {activeSingers}  |  Inactive: {inactiveSingers}  |  Total Songs Sung: {totalSongs}";
-                _gfx.DrawString(summary, SummaryFont, XBrushes.Black, _margin, _yPos, _leftAlign);
+                string karaokeSummary = $"Karaoke: {totalKaraokeSingers} Singers ({activeKaraokeSingers} Active, {inactiveKaraokeSingers} Inactive)  |  Total Songs Sung: {totalKaraokeSongs}";
+                _gfx.DrawString(karaokeSummary, SummaryFont, XBrushes.Black, _margin, _yPos, _leftAlign);
+                _yPos += 16;
+
+                string musicSummary = $"Music Requests: {totalMusicRequesters} Requesters  |  Total Tracks Played: {totalMusicTracks}";
+                _gfx.DrawString(musicSummary, SummaryFont, XBrushes.Black, _margin, _yPos, _leftAlign);
                 _yPos += 20;
             }
         }

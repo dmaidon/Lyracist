@@ -1,4 +1,4 @@
-// Last Edit: Jun 29, 2026 13:22 - Added SingerId (Guid) for stable singer identity; keying history on name alone was fragile.
+// Edited on Jul 31, 2026 @ 12:08:52 -> Added IsMusic property to track background music track performances
 using System;
 
 namespace KSRotation.Models
@@ -12,5 +12,6 @@ namespace KSRotation.Models
         public string ArtistName { get; set; } = string.Empty;
         public int Round { get; set; }
         public DateTime Timestamp { get; set; }
+        public bool IsMusic { get; set; }
     }
 }

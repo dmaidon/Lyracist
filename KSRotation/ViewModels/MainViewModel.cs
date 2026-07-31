@@ -1,5 +1,5 @@
+// Edited on Jul 31, 2026 @ 12:08:52 -> Populate and snapshot IsMusic property on SongPerformance
 // Edited on Jul 30, 2026 @ 07:55:00 -> Add WindowTitle dynamic property to display active Venue/DJ name in the window title bar
-// Edited on Jul 30, 2026 @ 07:50:00 -> Remove Flip Tile Board option from ProjectionViews list
 // Edited on Jul 28, 2026 @ 13:02:00 -> Disable UpdatePerformanceForSinger call on song/artist property change to prevent overwriting past performance history
 // Edited on Jul 27, 2026 @ 13:50:00 -> Add ClearRotation command and prompt logic
 // Last Edit: Jul 02, 2026 16:54 - Added SaveCurrentAsTestList command and fixed runtime binding gaps for Settings controls.
@@ -1508,7 +1508,8 @@ namespace KSRotation.ViewModels
                             SongTitle = entry.Song,
                             ArtistName = entry.Artist,
                             Round = round,
-                            Timestamp = DateTime.Now
+                            Timestamp = DateTime.Now,
+                            IsMusic = entry.IsMusic
                         });
                     }
                 }
@@ -1577,7 +1578,8 @@ namespace KSRotation.ViewModels
                         SongTitle = p.SongTitle,
                         ArtistName = p.ArtistName,
                         Round = p.Round,
-                        Timestamp = p.Timestamp
+                        Timestamp = p.Timestamp,
+                        IsMusic = p.IsMusic
                     })
                 ];
             }
