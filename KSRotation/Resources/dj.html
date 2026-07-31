@@ -337,6 +337,26 @@
         .btn-circle.blue { border-color: var(--blue); color: var(--blue); }
         .btn-circle.blue:hover { background-color: rgba(59, 130, 246, 0.1); }
         .btn-circle.red { border-color: var(--red); color: var(--red); }
+        .btn-circle.small { width: 22px; height: 22px; font-size: 0.7rem; flex-shrink: 0; }
+
+        /* Queued songs list */
+        .queued-songs {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .queued-song-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .queued-song-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .btn-circle.red:hover { background-color: rgba(239, 68, 68, 0.1); }
 
         .btn-text {
@@ -702,6 +722,18 @@
                     }
                 }
 
+                // Render queued songs (with per-song remove control)
+                let queuedSongsHtml = '';
+                if (s.queuedSongs && s.queuedSongs.length > 0) {
+                    const rows = s.queuedSongs.map((q, idx) => `
+                        <div class="queued-song-row">
+                            <span class="queued-song-text">${escapeHtml(q.song)}${q.artist ? ' (' + escapeHtml(q.artist) + ')' : ''}</span>
+                            <button class="btn-circle red small" title="Remove from queue" onclick="sendAction('remove-queued-song', '${s.id}', ${idx})">✕</button>
+                        </div>
+                    `).join('');
+                    queuedSongsHtml = `<div class="queued-songs">${rows}</div>`;
+                }
+
                 // Pause button text and state class
                 const pauseTextStr = s.isPaused ? "👁 Resume" : "👁 Pause";
                 const pauseClass = s.isPaused ? "btn-text resume" : "btn-text pause";
@@ -727,6 +759,7 @@
                         <div class="rounds-container">
                             ${roundsHtml}
                         </div>
+                        ${queuedSongsHtml}
                     </div>
                     <div class="actions-container">
                         <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
@@ -805,8 +838,8 @@
                             ${songsHtml}
                         </div>
                         <div class="request-actions">
-                            <button class="btn-outline" style="border-color: var(--green); color: var(--green);" onclick="sendRequestAction('accept', '${escapeJs(r.name)}')">✓ Accept</button>
-                            <button class="btn-outline" style="border-color: var(--red); color: var(--red);" onclick="sendRequestAction('decline', '${escapeJs(r.name)}')">✕ Decline</button>
+                            <button class="btn-outline" style="border-color: var(--green); color: var(--green);" onclick="sendRequestAction('accept', '${escapeJs(r.id)}')">✓ Accept</button>
+                            <button class="btn-outline" style="border-color: var(--red); color: var(--red);" onclick="sendRequestAction('decline', '${escapeJs(r.id)}')">✕ Decline</button>
                         </div>
                     </div>
                 `;
@@ -838,7 +871,7 @@
             }
         }
 
-        async function sendRequestAction(action, patronName) {
+        async function sendRequestAction(action, requestId) {
             const pin = sessionStorage.getItem("dj_pin");
             try {
                 const response = await fetch(`/api/dj/action?pin=${encodeURIComponent(pin)}`, {
@@ -847,7 +880,7 @@
                         'Content-Type': 'application/json',
                         'X-DJ-PIN': pin
                     },
-                    body: JSON.stringify({ action, targetId: patronName })
+                    body: JSON.stringify({ action, targetId: requestId })
                 });
 
                 if (response.ok) {

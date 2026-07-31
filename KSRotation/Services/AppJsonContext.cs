@@ -17,6 +17,8 @@ namespace KSRotation.Services
     [JsonSerializable(typeof(List<SongPerformance>))]
     [JsonSerializable(typeof(List<string>))]
     [JsonSerializable(typeof(List<RotationItemDto>))]
+    [JsonSerializable(typeof(QueuedSongDto))]
+    [JsonSerializable(typeof(List<QueuedSongDto>))]
     [JsonSerializable(typeof(PatronRequest))]
     [JsonSerializable(typeof(List<PatronRequest>))]
     [JsonSerializable(typeof(RequestedSong))]

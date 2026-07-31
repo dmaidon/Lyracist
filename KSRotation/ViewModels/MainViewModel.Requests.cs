@@ -316,6 +316,7 @@ namespace KSRotation.ViewModels
                 isInactive = s.IsInactive,
                 isPaused = s.IsPaused,
                 isMusic = s.IsMusic,
+                queuedSongs = s.QueuedSongs.Select(q => new QueuedSongDto { song = q.Song, artist = q.Artist }).ToList(),
                 song1Completed = s.Song1Completed,
                 song2Completed = s.Song2Completed,
                 song3Completed = s.Song3Completed,
@@ -434,14 +435,14 @@ namespace KSRotation.ViewModels
             {
                 case "accept":
                     {
-                        var request = IncomingRequests.FirstOrDefault(r => string.Equals(r.Name?.Trim(), targetId?.Trim(), StringComparison.OrdinalIgnoreCase));
+                        var request = IncomingRequests.FirstOrDefault(r => string.Equals(r.Id, targetId, StringComparison.OrdinalIgnoreCase));
                         if (request == null) return "Request not found.";
                         AcceptRequest(request);
                         return "";
                     }
                 case "decline":
                     {
-                        var request = IncomingRequests.FirstOrDefault(r => string.Equals(r.Name?.Trim(), targetId?.Trim(), StringComparison.OrdinalIgnoreCase));
+                        var request = IncomingRequests.FirstOrDefault(r => string.Equals(r.Id, targetId, StringComparison.OrdinalIgnoreCase));
                         if (request == null) return "Request not found.";
                         DeclineRequest(request);
                         return "";
@@ -618,6 +619,20 @@ namespace KSRotation.ViewModels
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();
                         return "";
+                    }
+                case "remove-queued-song":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        if (singer == null) return "Singer not found.";
+
+                        if (int.TryParse(extraData, out int songIndex) && songIndex >= 0 && songIndex < singer.QueuedSongs.Count)
+                        {
+                            singer.QueuedSongs.RemoveAt(songIndex);
+                            RebuildRotationJsonCacheNow();
+                            QueueSaveDatabase();
+                            return "";
+                        }
+                        return "Invalid queued song index.";
                     }
                 case "complete-round":
                 case "clear-round":
