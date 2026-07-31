@@ -1,3 +1,4 @@
+Last Edit: Jul 31, 2026 09:32 - Cleaned build directories and resolved nullability compiler warnings
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.

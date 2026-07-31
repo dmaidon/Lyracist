@@ -1,4 +1,4 @@
-// Edited on Jul 28, 2026 @ 19:36:00 -> Add automated user manual updater tests
+// Edited on Jul 31, 2026 @ 11:20:24 -> Fixed null dereference warnings in user manual tests
 using System;
 using System.IO;
 using Xunit;
@@ -107,40 +107,43 @@ Operators can now export the entire song database (Karaoke or Music) into Word (
             {
                 using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
                 {
-                    var body = doc.MainDocumentPart.Document.Body;
+                    var body = doc.MainDocumentPart?.Document?.Body;
                     
-                    // Check if already appended to avoid duplicates
-                    bool alreadyAppended = false;
-                    foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                    if (body != null)
                     {
-                        if (p.Text.Contains("Catalog Book Exporter"))
+                        // Check if already appended to avoid duplicates
+                        bool alreadyAppended = false;
+                        foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
                         {
-                            alreadyAppended = true;
-                            break;
+                            if (p.Text != null && p.Text.Contains("Catalog Book Exporter"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
                         }
-                    }
 
-                    if (!alreadyAppended)
-                    {
-                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
-                            new DocumentFormat.OpenXml.Wordprocessing.Run(
-                                new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
-                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
-                                new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Database Manager / Catalog Book Exporter")
-                            )
-                        ));
-
-                        foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                        if (!alreadyAppended)
                         {
-                            if (line.StartsWith("Section:")) continue;
                             body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
                                 new DocumentFormat.OpenXml.Wordprocessing.Run(
-                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
-                                    new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Database Manager / Catalog Book Exporter")
                                 )
                             ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
                         }
-                        doc.Save();
                     }
                 }
             }

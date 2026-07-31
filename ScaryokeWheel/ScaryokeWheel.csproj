@@ -10,8 +10,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.7.30.59</AssemblyVersion>
-    <FileVersion>26.7.30.59</FileVersion>
+    <AssemblyVersion>26.7.31.67</AssemblyVersion>
+    <FileVersion>26.7.31.67</FileVersion>
     <ApplicationIcon>..\Lyracist\Assets\scaryoke.ico</ApplicationIcon>
     <PackageIcon>scaryoke.png</PackageIcon>
   </PropertyGroup>

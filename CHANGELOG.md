@@ -1,6 +1,13 @@
+Last Edit: Jul 31, 2026 09:32 - Cleaned build directories and resolved nullability compiler warnings
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.7.31.0] - 2026-07-31
+
+### Fixed
+- **Nullability Warnings**: Resolved possible null reference return (CS8603) and dereference warnings (CS8602) in `CatalogBookGenerator.cs` and `CatalogBookGeneratorTests.cs`.
+- **Android SDK Build Issue**: Cleaned locked `bin`/`obj` folders under `KSRotation.Maui` to resolve clean/rebuild directory deletion errors.
 
 ## [26.7.25.0] - 2026-07-25
 

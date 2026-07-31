@@ -1,4 +1,4 @@
-// Created on Jul 28, 2026 @ 19:34:00 -> Add static constructor for PDFsharp font settings and EF Core migration check
+// Edited on Jul 31, 2026 @ 11:20:24 -> Fixed null reference return warning in custom font resolver
 using System;
 using System.IO;
 using System.Linq;
@@ -287,7 +287,7 @@ namespace Lyracist.Data.Services
                     else
                         return new PdfSharp.Fonts.FontResolverInfo("Arial");
                 }
-                return null;
+                return null!;
             }
         }
     }

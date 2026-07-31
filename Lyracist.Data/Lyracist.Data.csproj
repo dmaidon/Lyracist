@@ -6,8 +6,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>26.7.30.69</AssemblyVersion>
-    <FileVersion>26.7.30.69</FileVersion>
+    <AssemblyVersion>26.7.31.77</AssemblyVersion>
+    <FileVersion>26.7.31.77</FileVersion>
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
   </PropertyGroup>
