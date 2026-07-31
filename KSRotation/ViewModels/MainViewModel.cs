@@ -572,6 +572,67 @@ namespace KSRotation.ViewModels
             });
         }
 
+        /// <summary>Permanently deletes a singer row from the rotation (unlike <see cref="ToggleSingerInactive"/>,
+        /// which only hides it). Recorded performance history for the singer is unaffected and still appears in
+        /// the night's report. Master-console only — not exposed from the DJ web remote or the MAUI app.</summary>
+        [RelayCommand]
+        private void RemoveSinger(SingerEntry entry)
+        {
+            if (entry == null)
+            {
+                return;
+            }
+
+            var result = System.Windows.MessageBox.Show(
+                $"Permanently remove \"{entry.Name}\" from the rotation? This cannot be undone.",
+                "Confirm Remove",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            if (result != System.Windows.MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            if (entry.IsCurrent)
+            {
+                // 1. Try the singer already flagged as Next (manual next-singer override)
+                SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive);
+
+                if (nextCurrent == null)
+                {
+                    // 2. Fall back to standard index-based rotation
+                    int currentIndex = Singers.IndexOf(entry);
+                    int count = Singers.Count;
+                    for (int i = 1; i < count; i++)
+                    {
+                        SingerEntry candidate = Singers[(currentIndex + i) % count];
+                        if (candidate != entry && !candidate.IsInactive)
+                        {
+                            nextCurrent = candidate;
+                            break;
+                        }
+                    }
+                }
+
+                entry.IsCurrent = false;
+                if (nextCurrent != null)
+                {
+                    nextCurrent.IsCurrent = true;
+                    nextCurrent.IsNext = false;
+                }
+            }
+
+            Singers.Remove(entry);
+            UpdateNextSingerHighlight();
+            RebuildRotationJsonCacheNow();
+            QueueSaveDatabase();
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
+            }
+        }
+
         [RelayCommand]
         private void ClearRotation()
         {
