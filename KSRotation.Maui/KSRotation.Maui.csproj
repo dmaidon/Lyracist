@@ -1,4 +1,5 @@
-﻿<!-- Edited on Jul 30, 2026 @ 08:00:00 -> Enable cross-platform MauiSplashScreen for Android and Windows and update comments -->
+<!-- Edited on Aug 1, 2026 @ 09:48:15 -> Exclude DjBannerWindowService from compile linking -->
+<!-- Edited on Jul 30, 2026 @ 08:00:00 -> Enable cross-platform MauiSplashScreen for Android and Windows and update comments -->
 <!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -28,9 +29,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.7.31.125</AssemblyVersion>
+		<AssemblyVersion>26.8.1.139</AssemblyVersion>
 
-		<FileVersion>26.7.31.125</FileVersion>
+		<FileVersion>26.8.1.139</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
@@ -76,7 +77,8 @@
 		<!-- Wildcard so newly-added WPF services are picked up automatically instead of requiring a manual
 		     edit here. Excludes the three services that have MAUI-specific replacements in Shims\WpfShims.cs
 		     (compiling both would be a duplicate-type error). -->
-		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs" Link="Services\%(Filename)%(Extension)" />
+		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs;..\KSRotation\Services\DjBannerWindowService.cs" Link="Services\%(Filename)%(Extension)" />
+
 
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.Requests.cs" Link="ViewModels\MainViewModel.Requests.cs" />

@@ -1,3 +1,4 @@
+// Edited on Aug 1, 2026 @ 11:49:44 -> Add DJ Banner Delete functionality documentation updates
 Lyracist Pro & KSRotation - Performer Portal Update (July 2026)
 
 Section: Singer Request Board / Patron Request Portal
@@ -132,3 +133,39 @@ The splash screen for the mobile and desktop versions of Karaoke Singer Rotation
 
 2. Obsidian Dark Theme Background:
    - The launch background has been updated to a deep premium obsidian color (#12091A) on both platforms, providing a seamless visual transition during startup.
+
+Section: Display Projection Window / DJ Banner Screen & Selection
+
+[Update Details]
+Operators can now configure and display custom DJ branding, logos, and promotional banners on a designated projection screen.
+
+1. DJ Banner Screen Target:
+   - Available in both Lyracist (Settings page & Karaoke page) and KSRotation (Settings tab).
+   - Allows operators to choose which connected monitor will project the borderless, full-screen DJ banner.
+   - When enabled/opened, it launches the screen on the target monitor and keeps it topmost.
+
+2. Upload Banners:
+   - Operators can upload multiple banner images (PNG, JPG, JPEG, GIF, BMP) from their system via the "Upload" button.
+   - Files are copied into a local DJBanners settings subdirectory automatically.
+
+3. Select Active Banner:
+   - If more than one banner is uploaded, operators can select which banner is active and displayed from a dropdown list of available images.
+   - Selecting a different banner updates the projected screen instantly without reloading the window.
+
+4. Delete Custom Banners:
+   - Operators can delete custom banners from the system by selecting the target banner and clicking the "Delete" button.
+   - A confirmation prompt is displayed, after which the custom banner file is deleted from the settings directory and removed from all selectable dropdowns.
+
+
+Section: Display Projection Window / DJ Banner and Rotation Screen Collision Priority
+
+[Update Details]
+To ensure proper projection setup, priority logic has been added when both the DJ Banner and the Rotation Display target the same screen/monitor.
+
+1. Same-Screen Deconfliction:
+   - The DJ Banner will usually be displayed on the screen while everything is getting setup and the list is started.
+   - Once the Rotation Display is enabled (or moved) to the same screen, the DJ Banner is automatically disabled and hidden so the rotation list can display.
+   
+2. Multi-Screen Independent Operation:
+   - If the DJ Banner and the Rotation Display target different screens, they will both be displayed and operate simultaneously.
+

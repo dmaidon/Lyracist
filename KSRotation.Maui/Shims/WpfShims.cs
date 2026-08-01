@@ -1,4 +1,4 @@
-// Edited on Jul 27, 2026 @ 22:45:00 -> Add SetSelectedMonitor and RepositionWindow shims to DisplayWindowService
+// Edited on Aug 1, 2026 @ 09:52:00 -> Add DjBannerWindowService shim
 // Created on Jul 27, 2026 @ 13:50:00 -> Update MessageBox shim to support YesNo buttons and MessageBoxResult for compilation compatibility
 using System;
 using System.Collections.ObjectModel;
@@ -125,5 +125,15 @@ namespace KSRotation.Services
         {
             // Optional: Map dynamic app theme mapping if needed.
         }
+    }
+
+    public class DjBannerWindowService
+    {
+        public void SetSelectedMonitor(string deviceName) { }
+        public void SetBannerPath(string path) { }
+        public void Show() { }
+        public void Hide() { }
+        public void Shutdown() { }
+        public void RepositionWindow() { }
     }
 }

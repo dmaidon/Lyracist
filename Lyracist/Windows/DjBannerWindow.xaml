@@ -1,0 +1,17 @@
+<!-- Created on Aug 1, 2026 @ 09:43:00 -> Added DJ Banner projection window -->
+<Window x:Class="Lyracist.Windows.DjBannerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DJ Banner Screen" Height="600" Width="1000"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="Black"
+        Topmost="True"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterScreen"
+        MouseDoubleClick="OnMouseDoubleClick">
+
+    <Grid>
+        <Image Source="{Binding BannerImage}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Grid>
+</Window>

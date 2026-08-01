@@ -18,7 +18,7 @@
             <!-- Top Panel: Add New Singer -->
             <Border Grid.Row="0" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="12">
                 <Grid ColumnDefinitions="*, *, *, Auto" ColumnSpacing="8" VerticalOptions="Center">
-                    <Entry x:Name="NameEntry" Placeholder="Singer Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="0" VerticalOptions="Center" />
+                    <Entry x:Name="NameEntry" Placeholder="Performer Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="0" VerticalOptions="Center" />
                     <Entry x:Name="SongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="1" VerticalOptions="Center" />
                     <Entry x:Name="ArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="2" VerticalOptions="Center" />
                     <Button Text="Add Performer" Clicked="OnAddPerformerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" Grid.Column="3" Padding="16,0" HeightRequest="40" VerticalOptions="Center" />
@@ -84,7 +84,7 @@
 
                                                 <!-- Indicator badges (Now Singing [Orange], Next [Blue], Music [Green]) -->
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#F97316" Padding="4,2" IsVisible="{Binding IsCurrent}" StrokeThickness="0">
-                                                    <Label Text="NOW SINGING" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                                                    <Label Text="NOW PERFORMING" TextColor="White" FontSize="9" FontAttributes="Bold" />
                                                 </Border>
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#3B82F6" Padding="4,2" IsVisible="{Binding IsNext}" StrokeThickness="0">
                                                     <Label Text="NEXT" TextColor="White" FontSize="9" FontAttributes="Bold" />
@@ -181,10 +181,10 @@
                                         <!-- Actions Panel -->
                                         <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
                                             <!-- Edit Name/Song/Artist -->
-                                            <Button Text="✏" Clicked="OnEditSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#8B5CF6" BorderWidth="1" TextColor="#8B5CF6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
+                                            <Button Text="✏" Clicked="OnEditSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#8B5CF6" BorderWidth="1" TextColor="#8B5CF6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Edit Performer" />
 
                                             <!-- Highlight as Current -->
-                                            <Button Text="🎙" Clicked="OnSetCurrentSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#10B981" BorderWidth="1" TextColor="#10B981" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0">
+                                            <Button Text="🎙" Clicked="OnSetCurrentSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#10B981" BorderWidth="1" TextColor="#10B981" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Mark Current">
                                                 <Button.Triggers>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsPaused}" Value="True">
                                                         <Setter Property="IsEnabled" Value="False" />
@@ -198,7 +198,7 @@
                                             </Button>
 
                                             <!-- Complete current round -->
-                                            <Button Text="✓" Clicked="OnFinishSingerSongClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#3B82F6" BorderWidth="1" TextColor="#3B82F6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
+                                            <Button Text="✓" Clicked="OnFinishSingerSongClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#3B82F6" BorderWidth="1" TextColor="#3B82F6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Song Completed" />
 
                                             <!-- Up/Down buttons -->
                                             <Button Text="▲" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerUpCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
@@ -220,7 +220,7 @@
                                             </Button>
 
                                             <!-- Delete singer row -->
-                                            <Button Text="🗑" Clicked="OnDeleteSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#EF4444" BorderWidth="1" TextColor="#EF4444" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0">
+                                            <Button Text="🗑" Clicked="OnDeleteSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#EF4444" BorderWidth="1" TextColor="#EF4444" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Delete Performer">
                                                 <Button.Triggers>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsInactive}" Value="True">
                                                         <Setter Property="Text" Value="↺" />
@@ -302,56 +302,56 @@
                         <DataTemplate x:DataType="models:PatronRequest">
                             <Border StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Margin="0,0,0,6" Padding="8">
                                 <Grid RowDefinitions="Auto, Auto" RowSpacing="6">
-                                     <!-- Request Details -->
-                                     <VerticalStackLayout Grid.Row="0" Spacing="1">
-                                          <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
-                                              <Label Text="{Binding Name}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" FontAttributes="Bold" VerticalOptions="Center" />
-                                              <!-- Music Badge -->
-                                              <Border StrokeShape="RoundRectangle 4" BackgroundColor="#10B981" Padding="4,2" StrokeThickness="0" VerticalOptions="Center">
-                                                  <Border.Style>
-                                                      <Style TargetType="Border">
-                                                          <Setter Property="IsVisible" Value="False" />
-                                                          <Style.Triggers>
-                                                              <DataTrigger TargetType="Border" Binding="{Binding RequestType}" Value="Music">
-                                                                  <Setter Property="IsVisible" Value="True" />
-                                                              </DataTrigger>
-                                                          </Style.Triggers>
-                                                      </Style>
-                                                  </Border.Style>
-                                                  <Label Text="MUSIC" TextColor="White" FontSize="8" FontAttributes="Bold" />
-                                              </Border>
-                                              <!-- Karaoke Badge -->
-                                              <Border StrokeShape="RoundRectangle 4" BackgroundColor="#8B5CF6" Padding="4,2" StrokeThickness="0" VerticalOptions="Center">
-                                                  <Border.Style>
-                                                      <Style TargetType="Border">
-                                                          <Setter Property="IsVisible" Value="True" />
-                                                          <Style.Triggers>
-                                                              <DataTrigger TargetType="Border" Binding="{Binding RequestType}" Value="Music">
-                                                                  <Setter Property="IsVisible" Value="False" />
-                                                              </DataTrigger>
-                                                          </Style.Triggers>
-                                                      </Style>
-                                                  </Border.Style>
-                                                  <Label Text="KARAOKE" TextColor="White" FontSize="8" FontAttributes="Bold" />
-                                              </Border>
-                                          </HorizontalStackLayout>
-                                         <StackLayout BindableLayout.ItemsSource="{Binding Songs}" Spacing="0">
-                                             <BindableLayout.ItemTemplate>
-                                                 <DataTemplate x:DataType="models:RequestedSong">
-                                                     <Label FontSize="10" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#A78BFA}">
-                                                         <Label.FormattedText>
-                                                             <FormattedString>
-                                                                 <Span Text="• " />
-                                                                 <Span Text="{Binding Song}" FontAttributes="Italic" />
-                                                                 <Span Text=" - " />
-                                                                 <Span Text="{Binding Artist}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" />
-                                                             </FormattedString>
-                                                         </Label.FormattedText>
-                                                     </Label>
-                                                 </DataTemplate>
-                                             </BindableLayout.ItemTemplate>
-                                         </StackLayout>
-                                     </VerticalStackLayout>
+                                    <!-- Request Details -->
+                                    <VerticalStackLayout Grid.Row="0" Spacing="1">
+                                        <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                            <Label Text="{Binding Name}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" FontAttributes="Bold" VerticalOptions="Center" />
+                                            <!-- Music Badge -->
+                                            <Border StrokeShape="RoundRectangle 4" BackgroundColor="#10B981" Padding="4,2" StrokeThickness="0" VerticalOptions="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="IsVisible" Value="False" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding RequestType}" Value="Music">
+                                                                <Setter Property="IsVisible" Value="True" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <Label Text="MUSIC" TextColor="White" FontSize="8" FontAttributes="Bold" />
+                                            </Border>
+                                            <!-- Karaoke Badge -->
+                                            <Border StrokeShape="RoundRectangle 4" BackgroundColor="#8B5CF6" Padding="4,2" StrokeThickness="0" VerticalOptions="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="IsVisible" Value="True" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding RequestType}" Value="Music">
+                                                                <Setter Property="IsVisible" Value="False" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <Label Text="KARAOKE" TextColor="White" FontSize="8" FontAttributes="Bold" />
+                                            </Border>
+                                        </HorizontalStackLayout>
+                                        <StackLayout BindableLayout.ItemsSource="{Binding Songs}" Spacing="0">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="models:RequestedSong">
+                                                    <Label FontSize="10" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#A78BFA}">
+                                                        <Label.FormattedText>
+                                                            <FormattedString>
+                                                                <Span Text="• " />
+                                                                <Span Text="{Binding Song}" FontAttributes="Italic" />
+                                                                <Span Text=" - " />
+                                                                <Span Text="{Binding Artist}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" />
+                                                            </FormattedString>
+                                                        </Label.FormattedText>
+                                                    </Label>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </StackLayout>
+                                    </VerticalStackLayout>
 
                                     <!-- Action Buttons -->
                                     <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="6">
@@ -370,44 +370,44 @@
              renders on top of both columns without affecting their layout. -->
         <Grid x:Name="AboutOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False">
             <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="360" MaximumHeightRequest="620" HorizontalOptions="Center" VerticalOptions="Center">
-              <Grid RowDefinitions="*,Auto" RowSpacing="10">
-                <ScrollView Grid.Row="0">
-                <VerticalStackLayout Spacing="4">
-                    <Image Source="ksr_logo.png" HeightRequest="96" WidthRequest="96" Aspect="AspectFit" HorizontalOptions="Center" Margin="0,0,0,8" />
+                <Grid RowDefinitions="*,Auto" RowSpacing="10">
+                    <ScrollView Grid.Row="0">
+                        <VerticalStackLayout Spacing="4">
+                            <Image Source="ksr_logo.png" HeightRequest="96" WidthRequest="96" Aspect="AspectFit" HorizontalOptions="Center" Margin="0,0,0,8" />
 
-                    <Label Text="{Binding AppTitle}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
-                    <Label Text="{Binding AppVersion, StringFormat='Version {0}'}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="12" HorizontalOptions="Center" Margin="0,0,0,8" />
+                            <Label Text="{Binding AppTitle}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Text="{Binding AppVersion, StringFormat='Version {0}'}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="12" HorizontalOptions="Center" Margin="0,0,0,8" />
 
-                    <HorizontalStackLayout Spacing="4" HorizontalOptions="Center">
-                        <Label Text="Author:" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" FontAttributes="Bold" />
-                        <Label Text="{Binding AppAuthor}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="4" HorizontalOptions="Center">
-                        <Label Text="Company:" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" FontAttributes="Bold" />
-                        <Label Text="{Binding AppCompany}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" />
-                    </HorizontalStackLayout>
-                    <Label Text="{Binding AppCopyright}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" FontAttributes="Italic" HorizontalOptions="Center" Margin="0,4,0,12" />
+                            <HorizontalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Label Text="Author:" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" FontAttributes="Bold" />
+                                <Label Text="{Binding AppAuthor}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Label Text="Company:" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" FontAttributes="Bold" />
+                                <Label Text="{Binding AppCompany}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" />
+                            </HorizontalStackLayout>
+                            <Label Text="{Binding AppCopyright}" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" FontAttributes="Italic" HorizontalOptions="Center" Margin="0,4,0,12" />
 
-                    <Label Text="Manual Portal IPv4 (Optional)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" Margin="0,0,0,2" />
-                    <Entry x:Name="PreferredIpEntry" Text="{Binding PreferredHostIp, Mode=OneWay}" Unfocused="OnPreferredHostIpUnfocused" Completed="OnPreferredHostIpCompleted" Placeholder="e.g. 192.168.50.20" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" FontSize="12" />
-                    <Label Text="Leave blank to auto-detect. Set this if the app picks the wrong network adapter (e.g. on a travel router)." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,12" />
+                            <Label Text="Manual Portal IPv4 (Optional)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" Margin="0,0,0,2" />
+                            <Entry x:Name="PreferredIpEntry" Text="{Binding PreferredHostIp, Mode=OneWay}" Unfocused="OnPreferredHostIpUnfocused" Completed="OnPreferredHostIpCompleted" Placeholder="e.g. 192.168.50.20" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" FontSize="12" />
+                            <Label Text="Leave blank to auto-detect. Set this if the app picks the wrong network adapter (e.g. on a travel router)." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,12" />
 
-                    <Label Text="Report Email Recipient (Optional)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" Margin="0,0,0,2" />
-                    <Entry x:Name="EmailRecipientEntry" Text="{Binding EmailRecipient, Mode=OneWay}" Unfocused="OnEmailRecipientUnfocused" Completed="OnEmailRecipientCompleted" Placeholder="e.g. dj@venue.com" Keyboard="Email" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" FontSize="12" />
-                    <HorizontalStackLayout Spacing="6" Margin="0,4,0,2">
-                        <CheckBox IsChecked="{Binding SendEmailOnSave}" Scale="0.85" />
-                        <Label Text="Email the report when the night is saved" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
-                    <Label Text="Save &amp; Email below also clears the active queue and performance history, like Reset Session does." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,0" />
-                </VerticalStackLayout>
-                </ScrollView>
+                            <Label Text="Report Email Recipient (Optional)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" Margin="0,0,0,2" />
+                            <Entry x:Name="EmailRecipientEntry" Text="{Binding EmailRecipient, Mode=OneWay}" Unfocused="OnEmailRecipientUnfocused" Completed="OnEmailRecipientCompleted" Placeholder="e.g. dj@venue.com" Keyboard="Email" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" FontSize="12" />
+                            <HorizontalStackLayout Spacing="6" Margin="0,4,0,2">
+                                <CheckBox IsChecked="{Binding SendEmailOnSave}" Scale="0.85" />
+                                <Label Text="Email the report when the night is saved" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                            <Label Text="Save &amp; Email below also clears the active queue and performance history, like Reset Session does." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,0" />
+                        </VerticalStackLayout>
+                    </ScrollView>
 
-                <VerticalStackLayout Grid.Row="1" Spacing="8">
-                    <Button Text="💾 Save &amp; Email Night's Report" Clicked="OnSaveRotationClicked" BackgroundColor="#0EA5E9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
-                    <Button Text="Reset Session (Clear Queue &amp; DJ Pin)" Clicked="OnResetSessionClicked" BackgroundColor="#DC2626" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
-                    <Button Text="Close" Clicked="OnCloseAboutClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
-                </VerticalStackLayout>
-              </Grid>
+                    <VerticalStackLayout Grid.Row="1" Spacing="8">
+                        <Button Text="💾 Save &amp; Email Night's Report" Clicked="OnSaveRotationClicked" BackgroundColor="#0EA5E9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
+                        <Button Text="Reset Session (Clear Queue &amp; DJ Pin)" Clicked="OnResetSessionClicked" BackgroundColor="#DC2626" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
+                        <Button Text="Close" Clicked="OnCloseAboutClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
+                    </VerticalStackLayout>
+                </Grid>
             </Border>
         </Grid>
 
@@ -416,10 +416,10 @@
         <Grid x:Name="EditSingerOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False">
             <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="320" HorizontalOptions="Center" VerticalOptions="Center">
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="Edit Singer" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,12" />
+                    <Label Text="Edit Performer" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,12" />
 
                     <Label Text="Name" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
-                    <Entry x:Name="EditNameEntry" Placeholder="Singer Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
+                    <Entry x:Name="EditNameEntry" Placeholder="Performer Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
 
                     <Label Text="Song" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
                     <Entry x:Name="EditSongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />

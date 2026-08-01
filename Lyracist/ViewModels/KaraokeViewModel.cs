@@ -1,6 +1,10 @@
-// Edited on Jul 28, 2026 @ 19:04:00 -> Update PlayPerformerRequest to resolve non-karaoke background music requests
+// Edited on Aug 1, 2026 @ 11:49:44 -> Add DeleteDjBanner command for custom DJ banners
+// Edited on Aug 1, 2026 @ 11:02:00 -> Add pragma warning disable MVVMTK0034 to allow direct backing field updates without MVVM Toolkit warning
+// Edited on Aug 1, 2026 @ 10:59:16 -> Subscribe to ScreenAssignmentsChanged to handle DJ banner and rotation screen priorities
+// Edited on Aug 1, 2026 @ 10:02:00 -> Add missing System.IO namespace import for Path and Directory APIs
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Windows.Media;
@@ -437,6 +441,14 @@ public partial class KaraokeViewModel : BaseViewModel
     private int _selectedRotationScreenIndex = 0;
 
     [ObservableProperty]
+    private int _selectedDjBannerScreenIndex = 0;
+
+    public ObservableCollection<Lyracist.Models.DjBannerItem> DjBanners { get; } = [];
+
+    [ObservableProperty]
+    private Lyracist.Models.DjBannerItem? _selectedDjBanner;
+
+    [ObservableProperty]
     private string _rotationBannerText = "Welcome to Karaoke Night!";
 
     [ObservableProperty]
@@ -584,6 +596,15 @@ public partial class KaraokeViewModel : BaseViewModel
             ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.RotationScreenIndex.Value)
             : AvailableScreens.FirstOrDefault(s => s.Index == -1);
         _selectedRotationScreenIndex = currentRotationScreen != null ? AvailableScreens.IndexOf(currentRotationScreen) : 0;
+
+        var currentDjBannerScreen = prefs.DjBannerScreenIndex.HasValue
+            ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.DjBannerScreenIndex.Value)
+            : AvailableScreens.FirstOrDefault(s => s.Index == -1);
+        _selectedDjBannerScreenIndex = currentDjBannerScreen != null ? AvailableScreens.IndexOf(currentDjBannerScreen) : 0;
+
+        _displayService.ScreenAssignmentsChanged += OnScreenAssignmentsChanged;
+
+        RefreshDjBanners();
 
         RefreshFilteredList();
         UpdateNowNext();
@@ -786,6 +807,126 @@ public partial class KaraokeViewModel : BaseViewModel
             var screen = AvailableScreens[value];
             _displayService.MoveRotationToScreen(screen.Index == -1 ? null : screen.Index);
         }
+    }
+
+    partial void OnSelectedDjBannerScreenIndexChanged(int value)
+    {
+        if (value >= 0 && value < AvailableScreens.Count)
+        {
+            var screen = AvailableScreens[value];
+            _displayService.MoveDjBannerToScreen(screen.Index == -1 ? null : screen.Index);
+        }
+    }
+
+    private void RefreshDjBanners()
+    {
+        DjBanners.Clear();
+        string dir = Path.Combine(Lyracist.Shared.Globals.LyracistSettingsDir, "DJBanners");
+        if (Directory.Exists(dir))
+        {
+            foreach (var file in Directory.GetFiles(dir))
+            {
+                string ext = Path.GetExtension(file).ToLowerInvariant();
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp")
+                {
+                    DjBanners.Add(new Lyracist.Models.DjBannerItem
+                    {
+                        FileName = Path.GetFileName(file),
+                        FullPath = file
+                    });
+                }
+            }
+        }
+
+        var prefs = _displayService.GetPreferences();
+        if (!string.IsNullOrEmpty(prefs.SelectedDjBannerPath))
+        {
+            SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == prefs.SelectedDjBannerPath);
+        }
+        else
+        {
+            SelectedDjBanner = DjBanners.FirstOrDefault();
+        }
+    }
+
+    partial void OnSelectedDjBannerChanged(Lyracist.Models.DjBannerItem? value)
+    {
+        _displayService.UpdateDjBanner(value?.FullPath ?? string.Empty);
+    }
+
+    [RelayCommand]
+    private void UploadDjBanner()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Upload DJ Banner Image",
+            Filter = "Image Files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp|All Files (*.*)|*.*"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                string dir = Path.Combine(Lyracist.Shared.Globals.LyracistSettingsDir, "DJBanners");
+                Directory.CreateDirectory(dir);
+
+                string destPath = Path.Combine(dir, Path.GetFileName(dialog.FileName));
+                int counter = 1;
+                while (File.Exists(destPath))
+                {
+                    string name = Path.GetFileNameWithoutExtension(dialog.FileName);
+                    string ext = Path.GetExtension(dialog.FileName);
+                    destPath = Path.Combine(dir, $"{name}_{counter++}{ext}");
+                }
+
+                File.Copy(dialog.FileName, destPath);
+                RefreshDjBanners();
+
+                SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == destPath);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to upload banner: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteDjBanner()
+    {
+        if (SelectedDjBanner == null) return;
+
+        var result = System.Windows.MessageBox.Show(
+            $"Are you sure you want to delete the DJ Banner '{SelectedDjBanner.FileName}'?",
+            "Confirm Delete",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+
+        if (result == System.Windows.MessageBoxResult.Yes)
+        {
+            try
+            {
+                string path = SelectedDjBanner.FullPath;
+                SelectedDjBanner = null;
+
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+
+                RefreshDjBanners();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to delete banner: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ShowDjBanner()
+    {
+        _displayService.ShowDjBannerWindow();
     }
 
     [RelayCommand]
@@ -1497,6 +1638,48 @@ public partial class KaraokeViewModel : BaseViewModel
                 }
             }
         }
+    }
+
+    private void OnScreenAssignmentsChanged()
+    {
+        System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
+        {
+            var prefs = _displayService.GetPreferences();
+
+            var currentLyricsScreen = prefs.LyricsScreenIndex.HasValue
+                ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.LyricsScreenIndex.Value)
+                : AvailableScreens.FirstOrDefault(s => s.Index == -1);
+
+            var currentRotationScreen = prefs.RotationScreenIndex.HasValue
+                ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.RotationScreenIndex.Value)
+                : AvailableScreens.FirstOrDefault(s => s.Index == -1);
+
+            var currentDjBannerScreen = prefs.DjBannerScreenIndex.HasValue
+                ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.DjBannerScreenIndex.Value)
+                : AvailableScreens.FirstOrDefault(s => s.Index == -1);
+
+            int newLyricsIndex = currentLyricsScreen != null ? AvailableScreens.IndexOf(currentLyricsScreen) : 0;
+            int newRotationIndex = currentRotationScreen != null ? AvailableScreens.IndexOf(currentRotationScreen) : 0;
+            int newDjBannerIndex = currentDjBannerScreen != null ? AvailableScreens.IndexOf(currentDjBannerScreen) : 0;
+
+#pragma warning disable MVVMTK0034
+            if (_selectedLyricsScreenIndex != newLyricsIndex)
+            {
+                _selectedLyricsScreenIndex = newLyricsIndex;
+                OnPropertyChanged(nameof(SelectedLyricsScreenIndex));
+            }
+            if (_selectedRotationScreenIndex != newRotationIndex)
+            {
+                _selectedRotationScreenIndex = newRotationIndex;
+                OnPropertyChanged(nameof(SelectedRotationScreenIndex));
+            }
+            if (_selectedDjBannerScreenIndex != newDjBannerIndex)
+            {
+                _selectedDjBannerScreenIndex = newDjBannerIndex;
+                OnPropertyChanged(nameof(SelectedDjBannerScreenIndex));
+            }
+#pragma warning restore MVVMTK0034
+        });
     }
 
     public void RaiseSelectedProjectionViewChanged()

@@ -1,3 +1,4 @@
+// Edited on Aug 1, 2026 @ 10:59:16 -> Add ScreenAssignmentsChanged event definition
 using System;
 using System.Collections.Generic;
 
@@ -11,13 +12,18 @@ public interface IDisplayService
     /// <summary>Fires when a singer is added back to a previously-empty rotation queue.</summary>
     event Action? RotationResumed;
 
+    /// <summary>Fires when the screen/monitor assignments for displays change.</summary>
+    event Action? ScreenAssignmentsChanged;
+
     IReadOnlyList<ScreenInfo> GetScreens();
 
     void ShowRotationWindow();
     void ShowLyricsWindow();
+    void ShowDjBannerWindow();
 
     void MoveRotationToScreen(int? screenIndex);
     void MoveLyricsToScreen(int? screenIndex);
+    void MoveDjBannerToScreen(int? screenIndex);
 
     void FullscreenRotation();
     void FullscreenLyrics();
@@ -37,4 +43,7 @@ public interface IDisplayService
     void SetRotationAnnouncement(string message, bool visible);
     void SetRotationViewMode(string mode);
     void SetCrawlBannerText(string text);
+    void UpdateDjBanner(string path);
+    void HideDjBannerWindow();
 }
+

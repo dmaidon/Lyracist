@@ -10,8 +10,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.7.31.69</AssemblyVersion>
-    <FileVersion>26.7.31.69</FileVersion>
+    <AssemblyVersion>26.8.1.75</AssemblyVersion>
+    <FileVersion>26.8.1.75</FileVersion>
     <ApplicationIcon>..\Lyracist\Assets\db_manager_tp.ico</ApplicationIcon>
     <PackageIcon>db_manager_tp.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>

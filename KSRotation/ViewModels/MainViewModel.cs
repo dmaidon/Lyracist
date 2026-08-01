@@ -1,3 +1,8 @@
+// Edited on Aug 1, 2026 @ 11:49:44 -> Add DeleteDjBanner command for custom DJ banners
+// Edited on Aug 1, 2026 @ 11:46:04 -> Restore DJ banner automatically when rotation display screen collision is resolved
+// Edited on Aug 1, 2026 @ 10:59:16 -> Disable DJ banner if rotation display is enabled on the same monitor
+// Edited on Aug 1, 2026 @ 10:04:00 -> Conditionalize WPF-specific OpenFileDialog in UploadDjBanner for cross-platform MAUI support
+// Edited on Aug 1, 2026 @ 09:47:00 -> Add DJ Banner settings properties, commands, loading, saving, and shutdown logic
 // Edited on Jul 31, 2026 @ 12:08:52 -> Populate and snapshot IsMusic property on SongPerformance
 // Edited on Jul 30, 2026 @ 07:55:00 -> Add WindowTitle dynamic property to display active Venue/DJ name in the window title bar
 // Edited on Jul 28, 2026 @ 13:02:00 -> Disable UpdatePerformanceForSinger call on song/artist property change to prevent overwriting past performance history
@@ -19,6 +24,7 @@ namespace KSRotation.ViewModels
     public partial class MainViewModel : ObservableObject
     {
         private readonly DisplayWindowService _displayWindowService = new();
+        private readonly DjBannerWindowService _djBannerWindowService = new();
         private readonly List<SingerEntry> _subscribedSingers = [];
         private readonly DispatcherTimer _saveDebounceTimer;
         private readonly DispatcherTimer _dbDebounceTimer;
@@ -28,6 +34,8 @@ namespace KSRotation.ViewModels
         private readonly Dictionary<SingerEntry, string> _lastSingerNames = [];
         private readonly bool _isInitializing;
         private bool _isFinishingSong;
+        private bool _djBannerWasAutoDisabled;
+        private bool _isAutoDisablingDjBanner;
         private readonly Random _random = new();
         private PatronRequestServer? _requestServer;
         private int _activeServerPort = ServerPort;
@@ -94,6 +102,19 @@ namespace KSRotation.ViewModels
                 case nameof(IsDisplayEnabled):
                     if (IsDisplayEnabled)
                     {
+                        if (IsDjBannerEnabled && SelectedMonitorDevice == DjBannerMonitorDevice)
+                        {
+                            _isAutoDisablingDjBanner = true;
+                            try
+                            {
+                                IsDjBannerEnabled = false;
+                                _djBannerWasAutoDisabled = true;
+                            }
+                            finally
+                            {
+                                _isAutoDisablingDjBanner = false;
+                            }
+                        }
                         _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
                         _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
                         _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
@@ -105,6 +126,7 @@ namespace KSRotation.ViewModels
                     else
                     {
                         _displayWindowService.Hide();
+                        CheckRestoreDjBanner();
                     }
                     QueueSaveSettings();
                     break;
@@ -113,8 +135,86 @@ namespace KSRotation.ViewModels
                     _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
                     if (IsDisplayEnabled)
                     {
+                        if (IsDjBannerEnabled && SelectedMonitorDevice == DjBannerMonitorDevice)
+                        {
+                            _isAutoDisablingDjBanner = true;
+                            try
+                            {
+                                IsDjBannerEnabled = false;
+                                _djBannerWasAutoDisabled = true;
+                            }
+                            finally
+                            {
+                                _isAutoDisablingDjBanner = false;
+                            }
+                        }
                         _displayWindowService.RepositionWindow();
                     }
+                    CheckRestoreDjBanner();
+                    QueueSaveSettings();
+                    break;
+
+                case nameof(IsDjBannerEnabled):
+                    if (IsDjBannerEnabled)
+                    {
+                        if (IsDisplayEnabled && SelectedMonitorDevice == DjBannerMonitorDevice)
+                        {
+                            _isAutoDisablingDjBanner = true;
+                            try
+                            {
+                                IsDjBannerEnabled = false;
+                                _djBannerWasAutoDisabled = true;
+                            }
+                            finally
+                            {
+                                _isAutoDisablingDjBanner = false;
+                            }
+                            break;
+                        }
+                        _djBannerWasAutoDisabled = false;
+                        _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
+                        _djBannerWindowService.SetBannerPath(SelectedDjBannerPath);
+                        _djBannerWindowService.Show();
+                    }
+                    else
+                    {
+                        if (!_isAutoDisablingDjBanner)
+                        {
+                            _djBannerWasAutoDisabled = false;
+                        }
+                        _djBannerWindowService.Hide();
+                    }
+                    QueueSaveSettings();
+                    break;
+
+                case nameof(DjBannerMonitorDevice):
+                    _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
+                    if (IsDjBannerEnabled)
+                    {
+                        if (IsDisplayEnabled && SelectedMonitorDevice == DjBannerMonitorDevice)
+                        {
+                            _isAutoDisablingDjBanner = true;
+                            try
+                            {
+                                IsDjBannerEnabled = false;
+                                _djBannerWasAutoDisabled = true;
+                            }
+                            finally
+                            {
+                                _isAutoDisablingDjBanner = false;
+                            }
+                        }
+                        else
+                        {
+                            _djBannerWindowService.RepositionWindow();
+                        }
+                    }
+                    CheckRestoreDjBanner();
+                    QueueSaveSettings();
+                    break;
+
+                case nameof(SelectedDjBannerPath):
+                    _djBannerWindowService.SetBannerPath(SelectedDjBannerPath);
                     QueueSaveSettings();
                     break;
 
@@ -263,6 +363,17 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial string SelectedMonitorDevice { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string DjBannerMonitorDevice { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string SelectedDjBannerPath { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial bool IsDjBannerEnabled { get; set; } = false;
+
+        public ObservableCollection<DjBannerItem> AvailableDjBanners { get; } = [];
 
         [ObservableProperty]
         public partial string SelectedHelpTopic { get; set; } = "🚀 Getting Started";
@@ -432,6 +543,20 @@ namespace KSRotation.ViewModels
             SelectedMonitorDevice = settings.SelectedMonitorDevice ?? string.Empty;
             _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
             RefreshAvailableMonitors();
+
+            DjBannerMonitorDevice = settings.DjBannerMonitorDevice ?? string.Empty;
+            SelectedDjBannerPath = settings.SelectedDjBannerPath ?? string.Empty;
+            IsDjBannerEnabled = settings.IsDjBannerEnabled;
+
+            _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
+            _djBannerWindowService.SetBannerPath(SelectedDjBannerPath);
+
+            RefreshAvailableDjBanners();
+
+            if (IsDjBannerEnabled)
+            {
+                _djBannerWindowService.Show();
+            }
 
             IsDisplayEnabled = false;
 
@@ -1603,7 +1728,10 @@ namespace KSRotation.ViewModels
                 WatermarkOpacity = WatermarkOpacity,
                 PreferredHostIp = string.IsNullOrWhiteSpace(PreferredHostIp) ? string.Empty : PreferredHostIp.Trim(),
                 DjPin = string.IsNullOrWhiteSpace(DjPin) ? string.Empty : DjPin.Trim(),
-                SelectedMonitorDevice = SelectedMonitorDevice
+                SelectedMonitorDevice = SelectedMonitorDevice,
+                DjBannerMonitorDevice = DjBannerMonitorDevice,
+                SelectedDjBannerPath = SelectedDjBannerPath,
+                IsDjBannerEnabled = IsDjBannerEnabled
             };
 
             try
@@ -1626,6 +1754,111 @@ namespace KSRotation.ViewModels
         private void RefreshMonitors()
         {
             RefreshAvailableMonitors();
+        }
+
+        private void RefreshAvailableDjBanners()
+        {
+            AvailableDjBanners.Clear();
+            string dir = Path.Combine(AppPaths.SettingsDirectoryPath, "DJBanners");
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            foreach (var file in Directory.GetFiles(dir))
+            {
+                string ext = Path.GetExtension(file).ToLowerInvariant();
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp")
+                {
+                    AvailableDjBanners.Add(new DjBannerItem
+                    {
+                        FileName = Path.GetFileName(file),
+                        FullPath = file
+                    });
+                }
+            }
+
+            if (!string.IsNullOrEmpty(SelectedDjBannerPath) && AvailableDjBanners.Any(b => b.FullPath == SelectedDjBannerPath))
+            {
+                // Keep it
+            }
+            else
+            {
+                SelectedDjBannerPath = AvailableDjBanners.FirstOrDefault()?.FullPath ?? string.Empty;
+            }
+        }
+
+        [RelayCommand]
+        private void UploadDjBanner()
+        {
+#if WPF
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Upload DJ Banner",
+                Filter = "Image Files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    string dir = Path.Combine(AppPaths.SettingsDirectoryPath, "DJBanners");
+                    Directory.CreateDirectory(dir);
+
+                    string dest = Path.Combine(dir, Path.GetFileName(dialog.FileName));
+                    int counter = 1;
+                    while (File.Exists(dest))
+                    {
+                        string name = Path.GetFileNameWithoutExtension(dialog.FileName);
+                        string ext = Path.GetExtension(dialog.FileName);
+                        dest = Path.Combine(dir, $"{name}_{counter++}{ext}");
+                    }
+
+                    File.Copy(dialog.FileName, dest);
+                    RefreshAvailableDjBanners();
+                    SelectedDjBannerPath = dest;
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Failed to upload DJ Banner: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                }
+            }
+#endif
+        }
+
+        [RelayCommand]
+        private void DeleteDjBanner()
+        {
+#if WPF
+            if (string.IsNullOrEmpty(SelectedDjBannerPath)) return;
+
+            string fileName = Path.GetFileName(SelectedDjBannerPath);
+            var result = System.Windows.MessageBox.Show(
+                $"Are you sure you want to delete the DJ Banner '{fileName}'?",
+                "Confirm Delete",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question);
+
+            if (result == System.Windows.MessageBoxResult.Yes)
+            {
+                try
+                {
+                    string path = SelectedDjBannerPath;
+                    SelectedDjBannerPath = string.Empty;
+
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
+
+                    RefreshAvailableDjBanners();
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Failed to delete DJ Banner: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                }
+            }
+#endif
         }
 
         private void RefreshAvailableMonitors()
@@ -1755,6 +1988,19 @@ namespace KSRotation.ViewModels
             SaveSettingsNow();
             SaveDatabaseNow();
             _displayWindowService.Shutdown();
+            _djBannerWindowService.Shutdown();
+        }
+
+        private void CheckRestoreDjBanner()
+        {
+            if (_djBannerWasAutoDisabled)
+            {
+                if (!IsDisplayEnabled || SelectedMonitorDevice != DjBannerMonitorDevice)
+                {
+                    _djBannerWasAutoDisabled = false;
+                    IsDjBannerEnabled = true;
+                }
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-// Edited on Jul 19, 2026 @ 09:40:00 -> Add dynamic audio device enumeration, BGM device selection, and Hardware Mixer Mode
+// Edited on Aug 1, 2026 @ 11:49:44 -> Add DeleteDjBanner command for custom DJ banners
+// Edited on Aug 1, 2026 @ 09:44:40 -> Add DJ Banner settings properties, commands, and logic
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -60,6 +61,14 @@ public partial class SettingsViewModel : BaseViewModel
 
     [ObservableProperty]
     private bool _isLyricsMirrored;
+
+    public ObservableCollection<Lyracist.Models.DjBannerItem> DjBanners { get; } = [];
+
+    [ObservableProperty]
+    private Lyracist.Models.DjBannerItem? _selectedDjBanner;
+
+    [ObservableProperty]
+    private ScreenInfo? _djBannerScreen;
 
     public List<string> ProjectionViews { get; } = ["Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable"];
 
@@ -576,6 +585,9 @@ public partial class SettingsViewModel : BaseViewModel
         _lyricsScreen = prefs.LyricsScreenIndex.HasValue
             ? Screens.FirstOrDefault(s => s.Index == prefs.LyricsScreenIndex.Value)
             : Screens.FirstOrDefault(s => s.Index == -1);
+        _djBannerScreen = prefs.DjBannerScreenIndex.HasValue
+            ? Screens.FirstOrDefault(s => s.Index == prefs.DjBannerScreenIndex.Value)
+            : Screens.FirstOrDefault(s => s.Index == -1);
         _isLyricsMirrored = prefs.IsLyricsMirrored;
         _selectedProjectionView = prefs.RotationViewMode ?? "Normal List";
 
@@ -633,6 +645,7 @@ public partial class SettingsViewModel : BaseViewModel
         RefreshScaryokeCategories();
         RefreshVenues();
         RefreshAvailableRatingIcons();
+        RefreshDjBanners();
 
         AppSettings.ThemeModeChanged += theme =>
         {
@@ -1178,6 +1191,119 @@ public partial class SettingsViewModel : BaseViewModel
         if (value != null)
         {
             _display.MoveLyricsToScreen(value.Index == -1 ? null : value.Index);
+        }
+    }
+
+    partial void OnDjBannerScreenChanged(ScreenInfo? value)
+    {
+        if (value != null)
+        {
+            _display.MoveDjBannerToScreen(value.Index == -1 ? null : value.Index);
+        }
+    }
+
+    private void RefreshDjBanners()
+    {
+        DjBanners.Clear();
+        string dir = Path.Combine(Lyracist.Shared.Globals.LyracistSettingsDir, "DJBanners");
+        if (Directory.Exists(dir))
+        {
+            foreach (var file in Directory.GetFiles(dir))
+            {
+                string ext = Path.GetExtension(file).ToLowerInvariant();
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp")
+                {
+                    DjBanners.Add(new Lyracist.Models.DjBannerItem
+                    {
+                        FileName = Path.GetFileName(file),
+                        FullPath = file
+                    });
+                }
+            }
+        }
+
+        var prefs = _display.GetPreferences();
+        if (!string.IsNullOrEmpty(prefs.SelectedDjBannerPath))
+        {
+            SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == prefs.SelectedDjBannerPath);
+        }
+        else
+        {
+            SelectedDjBanner = DjBanners.FirstOrDefault();
+        }
+    }
+
+    partial void OnSelectedDjBannerChanged(Lyracist.Models.DjBannerItem? value)
+    {
+        _display.UpdateDjBanner(value?.FullPath ?? string.Empty);
+    }
+
+    [RelayCommand]
+    private void UploadDjBanner()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Upload DJ Banner Image",
+            Filter = "Image Files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp|All Files (*.*)|*.*"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                string dir = Path.Combine(Lyracist.Shared.Globals.LyracistSettingsDir, "DJBanners");
+                Directory.CreateDirectory(dir);
+
+                string destPath = Path.Combine(dir, Path.GetFileName(dialog.FileName));
+                int counter = 1;
+                while (File.Exists(destPath))
+                {
+                    string name = Path.GetFileNameWithoutExtension(dialog.FileName);
+                    string ext = Path.GetExtension(dialog.FileName);
+                    destPath = Path.Combine(dir, $"{name}_{counter++}{ext}");
+                }
+
+                File.Copy(dialog.FileName, destPath);
+                RefreshDjBanners();
+
+                SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == destPath);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to upload banner: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteDjBanner()
+    {
+        if (SelectedDjBanner == null) return;
+
+        var result = System.Windows.MessageBox.Show(
+            $"Are you sure you want to delete the DJ Banner '{SelectedDjBanner.FileName}'?",
+            "Confirm Delete",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+
+        if (result == System.Windows.MessageBoxResult.Yes)
+        {
+            try
+            {
+                string path = SelectedDjBanner.FullPath;
+                SelectedDjBanner = null;
+
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+
+                RefreshDjBanners();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to delete banner: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> SQLite keep-alive connection
+// Edited on Aug 1, 2026 @ 09:44:20 -> Register DJ Banner window and view model
 using System;
 using System.Windows;
 using System.Threading.Tasks;
@@ -101,6 +101,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<RotationWindowViewModel>();
                 services.AddSingleton<LyricsViewModel>();
                 services.AddSingleton<LyricsWindowViewModel>();
+                services.AddSingleton<DjBannerWindowViewModel>();
                 services.AddSingleton<SettingsViewModel>();
                 services.AddSingleton<PlaylistsViewModel>();
                 services.AddSingleton<RequestsViewModel>();
@@ -116,6 +117,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<MainWindow>();
                 services.AddSingleton<RotationWindow>();
                 services.AddSingleton<LyricsWindow>();
+                services.AddSingleton<DjBannerWindow>();
                 services.AddSingleton<ScaryokeWindow>();
                 services.AddTransient<SongSettingsWindow>();
                 services.AddTransient<SingerSettingsWindow>();

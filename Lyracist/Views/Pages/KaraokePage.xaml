@@ -1,4 +1,4 @@
-<!-- Edited on Jul 29, 2026 @ 10:40:00 -> Add ScrollViewer to Column 2 and set MinHeight on Preview Monitor to prevent clipping on small screen sizes -->
+<!-- Edited on Aug 1, 2026 @ 11:49:44 -> Add Delete button for custom DJ banners to selection group -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -1131,6 +1131,8 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="12" />
                                         <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
                                     <!-- Lyrics Monitor -->
@@ -1146,6 +1148,13 @@
                                         <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedRotationScreenIndex, Mode=TwoWay}" DisplayMemberPath="DisplayName" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
                                         <ui:Button Content="Open Rotation Window" Icon="{ui:SymbolIcon People24}" Command="{Binding ShowRotationCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
                                     </StackPanel>
+
+                                    <!-- DJ Banner Monitor -->
+                                    <StackPanel Grid.Column="4">
+                                        <TextBlock Text="DJ Banner Screen" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding AvailableScreens}" SelectedIndex="{Binding SelectedDjBannerScreenIndex, Mode=TwoWay}" DisplayMemberPath="DisplayName" HorizontalAlignment="Stretch" Margin="0,0,0,8" />
+                                        <ui:Button Content="Open DJ Banner Window" Icon="{ui:SymbolIcon Flag24}" Command="{Binding ShowDjBannerCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
+                                    </StackPanel>
                                 </Grid>
 
                                 <!-- Rotation Banner controls -->
@@ -1159,6 +1168,22 @@
                                     </Grid.ColumnDefinitions>
                                     <ui:TextBox Grid.Column="0" Text="{Binding RotationBannerText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Enter scroll announcement text..." Margin="0,0,0,0" />
                                     <CheckBox Grid.Column="2" Content="Show Banner" IsChecked="{Binding ShowRotationBanner, Mode=TwoWay}" VerticalAlignment="Center" />
+                                </Grid>
+
+                                <!-- DJ Banner controls -->
+                                <Separator Margin="0,6,0,6" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                                <TextBlock Text="DJ Banner Selection" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox Grid.Column="0" ItemsSource="{Binding DjBanners}" SelectedItem="{Binding SelectedDjBanner, Mode=TwoWay}" DisplayMemberPath="FileName" HorizontalAlignment="Stretch" />
+                                    <ui:Button Grid.Column="2" Content="Upload" Icon="{ui:SymbolIcon Upload24}" Command="{Binding UploadDjBannerCommand}" />
+                                    <ui:Button Grid.Column="4" Content="Delete" Icon="{ui:SymbolIcon Delete24}" Command="{Binding DeleteDjBannerCommand}" Appearance="Danger" />
                                 </Grid>
 
                                 <!-- Show Extras: Special Occasions + Scaryoke Party Mode -->

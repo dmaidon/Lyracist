@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.7.31.282</AssemblyVersion>
-    <FileVersion>26.7.31.282</FileVersion>
+    <AssemblyVersion>26.8.1.289</AssemblyVersion>
+    <FileVersion>26.8.1.289</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>

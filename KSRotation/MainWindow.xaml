@@ -1,4 +1,5 @@
-<!-- Edited on Jul 30, 2026 @ 07:55:00 -> Move active Venue/DJ name to window title bar and remove status card from WrapPanel to resolve layout wrapping -->
+<!-- Edited on Aug 1, 2026 @ 11:49:44 -> Add Delete button for custom DJ banners to settings -->
+<!-- Edited on Aug 1, 2026 @ 09:47:20 -> Add DJ Banner monitor targeting and selection controls to settings -->
 <!-- Edited on Jul 30, 2026 @ 07:45:00 -> Add active Venue/DJ display status card and visual selection indicators -->
 <!-- Edited on Jul 28, 2026 @ 18:45:00 -> Add music request badges and overlay background music labels to queue list -->
 <!-- Edited on Jul 27, 2026 @ 22:56:00 -> Set all settings columns to equal star widths -->
@@ -1281,6 +1282,75 @@
                             Content="Save Settings" Height="35"
                             Command="{Binding SaveSettingsCommand}" Margin="15,12,0,12"
                             Style="{StaticResource ModernButtonStyle}" />
+
+                        <GroupBox Header="DJ Banner Screen"
+                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Grid.Column="2"
+                                  Grid.ColumnSpan="2"
+                                  Grid.Row="5"
+                                  VerticalAlignment="Top"
+                                  Margin="15,12,0,12">
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="15" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Column 0: Target Monitor & Enable -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Target Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                    <ComboBox
+                                        ItemsSource="{Binding AvailableMonitors}"
+                                        SelectedValue="{Binding DjBannerMonitorDevice, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValuePath="DeviceName"
+                                        DisplayMemberPath="FriendlyName"
+                                        Style="{StaticResource ModernComboBoxStyle}"
+                                        Margin="0,0,0,12" />
+                                    <CheckBox
+                                        Content="Enable DJ Banner Screen"
+                                        IsChecked="{Binding IsDjBannerEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource ModernCheckBoxStyle}"
+                                        Margin="0,4,0,4" />
+                                </StackPanel>
+                                
+                                <!-- Column 2: Upload & Select Banner -->
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Select DJ Banner" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox
+                                            ItemsSource="{Binding AvailableDjBanners}"
+                                            SelectedValue="{Binding SelectedDjBannerPath, UpdateSourceTrigger=PropertyChanged}"
+                                            SelectedValuePath="FullPath"
+                                            DisplayMemberPath="FileName"
+                                            Style="{StaticResource ModernComboBoxStyle}" />
+                                        <Button
+                                            Grid.Column="1"
+                                            Content="Upload"
+                                            Command="{Binding UploadDjBannerCommand}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Margin="8,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Padding="8,4"
+                                            Height="32" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Content="Delete"
+                                            Command="{Binding DeleteDjBannerCommand}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Margin="8,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Padding="8,4"
+                                            Height="32" />
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
                     </Grid>
                 </ScrollViewer>
             </TabItem>

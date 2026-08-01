@@ -1,3 +1,4 @@
+// Edited on Aug 1, 2026 @ 09:46:30 -> Add DJ Banner settings properties
 // Edited on Jul 27, 2026 @ 22:38:00 -> Add SelectedMonitorDevice property
 // Edited on Jul 16, 2026 @ 11:00:00 -> Configuration key mappings
 // Last Edit: Jul 02, 2026 14:10 - Added optional PreferredHostIp setting for manual portal URL/QR host override.
@@ -46,5 +47,11 @@ namespace KSRotation.Models
 
         /// <summary>The DeviceName of the selected monitor for the rotation display.</summary>
         public string SelectedMonitorDevice { get; init; } = string.Empty;
+
+        public string DjBannerMonitorDevice { get; init; } = string.Empty;
+
+        public string SelectedDjBannerPath { get; init; } = string.Empty;
+
+        public bool IsDjBannerEnabled { get; init; } = false;
     }
-}
+}

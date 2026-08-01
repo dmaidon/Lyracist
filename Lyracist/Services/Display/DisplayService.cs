@@ -5,6 +5,7 @@ using Lyracist.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 
+// Edited on Aug 1, 2026 @ 11:46:04 -> Restore DJ banner automatically when rotation display screen collision is resolved
 namespace Lyracist.Services.Display;
 
 public class DisplayService : IDisplayService
@@ -13,12 +14,17 @@ public class DisplayService : IDisplayService
     private readonly IMediaEngine _mediaEngine;
     private RotationWindow? _rotationWindow;
     private LyricsWindow? _lyricsWindow;
+    private DjBannerWindow? _djBannerWindow;
     private readonly DisplayPreferences _preferences;
     private bool _rotationHadSingers;
+    private int? _autoDisabledDjBannerScreenIndex;
+
 
     public event Action? RotationCompleted;
 
     public event Action? RotationResumed;
+
+    public event Action? ScreenAssignmentsChanged;
 
     public DisplayService(IServiceProvider serviceProvider, IMediaEngine mediaEngine)
     {
@@ -126,13 +132,30 @@ public class DisplayService : IDisplayService
             _preferences.RotationScreenIndex = screenIndex;
             ShowRotationWindow();
             MoveWindowToScreen(_rotationWindow!, screenIndex.Value);
+
+            if (_preferences.DjBannerScreenIndex == screenIndex)
+            {
+                _autoDisabledDjBannerScreenIndex = screenIndex;
+                _preferences.DjBannerScreenIndex = null;
+                HideDjBannerWindow();
+            }
         }
         else
         {
             _preferences.RotationScreenIndex = null;
             HideRotationWindow();
         }
+
+        // Restore DJ Banner if conflict is resolved
+        if (_autoDisabledDjBannerScreenIndex.HasValue && _preferences.RotationScreenIndex != _autoDisabledDjBannerScreenIndex)
+        {
+            int restoreIndex = _autoDisabledDjBannerScreenIndex.Value;
+            _autoDisabledDjBannerScreenIndex = null;
+            MoveDjBannerToScreen(restoreIndex);
+        }
+
         DisplayPreferencesStore.Save(_preferences);
+        ScreenAssignmentsChanged?.Invoke();
     }
 
     public void MoveLyricsToScreen(int? screenIndex)
@@ -149,6 +172,7 @@ public class DisplayService : IDisplayService
             HideLyricsWindow();
         }
         DisplayPreferencesStore.Save(_preferences);
+        ScreenAssignmentsChanged?.Invoke();
     }
 
     public void RestoreAssignments()
@@ -171,7 +195,95 @@ public class DisplayService : IDisplayService
             HideLyricsWindow();
         }
 
+        if (_preferences.DjBannerScreenIndex.HasValue)
+        {
+            if (_preferences.RotationScreenIndex == _preferences.DjBannerScreenIndex)
+            {
+                _autoDisabledDjBannerScreenIndex = _preferences.DjBannerScreenIndex;
+                _preferences.DjBannerScreenIndex = null;
+                HideDjBannerWindow();
+                DisplayPreferencesStore.Save(_preferences);
+            }
+            else
+            {
+                _autoDisabledDjBannerScreenIndex = null;
+                MoveDjBannerToScreen(_preferences.DjBannerScreenIndex.Value);
+            }
+        }
+        else
+        {
+            _autoDisabledDjBannerScreenIndex = null;
+            HideDjBannerWindow();
+        }
+
         SetLyricsMirror(_preferences.IsLyricsMirrored);
+        ScreenAssignmentsChanged?.Invoke();
+    }
+
+    public void ShowDjBannerWindow()
+    {
+        if (!_preferences.DjBannerScreenIndex.HasValue)
+        {
+            return;
+        }
+        bool isNewWindow = _djBannerWindow == null || !_djBannerWindow.IsLoaded;
+        if (isNewWindow)
+        {
+            _djBannerWindow = _serviceProvider.GetRequiredService<DjBannerWindow>();
+        }
+        _djBannerWindow!.Show();
+
+        if (isNewWindow)
+        {
+            MoveWindowToScreen(_djBannerWindow, _preferences.DjBannerScreenIndex.Value);
+        }
+
+        UpdateDjBanner(_preferences.SelectedDjBannerPath);
+    }
+
+    public void HideDjBannerWindow()
+    {
+        if (_djBannerWindow != null && _djBannerWindow.IsLoaded)
+        {
+            _djBannerWindow.Hide();
+        }
+    }
+
+    public void MoveDjBannerToScreen(int? screenIndex)
+    {
+        if (screenIndex.HasValue && screenIndex.Value >= 0)
+        {
+            if (_preferences.RotationScreenIndex == screenIndex)
+            {
+                _autoDisabledDjBannerScreenIndex = screenIndex;
+                _preferences.DjBannerScreenIndex = null;
+                HideDjBannerWindow();
+            }
+            else
+            {
+                _autoDisabledDjBannerScreenIndex = null;
+                _preferences.DjBannerScreenIndex = screenIndex;
+                ShowDjBannerWindow();
+                MoveWindowToScreen(_djBannerWindow!, screenIndex.Value);
+            }
+        }
+        else
+        {
+            _autoDisabledDjBannerScreenIndex = null;
+            _preferences.DjBannerScreenIndex = null;
+            HideDjBannerWindow();
+        }
+        DisplayPreferencesStore.Save(_preferences);
+        ScreenAssignmentsChanged?.Invoke();
+    }
+
+    public void UpdateDjBanner(string path)
+    {
+        _preferences.SelectedDjBannerPath = path;
+        DisplayPreferencesStore.Save(_preferences);
+
+        var vm = _serviceProvider.GetService<DjBannerWindowViewModel>();
+        vm?.UpdateBanner(path);
     }
 
     public DisplayPreferences GetPreferences() => _preferences;

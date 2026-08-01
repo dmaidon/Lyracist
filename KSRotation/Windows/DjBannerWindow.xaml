@@ -1,0 +1,19 @@
+<!-- Created on Aug 1, 2026 @ 09:46:00 -> Added DJ Banner projection window -->
+<Window x:Class="KSRotation.Windows.DjBannerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DJ Banner Screen"
+        Width="1000"
+        Height="600"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        Background="Black"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True"
+        ShowInTaskbar="False"
+        MouseDoubleClick="OnMouseDoubleClick">
+
+    <Grid>
+        <Image x:Name="BannerImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Grid>
+</Window>
