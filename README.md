@@ -1,4 +1,4 @@
-Last Edit: Aug 2, 2026 07:47 - Added wireless casting, custom DJ banners, monitor selection, catalog book exporter, online search, and queue controls
+Last Edit: Aug 2, 2026 08:22 - Updated help systems, bumped assembly versions, and documented casting/DJ banner options
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.

@@ -1,4 +1,4 @@
-Last Edit: Aug 2, 2026 07:47 - Added wireless casting, custom DJ banners, monitor selection, catalog book exporter, online search, and queue controls
+Last Edit: Aug 2, 2026 08:22 - Updated help systems, bumped assembly versions, and documented casting/DJ banner options
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -16,6 +16,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Background Music Requests**: Patrons can request background music tracks from the mobile portal. These are distinguished in the KJ console and DJ portal queues with a green [MUSIC] badge.
 - **Paused and Inactive Singer Controls**: Added the ability to pause singers (retaining their index but skipping them in sequence) and mark deleted singers as inactive (moving them to the end of the queue with one-click restoration to the active section).
 - **Active Venue & DJ Title Bar Integration**: Integrated the active Venue and DJ name into the standard main window title bar to prevent layout wrapping issues on 1080p laptop screens.
+- **Help System Updates**: Updated both Lyracist and KSRotation integrated help panels to document wireless casting options, custom DJ banner configurations, iTunes online lookup, background music requests, remote DJ console locking/PIN protection, and deleted split-flap FlipTile references.
 
 ### Removed
 - **FlipTile Board View Mode**: Deprecated and completely removed the obsolete Split-Flap FlipTile view mode from the projection options and code.
