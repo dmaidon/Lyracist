@@ -1,4 +1,4 @@
-Last Edit: Aug 2, 2026 08:22 - Updated help systems, bumped assembly versions, and documented casting/DJ banner options
+Last Edit: Aug 2, 2026 10:20 - Added looping MP4 video DJ banner support, updated help system text, and bumped assembly versions
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -6,6 +6,8 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.2.0] - 2026-08-02
 
 ### Added
+- **Looping MP4 DJ Banners**: Added full support for displaying looping `.mp4` video files as full-screen borderless DJ promotional and branding banners. Includes same-screen collision priority with the rotation billboard display window.
+- **Settings Category Visual Styling**: Color-coded the Settings category group boxes in KSRotation (Purple, Blue, Navy, Slate) to visually differentiate settings categories.
 - **Wireless Casting Support**: Introduced target options for casting the singer rotation billboard directly to Miracast, Chromecast, AirPlay, Wireless HDMI, or Browser Cast. Used high-performance off-screen buffer rendering to run without cluttered windows on the host desktop.
 - **Browser Cast Server**: Self-hosts a local web server (http://localhost:8080/rotation/) to allow any browser on the local network to view the singer rotation billboard in real-time.
 - **Display Monitor Selection**: Added a Target Monitor dropdown to allow operators to select a specific monitor for projecting both the Singer Display Window and DJ Banner Window, with dynamic redirection and automatic fallback to secondary/primary screens if unplugged.

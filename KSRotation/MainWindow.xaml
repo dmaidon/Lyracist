@@ -1,3 +1,4 @@
+<!-- Edited on Aug 2, 2026 @ 10:19:00 -> Update DJ Banner help topic to include looping MP4 video formats -->
 <!-- Edited on Aug 2, 2026 @ 09:39:00 -> Add style resources and apply category-specific styling to GroupBoxes to differentiate categories visually -->
 <!-- Edited on Aug 2, 2026 @ 07:50:00 -> Update Help system with Casting & DJ Banners topic and remove FlipTile View reference -->
 <!-- Edited on Aug 1, 2026 @ 14:32:00 -> Move casting target settings to Casting tab -->
@@ -1859,7 +1860,7 @@
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
                                     <StackPanel>
                                         <TextBlock Text="🎏 DJ Banners &amp; Collision Priority" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <TextBlock Text="• DJ Banner Window: Select a target screen for your DJ Banner under Settings and toggle it on to display full-screen borderless branding banners." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• DJ Banner Window: Select a target screen for your DJ Banner under Settings and toggle it on to display full-screen borderless branding banners (supports PNG, JPG, JPEG, GIF, BMP, and looping MP4 video)." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="• Deconfliction Logic: If you select the same screen for both the DJ Banner and the main Rotation Display, the Rotation Display takes priority. The DJ Banner will automatically hide when the Rotation window is enabled or moved to that monitor, preventing any overlap collision." TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>
