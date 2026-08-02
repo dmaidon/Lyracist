@@ -192,7 +192,7 @@
                                 BorderThickness="1"
                                 BorderBrush="{StaticResource PurpleGroupBoxBorderBrush}"
                                 Background="{DynamicResource MaterialDesignCardBackground}">
-                            <StackPanelsn:StackPanel xmlns:sn="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                            <StackPanel>
                                 <Border Background="{StaticResource PurpleGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
                                         Padding="14,9">
@@ -206,7 +206,7 @@
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
-                            </StackPanelsn:StackPanel>
+                            </StackPanel>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -230,7 +230,7 @@
                                 BorderThickness="1"
                                 BorderBrush="{StaticResource BlueGroupBoxBorderBrush}"
                                 Background="{DynamicResource MaterialDesignCardBackground}">
-                            <StackPanelsn:StackPanel xmlns:sn="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                            <StackPanel>
                                 <Border Background="{StaticResource BlueGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
                                         Padding="14,9">
@@ -244,7 +244,7 @@
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
-                            </StackPanelsn:StackPanel>
+                            </StackPanel>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -268,7 +268,7 @@
                                 BorderThickness="1"
                                 BorderBrush="{StaticResource NavyGroupBoxBorderBrush}"
                                 Background="{DynamicResource MaterialDesignCardBackground}">
-                            <StackPanelsn:StackPanel xmlns:sn="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                            <StackPanel>
                                 <Border Background="{StaticResource NavyGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
                                         Padding="14,9">
@@ -282,7 +282,7 @@
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
-                            </StackPanelsn:StackPanel>
+                            </StackPanel>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -306,7 +306,7 @@
                                 BorderThickness="1"
                                 BorderBrush="{StaticResource SlateGroupBoxBorderBrush}"
                                 Background="{DynamicResource MaterialDesignCardBackground}">
-                            <StackPanelsn:StackPanel xmlns:sn="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                            <StackPanel>
                                 <Border Background="{StaticResource SlateGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
                                         Padding="14,9">
@@ -320,7 +320,7 @@
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
-                            </StackPanelsn:StackPanel>
+                            </StackPanel>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
