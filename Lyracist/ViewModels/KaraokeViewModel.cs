@@ -1,3 +1,4 @@
+// Edited on Aug 2, 2026 @ 10:10:00 -> Add mp4 support to DJ Banner scanning and file dialog filter
 // Edited on Aug 1, 2026 @ 11:49:44 -> Add DeleteDjBanner command for custom DJ banners
 // Edited on Aug 1, 2026 @ 11:02:00 -> Add pragma warning disable MVVMTK0034 to allow direct backing field updates without MVVM Toolkit warning
 // Edited on Aug 1, 2026 @ 10:59:16 -> Subscribe to ScreenAssignmentsChanged to handle DJ banner and rotation screen priorities
@@ -827,7 +828,7 @@ public partial class KaraokeViewModel : BaseViewModel
             foreach (var file in Directory.GetFiles(dir))
             {
                 string ext = Path.GetExtension(file).ToLowerInvariant();
-                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp")
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp" || ext == ".mp4")
                 {
                     DjBanners.Add(new Lyracist.Models.DjBannerItem
                     {
@@ -859,8 +860,8 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "Upload DJ Banner Image",
-            Filter = "Image Files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp|All Files (*.*)|*.*"
+            Title = "Upload DJ Banner",
+            Filter = "Supported Banners (*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.mp4)|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.mp4|Image Files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp|Video Files (*.mp4)|*.mp4|All Files (*.*)|*.*"
         };
 
         if (dialog.ShowDialog() == true)

@@ -1,4 +1,4 @@
-// Created on Aug 1, 2026 @ 09:42:45 -> Add DJ Banner Window view model
+// Edited on Aug 2, 2026 @ 10:05:00 -> Add BannerPath property to support video banner playback in code-behind
 using System;
 using System.IO;
 using System.Windows.Media.Imaging;
@@ -11,9 +11,21 @@ public partial class DjBannerWindowViewModel : ObservableObject
     [ObservableProperty]
     private BitmapImage? _bannerImage;
 
+    [ObservableProperty]
+    private string? _bannerPath;
+
     public void UpdateBanner(string? path)
     {
+        BannerPath = path;
+
         if (string.IsNullOrEmpty(path) || !File.Exists(path))
+        {
+            BannerImage = null;
+            return;
+        }
+
+        string ext = Path.GetExtension(path).ToLowerInvariant();
+        if (ext == ".mp4")
         {
             BannerImage = null;
             return;

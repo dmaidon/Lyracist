@@ -1,4 +1,4 @@
-<!-- Edited on Aug 2, 2026 @ 09:36:00 -> Bump AssemblyVersion and FileVersion to 26.8.2.312 -->
+<!-- Edited on Aug 2, 2026 @ 10:16:00 -> Bump AssemblyVersion and FileVersion to 26.8.2.313 -->
 <!-- Edited on Aug 1, 2026 @ 14:58:00 -> Link shared BrowserCastDiscoveryService in compile group -->
 <!-- Edited on Aug 1, 2026 @ 13:46:00 -> Link shared ChromecastSender in compile group -->
 <!-- Edited on Aug 1, 2026 @ 13:12:00 -> Link ChromecastDiscoveryService in compile group -->
@@ -15,8 +15,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.8.2.312</AssemblyVersion>
-    <FileVersion>26.8.2.312</FileVersion>
+    <AssemblyVersion>26.8.2.313</AssemblyVersion>
+    <FileVersion>26.8.2.313</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>

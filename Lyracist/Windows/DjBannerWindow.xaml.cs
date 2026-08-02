@@ -1,4 +1,5 @@
-// Edited on Aug 1, 2026 @ 09:52:00 -> Fix KeyEventArgs ambiguity
+// Edited on Aug 2, 2026 @ 10:07:00 -> Implement UpdateBannerView to loop video or display image based on file extension
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
@@ -15,6 +16,53 @@ public partial class DjBannerWindow : Window
         InitializeComponent();
         _vm = vm;
         DataContext = vm;
+        _vm.PropertyChanged += Vm_PropertyChanged;
+        UpdateBannerView();
+    }
+
+    private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(DjBannerWindowViewModel.BannerPath))
+        {
+            UpdateBannerView();
+        }
+    }
+
+    private void UpdateBannerView()
+    {
+        string? path = _vm.BannerPath;
+        if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
+        {
+            BannerImage.Source = null;
+            BannerVideo.Source = null;
+            BannerVideo.Visibility = Visibility.Collapsed;
+            BannerImage.Visibility = Visibility.Visible;
+            return;
+        }
+
+        string ext = System.IO.Path.GetExtension(path).ToLowerInvariant();
+        if (ext == ".mp4")
+        {
+            BannerImage.Source = null;
+            BannerImage.Visibility = Visibility.Collapsed;
+            BannerVideo.Visibility = Visibility.Visible;
+            BannerVideo.Source = new Uri(path);
+            BannerVideo.Play();
+        }
+        else
+        {
+            BannerVideo.Stop();
+            BannerVideo.Source = null;
+            BannerVideo.Visibility = Visibility.Collapsed;
+            BannerImage.Visibility = Visibility.Visible;
+            // The viewmodel handles loading BannerImage for standard image formats
+        }
+    }
+
+    private void BannerVideo_MediaEnded(object sender, RoutedEventArgs e)
+    {
+        BannerVideo.Position = TimeSpan.Zero;
+        BannerVideo.Play();
     }
 
     protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)

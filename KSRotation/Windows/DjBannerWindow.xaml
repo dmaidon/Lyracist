@@ -1,3 +1,4 @@
+<!-- Edited on Aug 2, 2026 @ 10:12:00 -> Add MediaElement for looping MP4 video support -->
 <!-- Created on Aug 1, 2026 @ 09:46:00 -> Added DJ Banner projection window -->
 <Window x:Class="KSRotation.Windows.DjBannerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -15,5 +16,6 @@
 
     <Grid>
         <Image x:Name="BannerImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <MediaElement x:Name="BannerVideo" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" LoadedBehavior="Manual" UnloadedBehavior="Stop" Visibility="Collapsed" MediaEnded="BannerVideo_MediaEnded" />
     </Grid>
 </Window>

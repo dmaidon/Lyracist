@@ -1,4 +1,4 @@
-<!-- Edited on Aug 2, 2026 @ 08:35:00 -> Bump AssemblyVersion and FileVersion to 26.8.2.374 -->
+<!-- Edited on Aug 2, 2026 @ 10:16:00 -> Bump AssemblyVersion and FileVersion to 26.8.2.375 -->
 <!-- Edited on Aug 1, 2026 @ 14:59:00 -> Link shared BrowserCastDiscoveryService in compile group -->
 <!-- Edited on Aug 1, 2026 @ 13:47:00 -> Link shared ChromecastSender in compile group -->
 <!-- Edited on Aug 1, 2026 @ 13:13:00 -> Link ChromecastDiscoveryService in compile group -->
@@ -14,8 +14,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.2.374</AssemblyVersion>
-    <FileVersion>26.8.2.374</FileVersion>
+    <AssemblyVersion>26.8.2.375</AssemblyVersion>
+    <FileVersion>26.8.2.375</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>

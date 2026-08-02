@@ -1,4 +1,4 @@
-// Created on Aug 1, 2026 @ 09:46:20 -> Added DJ Banner window service
+// Edited on Aug 2, 2026 @ 10:14:00 -> Delegate banner updating logic to the window UpdateBanner method
 using KSRotation.Windows;
 using System;
 using System.IO;
@@ -33,27 +33,7 @@ namespace KSRotation.Services
         private void UpdateImage()
         {
             if (_window == null) return;
-            if (string.IsNullOrEmpty(_bannerPath) || !File.Exists(_bannerPath))
-            {
-                _window.BannerImage.Source = null;
-                return;
-            }
-
-            try
-            {
-                var image = new BitmapImage();
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.UriSource = new Uri(_bannerPath);
-                image.EndInit();
-                image.Freeze();
-                _window.BannerImage.Source = image;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to load DJ banner: {ex.Message}");
-                _window.BannerImage.Source = null;
-            }
+            _window.UpdateBanner(_bannerPath);
         }
 
         public void Show()

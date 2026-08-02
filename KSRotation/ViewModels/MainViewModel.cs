@@ -1,3 +1,4 @@
+// Edited on Aug 2, 2026 @ 10:15:00 -> Add mp4 support to DJ Banner scanning and file dialog filter
 // Edited on Aug 2, 2026 @ 07:50:00 -> Update Help system with Casting & DJ Banners topic
 // Edited on Aug 1, 2026 @ 13:25:00 -> Use partial properties for Chromecast fields to resolve WinRT AOT compilation warnings
 // Edited on Aug 1, 2026 @ 13:20:00 -> Add Chromecast discovery VM properties, change hooks, and command to KSRotation
@@ -1816,7 +1817,7 @@ namespace KSRotation.ViewModels
             foreach (var file in Directory.GetFiles(dir))
             {
                 string ext = Path.GetExtension(file).ToLowerInvariant();
-                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp")
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp" || ext == ".mp4")
                 {
                     AvailableDjBanners.Add(new DjBannerItem
                     {
@@ -1843,7 +1844,7 @@ namespace KSRotation.ViewModels
             var dialog = new Microsoft.Win32.OpenFileDialog
             {
                 Title = "Upload DJ Banner",
-                Filter = "Image Files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp"
+                Filter = "Supported Banners (*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.mp4)|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.mp4|Image Files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp|Video Files (*.mp4)|*.mp4|All Files (*.*)|*.*"
             };
 
             if (dialog.ShowDialog() == true)
