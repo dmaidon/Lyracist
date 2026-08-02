@@ -20,78 +20,417 @@
             --amazon: #00a8e1;
             --partytyme: #ff8e53;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-primary); padding: 16px; display: flex; flex-direction: column; min-height: 100vh; }
-        .container { max-width: 480px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; flex-grow: 1; }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0 24px; }
-        h1 { font-size: 24px; font-weight: 800; background: linear-gradient(45deg, var(--accent), var(--partytyme)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .status-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
-        .card { background-color: var(--card-bg); border-radius: 16px; border: 1px solid #22222f; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        .welcome-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-        
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 480px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0 24px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--accent), var(--partytyme));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid #22222f;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .welcome-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
         /* Banners */
-        .banners-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-        .banner { border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .banner-now { background: #1b101c; border: 1px solid var(--accent); }
-        .banner-next { background: #0c1524; border: 1px solid var(--secondary); }
-        .banner-label { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-        .banner-label-now { color: var(--accent); }
-        .banner-label-next { color: var(--secondary); }
-        .banner-name { font-size: 16px; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .banner-song { font-size: 11px; color: var(--text-secondary); margin-top: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .banners-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .banner {
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .banner-now {
+            background: #1b101c;
+            border: 1px solid var(--accent);
+        }
+
+        .banner-next {
+            background: #0c1524;
+            border: 1px solid var(--secondary);
+        }
+
+        .banner-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .banner-label-now {
+            color: var(--accent);
+        }
+
+        .banner-label-next {
+            color: var(--secondary);
+        }
+
+        .banner-name {
+            font-size: 16px;
+            font-weight: 700;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .banner-song {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
         /* Tabs */
-        .tabs { display: flex; background-color: #121217; border-radius: 10px; padding: 4px; margin-bottom: 16px; }
-        .tab-btn { flex: 1; padding: 10px 0; background: none; border: none; color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
-        .tab-btn.active { background-color: var(--card-bg); color: var(--text-primary); box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tabs {
+            display: flex;
+            background-color: #121217;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 0;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+            .tab-btn.active {
+                background-color: var(--card-bg);
+                color: var(--text-primary);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            }
+
+        .tab-content {
+            display: none;
+        }
+
+            .tab-content.active {
+                display: block;
+            }
 
         /* Join Form */
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px; }
-        input, select, textarea { width: 100%; background-color: #0b0b0e; border: 1px solid #22222f; border-radius: 8px; padding: 12px; color: var(--text-primary); font-size: 14px; transition: border 0.2s; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
-        .btn-primary { width: 100%; padding: 14px; background: linear-gradient(45deg, var(--accent), var(--partytyme)); border: none; border-radius: 8px; color: white; font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 4px 15px var(--accent-glow); transition: transform 0.1s; }
-        .btn-primary:active { transform: scale(0.98); }
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+            .form-group label {
+                display: block;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: var(--text-secondary);
+                margin-bottom: 6px;
+            }
+
+        input, select, textarea {
+            width: 100%;
+            background-color: #0b0b0e;
+            border: 1px solid #22222f;
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: border 0.2s;
+        }
+
+            input:focus, select:focus, textarea:focus {
+                outline: none;
+                border-color: var(--accent);
+            }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(45deg, var(--accent), var(--partytyme));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--accent-glow);
+            transition: transform 0.1s;
+        }
+
+            .btn-primary:active {
+                transform: scale(0.98);
+            }
 
         /* Queue List */
-        .queue-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #22222f; }
-        .queue-item:last-child { border-bottom: none; }
-        .queue-details { display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; }
-        .queue-singer { font-size: 14px; font-weight: 700; }
-        .queue-song { font-size: 12px; color: var(--text-secondary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; margin-top: 2px; }
-        .badge { font-size: 8px; font-weight: 900; padding: 2px 6px; border-radius: 4px; display: inline-block; vertical-align: middle; margin-left: 6px; }
-        .badge-local { background-color: rgba(29, 185, 84, 0.15); color: var(--success); }
-        .badge-partytyme { background-color: rgba(255, 142, 83, 0.15); color: var(--partytyme); }
-        .badge-spotify { background-color: rgba(29, 185, 84, 0.15); color: var(--success); }
-        .badge-youtube { background-color: rgba(255, 0, 0, 0.15); color: var(--youtube); }
-        .badge-amazon { background-color: rgba(0, 168, 225, 0.15); color: var(--amazon); }
-        .queue-index { font-size: 18px; font-weight: 800; color: #3a3a47; margin-right: 12px; }
+        .queue-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #22222f;
+        }
+
+            .queue-item:last-child {
+                border-bottom: none;
+            }
+
+        .queue-details {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .queue-singer {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .queue-song {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            margin-top: 2px;
+        }
+
+        .badge {
+            font-size: 8px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+
+        .badge-local {
+            background-color: rgba(29, 185, 84, 0.15);
+            color: var(--success);
+        }
+
+        .badge-partytyme {
+            background-color: rgba(255, 142, 83, 0.15);
+            color: var(--partytyme);
+        }
+
+        .badge-spotify {
+            background-color: rgba(29, 185, 84, 0.15);
+            color: var(--success);
+        }
+
+        .badge-youtube {
+            background-color: rgba(255, 0, 0, 0.15);
+            color: var(--youtube);
+        }
+
+        .badge-amazon {
+            background-color: rgba(0, 168, 225, 0.15);
+            color: var(--amazon);
+        }
+
+        .queue-index {
+            font-size: 18px;
+            font-weight: 800;
+            color: #3a3a47;
+            margin-right: 12px;
+        }
 
         /* Search Results */
-        .search-results { max-height: 350px; overflow-y: auto; margin-top: 12px; }
-        .search-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #22222f; cursor: pointer; border-radius: 6px; }
-        .search-item:hover { background-color: #1a1a24; }
-        .search-item-info { display: flex; flex-direction: column; }
-        .search-item-title { font-size: 13px; font-weight: 700; }
-        .search-item-artist { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-        .badge-source { font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+        .search-results {
+            max-height: 350px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+
+        .search-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #22222f;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+            .search-item:hover {
+                background-color: #1a1a24;
+            }
+
+        .search-item-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-item-title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .search-item-artist {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .badge-source {
+            font-size: 8px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
 
         /* Modal Popup */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background-color: var(--card-bg); border-radius: 16px; border: 1px solid #22222f; width: 100%; max-width: 400px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-        .modal-artist { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
-        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-secondary { flex: 1; padding: 12px; background-color: #1e1e27; border: 1px solid #333344; border-radius: 8px; color: var(--text-primary); font-weight: 700; cursor: pointer; }
-        
-        .no-data { font-size: 13px; color: var(--text-secondary); text-align: center; padding: 30px 0; }
-        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid #22222f;
+            width: 100%;
+            max-width: 400px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .modal-artist {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            background-color: #1e1e27;
+            border: 1px solid #333344;
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .no-data {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 30px 0;
+        }
+
         /* Rating System Styles */
-        .stars-container { display: flex; justify-content: center; gap: 12px; margin: 15px 0 10px; }
-        .star { font-size: 32px; color: var(--text-secondary); cursor: pointer; transition: transform 0.15s, color 0.15s; }
-        .star:hover, .star.active { color: #F5D042; transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(245, 208, 66, 0.4)); }
+        .stars-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px 0 10px;
+        }
+
+        .star {
+            font-size: 32px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: transform 0.15s, color 0.15s;
+        }
+
+            .star:hover, .star.active {
+                color: #F5D042;
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 8px rgba(245, 208, 66, 0.4));
+            }
 
         /* Reaction Button Styles */
         .reaction-btn {
@@ -103,13 +442,15 @@
             cursor: pointer;
             transition: transform 0.15s, background-color 0.15s;
         }
-        .reaction-btn:hover {
-            transform: scale(1.15);
-            background-color: #242432;
-        }
-        .reaction-btn:active {
-            transform: scale(0.9);
-        }
+
+            .reaction-btn:hover {
+                transform: scale(1.15);
+                background-color: #242432;
+            }
+
+            .reaction-btn:active {
+                transform: scale(0.9);
+            }
     </style>
 </head>
 <body>
@@ -133,7 +474,7 @@
         <!-- Dashboard Screen -->
         <div id="dashboard-screen" style="display: none;">
             <div class="welcome-title">Hey, <span id="display-name">Singer</span>! 👋</div>
-            
+
             <!-- Performer Rating Card -->
             <div id="rating-card" class="card" style="display: none; border-color: #F5D042; background: rgba(245, 208, 66, 0.05);">
                 <div id="rating-title-label" style="font-size: 11px; font-weight: 800; color: #F5D042; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">⭐ Rate Current Performance ⭐</div>
@@ -146,8 +487,9 @@
                     <span class="star" data-value="5" onclick="submitRating(5)">☆</span>
                 </div>
                 <div id="rating-status" style="font-size: 11px; color: var(--text-secondary); margin-top: 8px; font-style: italic; height: 16px; text-align: center;">Tap a star to rate!</div>
+                <div id="rating-status" style="font-size: 11px; color: var(--text-secondary); margin-top: 8px; font-style: italic; height: 16px; text-align: center;">(Play nice)</div>
             </div>
-            
+
             <!-- Now / Next Up Grid -->
             <div class="banners-grid">
                 <div class="banner banner-now">
@@ -264,12 +606,12 @@
             <div id="content-scaryoke" class="tab-content card" style="text-align: center;">
                 <h2 style="font-size: 18px; margin-bottom: 12px; color: var(--partytyme); text-shadow: 0 0 10px rgba(255, 110, 0, 0.3);">🎃 SCARYOKE WHEEL 🎃</h2>
                 <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 16px;">Test your courage! Spin the wheel of terror!</p>
-                
+
                 <div style="position: relative; display: inline-block; width: 260px; height: 260px; margin: 0 auto 16px;">
                     <canvas id="wheel-canvas" width="260" height="260" style="border-radius: 50%; box-shadow: 0 0 20px rgba(255, 110, 0, 0.25);"></canvas>
                     <div style="position: absolute; top: -8px; left: 120px; width: 20px; height: 25px; background-color: var(--accent); clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></div>
                 </div>
-                
+
                 <div style="margin-top: 10px;">
                     <button id="btn-spin-wheel" class="btn-primary" style="max-width: 200px; margin: 0 auto; display: block;" onclick="requestSpin()">SPIN WHEEL</button>
                     <div id="scaryoke-not-your-turn" style="display: none; font-size: 12px; color: var(--text-secondary); max-width: 240px; margin: 0 auto;">🎤 Only the current performer can spin. Watch here for the results!</div>
@@ -296,7 +638,7 @@
         <div class="modal-content">
             <div id="modal-title" class="modal-title">Song Title</div>
             <div id="modal-artist" class="modal-artist">Artist</div>
-            
+
             <div class="form-group" id="request-key-group">
                 <label>Key Transposition</label>
                 <select id="request-key">
@@ -320,9 +662,9 @@
                 <label>Notes</label>
                 <textarea id="request-notes" placeholder="Any special requests or instructions..." rows="2"></textarea>
             </div>
-            
+
             <div id="request-msg" style="margin-bottom: 12px; font-size: 12px; text-align: center; color: var(--accent);"></div>
-            
+
             <div class="modal-actions">
                 <button class="btn-secondary" onclick="closeRequestModal()">Cancel</button>
                 <button class="btn-primary" style="flex: 1.5;" onclick="submitCatalogRequest()">Send Request</button>
@@ -342,7 +684,7 @@
                 token = 'sess_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
                 try {
                     localStorage.setItem("sessionToken", token);
-                } catch (e) {}
+                } catch (e) { }
             }
             return token;
         }
@@ -372,17 +714,17 @@
                 alert("Please enter a performer name!");
                 return;
             }
-            
+
             try {
                 const res = await fetch("/api/join", {
                     method: "POST",
-                    headers: { 
+                    headers: {
                         "Content-Type": "application/json",
                         "X-Session-Token": getSessionToken()
                     },
                     body: JSON.stringify({ singerName: input })
                 });
-                
+
                 if (res.ok) {
                     singerName = input;
                     try {
@@ -429,16 +771,16 @@
 
                     currentPerformerName = active.name || "None";
                     updateScaryokeSpinPermission();
-                    
+
                     const rateCard = document.getElementById("rating-card");
                     if (active.name && active.name !== "None" && active.name.toLowerCase() !== singerName.toLowerCase()) {
                         document.getElementById("rate-singer-name").textContent = active.name;
-                        
+
                         const titleLabel = document.getElementById("rating-title-label");
                         if (titleLabel) {
                             titleLabel.textContent = `${symbol} Rate Current Performance ${symbol}`;
                         }
-                        
+
                         rateCard.style.display = "block";
                         // Reset stars
                         document.querySelectorAll(".star").forEach(s => {
@@ -464,7 +806,7 @@
                     duration = (durationSec || 4.5) * 1000;
                     document.getElementById("btn-spin-wheel").disabled = true;
                     document.getElementById("scaryoke-result").textContent = "Spinning...";
-                    
+
                     // Trigger animation
                     startAngle = currentAngle;
                     target = currentAngle + 1440 + (targetFinalAngle - (currentAngle % 360));
@@ -609,19 +951,19 @@
             queue.forEach((item, idx) => {
                 const badgeClass = `badge badge-${(item.source || "local").toLowerCase()}`;
                 html += `
-                    <div class="queue-item">
-                        <div style="display: flex; align-items: center; overflow: hidden; width: 100%;">
-                            <span class="queue-index">${idx + 1}</span>
-                            <div class="queue-details">
-                                <div class="queue-singer">
-                                    ${item.name}
-                                    <span class="${badgeClass}">${item.source || "Local"}</span>
+                            <div class="queue-item">
+                                <div style="display: flex; align-items: center; overflow: hidden; width: 100%;">
+                                    <span class="queue-index">${idx + 1}</span>
+                                    <div class="queue-details">
+                                        <div class="queue-singer">
+                                            ${item.name}
+                                            <span class="${badgeClass}">${item.source || "Local"}</span>
+                                        </div>
+                                        <div class="queue-song">${item.artist} - ${item.songTitle}</div>
+                                    </div>
                                 </div>
-                                <div class="queue-song">${item.artist} - ${item.songTitle}</div>
                             </div>
-                        </div>
-                    </div>
-                `;
+                        `;
             });
             container.innerHTML = html;
         }
@@ -634,7 +976,7 @@
         async function performSearch() {
             const query = document.getElementById("catalog-search").value.trim();
             const container = document.getElementById("catalog-list");
-            
+
             if (!query) {
                 container.innerHTML = '<div class="no-data">Type to search the karaoke catalog...</div>';
                 return;
@@ -664,14 +1006,14 @@
             songs.forEach((song, idx) => {
                 const badgeClass = `badge-source badge-${song.source.toLowerCase()}`;
                 html += `
-                    <div class="search-item" onclick='openRequestModal(${JSON.stringify(song)}, "Karaoke")'>
-                        <div class="search-item-info">
-                            <span class="search-item-title">${song.title}</span>
-                            <span class="search-item-artist">${song.artist}</span>
-                        </div>
-                        <span class="${badgeClass}">${song.source}</span>
-                    </div>
-                `;
+                            <div class="search-item" onclick='openRequestModal(${JSON.stringify(song)}, "Karaoke")'>
+                                <div class="search-item-info">
+                                    <span class="search-item-title">${song.title}</span>
+                                    <span class="search-item-artist">${song.artist}</span>
+                                </div>
+                                <span class="${badgeClass}">${song.source}</span>
+                            </div>
+                        `;
             });
             container.innerHTML = html;
         }
@@ -715,13 +1057,13 @@
             let html = "";
             songs.forEach((song) => {
                 html += `
-                    <div class="search-item" onclick='openRequestModal(${JSON.stringify(song)}, "Music")'>
-                        <div class="search-item-info">
-                            <span class="search-item-title">${song.title}</span>
-                            <span class="search-item-artist">${song.artist}</span>
-                        </div>
-                    </div>
-                `;
+                            <div class="search-item" onclick='openRequestModal(${JSON.stringify(song)}, "Music")'>
+                                <div class="search-item-info">
+                                    <span class="search-item-title">${song.title}</span>
+                                    <span class="search-item-artist">${song.artist}</span>
+                                </div>
+                            </div>
+                        `;
             });
             container.innerHTML = html;
         }
@@ -745,7 +1087,7 @@
 
         async function submitCatalogRequest() {
             if (!selectedCatalogTrack) return;
-            
+
             const msgDiv = document.getElementById("request-msg");
             msgDiv.style.color = "var(--text-secondary)";
             msgDiv.textContent = "Submitting request...";
@@ -756,7 +1098,7 @@
             try {
                 const res = await fetch("/api/requests", {
                     method: "POST",
-                    headers: { 
+                    headers: {
                         "Content-Type": "application/json",
                         "X-Session-Token": getSessionToken()
                     },
@@ -825,7 +1167,7 @@
             try {
                 const res = await fetch("/api/requests", {
                     method: "POST",
-                    headers: { 
+                    headers: {
                         "Content-Type": "application/json",
                         "X-Session-Token": getSessionToken()
                     },
@@ -874,7 +1216,7 @@
         async function submitRating(value) {
             let activeName = document.getElementById("now-name").textContent;
             if (!activeName || activeName === "None") return;
-            
+
             // Strip the rating suffix if present: e.g. "Alice Johnson (⭐ 4.8)" -> "Alice Johnson"
             const parenIndex = activeName.lastIndexOf(" (");
             if (parenIndex !== -1) {
@@ -902,7 +1244,7 @@
             try {
                 const res = await fetch("/api/rate", {
                     method: "POST",
-                    headers: { 
+                    headers: {
                         "Content-Type": "application/json",
                         "X-Session-Token": getSessionToken()
                     },
@@ -954,16 +1296,16 @@
             if (!canvas || categories.length === 0) return;
             const ctx = canvas.getContext("2d");
             const r = canvas.width / 2;
-            
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             let currentStartAngle = angleOffset - Math.PI / 2; // Offset so 0 is at 12 o'clock
-            
+
             for (let i = 0; i < categories.length; i++) {
                 const segment = categories[i];
                 const sweepRad = (segment.sweep || segment.Sweep) * Math.PI / 180;
                 const currentEndAngle = currentStartAngle + sweepRad;
-                
+
                 ctx.fillStyle = segment.color || segment.Color || "#8A2BE2";
                 ctx.beginPath();
                 ctx.moveTo(r, r);
@@ -973,28 +1315,28 @@
                 ctx.strokeStyle = "#1E133A";
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
+
                 // Segment Label text along the radius
                 ctx.save();
                 ctx.translate(r, r);
                 ctx.rotate(currentStartAngle + sweepRad / 2);
                 ctx.fillStyle = segment.textColor || segment.TextColor || "#ffffff";
-                
+
                 const segName = segment.name || segment.Name || "";
                 const isDjsChoice = segName.toLowerCase() === "dj's choice";
-                
+
                 ctx.font = isDjsChoice ? "bold 13px -apple-system, sans-serif" : "bold 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
                 ctx.textAlign = "right";
-                
+
                 let text = isDjsChoice ? "💀" : segName;
                 if (text.length > 15) text = text.substring(0, 13) + "...";
-                
+
                 ctx.fillText(text, r - 15, 3);
                 ctx.restore();
-                
+
                 currentStartAngle = currentEndAngle;
             }
-            
+
             // Center pin
             ctx.fillStyle = "#1e133a";
             ctx.beginPath();
@@ -1010,12 +1352,12 @@
             if (!startTime) startTime = timestamp;
             const elapsed = timestamp - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             const easeProgress = 1 - Math.pow(1 - progress, 2.5);
             const current = startAngle + (target - startAngle) * easeProgress;
-            
+
             drawWheel(current * Math.PI / 180);
-            
+
             if (progress < 1) {
                 requestAnimationFrame(animateSpin);
             } else {
@@ -1030,7 +1372,7 @@
             try {
                 const res = await fetch("/api/scaryoke/spin", {
                     method: "POST",
-                    headers: { 
+                    headers: {
                         "Content-Type": "application/json",
                         "X-Session-Token": getSessionToken()
                     },
