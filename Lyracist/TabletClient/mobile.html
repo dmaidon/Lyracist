@@ -1,4 +1,4 @@
-<!-- Created on Jul 17, 2026 @ 09:00:00 -> Performer mobile portal client page -->
+<!-- Edited on Aug 2, 2026 @ 09:16:00 -> Pass singerName parameter to SignalR hub connection -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -411,7 +411,7 @@
 
             if (typeof signalR !== 'undefined') {
                 connection = new signalR.HubConnectionBuilder()
-                    .withUrl("/lyricsHub")
+                    .withUrl("/lyricsHub?singerName=" + encodeURIComponent(singerName))
                     .withAutomaticReconnect()
                     .build();
 

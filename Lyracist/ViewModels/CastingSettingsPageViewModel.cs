@@ -1,9 +1,10 @@
-// Created on Aug 1, 2026 @ 15:10:00 -> Add CastingSettingsPageViewModel class
+// Edited on Aug 2, 2026 @ 09:16:00 -> Expose ConnectedPerformers list from SignalR lyrics hub
 using System;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Input;
+using System.Linq;
 using Lyracist.Shared;
 
 namespace Lyracist.ViewModels
@@ -49,6 +50,8 @@ namespace Lyracist.ViewModels
 
         public ObservableCollection<BrowserCastClient> BrowserClients => BrowserDiscovery.Clients;
 
+        public ObservableCollection<Lyracist.Services.Tablet.PerformerClient> ConnectedPerformers { get; } = new();
+
         public CastingSettingsPageViewModel(
             CastRotationViewModel castRotation,
             CastStatusViewModel castStatus,
@@ -62,6 +65,12 @@ namespace Lyracist.ViewModels
 
             // Start BrowserCast discovery background loop
             _ = BrowserDiscovery.ListenAsync();
+
+            // Populate initially
+            UpdateConnectedPerformers();
+
+            // Subscribe to connected clients change event
+            Lyracist.Services.Tablet.LyricsHub.ClientsChanged += UpdateConnectedPerformers;
 
             // Forward property changes from sub-viewmodels
             CastStatus.PropertyChanged += (s, e) =>
@@ -87,6 +96,22 @@ namespace Lyracist.ViewModels
                     OnPropertyChanged(nameof(SelectedDevice));
                 }
             };
+        }
+
+        private void UpdateConnectedPerformers()
+        {
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(UpdateConnectedPerformers);
+                return;
+            }
+
+            ConnectedPerformers.Clear();
+            foreach (var client in Lyracist.Services.Tablet.LyricsHub.ActiveClients.Values.OrderBy(c => c.SingerName))
+            {
+                ConnectedPerformers.Add(client);
+            }
         }
     }
 }
