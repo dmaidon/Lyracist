@@ -1,4 +1,4 @@
-<!-- Edited on Aug 2, 2026 @ 09:16:00 -> Add Connected Clients list in Column 3 -->
+<!-- Edited on Aug 2, 2026 @ 09:20:00 -> Update Connected Clients header to a purple gradient and Active Mobile Devices GroupBox to a complimenting purple style -->
 <Page x:Class="Lyracist.Views.Pages.CastingPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,6 +13,12 @@
         <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
             <GradientStop Color="#00c6ff" Offset="0.0" />
             <GradientStop Color="#0072ff" Offset="1.0" />
+        </LinearGradientBrush>
+
+        <!-- Purple header gradient -->
+        <LinearGradientBrush x:Key="PurpleHeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#9a52ff" Offset="0.0" />
+            <GradientStop Color="#6e0dd0" Offset="1.0" />
         </LinearGradientBrush>
 
         <!-- GroupBox header: horizontal cyan→blue gradient, matching this page's header banner -->
@@ -44,6 +50,46 @@
                                                FontSize="13" />
                                 </Border>
                                 <Border Background="{StaticResource CastGroupBoxBodyBrush}"
+                                        Padding="14"
+                                        CornerRadius="0,0,7,7">
+                                    <ContentPresenter />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Purple GroupBox header: horizontal purple gradient -->
+        <LinearGradientBrush x:Key="PurpleGroupBoxHeaderBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#ab72ff" Offset="0.0" />
+            <GradientStop Color="#8535e5" Offset="1.0" />
+        </LinearGradientBrush>
+
+        <!-- Purple GroupBox body and border -->
+        <SolidColorBrush x:Key="PurpleGroupBoxBodyBrush"   Color="#0B9A52FF" />
+        <SolidColorBrush x:Key="PurpleGroupBoxBorderBrush" Color="#559A52FF" />
+
+        <!-- ControlTemplate that gives every GroupBox the purple-header card look -->
+        <Style x:Key="PurpleCastGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="{StaticResource PurpleGroupBoxBorderBrush}">
+                            <StackPanel>
+                                <Border Background="{StaticResource PurpleGroupBoxHeaderBrush}"
+                                        CornerRadius="7,7,0,0"
+                                        Padding="14,9">
+                                    <TextBlock Text="{TemplateBinding Header}"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="13" />
+                                </Border>
+                                <Border Background="{StaticResource PurpleGroupBoxBodyBrush}"
                                         Padding="14"
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
@@ -178,7 +224,7 @@
         </ScrollViewer>
 
         <!-- Connected Clients Header -->
-        <Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="1" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="Purple">
+        <Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="1" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource PurpleHeaderBackgroundBrush}">
             <StackPanel>
                 <TextBlock Text="Connected Clients" FontSize="28" FontWeight="Bold" Foreground="White" />
                 <TextBlock Text="Patrons connected to Lyracist" FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0" />
@@ -188,11 +234,11 @@
         <!-- Column 3: Connected Clients List -->
         <ScrollViewer Grid.Row="1" Grid.Column="3" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <GroupBox Header="Active Mobile Devices" Style="{StaticResource CastGroupBoxStyle}">
+                <GroupBox Header="Active Mobile Devices" Style="{StaticResource PurpleCastGroupBoxStyle}">
                     <StackPanel>
                         <TextBlock Text="Phones and Tablets Connected" Style="{StaticResource FieldLabelStyle}" />
                         
-                        <Border BorderBrush="{StaticResource CastGroupBoxBorderBrush}" BorderThickness="1" CornerRadius="4">
+                        <Border BorderBrush="{StaticResource PurpleGroupBoxBorderBrush}" BorderThickness="1" CornerRadius="4">
                             <ListBox ItemsSource="{Binding ConnectedPerformers}"
                                      BorderThickness="0"
                                      Background="Transparent"
@@ -211,7 +257,7 @@
                                                            FontSize="18" 
                                                            Margin="0,0,10,0" 
                                                            VerticalAlignment="Center" 
-                                                           Foreground="{DynamicResource SystemAccentColorBrush}"/>
+                                                           Foreground="{StaticResource PurpleGroupBoxHeaderBrush}"/>
                                             
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                 <TextBlock FontSize="13" FontWeight="SemiBold">
