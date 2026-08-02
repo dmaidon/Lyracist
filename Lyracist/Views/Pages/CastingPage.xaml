@@ -1,4 +1,4 @@
-<!-- Edited on Aug 2, 2026 @ 08:35:00 -> Place casting controls into the 4 columns of the page grid -->
+<!-- Edited on Aug 2, 2026 @ 08:41:00 -> Correct height and spacing of casting controls in columns 0 and 1 -->
 <Page x:Class="Lyracist.Views.Pages.CastingPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -64,8 +64,8 @@
 
     <Grid Margin="24">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="600" />
-            <ColumnDefinition Width="600" />
+            <ColumnDefinition Width="400" />
+            <ColumnDefinition Width="400" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
@@ -75,16 +75,17 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Grid.ColumnSpan="4" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
+        <Border Grid.Row="0" Grid.ColumnSpan="2" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
             <StackPanel>
                 <TextBlock Text="Casting Controls" FontSize="28" FontWeight="Bold" Foreground="White" />
                 <TextBlock Text="Configure remote projections and cast your singer rotation dynamically." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0" />
             </StackPanel>
         </Border>
 
-        <!-- Column 0: Cast Status -->
+        <!-- Column 0: Cast Status & Cast Rotation -->
         <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,16,0">
             <StackPanel>
+                <!-- Cast Status -->
                 <GroupBox Header="Cast Status" Style="{StaticResource CastGroupBoxStyle}">
                     <StackPanel Orientation="Horizontal">
                         <ui:SymbolIcon Symbol="Cast24" FontSize="20" Margin="0,0,10,0" VerticalAlignment="Center" />
@@ -94,12 +95,8 @@
                                    VerticalAlignment="Center" />
                     </StackPanel>
                 </GroupBox>
-            </StackPanel>
-        </ScrollViewer>
 
-        <!-- Column 1: Cast Rotation -->
-        <ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" Margin="0,0,16,0">
-            <StackPanel>
+                <!-- Cast Rotation -->
                 <GroupBox Header="Cast Rotation" Style="{StaticResource CastGroupBoxStyle}">
                     <StackPanel>
                         <TextBlock Text="Display Target" Style="{StaticResource FieldLabelStyle}" />
@@ -134,9 +131,10 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Column 2: Chromecast TVs -->
-        <ScrollViewer Grid.Row="1" Grid.Column="2" VerticalScrollBarVisibility="Auto" Margin="0,0,16,0">
+        <!-- Column 1: Chromecast TVs & BrowserCast Clients -->
+        <ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" Margin="0,0,16,0">
             <StackPanel>
+                <!-- Chromecast TVs -->
                 <GroupBox Header="Chromecast TVs" Style="{StaticResource CastGroupBoxStyle}">
                     <StackPanel>
                         <ui:Button Content="Scan for TVs"
@@ -161,12 +159,8 @@
                                    HorizontalContentAlignment="Center" />
                     </StackPanel>
                 </GroupBox>
-            </StackPanel>
-        </ScrollViewer>
 
-        <!-- Column 3: BrowserCast Clients -->
-        <ScrollViewer Grid.Row="1" Grid.Column="3" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
+                <!-- BrowserCast Clients -->
                 <GroupBox Header="BrowserCast Clients" Style="{StaticResource CastGroupBoxStyle}">
                     <StackPanel>
                         <TextBlock Text="Connected Browser Clients" Style="{StaticResource FieldLabelStyle}" />
