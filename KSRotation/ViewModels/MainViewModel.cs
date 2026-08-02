@@ -1,3 +1,4 @@
+// Edited on Aug 2, 2026 @ 07:50:00 -> Update Help system with Casting & DJ Banners topic
 // Edited on Aug 1, 2026 @ 13:25:00 -> Use partial properties for Chromecast fields to resolve WinRT AOT compilation warnings
 // Edited on Aug 1, 2026 @ 13:20:00 -> Add Chromecast discovery VM properties, change hooks, and command to KSRotation
 // Edited on Aug 1, 2026 @ 11:46:04 -> Restore DJ banner automatically when rotation display screen collision is resolved
@@ -422,6 +423,7 @@ namespace KSRotation.ViewModels
             "🎤 Rotation Management",
             "📺 Display Projection",
             "⚙️ Settings & Venues",
+            "📺 Casting & DJ Banners",
             "❓ FAQ & Shortcuts",
         ];
 

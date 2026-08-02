@@ -1,3 +1,4 @@
+<!-- Edited on Aug 2, 2026 @ 07:50:00 -> Update Help system with Casting & DJ Banners topic and remove FlipTile View reference -->
 <!-- Edited on Aug 1, 2026 @ 14:32:00 -> Move casting target settings to Casting tab -->
 <!-- Edited on Aug 1, 2026 @ 13:22:00 -> Add Chromecast target device selector controls to settings -->
 <!-- Edited on Aug 1, 2026 @ 12:48:00 -> Add Casting support target dropdown and bindings to settings -->
@@ -1604,7 +1605,6 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="150" />
@@ -1622,9 +1622,6 @@
 
                                     <TextBlock Grid.Row="3" Text="Star Wars Crawl" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
                                     <TextBlock Grid.Row="3" Grid.Column="1" Text="Animates the rotation queue in a 3D perspective scroll, moving up over a gorgeous twinkling starfield with distant galaxies. Ideal for breaks or dramatic rotation reveals!" Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-
-                                    <TextBlock Grid.Row="4" Text="Flip Tile Board" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="Presents the rotation list as a retro mechanical split-flap character board that dynamically cycles through alphabetical/numerical states (flap-flap-flap) with clean golden and green highlight states for current and next singers." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                 </Grid>
 
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12">
@@ -1671,6 +1668,49 @@
                                     <StackPanel>
                                         <TextBlock Text="💾 Automatic Debounced Saving" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
                                         <TextBlock Text="You do not need to click 'Save Settings' manually after every minor adjustment! Settings auto-save in the background 500ms after you finish typing or dragging. Clicking the button forces an immediate sync." TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Topic: Casting & DJ Banners -->
+                            <StackPanel x:Name="CastingHelpPanel">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="📺 Casting &amp; DJ Banners">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Casting &amp; DJ Banners" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="Configure wireless casting and projection for your singer rotation, along with custom branding screens."
+                                           FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="20" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="📺 Wireless Casting Target Selection" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="1. Navigate to the Casting tab." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="2. Select a target from the 'Cast Rotation To' dropdown (Monitor, Miracast, Chromecast, Browser Cast, AirPlay, Wireless HDMI)." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="3. If Chromecast is selected, select the specific Chromecast device from the list. Use 'Rescan' to rediscover devices on your local network." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="4. Click 'Cast Rotation' to start streaming. The app uses an off-screen capture buffer to keep your host laptop desktop free of rotation windows." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="5. Click 'Stop Casting' to terminate the stream and release background buffers." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="🌐 Browser Cast Server" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="Selecting 'Browser Cast' starts a local HTTP web server. Anyone on your local Wi-Fi network can visit http://localhost:8080/rotation/ (or using your laptop's local IP address) to view the live audience rotation billboard in real-time." TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="🎏 DJ Banners &amp; Collision Priority" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="• DJ Banner Window: Select a target screen for your DJ Banner under Settings and toggle it on to display full-screen borderless branding banners." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Deconfliction Logic: If you select the same screen for both the DJ Banner and the main Rotation Display, the Rotation Display takes priority. The DJ Banner will automatically hide when the Rotation window is enabled or moved to that monitor, preventing any overlap collision." TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

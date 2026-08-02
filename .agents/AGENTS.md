@@ -13,7 +13,7 @@ When implementing `.cdg` frame parsing, rendering, and timing synchronization in
    - Detailed specifications of CDG command packets (preset, border, tile block, scroll, define color, etc.).
    
    ## Update & Commit instructions
-   Whenever "update and commit" is entered, update the Readmew.md and ChangeLog.md files, commit and sync all changed or modified files to github.
+   Whenever "update and commit" is entered, update the Readmew.md and ChangeLog.md files, If changes have been made that affect the help system in any app, modify the help system, commit and sync all changed or modified files to github.
    
    ## File Modification Header Rule
 Whenever creating, editing, or modifying a source file, always add or update a comment line at the very top of the page in the following format:

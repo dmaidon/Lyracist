@@ -1,3 +1,4 @@
+// Edited on Aug 2, 2026 @ 07:50:00 -> Add Casting & DJ Banners topic, update online search, background music requests, singer edit, screen lock details, and book exporter
 // Edited on Jul 19, 2026 @ 09:40:00 -> Add external mixer setup guide to HelpPage
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -37,7 +38,7 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "People24",
                 AccentColor = "#0078D4",
                 DescriptionHeader = "Singer Rotation Management & Scaryoke Mode",
-                DescriptionContent = "• Add to Rotation: Enter the Performer Name, select a song, specify key transposition semitones (e.g. +2 for higher, -3 for lower), type custom notes, and click Add. Supports up to 4 singers in Rotation.\n\n• Queue Ordering: Use the Up/Down arrow buttons next to a performer's entry to adjust execution priority, or click Remove to dismiss them from the queue.\n\n• Scaryoke Selection Wheel: Toggle Scaryoke to show the spin wheel. When spun, it randomly picks a genre/challenge (Elvis, Rock, Country, Pop, Gender Bender, Oldies) and forces a random database song from that category onto the singer."
+                DescriptionContent = "• Add to Rotation: Enter the Performer Name, select a song, specify key transposition semitones (e.g. +2 for higher, -3 for lower), type custom notes, and click Add. Supports up to 4 singers in Rotation.\n\n• Queue Ordering: Use the Up/Down arrow buttons next to a performer's entry to adjust execution priority, or click Remove to dismiss them from the queue.\n\n• Paused & Inactive (Deleted) Singer Controls: Pause a singer to skip them in rotation while retaining their position, or mark them inactive ('delete' them) to move them to the end of the queue. Click 'Restore' to reactivate them and return them to the end of the active section.\n\n• Performer Editing: Double-click any singer row or select Edit to open the Singer Edit dialog to adjust the performer's name, requested track, transposition key, or custom notes dynamically.\n\n• Scaryoke Selection Wheel: Toggle Scaryoke to show the spin wheel. When spun, it randomly picks a genre/challenge (Elvis, Rock, Country, Pop, Gender Bender, Oldies) and forces a random database song from that category onto the singer."
             },
             new() {
                 Title = "3. Playlists Page",
@@ -51,7 +52,7 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "MailInboxArrowDown20",
                 AccentColor = "#E81123",
                 DescriptionHeader = "Mobile Performer Request Approvals",
-                DescriptionContent = "• Incoming Request Grid: Displays real-time song submissions sent by performers using their mobile portal.\n\n• Approval Workflow: Review details (Performer, Song, Key offset, notes). Click Approve to instantly queue the singer and song in the main rotation list, or click Decline to reject the submission."
+                DescriptionContent = "• Incoming Request Grid: Displays real-time song submissions sent by performers using their mobile portal.\n\n• Karaoke vs. Background Music: Requests are labeled as standard Karaoke (purple badge) or Background Music (green [MUSIC] badge). Singer rotation allows one active karaoke request and one background music request slot concurrently.\n\n• Music Request Automation: Background music requests show up in bold green in the rotation list. Completed music tracks are automatically removed from rotation upon completion and are excluded from standard performer stats. Round checkboxes are replaced by a 'Background Music' label for these tracks.\n\n• Approval Workflow: Review details (Performer, Song, Key offset, notes). Click Approve to instantly queue the singer and song in the main rotation list, or click Decline to reject the submission."
             },
             new() {
                 Title = "5. Settings: Display & Projectors",
@@ -79,14 +80,14 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "Server24",
                 AccentColor = "#8764B8",
                 DescriptionHeader = "SignalR Performer Portal Host Port Settings",
-                DescriptionContent = "• SignalR Server Port: Sets the hosting socket port (default: 5005). Ensure the port is open in Windows Defender Firewall.\n\n• Local Wi-Fi & Travel Routers: Host a private offline network by connecting your laptop and performers' devices to a local Wi-Fi travel router. Performers can connect to http://[Your-Laptop-IP]:5005 without needing any internet connection.\n\n• Live Performer Portal: Once logged in, performers can view rotation queues, search the song library, submit song requests, and view/spin the synchronized Scaryoke wheel.\n\n• Start/Stop Broadcast: Toggles hosting of the performer web portal."
+                DescriptionContent = "• SignalR Server Port: Sets the hosting socket port (default: 5005). Ensure the port is open in Windows Defender Firewall.\n\n• Local Wi-Fi & Travel Routers: Host a private offline network by connecting your laptop and performers' devices to a local Wi-Fi travel router. Performers can connect to http://[Your-Laptop-IP]:5005 without needing any internet connection.\n\n• Live Performer Portal & Online Search: Once logged in, performers can search the local catalog or search online song catalogs (querying the iTunes search index in real-time via their mobile browser) to submit song requests, view rotation queues, and view/spin the synchronized Scaryoke wheel. A graceful offline fallback message is shown if the phone has no internet connection.\n\n• Remote DJ Console Lock: The web-based remote DJ console features a secure screen lock, togglable QR code visibility, and a secure DJ PIN to prevent unauthorized modifications by patrons.\n\n• Start/Stop Broadcast: Toggles hosting of the performer web portal."
             },
             new() {
                 Title = "9. Settings: Library & Decoders",
                 Icon = "FolderAdd24",
                 AccentColor = "#F7630C",
                 DescriptionHeader = "Media Scanner and Playback Rendering Decoders",
-                DescriptionContent = "• CDG Canvas Scaling: Select pixel scaling interpolation (Point, Bilinear, Bicubic). Point provides sharp pixels; Bicubic provides smooth edges.\n\n• MP4 Video Decoder: Configures default video hardware acceleration backends (VLC / Native).\n\n• Target Frame Rate: Set graphics rendering updates (15 FPS to 60 FPS). Higher settings result in smoother lyrics scrolling at the expense of CPU usage.\n\n• Library Scanning Directories: Add local drives or folders. Click 'Rescan All Directories' to parse and index files (.zip, .mp3, .cdg, .mp4) into the FTS5 search engine."
+                DescriptionContent = "• CDG Canvas Scaling: Select pixel scaling interpolation (Point, Bilinear, Bicubic). Point provides sharp pixels; Bicubic provides smooth edges.\n\n• MP4 Video Decoder: Configures default video hardware acceleration backends (VLC / Native).\n\n• Target Frame Rate: Set graphics rendering updates (15 FPS to 60 FPS). Higher settings result in smoother lyrics scrolling at the expense of CPU usage.\n\n• Library Scanning Directories: Add local drives or folders. Click 'Rescan All Directories' to parse and index files (.zip, .mp3, .cdg, .mp4) into the FTS5 search engine.\n\n• Catalog Book Generator: Run the Database Manager (LyracistDbEditor) to export your entire indexed song library into printable, formatted Word (.docx) or PDF catalogs sorted alphabetically by artist."
             },
             new() {
                 Title = "10. Settings: Database Maintenance",
@@ -115,6 +116,13 @@ public partial class HelpViewModel : BaseViewModel
                 AccentColor = "#DFB900",
                 DescriptionHeader = "Integrating Hardware Audio Mixers",
                 DescriptionContent = "• Hardware Mixing Philosophy: When using a hardware mixer like the Pyle PMXU88BT, the singers' microphones are connected directly to the mixer's physical inputs (XLR Channels 1-4). Sound levels, microphone EQ (High/Mid/Low knobs), and microphone effects (Delay/Repeat) must be adjusted physically on the mixer, not in Lyracist software.\n\n• Hardware Mixer Mode: Toggle 'Enable Hardware Mixer Mode' in settings to flatten Lyracist's software equalizer, limiter, and compressor, and output at 100% volume. This prevents 'double-equalizing' or 'double-compressing' your music, giving you a clean, unprocessed output from your PC to mix physically.\n\n• Separate Karaoke & BGM Buses: Route Karaoke output and BGM (Background Music) to separate channels on your mixer (e.g. Karaoke to USB/Line-In 5/6 and BGM to Bluetooth 7/8). This allows you to crossfade and EQ them independently using physical mixer faders.\n\n• Live Recording: The Pyle's USB connection is primarily for flash drives. To record performances, route the mixer's 'Main Out' or 'Phones Out' back into your PC's Line-In or a USB audio capture adapter, and capture using a local recording device."
+            },
+            new() {
+                Title = "14. Wireless Casting & DJ Banners",
+                Icon = "Cast24",
+                AccentColor = "#0078D4",
+                DescriptionHeader = "Casting the Rotation and Custom DJ Banners",
+                DescriptionContent = "• Wireless Casting: Navigate to the Casting page in the sidebar menu. Choose a casting target (Monitor, Miracast, Chromecast, Browser Cast, AirPlay, or Wireless HDMI). Click 'Cast Rotation' to initialize casting using high-performance off-screen buffer rendering, leaving your host desktop clutter-free.\n\n• Chromecast Selection: When casting to Chromecast, you can select from scanned local devices and click 'Rescan' to query again. Make sure the Chromecast device is on the same local network.\n\n• Browser Cast Server: Self-hosts a real-time rotation page on http://[Your-Laptop-IP]:8080/rotation/ that can be opened in any browser on the local Wi-Fi network.\n\n• Custom DJ Banners: Set up borderless, full-screen DJ branding/promotional banners (PNG, JPG, JPEG, GIF, BMP) to display on a selected monitor. Manage banners (Upload, Select, Delete) on the Settings page or the main Karaoke control page.\n\n• Same-Screen Deconfliction: If the DJ Banner and the Rotation Display are configured to target the same screen, the active Rotation Display takes priority, and the DJ Banner is automatically disabled/hidden to prevent visual collision."
             }
         ];
 
