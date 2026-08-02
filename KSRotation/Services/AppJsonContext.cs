@@ -1,6 +1,8 @@
+// Edited on Aug 1, 2026 @ 12:50:00 -> Register DisplayTarget enum in AppJsonContext
 // Edited on Jul 16, 2026 @ 11:00:00 -> JSON context generation
 // Last Edit: Jun 30, 2026 08:40 - Source-generated JSON metadata for the app's persisted types and the rotation feed.
 using KSRotation.Models;
+using Lyracist.Shared;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -12,6 +14,7 @@ namespace KSRotation.Services
     /// </summary>
     [JsonSourceGenerationOptions(WriteIndented = true)]
     [JsonSerializable(typeof(AppSettings))]
+    [JsonSerializable(typeof(DisplayTarget))]
     [JsonSerializable(typeof(NightDbState))]
     [JsonSerializable(typeof(List<SingerEntry>))]
     [JsonSerializable(typeof(List<SongPerformance>))]

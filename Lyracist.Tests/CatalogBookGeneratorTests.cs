@@ -1,4 +1,4 @@
-// Edited on Jul 31, 2026 @ 11:20:24 -> Fixed null dereference warnings in user manual tests
+// Edited on Aug 1, 2026 @ 12:16:00 -> Add UpdateUserManualsForCastingSupport test case
 using System;
 using System.IO;
 using Xunit;
@@ -177,6 +177,128 @@ Operators can now export the entire song database (Karaoke or Music) into Word (
                             }
                             
                             doc.Info.Keywords = (keywords ?? string.Empty) + " CatalogBookExporter";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForCastingSupport()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"
+Section: Display Projection Window / Casting Support
+
+[Update Details]
+Operators can now select different casting targets for the Singer Rotation Billboard screen in both Lyracist and KSRotation applications, in addition to standard physical monitors.
+
+1. Casting Target Dropdown:
+   - Located in the ""Settings"" tab under ""Displays & Projection"" (or ""Display & Projection"" in KSRotation).
+   - Dropdown options include Monitor, Miracast, Chromecast, Browser Cast, AirPlay, and Wireless HDMI.
+   - When a casting target is selected, the application (Lyracist or KSRotation) initializes the appropriate casting sender/server in the background.
+
+2. Off-Screen Rendering:
+   - Selecting a casting target (such as Chromecast or Browser Cast) creates and renders the Rotation Window / Singer Display Window in an off-screen buffer (invisible to the host desktop) to capture frames dynamically.
+   - This ensures the KJ laptop screen is not cluttered while casting frames.
+
+3. Browser Cast Server:
+   - The self-hosted Browser Cast option spins up a local web server (http://localhost:8080/rotation/) to allow any browser on the local network to view the singer rotation billboard in real-time.
+";
+
+            // 1. Update text file if not already present
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Casting Support"))
+                {
+                    File.AppendAllText(txtPath, "\n" + updateText);
+                }
+            }
+
+            // 2. Update docx file by appending paragraph to the end
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+                    
+                    if (body != null)
+                    {
+                        // Check if already appended to avoid duplicates
+                        bool alreadyAppended = false;
+                        foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (p.Text != null && p.Text.Contains("Casting Support"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Display Projection Window / Casting Support")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("CastingSupport"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                            
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+                            
+                            gfx.DrawString("Section: Display Projection Window / Casting Support", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+                            
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                yPos += 15;
+                            }
+                            
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " CastingSupport";
                             doc.Save(pdfPath);
                         }
                     }

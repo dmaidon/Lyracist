@@ -1,3 +1,4 @@
+<!-- Edited on Aug 1, 2026 @ 14:24:00 -> Add Casting navigation item in MainWindow -->
 <!-- Edited on Jul 19, 2026 @ 09:50:00 -> Add drive connection status indicator to custom title bar -->
 <ui:FluentWindow x:Class="Lyracist.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -50,26 +51,27 @@
                 <TextBlock Text="{Binding DriveStatusText}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{Binding DriveStatusBrush}" />
             </StackPanel>
         </Grid>
-
-        <!-- Fluent navigation panel at the top (Horizontal Tabs) -->
-        <ui:NavigationView Grid.Row="1"
-                           x:Name="RootNavigation"
-                           PaneDisplayMode="Top"
-                           IsBackButtonVisible="Collapsed"
-                           Margin="0"
-                           ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                           ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-            <ui:NavigationView.MenuItems>
-                <ui:NavigationViewItem Content="Karaoke" Icon="{ui:SymbolIcon MusicNote224}" TargetPageType="{x:Type pages:KaraokePage}" />
-                <ui:NavigationViewItem Content="Rotation" Icon="{ui:SymbolIcon People24}" TargetPageType="{x:Type pages:RotationPage}" />
-                <ui:NavigationViewItem Content="Lyrics" Icon="{ui:SymbolIcon DocumentText24}" TargetPageType="{x:Type pages:LyricsPage}" />
-                <ui:NavigationViewItem Content="Playlists" Icon="{ui:SymbolIcon MusicNote2Play20}" TargetPageType="{x:Type pages:PlaylistsPage}" />
-                <ui:NavigationViewItem Content="Requests" Icon="{ui:SymbolIcon MailInboxArrowDown20}" TargetPageType="{x:Type pages:RequestsPage}" />
-                <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}" TargetPageType="{x:Type pages:SettingsPage}" />
-                <ui:NavigationViewItem Content="Help" Icon="{ui:SymbolIcon QuestionCircle24}" TargetPageType="{x:Type pages:HelpPage}" />
-                <ui:NavigationViewItem Content="About" Icon="{ui:SymbolIcon Info24}" TargetPageType="{x:Type pages:AboutPage}" />
-            </ui:NavigationView.MenuItems>
-        </ui:NavigationView>
+ 
+         <!-- Fluent navigation panel at the top (Horizontal Tabs) -->
+         <ui:NavigationView Grid.Row="1"
+                            x:Name="RootNavigation"
+                            PaneDisplayMode="Top"
+                            IsBackButtonVisible="Collapsed"
+                            Margin="0"
+                            ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+             <ui:NavigationView.MenuItems>
+                 <ui:NavigationViewItem Content="Karaoke" Icon="{ui:SymbolIcon MusicNote224}" TargetPageType="{x:Type pages:KaraokePage}" />
+                 <ui:NavigationViewItem Content="Rotation" Icon="{ui:SymbolIcon People24}" TargetPageType="{x:Type pages:RotationPage}" />
+                 <ui:NavigationViewItem Content="Lyrics" Icon="{ui:SymbolIcon DocumentText24}" TargetPageType="{x:Type pages:LyricsPage}" />
+                 <ui:NavigationViewItem Content="Playlists" Icon="{ui:SymbolIcon MusicNote2Play20}" TargetPageType="{x:Type pages:PlaylistsPage}" />
+                 <ui:NavigationViewItem Content="Requests" Icon="{ui:SymbolIcon MailInboxArrowDown20}" TargetPageType="{x:Type pages:RequestsPage}" />
+                 <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}" TargetPageType="{x:Type pages:SettingsPage}" />
+                 <ui:NavigationViewItem Content="Casting" Icon="{ui:SymbolIcon Cast24}" TargetPageType="{x:Type pages:CastingPage}" />
+                 <ui:NavigationViewItem Content="Help" Icon="{ui:SymbolIcon QuestionCircle24}" TargetPageType="{x:Type pages:HelpPage}" />
+                 <ui:NavigationViewItem Content="About" Icon="{ui:SymbolIcon Info24}" TargetPageType="{x:Type pages:AboutPage}" />
+             </ui:NavigationView.MenuItems>
+         </ui:NavigationView>
 
         <!-- Global Playback Control Bar at the bottom of the window -->
         <Border Grid.Row="2"

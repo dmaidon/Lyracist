@@ -1,9 +1,10 @@
-// Edited on Aug 1, 2026 @ 09:52:00 -> Add DjBannerWindowService shim
-// Created on Jul 27, 2026 @ 13:50:00 -> Update MessageBox shim to support YesNo buttons and MessageBoxResult for compilation compatibility
+// Edited on Aug 1, 2026 @ 14:02:00 -> Add SelectedDevice property to DisplayWindowService shim
+// Edited on Jul 27, 2026 @ 13:50:00 -> Update MessageBox shim to support YesNo buttons and MessageBoxResult for compilation compatibility
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using KSRotation.Models;
+using Lyracist.Shared;
 
 namespace System.Windows.Threading
 {
@@ -117,6 +118,8 @@ namespace KSRotation.Services
         public void SetCrawlBannerText(string template, string venueName, string djName) { }
         public void SetSelectedMonitor(string deviceName) { }
         public void RepositionWindow() { }
+        public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
+        public Lyracist.Shared.ChromecastDevice? SelectedDevice { get; set; }
     }
 
     public static class ThemeService

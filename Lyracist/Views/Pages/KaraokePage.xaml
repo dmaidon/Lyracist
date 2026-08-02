@@ -333,7 +333,7 @@
                                                         </Border>
 
                                                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                                            <ui:Button Icon="{ui:SymbolIcon CloudDownload24}" Command="{Binding DataContext.CachePartyTymeTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Cache Offline" Appearance="Secondary" Padding="6" Margin="0,0,4,0" />
+                                                            <ui:Button Icon="{ui:SymbolIcon CloudArrowDown24}" Command="{Binding DataContext.CachePartyTymeTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Cache Offline" Appearance="Secondary" Padding="6" Margin="0,0,4,0" />
                                                             <ui:Button Icon="{ui:SymbolIcon Play24}" Command="{Binding DataContext.PlayPartyTymeTrackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ToolTip="Stream Track" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Padding="6" />
                                                         </StackPanel>
                                                     </Grid>
@@ -1182,7 +1182,7 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <ComboBox Grid.Column="0" ItemsSource="{Binding DjBanners}" SelectedItem="{Binding SelectedDjBanner, Mode=TwoWay}" DisplayMemberPath="FileName" HorizontalAlignment="Stretch" />
-                                    <ui:Button Grid.Column="2" Content="Upload" Icon="{ui:SymbolIcon Upload24}" Command="{Binding UploadDjBannerCommand}" />
+                                    <ui:Button Grid.Column="2" Content="Upload" Icon="{ui:SymbolIcon ArrowUpload24}" Command="{Binding UploadDjBannerCommand}" />
                                     <ui:Button Grid.Column="4" Content="Delete" Icon="{ui:SymbolIcon Delete24}" Command="{Binding DeleteDjBannerCommand}" Appearance="Danger" />
                                 </Grid>
 

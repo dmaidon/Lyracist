@@ -1,4 +1,4 @@
-Last Edit: Jul 31, 2026 09:32 - Cleaned build directories and resolved nullability compiler warnings
+Last Edit: Aug 2, 2026 07:47 - Added wireless casting, custom DJ banners, monitor selection, catalog book exporter, online search, and queue controls
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.
@@ -13,10 +13,12 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Customizable Feedback Ratings**: Symmetrical DJ tab controls allowing hosts to customize positive symbol choices (⭐, ❤️, 🔥, 🏆, 👑) with strict safety guidelines (preventing negative feedback) and regular emoji preset support.
 - **Click-to-Deselect**: Easily toggle current singer selection on/off (highlighted in red) to allow correcting misclicks.
 - **Manual "Set as Current Performer" Override**: Star-toggle on any singer row to manually designate who's currently singing, taking priority over automatic sequencing on both the Karaoke and Rotation pages.
+- **Paused & Inactive (Deleted) Singer Controls**: Pause singers to skip them in rotation while retaining their position, or mark them inactive ("delete" them) to move them to the end of the queue with one-click restoration to the active section.
 - **Add From Singer History**: Re-queue a returning performer directly from the Singer History tab via row selection or double-click, without re-searching the catalog.
 - **Pending Request Indicator Bulbs**: Two glowing "K" (yellow) and "M" (neon green) bulbs on the Karaoke page light up and pulse the instant a karaoke or music request comes in from a singer's phone, so hosts never miss one.
 - **Test Mode**: Accessible under Settings → Theme & Appearance to instantly seed default performers for audio/video checks, or clear them when ready for the show.
 - **Theme Mode Selector**: Three-way Light/Dark/System theme dropdown on the Karaoke page header and Settings, with live system-theme watching and instant application.
+- **Active Venue & DJ Title Bar Integration**: Displays the active Venue and DJ name dynamically in the main window's title bar, maximizing vertical screen real estate on smaller screens.
 - **Customizable Scaryoke Categories**: Add, edit, or remove categories (2 to 12 total) from the settings page. The Scaryoke wheel will dynamically rebuild its structure, sector colors, play a mechanical pointer clicking sound synchronized to sector crossings, and project the active wheel and category announcement onto the rotation billboard window.
 
 ### 🖥️ Display & Projection Management
@@ -27,12 +29,12 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - **Vegas Marquee**: Theatrical Broadway stage layout displaying the current performer's name in glowing letters inside a brass frame ringed by lavender/purple "marching ants" chase bulb animations.
   - **Vinyl Turntable**: Classic warm DJ-booth theme with a dynamic rotating vinyl 45 record, tonearm, and center label showing the current singer and song metadata.
 - **Dynamic Chroma-Keying**: Automatically strips standard `.cdg` file backgrounds and borders (pixel index `0,0`) in real time to render lyrics transparent.
-- **GPU-Accelerated 4K Backdrops**: Beautiful, responsive vector backdrops layered behind transparent lyrics, wrapped in Viewbox controls to fit HD and 4K displays:
-  - *Neon Waveform*: Shifting and morphing neon waves.
-  - *Nebula Bokeh*: Liquid purple, blue, and red glow bubbles floating slowly.
-  - *Retro Synthwave*: Horizontal 3D perspective grids scrolling under a neon sun.
-  - *Space Starfield*: Multi-layer parallax stardust canvas.
-- **Flexible Monitor Assignment**: Direct dropdown selection in the KJ interface to project to any secondary monitor (with borderless, topmost, maximized sizing).
+- **GPU-Accelerated 4K Backdrops**: Beautiful, responsive vector backdrops layered behind transparent lyrics, wrapped in Viewbox controls to fit HD and 4K displays.
+- **Flexible Monitor Assignment & Dropdowns**: Direct dropdown selection in the KJ interface to target specific connected monitors for both the Rotation Display and DJ Banner windows, with real-time dynamic window relocation and automatic fallback to secondary/primary screens if unplugged.
+- **DJ Banner Projection Screen**: Upload, select, delete, and project borderless full-screen custom DJ branding/promotional banners (supporting PNG, JPG, GIF, BMP, etc.).
+- **Same-Screen Deconfliction Priority**: Automatically disables and hides the DJ Banner if the Rotation Display is targeted or moved to the same monitor.
+- **Wireless Casting Support**: Stream the singer rotation billboard directly to Miracast, Chromecast, AirPlay, Wireless HDMI, or Browser Cast using high-performance off-screen buffer rendering.
+- **Browser Cast Server**: Self-hosts a local web server (http://localhost:8080/rotation/) to allow any browser on the local network to view the singer rotation billboard in real-time.
 - **"None" Targeting (Deselection)**: Support for selecting *None (Do not show)* in settings or projection controls to immediately close or hide projection windows when not in use.
 - **Rear-Projection Mirroring**: Mirror the lyrics screen horizontally for custom projector arrangements.
 
@@ -46,6 +48,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 
 ### 🎵 Song Library & Integrations
 - **Local Scanner & Rescan Maintenance**: Scans folders for `.mp3 + .cdg`, `.mp4` or `.zip` files and builds a local query database. Cleanly deletes obsolete database logs and search indexes for files that were renamed or deleted on the drive during rescans.
+- **Catalog Book Exporter**: Export the entire song library (Karaoke or Music) directly into professionally formatted, paginated PDF or Word (.docx) documents with repeating table headers from the Database Manager.
 - **Streaming & Search Integration**: Includes search support for:
   - **Party Tyme Karaoke** (built-in streaming provider)
   - **YouTube** (direct URL stream linking and metadata lookups)
@@ -60,6 +63,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Local Web Server**: Serves a mobile-friendly web page (defaulting to port `5005`) over the local network.
 - **Singer Preview Monitor**: Allows singers to scan a local QR code and follow the live scrolling lyrics directly from their phone or tablet.
 - **"Scan to Join" QR Badges**: Auto-generated QR codes linking to the tablet portal appear as a badge on the Karaoke page header and as a floating overlay on the Lyrics projection window.
+- **Online Song & Artist Lookup**: Real-time lookup querying the iTunes search index from the patron's mobile browser with automatic form populating and offline fallback.
 - **Emoji Crowd Reactions**: Singers can send 👏 🔥 ❤️ 🙌 🎉 👑 reactions from their device that render in full color and float in from a random edge of the screen, drifting and fading across both the Lyrics and Rotation projection screens in real time.
 - **Live Rating Sync**: The tablet dashboard shows the current performer's live average rating and labels the rating card with the host's chosen feedback icon, updating instantly after each new submission.
 - **Live Server Log Viewer**: A "Logs" tab in the tablet portal surfaces the most recent app and error log entries for on-the-fly troubleshooting.

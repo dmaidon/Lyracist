@@ -1,3 +1,6 @@
+<!-- Edited on Aug 1, 2026 @ 14:59:00 -> Link shared BrowserCastDiscoveryService in compile group -->
+<!-- Edited on Aug 1, 2026 @ 13:47:00 -> Link shared ChromecastSender in compile group -->
+<!-- Edited on Aug 1, 2026 @ 13:13:00 -> Link ChromecastDiscoveryService in compile group -->
 <!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -10,8 +13,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.1.356</AssemblyVersion>
-    <FileVersion>26.8.1.356</FileVersion>
+    <AssemblyVersion>26.8.1.372</AssemblyVersion>
+    <FileVersion>26.8.1.372</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -104,6 +107,18 @@
     <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
     <Compile Include="..\Shared\IRotationSinger.cs" Link="IRotationSinger.cs" />
     <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
+    <Compile Include="..\Shared\ChromecastDiscoveryService.cs" Link="ChromecastDiscoveryService.cs" />
+    <Compile Include="..\Shared\ChromecastSender.cs" Link="ChromecastSender.cs" />
+    <Compile Include="..\Shared\BrowserCastDiscoveryService.cs" Link="BrowserCastDiscoveryService.cs" />
+    <Compile Include="..\Shared\LocalNetworkHelper.cs" Link="LocalNetworkHelper.cs" />
+    <Compile Include="..\Shared\DisplayTarget.cs" Link="DisplayTarget.cs" />
+    <Compile Include="..\Shared\ICaptureSource.cs" Link="ICaptureSource.cs" />
+    <Compile Include="..\Shared\IRotationRenderer.cs" Link="IRotationRenderer.cs" />
+    <Compile Include="..\Shared\RotationRenderer.cs" Link="RotationRenderer.cs" />
+    <Compile Include="..\Shared\MiracastController.cs" Link="MiracastController.cs" />
+    <Compile Include="..\Shared\BrowserCastServer.cs" Link="BrowserCastServer.cs" />
+    <Compile Include="..\Shared\ICastingService.cs" Link="ICastingService.cs" />
+    <Compile Include="..\Shared\CastingService.cs" Link="CastingService.cs" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-// Edited on Aug 1, 2026 @ 11:49:44 -> Add DeleteDjBanner command for custom DJ banners
+// Edited on Aug 1, 2026 @ 13:25:00 -> Use partial properties for Chromecast fields to resolve WinRT AOT compilation warnings
+// Edited on Aug 1, 2026 @ 13:20:00 -> Add Chromecast discovery VM properties, change hooks, and command to KSRotation
 // Edited on Aug 1, 2026 @ 11:46:04 -> Restore DJ banner automatically when rotation display screen collision is resolved
 // Edited on Aug 1, 2026 @ 10:59:16 -> Disable DJ banner if rotation display is enabled on the same monitor
 // Edited on Aug 1, 2026 @ 10:04:00 -> Conditionalize WPF-specific OpenFileDialog in UploadDjBanner for cross-platform MAUI support
@@ -82,6 +83,23 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool IsTestMode { get; set; }
 
+        public DisplayTarget[] AvailableDisplayTargets { get; } = (DisplayTarget[])Enum.GetValues(typeof(DisplayTarget));
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsChromecastSelectionVisible))]
+        [NotifyPropertyChangedFor(nameof(IsMonitorSelectionEnabled))]
+        public partial DisplayTarget RotationTarget { get; set; } = DisplayTarget.Monitor;
+
+        public bool IsMonitorSelectionEnabled => RotationTarget == DisplayTarget.Monitor || RotationTarget == DisplayTarget.WirelessHDMI;
+
+        [ObservableProperty]
+        public partial ObservableCollection<ChromecastDevice> AvailableChromecasts { get; set; } = [];
+
+        [ObservableProperty]
+        public partial ChromecastDevice? SelectedChromecast { get; set; }
+
+        public bool IsChromecastSelectionVisible => RotationTarget == DisplayTarget.Chromecast;
+
         protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
         {
             base.OnPropertyChanged(e);
@@ -118,7 +136,9 @@ namespace KSRotation.ViewModels
                         _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
                         _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
                         _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
+                        _displayWindowService.SelectedDevice = SelectedChromecast;
                         _displayWindowService.Show(Singers);
+                        _ = _displayWindowService.MoveRotationTo(RotationTarget);
                         _displayWindowService.SetProjectionView(SelectedProjectionView);
                         _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
                         _displayWindowService.SetCrawlBannerText(CrawlBannerText, VenueName, DjName);
@@ -127,6 +147,24 @@ namespace KSRotation.ViewModels
                     {
                         _displayWindowService.Hide();
                         CheckRestoreDjBanner();
+                    }
+                    QueueSaveSettings();
+                    break;
+
+                case nameof(SelectedChromecast):
+                    _displayWindowService.SelectedDevice = SelectedChromecast;
+                    QueueSaveSettings();
+                    break;
+
+                case nameof(RotationTarget):
+                    OnPropertyChanged(nameof(IsChromecastSelectionVisible));
+                    if (RotationTarget == DisplayTarget.Chromecast)
+                    {
+                        _ = DiscoverChromecastsAsync();
+                    }
+                    if (IsDisplayEnabled)
+                    {
+                        _ = _displayWindowService.MoveRotationTo(RotationTarget);
                     }
                     QueueSaveSettings();
                     break;
@@ -543,6 +581,13 @@ namespace KSRotation.ViewModels
             SelectedMonitorDevice = settings.SelectedMonitorDevice ?? string.Empty;
             _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
             RefreshAvailableMonitors();
+
+            RotationTarget = settings.RotationTarget;
+            _ = _displayWindowService.MoveRotationTo(RotationTarget);
+            if (RotationTarget == DisplayTarget.Chromecast)
+            {
+                _ = DiscoverChromecastsAsync();
+            }
 
             DjBannerMonitorDevice = settings.DjBannerMonitorDevice ?? string.Empty;
             SelectedDjBannerPath = settings.SelectedDjBannerPath ?? string.Empty;
@@ -1731,7 +1776,8 @@ namespace KSRotation.ViewModels
                 SelectedMonitorDevice = SelectedMonitorDevice,
                 DjBannerMonitorDevice = DjBannerMonitorDevice,
                 SelectedDjBannerPath = SelectedDjBannerPath,
-                IsDjBannerEnabled = IsDjBannerEnabled
+                IsDjBannerEnabled = IsDjBannerEnabled,
+                RotationTarget = RotationTarget
             };
 
             try
@@ -1989,6 +2035,43 @@ namespace KSRotation.ViewModels
             SaveDatabaseNow();
             _displayWindowService.Shutdown();
             _djBannerWindowService.Shutdown();
+        }
+
+        [RelayCommand]
+        private void Cast()
+        {
+            IsDisplayEnabled = true;
+        }
+
+        [RelayCommand]
+        private void Stop()
+        {
+            IsDisplayEnabled = false;
+        }
+
+        [RelayCommand]
+        private async Task DiscoverChromecastsAsync()
+        {
+            try
+            {
+                AvailableChromecasts.Clear();
+                var discovery = new ChromecastDiscoveryService();
+                var devices = await discovery.DiscoverAsync();
+                
+                foreach (var device in devices)
+                {
+                    AvailableChromecasts.Add(device);
+                }
+
+                if (devices.Count > 0)
+                {
+                    SelectedChromecast = devices[0];
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogError("MainViewModel.DiscoverChromecasts", ex);
+            }
         }
 
         private void CheckRestoreDjBanner()

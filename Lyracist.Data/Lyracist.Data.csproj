@@ -1,3 +1,4 @@
+<!-- Edited on Aug 1, 2026 @ 12:00:00 -> Bump AssemblyVersion and FileVersion to 26.8.1.87 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -6,8 +7,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>26.8.1.83</AssemblyVersion>
-    <FileVersion>26.8.1.83</FileVersion>
+    <AssemblyVersion>26.8.1.87</AssemblyVersion>
+    <FileVersion>26.8.1.87</FileVersion>
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
   </PropertyGroup>

@@ -1,5 +1,6 @@
-// Edited on Jul 31, 2026 @ 12:35:55 -> Dynamically scale Vegas Marquee font sizes based on window resolution
+// Edited on Aug 1, 2026 @ 12:12:00 -> Add CaptureBitmap method for off-screen rendering/casting support
 using Lyracist.Models;
+using Lyracist.Shared;
 using Lyracist.ViewModels;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -14,7 +15,7 @@ using System.Windows.Threading;
 
 namespace Lyracist.Windows;
 
-public partial class RotationWindow : Window
+public partial class RotationWindow : Window, ICaptureSource
 {
     private static readonly Random _rng = new();
 
@@ -78,6 +79,7 @@ public partial class RotationWindow : Window
         DataContextChanged += OnDataContextChanged;
         IsVisibleChanged += RotationWindow_IsVisibleChanged;
         SizeChanged += OnSizeChanged;
+        PreviewKeyDown += OnPreviewKeyDown;
 
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived += OnReactionReceived;
     }
@@ -89,6 +91,7 @@ public partial class RotationWindow : Window
         DataContextChanged -= OnDataContextChanged;
         IsVisibleChanged -= RotationWindow_IsVisibleChanged;
         SizeChanged -= OnSizeChanged;
+        PreviewKeyDown -= OnPreviewKeyDown;
         HookViewModel(null);
         StopSpaceshipTimer();
 
@@ -101,6 +104,28 @@ public partial class RotationWindow : Window
             scaryokeWindow.SpinCompleted -= ScaryokeWindow_SpinCompleted;
             scaryokeWindow.IsVisibleChanged -= ScaryokeWindow_IsVisibleChanged;
         }
+    }
+
+    // This window can end up borderless, topmost, and/or parked off-screen (casting targets
+    // intentionally hide it off-screen so it can still be captured for streaming). If casting
+    // never actually connects, or a "Monitor" target points at a display that's since been
+    // unplugged, there is otherwise no title bar and no way to reach it - Escape unconditionally
+    // pulls it back into a normal, visible, closeable window so the user is never stuck.
+    private void OnPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key != System.Windows.Input.Key.Escape) return;
+
+        Topmost = false;
+        WindowStyle = WindowStyle.SingleBorderWindow;
+        ResizeMode = ResizeMode.CanResize;
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        WindowState = WindowState.Normal;
+        Left = 100;
+        Top = 100;
+        Width = 1280;
+        Height = 720;
+        Activate();
+        e.Handled = true;
     }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)
@@ -1212,5 +1237,23 @@ public partial class RotationWindow : Window
             transform.BeginAnimation(TranslateTransform.XProperty, xAnimation);
             textBlock.BeginAnimation(OpacityProperty, opacityAnimation);
         });
+    }
+
+    public System.Windows.Media.Imaging.BitmapSource CaptureBitmap()
+    {
+        double width = ActualWidth;
+        double height = ActualHeight;
+
+        if (width <= 0) width = 1920;
+        if (height <= 0) height = 1080;
+
+        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(
+            (int)width,
+            (int)height,
+            96, 96,
+            System.Windows.Media.PixelFormats.Pbgra32);
+
+        rtb.Render(this);
+        return rtb;
     }
 }

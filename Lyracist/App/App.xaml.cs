@@ -1,4 +1,12 @@
-// Edited on Aug 1, 2026 @ 09:44:20 -> Register DJ Banner window and view model
+// Edited on Aug 1, 2026 @ 16:15:00 -> Update DI mappings for DisplayService and IChromecastSender
+// Edited on Aug 1, 2026 @ 15:47:00 -> Register IChromecastSender in DI
+// Edited on Aug 1, 2026 @ 15:27:00 -> Register CastingSettingsPageViewModel in DI
+// Edited on Aug 1, 2026 @ 15:13:00 -> Register BrowserCastDiscoveryService in DI
+// Edited on Aug 1, 2026 @ 14:47:00 -> Register MultiTvSelectorViewModel in DI
+// Edited on Aug 1, 2026 @ 14:42:00 -> Register CastStatusViewModel in DI
+// Edited on Aug 1, 2026 @ 14:07:00 -> Register CastRotationViewModel in DI
+// Edited on Aug 1, 2026 @ 13:30:00 -> Register IChromecastDiscoveryService in DI
+// Edited on Aug 1, 2026 @ 12:13:00 -> Register casting support services in DI
 using System;
 using System.Windows;
 using System.Threading.Tasks;
@@ -17,6 +25,7 @@ using Lyracist.ViewModels;
 using Lyracist.Views.Pages;
 using Lyracist.Windows;
 using Lyracist.Services.Integration;
+using Lyracist.Shared;
 
 namespace Lyracist;
 
@@ -79,7 +88,19 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<ICdgFrameScheduler, CdgFrameScheduler>();
                 services.AddSingleton<IVideoBackend, LibVlcVideoBackend>();
                 services.AddSingleton<IMediaEngine, MediaEngine>();
-                services.AddSingleton<IDisplayService, DisplayService>();
+                services.AddSingleton<ICastingService, CastingService>();
+                services.AddSingleton<MiracastController>();
+                services.AddSingleton<ChromecastSender>();
+                services.AddSingleton<IChromecastSender>(sp => sp.GetRequiredService<ChromecastSender>());
+                services.AddSingleton<BrowserCastServer>();
+                services.AddSingleton<BrowserCastDiscoveryService>();
+                services.AddSingleton<IChromecastDiscoveryService, ChromecastDiscoveryService>();
+                // RotationWindow is only touched lazily (inside the Func) once a frame is actually
+                // requested - constructing IRotationRenderer here does not resolve RotationWindow.
+                services.AddSingleton<IRotationRenderer>(sp =>
+                    new RotationRenderer(() => sp.GetRequiredService<RotationWindow>() as ICaptureSource));
+                services.AddSingleton<DisplayService>();
+                services.AddSingleton<IDisplayService>(sp => sp.GetRequiredService<DisplayService>());
                 services.AddSingleton<ILibraryService, LibraryService>();
                 services.AddSingleton<ITabletLyricsServer, TabletLyricsServer>();
                 services.AddSingleton<ILyricsController, LyricsController>();
@@ -108,6 +129,10 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<ScaryokeViewModel>();
                 services.AddSingleton<HelpViewModel>();
                 services.AddSingleton<AboutViewModel>();
+                services.AddSingleton<CastRotationViewModel>();
+                services.AddSingleton<CastStatusViewModel>();
+                services.AddSingleton<MultiTvSelectorViewModel>();
+                services.AddSingleton<CastingSettingsPageViewModel>();
                 services.AddTransient<SongSettingsViewModel>();
                 services.AddTransient<SingerSettingsViewModel>();
                 services.AddTransient<EditSingerViewModel>();
@@ -129,6 +154,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<RotationPage>();
                 services.AddSingleton<LyricsPage>();
                 services.AddSingleton<SettingsPage>();
+                services.AddSingleton<CastingPage>();
                 services.AddSingleton<PlaylistsPage>();
                 services.AddSingleton<RequestsPage>();
                 services.AddSingleton<HelpPage>();

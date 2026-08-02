@@ -1,13 +1,15 @@
-// Edited on Jul 27, 2026 @ 22:39:00 -> Update display window positioning to support target monitor selection and repositioning
-// Last Edit: Jul 02, 2026 11:50 - Reused shared default crawl banner text constant for template fallback.
+// Edited on Aug 1, 2026 @ 14:00:00 -> Add SelectedDevice property to DisplayWindowService
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using System.Threading.Tasks;
 using Screen = System.Windows.Forms.Screen;
+using Lyracist.Shared;
 
 namespace KSRotation.Services
 {
@@ -19,9 +21,59 @@ namespace KSRotation.Services
         private ImageSource? _qrCodeImage;
         private string _selectedMonitorDevice = string.Empty;
 
+        private readonly ICastingService _casting;
+        private DisplayTarget _rotationTarget = DisplayTarget.Monitor;
+
+        public ChromecastDevice? SelectedDevice
+        {
+            get => _casting.SelectedDevice;
+            set => _casting.SelectedDevice = value;
+        }
+
+        public DisplayWindowService()
+        {
+            _casting = new CastingService(
+                new MiracastController(),
+                new ChromecastSender(),
+                new BrowserCastServer(),
+                new RotationRenderer(() => _window));
+        }
+
         public void SetSelectedMonitor(string deviceName)
         {
             _selectedMonitorDevice = deviceName ?? string.Empty;
+        }
+
+        public async Task<bool> MoveRotationTo(DisplayTarget target)
+        {
+            _rotationTarget = target;
+
+            if (target != DisplayTarget.Monitor && target != DisplayTarget.WirelessHDMI)
+            {
+                var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
+                if (dispatcher.CheckAccess())
+                {
+                    EnsureWindowOffScreen();
+                }
+                else
+                {
+                    await dispatcher.InvokeAsync(EnsureWindowOffScreen);
+                }
+            }
+            else
+            {
+                var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
+                if (dispatcher.CheckAccess())
+                {
+                    RestoreLocalMonitorWindow();
+                }
+                else
+                {
+                    await dispatcher.InvokeAsync(RestoreLocalMonitorWindow);
+                }
+            }
+
+            return await _casting.CastRotationAsync(target);
         }
 
         public void RepositionWindow()
@@ -32,9 +84,17 @@ namespace KSRotation.Services
             }
 
             var previousState = _window.WindowState;
-            _window.WindowState = WindowState.Normal;
+            _window.WindowStyle = WindowStyle.None;
+            _window.ResizeMode = ResizeMode.NoResize;
+            _window.Topmost = true;
+
             PositionWindowOnTargetMonitor(_window);
-            _window.WindowState = previousState;
+
+            _window.Dispatcher.InvokeAsync(() =>
+            {
+                _window.WindowState = WindowState.Normal;
+                _window.WindowState = previousState;
+            });
         }
 
         /// <summary>
@@ -47,8 +107,15 @@ namespace KSRotation.Services
 
             if (_window != null)
             {
-                _window.WindowState = WindowState.Maximized;
-                _window.Activate();
+                if (_rotationTarget == DisplayTarget.Monitor || _rotationTarget == DisplayTarget.WirelessHDMI)
+                {
+                    _window.Dispatcher.InvokeAsync(() =>
+                    {
+                        _window.WindowState = WindowState.Normal;
+                        _window.WindowState = WindowState.Maximized;
+                        _window.Activate();
+                    });
+                }
                 return;
             }
 
@@ -62,10 +129,25 @@ namespace KSRotation.Services
             _viewModel.ConnectionUrl = _connectionUrl;
             _viewModel.QrCodeImage = _qrCodeImage;
             _viewModel.UpdateFromRotation(rotation);
-            PositionWindowOnTargetMonitor(_window);
-            _window.Show();
-            _window.WindowState = WindowState.Maximized;
-            _window.Activate();
+
+            if (_rotationTarget != DisplayTarget.Monitor && _rotationTarget != DisplayTarget.WirelessHDMI)
+            {
+                EnsureWindowOffScreen();
+            }
+            else
+            {
+                _window.WindowStyle = WindowStyle.None;
+                _window.ResizeMode = ResizeMode.NoResize;
+                _window.Topmost = true;
+                PositionWindowOnTargetMonitor(_window);
+                _window.Show();
+                _window.Dispatcher.InvokeAsync(() =>
+                {
+                    _window.WindowState = WindowState.Normal;
+                    _window.WindowState = WindowState.Maximized;
+                    _window.Activate();
+                });
+            }
         }
 
         /// <summary>
@@ -79,6 +161,7 @@ namespace KSRotation.Services
             }
 
             _window.Close();
+            _ = _casting.StopCastingAsync();
         }
 
         /// <summary>
@@ -86,6 +169,7 @@ namespace KSRotation.Services
         /// </summary>
         public void Shutdown()
         {
+            _ = _casting.StopCastingAsync();
             if (_window == null)
             {
                 return;
@@ -94,6 +178,38 @@ namespace KSRotation.Services
             _window.Closed -= OnWindowClosed;
             _window.Close();
             _window = null;
+        }
+
+        private void EnsureWindowOffScreen()
+        {
+            if (_window == null) return;
+            
+            _window.WindowStartupLocation = WindowStartupLocation.Manual;
+            _window.Left = -20000;
+            _window.Top = -20000;
+            _window.Width = 1920;
+            _window.Height = 1080;
+            _window.WindowStyle = WindowStyle.None;
+            _window.ResizeMode = ResizeMode.NoResize;
+            if (!_window.IsVisible)
+            {
+                _window.Show();
+            }
+        }
+
+        private void RestoreLocalMonitorWindow()
+        {
+            if (_window == null) return;
+            _window.WindowStyle = WindowStyle.None;
+            _window.ResizeMode = ResizeMode.NoResize;
+            _window.Topmost = true;
+            PositionWindowOnTargetMonitor(_window);
+
+            _window.Dispatcher.InvokeAsync(() =>
+            {
+                _window.WindowState = WindowState.Normal;
+                _window.WindowState = WindowState.Maximized;
+            });
         }
 
         /// <summary>
@@ -219,16 +335,16 @@ namespace KSRotation.Services
             double scaleX = 1.0 / dpi.DpiScaleX;
             double scaleY = 1.0 / dpi.DpiScaleY;
 
-            double windowWidth = window.Width > 0 ? window.Width : 450;
-            double windowHeight = window.Height > 0 ? window.Height : 300;
             double workAreaLeft = workArea.Left * scaleX;
             double workAreaTop = workArea.Top * scaleY;
             double workAreaWidth = workArea.Width * scaleX;
             double workAreaHeight = workArea.Height * scaleY;
 
             window.WindowStartupLocation = WindowStartupLocation.Manual;
-            window.Left = workAreaLeft + ((workAreaWidth - windowWidth) / 2);
-            window.Top = workAreaTop + ((workAreaHeight - windowHeight) / 2);
+            window.Left = workAreaLeft;
+            window.Top = workAreaTop;
+            window.Width = workAreaWidth;
+            window.Height = workAreaHeight;
 
             return screens.Length > 1;
         }

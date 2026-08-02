@@ -1,7 +1,8 @@
-// Edited on Aug 1, 2026 @ 11:49:44 -> Add DeleteDjBanner command for custom DJ banners
-// Edited on Aug 1, 2026 @ 09:44:40 -> Add DJ Banner settings properties, commands, and logic
+// Edited on Aug 1, 2026 @ 13:16:00 -> Add Chromecast discovery VM properties and discovery command logic
+// Edited on Aug 1, 2026 @ 12:14:00 -> Add Casting support properties to SettingsViewModel
 using System;
 using System.Collections.Generic;
+using Lyracist.Shared;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -52,6 +53,22 @@ public partial class SettingsViewModel : BaseViewModel
 
     // Display
     public List<ScreenInfo> Screens { get; }
+
+    public List<DisplayTarget> RotationTargets { get; } = System.Enum.GetValues<DisplayTarget>().ToList();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsChromecastSelectionVisible))]
+    private DisplayTarget _selectedRotationTarget;
+
+    [ObservableProperty]
+    private ObservableCollection<ChromecastDevice> _availableChromecasts = [];
+
+    [ObservableProperty]
+    private ChromecastDevice? _selectedChromecast;
+
+    public bool IsChromecastSelectionVisible => SelectedRotationTarget == DisplayTarget.Chromecast;
+
+    public bool IsRotationScreenSelectorEnabled => SelectedRotationTarget == DisplayTarget.Monitor || SelectedRotationTarget == DisplayTarget.WirelessHDMI;
 
     [ObservableProperty]
     private ScreenInfo? _rotationScreen;
@@ -500,6 +517,8 @@ public partial class SettingsViewModel : BaseViewModel
 
     private readonly KaraokeViewModel _karaoke;
     private readonly IRequestService _requests;
+    private readonly IChromecastDiscoveryService _chromecastDiscovery;
+    private readonly ICastingService _casting;
 
     public SettingsViewModel(IDisplayService display,
                              ITabletLyricsServer tablet,
@@ -510,7 +529,9 @@ public partial class SettingsViewModel : BaseViewModel
                              RotationWindowViewModel rotationWindowVm,
                              KaraokeViewModel karaoke,
                              IRequestService requests,
-                             IKSRotationSyncService ksRotationSync)
+                             IKSRotationSyncService ksRotationSync,
+                             IChromecastDiscoveryService chromecastDiscovery,
+                             ICastingService casting)
     {
         _display = display;
         _tablet = tablet;
@@ -522,6 +543,8 @@ public partial class SettingsViewModel : BaseViewModel
         _karaoke = karaoke;
         _requests = requests;
         _ksRotationSync = ksRotationSync;
+        _chromecastDiscovery = chromecastDiscovery;
+        _casting = casting;
 
         _library.LibraryUpdated += (_, _) =>
         {
@@ -579,6 +602,7 @@ public partial class SettingsViewModel : BaseViewModel
         // projection windows during SettingsViewModel construction, before
         // the show has even started).
         var prefs = _display.GetPreferences();
+        _selectedRotationTarget = prefs.RotationTarget;
         _rotationScreen = prefs.RotationScreenIndex.HasValue
             ? Screens.FirstOrDefault(s => s.Index == prefs.RotationScreenIndex.Value)
             : Screens.FirstOrDefault(s => s.Index == -1);
@@ -657,6 +681,11 @@ public partial class SettingsViewModel : BaseViewModel
         };
 
         ValidateRegistration();
+
+        if (_selectedRotationTarget == DisplayTarget.Chromecast)
+        {
+            _ = DiscoverChromecastsAsync();
+        }
     }
 
 
@@ -1176,6 +1205,51 @@ public partial class SettingsViewModel : BaseViewModel
         {
             _rotation.ClearRotationQueue();
         }
+    }
+
+    partial void OnSelectedRotationTargetChanged(DisplayTarget value)
+    {
+        OnPropertyChanged(nameof(IsRotationScreenSelectorEnabled));
+        OnPropertyChanged(nameof(IsChromecastSelectionVisible));
+
+        if (value == DisplayTarget.Chromecast)
+        {
+            _ = DiscoverChromecastsAsync();
+        }
+
+        Task.Run(async () =>
+        {
+            await _display.MoveRotationTo(value);
+        });
+    }
+
+    [RelayCommand]
+    private async Task DiscoverChromecastsAsync()
+    {
+        try
+        {
+            AvailableChromecasts.Clear();
+            var devices = await _chromecastDiscovery.DiscoverAsync();
+            
+            foreach (var device in devices)
+            {
+                AvailableChromecasts.Add(device);
+            }
+
+            if (devices.Count > 0)
+            {
+                SelectedChromecast = devices[0];
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "DiscoverChromecasts");
+        }
+    }
+
+    partial void OnSelectedChromecastChanged(ChromecastDevice? value)
+    {
+        _casting.SelectedDevice = value;
     }
 
     partial void OnRotationScreenChanged(ScreenInfo? value)

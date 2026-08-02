@@ -1,17 +1,25 @@
+// Edited on Aug 1, 2026 @ 16:11:00 -> Import Lyracist.Shared in DisplayService
+// Edited on Aug 1, 2026 @ 16:10:00 -> Update MoveRotationTo to discover Chromecast device when targeting Chromecast
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
 using Lyracist.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
+using System.Drawing; // For Screen bounds if needed, or fallback
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Lyracist.Shared;
 
-// Edited on Aug 1, 2026 @ 11:46:04 -> Restore DJ banner automatically when rotation display screen collision is resolved
+// Edited on Aug 1, 2026 @ 12:11:00 -> Add Casting support integration to DisplayService
 namespace Lyracist.Services.Display;
 
 public class DisplayService : IDisplayService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IMediaEngine _mediaEngine;
+    private readonly ICastingService _casting;
     private RotationWindow? _rotationWindow;
     private LyricsWindow? _lyricsWindow;
     private DjBannerWindow? _djBannerWindow;
@@ -26,10 +34,11 @@ public class DisplayService : IDisplayService
 
     public event Action? ScreenAssignmentsChanged;
 
-    public DisplayService(IServiceProvider serviceProvider, IMediaEngine mediaEngine)
+    public DisplayService(IServiceProvider serviceProvider, IMediaEngine mediaEngine, ICastingService casting)
     {
         _serviceProvider = serviceProvider;
         _mediaEngine = mediaEngine;
+        _casting = casting;
         _preferences = DisplayPreferencesStore.Load();
 
         // Auto-subscribe to the MediaEngine's frame tick events to sync with the LyricsWindow VM
@@ -63,6 +72,10 @@ public class DisplayService : IDisplayService
 
     public void ShowRotationWindow()
     {
+        if (_preferences.RotationTarget != DisplayTarget.Monitor && _preferences.RotationTarget != DisplayTarget.WirelessHDMI)
+        {
+            return;
+        }
         if (!_preferences.RotationScreenIndex.HasValue)
         {
             return;
@@ -177,13 +190,21 @@ public class DisplayService : IDisplayService
 
     public void RestoreAssignments()
     {
-        if (_preferences.RotationScreenIndex.HasValue)
+        var target = _preferences.RotationTarget;
+        if (target != DisplayTarget.Monitor && target != DisplayTarget.WirelessHDMI)
         {
-            MoveRotationToScreen(_preferences.RotationScreenIndex.Value);
+            Task.Run(async () => await MoveRotationTo(target));
         }
         else
         {
-            HideRotationWindow();
+            if (_preferences.RotationScreenIndex.HasValue)
+            {
+                MoveRotationToScreen(_preferences.RotationScreenIndex.Value);
+            }
+            else
+            {
+                HideRotationWindow();
+            }
         }
 
         if (_preferences.LyricsScreenIndex.HasValue)
@@ -405,5 +426,101 @@ public class DisplayService : IDisplayService
     {
         var vm = _serviceProvider.GetService<RotationWindowViewModel>();
         vm?.CrawlBannerText = text;
+    }
+
+    public async Task<bool> MoveRotationTo(DisplayTarget target, ChromecastDevice? device = null)
+    {
+        _preferences.RotationTarget = target;
+        DisplayPreferencesStore.Save(_preferences);
+
+        if (target != DisplayTarget.Monitor && target != DisplayTarget.WirelessHDMI)
+        {
+            var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
+            if (dispatcher.CheckAccess())
+            {
+                EnsureRotationWindowOffScreen();
+            }
+            else
+            {
+                await dispatcher.InvokeAsync(EnsureRotationWindowOffScreen);
+            }
+        }
+        else
+        {
+            var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
+            if (dispatcher.CheckAccess())
+            {
+                RestoreLocalMonitorWindow();
+            }
+            else
+            {
+                await dispatcher.InvokeAsync(RestoreLocalMonitorWindow);
+            }
+        }
+
+        if (target == DisplayTarget.Chromecast)
+        {
+            var tv = device;
+            if (tv == null)
+            {
+                var discovery = _serviceProvider.GetRequiredService<IChromecastDiscoveryService>();
+                var devices = await discovery.DiscoverAsync();
+                tv = devices.FirstOrDefault();
+            }
+            if (tv == null) return false;
+
+            return await _casting.CastRotationAsync(target, tv);
+        }
+
+        return await _casting.CastRotationAsync(target);
+    }
+
+    private void EnsureRotationWindowOffScreen()
+    {
+        bool isNewWindow = _rotationWindow == null || !_rotationWindow.IsLoaded;
+        if (isNewWindow)
+        {
+            _rotationWindow = _serviceProvider.GetRequiredService<RotationWindow>();
+        }
+        
+        var window = _rotationWindow!;
+        window.WindowStartupLocation = WindowStartupLocation.Manual;
+        window.Left = -20000;
+        window.Top = -20000;
+        window.Width = 1920;
+        window.Height = 1080;
+        window.WindowStyle = WindowStyle.None;
+        window.ResizeMode = ResizeMode.NoResize;
+        window.Show();
+    }
+
+    private void RestoreLocalMonitorWindow()
+    {
+        if (_preferences.RotationScreenIndex.HasValue)
+        {
+            MoveRotationToScreen(_preferences.RotationScreenIndex.Value);
+        }
+        else
+        {
+            HideRotationWindow();
+        }
+    }
+
+    public async Task StopRotationCasting()
+    {
+        await _casting.StopCastingAsync();
+        
+        _preferences.RotationTarget = DisplayTarget.Monitor;
+        DisplayPreferencesStore.Save(_preferences);
+
+        var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        if (dispatcher.CheckAccess())
+        {
+            RestoreLocalMonitorWindow();
+        }
+        else
+        {
+            await dispatcher.InvokeAsync(RestoreLocalMonitorWindow);
+        }
     }
 }

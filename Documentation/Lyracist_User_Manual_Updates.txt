@@ -169,3 +169,21 @@ To ensure proper projection setup, priority logic has been added when both the D
 2. Multi-Screen Independent Operation:
    - If the DJ Banner and the Rotation Display target different screens, they will both be displayed and operate simultaneously.
 
+
+
+Section: Display Projection Window / Casting Support
+
+[Update Details]
+Operators can now select different casting targets for the Singer Rotation Billboard screen in both Lyracist and KSRotation applications, in addition to standard physical monitors.
+
+1. Casting Target Dropdown:
+   - Located in the "Settings" tab under "Displays & Projection" (or "Display & Projection" in KSRotation).
+   - Dropdown options include Monitor, Miracast, Chromecast, Browser Cast, AirPlay, and Wireless HDMI.
+   - When a casting target is selected, the application (Lyracist or KSRotation) initializes the appropriate casting sender/server in the background.
+
+2. Off-Screen Rendering:
+   - Selecting a casting target (such as Chromecast or Browser Cast) creates and renders the Rotation Window / Singer Display Window in an off-screen buffer (invisible to the host desktop) to capture frames dynamically.
+   - This ensures the KJ laptop screen is not cluttered while casting frames.
+
+3. Browser Cast Server:
+   - The self-hosted Browser Cast option spins up a local web server (http://localhost:8080/rotation/) to allow any browser on the local network to view the singer rotation billboard in real-time.

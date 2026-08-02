@@ -1,4 +1,6 @@
-// Edited on Aug 1, 2026 @ 09:43:20 -> Add DJ Banner screen index and path preferences
+// Edited on Aug 1, 2026 @ 12:09:00 -> Add RotationTarget property to DisplayPreferences
+using Lyracist.Shared;
+
 namespace Lyracist.Services.Display;
 
 public class DisplayPreferences
@@ -9,5 +11,6 @@ public class DisplayPreferences
     public string RotationViewMode { get; set; } = "Normal List";
     public int? DjBannerScreenIndex { get; set; }
     public string SelectedDjBannerPath { get; set; } = string.Empty;
+    public DisplayTarget RotationTarget { get; set; } = DisplayTarget.Monitor;
 }
 

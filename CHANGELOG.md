@@ -1,7 +1,24 @@
-Last Edit: Jul 31, 2026 09:32 - Cleaned build directories and resolved nullability compiler warnings
+Last Edit: Aug 2, 2026 07:47 - Added wireless casting, custom DJ banners, monitor selection, catalog book exporter, online search, and queue controls
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.2.0] - 2026-08-02
+
+### Added
+- **Wireless Casting Support**: Introduced target options for casting the singer rotation billboard directly to Miracast, Chromecast, AirPlay, Wireless HDMI, or Browser Cast. Used high-performance off-screen buffer rendering to run without cluttered windows on the host desktop.
+- **Browser Cast Server**: Self-hosts a local web server (http://localhost:8080/rotation/) to allow any browser on the local network to view the singer rotation billboard in real-time.
+- **Display Monitor Selection**: Added a Target Monitor dropdown to allow operators to select a specific monitor for projecting both the Singer Display Window and DJ Banner Window, with dynamic redirection and automatic fallback to secondary/primary screens if unplugged.
+- **DJ Banner Projection Screen**: Added support for configuring and projecting borderless, full-screen custom DJ branding/promotional banners (PNG, JPG, JPEG, GIF, BMP, etc.). Includes uploading banners, selecting the active banner, and deleting custom banners.
+- **DJ Banner Same-Screen Collision Priority**: Added same-screen deconfliction logic that automatically disables and hides the DJ Banner when the Rotation Display is active on the same monitor.
+- **Catalog Book Exporter**: Added the ability to export the entire song database (Karaoke or Music) directly into Word (.docx) or PDF format from the Database Manager, featuring professionally formatted tables and paginated footer layouts.
+- **Online Song & Artist Lookup**: Added real-time lookup querying the iTunes search index from the patron's mobile browser, with automatic form population and offline fallback.
+- **Background Music Requests**: Patrons can request background music tracks from the mobile portal. These are distinguished in the KJ console and DJ portal queues with a green [MUSIC] badge.
+- **Paused and Inactive Singer Controls**: Added the ability to pause singers (retaining their index but skipping them in sequence) and mark deleted singers as inactive (moving them to the end of the queue with one-click restoration to the active section).
+- **Active Venue & DJ Title Bar Integration**: Integrated the active Venue and DJ name into the standard main window title bar to prevent layout wrapping issues on 1080p laptop screens.
+
+### Removed
+- **FlipTile Board View Mode**: Deprecated and completely removed the obsolete Split-Flap FlipTile view mode from the projection options and code.
 
 ## [26.7.31.0] - 2026-07-31
 

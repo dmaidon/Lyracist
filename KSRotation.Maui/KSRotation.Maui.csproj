@@ -1,4 +1,5 @@
-<!-- Edited on Aug 1, 2026 @ 09:48:15 -> Exclude DjBannerWindowService from compile linking -->
+<!-- Edited on Aug 1, 2026 @ 13:48:00 -> Link shared ChromecastSender in MAUI project -->
+<!-- Edited on Aug 1, 2026 @ 13:14:00 -> Link ChromecastDiscoveryService in MAUI project -->
 <!-- Edited on Jul 30, 2026 @ 08:00:00 -> Enable cross-platform MauiSplashScreen for Android and Windows and update comments -->
 <!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
 <Project Sdk="Microsoft.NET.Sdk">
@@ -29,9 +30,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.1.139</AssemblyVersion>
+		<AssemblyVersion>26.8.1.143</AssemblyVersion>
 
-		<FileVersion>26.8.1.139</FileVersion>
+		<FileVersion>26.8.1.143</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
@@ -77,7 +78,7 @@
 		<!-- Wildcard so newly-added WPF services are picked up automatically instead of requiring a manual
 		     edit here. Excludes the three services that have MAUI-specific replacements in Shims\WpfShims.cs
 		     (compiling both would be a duplicate-type error). -->
-		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs;..\KSRotation\Services\DjBannerWindowService.cs" Link="Services\%(Filename)%(Extension)" />
+		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs;..\KSRotation\Services\DjBannerWindowService.cs;..\KSRotation\Services\CastingService.cs;..\KSRotation\Services\BrowserCastServer.cs;..\KSRotation\Services\ChromecastSender.cs;..\KSRotation\Services\MiracastController.cs;..\KSRotation\Services\RotationRenderer.cs;..\KSRotation\Services\IRotationRenderer.cs;..\KSRotation\Services\ICastingService.cs" Link="Services\%(Filename)%(Extension)" />
 
 
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
@@ -140,6 +141,10 @@
 		<Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
 		<Compile Include="..\Shared\IRotationSinger.cs" Link="IRotationSinger.cs" />
 		<Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
+		<Compile Include="..\Shared\ChromecastDiscoveryService.cs" Link="ChromecastDiscoveryService.cs" />
+		<Compile Include="..\Shared\ChromecastSender.cs" Link="ChromecastSender.cs" />
+		<Compile Include="..\Shared\LocalNetworkHelper.cs" Link="LocalNetworkHelper.cs" />
+		<Compile Include="..\Shared\DisplayTarget.cs" Link="DisplayTarget.cs" />
 	</ItemGroup>
 
 </Project>

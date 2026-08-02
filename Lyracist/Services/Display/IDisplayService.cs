@@ -1,6 +1,8 @@
-// Edited on Aug 1, 2026 @ 10:59:16 -> Add ScreenAssignmentsChanged event definition
+// Edited on Aug 1, 2026 @ 12:10:00 -> Add Casting support methods to IDisplayService
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Lyracist.Shared;
 
 namespace Lyracist.Services.Display;
 
@@ -45,5 +47,8 @@ public interface IDisplayService
     void SetCrawlBannerText(string text);
     void UpdateDjBanner(string path);
     void HideDjBannerWindow();
+
+    Task<bool> MoveRotationTo(DisplayTarget target, ChromecastDevice? device = null);
+    Task StopRotationCasting();
 }
 

@@ -60,6 +60,12 @@ namespace KSRotation.Services
         {
             if (_window != null)
             {
+                // DjBannerWindow.OnClosing cancels the close and calls its own Hide() instead
+                // (so the singleton window survives the user clicking its own [X]) - which means
+                // _window is never actually destroyed and Closed never fires, so this branch runs
+                // on every re-show, not just the first. WindowState/Activate() alone cannot bring
+                // a Visibility.Hidden window back - only Show() actually does that.
+                _window.Show();
                 _window.WindowState = WindowState.Maximized;
                 _window.Activate();
                 return;

@@ -1,0 +1,38 @@
+<!-- Edited on Aug 1, 2026 @ 15:23:00 -> Embed CastingSettingsPage UserControl -->
+<Page x:Class="Lyracist.Views.Pages.CastingPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:views="clr-namespace:Lyracist.Views"
+      Title="Casting"
+      Background="{DynamicResource AppBackgroundBrush}"
+      Foreground="{DynamicResource AppTextPrimaryBrush}">
+
+    <Page.Resources>
+        <!-- Page header gradient -->
+        <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#00c6ff" Offset="0.0" />
+            <GradientStop Color="#0072ff" Offset="1.0" />
+        </LinearGradientBrush>
+    </Page.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
+            <StackPanel>
+                <TextBlock Text="Casting Controls" FontSize="28" FontWeight="Bold" Foreground="White" />
+                <TextBlock Text="Configure remote projections and cast your singer rotation dynamically." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <views:CastingSettingsPage />
+        </ScrollViewer>
+    </Grid>
+</Page>
