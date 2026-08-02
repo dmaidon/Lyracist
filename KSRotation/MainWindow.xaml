@@ -1,3 +1,4 @@
+<!-- Edited on Aug 2, 2026 @ 09:39:00 -> Add style resources and apply category-specific styling to GroupBoxes to differentiate categories visually -->
 <!-- Edited on Aug 2, 2026 @ 07:50:00 -> Update Help system with Casting & DJ Banners topic and remove FlipTile View reference -->
 <!-- Edited on Aug 1, 2026 @ 14:32:00 -> Move casting target settings to Casting tab -->
 <!-- Edited on Aug 1, 2026 @ 13:22:00 -> Add Chromecast target device selector controls to settings -->
@@ -173,6 +174,159 @@
             <Setter Property="Height" Value="28" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+
+        <!-- Purple GroupBox theme (Rotation, DJ, Venues) -->
+        <LinearGradientBrush x:Key="PurpleGroupBoxHeaderBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#7B3FA8" Offset="0.0" />
+            <GradientStop Color="#4A5AB8" Offset="1.0" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="PurpleGroupBoxBodyBrush" Color="#127B3FA8" />
+        <SolidColorBrush x:Key="PurpleGroupBoxBorderBrush" Color="#557B3FA8" />
+
+        <Style x:Key="PurpleSettingsGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="{StaticResource PurpleGroupBoxBorderBrush}"
+                                Background="{DynamicResource MaterialDesignCardBackground}">
+                            <StackPanelsn:StackPanel xmlns:sn="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                                <Border Background="{StaticResource PurpleGroupBoxHeaderBrush}"
+                                        CornerRadius="7,7,0,0"
+                                        Padding="14,9">
+                                    <TextBlock Text="{TemplateBinding Header}"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="13" />
+                                </Border>
+                                <Border Background="{StaticResource PurpleGroupBoxBodyBrush}"
+                                        Padding="14"
+                                        CornerRadius="0,0,7,7">
+                                    <ContentPresenter />
+                                </Border>
+                            </StackPanelsn:StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Blue GroupBox theme (Theme, Displays, Projection, Banners) -->
+        <LinearGradientBrush x:Key="BlueGroupBoxHeaderBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#00A6E0" Offset="0.0" />
+            <GradientStop Color="#0072ff" Offset="1.0" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="BlueGroupBoxBodyBrush" Color="#1200c6ff" />
+        <SolidColorBrush x:Key="BlueGroupBoxBorderBrush" Color="#550072ff" />
+
+        <Style x:Key="BlueSettingsGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="{StaticResource BlueGroupBoxBorderBrush}"
+                                Background="{DynamicResource MaterialDesignCardBackground}">
+                            <StackPanelsn:StackPanel xmlns:sn="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                                <Border Background="{StaticResource BlueGroupBoxHeaderBrush}"
+                                        CornerRadius="7,7,0,0"
+                                        Padding="14,9">
+                                    <TextBlock Text="{TemplateBinding Header}"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="13" />
+                                </Border>
+                                <Border Background="{StaticResource BlueGroupBoxBodyBrush}"
+                                        Padding="14"
+                                        CornerRadius="0,0,7,7">
+                                    <ContentPresenter />
+                                </Border>
+                            </StackPanelsn:StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Navy GroupBox theme (Network IP, Server/IP Setup) -->
+        <LinearGradientBrush x:Key="NavyGroupBoxHeaderBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#3a7bd5" Offset="0.0" />
+            <GradientStop Color="#3a6073" Offset="1.0" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="NavyGroupBoxBodyBrush" Color="#123a7bd5" />
+        <SolidColorBrush x:Key="NavyGroupBoxBorderBrush" Color="#553a7bd5" />
+
+        <Style x:Key="NavySettingsGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="{StaticResource NavyGroupBoxBorderBrush}"
+                                Background="{DynamicResource MaterialDesignCardBackground}">
+                            <StackPanelsn:StackPanel xmlns:sn="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                                <Border Background="{StaticResource NavyGroupBoxHeaderBrush}"
+                                        CornerRadius="7,7,0,0"
+                                        Padding="14,9">
+                                    <TextBlock Text="{TemplateBinding Header}"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="13" />
+                                </Border>
+                                <Border Background="{StaticResource NavyGroupBoxBodyBrush}"
+                                        Padding="14"
+                                        CornerRadius="0,0,7,7">
+                                    <ContentPresenter />
+                                </Border>
+                            </StackPanelsn:StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Slate GroupBox theme (Email Settings, Form Size, Security) -->
+        <LinearGradientBrush x:Key="SlateGroupBoxHeaderBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#708090" Offset="0.0" />
+            <GradientStop Color="#4f5d73" Offset="1.0" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="SlateGroupBoxBodyBrush" Color="#12708090" />
+        <SolidColorBrush x:Key="SlateGroupBoxBorderBrush" Color="#55708090" />
+
+        <Style x:Key="SlateSettingsGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="{StaticResource SlateGroupBoxBorderBrush}"
+                                Background="{DynamicResource MaterialDesignCardBackground}">
+                            <StackPanelsn:StackPanel xmlns:sn="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                                <Border Background="{StaticResource SlateGroupBoxHeaderBrush}"
+                                        CornerRadius="7,7,0,0"
+                                        Padding="14,9">
+                                    <TextBlock Text="{TemplateBinding Header}"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="13" />
+                                </Border>
+                                <Border Background="{StaticResource SlateGroupBoxBodyBrush}"
+                                        Padding="14"
+                                        CornerRadius="0,0,7,7">
+                                    <ContentPresenter />
+                                </Border>
+                            </StackPanelsn:StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Custom TabControl style to show borders/outlines around the content panel -->
         <Style x:Key="BorderedTabControlStyle" TargetType="TabControl">
             <Setter Property="Template">
@@ -818,7 +972,7 @@
 
                         <!-- Venue Names in the 1st column -->
                         <GroupBox Header="Venue Names"
-                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Style="{StaticResource PurpleSettingsGroupBoxStyle}"
                                   Grid.Row="1"
                                   Grid.RowSpan="5"
                                   Margin="0,0,0,12">
@@ -953,7 +1107,7 @@
 
                         <!-- DJ Names in the 3rd column -->
                         <GroupBox Header="DJ Names"
-                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Style="{StaticResource PurpleSettingsGroupBoxStyle}"
                                   Grid.Column="2"
                                   Grid.Row="1"
                                   Margin="15,0,0,12">
@@ -1088,7 +1242,7 @@
 
                         <!-- Form Size in the 3rd column under DJ Names -->
                         <GroupBox Header="Form Size"
-                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Style="{StaticResource SlateSettingsGroupBoxStyle}"
                                   Grid.Column="2"
                                   Grid.Row="3"
                                   Margin="15,33,0,12">
@@ -1108,7 +1262,7 @@
                         </GroupBox>
 
                         <GroupBox Header="Network IP Setup"
-                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Style="{StaticResource NavySettingsGroupBoxStyle}"
                                   Grid.Column="3"
                                   Grid.Row="1"
                                   VerticalAlignment="Top"
@@ -1128,7 +1282,7 @@
                         </GroupBox>
 
                         <GroupBox Header="Display &amp; Projection"
-                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Style="{StaticResource BlueSettingsGroupBoxStyle}"
                                   Grid.Column="3"
                                   Grid.Row="2"
                                   VerticalAlignment="Top"
@@ -1167,7 +1321,7 @@
 
                         <!-- Appearance Settings in the 2nd column -->
                         <GroupBox Header="Appearance"
-                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Style="{StaticResource BlueSettingsGroupBoxStyle}"
                                   Grid.Column="1"
                                   Grid.Row="1"
                                   Grid.RowSpan="5"
@@ -1258,15 +1412,11 @@
                         </StackPanel>
 
                         <!-- Email settings container panel with shaded background -->
-                        <Border Grid.Column="3" Grid.Row="3" Grid.RowSpan="2"
-                                Background="{DynamicResource MaterialDesignCardBackground}"
-                                BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                BorderThickness="1"
-                                CornerRadius="8"
-                                Padding="12"
-                                Margin="15,12,0,12">
+                        <GroupBox Header="Email Settings"
+                                  Style="{StaticResource SlateSettingsGroupBoxStyle}"
+                                  Grid.Column="3" Grid.Row="3" Grid.RowSpan="2"
+                                  Margin="15,12,0,12">
                             <StackPanel>
-                                <TextBlock Text="Report Email Recipients" FontWeight="SemiBold" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
                                 <TextBlock Text="Separate multiple addresses with  ,  or  ;" FontSize="11" Margin="0,0,0,6"
                                            Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                 <TextBox
@@ -1280,7 +1430,7 @@
                                     Style="{StaticResource ModernCheckBoxStyle}"
                                     Margin="0,4,0,4" />
                             </StackPanel>
-                        </Border>
+                        </GroupBox>
 
                         <Button
                             Grid.Column="2"
@@ -1290,7 +1440,7 @@
                             Style="{StaticResource ModernButtonStyle}" />
 
                         <GroupBox Header="DJ Banner Screen"
-                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Style="{StaticResource BlueSettingsGroupBoxStyle}"
                                   Grid.Column="2"
                                   Grid.ColumnSpan="2"
                                   Grid.Row="5"
@@ -1365,7 +1515,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid Margin="12">
                         <GroupBox Header="Casting Controls"
-                                  Background="{DynamicResource MaterialDesignCardBackground}"
+                                  Style="{StaticResource PurpleSettingsGroupBoxStyle}"
                                   Width="500"
                                   HorizontalAlignment="Left"
                                   VerticalAlignment="Top"
