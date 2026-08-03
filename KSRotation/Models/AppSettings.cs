@@ -59,5 +59,8 @@ namespace KSRotation.Models
 
         /// <summary>The display target type (Monitor, Chromecast, Miracast, BrowserCast, etc.)</summary>
         public DisplayTarget RotationTarget { get; init; } = DisplayTarget.Monitor;
+
+        /// <summary>When true, incoming patron requests are added straight to the rotation instead of waiting for DJ approval.</summary>
+        public bool AutoAcceptRequests { get; init; } = false;
     }
 }

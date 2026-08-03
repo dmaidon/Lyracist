@@ -1,7 +1,23 @@
-Last Edit: Aug 2, 2026 10:20 - Added looping MP4 video DJ banner support, updated help system text, and bumped assembly versions
+Last Edit: Aug 3, 2026 - Added Auto-Accept Requests toggle, consolidated shared KSRotation/Lyracist code, fixed multi-monitor DPI positioning and unwanted auto-casting
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.3.0] - 2026-08-03
+
+### Added
+- **Auto-Accept Requests**: New toggle in both Lyracist (Requests page) and KSRotation (next to the Incoming Requests list, including the KSRotation.Maui tablet app) that skips manual DJ approval — Karaoke requests go straight into the rotation and Music requests go straight to Approved the instant they arrive.
+- **Shared DJ Banners Folder**: KSRotation and Lyracist now read and write DJ banners from a single shared `DJBanners` folder next to the app installation, so a banner uploaded from either app (or dropped in by hand) is immediately available to both.
+
+### Fixed
+- **Multi-Monitor DPI Positioning**: The rotation display and DJ banner windows now report the correct physical resolution and position/size correctly on mixed-DPI multi-monitor setups (e.g. a 100% laptop panel plus a 125% external monitor), instead of using a stale DPI reading from whichever monitor the window happened to start on.
+- **Unwanted Auto-Casting**: Enabling the local rotation display, changing the Casting tab's target, or simply launching KSRotation no longer automatically starts (or resumes) casting to Miracast/Chromecast/BrowserCast/AirPlay. Casting now only ever starts from an explicit "Cast Rotation" action.
+- **KSRotation Monitor Selector**: Restored the Target Monitor dropdown and Refresh button to the Settings page (removing an accidental duplicate on the Rotation page) and fixed it being incorrectly greyed out / unable to select a second monitor.
+- **DJ Banner / Rotation Display Conflict**: Simplified so enabling the rotation display always disables the DJ Banner (and vice versa) regardless of which monitor each is targeting, instead of only when they happened to target the exact same monitor.
+
+### Changed
+- **Shared Code Consolidation**: Moved DJ banner file management, monitor enumeration, DPI-aware window positioning, and the crash-safe `AtomicJsonFile` writer out of per-app duplicates and into `Shared/`, used by both KSRotation and Lyracist (and KSRotation.Maui where applicable) so future fixes only need to happen once.
+- **KSRotation Settings Layout**: Removed the internal debug-only "Form Size" panel and moved Email Settings into its place.
 
 ## [26.8.2.0] - 2026-08-02
 

@@ -1,5 +1,4 @@
-// Created on Aug 1, 2026 @ 09:42:15 -> Add DJ Banner model for display configurations
-namespace Lyracist.Models;
+namespace Lyracist.Shared;
 
 public class DjBannerItem
 {

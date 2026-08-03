@@ -55,9 +55,7 @@ public static class AppSettings
         {
             try
             {
-                Directory.CreateDirectory(_settingsDir);
-                var json = JsonSerializer.Serialize(_data, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(_settingsPath, json);
+                Lyracist.Shared.AtomicJsonFile.Serialize(_settingsPath, _data, new JsonSerializerOptions { WriteIndented = true });
             }
             catch { /* Best-effort; non-critical */ }
         }
@@ -515,6 +513,16 @@ public static class AppSettings
         }
     }
 
+    // ─── Requests Settings ─────────────────────────────────────────────────────
+
+    /// <summary>When true, incoming mobile-portal song requests are approved automatically
+    /// instead of waiting in the Pending queue for the DJ to approve.</summary>
+    public static bool AutoAcceptRequests
+    {
+        get => _data.AutoAcceptRequests;
+        set { _data.AutoAcceptRequests = value; Save(); }
+    }
+
     // ─── Rating System Settings ────────────────────────────────────────────────
 
     public static bool IsRatingSystemEnabled
@@ -760,6 +768,8 @@ public static class AppSettings
         public string KSRotationIpAddress { get; set; } = "127.0.0.1";
         public int KSRotationPort { get; set; } = 5000;
         public int KSRotationSyncIntervalSeconds { get; set; } = 2;
+
+        public bool AutoAcceptRequests { get; set; } = false;
 
         // Channel volumes (0–100)
         public int OpeningVolume { get; set; } = 80;

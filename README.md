@@ -1,4 +1,4 @@
-Last Edit: Aug 2, 2026 10:20 - Added looping MP4 video DJ banner support, updated help system text, and bumped assembly versions
+Last Edit: Aug 3, 2026 - Added Auto-Accept Requests toggle, consolidated shared KSRotation/Lyracist code, fixed multi-monitor DPI positioning and unwanted auto-casting
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.
@@ -68,6 +68,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Live Rating Sync**: The tablet dashboard shows the current performer's live average rating and labels the rating card with the host's chosen feedback icon, updating instantly after each new submission.
 - **Live Server Log Viewer**: A "Logs" tab in the tablet portal surfaces the most recent app and error log entries for on-the-fly troubleshooting.
 - **Karaoke & Music Song Requests**: Singers can search the karaoke catalog to request a song to perform, or search a separate background-music library to request a track just be played — both flow into the KJ's Requests queue, and approving a Karaoke request adds the singer straight into the active rotation.
+- **Auto-Accept Requests**: Optional toggle (Requests page in Lyracist, next to the Incoming Requests list in KSRotation) that skips manual approval entirely — Karaoke requests go straight into the rotation and Music requests go straight to Approved the instant they arrive.
 - **Scaryoke Access Control**: The Scaryoke tab and wheel spin are only available on singers' phones once the host enables Scaryoke Mode, and only the currently-performing singer can trigger a spin — everyone else watches it live.
 
 ### ❓ Split-Pane Help System

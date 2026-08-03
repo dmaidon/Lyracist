@@ -80,7 +80,12 @@ namespace KSRotation.ViewModels
         ];
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsDjBannerAvailable))]
         public partial bool IsDisplayEnabled { get; set; }
+
+        // The rotation display and the DJ banner will typically be shown on the same physical
+        // screen, so the DJ banner is unavailable while the rotation display is on-screen.
+        public bool IsDjBannerAvailable => !IsDisplayEnabled;
 
         [ObservableProperty]
         public partial bool IsTestMode { get; set; }
@@ -89,10 +94,7 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsChromecastSelectionVisible))]
-        [NotifyPropertyChangedFor(nameof(IsMonitorSelectionEnabled))]
         public partial DisplayTarget RotationTarget { get; set; } = DisplayTarget.Monitor;
-
-        public bool IsMonitorSelectionEnabled => RotationTarget == DisplayTarget.Monitor || RotationTarget == DisplayTarget.WirelessHDMI;
 
         [ObservableProperty]
         public partial ObservableCollection<ChromecastDevice> AvailableChromecasts { get; set; } = [];
@@ -122,7 +124,12 @@ namespace KSRotation.ViewModels
                 case nameof(IsDisplayEnabled):
                     if (IsDisplayEnabled)
                     {
-                        if (IsDjBannerEnabled && SelectedMonitorDevice == DjBannerMonitorDevice)
+                        // Re-scan connected monitors right before using one, so a display plugged
+                        // in after the app launched (e.g. an HDMI projector connected mid-show)
+                        // is picked up without the user having to know to hit "Refresh" first.
+                        RefreshAvailableMonitors();
+
+                        if (IsDjBannerEnabled)
                         {
                             _isAutoDisablingDjBanner = true;
                             try
@@ -135,12 +142,16 @@ namespace KSRotation.ViewModels
                                 _isAutoDisablingDjBanner = false;
                             }
                         }
+                        // Enabling the display window only ever shows it locally on
+                        // SelectedMonitorDevice. It must NOT also start casting to whatever
+                        // target happens to be selected on the Casting tab - actual casting
+                        // (Miracast, Chromecast, etc.) only starts when the user explicitly
+                        // clicks "Cast Rotation".
                         _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
                         _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
                         _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
                         _displayWindowService.SelectedDevice = SelectedChromecast;
                         _displayWindowService.Show(Singers);
-                        _ = _displayWindowService.MoveRotationTo(RotationTarget);
                         _displayWindowService.SetProjectionView(SelectedProjectionView);
                         _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
                         _displayWindowService.SetCrawlBannerText(CrawlBannerText, VenueName, DjName);
@@ -159,14 +170,12 @@ namespace KSRotation.ViewModels
                     break;
 
                 case nameof(RotationTarget):
+                    // Just remembers which target "Cast Rotation" will use next - selecting a
+                    // target here must not itself start casting.
                     OnPropertyChanged(nameof(IsChromecastSelectionVisible));
                     if (RotationTarget == DisplayTarget.Chromecast)
                     {
                         _ = DiscoverChromecastsAsync();
-                    }
-                    if (IsDisplayEnabled)
-                    {
-                        _ = _displayWindowService.MoveRotationTo(RotationTarget);
                     }
                     QueueSaveSettings();
                     break;
@@ -175,29 +184,15 @@ namespace KSRotation.ViewModels
                     _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
                     if (IsDisplayEnabled)
                     {
-                        if (IsDjBannerEnabled && SelectedMonitorDevice == DjBannerMonitorDevice)
-                        {
-                            _isAutoDisablingDjBanner = true;
-                            try
-                            {
-                                IsDjBannerEnabled = false;
-                                _djBannerWasAutoDisabled = true;
-                            }
-                            finally
-                            {
-                                _isAutoDisablingDjBanner = false;
-                            }
-                        }
                         _displayWindowService.RepositionWindow();
                     }
-                    CheckRestoreDjBanner();
                     QueueSaveSettings();
                     break;
 
                 case nameof(IsDjBannerEnabled):
                     if (IsDjBannerEnabled)
                     {
-                        if (IsDisplayEnabled && SelectedMonitorDevice == DjBannerMonitorDevice)
+                        if (IsDisplayEnabled)
                         {
                             _isAutoDisablingDjBanner = true;
                             try
@@ -231,25 +226,8 @@ namespace KSRotation.ViewModels
                     _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
                     if (IsDjBannerEnabled)
                     {
-                        if (IsDisplayEnabled && SelectedMonitorDevice == DjBannerMonitorDevice)
-                        {
-                            _isAutoDisablingDjBanner = true;
-                            try
-                            {
-                                IsDjBannerEnabled = false;
-                                _djBannerWasAutoDisabled = true;
-                            }
-                            finally
-                            {
-                                _isAutoDisablingDjBanner = false;
-                            }
-                        }
-                        else
-                        {
-                            _djBannerWindowService.RepositionWindow();
-                        }
+                        _djBannerWindowService.RepositionWindow();
                     }
-                    CheckRestoreDjBanner();
                     QueueSaveSettings();
                     break;
 
@@ -574,6 +552,7 @@ namespace KSRotation.ViewModels
             DjPin = string.IsNullOrWhiteSpace(settings.DjPin)
                 ? string.Empty
                 : settings.DjPin.Trim();
+            AutoAcceptRequests = settings.AutoAcceptRequests;
             _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
             SelectedProjectionView = "Normal List";
             _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
@@ -585,8 +564,10 @@ namespace KSRotation.ViewModels
             _displayWindowService.SetSelectedMonitor(SelectedMonitorDevice);
             RefreshAvailableMonitors();
 
+            // Restores which target "Cast Rotation" will use next, but must NOT start casting
+            // to it automatically on launch - casting only ever starts from an explicit
+            // "Cast Rotation" click.
             RotationTarget = settings.RotationTarget;
-            _ = _displayWindowService.MoveRotationTo(RotationTarget);
             if (RotationTarget == DisplayTarget.Chromecast)
             {
                 _ = DiscoverChromecastsAsync();
@@ -1780,7 +1761,8 @@ namespace KSRotation.ViewModels
                 DjBannerMonitorDevice = DjBannerMonitorDevice,
                 SelectedDjBannerPath = SelectedDjBannerPath,
                 IsDjBannerEnabled = IsDjBannerEnabled,
-                RotationTarget = RotationTarget
+                RotationTarget = RotationTarget,
+                AutoAcceptRequests = AutoAcceptRequests
             };
 
             try
@@ -1808,23 +1790,9 @@ namespace KSRotation.ViewModels
         private void RefreshAvailableDjBanners()
         {
             AvailableDjBanners.Clear();
-            string dir = Path.Combine(AppPaths.SettingsDirectoryPath, "DJBanners");
-            if (!Directory.Exists(dir))
+            foreach (var item in DjBannerFileManager.ScanBanners(Globals.DjBannersDir))
             {
-                Directory.CreateDirectory(dir);
-            }
-
-            foreach (var file in Directory.GetFiles(dir))
-            {
-                string ext = Path.GetExtension(file).ToLowerInvariant();
-                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp" || ext == ".mp4")
-                {
-                    AvailableDjBanners.Add(new DjBannerItem
-                    {
-                        FileName = Path.GetFileName(file),
-                        FullPath = file
-                    });
-                }
+                AvailableDjBanners.Add(item);
             }
 
             if (!string.IsNullOrEmpty(SelectedDjBannerPath) && AvailableDjBanners.Any(b => b.FullPath == SelectedDjBannerPath))
@@ -1851,19 +1819,7 @@ namespace KSRotation.ViewModels
             {
                 try
                 {
-                    string dir = Path.Combine(AppPaths.SettingsDirectoryPath, "DJBanners");
-                    Directory.CreateDirectory(dir);
-
-                    string dest = Path.Combine(dir, Path.GetFileName(dialog.FileName));
-                    int counter = 1;
-                    while (File.Exists(dest))
-                    {
-                        string name = Path.GetFileNameWithoutExtension(dialog.FileName);
-                        string ext = Path.GetExtension(dialog.FileName);
-                        dest = Path.Combine(dir, $"{name}_{counter++}{ext}");
-                    }
-
-                    File.Copy(dialog.FileName, dest);
+                    string dest = DjBannerFileManager.CopyInWithDedup(dialog.FileName, Globals.DjBannersDir);
                     RefreshAvailableDjBanners();
                     SelectedDjBannerPath = dest;
                 }
@@ -1895,11 +1851,7 @@ namespace KSRotation.ViewModels
                     string path = SelectedDjBannerPath;
                     SelectedDjBannerPath = string.Empty;
 
-                    if (File.Exists(path))
-                    {
-                        File.Delete(path);
-                    }
-
+                    DjBannerFileManager.DeleteBanner(path);
                     RefreshAvailableDjBanners();
                 }
                 catch (Exception ex)
@@ -1913,17 +1865,16 @@ namespace KSRotation.ViewModels
         private void RefreshAvailableMonitors()
         {
 #if WPF
-            var screens = System.Windows.Forms.Screen.AllScreens;
+            var monitors = MonitorEnumerator.GetMonitors();
             string currentSelection = SelectedMonitorDevice;
 
             AvailableMonitors.Clear();
-            for (int i = 0; i < screens.Length; i++)
+            foreach (var monitor in monitors)
             {
-                var screen = screens[i];
-                string friendly = $"Monitor {i + 1} ({screen.Bounds.Width}x{screen.Bounds.Height}){(screen.Primary ? " [Primary]" : "")}";
+                string friendly = $"Monitor {monitor.Index + 1} ({monitor.Width}x{monitor.Height}){(monitor.IsPrimary ? " [Primary]" : "")}";
                 AvailableMonitors.Add(new MonitorItem
                 {
-                    DeviceName = screen.DeviceName,
+                    DeviceName = monitor.DeviceName,
                     FriendlyName = friendly
                 });
             }
@@ -1934,13 +1885,13 @@ namespace KSRotation.ViewModels
             }
             else
             {
-                if (screens.Length > 1)
+                if (monitors.Count > 1)
                 {
-                    SelectedMonitorDevice = screens[1].DeviceName;
+                    SelectedMonitorDevice = monitors[1].DeviceName;
                 }
-                else if (screens.Length > 0)
+                else if (monitors.Count > 0)
                 {
-                    SelectedMonitorDevice = screens[0].DeviceName;
+                    SelectedMonitorDevice = monitors[0].DeviceName;
                 }
                 else
                 {
@@ -2041,15 +1992,18 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
-        private void Cast()
+        private async Task Cast()
         {
-            IsDisplayEnabled = true;
+            // The explicit, only place actual casting (Miracast, Chromecast, BrowserCast,
+            // AirPlay) is started. Requires "Enable Display Window" to already be on, since
+            // casting mirrors that local window's content.
+            await _displayWindowService.MoveRotationTo(RotationTarget);
         }
 
         [RelayCommand]
-        private void Stop()
+        private async Task Stop()
         {
-            IsDisplayEnabled = false;
+            await _displayWindowService.StopCastingAsync();
         }
 
         [RelayCommand]
@@ -2079,13 +2033,10 @@ namespace KSRotation.ViewModels
 
         private void CheckRestoreDjBanner()
         {
-            if (_djBannerWasAutoDisabled)
+            if (_djBannerWasAutoDisabled && !IsDisplayEnabled)
             {
-                if (!IsDisplayEnabled || SelectedMonitorDevice != DjBannerMonitorDevice)
-                {
-                    _djBannerWasAutoDisabled = false;
-                    IsDjBannerEnabled = true;
-                }
+                _djBannerWasAutoDisabled = false;
+                IsDjBannerEnabled = true;
             }
         }
     }

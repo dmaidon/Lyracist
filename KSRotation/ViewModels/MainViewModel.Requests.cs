@@ -45,6 +45,10 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial string DjPin { get; set; } = string.Empty;
 
+        /// <summary>When true, incoming patron requests are added straight to the rotation instead of waiting here for DJ approval.</summary>
+        [ObservableProperty]
+        public partial bool AutoAcceptRequests { get; set; }
+
         [RelayCommand]
         public void AcceptRequest(PatronRequest request)
         {
@@ -279,14 +283,20 @@ namespace KSRotation.ViewModels
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 var first = songs.FirstOrDefault();
-                IncomingRequests.Add(new PatronRequest
+                var request = new PatronRequest
                 {
                     Name = name,
                     Song = first?.Song ?? string.Empty,
                     Artist = first?.Artist ?? string.Empty,
                     Songs = songs,
                     RequestType = requestType
-                });
+                };
+
+                IncomingRequests.Add(request);
+                if (AutoAcceptRequests)
+                {
+                    AcceptRequest(request);
+                }
             }));
         }
 

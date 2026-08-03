@@ -6,6 +6,7 @@ using System.Windows;
 using Application = System.Windows.Application;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 
@@ -39,6 +40,15 @@ public partial class RequestsViewModel : BaseViewModel
 
     [ObservableProperty]
     private string _statusMessage = string.Empty;
+
+    /// <summary>When true, incoming mobile-portal requests skip the Pending queue and are accepted automatically.</summary>
+    [ObservableProperty]
+    private bool _autoAcceptRequests = AppSettings.AutoAcceptRequests;
+
+    partial void OnAutoAcceptRequestsChanged(bool value)
+    {
+        AppSettings.AutoAcceptRequests = value;
+    }
 
     public RequestsViewModel(IRequestService requests, ILibraryService library, IMediaEngine mediaEngine, RotationViewModel rotation)
     {

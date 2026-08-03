@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using Lyracist.Core.Helpers;
+using Lyracist.Shared;
 
 namespace Lyracist.Services.Display;
 
@@ -43,8 +44,7 @@ public static class DisplayPreferencesStore
     {
         try
         {
-            string json = JsonSerializer.Serialize(preferences, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(FilePath, json);
+            AtomicJsonFile.Serialize(FilePath, preferences, new JsonSerializerOptions { WriteIndented = true });
         }
         catch (Exception ex)
         {

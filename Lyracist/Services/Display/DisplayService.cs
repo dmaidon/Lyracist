@@ -52,18 +52,16 @@ public class DisplayService : IDisplayService
 
     public IReadOnlyList<ScreenInfo> GetScreens()
     {
-        var screens = System.Windows.Forms.Screen.AllScreens;
         var list = new List<ScreenInfo>();
 
-        for (int i = 0; i < screens.Length; i++)
+        foreach (var monitor in MonitorEnumerator.GetMonitors())
         {
-            var s = screens[i];
             list.Add(new ScreenInfo
             {
-                Index = i,
-                DeviceName = s.DeviceName,
-                IsPrimary = s.Primary,
-                Bounds = new Rect(s.Bounds.X, s.Bounds.Y, s.Bounds.Width, s.Bounds.Height)
+                Index = monitor.Index,
+                DeviceName = monitor.DeviceName,
+                IsPrimary = monitor.IsPrimary,
+                Bounds = new Rect(monitor.X, monitor.Y, monitor.Width, monitor.Height)
             });
         }
 
@@ -332,12 +330,7 @@ public class DisplayService : IDisplayService
 
         var screen = screens[screenIndex];
 
-        // Apply placement settings
-        window.WindowStartupLocation = WindowStartupLocation.Manual;
-        window.Left = screen.Bounds.X;
-        window.Top = screen.Bounds.Y;
-        window.Width = screen.Bounds.Width;
-        window.Height = screen.Bounds.Height;
+        WindowPositioner.FillArea(window, screen.Bounds);
 
         // Apply borderless and projection settings
         window.WindowStyle = WindowStyle.None;

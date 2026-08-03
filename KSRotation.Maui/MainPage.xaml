@@ -291,10 +291,15 @@
             </Border>
 
             <!-- Incoming Requests List -->
-            <Grid Grid.Row="1" RowDefinitions="Auto, *">
+            <Grid Grid.Row="1" RowDefinitions="Auto, Auto, *">
                 <Label Text="INCOMING REQUESTS" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1.5" Margin="0,0,0,4" />
 
-                <CollectionView Grid.Row="1" ItemsSource="{Binding IncomingRequests}" SelectionMode="None">
+                <HorizontalStackLayout Grid.Row="1" Spacing="6" Margin="0,0,0,6">
+                    <CheckBox IsChecked="{Binding AutoAcceptRequests}" Scale="0.85" />
+                    <Label Text="Auto-accept incoming requests" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <CollectionView Grid.Row="2" ItemsSource="{Binding IncomingRequests}" SelectionMode="None">
                     <CollectionView.EmptyView>
                         <Label Text="No pending requests" TextColor="#70768F" FontSize="12" HorizontalOptions="Center" VerticalOptions="Center" Margin="0,32,0,0" />
                     </CollectionView.EmptyView>

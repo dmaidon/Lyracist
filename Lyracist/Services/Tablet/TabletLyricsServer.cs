@@ -220,6 +220,35 @@ public class TabletLyricsServer(
                     dto.RequestType ?? "Karaoke",
                     dto.Key ?? "0",
                     dto.Notes ?? string.Empty);
+
+                if (Lyracist.Core.Helpers.AppSettings.AutoAcceptRequests)
+                {
+                    // Mirrors RequestsViewModel.Approve(): Music requests just move to the Approved
+                    // queue, Karaoke requests send the singer straight into the rotation. Rotation
+                    // mutation must happen on the UI dispatcher thread, unlike the DB-only Approve call.
+                    if (request.RequestType == "Music")
+                    {
+                        _requests.Approve(request.Id);
+                        request.Status = "Approved";
+                    }
+                    else
+                    {
+                        _ = System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            try
+                            {
+                                _rotation.AddSinger(request.SingerName, request.Title, request.Artist, request.Key, request.Notes, request.Source);
+                                _requests.MarkQueued(request.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                Lyracist.Shared.Globals.LogError("Lyracist", "Failed to auto-accept karaoke request into rotation", ex);
+                            }
+                        }));
+                        request.Status = "Queued";
+                    }
+                }
+
                 return Results.Ok(request);
             });
 

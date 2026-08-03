@@ -76,6 +76,26 @@ namespace KSRotation.Services
             return await _casting.CastRotationAsync(target);
         }
 
+        /// <summary>
+        /// Stops any active cast (Miracast, Chromecast, BrowserCast, AirPlay) and, if the
+        /// display window is still enabled, restores it to the locally selected monitor.
+        /// </summary>
+        public async Task StopCastingAsync()
+        {
+            _rotationTarget = DisplayTarget.Monitor;
+            await _casting.StopCastingAsync();
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher ?? System.Windows.Threading.Dispatcher.CurrentDispatcher;
+            if (dispatcher.CheckAccess())
+            {
+                RestoreLocalMonitorWindow();
+            }
+            else
+            {
+                await dispatcher.InvokeAsync(RestoreLocalMonitorWindow);
+            }
+        }
+
         public void RepositionWindow()
         {
             if (_window == null)
@@ -304,47 +324,13 @@ namespace KSRotation.Services
             ArgumentNullException.ThrowIfNull(window);
 
             Screen[] screens = Screen.AllScreens;
-            if (screens.Length == 0)
+            Screen? targetScreen = WindowPositioner.ResolveByDeviceName(screens, _selectedMonitorDevice);
+            if (targetScreen == null)
             {
                 return false;
             }
 
-            Screen targetScreen = screens[0];
-            if (!string.IsNullOrEmpty(_selectedMonitorDevice))
-            {
-                var matched = screens.FirstOrDefault(s => string.Equals(s.DeviceName, _selectedMonitorDevice, StringComparison.OrdinalIgnoreCase));
-                if (matched != null)
-                {
-                    targetScreen = matched;
-                }
-                else
-                {
-                    bool isSecondMonitor = screens.Length > 1;
-                    targetScreen = isSecondMonitor ? screens[1] : screens[0];
-                }
-            }
-            else
-            {
-                bool isSecondMonitor = screens.Length > 1;
-                targetScreen = isSecondMonitor ? screens[1] : screens[0];
-            }
-
-            System.Drawing.Rectangle workArea = targetScreen.WorkingArea;
-
-            DpiScale dpi = VisualTreeHelper.GetDpi(window);
-            double scaleX = 1.0 / dpi.DpiScaleX;
-            double scaleY = 1.0 / dpi.DpiScaleY;
-
-            double workAreaLeft = workArea.Left * scaleX;
-            double workAreaTop = workArea.Top * scaleY;
-            double workAreaWidth = workArea.Width * scaleX;
-            double workAreaHeight = workArea.Height * scaleY;
-
-            window.WindowStartupLocation = WindowStartupLocation.Manual;
-            window.Left = workAreaLeft;
-            window.Top = workAreaTop;
-            window.Width = workAreaWidth;
-            window.Height = workAreaHeight;
+            WindowPositioner.FillArea(window, targetScreen.WorkingArea);
 
             return screens.Length > 1;
         }

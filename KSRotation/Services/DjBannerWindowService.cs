@@ -1,5 +1,6 @@
 // Edited on Aug 2, 2026 @ 10:14:00 -> Delegate banner updating logic to the window UpdateBanner method
 using KSRotation.Windows;
+using Lyracist.Shared;
 using System;
 using System.IO;
 using System.Linq;
@@ -98,44 +99,15 @@ namespace KSRotation.Services
             ArgumentNullException.ThrowIfNull(window);
 
             Screen[] screens = Screen.AllScreens;
-            if (screens.Length == 0) return false;
-
-            Screen targetScreen = screens[0];
-            if (!string.IsNullOrEmpty(_selectedMonitorDevice))
+            Screen? targetScreen = WindowPositioner.ResolveByDeviceName(screens, _selectedMonitorDevice);
+            if (targetScreen == null)
             {
-                var matched = screens.FirstOrDefault(s => string.Equals(s.DeviceName, _selectedMonitorDevice, StringComparison.OrdinalIgnoreCase));
-                if (matched != null)
-                {
-                    targetScreen = matched;
-                }
-                else
-                {
-                    bool isSecondMonitor = screens.Length > 1;
-                    targetScreen = isSecondMonitor ? screens[1] : screens[0];
-                }
+                return false;
             }
-            else
-            {
-                bool isSecondMonitor = screens.Length > 1;
-                targetScreen = isSecondMonitor ? screens[1] : screens[0];
-            }
-
-            System.Drawing.Rectangle workArea = targetScreen.WorkingArea;
-
-            DpiScale dpi = VisualTreeHelper.GetDpi(window);
-            double scaleX = 1.0 / dpi.DpiScaleX;
-            double scaleY = 1.0 / dpi.DpiScaleY;
 
             double windowWidth = window.Width > 0 ? window.Width : 450;
             double windowHeight = window.Height > 0 ? window.Height : 300;
-            double workAreaLeft = workArea.Left * scaleX;
-            double workAreaTop = workArea.Top * scaleY;
-            double workAreaWidth = workArea.Width * scaleX;
-            double workAreaHeight = workArea.Height * scaleY;
-
-            window.WindowStartupLocation = WindowStartupLocation.Manual;
-            window.Left = workAreaLeft + ((workAreaWidth - windowWidth) / 2);
-            window.Top = workAreaTop + ((workAreaHeight - windowHeight) / 2);
+            WindowPositioner.CenterInArea(window, targetScreen.WorkingArea, windowWidth, windowHeight);
 
             return screens.Length > 1;
         }

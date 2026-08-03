@@ -1,5 +1,6 @@
 // Last Edit: Jun 30, 2026 06:47 - Switched night DB path resolution to shared AppPaths helper.
 using KSRotation.Models;
+using Lyracist.Shared;
 using System;
 using System.Collections.Generic;
 using System.IO;

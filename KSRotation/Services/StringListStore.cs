@@ -1,4 +1,5 @@
 // Last Edit: Jun 30, 2026 06:47 - Switched Settings directory resolution to shared AppPaths helper.
+using Lyracist.Shared;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;

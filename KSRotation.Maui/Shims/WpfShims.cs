@@ -119,6 +119,7 @@ namespace KSRotation.Services
         public void SetSelectedMonitor(string deviceName) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
+        public Task StopCastingAsync() => Task.CompletedTask;
         public Lyracist.Shared.ChromecastDevice? SelectedDevice { get; set; }
     }
 

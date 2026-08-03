@@ -44,6 +44,11 @@ namespace Lyracist.Shared
             "ScaryokeWheel"
         );
 
+        // 7. DJ Banners directory (in Startup Path) - a single shared folder both KSRotation and
+        // Lyracist read banners from and save uploaded banners into, so a banner dropped in by
+        // hand is picked up by both apps and a banner uploaded from either app is visible to the other.
+        public static string DjBannersDir => Path.Combine(StartupPath, "DJBanners");
+
         // Centralized Logging Methods
         public static void LogAppStart(string appName)
         {

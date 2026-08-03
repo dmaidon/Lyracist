@@ -30,9 +30,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.1.143</AssemblyVersion>
+		<AssemblyVersion>26.8.3.150</AssemblyVersion>
 
-		<FileVersion>26.8.1.143</FileVersion>
+		<FileVersion>26.8.3.150</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
@@ -145,6 +145,9 @@
 		<Compile Include="..\Shared\ChromecastSender.cs" Link="ChromecastSender.cs" />
 		<Compile Include="..\Shared\LocalNetworkHelper.cs" Link="LocalNetworkHelper.cs" />
 		<Compile Include="..\Shared\DisplayTarget.cs" Link="DisplayTarget.cs" />
+		<Compile Include="..\Shared\DjBannerItem.cs" Link="DjBannerItem.cs" />
+		<Compile Include="..\Shared\DjBannerFileManager.cs" Link="DjBannerFileManager.cs" />
+		<Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
 	</ItemGroup>
 
 </Project>

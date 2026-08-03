@@ -444,10 +444,10 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private int _selectedDjBannerScreenIndex = 0;
 
-    public ObservableCollection<Lyracist.Models.DjBannerItem> DjBanners { get; } = [];
+    public ObservableCollection<Lyracist.Shared.DjBannerItem> DjBanners { get; } = [];
 
     [ObservableProperty]
-    private Lyracist.Models.DjBannerItem? _selectedDjBanner;
+    private Lyracist.Shared.DjBannerItem? _selectedDjBanner;
 
     [ObservableProperty]
     private string _rotationBannerText = "Welcome to Karaoke Night!";
@@ -822,21 +822,9 @@ public partial class KaraokeViewModel : BaseViewModel
     private void RefreshDjBanners()
     {
         DjBanners.Clear();
-        string dir = Path.Combine(Lyracist.Shared.Globals.LyracistSettingsDir, "DJBanners");
-        if (Directory.Exists(dir))
+        foreach (var item in Lyracist.Shared.DjBannerFileManager.ScanBanners(Lyracist.Shared.Globals.DjBannersDir))
         {
-            foreach (var file in Directory.GetFiles(dir))
-            {
-                string ext = Path.GetExtension(file).ToLowerInvariant();
-                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp" || ext == ".mp4")
-                {
-                    DjBanners.Add(new Lyracist.Models.DjBannerItem
-                    {
-                        FileName = Path.GetFileName(file),
-                        FullPath = file
-                    });
-                }
-            }
+            DjBanners.Add(item);
         }
 
         var prefs = _displayService.GetPreferences();
@@ -850,7 +838,7 @@ public partial class KaraokeViewModel : BaseViewModel
         }
     }
 
-    partial void OnSelectedDjBannerChanged(Lyracist.Models.DjBannerItem? value)
+    partial void OnSelectedDjBannerChanged(Lyracist.Shared.DjBannerItem? value)
     {
         _displayService.UpdateDjBanner(value?.FullPath ?? string.Empty);
     }
@@ -868,19 +856,7 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             try
             {
-                string dir = Path.Combine(Lyracist.Shared.Globals.LyracistSettingsDir, "DJBanners");
-                Directory.CreateDirectory(dir);
-
-                string destPath = Path.Combine(dir, Path.GetFileName(dialog.FileName));
-                int counter = 1;
-                while (File.Exists(destPath))
-                {
-                    string name = Path.GetFileNameWithoutExtension(dialog.FileName);
-                    string ext = Path.GetExtension(dialog.FileName);
-                    destPath = Path.Combine(dir, $"{name}_{counter++}{ext}");
-                }
-
-                File.Copy(dialog.FileName, destPath);
+                string destPath = Lyracist.Shared.DjBannerFileManager.CopyInWithDedup(dialog.FileName, Lyracist.Shared.Globals.DjBannersDir);
                 RefreshDjBanners();
 
                 SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == destPath);
@@ -910,11 +886,7 @@ public partial class KaraokeViewModel : BaseViewModel
                 string path = SelectedDjBanner.FullPath;
                 SelectedDjBanner = null;
 
-                if (File.Exists(path))
-                {
-                    File.Delete(path);
-                }
-
+                Lyracist.Shared.DjBannerFileManager.DeleteBanner(path);
                 RefreshDjBanners();
             }
             catch (Exception ex)

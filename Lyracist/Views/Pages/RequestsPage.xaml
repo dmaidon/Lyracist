@@ -47,10 +47,23 @@
 
         <!-- Header -->
         <Border Grid.Row="0" CornerRadius="12" Padding="20" Margin="0,0,0,16" Background="{StaticResource HeaderBackgroundBrush}">
-            <StackPanel>
-                <TextBlock Text="Music Requests" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                <TextBlock Text="Review incoming requests from singers, approve them, and cue them up. Singers can submit from their phones at http://&lt;this-pc&gt;:5005/request" FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0"/>
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Music Requests" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Review incoming requests from singers, approve them, and cue them up. Singers can submit from their phones at http://&lt;this-pc&gt;:5005/request" FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0"/>
+                </StackPanel>
+                <ui:ToggleSwitch Grid.Column="1"
+                                  Content="Auto-accept requests"
+                                  IsChecked="{Binding AutoAcceptRequests, Mode=TwoWay}"
+                                  Foreground="White"
+                                  VerticalAlignment="Center"
+                                  Margin="16,0,0,0"
+                                  ToolTip="When on, incoming requests skip the Pending queue and are accepted automatically instead of waiting for DJ approval."/>
+            </Grid>
         </Border>
 
         <!-- Manual Add Row -->

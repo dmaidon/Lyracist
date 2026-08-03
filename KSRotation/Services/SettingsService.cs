@@ -1,5 +1,6 @@
 // Last Edit: Jun 30, 2026 06:47 - Switched settings directory resolution to shared AppPaths helper.
 using KSRotation.Models;
+using Lyracist.Shared;
 using System.IO;
 using System.Text.Json;
 

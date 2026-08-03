@@ -290,7 +290,7 @@
             </Setter>
         </Style>
 
-        <!-- Slate GroupBox theme (Email Settings, Form Size, Security) -->
+        <!-- Slate GroupBox theme (Email Settings, Security) -->
         <LinearGradientBrush x:Key="SlateGroupBoxHeaderBrush" StartPoint="0,0" EndPoint="1,0">
             <GradientStop Color="#708090" Offset="0.0" />
             <GradientStop Color="#4f5d73" Offset="1.0" />
@@ -818,6 +818,7 @@
                         <Grid Grid.Row="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
@@ -833,7 +834,15 @@
                                                        Margin="0,0,8,0" />
                             </Grid>
 
-                            <Border Grid.Row="1"
+                            <CheckBox Grid.Row="1"
+                                      Content="Auto-accept incoming requests"
+                                      IsChecked="{Binding AutoAcceptRequests, UpdateSourceTrigger=PropertyChanged}"
+                                      Style="{StaticResource ModernCheckBoxStyle}"
+                                      FontSize="12"
+                                      Margin="0,0,0,8"
+                                      ToolTip="When checked, patron requests are added straight to the rotation instead of waiting here for DJ approval." />
+
+                            <Border Grid.Row="2"
                                     Background="{DynamicResource MaterialDesignCardBackground}"
                                     BorderBrush="{DynamicResource MaterialDesignDivider}"
                                     BorderThickness="1"
@@ -1241,27 +1250,6 @@
                              </Grid>
                         </GroupBox>
 
-                        <!-- Form Size in the 3rd column under DJ Names -->
-                        <GroupBox Header="Form Size"
-                                  Style="{StaticResource SlateSettingsGroupBoxStyle}"
-                                  Grid.Column="2"
-                                  Grid.Row="3"
-                                  Margin="15,33,0,12">
-                            <Grid Margin="0,4,0,0">
-                                <TextBox
-                                    IsReadOnly="True"
-                                    Style="{StaticResource ModernTextBoxStyle}"
-                                    VerticalAlignment="Center" Margin="-10,8,10,0" HorizontalAlignment="Center" FontWeight="Bold" Height="53" Background="{DynamicResource MaterialDesignPaper}">
-                                    <TextBox.Text>
-                                        <MultiBinding StringFormat="{}{0:F0} x {1:F0}">
-                                            <Binding ElementName="FrmMain" Path="ActualWidth" Mode="OneWay" />
-                                            <Binding ElementName="FrmMain" Path="ActualHeight" Mode="OneWay" />
-                                        </MultiBinding>
-                                    </TextBox.Text>
-                                </TextBox>
-                            </Grid>
-                        </GroupBox>
-
                         <GroupBox Header="Network IP Setup"
                                   Style="{StaticResource NavySettingsGroupBoxStyle}"
                                   Grid.Column="3"
@@ -1296,14 +1284,12 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <ComboBox
-                                        IsEnabled="{Binding IsMonitorSelectionEnabled}"
                                         ItemsSource="{Binding AvailableMonitors}"
                                         SelectedValue="{Binding SelectedMonitorDevice, UpdateSourceTrigger=PropertyChanged}"
                                         SelectedValuePath="DeviceName"
                                         DisplayMemberPath="FriendlyName"
                                         Style="{StaticResource ModernComboBoxStyle}" />
                                     <Button
-                                        IsEnabled="{Binding IsMonitorSelectionEnabled}"
                                         Grid.Column="1"
                                         Content="Refresh"
                                         Command="{Binding RefreshMonitorsCommand}"
@@ -1415,7 +1401,7 @@
                         <!-- Email settings container panel with shaded background -->
                         <GroupBox Header="Email Settings"
                                   Style="{StaticResource SlateSettingsGroupBoxStyle}"
-                                  Grid.Column="3" Grid.Row="3" Grid.RowSpan="2"
+                                  Grid.Column="2" Grid.Row="3"
                                   Margin="15,12,0,12">
                             <StackPanel>
                                 <TextBlock Text="Separate multiple addresses with  ,  or  ;" FontSize="11" Margin="0,0,0,6"
@@ -1467,8 +1453,10 @@
                                     <CheckBox
                                         Content="Enable DJ Banner Screen"
                                         IsChecked="{Binding IsDjBannerEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                        IsEnabled="{Binding IsDjBannerAvailable}"
                                         Style="{StaticResource ModernCheckBoxStyle}"
-                                        Margin="0,4,0,4" />
+                                        Margin="0,4,0,4"
+                                        ToolTip="The rotation display and DJ banner are typically shown on the same screen, so the banner is unavailable while 'Enable Display Window' is checked." />
                                 </StackPanel>
                                 
                                 <!-- Column 2: Upload & Select Banner -->
@@ -1723,6 +1711,12 @@
                                         <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
                                     </BulletDecorator.Bullet>
                                     <TextBlock Text="✓ (Accept Request): Adds a pending patron request to the rotation. If the singer is already listed, it avoids duplicate entries. If they have no song listed, it fills in their song/artist; if they already have a song, it queues it up as their next song." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="Auto-accept incoming requests: Checkbox above the Incoming Requests list. When checked, patron requests skip the pending queue entirely and are added straight into the rotation the moment they come in." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                 </BulletDecorator>
 
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,16,0,0">
