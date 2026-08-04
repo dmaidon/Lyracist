@@ -1,3 +1,4 @@
+// Edited on Aug 4, 2026 @ 09:55:00 -> Pass dataContext to Show() and set it on the window to support data binding to QR code and connection info
 // Edited on Aug 2, 2026 @ 10:14:00 -> Delegate banner updating logic to the window UpdateBanner method
 using KSRotation.Windows;
 using Lyracist.Shared;
@@ -37,10 +38,11 @@ namespace KSRotation.Services
             _window.UpdateBanner(_bannerPath);
         }
 
-        public void Show()
+        public void Show(object dataContext)
         {
             if (_window != null)
             {
+                _window.DataContext = dataContext;
                 // DjBannerWindow.OnClosing cancels the close and calls its own Hide() instead
                 // (so the singleton window survives the user clicking its own [X]) - which means
                 // _window is never actually destroyed and Closed never fires, so this branch runs
@@ -53,6 +55,7 @@ namespace KSRotation.Services
             }
 
             _window = new DjBannerWindow();
+            _window.DataContext = dataContext;
             _window.Closed += OnWindowClosed;
 
             UpdateImage();

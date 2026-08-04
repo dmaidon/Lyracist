@@ -1,3 +1,4 @@
+// Edited on Aug 4, 2026 @ 10:24:00 -> Add AcceptAllPendingRequests method to auto-accept pending requests when checked
 // Edited on Jul 28, 2026 @ 18:40:00 -> Add support for processing patron music requests and mapping isMusic
 // Last Edit: Jul 28, 2026 12:44 - Serialize isPaused and implement paused/deleted/restore API actions
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -664,6 +665,15 @@ namespace KSRotation.ViewModels
                     }
                 default:
                     return $"Unsupported action: '{action}'";
+            }
+        }
+
+        private void AcceptAllPendingRequests()
+        {
+            var requests = System.Linq.Enumerable.ToList(IncomingRequests);
+            foreach (var req in requests)
+            {
+                AcceptRequest(req);
             }
         }
     }

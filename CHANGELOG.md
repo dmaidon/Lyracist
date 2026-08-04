@@ -1,7 +1,21 @@
-Last Edit: Aug 3, 2026 - Added Auto-Accept Requests toggle, consolidated shared KSRotation/Lyracist code, fixed multi-monitor DPI positioning and unwanted auto-casting
+Last Edit: Aug 4, 2026 - Add DJ Banner QR code overlay, checkbox toggle, Display tab rename, skipped singer round tracking fix, and immediate auto-accept approval
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.4.0] - 2026-08-04
+
+### Added
+- **DJ Banner QR Code Overlay**: Toggles a floating patron web portal QR code overlay in the bottom-right corner of the full-screen DJ Banner projection window.
+- **DJ Banner QR Code Settings Toggle**: Added a check box under the Select DJ Banner dropdown to enable or disable showing the request QR code overlay.
+
+### Changed
+- **Display Tab Rename**: Renamed the "Casting" tab to "Display" across all UI tabs, help documentation topics, and code comments to better describe its display projection capabilities.
+- **Skipped Performer Round Tracking**: Corrected sequential round-checking logic to check the active show round rather than the first incomplete round when a performer skips their turn.
+- **Immediate Auto-Accept Processing**: Checking the "Auto-accept incoming requests" box now immediately processes and approves all currently pending requests in the queue.
+
+### Fixed
+- **Settings tab height and scrolling**: Shortened the Appearance GroupBox's RowSpan from 6 to 3 to align with Email Settings and prevent Settings tab scrollbars.
 
 ## [26.8.3.0] - 2026-08-03
 

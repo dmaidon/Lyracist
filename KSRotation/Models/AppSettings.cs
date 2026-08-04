@@ -1,3 +1,4 @@
+// Edited on Aug 4, 2026 @ 10:02:00 -> Add IsDjBannerQrCodeEnabled property to AppSettings
 // Edited on Aug 1, 2026 @ 12:40:00 -> Add RotationTarget property to AppSettings
 // Edited on Aug 1, 2026 @ 09:46:30 -> Add DJ Banner settings properties
 // Edited on Jul 27, 2026 @ 22:38:00 -> Add SelectedMonitorDevice property
@@ -56,6 +57,8 @@ namespace KSRotation.Models
         public string SelectedDjBannerPath { get; init; } = string.Empty;
 
         public bool IsDjBannerEnabled { get; init; } = false;
+
+        public bool IsDjBannerQrCodeEnabled { get; init; } = true;
 
         /// <summary>The display target type (Monitor, Chromecast, Miracast, BrowserCast, etc.)</summary>
         public DisplayTarget RotationTarget { get; init; } = DisplayTarget.Monitor;

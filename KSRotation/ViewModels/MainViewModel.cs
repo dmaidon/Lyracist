@@ -1,3 +1,8 @@
+// Edited on Aug 4, 2026 @ 10:24:00 -> Process and approve pending requests immediately when AutoAcceptRequests is checked
+// Edited on Aug 4, 2026 @ 10:20:00 -> Fix FinishSingerSong round marking to match active show round for skipped singers
+// Edited on Aug 4, 2026 @ 10:07:00 -> Update Casting references to Display tab and Display & DJ Banners help topic
+// Edited on Aug 4, 2026 @ 10:02:00 -> Add IsDjBannerQrCodeEnabled property, loading, saving, change notifications, and checkbox bindings
+// Edited on Aug 4, 2026 @ 09:55:00 -> Pass MainViewModel to DJ Banner window service to display the patron web portal QR code overlay
 // Edited on Aug 2, 2026 @ 10:15:00 -> Add mp4 support to DJ Banner scanning and file dialog filter
 // Edited on Aug 2, 2026 @ 07:50:00 -> Update Help system with Casting & DJ Banners topic
 // Edited on Aug 1, 2026 @ 13:25:00 -> Use partial properties for Chromecast fields to resolve WinRT AOT compilation warnings
@@ -144,7 +149,7 @@ namespace KSRotation.ViewModels
                         }
                         // Enabling the display window only ever shows it locally on
                         // SelectedMonitorDevice. It must NOT also start casting to whatever
-                        // target happens to be selected on the Casting tab - actual casting
+                        // target happens to be selected on the Display tab - actual casting
                         // (Miracast, Chromecast, etc.) only starts when the user explicitly
                         // clicks "Cast Rotation".
                         _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
@@ -189,6 +194,18 @@ namespace KSRotation.ViewModels
                     QueueSaveSettings();
                     break;
 
+                case nameof(IsDjBannerQrCodeEnabled):
+                    QueueSaveSettings();
+                    break;
+
+                case nameof(AutoAcceptRequests):
+                    if (AutoAcceptRequests)
+                    {
+                        AcceptAllPendingRequests();
+                    }
+                    QueueSaveSettings();
+                    break;
+
                 case nameof(IsDjBannerEnabled):
                     if (IsDjBannerEnabled)
                     {
@@ -209,7 +226,7 @@ namespace KSRotation.ViewModels
                         _djBannerWasAutoDisabled = false;
                         _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
                         _djBannerWindowService.SetBannerPath(SelectedDjBannerPath);
-                        _djBannerWindowService.Show();
+                        _djBannerWindowService.Show(this);
                     }
                     else
                     {
@@ -391,6 +408,9 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool IsDjBannerEnabled { get; set; } = false;
 
+        [ObservableProperty]
+        public partial bool IsDjBannerQrCodeEnabled { get; set; } = true;
+
         public ObservableCollection<DjBannerItem> AvailableDjBanners { get; } = [];
 
         [ObservableProperty]
@@ -402,7 +422,7 @@ namespace KSRotation.ViewModels
             "🎤 Rotation Management",
             "📺 Display Projection",
             "⚙️ Settings & Venues",
-            "📺 Casting & DJ Banners",
+            "📺 Display & DJ Banners",
             "❓ FAQ & Shortcuts",
         ];
 
@@ -576,6 +596,7 @@ namespace KSRotation.ViewModels
             DjBannerMonitorDevice = settings.DjBannerMonitorDevice ?? string.Empty;
             SelectedDjBannerPath = settings.SelectedDjBannerPath ?? string.Empty;
             IsDjBannerEnabled = settings.IsDjBannerEnabled;
+            IsDjBannerQrCodeEnabled = settings.IsDjBannerQrCodeEnabled;
 
             _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
             _djBannerWindowService.SetBannerPath(SelectedDjBannerPath);
@@ -584,7 +605,7 @@ namespace KSRotation.ViewModels
 
             if (IsDjBannerEnabled)
             {
-                _djBannerWindowService.Show();
+                _djBannerWindowService.Show(this);
             }
 
             IsDisplayEnabled = false;
@@ -924,6 +945,59 @@ namespace KSRotation.ViewModels
             }
 
             int roundToMark = entry.GetNextIncompleteRound();
+            if (roundToMark > 0)
+            {
+                int index = Singers.IndexOf(entry);
+                if (index >= 0)
+                {
+                    int showRound = 1;
+                    var activeBefore = new System.Collections.Generic.List<SingerEntry>();
+                    for (int j = 0; j < index; j++)
+                    {
+                        var s = Singers[j];
+                        if (!s.IsInactive && !s.IsPaused && !s.IsMusic)
+                        {
+                            activeBefore.Add(s);
+                        }
+                    }
+
+                    if (activeBefore.Count > 0)
+                    {
+                        int maxBefore = 0;
+                        foreach (var s in activeBefore)
+                        {
+                            int highest = s.GetHighestCompletedRound();
+                            if (highest > maxBefore)
+                            {
+                                maxBefore = highest;
+                            }
+                        }
+                        showRound = Math.Max(1, maxBefore);
+                    }
+                    else
+                    {
+                        int maxAll = 0;
+                        foreach (var s in Singers)
+                        {
+                            if (!s.IsInactive && !s.IsPaused && !s.IsMusic)
+                            {
+                                int highest = s.GetHighestCompletedRound();
+                                if (highest > maxAll)
+                                {
+                                    maxAll = highest;
+                                }
+                            }
+                        }
+                        showRound = Math.Max(1, maxAll + 1);
+                    }
+
+                    int calculatedRound = Math.Max(roundToMark, showRound);
+                    if (calculatedRound >= 1 && calculatedRound <= 10)
+                    {
+                        roundToMark = calculatedRound;
+                    }
+                }
+            }
 
             if (roundToMark > 0)
             {
@@ -1761,6 +1835,7 @@ namespace KSRotation.ViewModels
                 DjBannerMonitorDevice = DjBannerMonitorDevice,
                 SelectedDjBannerPath = SelectedDjBannerPath,
                 IsDjBannerEnabled = IsDjBannerEnabled,
+                IsDjBannerQrCodeEnabled = IsDjBannerQrCodeEnabled,
                 RotationTarget = RotationTarget,
                 AutoAcceptRequests = AutoAcceptRequests
             };

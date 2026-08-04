@@ -1,3 +1,8 @@
+<!-- Edited on Aug 4, 2026 @ 10:07:00 -> Update Casting tab references to Display tab and Display & DJ Banners help topic -->
+<!-- Edited on Aug 4, 2026 @ 10:02:00 -> Add checkbox in DJ Banner settings to toggle QR code overlay visibility -->
+<!-- Edited on Aug 3, 2026 @ 11:27:00 -> Shorten Appearance GroupBox to RowSpan=3 to align with Email Settings and fit Settings tab within screen height -->
+<!-- Edited on Aug 3, 2026 @ 11:17:00 -> Make Settings tab fit without scrolling: remove ScrollViewer, set Venue Names and DJ Names to RowSpan=2, and remove designer MinHeight constraints on rows -->
+<!-- Edited on Aug 3, 2026 @ 11:10:00 -> Move Display & Projection to Casting page, set it to 4-column layout, and rearrange Settings tab components -->
 <!-- Edited on Aug 2, 2026 @ 10:19:00 -> Update DJ Banner help topic to include looping MP4 video formats -->
 <!-- Edited on Aug 2, 2026 @ 09:39:00 -> Add style resources and apply category-specific styling to GroupBoxes to differentiate categories visually -->
 <!-- Edited on Aug 2, 2026 @ 07:50:00 -> Update Help system with Casting & DJ Banners topic and remove FlipTile View reference -->
@@ -193,8 +198,13 @@
                                 BorderThickness="1"
                                 BorderBrush="{StaticResource PurpleGroupBoxBorderBrush}"
                                 Background="{DynamicResource MaterialDesignCardBackground}">
-                            <StackPanel>
-                                <Border Background="{StaticResource PurpleGroupBoxHeaderBrush}"
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0"
+                                        Background="{StaticResource PurpleGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
                                         Padding="14,9">
                                     <TextBlock Text="{TemplateBinding Header}"
@@ -202,12 +212,13 @@
                                                FontWeight="SemiBold"
                                                FontSize="13" />
                                 </Border>
-                                <Border Background="{StaticResource PurpleGroupBoxBodyBrush}"
+                                <Border Grid.Row="1"
+                                        Background="{StaticResource PurpleGroupBoxBodyBrush}"
                                         Padding="14"
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -231,8 +242,13 @@
                                 BorderThickness="1"
                                 BorderBrush="{StaticResource BlueGroupBoxBorderBrush}"
                                 Background="{DynamicResource MaterialDesignCardBackground}">
-                            <StackPanel>
-                                <Border Background="{StaticResource BlueGroupBoxHeaderBrush}"
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0"
+                                        Background="{StaticResource BlueGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
                                         Padding="14,9">
                                     <TextBlock Text="{TemplateBinding Header}"
@@ -240,12 +256,13 @@
                                                FontWeight="SemiBold"
                                                FontSize="13" />
                                 </Border>
-                                <Border Background="{StaticResource BlueGroupBoxBodyBrush}"
+                                <Border Grid.Row="1"
+                                        Background="{StaticResource BlueGroupBoxBodyBrush}"
                                         Padding="14"
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -269,8 +286,13 @@
                                 BorderThickness="1"
                                 BorderBrush="{StaticResource NavyGroupBoxBorderBrush}"
                                 Background="{DynamicResource MaterialDesignCardBackground}">
-                            <StackPanel>
-                                <Border Background="{StaticResource NavyGroupBoxHeaderBrush}"
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0"
+                                        Background="{StaticResource NavyGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
                                         Padding="14,9">
                                     <TextBlock Text="{TemplateBinding Header}"
@@ -278,12 +300,13 @@
                                                FontWeight="SemiBold"
                                                FontSize="13" />
                                 </Border>
-                                <Border Background="{StaticResource NavyGroupBoxBodyBrush}"
+                                <Border Grid.Row="1"
+                                        Background="{StaticResource NavyGroupBoxBodyBrush}"
                                         Padding="14"
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -307,8 +330,13 @@
                                 BorderThickness="1"
                                 BorderBrush="{StaticResource SlateGroupBoxBorderBrush}"
                                 Background="{DynamicResource MaterialDesignCardBackground}">
-                            <StackPanel>
-                                <Border Background="{StaticResource SlateGroupBoxHeaderBrush}"
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0"
+                                        Background="{StaticResource SlateGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
                                         Padding="14,9">
                                     <TextBlock Text="{TemplateBinding Header}"
@@ -316,12 +344,13 @@
                                                FontWeight="SemiBold"
                                                FontSize="13" />
                                 </Border>
-                                <Border Background="{StaticResource SlateGroupBoxBodyBrush}"
+                                <Border Grid.Row="1"
+                                        Background="{StaticResource SlateGroupBoxBodyBrush}"
                                         Padding="14"
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -715,82 +744,82 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                     <TextBlock FontWeight="Bold"
+                                    <TextBlock FontWeight="Bold"
                                                 FontSize="11"
                                                 Margin="0,0,0,4"
                                                 Cursor="Hand"
                                                 ToolTip="Click to toggle DJ/Patron QR code mode"
                                                 PreviewMouseLeftButtonDown="OnPortalTitleClicked">
-                                         <TextBlock.Style>
-                                             <Style TargetType="TextBlock">
-                                                 <Setter Property="Text" Value="PATRON WEB PORTAL" />
-                                                 <Setter Property="Foreground" Value="{DynamicResource AppHeaderBrush}" />
-                                                 <Style.Triggers>
-                                                     <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
-                                                         <Setter Property="Text" Value="⚠️ DJ CONTROL PORTAL" />
-                                                         <Setter Property="Foreground" Value="#EF4444" />
-                                                     </DataTrigger>
-                                                 </Style.Triggers>
-                                             </Style>
-                                         </TextBlock.Style>
-                                     </TextBlock>
-                                     <TextBlock FontSize="11"
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="PATRON WEB PORTAL" />
+                                                <Setter Property="Foreground" Value="{DynamicResource AppHeaderBrush}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                        <Setter Property="Text" Value="⚠️ DJ CONTROL PORTAL" />
+                                                        <Setter Property="Foreground" Value="#EF4444" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock FontSize="11"
                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
                                                 Margin="0,0,0,4">
-                                         <TextBlock.Style>
-                                             <Style TargetType="TextBlock">
-                                                 <Setter Property="Text" Value="Connect to local Wi-Fi, then visit:" />
-                                                 <Style.Triggers>
-                                                     <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
-                                                         <Setter Property="Text" Value="DJ ONLY: Remote dashboard login URL" />
-                                                     </DataTrigger>
-                                                 </Style.Triggers>
-                                             </Style>
-                                         </TextBlock.Style>
-                                     </TextBlock>
-                                     <TextBox FontWeight="SemiBold"
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="Connect to local Wi-Fi, then visit:" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                        <Setter Property="Text" Value="DJ ONLY: Remote dashboard login URL" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBox FontWeight="SemiBold"
                                               FontSize="15"
                                               IsReadOnly="True"
                                               BorderThickness="0"
                                               Background="Transparent"
                                               Padding="0"
                                               HorizontalAlignment="Left">
-                                         <TextBox.Style>
-                                             <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                                 <Setter Property="Text" Value="{Binding ConnectionUrl, Mode=OneWay}" />
-                                                 <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
-                                                 <Style.Triggers>
-                                                     <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
-                                                         <Setter Property="Text" Value="{Binding DjConnectionUrl, Mode=OneWay}" />
-                                                         <Setter Property="Foreground" Value="#EF4444" />
-                                                     </DataTrigger>
-                                                 </Style.Triggers>
-                                             </Style>
-                                         </TextBox.Style>
-                                     </TextBox>
+                                        <TextBox.Style>
+                                            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                                <Setter Property="Text" Value="{Binding ConnectionUrl, Mode=OneWay}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                        <Setter Property="Text" Value="{Binding DjConnectionUrl, Mode=OneWay}" />
+                                                        <Setter Property="Foreground" Value="#EF4444" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBox.Style>
+                                    </TextBox>
 
-                                     <TextBlock Margin="0,6,0,0"
+                                    <TextBlock Margin="0,6,0,0"
                                                 FontSize="11"
                                                 Foreground="{DynamicResource MaterialDesignBodyLight}">
-                                         <TextBlock.Style>
-                                             <Style TargetType="TextBlock">
-                                                 <Setter Property="Visibility" Value="Collapsed" />
-                                                 <Style.Triggers>
-                                                     <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
-                                                         <Setter Property="Visibility" Value="Visible" />
-                                                     </DataTrigger>
-                                                 </Style.Triggers>
-                                             </Style>
-                                         </TextBlock.Style>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
                                          <Run Text="DJ PIN (give to DJ only): " />
                                          <Run Text="{Binding DjPin, Mode=OneWay}"
                                               FontWeight="Bold"
                                               FontSize="14"
                                               Foreground="#EF4444" />
-                                     </TextBlock>
-                                 </StackPanel>
+                                    </TextBlock>
+                                </StackPanel>
 
-                                 <Border Grid.Column="1"
+                                <Border Grid.Column="1"
                                          Width="80"
                                          Height="80"
                                          Margin="12,0,0,0"
@@ -798,19 +827,19 @@
                                          CornerRadius="4"
                                          Padding="2"
                                          VerticalAlignment="Center">
-                                     <Image Stretch="Uniform">
-                                         <Image.Style>
-                                             <Style TargetType="Image">
-                                                 <Setter Property="Source" Value="{Binding QrCodeImage}" />
-                                                 <Style.Triggers>
-                                                     <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
-                                                         <Setter Property="Source" Value="{Binding DjQrCodeImage}" />
-                                                     </DataTrigger>
-                                                 </Style.Triggers>
-                                             </Style>
-                                         </Image.Style>
-                                     </Image>
-                                 </Border>
+                                    <Image Stretch="Uniform">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Source" Value="{Binding QrCodeImage}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                        <Setter Property="Source" Value="{Binding DjQrCodeImage}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </Border>
                             </Grid>
                         </Border>
 
@@ -963,44 +992,44 @@
             </TabItem>
 
             <TabItem Header="Settings" Width="50" Height="45" VerticalAlignment="Top" d:LayoutOverrides="Height">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="6,0,-6,0" TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
-                    <Grid Margin="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="270" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
+                <Grid Margin="12" TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="222" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="148.736" />
+                        <RowDefinition Height="75" />
+                        <RowDefinition Height="Auto" MinHeight="134" />
+                        <RowDefinition Height="0*" />
+                    </Grid.RowDefinitions>
 
-                        <!-- Venue Names in the 1st column -->
-                        <GroupBox Header="Venue Names"
+                    <!-- Venue Names in the 1st column -->
+                    <GroupBox Header="Venue Names"
                                   Style="{StaticResource PurpleSettingsGroupBoxStyle}"
                                   Grid.Row="1"
-                                  Grid.RowSpan="5"
+                                  Grid.RowSpan="2"
                                   Margin="0,0,0,12">
-                             <Grid Margin="0,4,0,0">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
+                        <Grid Margin="0,4,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
-                                <!-- Active Venue Label -->
-                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,0,0,8">
-                                    <TextBlock Text="Active Venue: " FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBodyLight}" FontSize="13"/>
-                                    <TextBlock Text="{Binding VenueName}" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueMidBrush}" FontSize="13"/>
-                                </StackPanel>
+                            <!-- Active Venue Label -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,0,0,8">
+                                <TextBlock Text="Active Venue: " FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBodyLight}" FontSize="13" />
+                                <TextBlock Text="{Binding VenueName}" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueMidBrush}" FontSize="13" />
+                            </StackPanel>
 
-                                <ListBox x:Name="LbVenues"
+                            <ListBox x:Name="LbVenues"
                                          Grid.Row="1"
                                          ItemsSource="{Binding Venues}"
                                          SelectedItem="{Binding SelectedVenue, UpdateSourceTrigger=PropertyChanged}"
@@ -1010,132 +1039,133 @@
                                          Background="{DynamicResource MaterialDesignCardBackground}"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                          Padding="4" IsTabStop="True">
-                                     <ListBox.ItemTemplate>
-                                         <DataTemplate>
-                                             <Grid Margin="4,2">
-                                                 <Grid.ColumnDefinitions>
-                                                     <ColumnDefinition Width="Auto" />
-                                                     <ColumnDefinition Width="*" />
-                                                     <ColumnDefinition Width="Auto" />
-                                                 </Grid.ColumnDefinitions>
-                                                 <Path Data="M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2M12,6A3,3 0 0,1 15,9A3,3 0 0,1 12,12A3,3 0 0,1 9,9A3,3 0 0,1 12,6Z"
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="4,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Path Data="M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2M12,6A3,3 0 0,1 15,9A3,3 0 0,1 12,12A3,3 0 0,1 9,9A3,3 0 0,1 12,6Z"
                                                        Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
                                                        Width="14" Height="14"
                                                        Stretch="Uniform"
                                                        VerticalAlignment="Center"
                                                        Margin="0,0,8,0" />
-                                                 <TextBlock Grid.Column="1"
+                                            <TextBlock Grid.Column="1"
                                                             Text="{Binding}"
                                                             FontSize="14"
                                                             VerticalAlignment="Center">
-                                                     <TextBlock.Style>
-                                                         <Style TargetType="TextBlock">
-                                                             <Setter Property="FontWeight" Value="Medium" />
-                                                             <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
-                                                             <Style.Triggers>
-                                                                 <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                                     <Setter Property="FontWeight" Value="Bold" />
-                                                                 </DataTrigger>
-                                                             </Style.Triggers>
-                                                         </Style>
-                                                     </TextBlock.Style>
-                                                 </TextBlock>
-                                                 <Path Grid.Column="2"
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="FontWeight" Value="Medium" />
+                                                        <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <Path Grid.Column="2"
                                                        Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"
                                                        Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
                                                        Width="14" Height="14"
                                                        Stretch="Uniform"
                                                        VerticalAlignment="Center"
                                                        Margin="8,0,4,0">
-                                                     <Path.Style>
-                                                         <Style TargetType="Path">
-                                                             <Setter Property="Visibility" Value="Collapsed" />
-                                                             <Style.Triggers>
-                                                                 <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                                     <Setter Property="Visibility" Value="Visible" />
-                                                                 </DataTrigger>
-                                                             </Style.Triggers>
-                                                         </Style>
-                                                     </Path.Style>
-                                                 </Path>
-                                             </Grid>
-                                         </DataTemplate>
-                                     </ListBox.ItemTemplate>
-                                     <ListBox.ItemContainerStyle>
-                                         <Style TargetType="ListBoxItem">
-                                             <Setter Property="Padding" Value="8,6" />
-                                             <Setter Property="Margin" Value="0,1" />
-                                             <Setter Property="Background" Value="Transparent" />
-                                             <Setter Property="Template">
-                                                 <Setter.Value>
-                                                     <ControlTemplate TargetType="ListBoxItem">
-                                                         <Border x:Name="Bd"
+                                                <Path.Style>
+                                                    <Style TargetType="Path">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Path.Style>
+                                            </Path>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="8,6" />
+                                        <Setter Property="Margin" Value="0,1" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="Bd"
                                                                  Background="{TemplateBinding Background}"
                                                                  BorderThickness="0"
                                                                  CornerRadius="6"
                                                                  Padding="{TemplateBinding Padding}">
-                                                             <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-                                                         </Border>
-                                                         <ControlTemplate.Triggers>
-                                                             <Trigger Property="IsSelected" Value="True">
-                                                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
-                                                                 <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
-                                                             </Trigger>
-                                                             <Trigger Property="IsMouseOver" Value="True">
-                                                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
-                                                             </Trigger>
-                                                         </ControlTemplate.Triggers>
-                                                     </ControlTemplate>
-                                                 </Setter.Value>
-                                             </Setter>
-                                         </Style>
-                                     </ListBox.ItemContainerStyle>
-                                 </ListBox>
+                                                        <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
 
-                                 <TextBox
+                            <TextBox
                                      Grid.Row="2"
                                      Text="{Binding NewVenueName, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,0,8"
                                      ToolTip="Type a new venue name"
                                      Style="{StaticResource ModernTextBoxStyle}" />
 
-                                 <StackPanel Grid.Row="3" Orientation="Horizontal">
-                                     <Button
+                            <StackPanel Grid.Row="3" Orientation="Horizontal">
+                                <Button
                                          Content="Add Venue"
                                          Command="{Binding AddVenueCommand}"
                                          Width="110"
                                          Margin="0,0,8,0"
                                          Style="{StaticResource ModernButtonStyle}" />
-                                     <Button
+                                <Button
                                          Content="Remove"
                                          Command="{Binding RemoveVenueCommand}"
                                          Width="90"
                                          Style="{StaticResource ModernSecondaryButtonStyle}" />
-                                 </StackPanel>
-                             </Grid>
-                        </GroupBox>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
 
-                        <!-- DJ Names in the 3rd column -->
-                        <GroupBox Header="DJ Names"
+                    <!-- DJ Names in the 3rd column -->
+                    <GroupBox Header="DJ Names"
                                   Style="{StaticResource PurpleSettingsGroupBoxStyle}"
                                   Grid.Column="2"
                                   Grid.Row="1"
-                                  Margin="15,0,0,12">
-                             <Grid Margin="0,4,0,0">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
+                                  Grid.RowSpan="2"
+                                  Margin="15,0,0,12" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
+                        <Grid Margin="0,4,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
-                                <!-- Active DJ Label -->
-                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,0,0,8">
-                                    <TextBlock Text="Active DJ: " FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBodyLight}" FontSize="13"/>
-                                    <TextBlock Text="{Binding DjName}" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueMidBrush}" FontSize="13"/>
-                                </StackPanel>
+                            <!-- Active DJ Label -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,0,0,8">
+                                <TextBlock Text="Active DJ: " FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBodyLight}" FontSize="13" />
+                                <TextBlock Text="{Binding DjName}" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryHueMidBrush}" FontSize="13" />
+                            </StackPanel>
 
-                                <ListBox x:Name="LbDjs"
+                            <ListBox x:Name="LbDjs"
                                          Grid.Row="1"
                                          ItemsSource="{Binding Djs}"
                                          SelectedItem="{Binding SelectedDj, UpdateSourceTrigger=PropertyChanged}"
@@ -1145,336 +1175,297 @@
                                          Background="{DynamicResource MaterialDesignCardBackground}"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                          Padding="4" IsTabStop="True">
-                                     <ListBox.ItemTemplate>
-                                         <DataTemplate>
-                                             <Grid Margin="4,2">
-                                                 <Grid.ColumnDefinitions>
-                                                     <ColumnDefinition Width="Auto" />
-                                                     <ColumnDefinition Width="*" />
-                                                     <ColumnDefinition Width="Auto" />
-                                                 </Grid.ColumnDefinitions>
-                                                 <Path Data="M12,2A3,3 0 0,0 9,5V11A3,3 0 0,0 12,14A3,3 0 0,0 15,11V5A3,3 0 0,0 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="4,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Path Data="M12,2A3,3 0 0,0 9,5V11A3,3 0 0,0 12,14A3,3 0 0,0 15,11V5A3,3 0 0,0 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"
                                                        Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
                                                        Width="14" Height="14"
                                                        Stretch="Uniform"
                                                        VerticalAlignment="Center"
                                                        Margin="0,0,8,0" />
-                                                 <TextBlock Grid.Column="1"
+                                            <TextBlock Grid.Column="1"
                                                             Text="{Binding}"
                                                             FontSize="14"
                                                             VerticalAlignment="Center">
-                                                     <TextBlock.Style>
-                                                         <Style TargetType="TextBlock">
-                                                             <Setter Property="FontWeight" Value="Medium" />
-                                                             <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
-                                                             <Style.Triggers>
-                                                                 <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                                     <Setter Property="FontWeight" Value="Bold" />
-                                                                 </DataTrigger>
-                                                             </Style.Triggers>
-                                                         </Style>
-                                                     </TextBlock.Style>
-                                                 </TextBlock>
-                                                 <Path Grid.Column="2"
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="FontWeight" Value="Medium" />
+                                                        <Setter Property="Foreground" Value="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <Path Grid.Column="2"
                                                        Data="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"
                                                        Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
                                                        Width="14" Height="14"
                                                        Stretch="Uniform"
                                                        VerticalAlignment="Center"
                                                        Margin="8,0,4,0">
-                                                     <Path.Style>
-                                                         <Style TargetType="Path">
-                                                             <Setter Property="Visibility" Value="Collapsed" />
-                                                             <Style.Triggers>
-                                                                 <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                                     <Setter Property="Visibility" Value="Visible" />
-                                                                 </DataTrigger>
-                                                             </Style.Triggers>
-                                                         </Style>
-                                                     </Path.Style>
-                                                 </Path>
-                                             </Grid>
-                                         </DataTemplate>
-                                     </ListBox.ItemTemplate>
-                                     <ListBox.ItemContainerStyle>
-                                         <Style TargetType="ListBoxItem">
-                                             <Setter Property="Padding" Value="8,6" />
-                                             <Setter Property="Margin" Value="0,1" />
-                                             <Setter Property="Background" Value="Transparent" />
-                                             <Setter Property="Template">
-                                                 <Setter.Value>
-                                                     <ControlTemplate TargetType="ListBoxItem">
-                                                         <Border x:Name="Bd"
+                                                <Path.Style>
+                                                    <Style TargetType="Path">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Path.Style>
+                                            </Path>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="8,6" />
+                                        <Setter Property="Margin" Value="0,1" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="Bd"
                                                                  Background="{TemplateBinding Background}"
                                                                  BorderThickness="0"
                                                                  CornerRadius="6"
                                                                  Padding="{TemplateBinding Padding}">
-                                                             <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-                                                         </Border>
-                                                         <ControlTemplate.Triggers>
-                                                             <Trigger Property="IsSelected" Value="True">
-                                                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
-                                                                 <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
-                                                             </Trigger>
-                                                             <Trigger Property="IsMouseOver" Value="True">
-                                                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
-                                                             </Trigger>
-                                                         </ControlTemplate.Triggers>
-                                                     </ControlTemplate>
-                                                 </Setter.Value>
-                                             </Setter>
-                                         </Style>
-                                     </ListBox.ItemContainerStyle>
-                                 </ListBox>
+                                                        <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
 
-                                 <TextBox
+                            <TextBox
                                      Grid.Row="2"
                                      Text="{Binding NewDjName, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,0,8"
                                      ToolTip="Type a new DJ name"
                                      Style="{StaticResource ModernTextBoxStyle}" />
 
-                                 <StackPanel Grid.Row="3" Orientation="Horizontal">
-                                     <Button
+                            <StackPanel Grid.Row="3" Orientation="Horizontal">
+                                <Button
                                          Content="Add DJ"
                                          Command="{Binding AddDjCommand}"
                                          Width="110"
-                                         Margin="0,0,8,0"
+                                         Margin="0,0,8,10"
                                          Style="{StaticResource ModernButtonStyle}" />
-                                     <Button
+                                <Button
                                          Content="Remove"
                                          Command="{Binding RemoveDjCommand}"
                                          Width="90"
+                                           Margin="0,0,8,10"
                                          Style="{StaticResource ModernSecondaryButtonStyle}" />
-                                 </StackPanel>
-                             </Grid>
-                        </GroupBox>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
 
-                        <GroupBox Header="Network IP Setup"
+                    <GroupBox Header="Network IP Setup"
                                   Style="{StaticResource NavySettingsGroupBoxStyle}"
                                   Grid.Column="3"
                                   Grid.Row="1"
-                                  VerticalAlignment="Top"
-                                  Margin="15,0,0,12">
-                            <StackPanel Margin="0,4,0,0">
-                                <TextBlock Text="Manual Portal IPv4 (Optional)" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                <TextBox
+                                  Margin="15,0,0,2" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
+                        <StackPanel Margin="0,4,0,0">
+                            <TextBlock Text="Manual Portal IPv4 (Optional)" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                            <TextBox
                                     Text="{Binding PreferredHostIp, UpdateSourceTrigger=PropertyChanged}"
                                     Margin="0,0,0,8"
                                     ToolTip="Example: 192.168.50.20"
                                     Style="{StaticResource ModernTextBoxStyle}" />
-                                <TextBlock Text="Leave blank to auto-detect the local IPv4 address. Use this field when you want a fixed travel-router IP in the displayed URL and QR code."
+                            <TextBlock Text="Leave blank to auto-detect the local IPv4 address. Use this field when you want a fixed travel-router IP in the displayed URL and QR code."
                                            TextWrapping="Wrap"
                                            FontSize="12"
                                            Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                            </StackPanel>
-                        </GroupBox>
+                        </StackPanel>
+                    </GroupBox>
 
-                        <GroupBox Header="Display &amp; Projection"
-                                  Style="{StaticResource BlueSettingsGroupBoxStyle}"
-                                  Grid.Column="3"
-                                  Grid.Row="2"
-                                  VerticalAlignment="Top"
-                                  Margin="15,12,0,12">
-                            <StackPanel Margin="0,4,0,0">
-                                <TextBlock Text="Target Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                <Grid Margin="0,0,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <ComboBox
-                                        ItemsSource="{Binding AvailableMonitors}"
-                                        SelectedValue="{Binding SelectedMonitorDevice, UpdateSourceTrigger=PropertyChanged}"
-                                        SelectedValuePath="DeviceName"
-                                        DisplayMemberPath="FriendlyName"
-                                        Style="{StaticResource ModernComboBoxStyle}" />
-                                    <Button
-                                        Grid.Column="1"
-                                        Content="Refresh"
-                                        Command="{Binding RefreshMonitorsCommand}"
-                                        Style="{StaticResource ModernSecondaryButtonStyle}"
-                                        Margin="8,0,0,0"
-                                        VerticalAlignment="Center"
-                                        Padding="8,4"
-                                        Height="32" />
-                                </Grid>
-                                <TextBlock Text="Select which monitor will display the projection window. If not found, it defaults to the secondary or primary monitor."
-                                           TextWrapping="Wrap"
-                                           FontSize="12"
-                                           Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                            </StackPanel>
-                        </GroupBox>
-
-                        <!-- Appearance Settings in the 2nd column -->
-                        <GroupBox Header="Appearance"
-                                  Style="{StaticResource BlueSettingsGroupBoxStyle}"
-                                  Grid.Column="1"
-                                  Grid.Row="1"
-                                  Grid.RowSpan="5"
-                                  Margin="15,0,0,10">
-                            <StackPanel Margin="0,4,0,0">
-                                <!-- Theme -->
-                                <TextBlock Text="Theme" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                <ComboBox
+                    <!-- Appearance Settings in the 2nd column -->
+                    <GroupBox Header="Appearance"
+                              Style="{StaticResource BlueSettingsGroupBoxStyle}"
+                              Grid.Column="1"
+                              Grid.Row="1"
+                              Grid.RowSpan="3"
+                              Margin="15,0,0,12">
+                        <StackPanel Margin="0,4,0,0">
+                            <!-- Theme -->
+                            <TextBlock Text="Theme" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                            <ComboBox
                                     Width="120" HorizontalAlignment="Left"
                                     ItemsSource="{Binding Themes}"
                                     SelectedItem="{Binding SelectedTheme, UpdateSourceTrigger=PropertyChanged}"
                                     Style="{StaticResource ModernComboBoxStyle}"
                                     Margin="0,0,0,12" />
 
-                                <!-- Banner Text -->
-                                <TextBlock Text="Banner Text" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                <TextBox
+                            <!-- Banner Text -->
+                            <TextBlock Text="Banner Text" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                            <TextBox
                                     Text="{Binding BannerText, UpdateSourceTrigger=PropertyChanged}"
                                     Margin="0,0,0,12"
                                     Style="{StaticResource ModernTextBoxStyle}" />
 
-                                <!-- Star Wars Crawl Text -->
-                                <TextBlock Text="Star Wars Crawl Text" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                <TextBox
+                            <!-- Star Wars Crawl Text -->
+                            <TextBlock Text="Star Wars Crawl Text" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                            <TextBox
                                     Text="{Binding CrawlBannerText, UpdateSourceTrigger=PropertyChanged}"
                                     TextWrapping="Wrap" Height="120"
                                     Margin="0,0,0,12"
                                     Style="{StaticResource ModernTextBoxStyle}" VerticalContentAlignment="Top" HorizontalContentAlignment="Left" />
 
-                                <!-- Marquee Speed -->
-                                <TextBlock Text="Marquee Speed" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                <Grid Margin="0,0,0,12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="44" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Slow" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                    <Slider Grid.Column="1"
+                            <!-- Marquee Speed -->
+                            <TextBlock Text="Marquee Speed" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="44" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Slow" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <Slider Grid.Column="1"
                                             Minimum="20" Maximum="200"
                                             SmallChange="5" LargeChange="20"
                                             TickFrequency="20" TickPlacement="BottomRight"
                                             Value="{Binding MarqueeSpeed, UpdateSourceTrigger=PropertyChanged}"
                                             VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="2" Text="Fast" VerticalAlignment="Center" Margin="8,0,8,0" />
-                                    <TextBlock Grid.Column="3"
+                                <TextBlock Grid.Column="2" Text="Fast" VerticalAlignment="Center" Margin="8,0,8,0" />
+                                <TextBlock Grid.Column="3"
                                                Text="{Binding MarqueeSpeed, StringFormat={}{0:F0}}"
                                                VerticalAlignment="Center" />
-                                </Grid>
+                            </Grid>
 
-                                <!-- Watermark Opacity -->
-                                <TextBlock Text="Watermark Opacity" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                <Grid Margin="0,0,0,4">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="44" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Invisible" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                    <Slider Grid.Column="1"
+                            <!-- Watermark Opacity -->
+                            <TextBlock Text="Watermark Opacity" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="44" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Invisible" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <Slider Grid.Column="1"
                                             Minimum="0.0" Maximum="1.0"
                                             SmallChange="0.01" LargeChange="0.1"
                                             TickFrequency="0.1" TickPlacement="BottomRight"
                                             Value="{Binding WatermarkOpacity, UpdateSourceTrigger=PropertyChanged}"
                                             VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="2" Text="Solid" VerticalAlignment="Center" Margin="8,0,8,0" />
-                                    <TextBlock Grid.Column="3"
+                                <TextBlock Grid.Column="2" Text="Solid" VerticalAlignment="Center" Margin="8,0,8,0" />
+                                <TextBlock Grid.Column="3"
                                                Text="{Binding WatermarkOpacity, StringFormat={}{0:P0}}"
                                                VerticalAlignment="Center" />
-                                </Grid>
-                            </StackPanel>
-                        </GroupBox>
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
 
-                        <StackPanel Grid.Column="2" Grid.Row="2" Margin="15,12,0,12">
-                            <CheckBox
+                    <StackPanel Grid.Column="3" Grid.Row="2" Margin="15,12,0,12">
+                        <CheckBox
                                  Content="Test Mode (loads sample singers on next startup)"
                                  IsChecked="{Binding IsTestMode}"
                                  Style="{StaticResource ModernCheckBoxStyle}"
                                  Margin="0,0,0,8" />
-                            <Button
+                        <Button
                                  Content="Save Current Rotation as Test List"
                                  Command="{Binding SaveCurrentAsTestListCommand}"
-                                 HorizontalAlignment="Left"
+                                 HorizontalAlignment="Center"
                                  Width="260"
                                  Style="{StaticResource ModernButtonStyle}" />
-                        </StackPanel>
+                    </StackPanel>
 
-                        <!-- Email settings container panel with shaded background -->
-                        <GroupBox Header="Email Settings"
-                                  Style="{StaticResource SlateSettingsGroupBoxStyle}"
-                                  Grid.Column="2" Grid.Row="3"
-                                  Margin="15,12,0,12">
-                            <StackPanel>
-                                <TextBlock Text="Separate multiple addresses with  ,  or  ;" FontSize="11" Margin="0,0,0,6"
+                    <!-- Email settings container panel with shaded background -->
+                    <GroupBox Header="Email Settings"
+                                  Style="{StaticResource SlateSettingsGroupBoxStyle}" Grid.Row="3"
+                                  Margin="15,10,0,14" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin" Grid.RowSpan="2">
+                        <StackPanel Height="131">
+                            <TextBlock Text="Separate multiple addresses with  ,  or  ;" FontSize="11" Margin="0,0,0,6"
                                            Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                <TextBox
+                            <TextBox
                                     Text="{Binding EmailRecipient, UpdateSourceTrigger=PropertyChanged}"
                                     Margin="0,0,0,12"
                                     ToolTip="One or more email addresses separated by comma or semicolon"
                                     Style="{StaticResource ModernTextBoxStyle}" />
-                                <CheckBox
+                            <CheckBox
                                     Content="Send email automatically when saving rotation"
                                     IsChecked="{Binding SendEmailOnSave}"
                                     Style="{StaticResource ModernCheckBoxStyle}"
                                     Margin="0,4,0,4" />
-                            </StackPanel>
-                        </GroupBox>
+                        </StackPanel>
+                    </GroupBox>
 
-                        <Button
-                            Grid.Column="2"
+                    <Button
                             Grid.Row="4"
-                            Content="Save Settings" Height="35"
-                            Command="{Binding SaveSettingsCommand}" Margin="15,12,0,12"
-                            Style="{StaticResource ModernButtonStyle}" />
+                            Content="Save Settings"
+                            Command="{Binding SaveSettingsCommand}" Margin="20,15,19,28"
+                            Style="{StaticResource ModernButtonStyle}" Grid.Column="1" />
 
-                        <GroupBox Header="DJ Banner Screen"
+                    <GroupBox Header="DJ Banner Screen"
                                   Style="{StaticResource BlueSettingsGroupBoxStyle}"
                                   Grid.Column="2"
                                   Grid.ColumnSpan="2"
-                                  Grid.Row="5"
-                                  VerticalAlignment="Top"
-                                  Margin="15,12,0,12">
-                            <Grid Margin="0,4,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="15" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                
-                                <!-- Column 0: Target Monitor & Enable -->
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Target Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                    <ComboBox
+                                  Grid.Row="3"
+                                  Margin="15,15,0,14" d:LayoutOverrides="VerticalAlignment, LeftMargin, RightMargin" Grid.RowSpan="2">
+                        <Grid Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="15" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Column 0: Target Monitor & Enable -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Target Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <ComboBox
                                         ItemsSource="{Binding AvailableMonitors}"
                                         SelectedValue="{Binding DjBannerMonitorDevice, UpdateSourceTrigger=PropertyChanged}"
                                         SelectedValuePath="DeviceName"
                                         DisplayMemberPath="FriendlyName"
                                         Style="{StaticResource ModernComboBoxStyle}"
                                         Margin="0,0,0,12" />
-                                    <CheckBox
+                                <CheckBox
                                         Content="Enable DJ Banner Screen"
                                         IsChecked="{Binding IsDjBannerEnabled, UpdateSourceTrigger=PropertyChanged}"
                                         IsEnabled="{Binding IsDjBannerAvailable}"
                                         Style="{StaticResource ModernCheckBoxStyle}"
                                         Margin="0,4,0,4"
                                         ToolTip="The rotation display and DJ banner are typically shown on the same screen, so the banner is unavailable while 'Enable Display Window' is checked." />
-                                </StackPanel>
-                                
-                                <!-- Column 2: Upload & Select Banner -->
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Select DJ Banner" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox
+                            </StackPanel>
+
+                            <!-- Column 2: Upload & Select Banner -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Select DJ Banner" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox
                                             ItemsSource="{Binding AvailableDjBanners}"
                                             SelectedValue="{Binding SelectedDjBannerPath, UpdateSourceTrigger=PropertyChanged}"
                                             SelectedValuePath="FullPath"
                                             DisplayMemberPath="FileName"
                                             Style="{StaticResource ModernComboBoxStyle}" />
-                                        <Button
+                                    <Button
                                             Grid.Column="1"
                                             Content="Upload"
                                             Command="{Binding UploadDjBannerCommand}"
@@ -1483,7 +1474,7 @@
                                             VerticalAlignment="Center"
                                             Padding="8,4"
                                             Height="32" />
-                                        <Button
+                                    <Button
                                             Grid.Column="2"
                                             Content="Delete"
                                             Command="{Binding DeleteDjBannerCommand}"
@@ -1492,26 +1483,36 @@
                                             VerticalAlignment="Center"
                                             Padding="8,4"
                                             Height="32" />
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-                        </GroupBox>
-                    </Grid>
-                </ScrollViewer>
+                                </Grid>
+                                <CheckBox
+                                    Content="Show request QR Code overlay on DJ Banner"
+                                    IsChecked="{Binding IsDjBannerQrCodeEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                    Style="{StaticResource ModernCheckBoxStyle}"
+                                    Margin="0,8,0,4" />
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
             </TabItem>
 
-            <TabItem Header="Casting" Width="65" Height="45">
+            <TabItem Header="Display" Width="65" Height="45">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid Margin="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
                         <GroupBox Header="Casting Controls"
                                   Style="{StaticResource PurpleSettingsGroupBoxStyle}"
-                                  Width="500"
-                                  HorizontalAlignment="Left"
+                                  Grid.Column="0"
                                   VerticalAlignment="Top"
-                                  Margin="20">
+                                  Margin="0,0,0,12">
                             <StackPanel Orientation="Vertical" Margin="20">
-                                <TextBlock Text="Cast Rotation To:" 
-                                           FontSize="18" 
+                                <TextBlock Text="Cast Rotation To:"
+                                           FontSize="18"
                                            Margin="0,0,0,10"
                                            Foreground="{DynamicResource AppHeaderBrush}" />
 
@@ -1551,6 +1552,41 @@
                                         FontSize="16"
                                         Style="{StaticResource ModernSecondaryButtonStyle}"
                                         HorizontalAlignment="Left" />
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Display &amp; Projection"
+                                  Style="{StaticResource BlueSettingsGroupBoxStyle}"
+                                  Grid.Column="1"
+                                  VerticalAlignment="Top"
+                                  Margin="15,0,0,12">
+                            <StackPanel Margin="0,4,0,0">
+                                <TextBlock Text="Target Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox
+                                        ItemsSource="{Binding AvailableMonitors}"
+                                        SelectedValue="{Binding SelectedMonitorDevice, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValuePath="DeviceName"
+                                        DisplayMemberPath="FriendlyName"
+                                        Style="{StaticResource ModernComboBoxStyle}" />
+                                    <Button
+                                        Grid.Column="1"
+                                        Content="Refresh"
+                                        Command="{Binding RefreshMonitorsCommand}"
+                                        Style="{StaticResource ModernSecondaryButtonStyle}"
+                                        Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Padding="8,4"
+                                        Height="32" />
+                                </Grid>
+                                <TextBlock Text="Select which monitor will display the projection window. If not found, it defaults to the secondary or primary monitor."
+                                           TextWrapping="Wrap"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource MaterialDesignBodyLight}" />
                             </StackPanel>
                         </GroupBox>
                     </Grid>
@@ -1817,26 +1853,26 @@
                                 </Border>
                             </StackPanel>
 
-                            <!-- Topic: Casting & DJ Banners -->
-                            <StackPanel x:Name="CastingHelpPanel">
+                            <!-- Topic: Display & DJ Banners -->
+                            <StackPanel x:Name="DisplayHelpPanel">
                                 <StackPanel.Style>
                                     <Style TargetType="StackPanel">
                                         <Setter Property="Visibility" Value="Collapsed" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="📺 Casting &amp; DJ Banners">
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="📺 Display &amp; DJ Banners">
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </StackPanel.Style>
-                                <TextBlock Text="Casting &amp; DJ Banners" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
-                                <TextBlock Text="Configure wireless casting and projection for your singer rotation, along with custom branding screens."
+                                <TextBlock Text="Display &amp; DJ Banners" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="Configure wireless display streaming and projection for your singer rotation, along with custom branding screens."
                                            FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="20" Foreground="{DynamicResource MaterialDesignBodyLight}" />
 
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
                                     <StackPanel>
                                         <TextBlock Text="📺 Wireless Casting Target Selection" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <TextBlock Text="1. Navigate to the Casting tab." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="1. Navigate to the Display tab." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="2. Select a target from the 'Cast Rotation To' dropdown (Monitor, Miracast, Chromecast, Browser Cast, AirPlay, Wireless HDMI)." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="3. If Chromecast is selected, select the specific Chromecast device from the list. Use 'Rescan' to rediscover devices on your local network." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                         <TextBlock Text="4. Click 'Cast Rotation' to start streaming. The app uses an off-screen capture buffer to keep your host laptop desktop free of rotation windows." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />

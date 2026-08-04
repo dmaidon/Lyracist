@@ -1,3 +1,5 @@
+// Edited on Aug 4, 2026 @ 10:24:00 -> Add unit test for AutoAcceptRequests approving pending requests immediately
+// Edited on Aug 4, 2026 @ 10:20:00 -> Add unit test for FinishSingerSong with a skipped singer
 // Edited on Jul 28, 2026 @ 12:51:00 -> Add unit tests for pause, delete, restore, and set-current validation
 // Last Edit: Jun 29, 2026 13:26 - Initial test suite: SingerEntry round helpers, RotationHelpers, ThemeService.
 using KSRotation.Models;
@@ -678,6 +680,70 @@ public class MainViewModelTests
         // Assert
         Assert.Equal("Singer is paused or inactive.", resultPaused);
         Assert.Equal("Singer is paused or inactive.", resultInactive);
+    }
+
+    [Fact]
+    public void FinishSingerSong_WithSkippedRound_MarksActiveShowRound()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
+        vm.Singers.Clear();
+
+        var singer1 = new SingerEntry { Name = "Alice" };
+        var singer2 = new SingerEntry { Name = "Bob" };
+        var singer3 = new SingerEntry { Name = "Charlie" };
+
+        vm.Singers.Add(singer1);
+        vm.Singers.Add(singer2);
+        vm.Singers.Add(singer3);
+
+        // Round 1: Alice and Charlie sing. Bob is skipped (no song / decided not to sing).
+        singer1.MarkRoundCompleted(1);
+        singer3.MarkRoundCompleted(1);
+
+        // Round 2: Alice sings
+        singer1.MarkRoundCompleted(2);
+
+        // Now Bob sings in Round 2!
+        vm.FinishSingerSongCommand.Execute(singer2);
+
+        // Assert
+        Assert.False(singer2.Song1Completed); // Round 1 remains unchecked
+        Assert.True(singer2.Song2Completed);  // Round 2 is checked
+    }
+
+    [Fact]
+    public void AutoAcceptRequests_WhenChecked_ApprovesPendingRequests()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
+        vm.Singers.Clear();
+        vm.IncomingRequests.Clear();
+        vm.AutoAcceptRequests = false;
+
+        // Add some pending requests
+        vm.IncomingRequests.Add(new PatronRequest { Name = "Alice", Song = "Song A", Artist = "Artist A", RequestType = "Karaoke" });
+        vm.IncomingRequests.Add(new PatronRequest { Name = "Bob", Song = "Song B", Artist = "Artist B", RequestType = "Music" });
+
+        Assert.Equal(2, vm.IncomingRequests.Count);
+        Assert.Empty(vm.Singers);
+
+        // Act
+        vm.AutoAcceptRequests = true; // Trigger property changed callback
+
+        // Assert
+        Assert.Empty(vm.IncomingRequests); // Both requests are accepted
+        Assert.Equal(2, vm.Singers.Count); // Both are added to Singers
+
+        var alice = vm.Singers[0];
+        Assert.Equal("Alice", alice.Name);
+        Assert.Equal("Song A", alice.Song);
+        Assert.False(alice.IsMusic);
+
+        var bob = vm.Singers[1];
+        Assert.Equal("Bob", bob.Name);
+        Assert.Equal("Song B", bob.Song);
+        Assert.True(bob.IsMusic);
     }
 }
 

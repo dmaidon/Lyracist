@@ -1,3 +1,4 @@
+// Edited on Aug 4, 2026 @ 09:56:00 -> Update DjBannerWindowService.Show shim signature to accept dataContext
 // Edited on Aug 1, 2026 @ 14:02:00 -> Add SelectedDevice property to DisplayWindowService shim
 // Edited on Jul 27, 2026 @ 13:50:00 -> Update MessageBox shim to support YesNo buttons and MessageBoxResult for compilation compatibility
 using System;
@@ -135,7 +136,7 @@ namespace KSRotation.Services
     {
         public void SetSelectedMonitor(string deviceName) { }
         public void SetBannerPath(string path) { }
-        public void Show() { }
+        public void Show(object? dataContext = null) { }
         public void Hide() { }
         public void Shutdown() { }
         public void RepositionWindow() { }
