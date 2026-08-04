@@ -1,4 +1,4 @@
-<!-- Edited on Jul 19, 2026 @ 10:10:00 -> Add User Manual Documentation Rule -->
+<!-- Edited on Aug 4, 2026 @ 10:52:00 -> Add Error List Cleanliness Rule -->
 # Lyracist Project-Scoped Rules
 
 ## CDG Decoding Reference Repositories
@@ -23,4 +23,8 @@ There should never be but one edited header at the top of a page.  it should alw
 
 ## User Manual Documentation Rule
 Whenever changes are made that affect how a user uses the applications in this solution (excluding the keygen), you must update the user manuals in `C:\VB26\Lyracist\Documentation` (`Lyracist_User_Manual.docx` and the corresponding PDF file) accordingly. This documentation must be updated whenever there is an important change that needs documenting.
+
+## Error List Cleanliness Rule
+Whenever writing, editing, or refactoring code, always verify that your changes do not introduce new compiler warnings, analyzer warnings, or messages. Keep the compiler error list (including IDE warnings/messages) completely clean. If any warnings are expected or unavoidable (e.g. cross-platform API compatibility checks that are handled safely), use targeted `#pragma warning disable` and `#pragma warning restore` or local suppressions to keep the error list at zero warnings.
+
 

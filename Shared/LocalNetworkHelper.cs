@@ -1,3 +1,4 @@
+// Edited on Aug 4, 2026 @ 10:48:00 -> Disable CA1416 warning for Android target compatibility
 // Created on Aug 1, 2026 @ 12:00:00 -> Add LocalNetworkHelper for resolving the machine's LAN IPv4 address
 // Updated on Aug 1, 2026 @ 12:05:00 -> Prefer private-range (RFC 1918) addresses; machines with a second NIC
 // on a public/routed network (e.g. a dedicated WAN circuit) would otherwise have that adapter
@@ -6,6 +7,8 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+
+#pragma warning disable CA1416 // Validate platform compatibility
 
 namespace Lyracist.Shared
 {
@@ -79,3 +82,5 @@ namespace Lyracist.Shared
         }
     }
 }
+
+#pragma warning restore CA1416

@@ -1,3 +1,4 @@
+// Edited on Aug 4, 2026 @ 10:50:00 -> Pass CancellationToken to FirstOrDefaultAsync to address xUnit1051 analyzer warning
 // Edited on Aug 1, 2026 @ 12:16:00 -> Add UpdateUserManualsForCastingSupport test case
 using System;
 using System.IO;
@@ -328,7 +329,7 @@ Operators can now select different casting targets for the Singer Rotation Billb
                 await scanner.ScanDirectories([tempDir]);
                 
                 var song = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
-                    context.Songs, s => s.FilePath == mp3Path);
+                    context.Songs, s => s.FilePath == mp3Path, TestContext.Current.CancellationToken);
                 Assert.NotNull(song);
                 Assert.Equal("Toto", song.Artist);
                 Assert.Equal("Africa", song.Title);
