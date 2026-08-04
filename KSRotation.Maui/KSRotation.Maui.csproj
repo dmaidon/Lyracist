@@ -1,4 +1,4 @@
-<!-- Edited on Aug 1, 2026 @ 13:48:00 -> Link shared ChromecastSender in MAUI project -->
+<!-- Edited on Aug 4, 2026 @ 11:06:00 -> Add AndroidCleanWorkaround target to prevent clean/rebuild directory-not-empty lock errors -->
 <!-- Edited on Aug 1, 2026 @ 13:14:00 -> Link ChromecastDiscoveryService in MAUI project -->
 <!-- Edited on Jul 30, 2026 @ 08:00:00 -> Enable cross-platform MauiSplashScreen for Android and Windows and update comments -->
 <!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
@@ -30,9 +30,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.4.152</AssemblyVersion>
+		<AssemblyVersion>26.8.4.154</AssemblyVersion>
 
-		<FileVersion>26.8.4.152</FileVersion>
+		<FileVersion>26.8.4.154</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
@@ -149,5 +149,16 @@
 		<Compile Include="..\Shared\DjBannerFileManager.cs" Link="DjBannerFileManager.cs" />
 		<Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
 	</ItemGroup>
+
+	<!-- Workaround for Xamarin.Android directory lock issue on Clean/Rebuild -->
+	<Target Name="AndroidCleanWorkaround" BeforeTargets="Clean">
+		<PropertyGroup>
+			<AndroidObjDir>obj\Debug\net10.0-android</AndroidObjDir>
+			<AndroidObjDirRelease>obj\Release\net10.0-android</AndroidObjDirRelease>
+		</PropertyGroup>
+		<Exec Command="powershell -Command &quot;if (Test-Path '$(AndroidObjDir)') { Rename-Item -Path '$(AndroidObjDir)' -NewName ('net10.0-android-stale_' + [System.Guid]::NewGuid().ToString()) -ErrorAction SilentlyContinue }&quot;" ContinueOnError="true" Condition="Exists('$(AndroidObjDir)')" />
+		<Exec Command="powershell -Command &quot;if (Test-Path '$(AndroidObjDirRelease)') { Rename-Item -Path '$(AndroidObjDirRelease)' -NewName ('net10.0-android-stale_' + [System.Guid]::NewGuid().ToString()) -ErrorAction SilentlyContinue }&quot;" ContinueOnError="true" Condition="Exists('$(AndroidObjDirRelease)')" />
+		<Exec Command="powershell -Command &quot;Get-ChildItem -Path 'obj' -Filter 'net10.0-android-stale_*' -Directory -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue; exit 0&quot;" ContinueOnError="true" />
+	</Target>
 
 </Project>
