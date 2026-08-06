@@ -40,9 +40,6 @@ public partial class KaraokeViewModel : BaseViewModel
 
     public RotationViewModel Rotation { get; }
 
-    /// <summary>Nested Special Occasion menu (categories > subcategories > playable items).</summary>
-    public ObservableCollection<OccasionNode> OccasionMenu { get; } = [];
-
     [ObservableProperty]
     private bool _isScaryokeMode;
 
@@ -80,82 +77,7 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private ImageSource? _currentFrame;
 
-    [ObservableProperty]
-    private string _partyTymeClientId = string.Empty;
-
-    [ObservableProperty]
-    private string _partyTymeClientSecret = string.Empty;
-
-    [ObservableProperty]
-    private bool _isPartyTymeConnected;
-
-    [ObservableProperty]
-    private bool _isPartyTymeDisconnected = true;
-
-    [ObservableProperty]
-    private string _partyTymeConnectionStatus = string.Empty;
-
-    [ObservableProperty]
-    private bool _isPartyTymeLoading;
-
-    [ObservableProperty]
-    private PartyTymeTrack? _selectedPartyTymeTrack;
-
-    public ObservableCollection<PartyTymeTrack> PartyTymeResults { get; } = [];
-
-    [ObservableProperty]
-    private string _customExternalUrl = string.Empty;
-
-    [ObservableProperty]
-    private string _customExternalTitle = string.Empty;
-
-    [ObservableProperty]
-    private string _customExternalArtist = string.Empty;
-
-    [ObservableProperty]
-    private string _selectedExternalService = "All";
-
-    [ObservableProperty]
-    private ExternalTrack? _selectedExternalTrack;
-
-    [ObservableProperty]
-    private bool _isExternalLoading;
-
-    public ObservableCollection<ExternalTrack> ExternalResults { get; } = [];
     public ObservableCollection<SingerHistoryEntry> SingerHistoryResults { get; } = [];
-
-    [ObservableProperty]
-    private bool _showLocalFilter = true;
-
-    [ObservableProperty]
-    private bool _showPartyTymeFilter = false;
-
-    [ObservableProperty]
-    private bool _showSpotifyFilter = false;
-
-    [ObservableProperty]
-    private bool _showYouTubeFilter = true;
-
-    [ObservableProperty]
-    private bool _showAmazonFilter = false;
-
-    [ObservableProperty]
-    private bool _isSpotifyAvailable = false;
-
-    [ObservableProperty]
-    private bool _isYouTubeAvailable = true;
-
-    [ObservableProperty]
-    private bool _isAmazonAvailable = false;
-
-    [ObservableProperty]
-    private bool _isExternalPerformanceActive;
-
-    [ObservableProperty]
-    private string _externalPerformanceSource = string.Empty;
-
-    [ObservableProperty]
-    private string _externalPerformanceUrl = string.Empty;
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -190,26 +112,6 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             SelectedPartyTymeTrack = null;
             SelectedExternalTrack = null;
-            SelectedHistoryEntry = null;
-        }
-    }
-
-    partial void OnSelectedPartyTymeTrackChanged(PartyTymeTrack? value)
-    {
-        if (value != null)
-        {
-            SelectedSong = null;
-            SelectedExternalTrack = null;
-            SelectedHistoryEntry = null;
-        }
-    }
-
-    partial void OnSelectedExternalTrackChanged(ExternalTrack? value)
-    {
-        if (value != null)
-        {
-            SelectedSong = null;
-            SelectedPartyTymeTrack = null;
             SelectedHistoryEntry = null;
         }
     }
@@ -433,23 +335,6 @@ public partial class KaraokeViewModel : BaseViewModel
         }
     }
 
-    // Added properties for Multi-Monitor display lists
-    public ObservableCollection<ScreenInfo> AvailableScreens { get; } = [];
-
-    [ObservableProperty]
-    private int _selectedLyricsScreenIndex = 0;
-
-    [ObservableProperty]
-    private int _selectedRotationScreenIndex = 0;
-
-    [ObservableProperty]
-    private int _selectedDjBannerScreenIndex = 0;
-
-    public ObservableCollection<Lyracist.Shared.DjBannerItem> DjBanners { get; } = [];
-
-    [ObservableProperty]
-    private Lyracist.Shared.DjBannerItem? _selectedDjBanner;
-
     [ObservableProperty]
     private string _rotationBannerText = "Welcome to Karaoke Night!";
 
@@ -633,9 +518,6 @@ public partial class KaraokeViewModel : BaseViewModel
         LoadSingerNames();
     }
 
-    partial void OnPartyTymeClientIdChanged(string value) => AppSettings.PartyTymeClientId = value;
-    partial void OnPartyTymeClientSecretChanged(string value) => AppSettings.PartyTymeClientSecret = value;
-
     partial void OnSearchQueryChanged(string value)
     {
         _searchDebounceTimer.Stop();
@@ -791,116 +673,6 @@ public partial class KaraokeViewModel : BaseViewModel
         OnPropertyChanged(nameof(Bass));
         OnPropertyChanged(nameof(Compressor));
         OnPropertyChanged(nameof(Limiter));
-    }
-
-    partial void OnSelectedLyricsScreenIndexChanged(int value)
-    {
-        if (value >= 0 && value < AvailableScreens.Count)
-        {
-            var screen = AvailableScreens[value];
-            _displayService.MoveLyricsToScreen(screen.Index == -1 ? null : screen.Index);
-        }
-    }
-
-    partial void OnSelectedRotationScreenIndexChanged(int value)
-    {
-        if (value >= 0 && value < AvailableScreens.Count)
-        {
-            var screen = AvailableScreens[value];
-            _displayService.MoveRotationToScreen(screen.Index == -1 ? null : screen.Index);
-        }
-    }
-
-    partial void OnSelectedDjBannerScreenIndexChanged(int value)
-    {
-        if (value >= 0 && value < AvailableScreens.Count)
-        {
-            var screen = AvailableScreens[value];
-            _displayService.MoveDjBannerToScreen(screen.Index == -1 ? null : screen.Index);
-        }
-    }
-
-    private void RefreshDjBanners()
-    {
-        DjBanners.Clear();
-        foreach (var item in Lyracist.Shared.DjBannerFileManager.ScanBanners(Lyracist.Shared.Globals.DjBannersDir))
-        {
-            DjBanners.Add(item);
-        }
-
-        var prefs = _displayService.GetPreferences();
-        if (!string.IsNullOrEmpty(prefs.SelectedDjBannerPath))
-        {
-            SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == prefs.SelectedDjBannerPath);
-        }
-        else
-        {
-            SelectedDjBanner = DjBanners.FirstOrDefault();
-        }
-    }
-
-    partial void OnSelectedDjBannerChanged(Lyracist.Shared.DjBannerItem? value)
-    {
-        _displayService.UpdateDjBanner(value?.FullPath ?? string.Empty);
-    }
-
-    [RelayCommand]
-    private void UploadDjBanner()
-    {
-        var dialog = new Microsoft.Win32.OpenFileDialog
-        {
-            Title = "Upload DJ Banner",
-            Filter = "Supported Banners (*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.mp4)|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.mp4|Image Files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp|Video Files (*.mp4)|*.mp4|All Files (*.*)|*.*"
-        };
-
-        if (dialog.ShowDialog() == true)
-        {
-            try
-            {
-                string destPath = Lyracist.Shared.DjBannerFileManager.CopyInWithDedup(dialog.FileName, Lyracist.Shared.Globals.DjBannersDir);
-                RefreshDjBanners();
-
-                SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == destPath);
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Failed to upload banner: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
-        }
-    }
-
-    [RelayCommand]
-    private void DeleteDjBanner()
-    {
-        if (SelectedDjBanner == null) return;
-
-        var result = System.Windows.MessageBox.Show(
-            $"Are you sure you want to delete the DJ Banner '{SelectedDjBanner.FileName}'?",
-            "Confirm Delete",
-            System.Windows.MessageBoxButton.YesNo,
-            System.Windows.MessageBoxImage.Question);
-
-        if (result == System.Windows.MessageBoxResult.Yes)
-        {
-            try
-            {
-                string path = SelectedDjBanner.FullPath;
-                SelectedDjBanner = null;
-
-                Lyracist.Shared.DjBannerFileManager.DeleteBanner(path);
-                RefreshDjBanners();
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Failed to delete banner: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
-        }
-    }
-
-    [RelayCommand]
-    private void ShowDjBanner()
-    {
-        _displayService.ShowDjBannerWindow();
     }
 
     [RelayCommand]
@@ -1199,32 +971,6 @@ public partial class KaraokeViewModel : BaseViewModel
         _displayService.ShowLyricsWindow();
     }
 
-    private void RebuildOccasionMenu()
-    {
-        OccasionMenu.Clear();
-        foreach (var node in _occasions.GetMenuTree())
-        {
-            OccasionMenu.Add(node);
-        }
-    }
-
-    [RelayCommand]
-    private void PlayOccasion(object? parameter)
-    {
-        if (parameter is OccasionNode node)
-        {
-            // Category headers open their submenu; only playable items fire.
-            if (!node.IsItem) return;
-            _showFlow.PlayOccasion(node.Name, node.FilePath, node.Bass, node.Treble, node.Gain);
-        }
-    }
-
-    [RelayCommand]
-    private void StopOccasion()
-    {
-        _showFlow.StopOccasion();
-    }
-
     [RelayCommand]
     private void OpenScaryokeWheel()
     {
@@ -1277,105 +1023,6 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             _mediaEngine.UpdateAudioParameters();
             NotifyAudioPropertiesChanged();
-        }
-    }
-
-    [RelayCommand]
-    private async Task ConnectPartyTyme()
-    {
-        if (string.IsNullOrWhiteSpace(PartyTymeClientId) || string.IsNullOrWhiteSpace(PartyTymeClientSecret))
-        {
-            PartyTymeConnectionStatus = "Credentials cannot be empty.";
-            return;
-        }
-
-        PartyTymeConnectionStatus = "Authenticating...";
-        IsPartyTymeLoading = true;
-
-        bool success = await _partyTymeService.AuthenticateAsync(PartyTymeClientId, PartyTymeClientSecret);
-
-        IsPartyTymeLoading = false;
-        IsPartyTymeConnected = success;
-        IsPartyTymeDisconnected = !success;
-
-        if (success)
-        {
-            PartyTymeConnectionStatus = "Connected successfully!";
-            await SearchPartyTyme();
-        }
-        else
-        {
-            PartyTymeConnectionStatus = "Authentication failed. Try again.";
-        }
-    }
-
-    [RelayCommand]
-    private async Task SearchPartyTyme()
-    {
-        if (!IsPartyTymeConnected) return;
-
-        IsPartyTymeLoading = true;
-        try
-        {
-            var results = await _partyTymeService.SearchCatalogAsync(SearchQuery);
-            PartyTymeResults.Clear();
-            foreach (var track in results)
-            {
-                PartyTymeResults.Add(track);
-            }
-        }
-        catch (Exception ex)
-        {
-            PartyTymeConnectionStatus = $"Error: {ex.Message}";
-        }
-        finally
-        {
-            IsPartyTymeLoading = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task PlayPartyTymeTrack(PartyTymeTrack track)
-    {
-        if (track == null) return;
-
-        IsPlaying = false;
-        CurrentSongName = $"{track.Artist} - {track.Title} [Party Tyme]";
-
-        IsExternalPerformanceActive = false;
-        ExternalPerformanceSource = string.Empty;
-        ExternalPerformanceUrl = string.Empty;
-
-        string streamUrl = await _partyTymeService.GetStreamUrlAsync(track.TrackId);
-
-        SelectedSongPath = streamUrl;
-        await _mediaEngine.LoadSong(streamUrl);
-        await _mediaEngine.Play();
-        IsPlaying = true;
-
-        NotifyAudioPropertiesChanged();
-    }
-
-    [RelayCommand]
-    private async Task CachePartyTymeTrack(PartyTymeTrack track)
-    {
-        if (track == null) return;
-
-        PartyTymeConnectionStatus = $"Caching '{track.Title}'...";
-        IsPartyTymeLoading = true;
-
-        string cachedPath = await _partyTymeService.DownloadTrackAsync(track.TrackId, track.Title, track.Artist);
-
-        IsPartyTymeLoading = false;
-
-        if (!string.IsNullOrEmpty(cachedPath))
-        {
-            PartyTymeConnectionStatus = $"Cached '{track.Title}' successfully!";
-            await SearchPartyTyme();
-        }
-        else
-        {
-            PartyTymeConnectionStatus = "Failed to cache track.";
         }
     }
 
@@ -1497,55 +1144,6 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task SearchExternal()
-    {
-        IsExternalLoading = true;
-        try
-        {
-            var results = await _externalLinkService.SearchAsync(SearchQuery, SelectedExternalService);
-            ExternalResults.Clear();
-            foreach (var track in results)
-            {
-                ExternalResults.Add(track);
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"External search error: {ex.Message}");
-        }
-        finally
-        {
-            IsExternalLoading = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task PlayExternalTrack(ExternalTrack track)
-    {
-        if (track == null) return;
-
-        IsPlaying = false;
-        CurrentSongName = $"{track.Artist} - {track.Title} [{track.Source}]";
-        await _mediaEngine.Stop();
-
-        // Stop background music as performance is launching externally
-        _showFlow.OnKaraokeTrackStarted();
-
-        IsExternalPerformanceActive = true;
-        ExternalPerformanceSource = track.Source;
-        ExternalPerformanceUrl = track.Url;
-
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(track.Url) { UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            System.Windows.MessageBox.Show($"Failed to open link: {ex.Message}", "Browser Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-        }
-    }
-
-    [RelayCommand]
     private async Task LoadAndPlaySelectedPerformer()
     {
         Singer? targetSinger = Rotation.SelectedSinger;
@@ -1561,103 +1159,6 @@ public partial class KaraokeViewModel : BaseViewModel
         _displayService.HighlightSinger(targetSinger);
 
         await PlayPerformerRequest(targetSinger);
-    }
-
-    [RelayCommand]
-    private void ReopenExternalPerformanceLink()
-    {
-        if (string.IsNullOrWhiteSpace(ExternalPerformanceUrl)) return;
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(ExternalPerformanceUrl) { UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            System.Windows.MessageBox.Show($"Failed to open link: {ex.Message}", "Browser Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-        }
-    }
-
-    [RelayCommand]
-    private void OpenExternalLinkInBrowser(Singer singer)
-    {
-        if (singer == null || string.IsNullOrWhiteSpace(singer.ExternalLink)) return;
-
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(singer.ExternalLink) { UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            System.Windows.MessageBox.Show($"Failed to open link: {ex.Message}", "Browser Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-        }
-    }
-
-    public System.Collections.Generic.List<string> ProjectionViews { get; } = ["Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable"];
-
-    public string SelectedProjectionView
-    {
-        get => _displayService.GetPreferences().RotationViewMode ?? "Normal List";
-        set
-        {
-            if (SelectedProjectionView != value)
-            {
-                _displayService.SetRotationViewMode(value);
-                OnPropertyChanged(nameof(SelectedProjectionView));
-
-                var settingsVm = App.AppHost.Services.GetService<SettingsViewModel>();
-                if (settingsVm != null && settingsVm.SelectedProjectionView != value)
-                {
-                    settingsVm.SelectedProjectionView = value;
-                }
-            }
-        }
-    }
-
-    private void OnScreenAssignmentsChanged()
-    {
-        System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
-        {
-            var prefs = _displayService.GetPreferences();
-
-            var currentLyricsScreen = prefs.LyricsScreenIndex.HasValue
-                ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.LyricsScreenIndex.Value)
-                : AvailableScreens.FirstOrDefault(s => s.Index == -1);
-
-            var currentRotationScreen = prefs.RotationScreenIndex.HasValue
-                ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.RotationScreenIndex.Value)
-                : AvailableScreens.FirstOrDefault(s => s.Index == -1);
-
-            var currentDjBannerScreen = prefs.DjBannerScreenIndex.HasValue
-                ? AvailableScreens.FirstOrDefault(s => s.Index == prefs.DjBannerScreenIndex.Value)
-                : AvailableScreens.FirstOrDefault(s => s.Index == -1);
-
-            int newLyricsIndex = currentLyricsScreen != null ? AvailableScreens.IndexOf(currentLyricsScreen) : 0;
-            int newRotationIndex = currentRotationScreen != null ? AvailableScreens.IndexOf(currentRotationScreen) : 0;
-            int newDjBannerIndex = currentDjBannerScreen != null ? AvailableScreens.IndexOf(currentDjBannerScreen) : 0;
-
-#pragma warning disable MVVMTK0034
-            if (_selectedLyricsScreenIndex != newLyricsIndex)
-            {
-                _selectedLyricsScreenIndex = newLyricsIndex;
-                OnPropertyChanged(nameof(SelectedLyricsScreenIndex));
-            }
-            if (_selectedRotationScreenIndex != newRotationIndex)
-            {
-                _selectedRotationScreenIndex = newRotationIndex;
-                OnPropertyChanged(nameof(SelectedRotationScreenIndex));
-            }
-            if (_selectedDjBannerScreenIndex != newDjBannerIndex)
-            {
-                _selectedDjBannerScreenIndex = newDjBannerIndex;
-                OnPropertyChanged(nameof(SelectedDjBannerScreenIndex));
-            }
-#pragma warning restore MVVMTK0034
-        });
-    }
-
-    public void RaiseSelectedProjectionViewChanged()
-    {
-        OnPropertyChanged(nameof(SelectedProjectionView));
     }
 
 }
