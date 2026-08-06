@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Fix RefreshAll() race where an older background load could overwrite a newer one's results
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -111,6 +112,7 @@ public partial class PlaylistsViewModel : BaseViewModel
     private bool _isEndRotationPlaying;
 
     private System.Collections.Generic.List<KaraokeSong> _allLibrarySongs = [];
+    private int _refreshRequestToken;
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -145,6 +147,12 @@ public partial class PlaylistsViewModel : BaseViewModel
 
     private void RefreshAll()
     {
+        // Every mutating command calls RefreshAll(), so rapid successive commands can have
+        // multiple overlapping background loads in flight. Tag this call and discard its
+        // results if a newer RefreshAll() has since been issued, so an older load's dispatcher
+        // callback can't land after a newer one and revert the UI to stale playlist ordering.
+        int myToken = ++_refreshRequestToken;
+
         System.Threading.Tasks.Task.Run(() =>
         {
             try
@@ -156,6 +164,8 @@ public partial class PlaylistsViewModel : BaseViewModel
 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
+                    if (myToken != _refreshRequestToken) return;
+
                     OpeningTracks.Clear();
                     foreach (var track in opening)
                         OpeningTracks.Add(track);

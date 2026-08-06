@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Fix stress-test simulation reading Rotation/InactiveSingers off the UI thread (crash risk)
 // Edited on Aug 2, 2026 @ 10:10:00 -> Add mp4 support to DJ Banner scanning and file dialog filter
 // Edited on Aug 1, 2026 @ 13:16:00 -> Add Chromecast discovery VM properties and discovery command logic
 // Edited on Aug 1, 2026 @ 12:14:00 -> Add Casting support properties to SettingsViewModel
@@ -1563,23 +1564,30 @@ public partial class SettingsViewModel : BaseViewModel
                             break;
 
                         case 1:
-                            if (_rotation.Rotation.Count > 0)
+                            // Count/indexer reads and the toggle mutation must happen inside a single
+                            // Dispatcher.Invoke: ObservableCollection isn't thread-safe, so reading Count
+                            // here and indexing it separately (with a UI-thread mutation possibly landing
+                            // in between) can throw ArgumentOutOfRangeException on a resize.
+                            string? toggleLogMsg = System.Windows.Application.Current.Dispatcher.Invoke(() =>
                             {
-                                var singer = _rotation.Rotation[random.Next(_rotation.Rotation.Count)];
-                                LogSim($"[QUEUE] Simulating Inactivate Performer: {singer.Name}");
-                                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                                if (_rotation.Rotation.Count > 0)
                                 {
+                                    var singer = _rotation.Rotation[random.Next(_rotation.Rotation.Count)];
                                     _rotation.ToggleInactiveSingerCommand.Execute(singer);
-                                });
-                            }
-                            else if (_rotation.InactiveSingers.Count > 0)
+                                    return $"[QUEUE] Simulating Inactivate Performer: {singer.Name}";
+                                }
+                                if (_rotation.InactiveSingers.Count > 0)
+                                {
+                                    var singer = _rotation.InactiveSingers[random.Next(_rotation.InactiveSingers.Count)];
+                                    _rotation.ToggleInactiveSingerCommand.Execute(singer);
+                                    return $"[QUEUE] Simulating Reactivate Performer: {singer.Name}";
+                                }
+                                return null;
+                            });
+
+                            if (toggleLogMsg != null)
                             {
-                                var singer = _rotation.InactiveSingers[random.Next(_rotation.InactiveSingers.Count)];
-                                LogSim($"[QUEUE] Simulating Reactivate Performer: {singer.Name}");
-                                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                                {
-                                    _rotation.ToggleInactiveSingerCommand.Execute(singer);
-                                });
+                                LogSim(toggleLogMsg);
                             }
                             countToggledInactive++;
                             break;

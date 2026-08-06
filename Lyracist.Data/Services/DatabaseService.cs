@@ -1,4 +1,6 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Catch DbUpdateException in AddSong/UpdateSong (e.g. duplicate FilePath, which is uniquely indexed) instead of letting it crash the caller
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Lyracist.Data.Models;
@@ -14,17 +16,36 @@ namespace Lyracist.Data.Services
         // SONG OPERATIONS
         // ==========================================
 
-        public async Task<Song> AddSong(Song song)
+        /// <summary>Adds a song. Returns null (instead of throwing) if it violates the unique FilePath index.</summary>
+        public async Task<Song?> AddSong(Song song)
         {
-            _context.Songs.Add(song);
-            await _context.SaveChangesAsync();
-            return song;
+            try
+            {
+                _context.Songs.Add(song);
+                await _context.SaveChangesAsync();
+                return song;
+            }
+            catch (DbUpdateException ex)
+            {
+                Debug.WriteLine($"Failed to add song '{song.FilePath}': it may already exist in the database. {ex.Message}");
+                return null;
+            }
         }
 
-        public async Task UpdateSong(Song song)
+        /// <summary>Updates a song. Returns false (instead of throwing) if the update violates a DB constraint.</summary>
+        public async Task<bool> UpdateSong(Song song)
         {
-            _context.Songs.Update(song);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Songs.Update(song);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException ex)
+            {
+                Debug.WriteLine($"Failed to update song '{song.FilePath}': {ex.Message}");
+                return false;
+            }
         }
 
         public async Task<Song?> GetSongById(int songId)

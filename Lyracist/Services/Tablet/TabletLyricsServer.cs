@@ -1,13 +1,15 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Refactor tablet server and serve static files
+// Edited on Aug 6, 2026 @ 07:01:27 -> Serialize /api/rate's read-modify-write to fix a lost-update race, and make auto-accept's response reflect what actually happened in the DB
 using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -36,9 +38,27 @@ public class TabletLyricsServer(
     private readonly KaraokeViewModel _karaoke = karaoke;
     private readonly Lyracist.Windows.ScaryokeWindow _scaryokeWindow = scaryokeWindow;
 
-    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _singerTokens = new(StringComparer.OrdinalIgnoreCase);
+    // Name -> (claiming device's token, sliding expiry). A claim frees itself up for a new
+    // device to take once it goes stale, instead of permanently owning the name until the
+    // server process restarts.
+    private sealed record TokenClaim(string Token, DateTime ExpiresAtUtc);
+    private static readonly TimeSpan TokenClaimTtl = TimeSpan.FromHours(6);
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, TokenClaim> _singerTokens = new(StringComparer.OrdinalIgnoreCase);
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string, byte> _ratedTokens = new();
     private string _lastRatedPerformanceKey = string.Empty;
+    private readonly SemaphoreSlim _ratingLock = new(1, 1);
+
+    private const string MobilePortalWritePolicy = "mobile-portal-write";
+    private const string MobilePortalSearchPolicy = "mobile-portal-search";
+
+    // Generous caps on mobile-submitted text: enough for any real request, small enough that a
+    // buggy or malicious phone can't bloat the request queue/DB with oversized repeated payloads.
+    private const int MaxNameLength = 100;
+    private const int MaxTitleOrArtistLength = 200;
+    private const int MaxNotesLength = 500;
+    private const int MaxShortFieldLength = 50;
+
+    private static bool ExceedsLength(string? value, int max) => value != null && value.Length > max;
 
     private static System.Net.IPAddress? GetLocalLanIp()
     {
@@ -92,8 +112,32 @@ public class TabletLyricsServer(
             return true; // Anonymous requests are allowed without token claim
         }
 
-        var associatedToken = _singerTokens.GetOrAdd(normalizedName, sessionToken);
-        return associatedToken == sessionToken;
+        var now = DateTime.UtcNow;
+        var claim = _singerTokens.AddOrUpdate(
+            normalizedName,
+            _ => new TokenClaim(sessionToken, now + TokenClaimTtl),
+            (_, existing) =>
+            {
+                // The previous claim went stale (device idle/closed past the TTL) - let this
+                // device claim the name fresh instead of being locked out forever.
+                if (existing.ExpiresAtUtc <= now) return new TokenClaim(sessionToken, now + TokenClaimTtl);
+                // Same device continuing to use the name: slide the expiry forward.
+                if (existing.Token == sessionToken) return existing with { ExpiresAtUtc = now + TokenClaimTtl };
+                // A different, still-active device already holds this name.
+                return existing;
+            });
+
+        return claim.Token == sessionToken;
+    }
+
+    /// <summary>Read-only lookup of a name's current claim token, ignoring stale (expired) claims. Does not renew the claim.</summary>
+    private string? GetActiveOwnerToken(string singerName)
+    {
+        if (_singerTokens.TryGetValue(singerName, out var claim) && claim.ExpiresAtUtc > DateTime.UtcNow)
+        {
+            return claim.Token;
+        }
+        return null;
     }
 
     private string GetCurrentPerformanceKey()
@@ -140,10 +184,39 @@ public class TabletLyricsServer(
             builder.Services.AddSingleton(_occasions);
             builder.Services.AddSingleton(_karaoke);
 
+            // Per-IP rate limiting so a single phone (buggy or malicious) can't flood the
+            // request queue, DB, or catalog search. Write-style actions get a tight window;
+            // catalog search gets a looser one to comfortably fit the client's 300ms debounce.
+            builder.Services.AddRateLimiter(rateLimiterOptions =>
+            {
+                rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+                rateLimiterOptions.AddPolicy(MobilePortalWritePolicy, httpContext =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 10,
+                            Window = TimeSpan.FromSeconds(10),
+                            QueueLimit = 0
+                        }));
+
+                rateLimiterOptions.AddPolicy(MobilePortalSearchPolicy, httpContext =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 30,
+                            Window = TimeSpan.FromSeconds(10),
+                            QueueLimit = 0
+                        }));
+            });
+
             // Set minimum logging to warning to avoid flooding standard output/debug window
             builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
             _webApp = builder.Build();
+            _webApp.UseRateLimiter();
 
             _rotation.Rotation.CollectionChanged += OnRotationChanged;
             _karaoke.PropertyChanged += OnKaraokePropertyChanged;
@@ -179,6 +252,10 @@ public class TabletLyricsServer(
                 {
                     return Results.BadRequest(new { error = "Name is required." });
                 }
+                if (ExceedsLength(dto.SingerName, MaxNameLength))
+                {
+                    return Results.BadRequest(new { error = $"Name must be {MaxNameLength} characters or fewer." });
+                }
                 if (string.IsNullOrWhiteSpace(sessionToken))
                 {
                     return Results.BadRequest(new { error = "Session token is required." });
@@ -192,7 +269,7 @@ public class TabletLyricsServer(
                 {
                     return Results.Conflict(new { error = "This name has already been claimed by another device." });
                 }
-            });
+            }).RequireRateLimiting(MobilePortalWritePolicy);
 
             // Mobile portal: song request submission from singers' phones.
             _webApp.MapPost("/api/requests", (MobileRequestDto dto, HttpContext context) =>
@@ -210,6 +287,17 @@ public class TabletLyricsServer(
                 if (string.IsNullOrWhiteSpace(dto.Title))
                 {
                     return Results.BadRequest(new { error = "Title is required." });
+                }
+
+                if (ExceedsLength(dto.SingerName, MaxNameLength) ||
+                    ExceedsLength(dto.Title, MaxTitleOrArtistLength) ||
+                    ExceedsLength(dto.Artist, MaxTitleOrArtistLength) ||
+                    ExceedsLength(dto.Notes, MaxNotesLength) ||
+                    ExceedsLength(dto.Source, MaxShortFieldLength) ||
+                    ExceedsLength(dto.Key, MaxShortFieldLength) ||
+                    ExceedsLength(dto.RequestType, MaxShortFieldLength))
+                {
+                    return Results.BadRequest(new { error = "One or more fields exceed the maximum allowed length." });
                 }
 
                 var request = _requests.AddRequest(
@@ -233,24 +321,42 @@ public class TabletLyricsServer(
                     }
                     else
                     {
-                        _ = System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                        // Block (synchronously, on this Kestrel worker thread - not the UI thread)
+                        // until the rotation mutation actually completes, instead of firing it via
+                        // BeginInvoke and immediately claiming "Queued" in the response. Otherwise a
+                        // failure here (caught below) would leave the DB at "Pending" while the
+                        // client was already told it succeeded.
+                        bool queued = false;
+                        Exception? queueError = null;
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
                         {
                             try
                             {
                                 _rotation.AddSinger(request.SingerName, request.Title, request.Artist, request.Key, request.Notes, request.Source);
                                 _requests.MarkQueued(request.Id);
+                                queued = true;
                             }
                             catch (Exception ex)
                             {
-                                Lyracist.Shared.Globals.LogError("Lyracist", "Failed to auto-accept karaoke request into rotation", ex);
+                                queueError = ex;
                             }
-                        }));
-                        request.Status = "Queued";
+                        });
+
+                        if (queued)
+                        {
+                            request.Status = "Queued";
+                        }
+                        else
+                        {
+                            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to auto-accept karaoke request into rotation", queueError!);
+                            // Leave request.Status at its true DB value ("Pending") rather than
+                            // reporting a success that didn't happen.
+                        }
                     }
                 }
 
                 return Results.Ok(request);
-            });
+            }).RequireRateLimiting(MobilePortalWritePolicy);
 
             _webApp.MapPost("/api/rate", async (MobileRatingDto dto, HttpContext context) =>
             {
@@ -264,6 +370,10 @@ public class TabletLyricsServer(
                 {
                     return Results.BadRequest(new { error = "Singer name is required." });
                 }
+                if (ExceedsLength(dto.SingerName, MaxNameLength))
+                {
+                    return Results.BadRequest(new { error = $"Name must be {MaxNameLength} characters or fewer." });
+                }
 
                 if (dto.Rating < 1 || dto.Rating > 5)
                 {
@@ -271,7 +381,8 @@ public class TabletLyricsServer(
                 }
 
                 // Prevent self-rating
-                if (_singerTokens.TryGetValue(dto.SingerName, out var ownerToken) && ownerToken == sessionToken)
+                var ratingOwnerToken = GetActiveOwnerToken(dto.SingerName);
+                if (ratingOwnerToken != null && ratingOwnerToken == sessionToken)
                 {
                     return Results.BadRequest(new { error = "You cannot rate your own performance." });
                 }
@@ -291,57 +402,89 @@ public class TabletLyricsServer(
 
                 try
                 {
-                    using var dbContext = new Lyracist.Data.LyracistDbContext();
-                    var dbSinger = await dbContext.Singers.FirstOrDefaultAsync(s => s.Name == dto.SingerName);
-                    if (dbSinger != null)
+                    // Serialize the read-modify-write below: two concurrent ratings for the same
+                    // singer both read the pre-update Score/RatingPoints/RatingCount, and whichever
+                    // SaveChangesAsync commits second would silently overwrite the first increment
+                    // (classic lost update) since there's no DB-level concurrency token on Singer.
+                    int newScore, newRatingCount;
+                    double newAvgRating;
+                    bool singerFound;
+
+                    await _ratingLock.WaitAsync();
+                    try
                     {
-                        // Commit rating registration
-                        _ratedTokens[sessionToken] = 0;
-
-                        int pointsEarned = dto.Rating * 10;
-                        dbSinger.Score += pointsEarned;
-                        
-                        int totalPoints = dbSinger.RatingPoints + dto.Rating;
-                        int newCount = dbSinger.RatingCount + 1;
-                        dbSinger.RatingPoints = totalPoints;
-                        dbSinger.RatingCount = newCount;
-                        dbSinger.AverageRating = Math.Round((double)totalPoints / newCount, 1);
-
-                        dbContext.Singers.Update(dbSinger);
-                        await dbContext.SaveChangesAsync();
-
-                        // Update active rotation memory model asynchronously
-                        _ = System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                        using var dbContext = new Lyracist.Data.LyracistDbContext();
+                        var dbSinger = await dbContext.Singers.FirstOrDefaultAsync(s => s.Name == dto.SingerName);
+                        singerFound = dbSinger != null;
+                        if (dbSinger == null)
                         {
-                            try
-                            {
-                                var activeSinger = _rotation.Rotation.FirstOrDefault(s => s.Name.Equals(dto.SingerName, StringComparison.OrdinalIgnoreCase));
-                                if (activeSinger != null)
-                                {
-                                    activeSinger.Score = dbSinger.Score;
-                                    activeSinger.AverageRating = dbSinger.AverageRating;
-                                    activeSinger.RatingCount = dbSinger.RatingCount;
-                                }
-                                _rotation.NotifyRotationReordered();
-                            }
-                            catch (Exception ex)
-                            {
-                                Lyracist.Shared.Globals.LogError("Lyracist", "Failed to update rotation memory model on dispatcher thread", ex);
-                            }
-                        }));
+                            newScore = 0;
+                            newRatingCount = 0;
+                            newAvgRating = 0;
+                        }
+                        else
+                        {
+                            // Commit rating registration
+                            _ratedTokens[sessionToken] = 0;
 
-                        // Rebroadcast updated rating live to other performers
-                        _ = BroadcastActiveSingerAsync();
+                            int pointsEarned = dto.Rating * 10;
+                            dbSinger.Score += pointsEarned;
 
-                        return Results.Ok(new { success = true, score = dbSinger.Score, avgRating = dbSinger.AverageRating });
+                            int totalPoints = dbSinger.RatingPoints + dto.Rating;
+                            int newCount = dbSinger.RatingCount + 1;
+                            dbSinger.RatingPoints = totalPoints;
+                            dbSinger.RatingCount = newCount;
+                            dbSinger.AverageRating = Math.Round((double)totalPoints / newCount, 1);
+
+                            dbContext.Singers.Update(dbSinger);
+                            await dbContext.SaveChangesAsync();
+
+                            newScore = dbSinger.Score;
+                            newRatingCount = dbSinger.RatingCount;
+                            newAvgRating = dbSinger.AverageRating;
+                        }
                     }
-                    return Results.NotFound(new { error = "Singer not found." });
+                    finally
+                    {
+                        _ratingLock.Release();
+                    }
+
+                    if (!singerFound)
+                    {
+                        return Results.NotFound(new { error = "Singer not found." });
+                    }
+
+                    // Update active rotation memory model asynchronously
+                    _ = System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        try
+                        {
+                            var activeSinger = _rotation.Rotation.FirstOrDefault(s => s.Name.Equals(dto.SingerName, StringComparison.OrdinalIgnoreCase));
+                            if (activeSinger != null)
+                            {
+                                activeSinger.Score = newScore;
+                                activeSinger.AverageRating = newAvgRating;
+                                activeSinger.RatingCount = newRatingCount;
+                            }
+                            _rotation.NotifyRotationReordered();
+                        }
+                        catch (Exception ex)
+                        {
+                            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to update rotation memory model on dispatcher thread", ex);
+                        }
+                    }));
+
+                    // Rebroadcast updated rating live to other performers
+                    _ = BroadcastActiveSingerAsync();
+
+                    return Results.Ok(new { success = true, score = newScore, avgRating = newAvgRating });
                 }
                 catch (Exception ex)
                 {
-                    return Results.Problem(ex.Message);
+                    Lyracist.Shared.Globals.LogError("Lyracist", "Failed to save rating from /api/rate", ex);
+                    return Results.Problem("Failed to save rating.", statusCode: StatusCodes.Status500InternalServerError);
                 }
-            });
+            }).RequireRateLimiting(MobilePortalWritePolicy);
 
             _webApp.MapGet("/api/scaryoke/enabled", () => Results.Json(new { enabled = _karaoke.IsScaryokeMode }));
 
@@ -378,7 +521,8 @@ public class TabletLyricsServer(
 
                 // Check token ownership of the current performer
                 var performerName = dto?.SingerName;
-                if (performerName != null && _singerTokens.TryGetValue(performerName, out var ownerToken) && ownerToken != sessionToken)
+                var performerOwnerToken = performerName != null ? GetActiveOwnerToken(performerName) : null;
+                if (performerOwnerToken != null && performerOwnerToken != sessionToken)
                 {
                     return Results.Json(new { error = "Session token does not match the performer." }, statusCode: StatusCodes.Status403Forbidden);
                 }
@@ -392,7 +536,7 @@ public class TabletLyricsServer(
                     wheel.Spin();
                 }));
                 return Results.Ok(new { success = true });
-            });
+            }).RequireRateLimiting(MobilePortalWritePolicy);
 
             _webApp.MapGet("/api/requests", () => Results.Json(_requests.GetPending()));
 
@@ -432,7 +576,8 @@ public class TabletLyricsServer(
                 }
                 catch (Exception ex)
                 {
-                    return Results.Problem(ex.Message);
+                    Lyracist.Shared.Globals.LogError("Lyracist", "Failed to read logs for /api/logs", ex);
+                    return Results.Problem("Failed to read logs.", statusCode: StatusCodes.Status500InternalServerError);
                 }
             });
 
@@ -497,7 +642,7 @@ public class TabletLyricsServer(
                 }
 
                 return Results.Json(list.Take(50));
-            });
+            }).RequireRateLimiting(MobilePortalSearchPolicy);
 
             _webApp.MapGet("/", () => Results.Content(GetMobilePortalHtml(), "text/html"));
             _webApp.MapGet("/join", () => Results.Content(GetMobilePortalHtml(), "text/html"));

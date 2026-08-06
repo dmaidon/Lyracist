@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Remove duplicate IsPlaying = true; line in PlayPerformerRequest
 // Edited on Aug 2, 2026 @ 10:10:00 -> Add mp4 support to DJ Banner scanning and file dialog filter
 // Edited on Aug 1, 2026 @ 11:49:44 -> Add DeleteDjBanner command for custom DJ banners
 // Edited on Aug 1, 2026 @ 11:02:00 -> Add pragma warning disable MVVMTK0034 to allow direct backing field updates without MVVM Toolkit warning
@@ -1444,7 +1445,6 @@ public partial class KaraokeViewModel : BaseViewModel
                 await _mediaEngine.Play();
                 IsPlaying = true;
 
-                IsPlaying = true;
                 NotifyAudioPropertiesChanged();
                 return;
             }

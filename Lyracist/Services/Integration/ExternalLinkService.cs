@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Reuse a single static HttpClient instead of creating/disposing one per search call (socket exhaustion under repeated use)
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,14 @@ namespace Lyracist.Services.Integration
 {
     public class ExternalLinkService
     {
+        // Callers construct this with `new ExternalLinkService()` rather than through DI, so the
+        // HttpClient is shared via a static field (HttpClient is designed to be reused across
+        // calls, unlike most disposables) instead of being created and torn down per search.
+        private static readonly System.Net.Http.HttpClient _httpClient = new()
+        {
+            Timeout = TimeSpan.FromSeconds(10)
+        };
+
         private readonly List<ExternalTrack> _mockDatabase =
         [
             // Spotify
@@ -37,9 +46,8 @@ namespace Lyracist.Services.Integration
             {
                 try
                 {
-                    using var client = new System.Net.Http.HttpClient();
                     string url = $"https://www.googleapis.com/youtube/v3/search?part=snippet&q={Uri.EscapeDataString(query + " karaoke")}&type=video&maxResults=10&key={AppSettings.YouTubeApiKey}";
-                    var response = await client.GetAsync(url);
+                    var response = await _httpClient.GetAsync(url);
                     if (response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();

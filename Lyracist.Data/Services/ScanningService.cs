@@ -1,4 +1,4 @@
-// Edited on Jul 29, 2026 @ 00:35:00 -> Add robust recursive directory crawling supporting system/hidden folder skips and permission exceptions
+// Edited on Aug 6, 2026 @ 07:01:27 -> Fix dead-file cleanup matching sibling folders that share a scanned path's prefix (e.g. C:\Music vs C:\Music2)
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -267,7 +267,7 @@ namespace Lyracist.Data.Services
                 bool isInScannedPath = false;
                 foreach (var path in paths)
                 {
-                    if (s.FilePath.StartsWith(path, StringComparison.OrdinalIgnoreCase))
+                    if (IsPathUnderDirectory(s.FilePath, path))
                     {
                         isInScannedPath = true;
                         break;
@@ -518,6 +518,19 @@ namespace Lyracist.Data.Services
                     CurrentFile = batch.Count > 0 ? Path.GetFileName(batch[^1].FilePath) : string.Empty
                 });
             }
+        }
+
+        /// <summary>
+        /// True if filePath is inside directoryPath (or a subfolder of it). A plain StartsWith
+        /// on the raw strings would also match an unrelated sibling folder that happens to share
+        /// the prefix (e.g. scanning "C:\Music" would match "C:\Music2\..."), so this normalizes
+        /// with a trailing separator before comparing.
+        /// </summary>
+        private static bool IsPathUnderDirectory(string filePath, string directoryPath)
+        {
+            string normalizedDir = directoryPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                + Path.DirectorySeparatorChar;
+            return filePath.StartsWith(normalizedDir, StringComparison.OrdinalIgnoreCase);
         }
 
         private static List<string> SafeEnumerateFiles(string path)
