@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Add CanSave guard so Save is disabled until Load() has populated a valid audio path
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lyracist.Core.Interfaces;
@@ -60,9 +61,11 @@ namespace Lyracist.ViewModels
             Compressor = dbSettings.Compressor;
             Limiter = dbSettings.Limiter;
             Notes = dbSettings.Notes;
+
+            SaveCommand.NotifyCanExecuteChanged();
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanSave))]
         private void Save()
         {
             var settings = new SongAudioSettings
@@ -79,5 +82,7 @@ namespace Lyracist.ViewModels
             };
             _libraryService.SaveAudioSettings(_audioPath, settings);
         }
+
+        private bool CanSave() => !string.IsNullOrEmpty(_audioPath);
     }
 }

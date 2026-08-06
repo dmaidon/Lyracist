@@ -1,4 +1,4 @@
-Last Edit: Aug 6, 2026 - Add plain-text catalog export and failed-artist scan report; fix XP progress bar math and harden FFmpeg/CDG/LibVLC playback against deadlocks, race conditions, and memory leaks
+Last Edit: Aug 6, 2026 - Harden mobile portal security, fix rating/auto-accept/stress-test/playlist/scan races, and split the God-object Karaoke/Settings ViewModels into focused files
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -15,6 +15,18 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **CDG Playback Race Condition**: Synchronized the CDG frame scheduler's internal state so a song stop/reload can no longer race an in-flight background frame decode and hand back a stale or torn packet index.
 - **LibVLC Media Leaks**: The video and background-music playback backends now dispose the outgoing LibVLC `Media` instance on every track change instead of leaking the native handle, preventing memory growth over long shows with frequent song/crossfade changes.
 - **LibVLC Frame Buffer Use-After-Free**: The video backend now copies each decoded frame into a managed buffer before handing it to the UI thread, instead of deferring a copy from a native pointer that a concurrent format change could free first.
+- **Pitch Hot-Reload Race**: Rapidly changing pitch while a song load/stop was in flight could occasionally apply the pitch change over the wrong track; the pending change now targets a fixed snapshot of the track and cancels cleanly.
+- **Mobile Portal Security Hardening**: The singer mobile portal now rate-limits every endpoint per device, caps the length of submitted text fields (name, title, notes, etc.), and replaces permanent session-token bindings with a 6-hour sliding expiry so a singer who loses their token isn't locked out of their name until the server restarts.
+- **Duplicate/Lost Rating Updates**: Concurrent star ratings for the same performance can no longer silently overwrite each other's score/average-rating updates.
+- **Auto-Accept Status Mismatch**: The mobile portal's auto-accept flow now waits for the rotation to actually update before reporting a request as "Queued," instead of claiming success and then silently failing in the background.
+- **Stress-Test Simulator Crash Risk**: Fixed a rare crash in the Settings page's Stress-Test simulator caused by reading the rotation queue from a background thread while it was being modified on the UI thread.
+- **Stale Playlist Refresh**: Rapid playlist edits (add/remove/reorder) could occasionally leave the Opening/Fill-In/End-Rotation lists showing stale ordering; refreshes are now sequenced correctly.
+- **Library Scan Path Matching**: Scanning one music folder could incorrectly affect songs from an unrelated folder that happened to share a name prefix (e.g. `C:\Music` vs `C:\Music2`).
+- **Song/Singer Settings Save Guard**: The Save button in the Song and Singer settings windows is now disabled until settings have actually been loaded for an item.
+- **Reliability & Error Logging**: Several background database operations that previously failed silently now log errors for troubleshooting, and the YouTube and Party Tyme integrations now retry automatically on transient network failures instead of failing on the first hiccup.
+
+### Changed
+- **Karaoke & Settings ViewModel Cleanup**: Reorganized the two largest internal ViewModel files (DJ banners, Party Tyme, external search, display/monitor assignment, stress-test simulator, and more) into focused files by feature area, with no change in app behavior — purely an internal maintainability cleanup.
 
 ## [26.8.4.0] - 2026-08-04
 

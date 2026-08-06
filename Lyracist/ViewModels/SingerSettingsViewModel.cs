@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Add CanSave guard so Save is disabled until Load() has populated a valid singer name
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lyracist.Core.Interfaces;
@@ -78,9 +79,11 @@ namespace Lyracist.ViewModels
                 PartnerLimiter = dbPartnerSettings.Limiter;
                 PartnerNotes = dbPartnerSettings.Notes;
             }
+
+            SaveCommand.NotifyCanExecuteChanged();
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanSave))]
         private void Save()
         {
             var settings = new SingerAudioSettings
@@ -114,5 +117,7 @@ namespace Lyracist.ViewModels
                 _libraryService.SaveSingerSettings(_partnerName, partnerSettings);
             }
         }
+
+        private bool CanSave() => !string.IsNullOrEmpty(_singerName);
     }
 }

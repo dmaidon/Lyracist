@@ -1,10 +1,11 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Fix RefreshAll() race where an older background load could overwrite a newer one's results
+// Edited on Aug 6, 2026 @ 07:01:27 -> Handle DB failure in FindSongId instead of letting it throw; document singleton-lifetime timer subscription
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 
@@ -133,7 +134,9 @@ public partial class PlaylistsViewModel : BaseViewModel
         RefreshOccasionCategories();
 
         // Reflect MediaEngine-driven state changes (auto-pause/resume) that
-        // happen outside of this ViewModel's own commands.
+        // happen outside of this ViewModel's own commands. Never stopped: PlaylistsViewModel
+        // is registered AddSingleton in App.xaml.cs, so exactly one instance exists for the
+        // app's lifetime and this timer is meant to run until the process exits.
         _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         _statusTimer.Tick += (_, _) =>
         {
@@ -381,8 +384,16 @@ public partial class PlaylistsViewModel : BaseViewModel
     {
         // KaraokeSong doesn't carry the DB SongId, so resolve it back via
         // the library search-by-path lookup the scanning engine indexed.
-        using var context = new Lyracist.Data.LyracistDbContext();
-        return context.Songs.Where(s => s.FilePath == audioPath).Select(s => (int?)s.SongId).FirstOrDefault();
+        try
+        {
+            using var context = new Lyracist.Data.LyracistDbContext();
+            return context.Songs.Where(s => s.FilePath == audioPath).Select(s => (int?)s.SongId).FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "FindSongId: failed to resolve SongId from database");
+            return null;
+        }
     }
 
     private void RefreshOccasionCategories()

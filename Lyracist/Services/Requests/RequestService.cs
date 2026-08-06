@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Replace magic status strings with RequestStatuses constants
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,15 +21,15 @@ public class RequestService : IRequestService
 {
     public event EventHandler? RequestsChanged;
 
-    public List<RequestInfo> GetPending() => GetByStatus("Pending");
-    public List<RequestInfo> GetApproved() => GetByStatus("Approved");
+    public List<RequestInfo> GetPending() => GetByStatus(RequestStatuses.Pending);
+    public List<RequestInfo> GetApproved() => GetByStatus(RequestStatuses.Approved);
 
     public List<RequestInfo> GetHistory()
     {
         using var context = new LyracistDbContext();
         return [.. context.MusicRequests
             .Include(r => r.Singer)
-            .Where(r => r.Status == "Played" || r.Status == "Rejected" || r.Status == "Queued")
+            .Where(r => r.Status == RequestStatuses.Played || r.Status == RequestStatuses.Rejected || r.Status == RequestStatuses.Queued)
             .OrderByDescending(r => r.Timestamp)
             .Take(200)
             .ToList()
@@ -53,7 +54,7 @@ public class RequestService : IRequestService
             RequestType = string.IsNullOrWhiteSpace(requestType) ? "Karaoke" : requestType,
             Key = string.IsNullOrWhiteSpace(key) ? "0" : key,
             Notes = notes?.Trim() ?? string.Empty,
-            Status = "Pending",
+            Status = RequestStatuses.Pending,
             Timestamp = DateTime.UtcNow
         };
         context.MusicRequests.Add(request);
@@ -63,10 +64,10 @@ public class RequestService : IRequestService
         return Map(request);
     }
 
-    public void Approve(int requestId) => SetStatus(requestId, "Approved");
-    public void Reject(int requestId) => SetStatus(requestId, "Rejected");
-    public void MarkPlayed(int requestId) => SetStatus(requestId, "Played");
-    public void MarkQueued(int requestId) => SetStatus(requestId, "Queued");
+    public void Approve(int requestId) => SetStatus(requestId, RequestStatuses.Approved);
+    public void Reject(int requestId) => SetStatus(requestId, RequestStatuses.Rejected);
+    public void MarkPlayed(int requestId) => SetStatus(requestId, RequestStatuses.Played);
+    public void MarkQueued(int requestId) => SetStatus(requestId, RequestStatuses.Queued);
 
     private void SetStatus(int requestId, string status)
     {

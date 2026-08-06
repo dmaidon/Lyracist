@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Log swallowed exception in RefreshLeaderboard; document singleton-lifetime timer/event subscriptions
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -57,6 +58,9 @@ public partial class RotationWindowViewModel : BaseViewModel
     {
         RefreshQrCode();
 
+        // The timer and event subscription below are never stopped/unsubscribed:
+        // RotationWindowViewModel is registered AddSingleton in App.xaml.cs, so exactly one
+        // instance exists for the app's lifetime and both are meant to run until the process exits.
         _toggleTimer = new System.Timers.Timer(10000); // Toggle between queue and leaderboard every 10s
         _toggleTimer.Elapsed += (s, e) =>
         {
@@ -112,7 +116,10 @@ public partial class RotationWindowViewModel : BaseViewModel
                 Leaderboard.Add(new SingerRank(s.Name, s.Score, s.AverageRating, i + 1, level, levelName, badges));
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "RefreshLeaderboard: failed to load leaderboard from database");
+        }
     }
 
     public void RefreshQrCode()

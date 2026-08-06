@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Remove duplicate IsPlaying = true; line in PlayPerformerRequest
+// Edited on Aug 6, 2026 @ 07:01:27 -> Log swallowed exceptions in LoadSingerNames/OnNewSingerNameChanged instead of silently discarding them; document singleton-lifetime event subscriptions
 // Edited on Aug 2, 2026 @ 10:10:00 -> Add mp4 support to DJ Banner scanning and file dialog filter
 // Edited on Aug 1, 2026 @ 11:49:44 -> Add DeleteDjBanner command for custom DJ banners
 // Edited on Aug 1, 2026 @ 11:02:00 -> Add pragma warning disable MVVMTK0034 to allow direct backing field updates without MVVM Toolkit warning
@@ -140,7 +140,10 @@ public partial class KaraokeViewModel : BaseViewModel
                 SingerNames.Add(name);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "LoadSingerNames: failed to load singer names from database");
+        }
     }
 
     [ObservableProperty]
@@ -193,7 +196,10 @@ public partial class KaraokeViewModel : BaseViewModel
                     });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "OnNewSingerNameChanged: failed to load singer history for notes autofill");
+            }
         });
     }
 
@@ -412,6 +418,9 @@ public partial class KaraokeViewModel : BaseViewModel
         _navigation = navigation;
         _externalLinkService = new ExternalLinkService();
 
+        // None of the event/timer subscriptions below are ever unsubscribed: KaraokeViewModel
+        // is registered AddSingleton in App.xaml.cs, so exactly one instance exists for the
+        // app's lifetime and these are meant to live as long as the process does.
         RefreshPendingRequestIndicators();
         _requests.RequestsChanged += (_, _) =>
             System.Windows.Application.Current?.Dispatcher.BeginInvoke(RefreshPendingRequestIndicators);

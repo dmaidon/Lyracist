@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Document that the FrameReady subscription is intentionally permanent (AddSingleton lifetime)
 using System;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -41,6 +42,9 @@ public partial class LyricsViewModel : ObservableObject
         _display = display;
         _tablet = tablet;
 
+        // Never unsubscribed: LyricsViewModel is registered AddSingleton in App.xaml.cs, so
+        // exactly one instance exists for the app's lifetime and this subscription is meant
+        // to live as long as the process does.
         _media.FrameReady += OnFrameReady;
     }
 

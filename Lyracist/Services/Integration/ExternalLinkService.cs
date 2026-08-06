@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Reuse a single static HttpClient instead of creating/disposing one per search call (socket exhaustion under repeated use)
+// Edited on Aug 6, 2026 @ 07:01:27 -> Add retry-with-backoff to the YouTube search call and log the previously-swallowed fallback exception
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,8 +47,8 @@ namespace Lyracist.Services.Integration
                 try
                 {
                     string url = $"https://www.googleapis.com/youtube/v3/search?part=snippet&q={Uri.EscapeDataString(query + " karaoke")}&type=video&maxResults=10&key={AppSettings.YouTubeApiKey}";
-                    var response = await _httpClient.GetAsync(url);
-                    if (response.IsSuccessStatusCode)
+                    var response = await GetWithRetryAsync(url);
+                    if (response != null && response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();
                         using var doc = JsonDocument.Parse(json);
@@ -102,9 +102,10 @@ namespace Lyracist.Services.Integration
                         return finalResults;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                     // Fallback to mock search on network error
+                    System.Diagnostics.Debug.WriteLine($"YouTube search failed, falling back to mock results: {ex.Message}");
                 }
             }
 
@@ -124,6 +125,24 @@ namespace Lyracist.Services.Integration
             }
 
             return results.ToList();
+        }
+
+        /// <summary>Retries a transient GET failure (timeout/network error) up to twice with a short backoff.</summary>
+        private static async Task<System.Net.Http.HttpResponseMessage?> GetWithRetryAsync(string url, int maxAttempts = 3)
+        {
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
+                {
+                    return await _httpClient.GetAsync(url);
+                }
+                catch (Exception ex) when (attempt < maxAttempts && (ex is System.Net.Http.HttpRequestException or TaskCanceledException))
+                {
+                    System.Diagnostics.Debug.WriteLine($"YouTube search attempt {attempt} failed, retrying: {ex.Message}");
+                    await Task.Delay(TimeSpan.FromSeconds(attempt));
+                }
+            }
+            return null;
         }
 
         public ExternalTrack? ParseUrl(string url)

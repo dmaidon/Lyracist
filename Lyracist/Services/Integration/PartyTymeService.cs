@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Add HttpClient timeout and retry-with-backoff to the track download call
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,7 +33,10 @@ namespace Lyracist.Services.Integration
 
         public PartyTymeService()
         {
-            _httpClient = new HttpClient();
+            _httpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(30)
+            };
             _cacheDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Cache", "PartyTyme");
             if (!Directory.Exists(_cacheDirectory))
             {
@@ -117,8 +121,8 @@ namespace Lyracist.Services.Integration
 
             try
             {
-                var response = await _httpClient.GetAsync(track.StreamUrl);
-                if (response.IsSuccessStatusCode)
+                var response = await GetWithRetryAsync(track.StreamUrl);
+                if (response != null && response.IsSuccessStatusCode)
                 {
                     using var fs = new FileStream(cachedPath, FileMode.Create, FileAccess.Write, FileShare.None);
                     await response.Content.CopyToAsync(fs);
@@ -131,6 +135,24 @@ namespace Lyracist.Services.Integration
             }
 
             return string.Empty;
+        }
+
+        /// <summary>Retries a transient GET failure (timeout/network error) up to twice with a short backoff.</summary>
+        private async Task<HttpResponseMessage?> GetWithRetryAsync(string url, int maxAttempts = 3)
+        {
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
+                {
+                    return await _httpClient.GetAsync(url);
+                }
+                catch (Exception ex) when (attempt < maxAttempts && (ex is HttpRequestException or TaskCanceledException))
+                {
+                    System.Diagnostics.Debug.WriteLine($"Party Tyme download attempt {attempt} failed, retrying: {ex.Message}");
+                    await Task.Delay(TimeSpan.FromSeconds(attempt));
+                }
+            }
+            return null;
         }
 
         public void ClearCache()

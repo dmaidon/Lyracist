@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Deduplicate DB logging logic
+// Edited on Aug 6, 2026 @ 07:01:27 -> Log the six swallowed exceptions in background DB operations instead of silently discarding them
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -147,7 +147,10 @@ public partial class RotationViewModel : BaseViewModel
                 }
                 context.SaveChanges();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "SeedSingers: failed to save seed singers to database");
+            }
         });
 
         // Deferred: seeding runs from the RotationViewModel constructor when test
@@ -179,7 +182,10 @@ public partial class RotationViewModel : BaseViewModel
                 SingerNames.Add(name);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "LoadSingerNames: failed to load singer names from database");
+        }
     }
 
     partial void OnNewSingerNameChanged(string value)
@@ -214,7 +220,10 @@ public partial class RotationViewModel : BaseViewModel
                     });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "OnNewSingerNameChanged: failed to load singer history for notes autofill");
+            }
         });
     }
 
@@ -245,7 +254,10 @@ public partial class RotationViewModel : BaseViewModel
                 totalSongsSung = dbSinger.TotalSongsSung;
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "AddSinger: failed to load existing singer stats from database");
+        }
 
         // First, check if singer already exists in active rotation:
         var existingSinger = Rotation.FirstOrDefault(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
@@ -338,7 +350,10 @@ public partial class RotationViewModel : BaseViewModel
                     });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "AddSinger: failed to persist new singer to database");
+            }
         });
 
         Rotation.Add(new Singer
@@ -838,7 +853,10 @@ public partial class RotationViewModel : BaseViewModel
                     context.SaveChanges();
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "SavePerformanceHistory: failed to save performance history to database");
+            }
         });
     }
 }
