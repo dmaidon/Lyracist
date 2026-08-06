@@ -1,5 +1,6 @@
-// Edited on Jul 19, 2026 @ 09:40:00 -> Implement AudioDeviceId routing and Hardware Mixer Mode EQ bypass
+// Edited on Aug 6, 2026 @ 07:01:27 -> Copy frame bytes into a rented buffer before dispatching (fixes use-after-free on format change) and dispose outgoing Media on reload (fixes native handle leak)
 using System;
+using System.Buffers;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -210,7 +211,9 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
                 media.AddOption($":audio-filter=pitch");
                 media.AddOption($":pitch-shift={_pitchShift}");
             }
+            var oldMedia = _mediaPlayer.Media;
             _mediaPlayer.Media = media;
+            oldMedia?.Dispose();
 
             // Apply selected audio device
             if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
@@ -327,58 +330,71 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         var dispatcher = app.Dispatcher;
         if (dispatcher == null) return;
 
-        // Snapshot the buffer pointer/dimensions under a narrowly-scoped lock, then
-        // release before dispatching to the UI thread. Never hold _bufferLock across
-        // Dispatcher.Invoke — if any other code path (e.g. Dispose) ever needs this
-        // lock from the UI thread, holding it across a blocking cross-thread Invoke
-        // is a deadlock waiting to happen.
-        IntPtr pixelBuffer;
+        // Copy the native frame bytes into a rented managed buffer synchronously, while still
+        // holding the same lock VideoFormatCallback takes before it frees/reallocates
+        // _pixelBuffer. This is the only point at which touching the native pointer is safe —
+        // once the lock is released, a format change on another thread could free it out from
+        // under a deferred copy. We deliberately do NOT hold the lock across Dispatcher.Invoke
+        // (see LockCallback comment) — copying out the bytes up front avoids needing to.
         uint pitch, lines, width, height;
+        int size;
+        byte[] frameCopy;
         lock (_bufferLock)
         {
-            pixelBuffer = _pixelBuffer;
+            if (_pixelBuffer == IntPtr.Zero) return;
             pitch = _pitch;
             lines = _lines;
             width = _width;
             height = _height;
+            size = (int)(pitch * lines);
+            frameCopy = ArrayPool<byte>.Shared.Rent(size);
+            Marshal.Copy(_pixelBuffer, frameCopy, 0, size);
         }
-
-        if (pixelBuffer == IntPtr.Zero) return;
 
         try
         {
             // Perform fast memory copying inside UI thread dispatcher asynchronously to prevent cross-threading deadlocks
             dispatcher.BeginInvoke(new Action(() =>
             {
-                if (_isDisposed || _bitmap == null) return;
-
                 try
                 {
-                    _bitmap.Lock();
-                    int size = (int)(pitch * lines);
-                    unsafe
-                    {
-                        Buffer.MemoryCopy(
-                            (void*)pixelBuffer,
-                            (void*)_bitmap.BackBuffer,
-                            size,
-                            size
-                        );
-                    }
-                    _bitmap.AddDirtyRect(new Int32Rect(0, 0, (int)width, (int)height));
-                    _bitmap.Unlock();
+                    if (_isDisposed || _bitmap == null) return;
 
-                    FrameReady?.Invoke(this, new VideoFrame(_bitmap, Position));
+                    try
+                    {
+                        _bitmap.Lock();
+                        unsafe
+                        {
+                            fixed (byte* src = frameCopy)
+                            {
+                                Buffer.MemoryCopy(
+                                    src,
+                                    (void*)_bitmap.BackBuffer,
+                                    size,
+                                    size
+                                );
+                            }
+                        }
+                        _bitmap.AddDirtyRect(new Int32Rect(0, 0, (int)width, (int)height));
+                        _bitmap.Unlock();
+
+                        FrameReady?.Invoke(this, new VideoFrame(_bitmap, Position));
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"LibVLC custom rendering exception: {ex.Message}");
+                    }
                 }
-                catch (Exception ex)
+                finally
                 {
-                    System.Diagnostics.Debug.WriteLine($"LibVLC custom rendering exception: {ex.Message}");
+                    ArrayPool<byte>.Shared.Return(frameCopy);
                 }
             }));
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"LibVLC DisplayCallback dispatcher invocation exception: {ex.Message}");
+            ArrayPool<byte>.Shared.Return(frameCopy);
         }
     }
 

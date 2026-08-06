@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Optimise CDG UI updates
+// Edited on Aug 6, 2026 @ 07:01:27 -> Lock shared scheduler state against the Reset()/UpdateBackground() race, remove dead Update() method
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,11 @@ namespace Lyracist.Services.Media.Cdg;
 public class CdgFrameScheduler : ICdgFrameScheduler
 {
     private readonly ICDGDecoder _cdgDecoder;
+
+    // UpdateBackground() runs on a background thread while Reset() and GetFrame() can be
+    // called from the UI thread (e.g. Stop()/LoadSong() vs. the in-flight decode Task.Run
+    // in MediaEngine.OnPlaybackTick) — all access to the fields below must go through this lock.
+    private readonly System.Threading.Lock _syncRoot = new();
     private List<CdgPacket> _packets = [];
     private int _currentPacketIndex;
     private DateTime _lastFrameTime = DateTime.MinValue;
@@ -26,36 +31,45 @@ public class CdgFrameScheduler : ICdgFrameScheduler
 
     public void LoadPackets(List<CdgPacket> packets)
     {
-        _packets = [.. packets];
+        lock (_syncRoot)
+        {
+            _packets = [.. packets];
+        }
     }
 
     public void Reset()
     {
-        _currentPacketIndex = 0;
-        _lastFrameTime = DateTime.MinValue;
-        _lastFrame = null;
-        _needBitmapCopy = false;
-        if (_cdgDecoder is CdgDecoder cdg)
+        lock (_syncRoot)
         {
-            cdg.ResetState();
+            _currentPacketIndex = 0;
+            _lastFrameTime = DateTime.MinValue;
+            _lastFrame = null;
+            _needBitmapCopy = false;
+            if (_cdgDecoder is CdgDecoder cdg)
+            {
+                cdg.ResetState();
+            }
         }
     }
 
-    public void Update(TimeSpan audioPosition)
+    public void UpdateBackground(TimeSpan audioPosition, CdgDecoder cdg)
     {
-        if (_packets == null || _packets.Count == 0) return;
-
-        double targetSeconds = audioPosition.TotalSeconds;
-
-        // Handle seeks backward by resetting and starting over
-        if (_currentPacketIndex > 0 && targetSeconds < _packets[_currentPacketIndex - 1].Timestamp)
+        lock (_syncRoot)
         {
-            Reset();
-        }
+            if (_packets == null || _packets.Count == 0) return;
 
-        // Process subcode packet blocks sequentially up to the target timestamp
-        if (_cdgDecoder is CdgDecoder cdg)
-        {
+            double targetSeconds = audioPosition.TotalSeconds;
+
+            // Handle seeks backward by resetting and starting over
+            if (_currentPacketIndex > 0 && targetSeconds < _packets[_currentPacketIndex - 1].Timestamp)
+            {
+                _currentPacketIndex = 0;
+                _lastFrameTime = DateTime.MinValue;
+                _lastFrame = null;
+                _needBitmapCopy = false;
+                cdg.ResetState();
+            }
+
             while (_currentPacketIndex < _packets.Count && _packets[_currentPacketIndex].Timestamp <= targetSeconds)
             {
                 CdgPacket packet = _packets[_currentPacketIndex];
@@ -63,57 +77,32 @@ public class CdgFrameScheduler : ICdgFrameScheduler
                 _currentPacketIndex++;
             }
 
-            // Render the frame at the requested target frame rate limit
             DateTime now = DateTime.UtcNow;
             if (now - _lastFrameTime >= _frameInterval)
             {
-                _lastFrame = cdg.RenderToBitmap();
+                cdg.RenderToBuffer();
                 _lastFrameTime = now;
+                _needBitmapCopy = true;
             }
-        }
-    }
-
-    public void UpdateBackground(TimeSpan audioPosition, CdgDecoder cdg)
-    {
-        if (_packets == null || _packets.Count == 0) return;
-
-        double targetSeconds = audioPosition.TotalSeconds;
-
-        // Handle seeks backward by resetting and starting over
-        if (_currentPacketIndex > 0 && targetSeconds < _packets[_currentPacketIndex - 1].Timestamp)
-        {
-            Reset();
-        }
-
-        while (_currentPacketIndex < _packets.Count && _packets[_currentPacketIndex].Timestamp <= targetSeconds)
-        {
-            CdgPacket packet = _packets[_currentPacketIndex];
-            cdg.ApplyPacket(packet);
-            _currentPacketIndex++;
-        }
-
-        DateTime now = DateTime.UtcNow;
-        if (now - _lastFrameTime >= _frameInterval)
-        {
-            cdg.RenderToBuffer();
-            _lastFrameTime = now;
-            _needBitmapCopy = true;
         }
     }
 
     public WriteableBitmap? GetFrame()
     {
-        if (_needBitmapCopy && _cdgDecoder is CdgDecoder cdg)
+        lock (_syncRoot)
         {
-            int width = cdg.TargetWidth;
-            int height = cdg.TargetHeight;
-            if (_lastFrame == null || _lastFrame.PixelWidth != width || _lastFrame.PixelHeight != height)
+            if (_needBitmapCopy && _cdgDecoder is CdgDecoder cdg)
             {
-                _lastFrame = new WriteableBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Pbgra32, null);
+                int width = cdg.TargetWidth;
+                int height = cdg.TargetHeight;
+                if (_lastFrame == null || _lastFrame.PixelWidth != width || _lastFrame.PixelHeight != height)
+                {
+                    _lastFrame = new WriteableBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Pbgra32, null);
+                }
+                cdg.CopyToBitmap(_lastFrame);
+                _needBitmapCopy = false;
             }
-            cdg.CopyToBitmap(_lastFrame);
-            _needBitmapCopy = false;
+            return _lastFrame;
         }
-        return _lastFrame;
     }
 }

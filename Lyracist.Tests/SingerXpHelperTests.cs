@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Fix test to use the corrected XP-progress threshold formula (25*(l-1)*l, not the buggy 50*(l-1)*l)
 using Lyracist.Core.Helpers;
 
 namespace Lyracist.Tests;
@@ -38,7 +39,10 @@ public class SingerXpHelperTests
     public void CalculateXPProgress_AtLevelFloor_IsZero()
     {
         int level = 3;
-        int xpForCurrent = 50 * (level - 1) * level;
+        int xpForCurrent = 25 * (level - 1) * level;
+
+        // Sanity-check that this xp value is actually where CalculateLevel starts returning `level`.
+        Assert.Equal(level, SingerXpHelper.CalculateLevel(xpForCurrent));
 
         double progress = SingerXpHelper.CalculateXPProgress(xpForCurrent, level);
 

@@ -1,4 +1,4 @@
-<!-- Edited on Jul 28, 2026 @ 19:31:00 -> Add Catalog Book Generator UI card -->
+<!-- Edited on Aug 5, 2026 @ 06:58:00 -> Resort catalog book options and add txt format option -->
 <Window x:Class="LyracistDbEditor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -286,7 +286,7 @@
                     <Border Grid.Row="10" Background="{DynamicResource ControlFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="14">
                         <StackPanel>
                             <TextBlock Text="Catalog Book Generator" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                            <TextBlock Text="Create a Word (.docx) or PDF book of the Karaoke or Music databases." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,10" />
+                            <TextBlock Text="Create a PDF (.pdf), Text (.txt), or Word (.docx) book of the Karaoke or Music databases." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,10" />
 
                             <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
@@ -299,8 +299,9 @@
                                     <ComboBoxItem Content="Music Catalog" />
                                 </ComboBox>
                                 <ComboBox Grid.Column="2" SelectedIndex="{Binding ExportFormatIndex, Mode=TwoWay}" Height="35">
-                                    <ComboBoxItem Content="Word Document (.docx)" />
                                     <ComboBoxItem Content="PDF Document (.pdf)" />
+                                    <ComboBoxItem Content="Text File (.txt)" />
+                                    <ComboBoxItem Content="Word Document (.docx)" />
                                 </ComboBox>
                             </Grid>
 

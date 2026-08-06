@@ -1,4 +1,4 @@
-Last Edit: Aug 4, 2026 - Add DJ Banner QR code overlay, checkbox toggle, Display tab rename, skipped singer round tracking fix, and immediate auto-accept approval
+Last Edit: Aug 6, 2026 - Add plain-text catalog export and failed-artist scan report to the Database Manager; fix XP progress bar math and harden FFmpeg/CDG/LibVLC playback against deadlocks, race conditions, and memory leaks
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.
@@ -48,7 +48,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 
 ### 🎵 Song Library & Integrations
 - **Local Scanner & Rescan Maintenance**: Scans folders for `.mp3 + .cdg`, `.mp4` or `.zip` files and builds a local query database. Cleanly deletes obsolete database logs and search indexes for files that were renamed or deleted on the drive during rescans.
-- **Catalog Book Exporter**: Export the entire song library (Karaoke or Music) directly into professionally formatted, paginated PDF or Word (.docx) documents with repeating table headers from the Database Manager.
+- **Catalog Book Exporter**: Export the entire song library (Karaoke or Music) directly into professionally formatted, paginated PDF, plain text (.txt), or Word (.docx) documents with repeating table headers from the Database Manager.
 - **Streaming & Search Integration**: Includes search support for:
   - **Party Tyme Karaoke** (built-in streaming provider)
   - **YouTube** (direct URL stream linking and metadata lookups)

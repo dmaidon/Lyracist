@@ -187,3 +187,17 @@ Operators can now select different casting targets for the Singer Rotation Billb
 
 3. Browser Cast Server:
    - The self-hosted Browser Cast option spins up a local web server (http://localhost:8080/rotation/) to allow any browser on the local network to view the singer rotation billboard in real-time.
+
+
+Section: Database Manager / Catalog Book Exporter & Failed Artist List
+
+[Update Details]
+Updates have been made to the Catalog Book Exporter formats and the Slow Metadata Extractor.
+
+1. Supported Formats and Sorting:
+   - The Catalog Book Exporter now supports exporting the catalog as a plain text (.txt) file.
+   - The format selection dropdown has been sorted in the following order: PDF Document (.pdf), Text File (.txt), and Word Document (.docx).
+
+2. Metadata Scan Failed Artist Export:
+   - When running a Slow Metadata Scan for songs with unknown artists, any files that were unable to be resolved and updated with a valid artist during the scan are tracked.
+   - Upon completion or cancellation of the scan, a plain text file listing all unresolved file paths is automatically exported to the "Reports" directory, named "Failed_Artist_Updates_[Timestamp].txt".

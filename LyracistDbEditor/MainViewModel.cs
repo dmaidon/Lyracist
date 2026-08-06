@@ -1,4 +1,4 @@
-// Edited on Jul 29, 2026 @ 00:35:00 -> Run EF database migration in constructor
+// Edited on Aug 5, 2026 @ 07:07:00 -> Fix scope of ExportFailedFiles local function in RunSlowScanAsync
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -287,6 +287,34 @@ public partial class MainViewModel : ObservableObject
 
     private async Task RunSlowScanAsync(CancellationToken token)
     {
+        var failedFiles = new List<string>();
+
+        void ExportFailedFiles()
+        {
+            if (failedFiles.Count > 0)
+            {
+                try
+                {
+                    string reportsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Reports");
+                    Directory.CreateDirectory(reportsDir);
+                    string fileName = $"Failed_Artist_Updates_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+                    string filePath = Path.Combine(reportsDir, fileName);
+                    File.WriteAllLines(filePath, failedFiles);
+                    
+                    string logMsg = $"[{DateTime.Now:HH:mm:ss}] Exported {failedFiles.Count} unresolved tracks to: {filePath}";
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ScanLog.Insert(0, logMsg);
+                        if (ScanLog.Count > 100) ScanLog.RemoveAt(ScanLog.Count - 1);
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Failed to write unresolved artist list: {ex.Message}");
+                }
+            }
+        }
+
         try
         {
             using var context = new LyracistDbContext();
@@ -330,6 +358,7 @@ public partial class MainViewModel : ObservableObject
 
                 if (!File.Exists(song.FilePath))
                 {
+                    failedFiles.Add(song.FilePath);
                     continue;
                 }
 
@@ -399,7 +428,13 @@ public partial class MainViewModel : ObservableObject
                         if (ScanLog.Count > 100) ScanLog.RemoveAt(ScanLog.Count - 1);
                     });
                 }
+                else
+                {
+                    failedFiles.Add(song.FilePath);
+                }
             }
+
+            ExportFailedFiles();
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
@@ -411,6 +446,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (OperationCanceledException)
         {
+            ExportFailedFiles();
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 ScanProgressText = "Scan canceled.";
@@ -419,6 +455,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            ExportFailedFiles();
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 ScanProgressText = $"Error: {ex.Message}";
@@ -827,12 +864,16 @@ public partial class MainViewModel : ObservableObject
         try
         {
             bool isKaraoke = ExportCatalogIndex == 0;
-            bool isPdf = ExportFormatIndex == 1;
+            int formatIndex = ExportFormatIndex;
 
             string filePath;
-            if (isPdf)
+            if (formatIndex == 0)
             {
                 filePath = Lyracist.Data.Services.CatalogBookGenerator.GeneratePdf(isKaraoke);
+            }
+            else if (formatIndex == 1)
+            {
+                filePath = Lyracist.Data.Services.CatalogBookGenerator.GenerateTxt(isKaraoke);
             }
             else
             {

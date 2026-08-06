@@ -1,3 +1,4 @@
+<!-- Edited on Aug 6, 2026 @ 07:01:27 -> Bump AssemblyVersion and FileVersion to 26.8.6.99 -->
 <!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -10,8 +11,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.8.4.90</AssemblyVersion>
-    <FileVersion>26.8.4.90</FileVersion>
+    <AssemblyVersion>26.8.6.99</AssemblyVersion>
+    <FileVersion>26.8.6.99</FileVersion>
     <ApplicationIcon>..\Lyracist\Assets\db_manager_tp.ico</ApplicationIcon>
     <PackageIcon>db_manager_tp.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>

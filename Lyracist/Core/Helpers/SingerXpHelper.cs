@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 07:01:27 -> Fix XP progress bar math (was off by a factor of 2 vs CalculateLevel's threshold formula)
 using System;
 using System.Collections.Generic;
 
@@ -19,8 +20,8 @@ public static class SingerXpHelper
 
     public static double CalculateXPProgress(int xp, int level)
     {
-        int xpForCurrent = 50 * (level - 1) * level;
-        int xpForNext = 50 * level * (level + 1);
+        int xpForCurrent = 25 * (level - 1) * level;
+        int xpForNext = 25 * level * (level + 1);
         int range = xpForNext - xpForCurrent;
         if (range <= 0) return 0;
         double progress = (double)(xp - xpForCurrent) / range;

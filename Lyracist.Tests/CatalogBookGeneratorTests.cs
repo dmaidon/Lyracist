@@ -1,5 +1,4 @@
-// Edited on Aug 4, 2026 @ 10:50:00 -> Pass CancellationToken to FirstOrDefaultAsync to address xUnit1051 analyzer warning
-// Edited on Aug 1, 2026 @ 12:16:00 -> Add UpdateUserManualsForCastingSupport test case
+// Edited on Aug 5, 2026 @ 07:01:00 -> Fix readonly database attribute in test constructor
 using System;
 using System.IO;
 using Xunit;
@@ -22,7 +21,12 @@ namespace Lyracist.Tests
                 Directory.CreateDirectory(targetDir);
                 try
                 {
+                    if (File.Exists(targetDb))
+                    {
+                        File.SetAttributes(targetDb, FileAttributes.Normal);
+                    }
                     File.Copy(sourceDb, targetDb, overwrite: true);
+                    File.SetAttributes(targetDb, FileAttributes.Normal);
                 }
                 catch
                 {
@@ -300,6 +304,134 @@ Operators can now select different casting targets for the Singer Rotation Billb
                             }
                             
                             doc.Info.Keywords = (keywords ?? string.Empty) + " CastingSupport";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                }
+            }
+        }
+
+        [Fact]
+        public void TestGenerateTxtCatalog()
+        {
+            string txtPath = CatalogBookGenerator.GenerateTxt(isKaraoke: true);
+            Assert.True(File.Exists(txtPath));
+            
+            // Delete file after validation
+            try { File.Delete(txtPath); } catch {}
+        }
+
+        [Fact]
+        public void UpdateUserManualsForCatalogTxtAndExtractorFailedList()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"
+Section: Database Manager / Catalog Book Exporter & Failed Artist List
+
+[Update Details]
+Updates have been made to the Catalog Book Exporter formats and the Slow Metadata Extractor.
+
+1. Supported Formats and Sorting:
+   - The Catalog Book Exporter now supports exporting the catalog as a plain text (.txt) file.
+   - The format selection dropdown has been sorted in the following order: PDF Document (.pdf), Text File (.txt), and Word Document (.docx).
+
+2. Metadata Scan Failed Artist Export:
+   - When running a Slow Metadata Scan for songs with unknown artists, any files that were unable to be resolved and updated with a valid artist during the scan are tracked.
+   - Upon completion or cancellation of the scan, a plain text file listing all unresolved file paths is automatically exported to the ""Reports"" directory, named ""Failed_Artist_Updates_[Timestamp].txt"".
+";
+
+            // 1. Update text file if not already present
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Catalog Book Exporter & Failed Artist List"))
+                {
+                    File.AppendAllText(txtPath, "\n" + updateText);
+                }
+            }
+
+            // 2. Update docx file by appending paragraph to the end
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+                    
+                    if (body != null)
+                    {
+                        // Check if already appended to avoid duplicates
+                        bool alreadyAppended = false;
+                        foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (p.Text != null && p.Text.Contains("Catalog Book Exporter & Failed Artist List"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Database Manager / Catalog Book Exporter & Failed Artist List")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("CatalogTxtAndFailedList"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                            
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+                            
+                            gfx.DrawString("Section: Database Manager / Catalog Book Exporter & Failed Artist List", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+                            
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                yPos += 15;
+                            }
+                            
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " CatalogTxtAndFailedList";
                             doc.Save(pdfPath);
                         }
                     }

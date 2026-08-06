@@ -1,4 +1,4 @@
-// Edited on Jul 31, 2026 @ 11:20:24 -> Fixed null reference return warning in custom font resolver
+// Edited on Aug 5, 2026 @ 06:58:00 -> Add txt file support for catalog book generator
 using System;
 using System.IO;
 using System.Linq;
@@ -216,6 +216,51 @@ namespace Lyracist.Data.Services
             }
 
             document.Save(filePath);
+            return filePath;
+        }
+
+        public static string GenerateTxt(bool isKaraoke)
+        {
+            Directory.CreateDirectory(ReportsDirectory);
+            string catalogName = isKaraoke ? "Karaoke_Catalog" : "Music_Catalog";
+            string fileName = $"{catalogName}_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+            string filePath = Path.Combine(ReportsDirectory, fileName);
+
+            using var context = new LyracistDbContext();
+            context.Database.Migrate();
+            var songs = context.Songs
+                .Where(s => s.IsKaraoke == isKaraoke)
+                .OrderBy(s => s.Artist)
+                .ThenBy(s => s.Title)
+                .ToList();
+
+            using (var writer = new StreamWriter(filePath))
+            {
+                string title = isKaraoke ? "Karaoke Catalog" : "Music Catalog";
+                writer.WriteLine(title);
+                writer.WriteLine(new string('=', title.Length));
+                writer.WriteLine();
+
+                // Table Header
+                writer.WriteLine("{0,-30} {1,-50} {2,-8} {3,-20}", "Artist", "Title", "Length", "Genre");
+                writer.WriteLine(new string('-', 112));
+
+                foreach (var song in songs)
+                {
+                    string artist = Truncate(song.Artist, 30);
+                    string songTitle = Truncate(song.Title, 50);
+                    string durationStr = TimeSpan.FromSeconds(song.Duration).ToString(@"mm\:ss");
+                    string genre = Truncate(song.Genre, 20);
+
+                    writer.WriteLine("{0,-30} {1,-50} {2,-8} {3,-20}", artist, songTitle, durationStr, genre);
+                }
+
+                if (songs.Count == 0)
+                {
+                    writer.WriteLine("No tracks found in the database matching this type.");
+                }
+            }
+
             return filePath;
         }
 

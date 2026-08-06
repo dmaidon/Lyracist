@@ -1,7 +1,20 @@
-Last Edit: Aug 4, 2026 - Add DJ Banner QR code overlay, checkbox toggle, Display tab rename, skipped singer round tracking fix, and immediate auto-accept approval
+Last Edit: Aug 6, 2026 - Add plain-text catalog export and failed-artist scan report; fix XP progress bar math and harden FFmpeg/CDG/LibVLC playback against deadlocks, race conditions, and memory leaks
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.6.0] - 2026-08-06
+
+### Added
+- **Plain-Text Catalog Export**: The Database Manager's Catalog Book Exporter now supports exporting the Karaoke or Music catalog as a plain text (.txt) file, in addition to PDF and Word. Format dropdown reordered to PDF, Text, Word.
+- **Failed Artist Update Report**: The Database Manager's Slow Metadata Scan now tracks any songs whose artist could not be resolved and, on completion or cancellation, exports the unresolved file paths to a timestamped report in the app's `Reports` folder.
+
+### Fixed
+- **Singer XP Progress Bar**: Corrected the level-progress calculation, which was off by a factor of two and caused the progress bar to sit near 0% for almost an entire level before jumping.
+- **FFmpeg/FFprobe Conversion Hangs**: Stdout and stderr are now read concurrently from ffmpeg/ffprobe child processes instead of sequentially, eliminating a potential deadlock when a conversion or metadata probe produces enough stderr output to fill the OS pipe buffer.
+- **CDG Playback Race Condition**: Synchronized the CDG frame scheduler's internal state so a song stop/reload can no longer race an in-flight background frame decode and hand back a stale or torn packet index.
+- **LibVLC Media Leaks**: The video and background-music playback backends now dispose the outgoing LibVLC `Media` instance on every track change instead of leaking the native handle, preventing memory growth over long shows with frequent song/crossfade changes.
+- **LibVLC Frame Buffer Use-After-Free**: The video backend now copies each decoded frame into a managed buffer before handing it to the UI thread, instead of deferring a copy from a native pointer that a concurrent format change could free first.
 
 ## [26.8.4.0] - 2026-08-04
 

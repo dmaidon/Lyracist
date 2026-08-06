@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Re-introduce FFprobe metadata parsing
+// Edited on Aug 6, 2026 @ 07:01:27 -> Read ffmpeg stdout/stderr concurrently to prevent process deadlock on large stderr output
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -95,10 +95,15 @@ namespace Lyracist.Data.Services
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();
 
-                // Capture outputs asynchronously to prevent hang
-                string output = await process.StandardOutput.ReadToEndAsync();
-                string error = await process.StandardError.ReadToEndAsync();
+                // Read stdout and stderr concurrently: ffmpeg streams progress to stderr
+                // and will block writing to it if we drain stdout first and its pipe fills up.
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
                 await process.WaitForExitAsync();
+
+                string output = outputTask.Result;
+                string error = errorTask.Result;
 
                 if (process.ExitCode == 0)
                 {
@@ -229,8 +234,10 @@ namespace Lyracist.Data.Services
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();
 
-                string output = await process.StandardOutput.ReadToEndAsync();
-                string error = await process.StandardError.ReadToEndAsync();
+                // Read stdout and stderr concurrently to avoid deadlocking on a full pipe buffer.
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
                 await process.WaitForExitAsync();
 
                 return process.ExitCode == 0;

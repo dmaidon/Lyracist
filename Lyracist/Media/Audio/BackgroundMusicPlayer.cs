@@ -1,4 +1,4 @@
-// Edited on Jul 19, 2026 @ 09:40:00 -> Add AudioDeviceId routing and Hardware Mixer Mode EQ bypass
+// Edited on Aug 6, 2026 @ 07:01:27 -> Dispose the outgoing Media instance on track change to stop leaking native libVLC handles
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -260,7 +260,9 @@ public class BackgroundMusicPlayer : IDisposable
     private void PlayTrack(MediaPlayer player, string path)
     {
         var media = new LibVLCSharp.Shared.Media(_libVLC, new Uri(path));
+        var oldMedia = player.Media;
         player.Media = media;
+        oldMedia?.Dispose();
         if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
         {
             player.SetAudioOutput("mmdevice");

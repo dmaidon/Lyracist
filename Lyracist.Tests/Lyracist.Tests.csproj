@@ -1,3 +1,4 @@
+<!-- Edited on Aug 6, 2026 @ 07:01:27 -> Bump AssemblyVersion and FileVersion to 26.8.6.67 -->
 <!-- Edited on Jul 29, 2026 @ 10:12:00 -> Upgraded test project to xUnit v3 and set OutputType to Exe -->
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -8,8 +9,8 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <IsPackable>false</IsPackable>
-    <AssemblyVersion>26.8.4.62</AssemblyVersion>
-    <FileVersion>26.8.4.62</FileVersion>
+    <AssemblyVersion>26.8.6.67</AssemblyVersion>
+    <FileVersion>26.8.6.67</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

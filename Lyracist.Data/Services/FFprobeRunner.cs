@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Standardise FFprobe process execution
+// Edited on Aug 6, 2026 @ 07:01:27 -> Read ffprobe stdout/stderr concurrently to prevent process deadlock
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -53,9 +53,14 @@ namespace Lyracist.Data.Services
                 using var process = new Process { StartInfo = startInfo };
                 process.Start();
 
-                string output = await process.StandardOutput.ReadToEndAsync();
-                string error = await process.StandardError.ReadToEndAsync();
+                // Read stdout and stderr concurrently to avoid deadlocking on a full pipe buffer.
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
                 await process.WaitForExitAsync();
+
+                string output = outputTask.Result;
+                string error = errorTask.Result;
 
                 if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
                 {
