@@ -1,4 +1,4 @@
-// Edited on Jul 19, 2026 @ 09:40:00 -> Apply AudioDeviceId routing and bypass EQ/volume when Hardware Mixer Mode is active
+// Edited on Aug 6, 2026 @ 07:01:27 -> Fix pitch hot-reload race with LoadSong/Stop by snapshotting the path and checking cancellation after every await
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -68,11 +68,16 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
                     _pitchChangeCts = new CancellationTokenSource();
                     var token = _pitchChangeCts.Token;
 
+                    // Snapshot the path now, on the caller's thread, so a concurrent LoadSong()
+                    // swapping _loadedAudioPath can't make this task reload the wrong song.
+                    string loadedPath = _loadedAudioPath;
+
                     Task.Run(async () =>
                     {
                         try
                         {
                             await Task.Delay(150, token); // Debounce slider drags
+                            token.ThrowIfCancellationRequested();
 
                             var currentPos = _video.Position;
                             bool wasPlaying = _isPlaying;
@@ -83,13 +88,15 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
                             }
 
                             // Load the media backend again
-                            await _video.LoadAsync(_loadedAudioPath);
-                            
+                            await _video.LoadAsync(loadedPath);
+                            token.ThrowIfCancellationRequested();
+
                             // Apply equalizer, speed, volume, and the new Pitch setting
                             UpdateAudioParameters();
 
                             // Seek to the exact same position
                             await _video.SeekAsync(currentPos);
+                            token.ThrowIfCancellationRequested();
 
                             if (wasPlaying && _isPlaying)
                             {
@@ -351,6 +358,10 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
 
     public async Task Stop()
     {
+        // Cancel any in-flight pitch hot-reload so it can't load/seek/play over
+        // whatever gets loaded next (see the Pitch setter).
+        _pitchChangeCts?.Cancel();
+
         bool wasPlaying = _isPlaying;
         _isPlaying = false;
         _position = 0;
