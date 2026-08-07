@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> Cache FTS5 connection
+// Edited on Aug 7, 2026 @ 08:30:00 -> Add self-healing FTS5 virtual table detection and recreation
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -20,6 +20,8 @@ namespace Lyracist.Data.Services
 
         private static SqliteConnection? _sharedConnection;
         private static readonly System.Threading.Lock _connectionLock = new();
+        private static readonly System.Threading.Lock _verificationLock = new();
+        private static bool _ftsTableVerified = false;
         private static readonly System.Threading.SemaphoreSlim _querySemaphore = new(1, 1);
 
         private static async Task<SqliteConnection> GetSharedConnectionAsync()
@@ -111,12 +113,83 @@ namespace Lyracist.Data.Services
         // FTS5 SEARCH OPERATION
         // ==========================================
 
+        public void EnsureFtsTableExists()
+        {
+            lock (_verificationLock)
+            {
+                if (_ftsTableVerified) return;
+            }
+
+            try
+            {
+                var connection = _context.Database.GetDbConnection();
+                bool wasOpen = connection.State == System.Data.ConnectionState.Open;
+                if (!wasOpen)
+                {
+                    connection.Open();
+                }
+
+                try
+                {
+                    string sqlSchema = "";
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT sql FROM sqlite_master WHERE type='table' AND name='SongSearch';";
+                        var result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            sqlSchema = result.ToString() ?? "";
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(sqlSchema) || !sqlSchema.Contains("fts5", StringComparison.OrdinalIgnoreCase))
+                    {
+                        using (var transaction = connection.BeginTransaction())
+                        {
+                            using (var cmd = connection.CreateCommand())
+                            {
+                                cmd.Transaction = transaction;
+                                cmd.CommandText = "DROP TABLE IF EXISTS SongSearch;";
+                                cmd.ExecuteNonQuery();
+
+                                cmd.CommandText = "CREATE VIRTUAL TABLE SongSearch USING fts5(SongId UNINDEXED, Title, Artist, NormalizedTitle, NormalizedArtist);";
+                                cmd.ExecuteNonQuery();
+                            }
+                            transaction.Commit();
+                        }
+
+                        // Reindex all songs
+                        var songs = _context.Songs.AsNoTracking().ToList();
+                        IndexSongsBatch(songs).GetAwaiter().GetResult();
+                    }
+
+                    lock (_verificationLock)
+                    {
+                        _ftsTableVerified = true;
+                    }
+                }
+                finally
+                {
+                    if (!wasOpen)
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to ensure FTS table exists: {ex.Message}");
+            }
+        }
+
         public async Task<List<Song>> Search(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
                 return [];
             }
+
+            EnsureFtsTableExists();
 
             string ftsQuery = PrepareFtsQuery(query);
             if (string.IsNullOrWhiteSpace(ftsQuery))
@@ -272,6 +345,8 @@ namespace Lyracist.Data.Services
             {
                 return [];
             }
+
+            EnsureFtsTableExists();
 
             string ftsQuery = PrepareFtsQuery(query);
             if (string.IsNullOrWhiteSpace(ftsQuery))

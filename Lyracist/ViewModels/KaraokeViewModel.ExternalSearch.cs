@@ -1,4 +1,4 @@
-// Created on Aug 6, 2026 @ 07:01:27 -> Split external link (Spotify/YouTube/Amazon) search out of KaraokeViewModel.cs (God-object cleanup); pure code move, no behavior change
+// Edited on Aug 6, 2026 @ 08:40:05 -> Remove PartyTyme fields and properties
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -34,9 +34,6 @@ public partial class KaraokeViewModel
     private bool _showLocalFilter = true;
 
     [ObservableProperty]
-    private bool _showPartyTymeFilter = false;
-
-    [ObservableProperty]
     private bool _showSpotifyFilter = false;
 
     [ObservableProperty]
@@ -68,7 +65,6 @@ public partial class KaraokeViewModel
         if (value != null)
         {
             SelectedSong = null;
-            SelectedPartyTymeTrack = null;
             SelectedHistoryEntry = null;
         }
     }

@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 08:41:40 -> Remove IPartyTymeService from mocked dependencies
 using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
@@ -45,8 +46,6 @@ public class KaraokeRotationRegressionTests
         var occasions = new Mock<IOccasionService>();
         occasions.Setup(o => o.GetMenuTree()).Returns(new List<OccasionNode>());
 
-        var partyTyme = new Mock<IPartyTymeService>();
-
         var requests = new Mock<IRequestService>();
         requests.Setup(r => r.GetPending()).Returns(new List<RequestInfo>());
 
@@ -59,7 +58,6 @@ public class KaraokeRotationRegressionTests
             showFlow.Object,
             occasions.Object,
             rotationVm,
-            partyTyme.Object,
             requests.Object,
             navigation.Object);
     }

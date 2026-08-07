@@ -201,3 +201,37 @@ Updates have been made to the Catalog Book Exporter formats and the Slow Metadat
 2. Metadata Scan Failed Artist Export:
    - When running a Slow Metadata Scan for songs with unknown artists, any files that were unable to be resolved and updated with a valid artist during the scan are tracked.
    - Upon completion or cancellation of the scan, a plain text file listing all unresolved file paths is automatically exported to the "Reports" directory, named "Failed_Artist_Updates_[Timestamp].txt".
+
+
+Section: Integration Settings / Party Tyme Removal
+
+[Update Details]
+The Party Tyme karaoke streaming integration has been removed from the application.
+
+1. Removal of Streaming Tab:
+   - The "Party Tyme Online" tab has been removed from the main Karaoke dashboard view.
+   - The "Party Tyme (Streaming)" tab has been removed from the Special Occasions Music search dialog.
+
+2. Settings Panel Clean-up:
+   - The subscription fields (Client ID and Client Secret) for Party Tyme have been removed from the Settings panel under APIs & Logins.
+
+3. Queue & Badge Updates:
+   - The "Party Tyme" filter checkbox and visual badge triggers have been removed from the singer rotation queue list.
+
+
+Section: Performer Profiles, Song Tagging & Singer Avatars
+
+[Update Details]
+A comprehensive performer profile system and song tagging support have been integrated into Lyracist.
+
+1. Performer Profiles & Login:
+   - Patrons accessing the Patron Request Portal can log in or register using their Performer Name and a 4-digit PIN.
+   - Profile settings include email registration, custom vocal range specification (e.g. Tenor, Soprano), and custom title assignment (e.g. The Screamer).
+
+2. Singer Avatars & Custom Uploads:
+   - Performers can customize their profile avatar using a dropdown selector.
+   - Supports default silhouette, Gravatar logo generation (via email MD5 hash), and direct mobile photo/selfie uploads (capped at 2MB).
+   - Avatars are displayed as circular icons in the rotation board on both the mobile Patron Portal and host WPF Singer Queue ListBox.
+
+3. Database Tagging:
+   - Songs can now be tagged with comma-separated categories to organize, filter, and challenge performers.

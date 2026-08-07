@@ -1,7 +1,9 @@
+<!-- Edited on Aug 6, 2026 @ 09:08:50 -> Suppress warning CS0436 globally for shared source type conflicts -->
 <Project>
   <PropertyGroup>
     <Company>PAROLE Software</Company>
     <Copyright>© $([System.DateTime]::UtcNow.ToString('yyyy')) PAROLE Software - All rights reserved.</Copyright>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <NoWarn>$(NoWarn);0436</NoWarn>
   </PropertyGroup>
 </Project>

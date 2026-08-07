@@ -1,7 +1,19 @@
-Last Edit: Aug 6, 2026 - Harden mobile portal security, fix rating/auto-accept/stress-test/playlist/scan races, and split the God-object Karaoke/Settings ViewModels into focused files
+<!-- Edited on Aug 7, 2026 @ 09:15:00 -> Add 26.8.7.0 changelog entries for database manager search fixes -->
+Last Edit: Aug 7, 2026 - Fix database manager search and track edit bindings, resolve SQLite FTS5 MATCH query exception via self-healing table detection, and update initial database migration
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.7.0] - 2026-08-07
+
+### Fixed
+- **Database Manager Search and Bindings**: Fixed data binding mismatches in the Database Manager (`LyracistDbEditor`) that broke track search, filtering, right-click metadata scanning, and saving track edits.
+- **SQLite FTS5 MATCH Query Exception**: Added a self-healing detection check in the search service that automatically drops and recreates `SongSearch` as a true FTS5 virtual table if it is detected as a regular SQL table, preventing the `'no such column: SongSearch'` exception when searching.
+- **Initial Database Creation Migration**: Updated the consolidated EF Core migration to directly use raw SQL to create the `SongSearch` virtual table on any fresh installations.
+
+### Changed
+- **ListBox Layout Compactness**: Changed the search results list layout from 3 lines to 2 lines, merging the track title and artist into a single line (`Title (Artist)`) while preserving font size and weights, and moving the file location path to the second line.
+- **Subtle Alternating Rows**: Configured the search results list to display alternating row backgrounds using the Fluent theme's intermediate control brush for a polished, low-contrast UI.
 
 ## [26.8.6.0] - 2026-08-06
 
@@ -23,10 +35,13 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Stale Playlist Refresh**: Rapid playlist edits (add/remove/reorder) could occasionally leave the Opening/Fill-In/End-Rotation lists showing stale ordering; refreshes are now sequenced correctly.
 - **Library Scan Path Matching**: Scanning one music folder could incorrectly affect songs from an unrelated folder that happened to share a name prefix (e.g. `C:\Music` vs `C:\Music2`).
 - **Song/Singer Settings Save Guard**: The Save button in the Song and Singer settings windows is now disabled until settings have actually been loaded for an item.
-- **Reliability & Error Logging**: Several background database operations that previously failed silently now log errors for troubleshooting, and the YouTube and Party Tyme integrations now retry automatically on transient network failures instead of failing on the first hiccup.
+- **Reliability & Error Logging**: Several background database operations that previously failed silently now log errors for troubleshooting, and the YouTube integration now retries automatically on transient network failures instead of failing on the first hiccup.
 
 ### Changed
 - **Karaoke & Settings ViewModel Cleanup**: Reorganized the two largest internal ViewModel files (DJ banners, Party Tyme, external search, display/monitor assignment, stress-test simulator, and more) into focused files by feature area, with no change in app behavior — purely an internal maintainability cleanup.
+
+### Removed
+- **Party Tyme Karaoke Integration**: Completely removed the commercial streaming/caching karaoke integration (tabs, UI inputs, settings, model definitions, and backend service code) from the application.
 
 ## [26.8.4.0] - 2026-08-04
 

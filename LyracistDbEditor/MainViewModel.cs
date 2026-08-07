@@ -1,4 +1,4 @@
-// Edited on Aug 5, 2026 @ 07:07:00 -> Fix scope of ExportFailedFiles local function in RunSlowScanAsync
+// Edited on Aug 7, 2026 @ 07:56:00 -> Fix search and edit bindings, add OnlyShowMissingArtist filter
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,13 +19,18 @@ namespace LyracistDbEditor;
 
 public partial class MainViewModel : ObservableObject
 {
-    private CancellationTokenSource? _scanCts;
+    private static readonly Lock _lock = new();
+
+    [ObservableProperty]
+    private int _totalSongCount;
+
+    [ObservableProperty]
+    private int _missingArtistCount;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
 
-    [ObservableProperty]
-    private bool _onlyShowMissingArtist = false;
+    public ObservableCollection<Song> SearchResults { get; } = [];
 
     [ObservableProperty]
     private Song? _selectedSong;
@@ -37,59 +42,71 @@ public partial class MainViewModel : ObservableObject
     private string _editArtist = string.Empty;
 
     [ObservableProperty]
-    private bool _isScanning = false;
+    private bool _onlyShowMissingArtist;
+
+    partial void OnSelectedSongChanged(Song? value)
+    {
+        if (value != null)
+        {
+            EditTitle = value.Title ?? string.Empty;
+            EditArtist = value.Artist ?? string.Empty;
+        }
+        else
+        {
+            EditTitle = string.Empty;
+            EditArtist = string.Empty;
+        }
+    }
+
+    partial void OnOnlyShowMissingArtistChanged(bool value)
+    {
+        Search();
+    }
 
     [ObservableProperty]
-    private double _scanProgressPercent = 0;
+    private bool _isScanning;
 
     [ObservableProperty]
-    private string _scanProgressText = "Idle";
+    private double _scanProgressPercent;
 
     [ObservableProperty]
-    private int _totalSongCount = 0;
+    private string _scanProgressText = string.Empty;
+
+    public ObservableCollection<string> ScanLog { get; } = [];
+
+    private CancellationTokenSource? _scanCts;
+
+    // Library Folder Scanner properties
+    public ObservableCollection<string> LibraryDirectories { get; } = [];
 
     [ObservableProperty]
-    private int _missingArtistCount = 0;
-
-    [ObservableProperty]
-    private int _exportCatalogIndex = 0;
-
-    [ObservableProperty]
-    private int _exportFormatIndex = 0;
-
-    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanRemoveDirectory))]
+    [NotifyPropertyChangedFor(nameof(CanRescanDirectory))]
     private string? _selectedLibraryDirectory;
 
     [ObservableProperty]
-    private bool _isLibraryScanning = false;
+    private bool _isLibraryScanning;
 
     [ObservableProperty]
-    private double _libraryScanProgressPercent = 0;
+    private double _libraryScanProgressPercent;
 
     [ObservableProperty]
     private string _libraryScanStatusText = "Idle";
 
-    public ObservableCollection<Song> Songs { get; } = [];
-    public ObservableCollection<string> ScanLog { get; } = [];
-    public ObservableCollection<string> LibraryDirectories { get; } = [];
+    [ObservableProperty]
+    private int _exportCatalogIndex = 0; // 0 = Karaoke Only, 1 = All Songs
+
+    [ObservableProperty]
+    private int _exportFormatIndex = 0; // 0 = PDF, 1 = TXT, 2 = Word DOCX
+
+    public bool CanRemoveDirectory => !string.IsNullOrWhiteSpace(SelectedLibraryDirectory) && !IsLibraryScanning;
+    public bool CanRescanDirectory => !string.IsNullOrWhiteSpace(SelectedLibraryDirectory) && !IsLibraryScanning;
 
     public MainViewModel()
     {
-        // Resolve FFmpeg/FFprobe paths for metadata parsing
-        FFmpegService.ResolvePaths();
-
-        // Ensure database is created and up to date
-        try
-        {
-            using var context = new LyracistDbContext();
-            context.Database.Migrate();
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to migrate database: {ex.Message}");
-        }
-
-        foreach (var dir in LibraryDirectoryStore.Load())
+        // Load library directories on startup
+        var dirs = LibraryDirectoryStore.Load();
+        foreach (var dir in dirs)
         {
             LibraryDirectories.Add(dir);
         }
@@ -104,46 +121,36 @@ public partial class MainViewModel : ObservableObject
         try
         {
             using var context = new LyracistDbContext();
-            
-            IQueryable<Song> query = context.Songs.AsNoTracking();
-
-            if (OnlyShowMissingArtist)
+            List<Song> songs;
+            if (string.IsNullOrWhiteSpace(SearchText))
             {
-                query = query.Where(s => s.Artist == "Unknown Artist" || s.Artist == "" || s.Artist == null);
+                IQueryable<Song> query = context.Songs;
+                if (OnlyShowMissingArtist)
+                {
+                    query = query.Where(s => s.Artist == "Unknown Artist" || s.Artist == "" || s.Artist == null);
+                }
+                songs = query.OrderBy(s => s.Artist).ThenBy(s => s.Title).Take(100).ToList();
+            }
+            else
+            {
+                var searchService = new SearchService(context);
+                songs = Task.Run(() => searchService.Search(SearchText)).Result;
+                if (OnlyShowMissingArtist)
+                {
+                    songs = songs.Where(s => s.Artist == "Unknown Artist" || string.IsNullOrEmpty(s.Artist)).ToList();
+                }
             }
 
-            if (!string.IsNullOrWhiteSpace(SearchText))
+            SearchResults.Clear();
+            foreach (var s in songs)
             {
-                string search = SearchText.ToLower();
-                query = query.Where(s => s.Title.ToLower().Contains(search) || 
-                                         s.Artist.ToLower().Contains(search) || 
-                                         s.FilePath.ToLower().Contains(search));
-            }
-
-            // Order by title and limit results for performance
-            var results = query.OrderBy(s => s.Title).Take(150).ToList();
-
-            Songs.Clear();
-            foreach (var song in results)
-            {
-                Songs.Add(song);
+                SearchResults.Add(s);
             }
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to query songs: {ex.Message}");
+            Debug.WriteLine($"Search failed: {ex.Message}");
         }
-    }
-
-    partial void OnSelectedSongChanged(Song? value)
-    {
-        EditTitle = value?.Title ?? string.Empty;
-        EditArtist = value?.Artist ?? string.Empty;
-    }
-
-    partial void OnOnlyShowMissingArtistChanged(bool value)
-    {
-        Search();
     }
 
     [RelayCommand]
@@ -154,23 +161,27 @@ public partial class MainViewModel : ObservableObject
         try
         {
             using var context = new LyracistDbContext();
-            
             var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == SelectedSong.SongId);
             if (dbSong != null)
             {
-                dbSong.Title = EditTitle.Trim();
-                dbSong.Artist = EditArtist.Trim();
+                dbSong.Artist = EditArtist;
+                dbSong.Title = EditTitle;
+                dbSong.Genre = SelectedSong.Genre;
+                dbSong.Tags = SelectedSong.Tags;
+                dbSong.Duration = SelectedSong.Duration;
+                dbSong.IsKaraoke = SelectedSong.IsKaraoke;
+                dbSong.KaraokeType = SelectedSong.KaraokeType;
 
                 await context.SaveChangesAsync();
 
-                // Re-index full-text search (FTS5)
+                // Update the FTS search index
                 var searchService = new SearchService(context);
                 await searchService.IndexSong(dbSong);
 
                 RefreshStats();
-                Search(); // Re-fetch to synchronize the UI
+                Search();
 
-                System.Windows.MessageBox.Show("Song details updated successfully.", "Changes Saved", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("Song details updated successfully.", "Success", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
             }
         }
         catch (Exception ex)
@@ -180,23 +191,62 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task ScanSongMetadata(Song? song)
+    private async Task DeleteSong()
     {
-        if (song == null) return;
-        
+        if (SelectedSong == null) return;
+
+        var confirm = System.Windows.MessageBox.Show(
+            $"Are you sure you want to delete '{SelectedSong.Title}' by '{SelectedSong.Artist}' from the database?\nThis will not delete the physical file.",
+            "Confirm Delete",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
         try
         {
-            if (!File.Exists(song.FilePath))
+            using var context = new LyracistDbContext();
+            var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == SelectedSong.SongId);
+            if (dbSong != null)
             {
-                System.Windows.MessageBox.Show("The physical file does not exist.", "File Not Found", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
-                return;
-            }
+                var searchService = new SearchService(context);
+                context.Songs.Remove(dbSong);
+                await context.SaveChangesAsync();
 
-            string ext = Path.GetExtension(song.FilePath).ToLowerInvariant();
+                await searchService.RemoveSongFromIndex(dbSong.SongId);
+
+                SelectedSong = null;
+                RefreshStats();
+                Search();
+
+                System.Windows.MessageBox.Show("Song deleted from index.", "Deleted", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Failed to delete song: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ScanSongMetadata(Song? song)
+    {
+        song ??= SelectedSong;
+        if (song == null) return;
+
+        try
+        {
             string resolvedArtist = string.Empty;
             string resolvedTitle = string.Empty;
             string resolvedGenre = string.Empty;
 
+            if (!File.Exists(song.FilePath))
+            {
+                System.Windows.MessageBox.Show("The physical file does not exist on disk.", "File Not Found", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            string ext = Path.GetExtension(song.FilePath).ToLowerInvariant();
             if (ext == ".zip")
             {
                 using var archive = ZipFile.OpenRead(song.FilePath);
@@ -225,34 +275,78 @@ public partial class MainViewModel : ObservableObject
                 resolvedGenre = probeResult.GenreTag;
             }
 
-            if (!string.IsNullOrWhiteSpace(resolvedArtist))
+            // Update using local file tag resolution if resolved
+            if (!string.IsNullOrWhiteSpace(resolvedArtist) && resolvedArtist.Trim() != "Unknown Artist")
+            {
+                song.Artist = resolvedArtist.Trim();
+                if (!string.IsNullOrWhiteSpace(resolvedTitle))
+                {
+                    song.Title = resolvedTitle.Trim();
+                }
+                song.Genre = resolvedGenre;
+            }
+
+            // Query online service for missing artist and tags
+            try
+            {
+                var onlineMeta = await MetadataFetchService.FetchMetadataAsync(song.Title, song.Artist, CancellationToken.None);
+                if (onlineMeta != null)
+                {
+                    if ((song.Artist == "Unknown Artist" || string.IsNullOrEmpty(song.Artist)) && !string.IsNullOrEmpty(onlineMeta.Artist))
+                    {
+                        song.Artist = onlineMeta.Artist;
+                        if (!string.IsNullOrEmpty(onlineMeta.Title))
+                        {
+                            song.Title = onlineMeta.Title;
+                        }
+                    }
+
+                    if (onlineMeta.Tags.Count > 0)
+                    {
+                        song.Tags = string.Join(", ", onlineMeta.Tags);
+                    }
+                    else
+                    {
+                        song.Tags = "none";
+                    }
+                }
+                else
+                {
+                    song.Tags = "none";
+                }
+            }
+            catch
+            {
+                // Preserve empty tags to try again later
+            }
+
+            // If tags or artist resolved successfully, update the DB record
+            if (!string.IsNullOrWhiteSpace(song.Artist) && song.Artist != "Unknown Artist")
             {
                 using var context = new LyracistDbContext();
                 var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == song.SongId);
                 if (dbSong != null)
                 {
-                    dbSong.Artist = resolvedArtist.Trim();
-                    if (!string.IsNullOrWhiteSpace(resolvedTitle))
-                    {
-                        dbSong.Title = resolvedTitle.Trim();
-                    }
-                    dbSong.Genre = resolvedGenre;
+                    dbSong.Artist = song.Artist;
+                    dbSong.Title = song.Title;
+                    dbSong.Genre = song.Genre;
+                    dbSong.Tags = song.Tags;
 
                     await context.SaveChangesAsync();
 
-                    // Sync FTS
+                    // Sync FTS Search
                     var searchService = new SearchService(context);
                     await searchService.IndexSong(dbSong);
 
                     RefreshStats();
                     Search();
 
-                    System.Windows.MessageBox.Show($"Metadata extracted successfully!\nArtist: {dbSong.Artist}\nTitle: {dbSong.Title}", "Metadata Scanned", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                    System.Windows.MessageBox.Show($"Metadata updated: {dbSong.Artist} - {dbSong.Title}", "Metadata Scanned", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
                 }
             }
             else
             {
-                System.Windows.MessageBox.Show("No metadata tags were found in the file.", "No Metadata Found", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("No artist metadata could be found for this file.", "No Metadata Found", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
             }
         }
         catch (Exception ex)
@@ -320,7 +414,6 @@ public partial class MainViewModel : ObservableObject
             using var context = new LyracistDbContext();
             var searchService = new SearchService(context);
 
-            // Fetch songs with unknown artists
             var targetSongs = await context.Songs
                 .Where(s => s.Artist == "Unknown Artist" || s.Artist == "" || s.Artist == null)
                 .ToListAsync(token);
@@ -353,7 +446,6 @@ public partial class MainViewModel : ObservableObject
                     ScanProgressText = $"Processing {processed}/{total}: {currentFile}";
                 });
 
-                // Yield CPU and database locks to preserve live performance in Lyracist
                 await Task.Delay(60, token);
 
                 if (!File.Exists(song.FilePath))
@@ -402,17 +494,65 @@ public partial class MainViewModel : ObservableObject
                     resolvedGenre = probeResult.GenreTag;
                 }
 
-                // If tags resolved a valid artist name, update the DB record
+                // Update using local file tag resolution if resolved
                 if (!string.IsNullOrWhiteSpace(resolvedArtist) && resolvedArtist.Trim() != "Unknown Artist")
                 {
                     song.Artist = resolvedArtist.Trim();
-                    
                     if (!string.IsNullOrWhiteSpace(resolvedTitle))
                     {
                         song.Title = resolvedTitle.Trim();
                     }
                     song.Genre = resolvedGenre;
+                }
 
+                // Query online service for missing artist and tags (only for karaoke files to keep scans fast)
+                if (song.IsKaraoke)
+                {
+                    try
+                    {
+                        var onlineMeta = await MetadataFetchService.FetchMetadataAsync(song.Title, song.Artist, token);
+                        if (onlineMeta != null)
+                        {
+                            if ((song.Artist == "Unknown Artist" || string.IsNullOrEmpty(song.Artist)) && !string.IsNullOrEmpty(onlineMeta.Artist))
+                            {
+                                song.Artist = onlineMeta.Artist;
+                                if (!string.IsNullOrEmpty(onlineMeta.Title))
+                                {
+                                    song.Title = onlineMeta.Title;
+                                }
+                            }
+
+                            if (onlineMeta.Tags.Count > 0)
+                            {
+                                song.Tags = string.Join(", ", onlineMeta.Tags);
+                            }
+                            else
+                            {
+                                song.Tags = "none";
+                            }
+                        }
+                        else
+                        {
+                            song.Tags = "none";
+                        }
+                    }
+                    catch
+                    {
+                        // Preserve empty tags to try again later
+                    }
+                }
+                else
+                {
+                    // Non-karaoke standard music track: Fall back to local file genre, avoiding network rate-limit delay
+                    if (song.Tags == null || song.Tags == "")
+                    {
+                        song.Tags = !string.IsNullOrWhiteSpace(song.Genre) ? song.Genre : "none";
+                    }
+                }
+
+                // If tags or artist resolved successfully, update the DB record
+                if (!string.IsNullOrWhiteSpace(song.Artist) && song.Artist != "Unknown Artist")
+                {
                     // Save immediately in small transactions
                     await context.SaveChangesAsync(token);
 
@@ -430,6 +570,8 @@ public partial class MainViewModel : ObservableObject
                 }
                 else
                 {
+                    // Even if artist is not found, save the "none" tags update if set
+                    await context.SaveChangesAsync(token);
                     failedFiles.Add(song.FilePath);
                 }
             }

@@ -1,4 +1,4 @@
-<!-- Edited on Aug 2, 2026 @ 09:36:00 -> Add style resources and apply category-specific styling to GroupBoxes to differentiate categories visually -->
+<!-- Edited on Aug 6, 2026 @ 08:40:40 -> Remove PartyTyme credentials textboxes -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -651,11 +651,7 @@
                                         <TextBlock Text="Amazon AWS Key ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
                                         <ui:TextBox Text="{Binding AmazonAccessKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="AKIA..." Margin="0,0,0,10" />
                                         <TextBlock Text="Amazon AWS Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10" />
-                                        <ui:PasswordBox PasswordChar="*" Password="{Binding AmazonSecretKey, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="AWS Secret..." Margin="0,0,0,10" />
-                                        <TextBlock Text="Party Tyme Client ID" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
-                                        <ui:TextBox Text="{Binding PartyTymeClientId, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="PT-ID..." Margin="0,0,0,10" />
-                                        <TextBlock Text="Party Tyme Secret" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
-                                        <ui:PasswordBox PasswordChar="*" Password="{Binding PartyTymeClientSecret, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="PT-Secret..." />
+                                        <ui:PasswordBox PasswordChar="*" Password="{Binding AmazonSecretKey, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" PlaceholderText="AWS Secret..." />
                                     </StackPanel>
                                 </GroupBox>
                             </StackPanel>

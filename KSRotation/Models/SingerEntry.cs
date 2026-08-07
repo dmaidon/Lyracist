@@ -1,8 +1,9 @@
-// Edited on Jul 28, 2026 @ 18:36:00 -> Add IsMusic property to track background music tracks
-// Last Edit: Jul 28, 2026 12:40 - Make IsPaused observable
+// Edited on Aug 6, 2026 @ 09:12:45 -> Add Email, PinCode, AvatarType, AvatarSource, VocalRange, and CustomTitle properties
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
 
 namespace KSRotation.Models
 {
@@ -10,6 +11,23 @@ namespace KSRotation.Models
 
     public partial class SingerEntry : ObservableObject, Lyracist.Shared.IRotationSinger
     {
+        [ObservableProperty]
+        public partial string Email { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string PinCode { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string AvatarType { get; set; } = "None";
+
+        [ObservableProperty]
+        public partial string AvatarSource { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string VocalRange { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string CustomTitle { get; set; } = string.Empty;
         /// <summary>Stable identity assigned once at construction; never changes even when Name is edited.
         /// Declared as <c>init</c> so JSON deserialization can round-trip it, while preventing accidental mutation in code.</summary>
         public Guid Id { get; init; } = Guid.NewGuid();

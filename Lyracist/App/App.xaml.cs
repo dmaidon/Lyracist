@@ -1,12 +1,4 @@
-// Edited on Aug 1, 2026 @ 16:15:00 -> Update DI mappings for DisplayService and IChromecastSender
-// Edited on Aug 1, 2026 @ 15:47:00 -> Register IChromecastSender in DI
-// Edited on Aug 1, 2026 @ 15:27:00 -> Register CastingSettingsPageViewModel in DI
-// Edited on Aug 1, 2026 @ 15:13:00 -> Register BrowserCastDiscoveryService in DI
-// Edited on Aug 1, 2026 @ 14:47:00 -> Register MultiTvSelectorViewModel in DI
-// Edited on Aug 1, 2026 @ 14:42:00 -> Register CastStatusViewModel in DI
-// Edited on Aug 1, 2026 @ 14:07:00 -> Register CastRotationViewModel in DI
-// Edited on Aug 1, 2026 @ 13:30:00 -> Register IChromecastDiscoveryService in DI
-// Edited on Aug 1, 2026 @ 12:13:00 -> Register casting support services in DI
+// Edited on Aug 6, 2026 @ 08:39:30 -> Remove PartyTyme DI mapping
 using System;
 using System.Windows;
 using System.Threading.Tasks;
@@ -107,7 +99,6 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<IPlaylistService, PlaylistService>();
                 services.AddSingleton<IRequestService, Services.Requests.RequestService>();
                 services.AddSingleton<IOccasionService, Services.Occasions.OccasionService>();
-                services.AddSingleton<IPartyTymeService, PartyTymeService>();
                 services.AddKeyedSingleton<BackgroundMusicPlayer>("Opening");
                 services.AddKeyedSingleton<BackgroundMusicPlayer>("FillIn");
                 services.AddKeyedSingleton<BackgroundMusicPlayer>("EndRotation");

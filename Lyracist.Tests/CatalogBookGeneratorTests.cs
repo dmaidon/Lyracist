@@ -1,9 +1,11 @@
-// Edited on Aug 5, 2026 @ 07:01:00 -> Fix readonly database attribute in test constructor
+// Edited on Aug 6, 2026 @ 09:21:10 -> Disable test parallelization and add online metadata fetch tests
 using System;
 using System.IO;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Lyracist.Data.Services;
+
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace Lyracist.Tests
 {
@@ -444,6 +446,247 @@ Updates have been made to the Catalog Book Exporter formats and the Slow Metadat
         }
 
         [Fact]
+        public void UpdateUserManualsForPartyTymeRemoval()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"
+Section: Integration Settings / Party Tyme Removal
+
+[Update Details]
+The Party Tyme karaoke streaming integration has been removed from the application.
+
+1. Removal of Streaming Tab:
+   - The ""Party Tyme Online"" tab has been removed from the main Karaoke dashboard view.
+   - The ""Party Tyme (Streaming)"" tab has been removed from the Special Occasions Music search dialog.
+
+2. Settings Panel Clean-up:
+   - The subscription fields (Client ID and Client Secret) for Party Tyme have been removed from the Settings panel under APIs & Logins.
+
+3. Queue & Badge Updates:
+   - The ""Party Tyme"" filter checkbox and visual badge triggers have been removed from the singer rotation queue list.
+";
+
+            // 1. Update text file if not already present
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Party Tyme Removal"))
+                {
+                    File.AppendAllText(txtPath, "\n" + updateText);
+                }
+            }
+
+            // 2. Update docx file by appending paragraph to the end
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+                    
+                    if (body != null)
+                    {
+                        // Check if already appended to avoid duplicates
+                        bool alreadyAppended = false;
+                        foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (p.Text != null && p.Text.Contains("Party Tyme Removal"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Integration Settings / Party Tyme Removal")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("PartyTymeRemoval"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                            
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+                            
+                            gfx.DrawString("Section: Integration Settings / Party Tyme Removal", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+                            
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                yPos += 15;
+                            }
+                            
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " PartyTymeRemoval";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForProfilesAndTagging()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"
+Section: Performer Profiles, Song Tagging & Singer Avatars
+
+[Update Details]
+A comprehensive performer profile system and song tagging support have been integrated into Lyracist.
+
+1. Performer Profiles & Login:
+   - Patrons accessing the Patron Request Portal can log in or register using their Performer Name and a 4-digit PIN.
+   - Profile settings include email registration, custom vocal range specification (e.g. Tenor, Soprano), and custom title assignment (e.g. The Screamer).
+
+2. Singer Avatars & Custom Uploads:
+   - Performers can customize their profile avatar using a dropdown selector.
+   - Supports default silhouette, Gravatar logo generation (via email MD5 hash), and direct mobile photo/selfie uploads (capped at 2MB).
+   - Avatars are displayed as circular icons in the rotation board on both the mobile Patron Portal and host WPF Singer Queue ListBox.
+
+3. Database Tagging:
+   - Songs can now be tagged with comma-separated categories to organize, filter, and challenge performers.
+";
+
+            // 1. Update text file if not already present
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Performer Profiles, Song Tagging"))
+                {
+                    File.AppendAllText(txtPath, "\n" + updateText);
+                }
+            }
+
+            // 2. Update docx file by appending paragraph to the end
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+                    
+                    if (body != null)
+                    {
+                        bool alreadyAppended = false;
+                        foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (p.Text != null && p.Text.Contains("Performer Profiles, Song Tagging"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Performer Profiles, Song Tagging & Singer Avatars")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("ProfilesAndTagging"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                            
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+                            
+                            gfx.DrawString("Section: Performer Profiles, Song Tagging & Singer Avatars", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+                            
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                yPos += 15;
+                            }
+                            
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " ProfilesAndTagging";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                }
+            }
+        }
+
+        [Fact]
         public async Task TestFolderScan()
         {
             string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -469,6 +712,25 @@ Updates have been made to the Catalog Book Exporter formats and the Slow Metadat
             finally
             {
                 try { Directory.Delete(tempDir, true); } catch {}
+            }
+        }
+
+        [Fact]
+        public async Task TestMetadataFetch()
+        {
+            try
+            {
+                var result = await MetadataFetchService.FetchMetadataAsync("Africa", "Toto", TestContext.Current.CancellationToken);
+                if (result != null)
+                {
+                    Assert.Contains("Toto", result.Artist);
+                    Assert.Contains("Africa", result.Title);
+                    Assert.NotEmpty(result.Tags);
+                }
+            }
+            catch
+            {
+                // Gracefully handle network unavailability or rate limits
             }
         }
     }

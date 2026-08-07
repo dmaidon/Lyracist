@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 09:12:35 -> Add Email, PinCode, AvatarType, AvatarSource, VocalRange, and CustomTitle properties
 using System;
 using System.Collections.Generic;
 
@@ -15,6 +16,13 @@ namespace Lyracist.Data.Models
         public int RatingPoints { get; set; } = 0;
         public int RatingCount { get; set; } = 0;
         public double AverageRating { get; set; } = 0.0;
+
+        public string Email { get; set; } = string.Empty;
+        public string PinCode { get; set; } = string.Empty;
+        public string AvatarType { get; set; } = "None";
+        public string AvatarSource { get; set; } = string.Empty;
+        public string VocalRange { get; set; } = string.Empty;
+        public string CustomTitle { get; set; } = string.Empty;
 
         // Navigation Properties
         public SingerAudioSettings? AudioSettings { get; set; }

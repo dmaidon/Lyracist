@@ -1,4 +1,4 @@
-// Created on Jul 16, 2026 @ 12:00:00 -> Shared global path settings
+// Edited on Aug 6, 2026 @ 09:03:45 -> Add AvatarsDir global setting
 using System;
 using System.IO;
 
@@ -48,6 +48,9 @@ namespace Lyracist.Shared
         // Lyracist read banners from and save uploaded banners into, so a banner dropped in by
         // hand is picked up by both apps and a banner uploaded from either app is visible to the other.
         public static string DjBannersDir => Path.Combine(StartupPath, "DJBanners");
+
+        // 8. Avatars directory (in Startup Path) - a folder for uploaded performer profile selfies.
+        public static string AvatarsDir => Path.Combine(StartupPath, "Avatars");
 
         // Centralized Logging Methods
         public static void LogAppStart(string appName)

@@ -1,4 +1,4 @@
-// Edited on Jul 19, 2026 @ 09:40:00 -> Implement SetBgmAudioDevice and route to background players
+// Edited on Aug 6, 2026 @ 08:42:15 -> Remove PartyTyme occasion stream loader
 using System;
 using System.Linq;
 using System.Threading;
@@ -153,21 +153,7 @@ public class ShowFlowService : IShowFlowService
             return;
         }
 
-        if (filePath.StartsWith("PartyTyme:"))
-        {
-            string trackId = filePath[10..];
-            try
-            {
-                var partyTyme = (IPartyTymeService)App.AppHost.Services.GetService(typeof(IPartyTymeService))!;
-                finalPath = await partyTyme.GetStreamUrlAsync(trackId);
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Failed to fetch Party Tyme stream: {ex.Message}", "Streaming Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                _fillIn.Resume();
-                return;
-            }
-        }
+
 
         _occasion.LoadPlaylist(new[] { finalPath });
         _occasion.Play();

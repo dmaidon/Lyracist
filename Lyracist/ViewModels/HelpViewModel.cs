@@ -1,5 +1,4 @@
-// Edited on Aug 2, 2026 @ 07:50:00 -> Add Casting & DJ Banners topic, update online search, background music requests, singer edit, screen lock details, and book exporter
-// Edited on Jul 19, 2026 @ 09:40:00 -> Add external mixer setup guide to HelpPage
+// Edited on Aug 6, 2026 @ 08:41:10 -> Remove PartyTyme from Help topics
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -31,7 +30,7 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "PlayCircle24",
                 AccentColor = "#107C41",
                 DescriptionHeader = "Media Playback Controls & Search Library",
-                DescriptionContent = "• Search Box & Library: Type artist or title keywords to query the local SQLite database and active streaming providers (YouTube, Party Tyme) in real-time. Use filters to narrow results.\n\n• Direct Queueing: Click the '+' (Add) button next to any track in search results to instantly queue it, avoiding copy-paste operations.\n\n• Singer Selection: Click on a singer in the rotation list to select them as the current singer (highlighted in red). Click the singer again to deselect, allowing you to easily correct misclicks.\n\n• Playback controls: Play, Pause, Stop, Seek Slider, and Volume. The active lyrics projection window displays synchronized CDG frames or MP4 video streams."
+                DescriptionContent = "• Search Box & Library: Type artist or title keywords to query the local SQLite database and active streaming providers (YouTube) in real-time. Use filters to narrow results.\n\n• Direct Queueing: Click the '+' (Add) button next to any track in search results to instantly queue it, avoiding copy-paste operations.\n\n• Singer Selection: Click on a singer in the rotation list to select them as the current singer (highlighted in red). Click the singer again to deselect, allowing you to easily correct misclicks.\n\n• Playback controls: Play, Pause, Stop, Seek Slider, and Volume. The active lyrics projection window displays synchronized CDG frames or MP4 video streams."
             },
             new() {
                 Title = "2. Rotation Page",
@@ -73,7 +72,7 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "Globe24",
                 AccentColor = "#00B7C3",
                 DescriptionHeader = "Logins and API Integration Configurations",
-                DescriptionContent = "• YouTube API Key: Enter your Google developer key to query the YouTube karaoke catalog directly.\n\n• Spotify Client ID & Secret: Enter client credentials to fetch album artwork and song recommendations.\n\n• Amazon Access & Secret Keys: Enables lookups on the Amazon Music platform.\n\n• Party Tyme Client ID & Secret: Input subscription credentials to authenticate the Party Tyme premium karaoke streaming catalog search and playback."
+                DescriptionContent = "• YouTube API Key: Enter your Google developer key to query the YouTube karaoke catalog directly.\n\n• Spotify Client ID & Secret: Enter client credentials to fetch album artwork and song recommendations.\n\n• Amazon Access & Secret Keys: Enables lookups on the Amazon Music platform."
             },
             new() {
                 Title = "8. Settings: Tablet Web Server",

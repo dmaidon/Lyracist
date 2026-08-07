@@ -1,10 +1,27 @@
-// Edited on Jul 28, 2026 @ 18:34:00 -> Implement IsMusic property for compilation compatibility
+// Edited on Aug 6, 2026 @ 09:12:40 -> Add Email, PinCode, AvatarType, AvatarSource, VocalRange, and CustomTitle properties
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Lyracist.Models;
 
 public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
 {
+    [ObservableProperty]
+    private string _email = string.Empty;
+
+    [ObservableProperty]
+    private string _pinCode = string.Empty;
+
+    [ObservableProperty]
+    private string _avatarType = "None";
+
+    [ObservableProperty]
+    private string _avatarSource = string.Empty;
+
+    [ObservableProperty]
+    private string _vocalRange = string.Empty;
+
+    [ObservableProperty]
+    private string _customTitle = string.Empty;
     [ObservableProperty]
     private string _name = string.Empty;
 

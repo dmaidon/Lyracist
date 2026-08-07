@@ -1,4 +1,4 @@
-// Edited on Jul 19, 2026 @ 09:40:00 -> Add audio routing and hardware mixer settings
+// Edited on Aug 6, 2026 @ 08:39:45 -> Remove PartyTyme configurations
 using System.IO;
 using System.Text.Json;
 
@@ -145,12 +145,6 @@ public static class AppSettings
         set { _data.AmazonSecretKey = Lyracist.Shared.EncryptionHelper.Encrypt(value); Save(); }
     }
 
-    public static string PartyTymeClientId
-    {
-        get => Lyracist.Shared.EncryptionHelper.Decrypt(_data.PartyTymeClientId);
-        set { _data.PartyTymeClientId = Lyracist.Shared.EncryptionHelper.Encrypt(value); Save(); }
-    }
-
     public static bool EnableAutoAdvance
     {
         get => _data.EnableAutoAdvance;
@@ -161,12 +155,6 @@ public static class AppSettings
     {
         get => _data.AutoAdvanceCountdownSeconds;
         set { _data.AutoAdvanceCountdownSeconds = value; Save(); }
-    }
-
-    public static string PartyTymeClientSecret
-    {
-        get => Lyracist.Shared.EncryptionHelper.Decrypt(_data.PartyTymeClientSecret);
-        set { _data.PartyTymeClientSecret = Lyracist.Shared.EncryptionHelper.Encrypt(value); Save(); }
     }
 
     public static string StaticIPAddress
@@ -759,8 +747,6 @@ public static class AppSettings
         public string SpotifyClientSecret { get; set; } = string.Empty;
         public string AmazonAccessKey { get; set; } = string.Empty;
         public string AmazonSecretKey { get; set; } = string.Empty;
-        public string PartyTymeClientId { get; set; } = string.Empty;
-        public string PartyTymeClientSecret { get; set; } = string.Empty;
         public string StaticIPAddress { get; set; } = string.Empty;
         public int TabletPort { get; set; } = 5005;
 

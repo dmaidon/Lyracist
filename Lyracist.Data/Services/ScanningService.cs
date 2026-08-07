@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Fix dead-file cleanup matching sibling folders that share a scanned path's prefix (e.g. C:\Music vs C:\Music2)
+// Edited on Aug 6, 2026 @ 09:20:50 -> Fetch online tags and missing artists using MusicBrainz and Spotify in ProbeMissingMetadataAsync
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -421,18 +421,13 @@ namespace Lyracist.Data.Services
         }
 
         // ==========================================
-        // BACKGROUND METADATA FILL-IN (DURATION / GENRE)
+        // BACKGROUND METADATA FILL-IN (DURATION / GENRE / ONLINE TAGS)
         // ==========================================
 
-        // Probes duration/genre for any song still missing it (Duration <= 0). Kept separate
-        // from ScanDirectories so folder scans stay fast — this is meant to be run afterward as
-        // a low-priority background pass. It always re-queries songs with Duration <= 0 from the
-        // database, so it naturally resumes wherever it left off if interrupted (app closed,
-        // crash) or run again later, without needing any separate state to track progress.
         public async Task ProbeMissingMetadataAsync(IProgress<ScanProgress>? progress = null)
         {
             var songsNeedingProbe = await _context.Songs
-                .Where(s => s.Duration <= 0)
+                .Where(s => s.Duration <= 0 || s.Tags == null || s.Tags == "" || s.Artist == "Unknown Artist" || s.Artist == null)
                 .ToListAsync();
 
             int totalFiles = songsNeedingProbe.Count;
@@ -441,13 +436,12 @@ namespace Lyracist.Data.Services
             const int batchSize = 100;
             int processed = 0;
 
+            var searchService = new SearchService(_context);
+
             for (int i = 0; i < songsNeedingProbe.Count; i += batchSize)
             {
                 var batch = songsNeedingProbe.Skip(i).Take(batchSize).ToList();
 
-                // Lower concurrency than the scan-time probing used to have — this now runs
-                // unattended in the background, potentially while the app is actively being used
-                // for a live show, so it should be gentle on disk I/O rather than maximize throughput.
                 var semaphore = new System.Threading.SemaphoreSlim(3);
                 var tasks = batch.Select(async song =>
                 {
@@ -456,44 +450,95 @@ namespace Lyracist.Data.Services
                     {
                         if (!File.Exists(song.FilePath)) return;
 
-                        if (song.KaraokeType == "ZIPCDG")
+                        // 1. Local FFprobe Duration/Genre Extraction (if missing duration)
+                        if (song.Duration <= 0)
                         {
-                            var (isKaraoke, audioEntryName) = CheckZipKaraoke(song.FilePath);
-                            if (isKaraoke && !string.IsNullOrEmpty(audioEntryName))
+                            if (song.KaraokeType == "ZIPCDG")
                             {
-                                string tempPath = string.Empty;
+                                var (isKaraoke, audioEntryName) = CheckZipKaraoke(song.FilePath);
+                                if (isKaraoke && !string.IsNullOrEmpty(audioEntryName))
+                                {
+                                    string tempPath = string.Empty;
+                                    try
+                                    {
+                                        using var archive = ZipFile.OpenRead(song.FilePath);
+                                        var entry = archive.GetEntry(audioEntryName);
+                                        if (entry != null)
+                                        {
+                                            tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntryName));
+                                            entry.ExtractToFile(tempPath);
+
+                                            var probeResult = await FFprobeRunner.ProbeFile(tempPath);
+                                            song.Duration = probeResult.Duration;
+                                            song.Genre = probeResult.GenreTag;
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine($"Failed to extract and probe zip entry {audioEntryName} in {song.FilePath}: {ex.Message}");
+                                    }
+                                    finally
+                                    {
+                                        if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
+                                        {
+                                            try { File.Delete(tempPath); } catch { }
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
+                                song.Duration = probeResult.Duration;
+                                song.Genre = probeResult.GenreTag;
+                            }
+                        }
+
+                        // 2. Online API Tag & Artist Resolution (only for unresolved karaoke artists to keep scans fast)
+                        if (song.IsKaraoke && (song.Artist == "Unknown Artist" || string.IsNullOrEmpty(song.Artist) || song.Artist == null))
+                        {
+                            if (song.Tags == null || song.Tags == "")
+                            {
                                 try
                                 {
-                                    using var archive = ZipFile.OpenRead(song.FilePath);
-                                    var entry = archive.GetEntry(audioEntryName);
-                                    if (entry != null)
+                                    var onlineMeta = await MetadataFetchService.FetchMetadataAsync(song.Title, song.Artist);
+                                    if (onlineMeta != null)
                                     {
-                                        tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntryName));
-                                        entry.ExtractToFile(tempPath);
-
-                                        var probeResult = await FFprobeRunner.ProbeFile(tempPath);
-                                        song.Duration = probeResult.Duration;
-                                        song.Genre = probeResult.GenreTag;
+                                        if ((song.Artist == "Unknown Artist" || string.IsNullOrEmpty(song.Artist)) && !string.IsNullOrEmpty(onlineMeta.Artist))
+                                        {
+                                            song.Artist = onlineMeta.Artist;
+                                            if (!string.IsNullOrEmpty(onlineMeta.Title))
+                                            {
+                                                song.Title = onlineMeta.Title;
+                                            }
+                                        }
+                                        if (onlineMeta.Tags.Count > 0)
+                                        {
+                                            song.Tags = string.Join(", ", onlineMeta.Tags);
+                                        }
+                                        else
+                                        {
+                                            song.Tags = "none";
+                                        }
+                                    }
+                                    else
+                                    {
+                                        song.Tags = "none";
                                     }
                                 }
-                                catch (Exception ex)
+                                catch
                                 {
-                                    Debug.WriteLine($"Failed to extract and probe zip entry {audioEntryName} in {song.FilePath}: {ex.Message}");
-                                }
-                                finally
-                                {
-                                    if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
-                                    {
-                                        try { File.Delete(tempPath); } catch { }
-                                    }
+                                    // Offline or API rate-limited; preserve empty tags to try again in subsequent scans
                                 }
                             }
                         }
                         else
                         {
-                            var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
-                            song.Duration = probeResult.Duration;
-                            song.Genre = probeResult.GenreTag;
+                            // Known artist or standard music track: Fall back to local file genre if tags are empty, avoiding network rate-limit delay
+                            if (song.Tags == null || song.Tags == "")
+                            {
+                                song.Tags = !string.IsNullOrWhiteSpace(song.Genre) ? song.Genre : "none";
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -509,6 +554,9 @@ namespace Lyracist.Data.Services
 
                 _context.Songs.UpdateRange(batch);
                 await _context.SaveChangesAsync();
+
+                // Re-index FTS5 index to support tag searching immediately
+                await searchService.IndexSongsBatch(batch);
 
                 processed += batch.Count;
                 progress?.Report(new ScanProgress

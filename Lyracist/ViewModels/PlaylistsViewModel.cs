@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Handle DB failure in FindSongId instead of letting it throw; document singleton-lifetime timer subscription
+// Edited on Aug 6, 2026 @ 08:40:10 -> Remove PartyTyme from SearchOccasionItem
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -482,11 +482,9 @@ public partial class PlaylistsViewModel : BaseViewModel
             return;
         }
 
-        var partyTyme = (IPartyTymeService)App.AppHost.Services.GetService(typeof(IPartyTymeService))!;
         var window = new Lyracist.Windows.OccasionSearchWindow(
             _occasions,
             _libraryService,
-            partyTyme,
             SelectedOccasionCategory.Id,
             () => RefreshOccasionItems()
         )

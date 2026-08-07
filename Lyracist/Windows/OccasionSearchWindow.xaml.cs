@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 08:40:20 -> Remove PartyTyme service integration
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,25 +15,21 @@ public partial class OccasionSearchWindow : Window
 {
     private readonly IOccasionService _occasions;
     private readonly ILibraryService _library;
-    private readonly IPartyTymeService _partyTyme;
     private readonly ExternalLinkService _externalLinkService;
     private readonly int _categoryId;
     private readonly Action _callback;
 
     public ObservableCollection<KaraokeSong> LocalSongs { get; } = [];
-    public ObservableCollection<PartyTymeTrack> PartyTymeSongs { get; } = [];
     public ObservableCollection<ExternalTrack> ExternalSongs { get; } = [];
 
     public OccasionSearchWindow(
         IOccasionService occasions,
         ILibraryService library,
-        IPartyTymeService partyTyme,
         int categoryId,
         Action callback)
     {
         _occasions = occasions;
         _library = library;
-        _partyTyme = partyTyme;
         _externalLinkService = new ExternalLinkService();
         _categoryId = categoryId;
         _callback = callback;
@@ -40,7 +37,6 @@ public partial class OccasionSearchWindow : Window
         InitializeComponent();
 
         LocalResultsList.ItemsSource = LocalSongs;
-        PartyTymeResultsList.ItemsSource = PartyTymeSongs;
         ExternalResultsList.ItemsSource = ExternalSongs;
     }
 
@@ -71,35 +67,7 @@ public partial class OccasionSearchWindow : Window
         }
         NoLocalText.Visibility = LocalSongs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-        // 2. Party Tyme Search
-        PartyTymeSongs.Clear();
-        if (_partyTyme.IsAuthenticated)
-        {
-            PartyTymeLoading.Visibility = Visibility.Visible;
-            NoPartyTymeText.Visibility = Visibility.Collapsed;
-            try
-            {
-                var ptResults = await _partyTyme.SearchCatalogAsync(query);
-                foreach (var track in ptResults)
-                {
-                    PartyTymeSongs.Add(track);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Party Tyme Occasion Search failed: {ex.Message}");
-            }
-            finally
-            {
-                PartyTymeLoading.Visibility = Visibility.Collapsed;
-            }
-            NoPartyTymeText.Visibility = PartyTymeSongs.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        }
-        else
-        {
-            NoPartyTymeText.Text = "Party Tyme is not authenticated.";
-            NoPartyTymeText.Visibility = Visibility.Visible;
-        }
+
 
         // 3. External Streams Search
         ExternalSongs.Clear();
@@ -134,14 +102,7 @@ public partial class OccasionSearchWindow : Window
             _callback.Invoke();
             Close();
         }
-        else if (PartyTymeResultsList.SelectedItem is PartyTymeTrack ptTrack)
-        {
-            string name = $"{ptTrack.Artist} - {ptTrack.Title} (Party Tyme)";
-            string path = $"PartyTyme:{ptTrack.TrackId}";
-            _occasions.AddItem(_categoryId, name, path);
-            _callback.Invoke();
-            Close();
-        }
+
         else if (ExternalResultsList.SelectedItem is ExternalTrack extTrack)
         {
             string name = $"{extTrack.Artist} - {extTrack.Title} ({extTrack.Source})";

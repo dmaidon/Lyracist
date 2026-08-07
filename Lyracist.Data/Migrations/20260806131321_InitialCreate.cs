@@ -1,3 +1,4 @@
+// Edited on Aug 7, 2026 @ 08:35:00 -> Create FTS5 virtual table using raw SQL in migration instead of regular table
 using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -43,7 +44,17 @@ namespace Lyracist.Data.Migrations
                     JoinDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     LastSang = table.Column<DateTime>(type: "TEXT", nullable: true),
                     TotalSongsSung = table.Column<int>(type: "INTEGER", nullable: false),
-                    Notes = table.Column<string>(type: "TEXT", nullable: false)
+                    Notes = table.Column<string>(type: "TEXT", nullable: false),
+                    Score = table.Column<int>(type: "INTEGER", nullable: false),
+                    RatingPoints = table.Column<int>(type: "INTEGER", nullable: false),
+                    RatingCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    AverageRating = table.Column<double>(type: "REAL", nullable: false),
+                    Email = table.Column<string>(type: "TEXT", nullable: false),
+                    PinCode = table.Column<string>(type: "TEXT", nullable: false),
+                    AvatarType = table.Column<string>(type: "TEXT", nullable: false),
+                    AvatarSource = table.Column<string>(type: "TEXT", nullable: false),
+                    VocalRange = table.Column<string>(type: "TEXT", nullable: false),
+                    CustomTitle = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -61,6 +72,8 @@ namespace Lyracist.Data.Migrations
                     FilePath = table.Column<string>(type: "TEXT", nullable: false),
                     IsKaraoke = table.Column<bool>(type: "INTEGER", nullable: false),
                     KaraokeType = table.Column<string>(type: "TEXT", nullable: false),
+                    Genre = table.Column<string>(type: "TEXT", nullable: false),
+                    Tags = table.Column<string>(type: "TEXT", nullable: false),
                     Duration = table.Column<double>(type: "REAL", nullable: false),
                     KeyDefault = table.Column<int>(type: "INTEGER", nullable: false),
                     TempoDefault = table.Column<double>(type: "REAL", nullable: false),
@@ -73,11 +86,7 @@ namespace Lyracist.Data.Migrations
                     table.PrimaryKey("PK_Songs", x => x.SongId);
                 });
 
-            // Create FTS5 Virtual Table for SongSearch
             migrationBuilder.Sql("CREATE VIRTUAL TABLE SongSearch USING fts5(SongId UNINDEXED, Title, Artist, NormalizedTitle, NormalizedArtist);");
-
-            // Create Trigger to automatically clean up index entries on song deletion
-            migrationBuilder.Sql("CREATE TRIGGER tr_Songs_Delete AFTER DELETE ON Songs BEGIN DELETE FROM SongSearch WHERE SongId = old.SongId; END;");
 
             migrationBuilder.CreateTable(
                 name: "OccasionItems",
@@ -120,6 +129,9 @@ namespace Lyracist.Data.Migrations
                     Title = table.Column<string>(type: "TEXT", nullable: false),
                     Artist = table.Column<string>(type: "TEXT", nullable: false),
                     Source = table.Column<string>(type: "TEXT", nullable: false),
+                    RequestType = table.Column<string>(type: "TEXT", nullable: false),
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
+                    Notes = table.Column<string>(type: "TEXT", nullable: false),
                     Status = table.Column<string>(type: "TEXT", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
@@ -283,7 +295,7 @@ namespace Lyracist.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "OccasionCategories",
-                columns: ["OccasionCategoryId", "Name", "ParentCategoryId"],
+                columns: new[] { "OccasionCategoryId", "Name", "ParentCategoryId" },
                 values: new object[,]
                 {
                     { 1, "Holiday", null },
@@ -354,7 +366,8 @@ namespace Lyracist.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Songs_FilePath",
                 table: "Songs",
-                column: "FilePath");
+                column: "FilePath",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Songs_Title",
@@ -388,8 +401,6 @@ namespace Lyracist.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "SongAudioSettings");
-
-            migrationBuilder.Sql("DROP TRIGGER IF EXISTS tr_Songs_Delete;");
 
             migrationBuilder.DropTable(
                 name: "SongSearch");

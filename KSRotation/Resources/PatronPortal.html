@@ -1,4 +1,4 @@
-<!-- Edited on Jul 28, 2026 @ 18:47:00 -> Add request type options (Karaoke/Music), distinct visual styles, and optimize mobile layouts -->
+<!-- Edited on Aug 6, 2026 @ 09:12:55 -> Add Vocal Range and Custom Title fields to profile management UI and logic -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -386,6 +386,86 @@
                 font-size: 0.9rem;
             }
         }
+
+        /* Performer Profile & Avatar Styles */
+        .avatar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            object-fit: cover;
+            margin-bottom: 10px;
+            background-color: #1e293b;
+        }
+        .avatar-mini {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            border: 2px solid var(--primary);
+            flex-shrink: 0;
+        }
+        .profile-username {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--gold);
+        }
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .file-upload-btn {
+            width: 100%;
+            background-color: #334155;
+            color: white;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            display: block;
+            transition: background 0.2s;
+        }
+        .file-upload-btn:hover {
+            background-color: #475569;
+        }
+        .file-upload-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .logout-btn {
+            width: 100%;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover {
+            background-color: #dc2626;
+        }
     </style>
 </head>
 <body>
@@ -396,8 +476,9 @@
         </header>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('request')">Request Song</button>
-            <button class="tab-btn" onclick="switchTab('rotation')">View Rotation</button>
+            <button id="tab-btn-request" class="tab-btn active" onclick="switchTab('request')">Request Song</button>
+            <button id="tab-btn-rotation" class="tab-btn" onclick="switchTab('rotation')">View Rotation</button>
+            <button id="tab-btn-profile" class="tab-btn" onclick="switchTab('profile')">My Profile</button>
         </div>
 
         <!-- Request Panel -->
@@ -410,7 +491,7 @@
                 </div>
                 <div class="form-group">
                     <label>Request Type</label>
-                    <div class="tabs" style="margin-bottom: 0px; padding: 2px; border-radius: 8px;">
+                    <div class="tabs request-type-tabs" style="margin-bottom: 0px; padding: 2px; border-radius: 8px;">
                         <button type="button" class="tab-btn active" id="type-karaoke" onclick="setRequestType('Karaoke')" style="padding: 8px; font-size: 0.85rem;">Karaoke (Sing)</button>
                         <button type="button" class="tab-btn" id="type-music" onclick="setRequestType('Music')" style="padding: 8px; font-size: 0.85rem;">Music (Play)</button>
                     </div>
@@ -449,6 +530,78 @@
                 <div class="no-singers">Loading rotation...</div>
             </div>
         </div>
+
+        <!-- Profile Panel -->
+        <div id="profile-panel" class="panel">
+            <div id="profile-alert" class="alert"></div>
+            
+            <!-- Login View -->
+            <div id="profile-login-view">
+                <form id="profile-login-form" onsubmit="handleProfileLogin(event)">
+                    <h3 style="margin-bottom: 12px; font-weight: 600;">Singer Profile Login</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+                        Log in or create a new performer profile to claim your name and customize your avatar!
+                    </p>
+                    <div class="form-group">
+                        <label for="login-name">Performer Name</label>
+                        <input type="text" id="login-name" required placeholder="e.g. Charlie">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-pin">4-Digit PIN</label>
+                        <input type="password" id="login-pin" required pattern="[0-9]{4}" inputmode="numeric" maxlength="4" placeholder="Enter PIN code...">
+                    </div>
+                    <button type="submit" class="submit-btn">Login / Create Profile</button>
+                </form>
+            </div>
+
+            <!-- Logged In View -->
+            <div id="profile-details-view" style="display: none;">
+                <div class="avatar-container">
+                    <img id="avatar-preview-img" class="avatar-preview" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=150" alt="Avatar Preview">
+                    <div id="profile-display-name" class="profile-username">Charlie</div>
+                </div>
+
+                <form id="profile-update-form" onsubmit="handleProfileUpdate(event)">
+                    <div class="form-group">
+                        <label for="profile-email">Gravatar Email (optional)</label>
+                        <input type="email" id="profile-email" placeholder="email@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-vocal-range">Vocal Range (optional)</label>
+                        <input type="text" id="profile-vocal-range" placeholder="e.g. Tenor, Soprano, Alto, Bass...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-custom-title">Custom Title (optional)</label>
+                        <input type="text" id="profile-custom-title" placeholder="e.g. The Screamer, Queen of Rock...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-avatar-type">Avatar Source</label>
+                        <select id="profile-avatar-type" onchange="toggleAvatarSourceFields()" style="width:100%; background:#0F172A; border:1px solid #334155; border-radius:8px; padding:12px; color:white; font-size:1rem; outline:none;">
+                            <option value="None">Default Silhouette</option>
+                            <option value="Gravatar">Gravatar Logo</option>
+                            <option value="Uploaded">Upload Selfie / Photo</option>
+                        </select>
+                    </div>
+
+                    <!-- Selfie Uploader Group -->
+                    <div class="form-group" id="selfie-upload-group" style="display: none;">
+                        <label>Upload Selfie</label>
+                        <div class="file-upload-wrapper">
+                            <span class="file-upload-btn">Select Selfie File</span>
+                            <input type="file" id="selfie-file" accept="image/*" onchange="handleSelfieFileSelected(event)">
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">Maximum upload size: 2MB</div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" style="margin-top: 16px;">Save Profile Changes</button>
+                </form>
+
+                <button class="logout-btn" onclick="handleProfileLogout()">Logout</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -476,16 +629,20 @@
         }
 
         function switchTab(tab) {
-            document.querySelectorAll('.tab-btn:not(#type-karaoke):not(#type-music)').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tabs:not(.request-type-tabs) .tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
 
             if (tab === 'request') {
-                document.querySelectorAll('.tab-btn:not(#type-karaoke):not(#type-music)')[0].classList.add('active');
+                document.getElementById('tab-btn-request').classList.add('active');
                 document.getElementById('request-panel').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab-btn:not(#type-karaoke):not(#type-music)')[1].classList.add('active');
+            } else if (tab === 'rotation') {
+                document.getElementById('tab-btn-rotation').classList.add('active');
                 document.getElementById('rotation-panel').classList.add('active');
                 loadRotation();
+            } else if (tab === 'profile') {
+                document.getElementById('tab-btn-profile').classList.add('active');
+                document.getElementById('profile-panel').classList.add('active');
+                checkSingerSession();
             }
         }
 
@@ -666,12 +823,22 @@
                             nameHtml = `${escapeHtml(singer.song)} <span class="badge next">Up Next</span>`;
                         }
                     } else {
-                        nameHtml += badge;
+                        let titleSuffix = '';
+                        if (singer.customTitle) {
+                            titleSuffix = ` <span class="singer-custom-title" style="color: var(--gold); font-size: 0.85rem; font-style: italic; margin-left: 6px;">"${escapeHtml(singer.customTitle)}"</span>`;
+                        }
+                        let rangeSuffix = '';
+                        if (singer.vocalRange) {
+                            rangeSuffix = ` <span class="singer-vocal-range" style="color: var(--text-muted); font-size: 0.85rem; margin-left: 6px;">[${escapeHtml(singer.vocalRange)}]</span>`;
+                        }
+                        nameHtml += titleSuffix + rangeSuffix + badge;
                     }
 
+                    let avatarUrl = `/api/singer/avatar?name=${encodeURIComponent(singer.name)}`;
                     html += `
                         <div class="${cssClass}">
                             <div class="singer-num">${index + 1}</div>
+                            <img class="avatar-mini" src="${avatarUrl}" alt="${escapeHtml(singer.name)}" onerror="this.src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=150'"/>
                             <div class="singer-details">
                                 <div class="singer-name">${nameHtml}</div>
                                 <div class="singer-song">${songHtml}</div>
@@ -899,6 +1066,213 @@
             }
         });
 
+        // --- Performer Session & Profile Logic ---
+        let performerSession = null;
+
+        function checkSingerSession() {
+            const savedSession = localStorage.getItem('ks_performer_session');
+            if (savedSession) {
+                try {
+                    performerSession = JSON.parse(savedSession);
+                    showProfileDetailsView();
+                    return;
+                } catch (e) {
+                    localStorage.removeItem('ks_performer_session');
+                }
+            }
+            showProfileLoginView();
+        }
+
+        function showProfileLoginView() {
+            document.getElementById('profile-login-view').style.display = 'block';
+            document.getElementById('profile-details-view').style.display = 'none';
+            document.getElementById('profile-alert').style.display = 'none';
+        }
+
+        function showProfileDetailsView() {
+            document.getElementById('profile-login-view').style.display = 'none';
+            document.getElementById('profile-details-view').style.display = 'block';
+            document.getElementById('profile-alert').style.display = 'none';
+            
+            document.getElementById('profile-display-name').textContent = performerSession.name;
+            document.getElementById('profile-email').value = performerSession.email || '';
+            document.getElementById('profile-vocal-range').value = performerSession.vocalRange || '';
+            document.getElementById('profile-custom-title').value = performerSession.customTitle || '';
+            document.getElementById('profile-avatar-type').value = performerSession.avatarType || 'None';
+            
+            updateAvatarPreview();
+            toggleAvatarSourceFields();
+        }
+
+        function updateAvatarPreview() {
+            const previewImg = document.getElementById('avatar-preview-img');
+            const cacheBuster = new Date().getTime();
+            previewImg.src = `/api/singer/avatar?name=${encodeURIComponent(performerSession.name)}&t=${cacheBuster}`;
+        }
+
+        function toggleAvatarSourceFields() {
+            const avatarType = document.getElementById('profile-avatar-type').value;
+            const uploadGroup = document.getElementById('selfie-upload-group');
+            uploadGroup.style.display = avatarType === 'Uploaded' ? 'block' : 'none';
+        }
+
+        async function handleProfileLogin(event) {
+            event.preventDefault();
+            const alertDiv = document.getElementById('profile-alert');
+            const name = document.getElementById('login-name').value.trim();
+            const pin = document.getElementById('login-pin').value;
+
+            if (!name || pin.length !== 4) {
+                alertDiv.textContent = "Please enter your name and a 4-digit PIN.";
+                alertDiv.className = 'alert error';
+                alertDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/singer/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, pin })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    performerSession = data.singer;
+                    performerSession.pin = pin; // Store pin in session for update requests
+                    localStorage.setItem('ks_performer_session', JSON.stringify(performerSession));
+                    
+                    // Pre-fill request form name too
+                    localStorage.setItem('ks_patron_name', performerSession.name);
+                    const nameInput = document.getElementById('name');
+                    if (nameInput) nameInput.value = performerSession.name;
+
+                    showProfileDetailsView();
+                } else {
+                    alertDiv.textContent = data.error || "Login failed.";
+                    alertDiv.className = 'alert error';
+                    alertDiv.style.display = 'block';
+                }
+            } catch (err) {
+                alertDiv.textContent = "Error connecting to server.";
+                alertDiv.className = 'alert error';
+                alertDiv.style.display = 'block';
+            }
+        }
+
+        async function handleProfileUpdate(event) {
+            event.preventDefault();
+            const alertDiv = document.getElementById('profile-alert');
+            const email = document.getElementById('profile-email').value.trim();
+            const vocalRange = document.getElementById('profile-vocal-range').value.trim();
+            const customTitle = document.getElementById('profile-custom-title').value.trim();
+            const avatarType = document.getElementById('profile-avatar-type').value;
+
+            try {
+                const response = await fetch('/api/singer/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: performerSession.name,
+                        pin: performerSession.pin,
+                        email: email,
+                        avatarType: avatarType,
+                        vocalRange: vocalRange,
+                        customTitle: customTitle
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    performerSession.email = email;
+                    performerSession.avatarType = avatarType;
+                    performerSession.vocalRange = vocalRange;
+                    performerSession.customTitle = customTitle;
+                    localStorage.setItem('ks_performer_session', JSON.stringify(performerSession));
+                    
+                    alertDiv.textContent = "Profile updated successfully!";
+                    alertDiv.className = 'alert success';
+                    alertDiv.style.display = 'block';
+                    
+                    updateAvatarPreview();
+                    
+                    setTimeout(() => {
+                        alertDiv.style.display = 'none';
+                    }, 3000);
+                } else {
+                    alertDiv.textContent = data.error || "Failed to update profile.";
+                    alertDiv.className = 'alert error';
+                    alertDiv.style.display = 'block';
+                }
+            } catch (err) {
+                alertDiv.textContent = "Error connecting to server.";
+                alertDiv.className = 'alert error';
+                alertDiv.style.display = 'block';
+            }
+        }
+
+        async function handleSelfieFileSelected(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Cap at 2MB
+            if (file.size > 2 * 1024 * 1024) {
+                alert("Selfie file exceeds 2MB size limit.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Data = e.target.result;
+                const alertDiv = document.getElementById('profile-alert');
+                
+                try {
+                    const response = await fetch('/api/singer/avatar/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: performerSession.name,
+                            pin: performerSession.pin,
+                            image: base64Data
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        performerSession.avatarType = 'Uploaded';
+                        performerSession.avatarSource = data.avatarSource;
+                        localStorage.setItem('ks_performer_session', JSON.stringify(performerSession));
+                        
+                        document.getElementById('profile-avatar-type').value = 'Uploaded';
+                        toggleAvatarSourceFields();
+                        updateAvatarPreview();
+
+                        alertDiv.textContent = "Selfie uploaded and set as avatar!";
+                        alertDiv.className = 'alert success';
+                        alertDiv.style.display = 'block';
+                        setTimeout(() => {
+                            alertDiv.style.display = 'none';
+                        }, 3000);
+                    } else {
+                        alertDiv.textContent = data.error || "Selfie upload failed.";
+                        alertDiv.className = 'alert error';
+                        alertDiv.style.display = 'block';
+                    }
+                } catch (err) {
+                    alertDiv.textContent = "Error uploading selfie.";
+                    alertDiv.className = 'alert error';
+                    alertDiv.style.display = 'block';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleProfileLogout() {
+            performerSession = null;
+            localStorage.removeItem('ks_performer_session');
+            showProfileLoginView();
+        }
+
         // Initialize from local storage
         document.addEventListener("DOMContentLoaded", () => {
             const savedName = localStorage.getItem('ks_patron_name');
@@ -907,6 +1281,7 @@
                 if (nameInput) nameInput.value = savedName;
             }
             loadPastSongs();
+            checkSingerSession();
         });
     </script>
 </body>

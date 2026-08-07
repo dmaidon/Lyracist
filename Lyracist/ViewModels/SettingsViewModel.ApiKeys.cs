@@ -1,4 +1,4 @@
-// Created on Aug 6, 2026 @ 07:01:27 -> Split service login/API key settings out of SettingsViewModel.cs (God-object cleanup); pure code move, no behavior change
+// Edited on Aug 6, 2026 @ 08:40:07 -> Remove PartyTyme setting fields
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lyracist.Core.Helpers;
 
@@ -24,12 +24,6 @@ public partial class SettingsViewModel
     private string _amazonSecretKey = AppSettings.AmazonSecretKey;
 
     [ObservableProperty]
-    private string _partyTymeClientId = AppSettings.PartyTymeClientId;
-
-    [ObservableProperty]
-    private string _partyTymeClientSecret = AppSettings.PartyTymeClientSecret;
-
-    [ObservableProperty]
     private string _staticIPAddress = AppSettings.StaticIPAddress;
 
     partial void OnYouTubeApiKeyChanged(string value) => AppSettings.YouTubeApiKey = value;
@@ -37,8 +31,6 @@ public partial class SettingsViewModel
     partial void OnSpotifyClientSecretChanged(string value) => AppSettings.SpotifyClientSecret = value;
     partial void OnAmazonAccessKeyChanged(string value) => AppSettings.AmazonAccessKey = value;
     partial void OnAmazonSecretKeyChanged(string value) => AppSettings.AmazonSecretKey = value;
-    partial void OnPartyTymeClientIdChanged(string value) => AppSettings.PartyTymeClientId = value;
-    partial void OnPartyTymeClientSecretChanged(string value) => AppSettings.PartyTymeClientSecret = value;
     partial void OnStaticIPAddressChanged(string value)
     {
         AppSettings.StaticIPAddress = value;

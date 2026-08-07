@@ -1,5 +1,4 @@
-// Edited on Jul 28, 2026 @ 18:39:00 -> Add support for requestType parameter in REST web API requests
-// Last Edit: Jul 16, 2026 11:00 - REST backend web API server
+// Edited on Aug 6, 2026 @ 09:12:50 -> Add VocalRange and CustomTitle fields to singer profile endpoints
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +10,10 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using KSRotation.Models;
+#if !MAUI
+using Microsoft.EntityFrameworkCore;
+#endif
+using System.Security.Cryptography;
 
 namespace KSRotation.Services
 {
@@ -22,7 +25,7 @@ namespace KSRotation.Services
         Func<string> onGetRequestsJson,
         Func<string, string, string, string, string, string, string> onHandleDjAction)
     {
-        private const int MaxRequestBodyBytes = 8_192;
+        private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
         private const int MaxConcurrentConnections = 64;
         private const int MaxPinAttemptsBeforeLockout = 5;
         private static readonly TimeSpan PinLockoutDuration = TimeSpan.FromMinutes(2);
@@ -196,6 +199,59 @@ namespace KSRotation.Services
                             string json = _onGetRequestsJson();
                             await SendJsonResponseAsync(stream, json);
                         }
+                        else if (path.StartsWith("/api/singer/avatar", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string queryName = "";
+                            int nameIdx = rawPath.IndexOf("name=");
+                            if (nameIdx >= 0)
+                            {
+                                queryName = rawPath[(nameIdx + 5)..];
+                                int ampIdx = queryName.IndexOf('&');
+                                if (ampIdx >= 0)
+                                {
+                                    queryName = queryName[..ampIdx];
+                                }
+                                queryName = WebUtility.UrlDecode(queryName).Trim();
+                            }
+
+                            if (string.IsNullOrEmpty(queryName))
+                            {
+                                await SendRedirectResponseAsync(stream, "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=150");
+                                return;
+                            }
+
+#if !MAUI
+                            using var context = new Lyracist.Data.LyracistDbContext();
+                            var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == queryName);
+                            if (dbSinger != null)
+                            {
+                                if (dbSinger.AvatarType == "Gravatar" && !string.IsNullOrEmpty(dbSinger.AvatarSource))
+                                {
+                                    await SendRedirectResponseAsync(stream, $"https://www.gravatar.com/avatar/{dbSinger.AvatarSource}?d=identicon&s=150");
+                                    return;
+                                }
+                                else if (dbSinger.AvatarType == "Uploaded" && !string.IsNullOrEmpty(dbSinger.AvatarSource))
+                                {
+                                    string fullPath = Path.Combine(Lyracist.Shared.Globals.AvatarsDir, dbSinger.AvatarSource);
+                                    if (File.Exists(fullPath))
+                                    {
+                                        try
+                                        {
+                                            byte[] fileBytes = await File.ReadAllBytesAsync(fullPath);
+                                            await SendImageResponseAsync(stream, fileBytes);
+                                            return;
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            LoggerService.LogError("ServeUploadedAvatar", ex);
+                                        }
+                                    }
+                                }
+                            }
+#endif
+
+                            await SendRedirectResponseAsync(stream, "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=150");
+                        }
                         else
                         {
                             await SendNotFoundAsync(stream);
@@ -278,6 +334,172 @@ namespace KSRotation.Services
                         {
                             await SendBadRequestAsync(stream, $"{{\"error\":\"{JsonEncodedText.Encode(error)}\"}}");
                         }
+                    }
+                    else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/singer/login", StringComparison.OrdinalIgnoreCase))
+                    {
+#if !MAUI
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength);
+                        string body = Encoding.UTF8.GetString(bodyBytes);
+
+                        using JsonDocument doc = JsonDocument.Parse(body);
+                        JsonElement root = doc.RootElement;
+                        string name = root.TryGetProperty("name", out var nProp) ? (nProp.GetString() ?? "") : "";
+                        string singerPin = root.TryGetProperty("pin", out var pProp) ? (pProp.GetString() ?? "") : "";
+
+                        if (string.IsNullOrWhiteSpace(name))
+                        {
+                            await SendBadRequestAsync(stream, "{\"error\":\"Singer name is required.\"}");
+                            return;
+                        }
+
+                        using var context = new Lyracist.Data.LyracistDbContext();
+                        var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name);
+                        if (dbSinger == null)
+                        {
+                            dbSinger = new Lyracist.Data.Models.Singer
+                            {
+                                Name = name,
+                                PinCode = singerPin,
+                                AvatarType = "None",
+                                AvatarSource = ""
+                            };
+                            context.Singers.Add(dbSinger);
+                            await context.SaveChangesAsync();
+
+                            await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new
+                            {
+                                success = true,
+                                registered = true,
+                                singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
+                            }));
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(dbSinger.PinCode))
+                            {
+                                dbSinger.PinCode = singerPin;
+                                await context.SaveChangesAsync();
+
+                                await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new
+                                {
+                                    success = true,
+                                    claimed = true,
+                                    singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
+                                }));
+                            }
+                            else if (dbSinger.PinCode == singerPin)
+                            {
+                                await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new
+                                {
+                                    success = true,
+                                    singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
+                                }));
+                            }
+                            else
+                            {
+                                await SendBadRequestAsync(stream, "{\"error\":\"Incorrect PIN code for this singer name.\"}");
+                            }
+                        }
+#else
+                        await SendBadRequestAsync(stream, "{\"error\":\"Performer profiles not supported on mobile rotation view controller.\"}");
+#endif
+                    }
+                    else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/singer/profile", StringComparison.OrdinalIgnoreCase))
+                    {
+#if !MAUI
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength);
+                        string body = Encoding.UTF8.GetString(bodyBytes);
+
+                        using JsonDocument doc = JsonDocument.Parse(body);
+                        JsonElement root = doc.RootElement;
+                        string name = root.TryGetProperty("name", out var nProp) ? (nProp.GetString() ?? "") : "";
+                        string singerPin = root.TryGetProperty("pin", out var pProp) ? (pProp.GetString() ?? "") : "";
+                        string email = root.TryGetProperty("email", out var eProp) ? (eProp.GetString() ?? "") : "";
+                        string avatarType = root.TryGetProperty("avatarType", out var atProp) ? (atProp.GetString() ?? "None") : "None";
+                        string vocalRange = root.TryGetProperty("vocalRange", out var vrProp) ? (vrProp.GetString() ?? "") : "";
+                        string customTitle = root.TryGetProperty("customTitle", out var ctProp) ? (ctProp.GetString() ?? "") : "";
+
+                        using var context = new Lyracist.Data.LyracistDbContext();
+                        var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name && s.PinCode == singerPin);
+                        if (dbSinger == null)
+                        {
+                            await SendUnauthorizedAsync(stream);
+                            return;
+                        }
+
+                        dbSinger.Email = email;
+                        dbSinger.AvatarType = avatarType;
+                        dbSinger.VocalRange = vocalRange;
+                        dbSinger.CustomTitle = customTitle;
+                        if (avatarType == "Gravatar")
+                        {
+                            dbSinger.AvatarSource = MD5Hash(email);
+                        }
+
+                        await context.SaveChangesAsync();
+                        await SendJsonResponseAsync(stream, "{\"success\":true}");
+#else
+                        await SendBadRequestAsync(stream, "{\"error\":\"Performer profiles not supported on mobile rotation view controller.\"}");
+#endif
+                    }
+                    else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/singer/avatar/upload", StringComparison.OrdinalIgnoreCase))
+                    {
+#if !MAUI
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength);
+                        string body = Encoding.UTF8.GetString(bodyBytes);
+
+                        using JsonDocument doc = JsonDocument.Parse(body);
+                        JsonElement root = doc.RootElement;
+                        string name = root.TryGetProperty("name", out var nProp) ? (nProp.GetString() ?? "") : "";
+                        string singerPin = root.TryGetProperty("pin", out var pProp) ? (pProp.GetString() ?? "") : "";
+                        string imageBase64 = root.TryGetProperty("image", out var imgProp) ? (imgProp.GetString() ?? "") : "";
+
+                        using var context = new Lyracist.Data.LyracistDbContext();
+                        var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name && s.PinCode == singerPin);
+                        if (dbSinger == null)
+                        {
+                            await SendUnauthorizedAsync(stream);
+                            return;
+                        }
+
+                        if (!string.IsNullOrEmpty(imageBase64))
+                        {
+                            if (imageBase64.Contains(","))
+                            {
+                                imageBase64 = imageBase64[(imageBase64.IndexOf(",") + 1)..];
+                            }
+                            byte[] imgBytes = Convert.FromBase64String(imageBase64);
+
+                            string avatarsDir = Lyracist.Shared.Globals.AvatarsDir;
+                            Directory.CreateDirectory(avatarsDir);
+
+                            string filename = $"{name.Replace(" ", "_")}_{DateTime.Now.Ticks}.jpg";
+                            string fullPath = Path.Combine(avatarsDir, filename);
+
+                            if (dbSinger.AvatarType == "Uploaded" && !string.IsNullOrEmpty(dbSinger.AvatarSource))
+                            {
+                                string oldPath = Path.Combine(avatarsDir, dbSinger.AvatarSource);
+                                if (File.Exists(oldPath))
+                                {
+                                    try { File.Delete(oldPath); } catch {}
+                                }
+                            }
+
+                            await File.WriteAllBytesAsync(fullPath, imgBytes);
+
+                            dbSinger.AvatarType = "Uploaded";
+                            dbSinger.AvatarSource = filename;
+                            await context.SaveChangesAsync();
+
+                            await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new { success = true, avatarSource = filename }));
+                        }
+                        else
+                        {
+                            await SendBadRequestAsync(stream, "{\"error\":\"Image content is empty.\"}");
+                        }
+#else
+                        await SendBadRequestAsync(stream, "{\"error\":\"Performer profiles not supported on mobile rotation view controller.\"}");
+#endif
                     }
                     else
                     {
@@ -437,6 +659,46 @@ namespace KSRotation.Services
                 "Connection: close\r\n\r\n" +
                 json);
             await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+        }
+
+        private static async Task SendRedirectResponseAsync(NetworkStream stream, string redirectUrl)
+        {
+            byte[] responseBytes = Encoding.UTF8.GetBytes(
+                "HTTP/1.1 302 Found\r\n" +
+                $"Location: {redirectUrl}\r\n" +
+                "Access-Control-Allow-Origin: *\r\n" +
+                "Content-Length: 0\r\n" +
+                "Connection: close\r\n\r\n");
+            await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+        }
+
+        private static async Task SendImageResponseAsync(NetworkStream stream, byte[] imageBytes)
+        {
+            byte[] responseBytes = Encoding.UTF8.GetBytes(
+                "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: image/jpeg\r\n" +
+                "Access-Control-Allow-Origin: *\r\n" +
+                $"Content-Length: {imageBytes.Length}\r\n" +
+                "Connection: close\r\n\r\n");
+            
+            byte[] fullResponse = new byte[responseBytes.Length + imageBytes.Length];
+            Buffer.BlockCopy(responseBytes, 0, fullResponse, 0, responseBytes.Length);
+            Buffer.BlockCopy(imageBytes, 0, fullResponse, responseBytes.Length, imageBytes.Length);
+            
+            await stream.WriteAsync(fullResponse, 0, fullResponse.Length);
+        }
+
+        private static string MD5Hash(string input)
+        {
+            using var md5 = System.Security.Cryptography.MD5.Create();
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input.Trim().ToLowerInvariant());
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+            StringBuilder sb = new();
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                sb.Append(hashBytes[i].ToString("x2"));
+            }
+            return sb.ToString();
         }
 
         /// <summary>

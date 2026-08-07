@@ -1,3 +1,4 @@
+// Edited on Aug 6, 2026 @ 09:12:55 -> Populate vocalRange and customTitle properties in RotationItemDto
 // Edited on Aug 4, 2026 @ 10:24:00 -> Add AcceptAllPendingRequests method to auto-accept pending requests when checked
 // Edited on Jul 28, 2026 @ 18:40:00 -> Add support for processing patron music requests and mapping isMusic
 // Last Edit: Jul 28, 2026 12:44 - Serialize isPaused and implement paused/deleted/restore API actions
@@ -327,6 +328,8 @@ namespace KSRotation.ViewModels
                 isInactive = s.IsInactive,
                 isPaused = s.IsPaused,
                 isMusic = s.IsMusic,
+                vocalRange = s.VocalRange,
+                customTitle = s.CustomTitle,
                 queuedSongs = s.QueuedSongs.Select(q => new QueuedSongDto { song = q.Song, artist = q.Artist }).ToList(),
                 song1Completed = s.Song1Completed,
                 song2Completed = s.Song2Completed,

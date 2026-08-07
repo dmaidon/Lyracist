@@ -1,4 +1,5 @@
-Last Edit: Aug 6, 2026 - Harden tablet portal security and reliability, split God-object ViewModels into focused files, and clean up swallowed exceptions, save-command guards, and external API timeouts/retries across the codebase
+<!-- Edited on Aug 7, 2026 @ 09:15:00 -> Update for version 26.8.7.0 database manager search fixes -->
+Last Edit: Aug 7, 2026 - Fix database manager search and track edit bindings, resolve SQLite FTS5 MATCH query exception via self-healing table detection, and update initial database migration
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.
@@ -49,10 +50,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ### 🎵 Song Library & Integrations
 - **Local Scanner & Rescan Maintenance**: Scans folders for `.mp3 + .cdg`, `.mp4` or `.zip` files and builds a local query database. Cleanly deletes obsolete database logs and search indexes for files that were renamed or deleted on the drive during rescans.
 - **Catalog Book Exporter**: Export the entire song library (Karaoke or Music) directly into professionally formatted, paginated PDF, plain text (.txt), or Word (.docx) documents with repeating table headers from the Database Manager.
-- **Streaming & Search Integration**: Includes search support for:
-  - **Party Tyme Karaoke** (built-in streaming provider)
-  - **YouTube** (direct URL stream linking and metadata lookups)
-  - **Spotify & Amazon Music** links
+- **Streaming & Search Integration**: Includes search support for YouTube (direct URL stream linking and metadata lookups) and Spotify & Amazon Music links.
 - **Singer History DB**: Automatically saves matching song, artist, singer, and links for instant lookup in future sessions.
 
 ### 💾 Database Maintenance & Stability
@@ -95,7 +93,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 
 ### Configuration
 1. Open **Settings** on the left menu.
-2. In **Service Logins & API Keys**, enter credentials for YouTube, Spotify, or Party Tyme if using streaming search.
+2. In **Service Logins & API Keys**, enter credentials for YouTube or Spotify if using streaming search.
 3. In **Theme & Appearance**, toggle **Test Mode** on to test queue workflows.
 4. Set up monitor assignments under **Display & Projection Monitors** or the main control panel.
 5. Manage backups and database restorations in the **Database Maintenance** section under the **Music Library** group box.

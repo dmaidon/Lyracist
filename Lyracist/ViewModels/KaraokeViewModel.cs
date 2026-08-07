@@ -1,9 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Log swallowed exceptions in LoadSingerNames/OnNewSingerNameChanged instead of silently discarding them; document singleton-lifetime event subscriptions
-// Edited on Aug 2, 2026 @ 10:10:00 -> Add mp4 support to DJ Banner scanning and file dialog filter
-// Edited on Aug 1, 2026 @ 11:49:44 -> Add DeleteDjBanner command for custom DJ banners
-// Edited on Aug 1, 2026 @ 11:02:00 -> Add pragma warning disable MVVMTK0034 to allow direct backing field updates without MVVM Toolkit warning
-// Edited on Aug 1, 2026 @ 10:59:16 -> Subscribe to ScreenAssignmentsChanged to handle DJ banner and rotation screen priorities
-// Edited on Aug 1, 2026 @ 10:02:00 -> Add missing System.IO namespace import for Path and Directory APIs
+// Edited on Aug 6, 2026 @ 08:42:30 -> Remove remaining PartyTyme references
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -31,7 +26,6 @@ public partial class KaraokeViewModel : BaseViewModel
     private readonly ILibraryService _libraryService;
     private readonly IShowFlowService _showFlow;
     private readonly IOccasionService _occasions;
-    private readonly IPartyTymeService _partyTymeService;
     private readonly IRequestService _requests;
     private readonly INavigationService _navigation;
     private readonly ExternalLinkService _externalLinkService;
@@ -110,7 +104,6 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         if (value != null)
         {
-            SelectedPartyTymeTrack = null;
             SelectedExternalTrack = null;
             SelectedHistoryEntry = null;
         }
@@ -121,7 +114,6 @@ public partial class KaraokeViewModel : BaseViewModel
         if (value != null)
         {
             SelectedSong = null;
-            SelectedPartyTymeTrack = null;
             SelectedExternalTrack = null;
         }
     }
@@ -403,7 +395,6 @@ public partial class KaraokeViewModel : BaseViewModel
         IShowFlowService showFlow,
         IOccasionService occasions,
         RotationViewModel rotationViewModel,
-        IPartyTymeService partyTymeService,
         IRequestService requests,
         INavigationService navigation)
     {
@@ -413,7 +404,6 @@ public partial class KaraokeViewModel : BaseViewModel
         _showFlow = showFlow;
         _occasions = occasions;
         Rotation = rotationViewModel;
-        _partyTymeService = partyTymeService;
         _requests = requests;
         _navigation = navigation;
         _externalLinkService = new ExternalLinkService();
@@ -519,8 +509,6 @@ public partial class KaraokeViewModel : BaseViewModel
     public void OnNavigatedTo()
     {
         // Refresh credentials and availability from settings
-        PartyTymeClientId = AppSettings.PartyTymeClientId;
-        PartyTymeClientSecret = AppSettings.PartyTymeClientSecret;
         IsSpotifyAvailable = !string.IsNullOrWhiteSpace(AppSettings.SpotifyClientId);
         IsAmazonAvailable = !string.IsNullOrWhiteSpace(AppSettings.AmazonAccessKey);
 
@@ -532,10 +520,6 @@ public partial class KaraokeViewModel : BaseViewModel
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Start();
 
-        if (IsPartyTymeConnected)
-        {
-            SearchPartyTymeCommand.Execute(null);
-        }
         SearchExternalCommand.Execute(null);
     }
 
@@ -912,11 +896,6 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             Rotation.AddSinger(targetSingerName, SelectedSong.Title, SelectedSong.Artist, NewSingerKey, NewSingerNotes, "Local", SelectedSong.AudioPath, NewDuetPartnerName);
         }
-        else if (SelectedPartyTymeTrack != null)
-        {
-            Rotation.AddSinger(targetSingerName, SelectedPartyTymeTrack.Title, SelectedPartyTymeTrack.Artist, NewSingerKey,
-                $"[Party Tyme ID: {SelectedPartyTymeTrack.TrackId}] {NewSingerNotes}", "PartyTyme", string.Empty, NewDuetPartnerName);
-        }
         else if (SelectedExternalTrack != null)
         {
             Rotation.AddSinger(targetSingerName, SelectedExternalTrack.Title, SelectedExternalTrack.Artist, NewSingerKey,
@@ -1077,34 +1056,7 @@ public partial class KaraokeViewModel : BaseViewModel
             return;
         }
 
-        if (singer.Notes.Contains("[Party Tyme ID:"))
-        {
-            int startIdx = singer.Notes.IndexOf("[Party Tyme ID:") + 15;
-            int endIdx = singer.Notes.IndexOf("]", startIdx);
-            if (startIdx >= 15 && endIdx > startIdx)
-            {
-                string trackId = singer.Notes[startIdx..endIdx].Trim();
 
-                IsPlaying = false;
-                CurrentSongName = $"{singer.Artist} - {singer.SongTitle} [Party Tyme]";
-                _mediaEngine.ActiveSingerName = singer.Name;
-                _mediaEngine.ActiveDuetPartnerName = singer.DuetPartnerName;
-
-                IsExternalPerformanceActive = false;
-                ExternalPerformanceSource = string.Empty;
-                ExternalPerformanceUrl = string.Empty;
-
-                string streamUrl = await _partyTymeService.GetStreamUrlAsync(trackId);
-
-                SelectedSongPath = streamUrl;
-                await _mediaEngine.LoadSong(streamUrl);
-                await _mediaEngine.Play();
-                IsPlaying = true;
-
-                NotifyAudioPropertiesChanged();
-                return;
-            }
-        }
 
         string localPath = string.Empty;
         if (singer.Source == "Local" && !string.IsNullOrWhiteSpace(singer.ExternalLink) && System.IO.File.Exists(singer.ExternalLink))
