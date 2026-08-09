@@ -1,4 +1,4 @@
-<!-- Edited on Aug 8, 2026 @ 19:32:15 -> Link SpecialEventConfig shared model -->
+<!-- Edited on Aug 9, 2026 @ 13:52:00 -> Condition PackageOutputPath on non-Android target frameworks to prevent Android SDK clean target errors -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -27,15 +27,15 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.9.161</AssemblyVersion>
+		<AssemblyVersion>26.8.9.162</AssemblyVersion>
 
-		<FileVersion>26.8.9.161</FileVersion>
+		<FileVersion>26.8.9.162</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
 		<PackageIcon>rotation_m.png</PackageIcon>
 
-		<PackageOutputPath>C:\VB26\Release\KSRotation.MAUI</PackageOutputPath>
+		<PackageOutputPath Condition="!$(TargetFramework.Contains('-android'))">C:\VB26\Release\KSRotation.MAUI</PackageOutputPath>
 
 		<NeutralLanguage>en-US</NeutralLanguage>
 

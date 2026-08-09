@@ -1,4 +1,4 @@
-// Edited on Aug 9, 2026 @ 10:14:00 -> Add EnsureStandardEventBanners method to generate standard event banner graphics if missing
+// Edited on Aug 9, 2026 @ 13:52:00 -> Update preprocessor guards to #if !MAUI for WPF drawing API calls
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,6 +21,7 @@ public static class DjBannerFileManager
             Directory.CreateDirectory(directory);
         }
 
+#if !MAUI
         string[] standardFiles = ["Birthday.png", "Wedding.png", "Engagement.png", "Anniversary.png"];
         for (int i = 0; i < standardFiles.Length; i++)
         {
@@ -38,8 +39,10 @@ public static class DjBannerFileManager
                 }
             }
         }
+#endif
     }
 
+#if !MAUI
     private static void CreateDefaultBannerPng(string filePath, string title)
     {
         int width = 800;
@@ -81,6 +84,7 @@ public static class DjBannerFileManager
         using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
         encoder.Save(fs);
     }
+#endif
 
     public static IReadOnlyList<DjBannerItem> ScanBanners(string directory)
     {
