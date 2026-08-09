@@ -1,6 +1,4 @@
-// Edited on Aug 1, 2026 @ 12:20:00 -> Add CaptureBitmap method for off-screen rendering/casting support
-// Edited on Jul 31, 2026 @ 12:35:55 -> Dynamically scale Vegas Marquee font sizes based on window resolution
-// Last Edit: Jul 20, 2026 06:50 - Bind off-tree visual source to XAML CrawlSourceCanvas in clipped Grid to fix Star Wars crawl text rendering
+// Edited on Aug 9, 2026 @ 09:28:00 -> Set _marqueeTimer to DispatcherPriority.Background to prevent UI input/cursor flickering
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -389,7 +387,7 @@ namespace KSRotation.Windows
             _marqueeStep = 0;
             ApplyMarqueePattern();
 
-            _marqueeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(110) };
+            _marqueeTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(110) };
             _marqueeTimer.Tick += (_, _) =>
             {
                 _marqueeStep++;

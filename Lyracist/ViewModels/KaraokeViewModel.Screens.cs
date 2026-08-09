@@ -1,4 +1,4 @@
-// Created on Aug 6, 2026 @ 07:01:27 -> Split multi-monitor screen assignment out of KaraokeViewModel.cs (God-object cleanup); pure code move, no behavior change
+// Edited on Aug 8, 2026 @ 16:43:00 -> Add active status properties to KaraokeViewModel.Screens
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,6 +10,45 @@ namespace Lyracist.ViewModels;
 
 public partial class KaraokeViewModel
 {
+    public bool IsLyricsActive
+    {
+        get => _displayService.IsLyricsActive;
+        set
+        {
+            if (_displayService.IsLyricsActive != value)
+            {
+                _displayService.IsLyricsActive = value;
+                OnPropertyChanged(nameof(IsLyricsActive));
+            }
+        }
+    }
+
+    public bool IsRotationActive
+    {
+        get => _displayService.IsRotationActive;
+        set
+        {
+            if (_displayService.IsRotationActive != value)
+            {
+                _displayService.IsRotationActive = value;
+                OnPropertyChanged(nameof(IsRotationActive));
+            }
+        }
+    }
+
+    public bool IsDjBannerActive
+    {
+        get => _displayService.IsDjBannerActive;
+        set
+        {
+            if (_displayService.IsDjBannerActive != value)
+            {
+                _displayService.IsDjBannerActive = value;
+                OnPropertyChanged(nameof(IsDjBannerActive));
+            }
+        }
+    }
+
     // Added properties for Multi-Monitor display lists
     public ObservableCollection<ScreenInfo> AvailableScreens { get; } = [];
 
@@ -109,6 +148,10 @@ public partial class KaraokeViewModel
                 OnPropertyChanged(nameof(SelectedDjBannerScreenIndex));
             }
 #pragma warning restore MVVMTK0034
+
+            OnPropertyChanged(nameof(IsLyricsActive));
+            OnPropertyChanged(nameof(IsRotationActive));
+            OnPropertyChanged(nameof(IsDjBannerActive));
         });
     }
 

@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 09:12:50 -> Add VocalRange and CustomTitle fields to singer profile endpoints
+// Edited on Aug 9, 2026 @ 13:31:00 -> Fix GET route dispatching for /api/special-events in PatronRequestServer
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,7 +23,9 @@ namespace KSRotation.Services
         Func<string> onGetRotationJson,
         Func<string, bool> onVerifyPin,
         Func<string> onGetRequestsJson,
-        Func<string, string, string, string, string, string, string> onHandleDjAction)
+        Func<string, string, string, string, string, string, string> onHandleDjAction,
+        Func<string> onGetSpecialEventsJson,
+        Func<string> onGetActiveSpecialEvent)
     {
         private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
         private const int MaxConcurrentConnections = 64;
@@ -38,6 +40,8 @@ namespace KSRotation.Services
         private readonly Func<string, bool> _onVerifyPin = onVerifyPin;
         private readonly Func<string> _onGetRequestsJson = onGetRequestsJson;
         private readonly Func<string, string, string, string, string, string, string> _onHandleDjAction = onHandleDjAction;
+        private readonly Func<string> _onGetSpecialEventsJson = onGetSpecialEventsJson;
+        private readonly Func<string> _onGetActiveSpecialEvent = onGetActiveSpecialEvent;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, PinAttemptState> _pinAttemptsByIp = new();
 
@@ -199,6 +203,29 @@ namespace KSRotation.Services
                             string json = _onGetRequestsJson();
                             await SendJsonResponseAsync(stream, json);
                         }
+                        else if (path.StartsWith("/api/special-events", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (!TryAuthorizeDj(clientIp, pin, out bool lockedOut))
+                            {
+                                if (lockedOut)
+                                {
+                                    await SendTooManyRequestsAsync(stream);
+                                }
+                                else
+                                {
+                                    await SendUnauthorizedAsync(stream);
+                                }
+                                return;
+                            }
+                            string json = _onGetSpecialEventsJson();
+                            await SendJsonResponseAsync(stream, json);
+                        }
+                        else if (path.StartsWith("/api/special-event/active", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string activeEvent = _onGetActiveSpecialEvent();
+                            string json = JsonSerializer.Serialize(new { activeSpecialEvent = activeEvent });
+                            await SendJsonResponseAsync(stream, json);
+                        }
                         else if (path.StartsWith("/api/singer/avatar", StringComparison.OrdinalIgnoreCase))
                         {
                             string queryName = "";
@@ -298,6 +325,7 @@ namespace KSRotation.Services
                             await SendBadRequestAsync(stream, "{\"error\":\"Name and at least one Song title are required.\"}");
                         }
                     }
+
                     else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/dj/action", StringComparison.OrdinalIgnoreCase))
                     {
                         if (!TryAuthorizeDj(clientIp, pin, out bool lockedOut))

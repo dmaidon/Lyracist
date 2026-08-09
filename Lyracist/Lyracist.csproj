@@ -1,8 +1,4 @@
-<!-- Edited on Aug 6, 2026 @ 07:01:27 -> Bump AssemblyVersion and FileVersion to 26.8.6.345 -->
-<!-- Edited on Aug 2, 2026 @ 10:16:00 -> Bump AssemblyVersion and FileVersion to 26.8.2.313 -->
-<!-- Edited on Aug 1, 2026 @ 14:58:00 -> Link shared BrowserCastDiscoveryService in compile group -->
-<!-- Edited on Aug 1, 2026 @ 13:46:00 -> Link shared ChromecastSender in compile group -->
-<!-- Edited on Aug 1, 2026 @ 13:12:00 -> Link ChromecastDiscoveryService in compile group -->
+<!-- Edited on Aug 8, 2026 @ 19:15:32 -> Add SpecialEventConfig link and EventBanners build copy item -->
 <!-- Consolidated icons to Assets/ folder and resolved Downloads folder reference -->
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -16,8 +12,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.8.7.351</AssemblyVersion>
-    <FileVersion>26.8.7.351</FileVersion>
+    <AssemblyVersion>26.8.9.361</AssemblyVersion>
+    <FileVersion>26.8.9.361</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -104,6 +100,7 @@
     <Compile Include="..\Shared\CastingService.cs" Link="CastingService.cs" />
     <Compile Include="..\Shared\MonitorDpiHelper.cs" Link="MonitorDpiHelper.cs" />
     <Compile Include="..\Shared\DjBannerItem.cs" Link="DjBannerItem.cs" />
+    <Compile Include="..\Shared\SpecialEventConfig.cs" Link="SpecialEventConfig.cs" />
     <Compile Include="..\Shared\DjBannerFileManager.cs" Link="DjBannerFileManager.cs" />
     <Compile Include="..\Shared\WindowPositioner.cs" Link="WindowPositioner.cs" />
     <Compile Include="..\Shared\MonitorInfo.cs" Link="MonitorInfo.cs" />
@@ -115,6 +112,12 @@
     <None Update="TabletClient\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\EventBanners\*" Link="EventBanners\%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

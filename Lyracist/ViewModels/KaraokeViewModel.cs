@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 08:42:30 -> Remove remaining PartyTyme references
+// Edited on Aug 8, 2026 @ 19:23:45 -> Call InitializeSpecialEvents in constructor
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -80,6 +80,9 @@ public partial class KaraokeViewModel : BaseViewModel
     private ObservableCollection<KaraokeSong> _filteredSongs = [];
 
     [ObservableProperty]
+    private ObservableCollection<KaraokeSong> _filteredMusic = [];
+
+    [ObservableProperty]
     private bool _isPreviewExpanded;
 
     // Added properties for Singer Assignment & Rotation binding
@@ -98,6 +101,34 @@ public partial class KaraokeViewModel : BaseViewModel
     partial void OnThemeModeChanged(string value)
     {
         AppSettings.ThemeMode = value;
+    }
+
+    public List<int> MusicDelayOptions { get; } = [0, 1, 2, 3, 4, 5, 10, 15, 20, 30];
+
+    public bool AutoPlayRotationMusic
+    {
+        get => AppSettings.AutoPlayRotationMusic;
+        set
+        {
+            if (AppSettings.AutoPlayRotationMusic != value)
+            {
+                AppSettings.AutoPlayRotationMusic = value;
+                OnPropertyChanged(nameof(AutoPlayRotationMusic));
+            }
+        }
+    }
+
+    public int RotationMusicDelaySeconds
+    {
+        get => AppSettings.RotationMusicDelaySeconds;
+        set
+        {
+            if (AppSettings.RotationMusicDelaySeconds != value)
+            {
+                AppSettings.RotationMusicDelaySeconds = value;
+                OnPropertyChanged(nameof(RotationMusicDelaySeconds));
+            }
+        }
     }
 
     partial void OnSelectedSongChanged(KaraokeSong? value)
@@ -491,6 +522,7 @@ public partial class KaraokeViewModel : BaseViewModel
         _displayService.ScreenAssignmentsChanged += OnScreenAssignmentsChanged;
 
         RefreshDjBanners();
+        InitializeSpecialEvents();
 
         RefreshFilteredList();
         UpdateNowNext();
@@ -530,9 +562,8 @@ public partial class KaraokeViewModel : BaseViewModel
 
         try
         {
-            var results = (await _libraryService.SearchAsync(query))
-                .Where(s => s.IsKaraoke)
-                .ToList();
+            var results = (await _libraryService.SearchAsync(query, isMusic: false)).ToList();
+            var musicResults = (await _libraryService.SearchAsync(query, isMusic: true)).ToList();
 
             // Discard results if a newer search has since been issued.
             if (myToken != _searchRequestToken) return;
@@ -541,6 +572,12 @@ public partial class KaraokeViewModel : BaseViewModel
             foreach (var song in results)
             {
                 FilteredSongs.Add(song);
+            }
+
+            FilteredMusic.Clear();
+            foreach (var song in musicResults)
+            {
+                FilteredMusic.Add(song);
             }
         }
         catch { }
@@ -654,6 +691,60 @@ public partial class KaraokeViewModel : BaseViewModel
             _mediaEngine.ActiveDuetPartnerName = partnerName;
             NotifyAudioPropertiesChanged();
         }
+
+        CheckAutoPlayMusicTrack(current);
+    }
+
+    private System.Threading.CancellationTokenSource? _musicAutoPlayCts;
+
+    private void CheckAutoPlayMusicTrack(Singer? current)
+    {
+        _musicAutoPlayCts?.Cancel();
+        _musicAutoPlayCts = null;
+
+        if (current == null || !current.IsMusic || !AutoPlayRotationMusic)
+        {
+            return;
+        }
+
+        // Only auto-play if this music track is not already the loaded/playing track
+        // to prevent infinite load loops when properties update.
+        if (SelectedSongPath == current.ExternalLink && IsPlaying)
+        {
+            return;
+        }
+
+        _musicAutoPlayCts = new System.Threading.CancellationTokenSource();
+        var token = _musicAutoPlayCts.Token;
+        int delaySeconds = RotationMusicDelaySeconds;
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                if (delaySeconds > 0)
+                {
+                    await Task.Delay(delaySeconds * 1000, token);
+                }
+
+                if (token.IsCancellationRequested) return;
+
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    if (token.IsCancellationRequested) return;
+                    var activeCurrent = Rotation.Rotation.FirstOrDefault(s => s.IsCurrent);
+                    if (activeCurrent != null && activeCurrent.IsMusic && activeCurrent.Name == current.Name && activeCurrent.SongTitle == current.SongTitle)
+                    {
+                        await PlayPerformerRequest(activeCurrent);
+                    }
+                });
+            }
+            catch (TaskCanceledException) { }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "CheckAutoPlayMusicTrack: failed to auto-play rotation music");
+            }
+        }, token);
     }
 
     private void NotifyAudioPropertiesChanged()
@@ -792,20 +883,29 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         if (song == null) return;
 
-        string targetSingerName = NewSingerName?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(targetSingerName))
+        if (!song.IsKaraoke)
         {
-            if (Rotation.SelectedSinger != null)
-            {
-                targetSingerName = Rotation.SelectedSinger.Name;
-            }
-            else
-            {
-                targetSingerName = "Singer";
-            }
+            // Background music tracks are not queued for anyone.
+            // Add them as a "Music Request" track directly.
+            Rotation.AddSinger("Music Request", song.Title, song.Artist, "0", string.Empty, "Local", song.AudioPath, string.Empty, isMusic: true);
         }
+        else
+        {
+            string targetSingerName = NewSingerName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(targetSingerName))
+            {
+                if (Rotation.SelectedSinger != null)
+                {
+                    targetSingerName = Rotation.SelectedSinger.Name;
+                }
+                else
+                {
+                    targetSingerName = "Singer";
+                }
+            }
 
-        Rotation.AddSinger(targetSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local", song.AudioPath, NewDuetPartnerName);
+            Rotation.AddSinger(targetSingerName, song.Title, song.Artist, NewSingerKey, NewSingerNotes, "Local", song.AudioPath, NewDuetPartnerName, isMusic: false);
+        }
 
         // Reset inputs
         NewSingerName = string.Empty;

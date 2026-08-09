@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 09:03:45 -> Add AvatarsDir global setting
+// Edited on Aug 8, 2026 @ 19:12:10 -> Add EventBannersDir global setting
 using System;
 using System.IO;
 
@@ -48,6 +48,9 @@ namespace Lyracist.Shared
         // Lyracist read banners from and save uploaded banners into, so a banner dropped in by
         // hand is picked up by both apps and a banner uploaded from either app is visible to the other.
         public static string DjBannersDir => Path.Combine(StartupPath, "DJBanners");
+
+        // 7b. Special Event Banners directory (in Startup Path)
+        public static string EventBannersDir => Path.Combine(StartupPath, "EventBanners");
 
         // 8. Avatars directory (in Startup Path) - a folder for uploaded performer profile selfies.
         public static string AvatarsDir => Path.Combine(StartupPath, "Avatars");

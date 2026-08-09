@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 08:39:45 -> Remove PartyTyme configurations
+// Edited on Aug 8, 2026 @ 19:16:45 -> Add SpecialEvents mapping properties to AppSettings
 using System.IO;
 using System.Text.Json;
 
@@ -720,6 +720,24 @@ public static class AppSettings
         set { _data.IsHardwareMixerMode = value; Save(); }
     }
 
+    public static bool AutoPlayRotationMusic
+    {
+        get => _data.AutoPlayRotationMusic;
+        set { _data.AutoPlayRotationMusic = value; Save(); }
+    }
+
+    public static int RotationMusicDelaySeconds
+    {
+        get => _data.RotationMusicDelaySeconds;
+        set { _data.RotationMusicDelaySeconds = value; Save(); }
+    }
+
+    public static List<Lyracist.Shared.SpecialEventConfig> SpecialEvents
+    {
+        get => _data.SpecialEvents;
+        set { _data.SpecialEvents = value; Save(); }
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
@@ -820,5 +838,14 @@ public static class AppSettings
         public string SelectedKaraokeAudioDevice { get; set; } = string.Empty;
         public string SelectedBgmAudioDevice { get; set; } = string.Empty;
         public bool IsHardwareMixerMode { get; set; } = false;
+        public bool AutoPlayRotationMusic { get; set; } = true;
+        public int RotationMusicDelaySeconds { get; set; } = 0;
+        public List<Lyracist.Shared.SpecialEventConfig> SpecialEvents { get; set; } =
+        [
+            new() { EventName = "Birthday", BannerFileName = "Birthday.png" },
+            new() { EventName = "Wedding", BannerFileName = "Wedding.png" },
+            new() { EventName = "Engagement", BannerFileName = "Engagement.png" },
+            new() { EventName = "Anniversary", BannerFileName = "Anniversary.png" }
+        ];
     }
 }

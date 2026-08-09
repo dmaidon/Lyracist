@@ -1,4 +1,4 @@
-// Edited on Jul 19, 2026 @ 09:50:00 -> Add drive connection status indicator
+// Edited on Aug 8, 2026 @ 16:45:00 -> Update display projection buttons and active sync in MainWindow.xaml.cs
 using System;
 using System.Windows;
 using System.Windows.Media;

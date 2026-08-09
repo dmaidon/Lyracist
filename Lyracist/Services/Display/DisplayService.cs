@@ -1,5 +1,4 @@
-// Edited on Aug 1, 2026 @ 16:11:00 -> Import Lyracist.Shared in DisplayService
-// Edited on Aug 1, 2026 @ 16:10:00 -> Update MoveRotationTo to discover Chromecast device when targeting Chromecast
+// Edited on Aug 8, 2026 @ 19:19:15 -> Add UpdateSpecialEvent and ResolveActiveBannerPath helper to DisplayService
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
@@ -12,7 +11,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lyracist.Shared;
 
-// Edited on Aug 1, 2026 @ 12:11:00 -> Add Casting support integration to DisplayService
 namespace Lyracist.Services.Display;
 
 public class DisplayService : IDisplayService
@@ -25,7 +23,6 @@ public class DisplayService : IDisplayService
     private DjBannerWindow? _djBannerWindow;
     private readonly DisplayPreferences _preferences;
     private bool _rotationHadSingers;
-    private int? _autoDisabledDjBannerScreenIndex;
 
 
     public event Action? RotationCompleted;
@@ -68,67 +65,75 @@ public class DisplayService : IDisplayService
         return list;
     }
 
-    public void ShowRotationWindow()
+    public bool IsLyricsActive
     {
-        if (_preferences.RotationTarget != DisplayTarget.Monitor && _preferences.RotationTarget != DisplayTarget.WirelessHDMI)
+        get => _preferences.IsLyricsActive;
+        set
         {
-            return;
-        }
-        if (!_preferences.RotationScreenIndex.HasValue)
-        {
-            return;
-        }
-        bool isNewWindow = _rotationWindow == null || !_rotationWindow.IsLoaded;
-        if (isNewWindow)
-        {
-            _rotationWindow = _serviceProvider.GetRequiredService<RotationWindow>();
-        }
-        _rotationWindow!.Show();
-
-        var vm = _serviceProvider.GetService<RotationWindowViewModel>();
-        if (vm != null)
-        {
-            vm.SelectedProjectionView = _preferences.RotationViewMode ?? "Normal List";
-            vm.CrawlBannerText = Core.Helpers.AppSettings.GetActiveCrawlBannerTemplate();
-        }
-
-        if (isNewWindow)
-        {
-            MoveWindowToScreen(_rotationWindow, _preferences.RotationScreenIndex.Value);
+            if (_preferences.IsLyricsActive != value)
+            {
+                _preferences.IsLyricsActive = value;
+                DisplayPreferencesStore.Save(_preferences);
+                UpdateWindowVisibilities();
+                ScreenAssignmentsChanged?.Invoke();
+            }
         }
     }
 
-    public void HideRotationWindow()
+    public bool IsRotationActive
     {
-        if (_rotationWindow != null && _rotationWindow.IsLoaded)
+        get => _preferences.IsRotationActive;
+        set
         {
-            _rotationWindow.Hide();
+            if (_preferences.IsRotationActive != value)
+            {
+                _preferences.IsRotationActive = value;
+                DisplayPreferencesStore.Save(_preferences);
+                UpdateWindowVisibilities();
+                ScreenAssignmentsChanged?.Invoke();
+            }
         }
     }
 
-    public void ShowLyricsWindow()
+    public bool IsDjBannerActive
     {
-        if (!_preferences.LyricsScreenIndex.HasValue)
+        get => _preferences.IsDjBannerActive;
+        set
         {
-            return;
+            if (_preferences.IsDjBannerActive != value)
+            {
+                _preferences.IsDjBannerActive = value;
+                DisplayPreferencesStore.Save(_preferences);
+                UpdateWindowVisibilities();
+                ScreenAssignmentsChanged?.Invoke();
+            }
         }
+    }
+
+    public void ShowLyricsWindow() => IsLyricsActive = true;
+    public void ShowRotationWindow() => IsRotationActive = true;
+    public void ShowDjBannerWindow() => IsDjBannerActive = true;
+    public void HideDjBannerWindow() => IsDjBannerActive = false;
+
+    public void HideLyricsWindow() => IsLyricsActive = false;
+    public void HideRotationWindow() => IsRotationActive = false;
+
+    private void ShowLyricsWindowInternal()
+    {
         bool isNewWindow = _lyricsWindow == null || !_lyricsWindow.IsLoaded;
         if (isNewWindow)
         {
             _lyricsWindow = _serviceProvider.GetRequiredService<LyricsWindow>();
+            var vm = _serviceProvider.GetService<LyricsWindowViewModel>();
+            if (vm != null)
+            {
+                vm.IsMirrored = _preferences.IsLyricsMirrored;
+            }
         }
         _lyricsWindow!.Show();
-
-        if (isNewWindow)
-        {
-            var vm = _serviceProvider.GetService<LyricsWindowViewModel>();
-            vm?.IsMirrored = _preferences.IsLyricsMirrored;
-
-            MoveWindowToScreen(_lyricsWindow, _preferences.LyricsScreenIndex.Value);
-        }
     }
 
-    public void HideLyricsWindow()
+    private void HideLyricsWindowInternal()
     {
         if (_lyricsWindow != null && _lyricsWindow.IsLoaded)
         {
@@ -136,54 +141,89 @@ public class DisplayService : IDisplayService
         }
     }
 
-    public void MoveRotationToScreen(int? screenIndex)
+    private void ShowRotationWindowInternal()
     {
-        if (screenIndex.HasValue && screenIndex.Value >= 0)
+        bool isNewWindow = _rotationWindow == null || !_rotationWindow.IsLoaded;
+        if (isNewWindow)
         {
-            _preferences.RotationScreenIndex = screenIndex;
-            ShowRotationWindow();
-            MoveWindowToScreen(_rotationWindow!, screenIndex.Value);
-
-            if (_preferences.DjBannerScreenIndex == screenIndex)
+            _rotationWindow = _serviceProvider.GetRequiredService<RotationWindow>();
+            var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+            if (vm != null)
             {
-                _autoDisabledDjBannerScreenIndex = screenIndex;
-                _preferences.DjBannerScreenIndex = null;
-                HideDjBannerWindow();
+                vm.SelectedProjectionView = _preferences.RotationViewMode ?? "Normal List";
+                vm.CrawlBannerText = Core.Helpers.AppSettings.GetActiveCrawlBannerTemplate();
             }
         }
-        else
-        {
-            _preferences.RotationScreenIndex = null;
-            HideRotationWindow();
-        }
+        _rotationWindow!.Show();
+    }
 
-        // Restore DJ Banner if conflict is resolved
-        if (_autoDisabledDjBannerScreenIndex.HasValue && _preferences.RotationScreenIndex != _autoDisabledDjBannerScreenIndex)
+    private void HideRotationWindowInternal()
+    {
+        if (_rotationWindow != null && _rotationWindow.IsLoaded)
         {
-            int restoreIndex = _autoDisabledDjBannerScreenIndex.Value;
-            _autoDisabledDjBannerScreenIndex = null;
-            MoveDjBannerToScreen(restoreIndex);
+            _rotationWindow.Hide();
         }
+    }
 
+    private void ShowDjBannerWindowInternal()
+    {
+        bool isNewWindow = _djBannerWindow == null || !_djBannerWindow.IsLoaded;
+        if (isNewWindow)
+        {
+            _djBannerWindow = _serviceProvider.GetRequiredService<DjBannerWindow>();
+        }
+        _djBannerWindow!.Show();
+        UpdateDjBanner(_preferences.SelectedDjBannerPath);
+    }
+
+    private void HideDjBannerWindowInternal()
+    {
+        if (_djBannerWindow != null && _djBannerWindow.IsLoaded)
+        {
+            _djBannerWindow.Hide();
+        }
+    }
+
+    public void MoveRotationToScreen(int? screenIndex)
+    {
+        _preferences.RotationScreenIndex = screenIndex;
         DisplayPreferencesStore.Save(_preferences);
+        UpdateWindowVisibilities();
         ScreenAssignmentsChanged?.Invoke();
     }
 
     public void MoveLyricsToScreen(int? screenIndex)
     {
-        if (screenIndex.HasValue && screenIndex.Value >= 0)
-        {
-            _preferences.LyricsScreenIndex = screenIndex;
-            ShowLyricsWindow();
-            MoveWindowToScreen(_lyricsWindow!, screenIndex.Value);
-        }
-        else
-        {
-            _preferences.LyricsScreenIndex = null;
-            HideLyricsWindow();
-        }
+        _preferences.LyricsScreenIndex = screenIndex;
         DisplayPreferencesStore.Save(_preferences);
+        UpdateWindowVisibilities();
         ScreenAssignmentsChanged?.Invoke();
+    }
+
+    public void MoveDjBannerToScreen(int? screenIndex)
+    {
+        _preferences.DjBannerScreenIndex = screenIndex;
+        DisplayPreferencesStore.Save(_preferences);
+        UpdateWindowVisibilities();
+        ScreenAssignmentsChanged?.Invoke();
+    }
+
+    private string ResolveActiveBannerPath()
+    {
+        if (!string.IsNullOrEmpty(_preferences.SelectedSpecialEvent) && 
+            !_preferences.SelectedSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase))
+        {
+            var eventConfig = Lyracist.Core.Helpers.AppSettings.SpecialEvents.FirstOrDefault(e => e.EventName.Equals(_preferences.SelectedSpecialEvent, StringComparison.OrdinalIgnoreCase));
+            if (eventConfig != null)
+            {
+                string fullPath = System.IO.Path.Combine(Globals.EventBannersDir, eventConfig.BannerFileName);
+                if (System.IO.File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
+        }
+        return _preferences.SelectedDjBannerPath;
     }
 
     public void RestoreAssignments()
@@ -193,106 +233,14 @@ public class DisplayService : IDisplayService
         {
             Task.Run(async () => await MoveRotationTo(target));
         }
-        else
-        {
-            if (_preferences.RotationScreenIndex.HasValue)
-            {
-                MoveRotationToScreen(_preferences.RotationScreenIndex.Value);
-            }
-            else
-            {
-                HideRotationWindow();
-            }
-        }
-
-        if (_preferences.LyricsScreenIndex.HasValue)
-        {
-            MoveLyricsToScreen(_preferences.LyricsScreenIndex.Value);
-        }
-        else
-        {
-            HideLyricsWindow();
-        }
-
-        if (_preferences.DjBannerScreenIndex.HasValue)
-        {
-            if (_preferences.RotationScreenIndex == _preferences.DjBannerScreenIndex)
-            {
-                _autoDisabledDjBannerScreenIndex = _preferences.DjBannerScreenIndex;
-                _preferences.DjBannerScreenIndex = null;
-                HideDjBannerWindow();
-                DisplayPreferencesStore.Save(_preferences);
-            }
-            else
-            {
-                _autoDisabledDjBannerScreenIndex = null;
-                MoveDjBannerToScreen(_preferences.DjBannerScreenIndex.Value);
-            }
-        }
-        else
-        {
-            _autoDisabledDjBannerScreenIndex = null;
-            HideDjBannerWindow();
-        }
 
         SetLyricsMirror(_preferences.IsLyricsMirrored);
-        ScreenAssignmentsChanged?.Invoke();
-    }
 
-    public void ShowDjBannerWindow()
-    {
-        if (!_preferences.DjBannerScreenIndex.HasValue)
-        {
-            return;
-        }
-        bool isNewWindow = _djBannerWindow == null || !_djBannerWindow.IsLoaded;
-        if (isNewWindow)
-        {
-            _djBannerWindow = _serviceProvider.GetRequiredService<DjBannerWindow>();
-        }
-        _djBannerWindow!.Show();
+        string activePath = ResolveActiveBannerPath();
+        var vm = _serviceProvider.GetService<DjBannerWindowViewModel>();
+        vm?.UpdateBanner(activePath);
 
-        if (isNewWindow)
-        {
-            MoveWindowToScreen(_djBannerWindow, _preferences.DjBannerScreenIndex.Value);
-        }
-
-        UpdateDjBanner(_preferences.SelectedDjBannerPath);
-    }
-
-    public void HideDjBannerWindow()
-    {
-        if (_djBannerWindow != null && _djBannerWindow.IsLoaded)
-        {
-            _djBannerWindow.Hide();
-        }
-    }
-
-    public void MoveDjBannerToScreen(int? screenIndex)
-    {
-        if (screenIndex.HasValue && screenIndex.Value >= 0)
-        {
-            if (_preferences.RotationScreenIndex == screenIndex)
-            {
-                _autoDisabledDjBannerScreenIndex = screenIndex;
-                _preferences.DjBannerScreenIndex = null;
-                HideDjBannerWindow();
-            }
-            else
-            {
-                _autoDisabledDjBannerScreenIndex = null;
-                _preferences.DjBannerScreenIndex = screenIndex;
-                ShowDjBannerWindow();
-                MoveWindowToScreen(_djBannerWindow!, screenIndex.Value);
-            }
-        }
-        else
-        {
-            _autoDisabledDjBannerScreenIndex = null;
-            _preferences.DjBannerScreenIndex = null;
-            HideDjBannerWindow();
-        }
-        DisplayPreferencesStore.Save(_preferences);
+        UpdateWindowVisibilities();
         ScreenAssignmentsChanged?.Invoke();
     }
 
@@ -302,10 +250,116 @@ public class DisplayService : IDisplayService
         DisplayPreferencesStore.Save(_preferences);
 
         var vm = _serviceProvider.GetService<DjBannerWindowViewModel>();
-        vm?.UpdateBanner(path);
+        vm?.UpdateBanner(ResolveActiveBannerPath());
+    }
+
+    public void UpdateSpecialEvent(string eventName)
+    {
+        _preferences.SelectedSpecialEvent = eventName;
+        DisplayPreferencesStore.Save(_preferences);
+
+        var vm = _serviceProvider.GetService<DjBannerWindowViewModel>();
+        vm?.UpdateBanner(ResolveActiveBannerPath());
+        ScreenAssignmentsChanged?.Invoke();
     }
 
     public DisplayPreferences GetPreferences() => _preferences;
+
+    public void UpdateWindowVisibilities()
+    {
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher == null) return;
+
+        if (!dispatcher.CheckAccess())
+        {
+            dispatcher.Invoke(UpdateWindowVisibilities);
+            return;
+        }
+
+        int? lyricsScreen = _preferences.LyricsScreenIndex;
+        int? rotationScreen = _preferences.RotationScreenIndex;
+        int? djBannerScreen = _preferences.DjBannerScreenIndex;
+
+        bool lyricsActive = _preferences.IsLyricsActive;
+        bool rotationActive = _preferences.IsRotationActive;
+        bool djBannerActive = _preferences.IsDjBannerActive;
+
+        // Lyrics projection: priority 1
+        bool showLyrics = lyricsActive && lyricsScreen.HasValue && lyricsScreen.Value >= 0;
+
+        // Rotation queue: priority 2
+        bool showRotation = rotationActive;
+        bool isLocalRotation = _preferences.RotationTarget == DisplayTarget.Monitor || _preferences.RotationTarget == DisplayTarget.WirelessHDMI;
+
+        if (showRotation)
+        {
+            if (isLocalRotation)
+            {
+                if (!rotationScreen.HasValue || rotationScreen.Value < 0)
+                {
+                    showRotation = false;
+                }
+                else if (showLyrics && lyricsScreen == rotationScreen)
+                {
+                    showRotation = false;
+                }
+            }
+        }
+
+        // DJ Banner: priority 3
+        bool showDjBanner = djBannerActive && djBannerScreen.HasValue && djBannerScreen.Value >= 0;
+        if (showDjBanner)
+        {
+            if (showLyrics && lyricsScreen == djBannerScreen)
+            {
+                showDjBanner = false;
+            }
+            else if (showRotation && isLocalRotation && rotationScreen == djBannerScreen)
+            {
+                showDjBanner = false;
+            }
+        }
+
+        // Apply Lyrics Display
+        if (showLyrics)
+        {
+            ShowLyricsWindowInternal();
+            MoveWindowToScreen(_lyricsWindow!, lyricsScreen!.Value);
+        }
+        else
+        {
+            HideLyricsWindowInternal();
+        }
+
+        // Apply Rotation Display
+        if (showRotation)
+        {
+            if (isLocalRotation)
+            {
+                ShowRotationWindowInternal();
+                MoveWindowToScreen(_rotationWindow!, rotationScreen!.Value);
+            }
+            else
+            {
+                EnsureRotationWindowOffScreen();
+            }
+        }
+        else
+        {
+            HideRotationWindowInternal();
+        }
+
+        // Apply DJ Banner Display
+        if (showDjBanner)
+        {
+            ShowDjBannerWindowInternal();
+            MoveWindowToScreen(_djBannerWindow!, djBannerScreen!.Value);
+        }
+        else
+        {
+            HideDjBannerWindowInternal();
+        }
+    }
 
     public void FullscreenRotation()
     {

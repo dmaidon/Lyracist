@@ -1,7 +1,4 @@
-// Edited on Aug 6, 2026 @ 09:12:55 -> Populate vocalRange and customTitle properties in RotationItemDto
-// Edited on Aug 4, 2026 @ 10:24:00 -> Add AcceptAllPendingRequests method to auto-accept pending requests when checked
-// Edited on Jul 28, 2026 @ 18:40:00 -> Add support for processing patron music requests and mapping isMusic
-// Last Edit: Jul 28, 2026 12:44 - Serialize isPaused and implement paused/deleted/restore API actions
+// Edited on Aug 9, 2026 @ 13:42:00 -> Update DJ QR Code color to dark maroon [128, 0, 32] for optical contrast
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -177,7 +174,9 @@ namespace KSRotation.ViewModels
                         GetRotationJson,
                         VerifyDjPin,
                         GetRequestsJson,
-                        HandleDjAction);
+                        HandleDjAction,
+                        GetSpecialEventsJson,
+                        () => ActiveSpecialEvent);
                     _requestServer.Start();
                     activePort = p;
                     started = true;
@@ -211,7 +210,7 @@ namespace KSRotation.ViewModels
             _activeServerPort = activePort;
  
             QrCodeImage = started ? GenerateQRCode(ConnectionUrl) : null;
-            DjQrCodeImage = started ? GenerateQRCode(DjConnectionUrl, [239, 68, 68], [255, 255, 255]) : null;
+            DjQrCodeImage = started ? GenerateQRCode(DjConnectionUrl, [128, 0, 32], [255, 255, 255]) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
         }
 
@@ -226,7 +225,7 @@ namespace KSRotation.ViewModels
             ConnectionUrl = $"http://{host}:{_activeServerPort}";
             DjConnectionUrl = $"http://{host}:{_activeServerPort}/dj.html";
             QrCodeImage = GenerateQRCode(ConnectionUrl);
-            DjQrCodeImage = GenerateQRCode(DjConnectionUrl, [239, 68, 68], [255, 255, 255]);
+            DjQrCodeImage = GenerateQRCode(DjConnectionUrl, [128, 0, 32], [255, 255, 255]);
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
         }
 
@@ -666,9 +665,24 @@ namespace KSRotation.ViewModels
                         }
                         return "Invalid round index.";
                     }
+                case "set-special-event":
+                    {
+                        ActiveSpecialEvent = targetId;
+                        return "";
+                    }
                 default:
                     return $"Unsupported action: '{action}'";
             }
+        }
+
+        private string GetSpecialEventsJson()
+        {
+            var data = new
+            {
+                activeSpecialEvent = ActiveSpecialEvent,
+                specialEvents = SpecialEvents.Select(e => e.EventName).ToList()
+            };
+            return JsonSerializer.Serialize(data);
         }
 
         private void AcceptAllPendingRequests()

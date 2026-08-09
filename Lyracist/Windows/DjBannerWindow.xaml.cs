@@ -1,8 +1,9 @@
-// Edited on Aug 2, 2026 @ 10:07:00 -> Implement UpdateBannerView to loop video or display image based on file extension
+// Edited on Aug 8, 2026 @ 16:45:00 -> Update close/hide/escape events to toggle active status in DisplayService
 using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using Lyracist.Services.Display;
 using Lyracist.ViewModels;
 
 namespace Lyracist.Windows;
@@ -70,7 +71,17 @@ public partial class DjBannerWindow : Window
         switch (e.Key)
         {
             case Key.Escape:
-                Hide();
+                {
+                    var displayService = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
+                    if (displayService != null)
+                    {
+                        displayService.IsDjBannerActive = false;
+                    }
+                    else
+                    {
+                        Hide();
+                    }
+                }
                 e.Handled = true;
                 break;
             case Key.F11:
@@ -85,7 +96,15 @@ public partial class DjBannerWindow : Window
     protected override void OnClosing(CancelEventArgs e)
     {
         e.Cancel = true;
-        Hide();
+        var displayService = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
+        if (displayService != null)
+        {
+            displayService.IsDjBannerActive = false;
+        }
+        else
+        {
+            Hide();
+        }
         base.OnClosing(e);
     }
 

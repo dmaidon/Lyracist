@@ -1,7 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Fix stress-test simulation reading Rotation/InactiveSingers off the UI thread (crash risk)
-// Edited on Aug 2, 2026 @ 10:10:00 -> Add mp4 support to DJ Banner scanning and file dialog filter
-// Edited on Aug 1, 2026 @ 13:16:00 -> Add Chromecast discovery VM properties and discovery command logic
-// Edited on Aug 1, 2026 @ 12:14:00 -> Add Casting support properties to SettingsViewModel
+// Edited on Aug 8, 2026 @ 19:21:40 -> Initialize Special Events and Event Banners collections on load
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -167,6 +164,8 @@ public partial class SettingsViewModel : BaseViewModel
             System.Windows.Application.Current.Dispatcher.Invoke(RefreshLibraryStatus);
         };
 
+        _display.ScreenAssignmentsChanged += OnScreenAssignmentsChanged;
+
         // Apply persisted channel settings to the show flow service on load
         _showFlow.SetOpeningVolume(OpeningVolume);
         _showFlow.SetFillInVolume(FillInVolume);
@@ -253,6 +252,8 @@ public partial class SettingsViewModel : BaseViewModel
         RefreshVenues();
         RefreshAvailableRatingIcons();
         RefreshDjBanners();
+        RefreshSpecialEventsList();
+        RefreshAvailableEventBannerFiles();
 
         AppSettings.ThemeModeChanged += theme =>
         {

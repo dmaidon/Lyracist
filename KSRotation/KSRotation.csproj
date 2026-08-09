@@ -1,8 +1,4 @@
-<!-- Edited on Aug 6, 2026 @ 09:04:10 -> Add ProjectReference to Lyracist.Data -->
-<!-- Edited on Aug 1, 2026 @ 14:59:00 -> Link shared BrowserCastDiscoveryService in compile group -->
-<!-- Edited on Aug 1, 2026 @ 13:47:00 -> Link shared ChromecastSender in compile group -->
-<!-- Edited on Aug 1, 2026 @ 13:13:00 -> Link ChromecastDiscoveryService in compile group -->
-<!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
+<!-- Edited on Aug 8, 2026 @ 19:26:40 -> Add SpecialEventConfig link and EventBanners build copy item -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -14,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.7.401</AssemblyVersion>
-    <FileVersion>26.8.7.401</FileVersion>
+    <AssemblyVersion>26.8.9.414</AssemblyVersion>
+    <FileVersion>26.8.9.414</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -124,6 +120,7 @@
     <Compile Include="..\Shared\CastingService.cs" Link="CastingService.cs" />
     <Compile Include="..\Shared\MonitorDpiHelper.cs" Link="MonitorDpiHelper.cs" />
     <Compile Include="..\Shared\DjBannerItem.cs" Link="DjBannerItem.cs" />
+    <Compile Include="..\Shared\SpecialEventConfig.cs" Link="SpecialEventConfig.cs" />
     <Compile Include="..\Shared\DjBannerFileManager.cs" Link="DjBannerFileManager.cs" />
     <Compile Include="..\Shared\WindowPositioner.cs" Link="WindowPositioner.cs" />
     <Compile Include="..\Shared\MonitorInfo.cs" Link="MonitorInfo.cs" />
@@ -132,5 +129,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lyracist.Data\Lyracist.Data.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\EventBanners\*" Link="EventBanners\%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

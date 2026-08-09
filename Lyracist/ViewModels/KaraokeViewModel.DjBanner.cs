@@ -1,4 +1,4 @@
-// Created on Aug 6, 2026 @ 07:01:27 -> Split DJ Banner management out of KaraokeViewModel.cs (God-object cleanup); pure code move, no behavior change
+// Edited on Aug 9, 2026 @ 09:15:00 -> Add UpdateActiveSpecialEventFromSync helper method to synchronize active special event from KSRotation
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -95,5 +95,81 @@ public partial class KaraokeViewModel
     private void ShowDjBanner()
     {
         _displayService.ShowDjBannerWindow();
+    }
+
+    [ObservableProperty]
+    private string _activeSpecialEvent = "None";
+
+    public ObservableCollection<SpecialEventOptionViewModel> SpecialEventOptions { get; } = [];
+
+    public void InitializeSpecialEvents()
+    {
+        var prefs = _displayService.GetPreferences();
+        ActiveSpecialEvent = string.IsNullOrEmpty(prefs.SelectedSpecialEvent) ? "None" : prefs.SelectedSpecialEvent;
+        RebuildSpecialEventOptions();
+    }
+
+    public void RebuildSpecialEventOptions()
+    {
+        SpecialEventOptions.Clear();
+        SpecialEventOptions.Add(new SpecialEventOptionViewModel("None", "None", ActiveSpecialEvent == "None", OnSpecialEventChanged));
+        foreach (var ev in Lyracist.Core.Helpers.AppSettings.SpecialEvents)
+        {
+            SpecialEventOptions.Add(new SpecialEventOptionViewModel(ev.EventName, ev.EventName, ActiveSpecialEvent == ev.EventName, OnSpecialEventChanged));
+        }
+    }
+
+    private void OnSpecialEventChanged(string value)
+    {
+        ActiveSpecialEvent = value;
+        _displayService.UpdateSpecialEvent(value);
+    }
+
+    public void UpdateActiveSpecialEventFromSync(string eventName)
+    {
+        if (ActiveSpecialEvent == eventName) return;
+
+        ActiveSpecialEvent = eventName;
+        _displayService.UpdateSpecialEvent(eventName);
+
+        foreach (var option in SpecialEventOptions)
+        {
+            if (option.Value == eventName)
+            {
+                if (!option.IsSelected) option.IsSelected = true;
+            }
+            else
+            {
+                if (option.IsSelected) option.IsSelected = false;
+            }
+        }
+    }
+}
+
+public class SpecialEventOptionViewModel : ObservableObject
+{
+    private readonly Action<string> _onSelected;
+    public string DisplayName { get; }
+    public string Value { get; }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (SetProperty(ref _isSelected, value) && value)
+            {
+                _onSelected(Value);
+            }
+        }
+    }
+
+    public SpecialEventOptionViewModel(string displayName, string value, bool isSelected, Action<string> onSelected)
+    {
+        DisplayName = displayName;
+        Value = value;
+        _isSelected = isSelected;
+        _onSelected = onSelected;
     }
 }

@@ -1,7 +1,4 @@
-<!-- Edited on Aug 4, 2026 @ 11:06:00 -> Add AndroidCleanWorkaround target to prevent clean/rebuild directory-not-empty lock errors -->
-<!-- Edited on Aug 1, 2026 @ 13:14:00 -> Link ChromecastDiscoveryService in MAUI project -->
-<!-- Edited on Jul 30, 2026 @ 08:00:00 -> Enable cross-platform MauiSplashScreen for Android and Windows and update comments -->
-<!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
+<!-- Edited on Aug 8, 2026 @ 19:32:15 -> Link SpecialEventConfig shared model -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -30,9 +27,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.7.157</AssemblyVersion>
+		<AssemblyVersion>26.8.9.161</AssemblyVersion>
 
-		<FileVersion>26.8.7.157</FileVersion>
+		<FileVersion>26.8.9.161</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
@@ -146,6 +143,7 @@
 		<Compile Include="..\Shared\LocalNetworkHelper.cs" Link="LocalNetworkHelper.cs" />
 		<Compile Include="..\Shared\DisplayTarget.cs" Link="DisplayTarget.cs" />
 		<Compile Include="..\Shared\DjBannerItem.cs" Link="DjBannerItem.cs" />
+		<Compile Include="..\Shared\SpecialEventConfig.cs" Link="SpecialEventConfig.cs" />
 		<Compile Include="..\Shared\DjBannerFileManager.cs" Link="DjBannerFileManager.cs" />
 		<Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
 	</ItemGroup>

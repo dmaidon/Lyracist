@@ -1,21 +1,4 @@
-// Edited on Aug 4, 2026 @ 10:24:00 -> Process and approve pending requests immediately when AutoAcceptRequests is checked
-// Edited on Aug 4, 2026 @ 10:20:00 -> Fix FinishSingerSong round marking to match active show round for skipped singers
-// Edited on Aug 4, 2026 @ 10:07:00 -> Update Casting references to Display tab and Display & DJ Banners help topic
-// Edited on Aug 4, 2026 @ 10:02:00 -> Add IsDjBannerQrCodeEnabled property, loading, saving, change notifications, and checkbox bindings
-// Edited on Aug 4, 2026 @ 09:55:00 -> Pass MainViewModel to DJ Banner window service to display the patron web portal QR code overlay
-// Edited on Aug 2, 2026 @ 10:15:00 -> Add mp4 support to DJ Banner scanning and file dialog filter
-// Edited on Aug 2, 2026 @ 07:50:00 -> Update Help system with Casting & DJ Banners topic
-// Edited on Aug 1, 2026 @ 13:25:00 -> Use partial properties for Chromecast fields to resolve WinRT AOT compilation warnings
-// Edited on Aug 1, 2026 @ 13:20:00 -> Add Chromecast discovery VM properties, change hooks, and command to KSRotation
-// Edited on Aug 1, 2026 @ 11:46:04 -> Restore DJ banner automatically when rotation display screen collision is resolved
-// Edited on Aug 1, 2026 @ 10:59:16 -> Disable DJ banner if rotation display is enabled on the same monitor
-// Edited on Aug 1, 2026 @ 10:04:00 -> Conditionalize WPF-specific OpenFileDialog in UploadDjBanner for cross-platform MAUI support
-// Edited on Aug 1, 2026 @ 09:47:00 -> Add DJ Banner settings properties, commands, loading, saving, and shutdown logic
-// Edited on Jul 31, 2026 @ 12:08:52 -> Populate and snapshot IsMusic property on SongPerformance
-// Edited on Jul 30, 2026 @ 07:55:00 -> Add WindowTitle dynamic property to display active Venue/DJ name in the window title bar
-// Edited on Jul 28, 2026 @ 13:02:00 -> Disable UpdatePerformanceForSinger call on song/artist property change to prevent overwriting past performance history
-// Edited on Jul 27, 2026 @ 13:50:00 -> Add ClearRotation command and prompt logic
-// Last Edit: Jul 02, 2026 16:54 - Added SaveCurrentAsTestList command and fixed runtime binding gaps for Settings controls.
+// Edited on Aug 9, 2026 @ 13:40:00 -> Update FinishSingerSong to advance rotation and record history when performer has 10+ completed songs
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -225,7 +208,7 @@ namespace KSRotation.ViewModels
                         }
                         _djBannerWasAutoDisabled = false;
                         _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
-                        _djBannerWindowService.SetBannerPath(SelectedDjBannerPath);
+                        _djBannerWindowService.SetBannerPath(ResolveActiveBannerPath());
                         _djBannerWindowService.Show(this);
                     }
                     else
@@ -249,8 +232,26 @@ namespace KSRotation.ViewModels
                     break;
 
                 case nameof(SelectedDjBannerPath):
-                    _djBannerWindowService.SetBannerPath(SelectedDjBannerPath);
+                    UpdateDjBannerPath();
                     QueueSaveSettings();
+                    RebuildRotationJsonCacheNow();
+                    break;
+
+                case nameof(ActiveSpecialEvent):
+                    foreach (var option in SpecialEventOptions)
+                    {
+                        if (option.Value == ActiveSpecialEvent)
+                        {
+                            if (!option.IsSelected) option.IsSelected = true;
+                        }
+                        else
+                        {
+                            if (option.IsSelected) option.IsSelected = false;
+                        }
+                    }
+                    UpdateDjBannerPath();
+                    QueueSaveSettings();
+                    RebuildRotationJsonCacheNow();
                     break;
 
                 case nameof(SelectedProjectionView):
@@ -407,6 +408,13 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool IsDjBannerEnabled { get; set; } = false;
+
+        [ObservableProperty]
+        public partial string ActiveSpecialEvent { get; set; } = "None";
+
+        public ObservableCollection<Lyracist.Shared.SpecialEventConfig> SpecialEvents { get; } = [];
+        public ObservableCollection<string> AvailableEventBannerFiles { get; } = [];
+        public ObservableCollection<SpecialEventOptionViewModel> SpecialEventOptions { get; } = [];
 
         [ObservableProperty]
         public partial bool IsDjBannerQrCodeEnabled { get; set; } = true;
@@ -597,9 +605,34 @@ namespace KSRotation.ViewModels
             SelectedDjBannerPath = settings.SelectedDjBannerPath ?? string.Empty;
             IsDjBannerEnabled = settings.IsDjBannerEnabled;
             IsDjBannerQrCodeEnabled = settings.IsDjBannerQrCodeEnabled;
+            ActiveSpecialEvent = string.IsNullOrEmpty(settings.ActiveSpecialEvent) ? "None" : settings.ActiveSpecialEvent;
+
+            SpecialEvents.Clear();
+            if (settings.SpecialEvents != null)
+            {
+                foreach (var ev in settings.SpecialEvents)
+                {
+                    SpecialEvents.Add(ev);
+                }
+            }
+
+            foreach (var stdName in DjBannerFileManager.StandardEventNames)
+            {
+                if (!SpecialEvents.Any(e => e.EventName.Equals(stdName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    SpecialEvents.Add(new Lyracist.Shared.SpecialEventConfig
+                    {
+                        EventName = stdName,
+                        BannerFileName = $"{stdName}.png"
+                    });
+                }
+            }
+
+            RefreshAvailableEventBannerFiles();
+            RebuildSpecialEventOptions();
 
             _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
-            _djBannerWindowService.SetBannerPath(SelectedDjBannerPath);
+            _djBannerWindowService.SetBannerPath(ResolveActiveBannerPath());
 
             RefreshAvailableDjBanners();
 
@@ -945,7 +978,11 @@ namespace KSRotation.ViewModels
             }
 
             int roundToMark = entry.GetNextIncompleteRound();
-            if (roundToMark > 0)
+            if (roundToMark == 0)
+            {
+                roundToMark = 10;
+            }
+            else
             {
                 int index = Singers.IndexOf(entry);
                 if (index >= 0)
@@ -1836,6 +1873,8 @@ namespace KSRotation.ViewModels
                 SelectedDjBannerPath = SelectedDjBannerPath,
                 IsDjBannerEnabled = IsDjBannerEnabled,
                 IsDjBannerQrCodeEnabled = IsDjBannerQrCodeEnabled,
+                ActiveSpecialEvent = ActiveSpecialEvent,
+                SpecialEvents = SpecialEvents.ToList(),
                 RotationTarget = RotationTarget,
                 AutoAcceptRequests = AutoAcceptRequests
             };
@@ -2113,6 +2152,162 @@ namespace KSRotation.ViewModels
                 _djBannerWasAutoDisabled = false;
                 IsDjBannerEnabled = true;
             }
+        }
+
+        private string ResolveActiveBannerPath()
+        {
+            if (!string.IsNullOrEmpty(ActiveSpecialEvent) && 
+                !ActiveSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase))
+            {
+                var eventConfig = SpecialEvents.FirstOrDefault(e => e.EventName.Equals(ActiveSpecialEvent, StringComparison.OrdinalIgnoreCase));
+                if (eventConfig != null)
+                {
+                    string fullPath = Path.Combine(Globals.EventBannersDir, eventConfig.BannerFileName);
+                    if (File.Exists(fullPath))
+                    {
+                        return fullPath;
+                    }
+                }
+            }
+            return SelectedDjBannerPath;
+        }
+
+        private void UpdateDjBannerPath()
+        {
+            _djBannerWindowService.SetBannerPath(ResolveActiveBannerPath());
+        }
+
+        public void RefreshAvailableEventBannerFiles()
+        {
+            DjBannerFileManager.EnsureStandardEventBanners(Globals.EventBannersDir);
+            AvailableEventBannerFiles.Clear();
+            AvailableEventBannerFiles.Add("None");
+            foreach (var item in DjBannerFileManager.ScanBanners(Globals.EventBannersDir))
+            {
+                AvailableEventBannerFiles.Add(item.FileName);
+            }
+        }
+
+        public void RebuildSpecialEventOptions()
+        {
+            SpecialEventOptions.Clear();
+            SpecialEventOptions.Add(new SpecialEventOptionViewModel("None", "None", ActiveSpecialEvent == "None", OnSpecialEventOptionChanged));
+            foreach (var ev in SpecialEvents)
+            {
+                SpecialEventOptions.Add(new SpecialEventOptionViewModel(ev.EventName, ev.EventName, ActiveSpecialEvent == ev.EventName, OnSpecialEventOptionChanged));
+            }
+        }
+
+        private void OnSpecialEventOptionChanged(string value)
+        {
+            ActiveSpecialEvent = value;
+        }
+
+        [RelayCommand]
+        private void SaveSpecialEventsMapping()
+        {
+            QueueSaveSettings();
+            UpdateDjBannerPath();
+            RebuildRotationJsonCacheNow();
+        }
+
+        [RelayCommand]
+        private void UploadEventBanner()
+        {
+#if WPF
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Upload Special Event Banner",
+                Filter = "Supported Banners (*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.mp4)|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.mp4|Image Files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp|Video Files (*.mp4)|*.mp4|All Files (*.*)|*.*"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    string dest = DjBannerFileManager.CopyInWithDedup(dialog.FileName, Globals.EventBannersDir);
+                    RefreshAvailableEventBannerFiles();
+                    string fileName = Path.GetFileName(dest);
+                    if (!AvailableEventBannerFiles.Contains(fileName))
+                    {
+                        AvailableEventBannerFiles.Add(fileName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Failed to upload Event Banner: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                }
+            }
+#endif
+        }
+
+        [RelayCommand]
+        private void AddSpecialEvent()
+        {
+            int nextIndex = SpecialEvents.Count + 1;
+            string newEventName = $"Event {nextIndex}";
+            SpecialEvents.Add(new Lyracist.Shared.SpecialEventConfig
+            {
+                EventName = newEventName,
+                BannerFileName = "None"
+            });
+            RebuildSpecialEventOptions();
+            QueueSaveSettings();
+        }
+
+        [RelayCommand]
+        private void DeleteSpecialEvent(Lyracist.Shared.SpecialEventConfig item)
+        {
+            if (item == null) return;
+            if (DjBannerFileManager.StandardEventNames.Any(s => s.Equals(item.EventName, StringComparison.OrdinalIgnoreCase)))
+            {
+#if WPF
+                System.Windows.MessageBox.Show(
+                    $"The event '{item.EventName}' is a standard pre-saved event and cannot be deleted.",
+                    "Standard Event Protected",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+#endif
+                return;
+            }
+
+            SpecialEvents.Remove(item);
+            if (ActiveSpecialEvent == item.EventName)
+            {
+                ActiveSpecialEvent = "None";
+            }
+            RebuildSpecialEventOptions();
+            QueueSaveSettings();
+            UpdateDjBannerPath();
+            RebuildRotationJsonCacheNow();
+        }
+    }
+
+    public class SpecialEventOptionViewModel : ObservableObject
+    {
+        private readonly Action<string> _onSelected;
+        public string DisplayName { get; }
+        public string Value { get; }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                if (SetProperty(ref _isSelected, value) && value)
+                {
+                    _onSelected(Value);
+                }
+            }
+        }
+
+        public SpecialEventOptionViewModel(string displayName, string value, bool isSelected, Action<string> onSelected)
+        {
+            DisplayName = displayName;
+            Value = value;
+            _isSelected = isSelected;
+            _onSelected = onSelected;
         }
     }
 }

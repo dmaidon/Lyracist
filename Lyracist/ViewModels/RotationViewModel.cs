@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Log the six swallowed exceptions in background DB operations instead of silently discarding them
+// Edited on Aug 7, 2026 @ 16:05:00 -> Add MoveUp and MoveDown reordering commands, and add isMusic parameter to AddSinger
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -227,10 +227,34 @@ public partial class RotationViewModel : BaseViewModel
         });
     }
 
-    public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "", string duetPartner = "")
+    public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "", string duetPartner = "", bool isMusic = false)
     {
         name = NameFormatting.ProperCase(name);
         duetPartner = NameFormatting.ProperCase(duetPartner);
+
+        if (isMusic)
+        {
+            Rotation.Add(new Singer
+            {
+                Name = name,
+                SongTitle = title,
+                Artist = artist,
+                Key = key,
+                Notes = notes,
+                Source = source,
+                ExternalLink = externalLink,
+                DuetPartnerName = duetPartner,
+                Score = 0,
+                AverageRating = 0,
+                RatingCount = 0,
+                TotalSongsSung = 0,
+                IsMusic = true
+            });
+
+            RotationStateChanged?.Invoke();
+            _display.UpdateRotation([.. Rotation]);
+            return;
+        }
 
         // Save to singer song history database
         System.Threading.Tasks.Task.Run(() =>
@@ -276,6 +300,7 @@ public partial class RotationViewModel : BaseViewModel
                 existingSinger.AverageRating = avgRating;
                 existingSinger.RatingCount = ratingCount;
                 existingSinger.TotalSongsSung = totalSongsSung;
+                existingSinger.IsMusic = isMusic;
             }
             else
             {
@@ -321,6 +346,7 @@ public partial class RotationViewModel : BaseViewModel
             inactiveSinger.AverageRating = avgRating;
             inactiveSinger.RatingCount = ratingCount;
             inactiveSinger.TotalSongsSung = totalSongsSung;
+            inactiveSinger.IsMusic = isMusic;
             
             InactiveSingers.Remove(inactiveSinger);
             Rotation.Add(inactiveSinger);
@@ -369,7 +395,8 @@ public partial class RotationViewModel : BaseViewModel
             Score = score,
             AverageRating = avgRating,
             RatingCount = ratingCount,
-            TotalSongsSung = totalSongsSung
+            TotalSongsSung = totalSongsSung,
+            IsMusic = isMusic
         });
 
         RotationStateChanged?.Invoke();
@@ -567,6 +594,28 @@ public partial class RotationViewModel : BaseViewModel
     private void DoneSinger(Singer singer)
     {
         if (singer == null) return;
+
+        if (singer.IsMusic)
+        {
+            if (singer.IsCurrent)
+            {
+                var nextActive = Rotation.FirstOrDefault(s => s.IsNext);
+                if (nextActive != null)
+                {
+                    singer.IsCurrent = false;
+                    nextActive.IsCurrent = true;
+                    Lyracist.Shared.RotationHelpers.MarkNextSinger(Rotation, nextActive);
+                }
+                else
+                {
+                    singer.IsCurrent = false;
+                }
+            }
+            Rotation.Remove(singer);
+            RotationStateChanged?.Invoke();
+            _display.UpdateRotation([.. Rotation]);
+            return;
+        }
 
         string name = singer.Name;
         string title = singer.SongTitle;

@@ -1,4 +1,4 @@
-// Edited on Aug 1, 2026 @ 12:10:00 -> Add Casting support methods to IDisplayService
+// Edited on Aug 8, 2026 @ 19:18:20 -> Add UpdateSpecialEvent to IDisplayService
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,6 +16,10 @@ public interface IDisplayService
 
     /// <summary>Fires when the screen/monitor assignments for displays change.</summary>
     event Action? ScreenAssignmentsChanged;
+
+    bool IsLyricsActive { get; set; }
+    bool IsRotationActive { get; set; }
+    bool IsDjBannerActive { get; set; }
 
     IReadOnlyList<ScreenInfo> GetScreens();
 
@@ -46,9 +50,12 @@ public interface IDisplayService
     void SetRotationViewMode(string mode);
     void SetCrawlBannerText(string text);
     void UpdateDjBanner(string path);
+    void UpdateSpecialEvent(string eventName);
     void HideDjBannerWindow();
 
     Task<bool> MoveRotationTo(DisplayTarget target, ChromecastDevice? device = null);
     Task StopRotationCasting();
+
+    void UpdateWindowVisibilities();
 }
 

@@ -1,5 +1,6 @@
-// Edited on Aug 1, 2026 @ 12:12:00 -> Add CaptureBitmap method for off-screen rendering/casting support
+// Edited on Aug 8, 2026 @ 16:45:00 -> Update close/hide events to toggle active status in DisplayService
 using Lyracist.Models;
+using Lyracist.Services.Display;
 using Lyracist.Shared;
 using Lyracist.ViewModels;
 using System.Collections.Specialized;
@@ -656,7 +657,15 @@ public partial class RotationWindow : Window, ICaptureSource
         // Registered as a singleton: a closed WPF window can never be shown
         // again, so hide instead and let app shutdown tear it down.
         e.Cancel = true;
-        Hide();
+        var displayService = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
+        if (displayService != null)
+        {
+            displayService.IsRotationActive = false;
+        }
+        else
+        {
+            Hide();
+        }
         base.OnClosing(e);
     }
 
@@ -669,7 +678,15 @@ public partial class RotationWindow : Window, ICaptureSource
 
     private void OnHide(object sender, RoutedEventArgs e)
     {
-        Hide();
+        var displayService = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
+        if (displayService != null)
+        {
+            displayService.IsRotationActive = false;
+        }
+        else
+        {
+            Hide();
+        }
     }
 
     private void BannerBorder_SizeChanged(object sender, SizeChangedEventArgs e)

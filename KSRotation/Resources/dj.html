@@ -1,4 +1,4 @@
-<!-- Edited on Jul 28, 2026 @ 18:47:00 -> Add pause state triggers, support background music requests, and optimize mobile layouts -->
+<!-- Edited on Aug 9, 2026 @ 10:14:00 -> Update button.btn-outline border and text colors to light lavender (#C4B5FD) in dark mode -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +37,8 @@
             --green: #10B981;
             --red: #EF4444;
             --orange: #D97706;
+            --btn-outline-border: #C4B5FD;
+            --btn-outline-text: #E9D5FF;
         }
 
         :root[data-theme="light"] {
@@ -54,6 +56,8 @@
             --text-muted: #64748B;
             --accent-text: #7C3AED;
             --panel-title-color: #7C3AED;
+            --btn-outline-border: #7C3AED;
+            --btn-outline-text: #7C3AED;
         }
 
         * {
@@ -103,17 +107,19 @@
 
         button.btn-outline {
             background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
+            border: 1.5px solid var(--btn-outline-border);
+            color: var(--btn-outline-text);
             border-radius: 6px;
             padding: 6px 12px;
             font-size: 0.85rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
         }
         button.btn-outline:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+            border-color: #DDD6FE;
+            background-color: rgba(196, 181, 253, 0.15);
+            color: #FFFFFF;
         }
 
         /* Lock Overlay (Passcode modal) */
@@ -535,6 +541,14 @@
                     </form>
                 </div>
 
+                <!-- Special Event Banners Card -->
+                <div class="panel">
+                    <div class="panel-title">Special Event Banners</div>
+                    <div id="special-events-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <div class="no-data">Loading events...</div>
+                    </div>
+                </div>
+
                 <!-- Incoming Requests Card -->
                 <div class="panel">
                     <div class="panel-title">Incoming Requests</div>
@@ -645,8 +659,44 @@
                 const requests = await reqResponse.json();
                 renderRequests(requests);
 
+                // Fetch Special Events
+                const eventsResponse = await fetch(`/api/special-events${querySuffix}`, { headers });
+                if (eventsResponse.ok) {
+                    const data = await eventsResponse.json();
+                    renderSpecialEvents(data.specialEvents, data.activeSpecialEvent);
+                }
+
             } catch (err) {
                 console.error("Connection error loading DJ data", err);
+            }
+        }
+
+        function renderSpecialEvents(specialEvents, activeSpecialEvent) {
+            const container = document.getElementById("special-events-container");
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            // Create option for 'None'
+            const noneBtn = document.createElement("button");
+            noneBtn.className = activeSpecialEvent === "None" || !activeSpecialEvent ? "btn-primary" : "btn-outline";
+            noneBtn.style.padding = "6px 12px";
+            noneBtn.style.fontSize = "12px";
+            noneBtn.innerText = "None";
+            noneBtn.onclick = () => sendAction("set-special-event", "None");
+            container.appendChild(noneBtn);
+
+            // Create buttons for each special event
+            if (specialEvents && specialEvents.length > 0) {
+                specialEvents.forEach(eventName => {
+                    const btn = document.createElement("button");
+                    btn.className = activeSpecialEvent === eventName ? "btn-primary" : "btn-outline";
+                    btn.style.padding = "6px 12px";
+                    btn.style.fontSize = "12px";
+                    btn.innerText = eventName;
+                    btn.onclick = () => sendAction("set-special-event", eventName);
+                    container.appendChild(btn);
+                });
             }
         }
 

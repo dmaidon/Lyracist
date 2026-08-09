@@ -1,7 +1,9 @@
+// Edited on Aug 8, 2026 @ 17:05:00 -> Optimize visualizer layout thrashing and allocations to resolve cursor flicker
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Lyracist.Services.Display;
 using Lyracist.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,7 +31,17 @@ public partial class LyricsWindow : Window
         switch (e.Key)
         {
             case Key.Escape:
-                Hide();
+                {
+                    var displayService = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
+                    if (displayService != null)
+                    {
+                        displayService.IsLyricsActive = false;
+                    }
+                    else
+                    {
+                        Hide();
+                    }
+                }
                 e.Handled = true;
                 break;
             case Key.M:
@@ -50,7 +62,15 @@ public partial class LyricsWindow : Window
         // Registered as a singleton: a closed WPF window can never be shown
         // again, so hide instead and let app shutdown tear it down.
         e.Cancel = true;
-        Hide();
+        var displayService = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
+        if (displayService != null)
+        {
+            displayService.IsLyricsActive = false;
+        }
+        else
+        {
+            Hide();
+        }
         base.OnClosing(e);
     }
 
@@ -71,7 +91,15 @@ public partial class LyricsWindow : Window
 
     private void OnHide(object sender, RoutedEventArgs e)
     {
-        Hide();
+        var displayService = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
+        if (displayService != null)
+        {
+            displayService.IsLyricsActive = false;
+        }
+        else
+        {
+            Hide();
+        }
     }
 
     private void ToggleFullscreen()
@@ -89,8 +117,6 @@ public partial class LyricsWindow : Window
         double height = VisualizerCanvas.ActualHeight;
         if (width <= 0 || height <= 0) return;
 
-        VisualizerCanvas.Children.Clear();
-
         var karaoke = App.AppHost.Services.GetService<KaraokeViewModel>();
         bool isPlaying = karaoke != null && karaoke.IsPlaying;
 
@@ -98,6 +124,32 @@ public partial class LyricsWindow : Window
         double barWidth = width / numBars;
         double decay = 0.15;
         double rise = 0.4;
+
+        // Populate visualizer rectangles once and reuse them to prevent constant layout recalculations
+        if (VisualizerCanvas.Children.Count != numBars)
+        {
+            VisualizerCanvas.Children.Clear();
+            for (int i = 0; i < numBars; i++)
+            {
+                var rect = new System.Windows.Shapes.Rectangle
+                {
+                    RadiusX = 3,
+                    RadiusY = 3,
+                    Fill = new System.Windows.Media.LinearGradientBrush
+                    {
+                        StartPoint = new System.Windows.Point(0, 1),
+                        EndPoint = new System.Windows.Point(0, 0),
+                        GradientStops =
+                        {
+                            new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(37, 99, 235), 0.0), // Blue
+                            new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(168, 85, 247), 0.5), // Purple
+                            new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(236, 72, 153), 1.0) // Pink
+                        }
+                    }
+                };
+                VisualizerCanvas.Children.Add(rect);
+            }
+        }
 
         for (int i = 0; i < numBars; i++)
         {
@@ -117,29 +169,15 @@ public partial class LyricsWindow : Window
 
             _barHeights[i] += (_targetHeights[i] - _barHeights[i]) * (isPlaying ? rise : decay);
 
-            var rect = new System.Windows.Shapes.Rectangle
+            if (VisualizerCanvas.Children[i] is System.Windows.Shapes.Rectangle rect)
             {
-                Width = System.Math.Max(1.0, barWidth - 2),
-                Height = System.Math.Max(4, _barHeights[i]),
-                RadiusX = 3,
-                RadiusY = 3,
-                Fill = new System.Windows.Media.LinearGradientBrush
-                {
-                    StartPoint = new System.Windows.Point(0, 1),
-                    EndPoint = new System.Windows.Point(0, 0),
-                    GradientStops =
-                    {
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(37, 99, 235), 0.0), // Blue
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(168, 85, 247), 0.5), // Purple
-                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(236, 72, 153), 1.0) // Pink
-                    }
-                },
-                Opacity = isPlaying ? 0.65 : 0.25
-            };
+                rect.Width = System.Math.Max(1.0, barWidth - 2);
+                rect.Height = System.Math.Max(4, _barHeights[i]);
+                rect.Opacity = isPlaying ? 0.65 : 0.25;
 
-            Canvas.SetLeft(rect, i * barWidth + 1);
-            Canvas.SetBottom(rect, 0);
-            VisualizerCanvas.Children.Add(rect);
+                Canvas.SetLeft(rect, i * barWidth + 1);
+                Canvas.SetBottom(rect, 0);
+            }
         }
     }
 

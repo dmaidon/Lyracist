@@ -1,8 +1,25 @@
-<!-- Edited on Aug 7, 2026 @ 09:15:00 -> Add 26.8.7.0 changelog entries for database manager search fixes -->
-Last Edit: Aug 7, 2026 - Fix database manager search and track edit bindings, resolve SQLite FTS5 MATCH query exception via self-healing table detection, and update initial database migration
+<!-- Edited on Aug 9, 2026 @ 17:45:00 -> Add 26.8.9.0 changelog entries for Special Event management, QR code contrast, cursor flicker fix, and rotation alignment -->
+Last Edit: Aug 9, 2026 - Add Special Event Banner management, remote banner synchronization, dark mode light lavender styling, cursor flicker fix, dark maroon DJ QR code, and 11+ performance rotation alignment
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.9.0] - 2026-08-09
+
+### Added
+- **Special Event Banner Management in KSRotation**: Added **Upload Banner**, **Add Event**, and **Delete Event** controls to the Display tab in KSRotation, allowing hosts to upload image/video banners directly to `EventBanners` and manage custom event mappings.
+- **Pre-Saved Standard Event Protection**: Guaranteed the presence of 4 standard pre-saved events (`Birthday`, `Wedding`, `Engagement`, `Anniversary`) in `Globals.EventBannersDir` with auto-generated 16:9 banner graphics if missing, and protected standard events from accidental deletion.
+- **Remote Active Special Event Synchronization**: Added public `/api/special-event/active` GET endpoint and extended `KSRotationSyncService` to synchronize active special event banner projections in real-time between KSRotation and Lyracist.
+
+### Fixed
+- **DJ Web App Special Event Loading**: Fixed an HTTP route matching bug in `PatronRequestServer.cs` where GET `/api/special-events` was intercepted by the `404 Not Found` fallback, allowing the remote DJ dashboard (`dj.html`) to load special event buttons properly instead of hanging on `"Loading events..."`.
+- **Mouse Cursor Flickering in KSRotation**: Eliminated mouse cursor flickering by disabling Win32 layered popup transparency and drop-shadow effects on autocomplete suggestion popups inside ListViews, and lowering marquee timer execution priority to `DispatcherPriority.Background`.
+- **KSRotation Finished Song Rotation Advance**: Updated `FinishSingerSong` in `MainViewModel.cs` so that performers who have completed all 10 round checkboxes still have their rotation position advanced, queued songs promoted, and 11th+ song performances logged to database history upon clicking **Finished Song**.
+
+### Changed
+- **High-Contrast Light Lavender UI Styling**: Updated button text, button borders (`#C4B5FD`), and RadioButton labels in `MainWindow.xaml` and `dj.html` to a bright light lavender purple (`#E9D5FF`) for high legibility against dark green/teal backgrounds.
+- **Clean Standard Banner Mapping Interface**: Simplified the **Special Event Banners Mapping** panel in KSRotation by hiding drop-down list boxes (ComboBoxes), TextBoxes, and Delete buttons for standard pre-saved events, reserving edit controls exclusively for custom events.
+- **High-Contrast DJ QR Code Color**: Changed the DJ QR Code foreground color from bright crimson red (`RGB(239, 68, 68)`) to a dark maroon/brick-red (`RGB(128, 0, 32)` / `#800020`), maximizing contrast against white background tiles for optical scanning by mobile cameras.
 
 ## [26.8.7.0] - 2026-08-07
 

@@ -1,4 +1,4 @@
-// Created on Aug 6, 2026 @ 07:01:27 -> Split display/monitor/Chromecast settings out of SettingsViewModel.cs (God-object cleanup); pure code move, no behavior change
+// Edited on Aug 8, 2026 @ 19:20:10 -> Add Special Event Banners list and available files properties
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,6 +16,86 @@ namespace Lyracist.ViewModels;
 
 public partial class SettingsViewModel
 {
+    public bool IsLyricsActive
+    {
+        get => _display.IsLyricsActive;
+        set
+        {
+            if (_display.IsLyricsActive != value)
+            {
+                _display.IsLyricsActive = value;
+                OnPropertyChanged(nameof(IsLyricsActive));
+            }
+        }
+    }
+
+    public bool IsRotationActive
+    {
+        get => _display.IsRotationActive;
+        set
+        {
+            if (_display.IsRotationActive != value)
+            {
+                _display.IsRotationActive = value;
+                OnPropertyChanged(nameof(IsRotationActive));
+            }
+        }
+    }
+
+    public bool IsDjBannerActive
+    {
+        get => _display.IsDjBannerActive;
+        set
+        {
+            if (_display.IsDjBannerActive != value)
+            {
+                _display.IsDjBannerActive = value;
+                OnPropertyChanged(nameof(IsDjBannerActive));
+            }
+        }
+    }
+
+    private void OnScreenAssignmentsChanged()
+    {
+        System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
+        {
+            var prefs = _display.GetPreferences();
+
+            var currentLyricsScreen = prefs.LyricsScreenIndex.HasValue
+                ? Screens.FirstOrDefault(s => s.Index == prefs.LyricsScreenIndex.Value)
+                : Screens.FirstOrDefault(s => s.Index == -1);
+
+            var currentRotationScreen = prefs.RotationScreenIndex.HasValue
+                ? Screens.FirstOrDefault(s => s.Index == prefs.RotationScreenIndex.Value)
+                : Screens.FirstOrDefault(s => s.Index == -1);
+
+            var currentDjBannerScreen = prefs.DjBannerScreenIndex.HasValue
+                ? Screens.FirstOrDefault(s => s.Index == prefs.DjBannerScreenIndex.Value)
+                : Screens.FirstOrDefault(s => s.Index == -1);
+
+#pragma warning disable MVVMTK0034
+            if (_lyricsScreen != currentLyricsScreen)
+            {
+                _lyricsScreen = currentLyricsScreen;
+                OnPropertyChanged(nameof(LyricsScreen));
+            }
+            if (_rotationScreen != currentRotationScreen)
+            {
+                _rotationScreen = currentRotationScreen;
+                OnPropertyChanged(nameof(RotationScreen));
+            }
+            if (_djBannerScreen != currentDjBannerScreen)
+            {
+                _djBannerScreen = currentDjBannerScreen;
+                OnPropertyChanged(nameof(DjBannerScreen));
+            }
+#pragma warning restore MVVMTK0034
+
+            OnPropertyChanged(nameof(IsLyricsActive));
+            OnPropertyChanged(nameof(IsRotationActive));
+            OnPropertyChanged(nameof(IsDjBannerActive));
+        });
+    }
     // Display
     public List<ScreenInfo> Screens { get; }
 
@@ -139,5 +219,35 @@ public partial class SettingsViewModel
     private void RestoreLayout()
     {
         _display.RestoreAssignments();
+    }
+
+    public ObservableCollection<Lyracist.Shared.SpecialEventConfig> SpecialEventsList { get; } = [];
+    public ObservableCollection<string> AvailableEventBannerFiles { get; } = [];
+
+    public void RefreshSpecialEventsList()
+    {
+        SpecialEventsList.Clear();
+        foreach (var ev in AppSettings.SpecialEvents)
+        {
+            SpecialEventsList.Add(ev);
+        }
+    }
+
+    public void RefreshAvailableEventBannerFiles()
+    {
+        AvailableEventBannerFiles.Clear();
+        AvailableEventBannerFiles.Add("None");
+        foreach (var item in DjBannerFileManager.ScanBanners(Globals.EventBannersDir))
+        {
+            AvailableEventBannerFiles.Add(item.FileName);
+        }
+    }
+
+    [RelayCommand]
+    private void SaveSpecialEvents()
+    {
+        AppSettings.SpecialEvents = SpecialEventsList.ToList();
+        // Notify display service
+        _display.UpdateSpecialEvent(_display.GetPreferences().SelectedSpecialEvent);
     }
 }

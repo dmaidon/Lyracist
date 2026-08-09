@@ -1,4 +1,4 @@
-// Edited on Jul 28, 2026 @ 19:16:00 -> Fix singer match logic by including isMusic filter in KSRotationSyncService
+// Edited on Aug 9, 2026 @ 09:15:00 -> Sync active special event banner from KSRotation API
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,15 +16,17 @@ namespace Lyracist.Services.Integration
     public class KSRotationSyncService : IKSRotationSyncService
     {
         private readonly RotationViewModel _rotationViewModel;
+        private readonly KaraokeViewModel _karaokeViewModel;
         private readonly HttpClient _httpClient;
         private CancellationTokenSource? _cts;
         private Task? _syncTask;
         private bool _lastConnectSuccess = true;
         private readonly Lock _lock = new();
 
-        public KSRotationSyncService(RotationViewModel rotationViewModel)
+        public KSRotationSyncService(RotationViewModel rotationViewModel, KaraokeViewModel karaokeViewModel)
         {
             _rotationViewModel = rotationViewModel;
+            _karaokeViewModel = karaokeViewModel;
             _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
         }
 
@@ -129,6 +131,20 @@ namespace Lyracist.Services.Integration
                         _lastConnectSuccess = false;
                     }
                 }
+
+                // Query active special event banner
+                string eventsUrl = $"http://{AppSettings.KSRotationIpAddress}:{AppSettings.KSRotationPort}/api/special-event/active";
+                var eventsResponse = await _httpClient.GetAsync(eventsUrl, token);
+                if (eventsResponse.IsSuccessStatusCode)
+                {
+                    string eventsJson = await eventsResponse.Content.ReadAsStringAsync(token);
+                    using var doc = JsonDocument.Parse(eventsJson);
+                    if (doc.RootElement.TryGetProperty("activeSpecialEvent", out var activeProp))
+                    {
+                        string activeEvent = activeProp.GetString() ?? "None";
+                        await UpdateSpecialEventDataAsync(activeEvent);
+                    }
+                }
             }
             catch (OperationCanceledException)
             {
@@ -142,6 +158,14 @@ namespace Lyracist.Services.Integration
                     _lastConnectSuccess = false;
                 }
             }
+        }
+
+        private Task UpdateSpecialEventDataAsync(string activeSpecialEvent)
+        {
+            return System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                _karaokeViewModel.UpdateActiveSpecialEventFromSync(activeSpecialEvent);
+            }).Task;
         }
 
         private Task UpdateRotationDataAsync(List<RotationItemDto> syncedItems)
@@ -163,6 +187,10 @@ namespace Lyracist.Services.Integration
                     {
                         singer = new Singer { Name = item.name, IsMusic = item.isMusic };
                         LoadSingerDbMetadata(singer);
+                    }
+                    else
+                    {
+                        currentRotation.Remove(singer);
                     }
 
                     singer.SongTitle = item.song ?? string.Empty;

@@ -1,4 +1,4 @@
-// Edited on Aug 1, 2026 @ 11:49:44 -> Add DJ Banner Delete functionality documentation updates
+// Edited on Aug 9, 2026 @ 17:45:00 -> Add Special Event management, QR code contrast, and 11+ performance updates to manual documentation
 Lyracist Pro & KSRotation - Performer Portal Update (July 2026)
 
 Section: Singer Request Board / Patron Request Portal
@@ -234,4 +234,70 @@ A comprehensive performer profile system and song tagging support have been inte
    - Avatars are displayed as circular icons in the rotation board on both the mobile Patron Portal and host WPF Singer Queue ListBox.
 
 3. Database Tagging:
-   - Songs can now be tagged with comma-separated categories to organize, filter, and challenge performers.
+    - Songs can now be tagged with comma-separated categories to organize, filter, and challenge performers.
+
+
+Section: Main Console / Front Page Music Search & Rotation Insertion
+
+[Update Details]
+Operators can now search the background music library directly from the main Karaoke dashboard, add tracks to the rotation queue as music, and configure automated playback.
+
+1. Music Library Search Tab:
+   - A new "Music Library" tab has been added to the search panel on the front page of Lyracist, positioned next to the "Local Library" tab.
+   - Searching via the main search bar queries both the karaoke library and the background music library (tracks where IsKaraoke is false) simultaneously.
+   
+2. Insertion into Performer Rotation:
+   - Displays search results with Song and Artist columns.
+   - Click the "Add to Rotation" (+) button or double-click a song in the list to immediately insert the track into the active rotation queue as a music track (highlighted in green and labeled "♪ Background Music Track").
+   - Music tracks are added under the generic name "Music Request", bypassing the duplicate check and database persistence, allowing you to insert multiple independent music tracks into different positions in the queue.
+   - This provides a convenient mechanism for hosts to interject background music tracks into the main rotation occasionally without requiring a patron request.
+
+3. Auto-Play & Configurable Delay:
+   - Added a new control row right below the queue filters on the front page containing an "Auto-Play Rotation Music" checkbox and a "Delay" selector.
+   - When checked, background music tracks in the rotation queue will automatically start playing after the previous singer finishes.
+   - The delay selector allows customizing how many seconds (0s to 30s) the system waits before starting the music track.
+
+4. Automatic Queue Cleanup:
+   - Once a background music track finishes playing and is marked Done, it is automatically removed from the rotation queue rather than remaining for subsequent rounds.
+
+
+Section: Display Settings & Remote DJ Board / Special Event Banners
+
+[Update Details]
+Special Event Banners have been introduced to Lyracist, KSRotation, and the remote DJ Board app. These banners share the same screen space as the standard DJ banners, allowing operators and DJs to toggle custom banners for special occasions.
+
+1. Pre-Configured Events:
+   - Includes default, high-quality event graphics for "Birthday", "Wedding", "Engagement", and "Anniversary".
+   
+2. Configurable Mapping:
+   - In both Lyracist and KSRotation Settings panels, operators can define custom Event Names and map them to image/video files residing in the "EventBanners" directory.
+   
+3. Host Control Toggles:
+   - A row of radio buttons has been added directly to Lyracist's "Karaoke Page" (under DJ Banner Selection) and KSRotation's "Display" tab (under DJ &amp; Special Event Banners).
+   - Selecting an event name immediately projects the mapped special event banner on the projection screen. Selecting "None" reverts the screen to the standard DJ banner.
+
+4. Remote DJ App Integration:
+   - The web-based remote DJ dashboard (`dj.html`) has a new "Special Event Banners" panel.
+   - Polling queries the active event state from the host. Tapping any event button (or "None") updates the host display in real-time, allowing DJs to easily manage special event banners from their phone/tablet.
+
+
+Section: Display Settings & Remote DJ Board / Special Event Banners Management & Styling
+
+[Update Details]
+Updates have been made to Special Event Banner management in KSRotation and the remote DJ Board app, along with high-contrast styling and optical scanning enhancements.
+
+1. Upload, Add & Delete Special Event Controls:
+   - Added "Upload Banner", "Add Event", and "Delete" buttons to the Special Event Banners Mapping panel under KSRotation's Display tab.
+   - Uploading copies banner graphics directly to the EventBanners directory.
+
+2. Standard Pre-Saved Event Protection & Display:
+   - The 4 standard pre-saved events ("Birthday", "Wedding", "Engagement", "Anniversary") are guaranteed to exist with auto-generated graphics if missing.
+   - Standard events are protected from accidental deletion.
+   - The mapping grid displays standard events as clean fixed labels, reserving drop-down list boxes and edit inputs exclusively for custom events.
+
+3. High-Contrast Light Lavender UI Styling & Dark Maroon QR Code:
+   - Button text, borders (#C4B5FD), and RadioButton labels use bright light lavender purple (#E9D5FF) for high contrast against dark green/teal backgrounds.
+   - The DJ QR Code foreground color has been updated from bright crimson to dark maroon/brick-red (RGB 128, 0, 32 / #800020), ensuring high optical contrast against white tiles for scanning by all mobile cameras.
+
+4. 11+ Performance Rotation Advance:
+   - Clicking Finished Song in KSRotation for a performer who has completed all 10 round checkboxes now seamlessly advances the rotation, promotes queued songs, and logs performance details to the database history.
