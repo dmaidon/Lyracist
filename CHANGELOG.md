@@ -1,8 +1,18 @@
-<!-- Edited on Aug 9, 2026 @ 17:45:00 -> Add 26.8.9.0 changelog entries for Special Event management, QR code contrast, cursor flicker fix, and rotation alignment -->
-Last Edit: Aug 9, 2026 - Add Special Event Banner management, remote banner synchronization, dark mode light lavender styling, cursor flicker fix, dark maroon DJ QR code, and 11+ performance rotation alignment
+<!-- Edited on Aug 10, 2026 @ 14:12:00 -> Add 26.8.10.0 changelog entries for rotation rollover fix and Last Song default event banner -->
+Last Edit: Aug 10, 2026 - Fix rotation sequence rollover and advance when checking off singers; add "Last Song" default event banner
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.10.0] - 2026-08-10
+
+### Added
+- **"Last Song" Default Event Banner**: Added `"Last Song"` (`LastSong.png`) to standard pre-saved event banners alongside `Birthday`, `Wedding`, `Engagement`, and `Anniversary` across both Lyracist and KSRotation. Standard pre-saved events are protected from deletion and automatically mapped to their respective graphics.
+
+### Fixed
+- **1-Click Rotation Advancement & Rollover**: Created `AdvanceRotationAfterFinished` in `RotationHelpers.cs` to advance rotation sequence sequentially relative to the finished performer. When the last singer in rotation finishes, rotation automatically rolls over to the top performer in 1 click without needing multiple clicks or manual reset.
+- **Out-of-Sync `IsCurrent` Recovery**: Fixed a bug where checking off a singer when `IsCurrent` was out of sync or unassigned failed to advance the rotation indicator. Rotation now advances reliably starting from the finished singer's position.
+- **Web Portal Round Checkbox Sync**: Updated `OnSingerEntryPropertyChanged` in `MainViewModel.cs` so that toggling round completion checkboxes triggers an immediate web JSON cache rebuild for DJ and Patron web views.
 
 ## [26.8.9.0] - 2026-08-09
 

@@ -1,5 +1,5 @@
-<!-- Edited on Aug 9, 2026 @ 17:45:00 -> Update for version 26.8.9.0 Special Event management and styling updates -->
-Last Edit: Aug 9, 2026 - Add Special Event Banner management, remote banner synchronization, dark mode light lavender styling, cursor flicker fix, dark maroon DJ QR code, and 11+ performance rotation alignment
+<!-- Edited on Aug 10, 2026 @ 14:12:00 -> Update for robust rotation rollover advancement and Last Song default event banner -->
+Last Edit: Aug 10, 2026 - Fix rotation sequence rollover and advance when checking off singers; add "Last Song" default event banner
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.

@@ -1,4 +1,4 @@
-// Edited on Aug 9, 2026 @ 13:40:00 -> Update FinishSingerSong to advance rotation and record history when performer has 10+ completed songs
+// Edited on Aug 10, 2026 @ 13:05:00 -> Update FinishSingerSong to use RotationHelpers.AdvanceRotationAfterFinished for robust rollover and rotation advancement
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -623,7 +623,7 @@ namespace KSRotation.ViewModels
                     SpecialEvents.Add(new Lyracist.Shared.SpecialEventConfig
                     {
                         EventName = stdName,
-                        BannerFileName = $"{stdName}.png"
+                        BannerFileName = DjBannerFileManager.GetStandardBannerFileName(stdName)
                     });
                 }
             }
@@ -1127,42 +1127,8 @@ namespace KSRotation.ViewModels
                         entry.Artist = string.Empty;
                     }
 
-                    // Advance rotation to next active singer if Done was clicked on the current singer
-                    if (entry.IsCurrent)
-                    {
-                        // 1. Try to find a singer explicitly flagged as Next (manual next-singer override)
-                        SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s.IsNext && !s.IsInactive && !s.IsPaused);
-
-                        if (nextCurrent == null)
-                        {
-                            // 2. Fall back to standard index-based rotation
-                            int currentIndex = Singers.IndexOf(entry);
-                            int count = Singers.Count;
-
-                            for (int i = 1; i < count; i++)
-                            {
-                                SingerEntry candidate = Singers[(currentIndex + i) % count];
-                                if (!candidate.IsInactive && !candidate.IsPaused)
-                                {
-                                    nextCurrent = candidate;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (nextCurrent != null)
-                        {
-                            entry.IsCurrent = false;
-                            nextCurrent.IsCurrent = true;
-                            nextCurrent.IsNext = false;
-                        }
-                        else
-                        {
-                            entry.IsCurrent = false;
-                        }
-                    }
-
-                    UpdateNextSingerHighlight();
+                    // Advance rotation sequentially after entry (wraps around to top of rotation if last singer)
+                    RotationHelpers.AdvanceRotationAfterFinished(Singers, entry);
 
                     // A music request with nothing left queued (and no further pending request merged in above)
                     // has been fully played — unlike a karaoke singer, it doesn't wait around in the rotation for
@@ -1171,6 +1137,7 @@ namespace KSRotation.ViewModels
                     if (entry.IsMusic && string.IsNullOrWhiteSpace(entry.Song))
                     {
                         Singers.Remove(entry);
+                        UpdateNextSingerHighlight();
                     }
                 }
                 finally
@@ -1706,9 +1673,10 @@ namespace KSRotation.ViewModels
                 || e.PropertyName == nameof(SingerEntry.Artist)
                 || e.PropertyName == nameof(SingerEntry.IsCurrent)
                 || e.PropertyName == nameof(SingerEntry.IsNext)
-                || e.PropertyName == nameof(SingerEntry.IsInactive))
+                || e.PropertyName == nameof(SingerEntry.IsInactive)
+                || TryGetSongRound(e.PropertyName ?? string.Empty, out _))
             {
-                // IsCurrent/IsNext/IsInactive are single-shot toggles → rebuild immediately so the
+                // IsCurrent/IsNext/IsInactive/RoundCompleted are single-shot toggles → rebuild immediately so the
                 // web view reflects rotation changes promptly. Name/Song/Artist stream per-keystroke → debounce.
                 if (e.PropertyName == nameof(SingerEntry.Name)
                     || e.PropertyName == nameof(SingerEntry.Song)

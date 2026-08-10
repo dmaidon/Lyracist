@@ -1,4 +1,4 @@
-// Edited on Aug 7, 2026 @ 16:05:00 -> Add MoveUp and MoveDown reordering commands, and add isMusic parameter to AddSinger
+// Edited on Aug 10, 2026 @ 13:05:00 -> Update DoneSinger to use RotationHelpers.AdvanceRotationAfterFinished for robust rollover
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -597,20 +597,7 @@ public partial class RotationViewModel : BaseViewModel
 
         if (singer.IsMusic)
         {
-            if (singer.IsCurrent)
-            {
-                var nextActive = Rotation.FirstOrDefault(s => s.IsNext);
-                if (nextActive != null)
-                {
-                    singer.IsCurrent = false;
-                    nextActive.IsCurrent = true;
-                    Lyracist.Shared.RotationHelpers.MarkNextSinger(Rotation, nextActive);
-                }
-                else
-                {
-                    singer.IsCurrent = false;
-                }
-            }
+            Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer);
             Rotation.Remove(singer);
             RotationStateChanged?.Invoke();
             _display.UpdateRotation([.. Rotation]);
@@ -628,26 +615,8 @@ public partial class RotationViewModel : BaseViewModel
         // 2. Log performance history in database
         SavePerformanceHistory(name, title, artist);
 
-        // If the singer being marked Done is the current singer, advance the indicator first
-        if (singer.IsCurrent)
-        {
-            // Find the next active singer (the one currently marked as IsNext)
-            var nextActive = Rotation.FirstOrDefault(s => s.IsNext);
-            if (nextActive != null)
-            {
-                singer.IsCurrent = false;
-                nextActive.IsCurrent = true;
-
-                // nextActive's own IsNext flag is now stale (they're current, not next), and
-                // whoever should follow them hasn't been marked yet — recompute in one pass so
-                // no singer is ever left simultaneously "current" and "next".
-                Lyracist.Shared.RotationHelpers.MarkNextSinger(Rotation, nextActive);
-            }
-            else
-            {
-                singer.IsCurrent = false;
-            }
-        }
+        // Advance rotation to next active singer relative to singer
+        Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer);
 
         // 3. Check for pending songs
         if (_pendingSingerSongs.TryGetValue(name, out var list) && list.Count > 0)

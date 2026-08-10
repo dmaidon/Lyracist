@@ -1,4 +1,4 @@
-// Created on Jul 17, 2026 @ 09:00:00 -> Shared rotation utilities
+// Edited on Aug 10, 2026 @ 13:05:00 -> Add AdvanceRotationAfterFinished helper for robust rotation rollover
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,6 +98,49 @@ namespace Lyracist.Shared
             {
                 UpdateNextSingerHighlight(singers);
             }
+        }
+
+        /// <summary>
+        /// Advances the rotation after <paramref name="finishedEntry"/> has completed their performance.
+        /// Clears IsCurrent on all singers, finds the first active non-paused singer sequentially AFTER
+        /// <paramref name="finishedEntry"/> (wrapping around the list to the top), promotes that singer to
+        /// current, and updates <see cref="IRotationSinger.IsNext"/> highlights accordingly.
+        /// </summary>
+        public static T? AdvanceRotationAfterFinished<T>(IList<T> singers, T finishedEntry) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            ArgumentNullException.ThrowIfNull(finishedEntry);
+
+            int currentIndex = singers.IndexOf(finishedEntry);
+            int count = singers.Count;
+            T? nextCurrent = null;
+
+            if (currentIndex >= 0 && count > 0)
+            {
+                for (int i = 1; i < count; i++)
+                {
+                    T candidate = singers[(currentIndex + i) % count];
+                    if (candidate != finishedEntry && !candidate.IsInactive && !candidate.IsPaused)
+                    {
+                        nextCurrent = candidate;
+                        break;
+                    }
+                }
+            }
+
+            foreach (T s in singers)
+            {
+                s.IsCurrent = false;
+                s.IsNext = false;
+            }
+
+            if (nextCurrent != null)
+            {
+                nextCurrent.IsCurrent = true;
+                MarkNextSinger(singers, nextCurrent);
+            }
+
+            return nextCurrent;
         }
 
         /// <summary>

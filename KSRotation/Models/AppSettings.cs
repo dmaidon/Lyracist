@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 19:27:30 -> Add SpecialEvents and ActiveSpecialEvent properties to AppSettings
+// Edited on Aug 10, 2026 @ 13:25:00 -> Add Last Song default event banner to AppSettings
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -62,7 +62,8 @@ namespace KSRotation.Models
             new() { EventName = "Birthday", BannerFileName = "Birthday.png" },
             new() { EventName = "Wedding", BannerFileName = "Wedding.png" },
             new() { EventName = "Engagement", BannerFileName = "Engagement.png" },
-            new() { EventName = "Anniversary", BannerFileName = "Anniversary.png" }
+            new() { EventName = "Anniversary", BannerFileName = "Anniversary.png" },
+            new() { EventName = "Last Song", BannerFileName = "LastSong.png" }
         ];
 
         /// <summary>The display target type (Monitor, Chromecast, Miracast, BrowserCast, etc.)</summary>

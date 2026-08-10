@@ -301,3 +301,18 @@ Updates have been made to Special Event Banner management in KSRotation and the 
 
 4. 11+ Performance Rotation Advance:
    - Clicking Finished Song in KSRotation for a performer who has completed all 10 round checkboxes now seamlessly advances the rotation, promotes queued songs, and logs performance details to the database history.
+
+
+Section: Rotation Advancement & Default Event Banners Update
+
+[Update Details]
+Updates have been made to rotation sequence advancement and standard default event banners in KSRotation and Lyracist.
+
+1. Robust 1-Click Rotation Advancement & Rollover:
+   - When marking a singer finished (via "Done", "✓", or remote DJ portal), rotation sequence advancement calculates the next active singer sequentially starting after the finished singer's index.
+   - When the last singer in the rotation finishes, rotation automatically rolls over to the top performer in 1 click.
+   - Rotation advances reliably even if the finishing singer was not marked as current prior to clicking "Done".
+
+2. "Last Song" Default Event Banner:
+   - Added "Last Song" (`LastSong.png`) to the standard pre-saved event banners list alongside Birthday, Wedding, Engagement, and Anniversary.
+   - Standard pre-saved events are protected from deletion and automatically mapped to their respective graphics.

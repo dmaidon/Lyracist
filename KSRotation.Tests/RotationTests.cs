@@ -1,4 +1,4 @@
-// Edited on Aug 4, 2026 @ 10:24:00 -> Add unit test for AutoAcceptRequests approving pending requests immediately
+// Edited on Aug 10, 2026 @ 13:05:00 -> Add unit tests for FinishSingerSong rollover to top of rotation and AdvanceRotationAfterFinished
 // Edited on Aug 4, 2026 @ 10:20:00 -> Add unit test for FinishSingerSong with a skipped singer
 // Edited on Jul 28, 2026 @ 12:51:00 -> Add unit tests for pause, delete, restore, and set-current validation
 // Last Edit: Jun 29, 2026 13:26 - Initial test suite: SingerEntry round helpers, RotationHelpers, ThemeService.
@@ -744,6 +744,61 @@ public class MainViewModelTests
         Assert.Equal("Bob", bob.Name);
         Assert.Equal("Song B", bob.Song);
         Assert.True(bob.IsMusic);
+    }
+
+    [Fact]
+    public void FinishSingerSong_LastSingerInRotation_RollsOverToTopSinger()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
+        vm.Singers.Clear();
+
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var charlie = new SingerEntry { Name = "Charlie" };
+
+        vm.Singers.Add(alice);
+        vm.Singers.Add(bob);
+        vm.Singers.Add(charlie);
+
+        // Charlie (last singer) is current
+        charlie.IsCurrent = true;
+        RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
+        Assert.True(alice.IsNext);
+
+        // Act - Finish Charlie's song
+        vm.FinishSingerSongCommand.Execute(charlie);
+
+        // Assert - Rotation rolled over to Alice (top singer) and Bob is marked next
+        Assert.False(charlie.IsCurrent);
+        Assert.True(alice.IsCurrent);
+        Assert.False(alice.IsNext);
+        Assert.True(bob.IsNext);
+    }
+
+    [Fact]
+    public void FinishSingerSong_WhenSingerNotMarkedCurrent_StillAdvancesToNextSinger()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
+        vm.Singers.Clear();
+
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var charlie = new SingerEntry { Name = "Charlie" };
+
+        vm.Singers.Add(alice);
+        vm.Singers.Add(bob);
+        vm.Singers.Add(charlie);
+
+        // Charlie is NOT marked current (IsCurrent was out of sync or on Alice)
+        alice.IsCurrent = true;
+
+        // Act - Click Done on Charlie
+        vm.FinishSingerSongCommand.Execute(charlie);
+
+        // Assert - Rotation advances relative to Charlie, wrapping around to Alice
+        Assert.False(charlie.IsCurrent);
+        Assert.True(alice.IsCurrent);
+        Assert.True(bob.IsNext);
     }
 }
 

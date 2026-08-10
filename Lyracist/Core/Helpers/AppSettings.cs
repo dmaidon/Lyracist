@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 19:16:45 -> Add SpecialEvents mapping properties to AppSettings
+// Edited on Aug 10, 2026 @ 13:25:00 -> Add Last Song default event banner to AppSettings
 using System.IO;
 using System.Text.Json;
 
@@ -845,7 +845,8 @@ public static class AppSettings
             new() { EventName = "Birthday", BannerFileName = "Birthday.png" },
             new() { EventName = "Wedding", BannerFileName = "Wedding.png" },
             new() { EventName = "Engagement", BannerFileName = "Engagement.png" },
-            new() { EventName = "Anniversary", BannerFileName = "Anniversary.png" }
+            new() { EventName = "Anniversary", BannerFileName = "Anniversary.png" },
+            new() { EventName = "Last Song", BannerFileName = "LastSong.png" }
         ];
     }
 }

@@ -1,4 +1,4 @@
-// Edited on Aug 9, 2026 @ 13:52:00 -> Update preprocessor guards to #if !MAUI for WPF drawing API calls
+// Edited on Aug 10, 2026 @ 13:25:00 -> Add "Last Song" (LastSong.png) to standard event banners
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +12,10 @@ namespace Lyracist.Shared;
 public static class DjBannerFileManager
 {
     private static readonly string[] SupportedExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".mp4"];
-    public static readonly string[] StandardEventNames = ["Birthday", "Wedding", "Engagement", "Anniversary"];
+    public static readonly string[] StandardEventNames = ["Birthday", "Wedding", "Engagement", "Anniversary", "Last Song"];
+
+    public static string GetStandardBannerFileName(string eventName) =>
+        eventName.Equals("Last Song", StringComparison.OrdinalIgnoreCase) ? "LastSong.png" : $"{eventName}.png";
 
     public static void EnsureStandardEventBanners(string directory)
     {
@@ -22,7 +25,7 @@ public static class DjBannerFileManager
         }
 
 #if !MAUI
-        string[] standardFiles = ["Birthday.png", "Wedding.png", "Engagement.png", "Anniversary.png"];
+        string[] standardFiles = ["Birthday.png", "Wedding.png", "Engagement.png", "Anniversary.png", "LastSong.png"];
         for (int i = 0; i < standardFiles.Length; i++)
         {
             string fullPath = Path.Combine(directory, standardFiles[i]);
