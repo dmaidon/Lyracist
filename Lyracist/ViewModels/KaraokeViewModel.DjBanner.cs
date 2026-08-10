@@ -1,9 +1,10 @@
-// Edited on Aug 9, 2026 @ 09:15:00 -> Add UpdateActiveSpecialEventFromSync helper method to synchronize active special event from KSRotation
+// Edited on Aug 10, 2026 @ 12:05:00 -> Add RefreshConnectInstructionsBanner helper method
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lyracist.Shared;
 
 namespace Lyracist.ViewModels;
 
@@ -105,17 +106,38 @@ public partial class KaraokeViewModel
     public void InitializeSpecialEvents()
     {
         var prefs = _displayService.GetPreferences();
-        ActiveSpecialEvent = string.IsNullOrEmpty(prefs.SelectedSpecialEvent) ? "None" : prefs.SelectedSpecialEvent;
+        ActiveSpecialEvent = string.IsNullOrWhiteSpace(prefs.SelectedSpecialEvent) ? "None" : prefs.SelectedSpecialEvent;
         RebuildSpecialEventOptions();
+        RefreshConnectInstructionsBanner();
+    }
+
+    public void RefreshConnectInstructionsBanner()
+    {
+        try
+        {
+            DjBannerFileManager.CreateConnectInstructionsBannerPng(
+                System.IO.Path.Combine(Globals.EventBannersDir, "ConnectInstructions.png"),
+                WifiHelper.GetConnectedSsid() ?? string.Empty,
+                Lyracist.Core.Helpers.AppSettings.WifiPassword,
+                JoinUrl);
+        }
+        catch
+        {
+            // Ignore background rendering exceptions
+        }
     }
 
     public void RebuildSpecialEventOptions()
     {
+        if (string.IsNullOrWhiteSpace(ActiveSpecialEvent))
+        {
+            ActiveSpecialEvent = "None";
+        }
         SpecialEventOptions.Clear();
-        SpecialEventOptions.Add(new SpecialEventOptionViewModel("None", "None", ActiveSpecialEvent == "None", OnSpecialEventChanged));
+        SpecialEventOptions.Add(new SpecialEventOptionViewModel("None", "None", ActiveSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase), OnSpecialEventChanged));
         foreach (var ev in Lyracist.Core.Helpers.AppSettings.SpecialEvents)
         {
-            SpecialEventOptions.Add(new SpecialEventOptionViewModel(ev.EventName, ev.EventName, ActiveSpecialEvent == ev.EventName, OnSpecialEventChanged));
+            SpecialEventOptions.Add(new SpecialEventOptionViewModel(ev.EventName, ev.EventName, ActiveSpecialEvent.Equals(ev.EventName, StringComparison.OrdinalIgnoreCase), OnSpecialEventChanged));
         }
     }
 

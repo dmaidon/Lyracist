@@ -259,6 +259,50 @@
             </Setter>
         </Style>
 
+        <!-- Green GroupBox theme (Connect & Request Instructions) -->
+        <LinearGradientBrush x:Key="GreenGroupBoxHeaderBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#059669" Offset="0.0" />
+            <GradientStop Color="#047857" Offset="1.0" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="GreenGroupBoxBodyBrush" Color="#12059669" />
+        <SolidColorBrush x:Key="GreenGroupBoxBorderBrush" Color="#5510B981" />
+
+        <Style x:Key="GreenSettingsGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="{StaticResource GreenGroupBoxBorderBrush}"
+                                Background="{DynamicResource MaterialDesignCardBackground}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0"
+                                        Background="{StaticResource GreenGroupBoxHeaderBrush}"
+                                        CornerRadius="7,7,0,0"
+                                        Padding="14,9">
+                                    <TextBlock Text="{TemplateBinding Header}"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="13" />
+                                </Border>
+                                <Border Grid.Row="1"
+                                        Background="{StaticResource GreenGroupBoxBodyBrush}"
+                                        Padding="14"
+                                        CornerRadius="0,0,7,7">
+                                    <ContentPresenter />
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Navy GroupBox theme (Network IP, Server/IP Setup) -->
         <LinearGradientBrush x:Key="NavyGroupBoxHeaderBrush" StartPoint="0,0" EndPoint="1,0">
             <GradientStop Color="#3a7bd5" Offset="0.0" />
@@ -578,7 +622,7 @@
                                              Focusable="False"
                                              Width="220"
                                              PopupAnimation="None">
-                                                 <Border Background="{DynamicResource MaterialDesignPaper}"
+                                                <Border Background="{DynamicResource MaterialDesignPaper}"
                                                          BorderBrush="{DynamicResource MaterialDesignDivider}"
                                                          BorderThickness="1"
                                                          CornerRadius="4"
@@ -1471,40 +1515,63 @@
                             </StackPanel>
                         </GroupBox>
 
-                        <GroupBox Header="Display &amp; Projection"
-                                  Style="{StaticResource BlueSettingsGroupBoxStyle}"
-                                  Grid.Column="1"
-                                  VerticalAlignment="Top"
-                                  Margin="15,0,0,12">
-                            <StackPanel Margin="0,4,0,0">
-                                <TextBlock Text="Target Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                <Grid Margin="0,0,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                        <!-- Column 1: Display & Projection + Connect Instructions -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="15,0,0,12">
+                            <GroupBox Header="Display &amp; Projection" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="Target Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox
+                                            ItemsSource="{Binding AvailableMonitors}"
+                                            SelectedValue="{Binding SelectedMonitorDevice, UpdateSourceTrigger=PropertyChanged}"
+                                            SelectedValuePath="DeviceName"
+                                            DisplayMemberPath="FriendlyName"
+                                            Style="{StaticResource ModernComboBoxStyle}" />
+                                        <Button
+                                            Grid.Column="1"
+                                            Content="Refresh"
+                                            Command="{Binding RefreshMonitorsCommand}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Margin="8,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Padding="8,4"
+                                            Height="32" />
+                                    </Grid>
+                                    <TextBlock Text="Select which monitor will display the projection window. If not found, it defaults to the secondary or primary monitor."
+                                               TextWrapping="Wrap"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <!-- Connect & Request Instructions GroupBox -->
+                            <GroupBox Header="Connect &amp; Request Instructions" Style="{StaticResource GreenSettingsGroupBoxStyle}">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="Target Screen / Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
                                     <ComboBox
-                                        ItemsSource="{Binding AvailableMonitors}"
-                                        SelectedValue="{Binding SelectedMonitorDevice, UpdateSourceTrigger=PropertyChanged}"
+                                        ItemsSource="{Binding AvailableMonitorsWithAll}"
+                                        SelectedValue="{Binding ConnectInstructionsScreen, UpdateSourceTrigger=PropertyChanged}"
                                         SelectedValuePath="DeviceName"
                                         DisplayMemberPath="FriendlyName"
-                                        Style="{StaticResource ModernComboBoxStyle}" />
-                                    <Button
-                                        Grid.Column="1"
-                                        Content="Refresh"
-                                        Command="{Binding RefreshMonitorsCommand}"
-                                        Style="{StaticResource ModernSecondaryButtonStyle}"
-                                        Margin="8,0,0,0"
-                                        VerticalAlignment="Center"
-                                        Padding="8,4"
-                                        Height="32" />
-                                </Grid>
-                                <TextBlock Text="Select which monitor will display the projection window. If not found, it defaults to the secondary or primary monitor."
-                                           TextWrapping="Wrap"
-                                           FontSize="12"
-                                           Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                            </StackPanel>
-                        </GroupBox>
+                                        Style="{StaticResource ModernComboBoxStyle}"
+                                        Margin="0,0,0,10" />
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Wi-Fi Password (Optional): " VerticalAlignment="Center" Foreground="#E9D5FF" Margin="0,0,8,0" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
+                                        <TextBox Grid.Column="1" Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" Padding="6,2" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
+                                    </Grid>
+                                    <TextBlock Text="Auto-detects active Wi-Fi SSID, and request portal URL." Foreground="#A7F3D0" FontSize="11" TextWrapping="Wrap" TextAlignment="Center" />
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
 
                         <GroupBox Header="DJ &amp; Special Event Banners"
                                   Style="{StaticResource BlueSettingsGroupBoxStyle}"
@@ -1542,7 +1609,7 @@
                                     <ItemsControl ItemsSource="{Binding SpecialEventOptions}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
-                                                <UniformGrid Columns="2"/>
+                                                <UniformGrid Columns="2" />
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
@@ -1593,54 +1660,54 @@
                                         Style="{StaticResource ModernCheckBoxStyle}"
                                         Margin="0,8,0,4" />
 
-                                    <Separator Style="{StaticResource MaterialDesignSeparator}" Margin="0,12,0,12" />
-                                     <Grid Margin="0,0,0,6">
-                                         <Grid.ColumnDefinitions>
-                                             <ColumnDefinition Width="*" />
-                                             <ColumnDefinition Width="Auto" />
-                                             <ColumnDefinition Width="Auto" />
-                                         </Grid.ColumnDefinitions>
-                                         <TextBlock Text="Special Event Banners Mapping" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource AppHeaderBrush}" />
-                                         <Button Grid.Column="1" Content="Upload Banner" Command="{Binding UploadEventBannerCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" Margin="6,0,0,0" ToolTip="Upload an image or video file to the EventBanners folder" />
-                                         <Button Grid.Column="2" Content="Add Event" Command="{Binding AddSpecialEventCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" Margin="6,0,0,0" ToolTip="Add a new special event banner entry" />
-                                     </Grid>
-                                     <ItemsControl ItemsSource="{Binding SpecialEvents}" Margin="0,0,0,12">
-                                         <ItemsControl.ItemTemplate>
-                                             <DataTemplate>
-                                                 <Grid x:Name="RootRow" Margin="0,3,0,3">
-                                                     <Grid.ColumnDefinitions>
-                                                         <ColumnDefinition Width="130" />
-                                                         <ColumnDefinition Width="8" />
-                                                         <ColumnDefinition Width="*" />
-                                                         <ColumnDefinition Width="8" />
-                                                         <ColumnDefinition Width="Auto" />
-                                                     </Grid.ColumnDefinitions>
+                                    <Separator Style="{StaticResource MaterialDesignSeparator}" Margin="0,8,0,12" />
+                                    <Grid Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Special Event Banners Mapping" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <Button Grid.Column="1" Content="Upload Banner" Command="{Binding UploadEventBannerCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" Margin="6,0,0,0" ToolTip="Upload an image or video file to the EventBanners folder" />
+                                        <Button Grid.Column="2" Content="Add Event" Command="{Binding AddSpecialEventCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" Margin="6,0,0,0" ToolTip="Add a new special event banner entry" />
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding SpecialEvents}" Margin="0,0,0,12">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid x:Name="RootRow" Margin="0,3,0,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="130" />
+                                                        <ColumnDefinition Width="8" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="8" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
 
-                                                     <TextBlock x:Name="StandardTitleText" Grid.Column="0" Text="{Binding EventName}" FontWeight="SemiBold" Foreground="#E9D5FF" VerticalAlignment="Center" Visibility="Collapsed" />
-                                                     <TextBox x:Name="CustomTitleInput" Grid.Column="0" Text="{Binding EventName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Foreground="#E9D5FF" Height="28" Padding="4,2" />
+                                                    <TextBlock x:Name="StandardTitleText" Grid.Column="0" Text="{Binding EventName}" FontWeight="SemiBold" Foreground="#E9D5FF" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                    <TextBox x:Name="CustomTitleInput" Grid.Column="0" Text="{Binding EventName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Foreground="#E9D5FF" Height="28" Padding="4,2" />
 
-                                                     <TextBlock x:Name="StandardFileText" Grid.Column="2" Text="{Binding BannerFileName, StringFormat='Standard Graphic ({0})'}" Foreground="#C4B5FD" FontStyle="Italic" VerticalAlignment="Center" Visibility="Collapsed" />
-                                                     <ComboBox x:Name="CustomFileCombo" Grid.Column="2" 
-                                                               ItemsSource="{Binding DataContext.AvailableEventBannerFiles, RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
-                                                               SelectedItem="{Binding BannerFileName, Mode=TwoWay}" 
-                                                               Style="{StaticResource ModernComboBoxStyle}" 
+                                                    <TextBlock x:Name="StandardFileText" Grid.Column="2" Text="{Binding BannerFileName, StringFormat='Standard Graphic ({0})'}" Foreground="#C4B5FD" FontStyle="Italic" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                    <ComboBox x:Name="CustomFileCombo" Grid.Column="2"
+                                                               ItemsSource="{Binding DataContext.AvailableEventBannerFiles, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                               SelectedItem="{Binding BannerFileName, Mode=TwoWay}"
+                                                               Style="{StaticResource ModernComboBoxStyle}"
                                                                Height="28" Padding="4,2" />
 
-                                                     <Button x:Name="DeleteBtn" Grid.Column="4" Content="Delete" Command="{Binding DataContext.DeleteSpecialEventCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" ToolTip="Delete this special event banner entry" />
-                                                 </Grid>
-                                                 <DataTemplate.Triggers>
-                                                     <DataTrigger Binding="{Binding IsStandard}" Value="True">
-                                                         <Setter TargetName="StandardTitleText" Property="Visibility" Value="Visible" />
-                                                         <Setter TargetName="CustomTitleInput" Property="Visibility" Value="Collapsed" />
-                                                         <Setter TargetName="StandardFileText" Property="Visibility" Value="Visible" />
-                                                         <Setter TargetName="CustomFileCombo" Property="Visibility" Value="Collapsed" />
-                                                         <Setter TargetName="DeleteBtn" Property="Visibility" Value="Collapsed" />
-                                                     </DataTrigger>
-                                                 </DataTemplate.Triggers>
-                                             </DataTemplate>
-                                         </ItemsControl.ItemTemplate>
-                                     </ItemsControl>
-                                     <Button Content="Save Special Events Mapping" Command="{Binding SaveSpecialEventsMappingCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="30" Padding="8,2" HorizontalAlignment="Left" />
+                                                    <Button x:Name="DeleteBtn" Grid.Column="4" Content="Delete" Command="{Binding DataContext.DeleteSpecialEventCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" ToolTip="Delete this special event banner entry" />
+                                                </Grid>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding IsStandard}" Value="True">
+                                                        <Setter TargetName="StandardTitleText" Property="Visibility" Value="Visible" />
+                                                        <Setter TargetName="CustomTitleInput" Property="Visibility" Value="Collapsed" />
+                                                        <Setter TargetName="StandardFileText" Property="Visibility" Value="Visible" />
+                                                        <Setter TargetName="CustomFileCombo" Property="Visibility" Value="Collapsed" />
+                                                        <Setter TargetName="DeleteBtn" Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Button Content="Save Special Events Mapping" Command="{Binding SaveSpecialEventsMappingCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="30" Padding="8,2" HorizontalAlignment="Left" />
                                 </StackPanel>
                             </Grid>
                         </GroupBox>

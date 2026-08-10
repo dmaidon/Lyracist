@@ -80,8 +80,16 @@ namespace KSRotation.Windows
             base.OnKeyDown(e);
         }
 
+        public bool IsShuttingDown { get; set; }
+
         protected override void OnClosing(CancelEventArgs e)
         {
+            if (IsShuttingDown)
+            {
+                base.OnClosing(e);
+                return;
+            }
+
             e.Cancel = true;
             Hide();
             base.OnClosing(e);

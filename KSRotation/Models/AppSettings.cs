@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 13:25:00 -> Add Last Song default event banner to AppSettings
+// Edited on Aug 10, 2026 @ 12:25:00 -> Add ConnectInstructionsScreen monitor setting
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -49,13 +49,17 @@ namespace KSRotation.Models
 
         public string DjBannerMonitorDevice { get; init; } = string.Empty;
 
+        public string ConnectInstructionsScreen { get; init; } = "All Screens / Monitors";
+
         public string SelectedDjBannerPath { get; init; } = string.Empty;
 
         public bool IsDjBannerEnabled { get; init; } = false;
 
         public bool IsDjBannerQrCodeEnabled { get; init; } = true;
 
-        public string ActiveSpecialEvent { get; init; } = string.Empty;
+        public string WifiPassword { get; init; } = string.Empty;
+
+        public string ActiveSpecialEvent { get; init; } = "None";
 
         public System.Collections.Generic.List<SpecialEventConfig> SpecialEvents { get; init; } =
         [
@@ -63,7 +67,8 @@ namespace KSRotation.Models
             new() { EventName = "Wedding", BannerFileName = "Wedding.png" },
             new() { EventName = "Engagement", BannerFileName = "Engagement.png" },
             new() { EventName = "Anniversary", BannerFileName = "Anniversary.png" },
-            new() { EventName = "Last Song", BannerFileName = "LastSong.png" }
+            new() { EventName = "Last Song", BannerFileName = "LastSong.png" },
+            new() { EventName = "Connect Instructions", BannerFileName = "ConnectInstructions.png" }
         ];
 
         /// <summary>The display target type (Monitor, Chromecast, Miracast, BrowserCast, etc.)</summary>

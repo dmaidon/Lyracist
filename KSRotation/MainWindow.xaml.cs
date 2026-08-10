@@ -29,6 +29,7 @@ namespace KSRotation
             {
                 vm.Shutdown();
             }
+            System.Windows.Application.Current.Shutdown();
         }
 
         private void OnPortalTitleClicked(object sender, MouseButtonEventArgs e)

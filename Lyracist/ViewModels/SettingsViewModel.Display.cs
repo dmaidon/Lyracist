@@ -221,11 +221,121 @@ public partial class SettingsViewModel
         _display.RestoreAssignments();
     }
 
+    public ObservableCollection<string> ConnectInstructionScreens { get; } = [];
+
+    public string ConnectInstructionsScreen
+    {
+        get => AppSettings.ConnectInstructionsScreen;
+        set
+        {
+            if (AppSettings.ConnectInstructionsScreen != value)
+            {
+                AppSettings.ConnectInstructionsScreen = value;
+                OnPropertyChanged();
+                RefreshConnectInstructionsBanner();
+            }
+        }
+    }
+
+    public string WifiPassword
+    {
+        get
+        {
+            string? ssid = WifiHelper.GetConnectedSsid();
+            string savedPwd = !string.IsNullOrWhiteSpace(ssid) ? WifiPasswordStore.GetPasswordForSsid(ssid) : string.Empty;
+            return !string.IsNullOrEmpty(savedPwd) ? savedPwd : AppSettings.WifiPassword;
+        }
+        set
+        {
+            if (AppSettings.WifiPassword != value)
+            {
+                AppSettings.WifiPassword = value;
+                string? ssid = WifiHelper.GetConnectedSsid();
+                if (!string.IsNullOrWhiteSpace(ssid))
+                {
+                    WifiPasswordStore.SetPasswordForSsid(ssid, value);
+                }
+                OnPropertyChanged();
+                RefreshConnectInstructionsBanner();
+            }
+        }
+    }
+
+    public void RefreshConnectInstructionScreens()
+    {
+        ConnectInstructionScreens.Clear();
+        ConnectInstructionScreens.Add("None");
+        ConnectInstructionScreens.Add("All Screens / Monitors");
+        foreach (var screen in Screens)
+        {
+            ConnectInstructionScreens.Add(screen.DisplayName);
+        }
+    }
+
+    private void RefreshConnectInstructionsBanner()
+    {
+        try
+        {
+            string localIp = AppSettings.GetLocalIPAddress();
+            string requestUrl = $"http://{localIp}:8080/request";
+            var (w, h) = GetTargetScreenResolution(ConnectInstructionsScreen);
+            DjBannerFileManager.CreateConnectInstructionsBannerPng(
+                System.IO.Path.Combine(Globals.EventBannersDir, "ConnectInstructions.png"),
+                WifiHelper.GetConnectedSsid() ?? string.Empty,
+                AppSettings.WifiPassword,
+                requestUrl,
+                w, h);
+        }
+        catch
+        {
+            // Ignore background rendering exceptions
+        }
+    }
+
+    private static (int Width, int Height) GetTargetScreenResolution(string screenSelection)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(screenSelection) || screenSelection.Equals("None", StringComparison.OrdinalIgnoreCase))
+            {
+                return (1920, 1080);
+            }
+
+            if (screenSelection.Equals("All Screens", StringComparison.OrdinalIgnoreCase) ||
+                screenSelection.Equals("All Screens / Monitors", StringComparison.OrdinalIgnoreCase))
+            {
+                int maxW = 1920, maxH = 1080;
+                foreach (var s in System.Windows.Forms.Screen.AllScreens)
+                {
+                    if (s.Bounds.Width > maxW) maxW = s.Bounds.Width;
+                    if (s.Bounds.Height > maxH) maxH = s.Bounds.Height;
+                }
+                return (maxW, maxH);
+            }
+
+            foreach (var s in System.Windows.Forms.Screen.AllScreens)
+            {
+                if (s.DeviceName.Equals(screenSelection, StringComparison.OrdinalIgnoreCase) ||
+                    screenSelection.Contains(s.DeviceName) ||
+                    s.Bounds.ToString().Contains(screenSelection))
+                {
+                    return (s.Bounds.Width, s.Bounds.Height);
+                }
+            }
+        }
+        catch
+        {
+            // Ignore screen enumeration errors
+        }
+        return (1920, 1080);
+    }
+
     public ObservableCollection<Lyracist.Shared.SpecialEventConfig> SpecialEventsList { get; } = [];
     public ObservableCollection<string> AvailableEventBannerFiles { get; } = [];
 
     public void RefreshSpecialEventsList()
     {
+        RefreshConnectInstructionScreens();
         SpecialEventsList.Clear();
         foreach (var ev in AppSettings.SpecialEvents)
         {

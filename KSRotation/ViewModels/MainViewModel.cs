@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 13:05:00 -> Update FinishSingerSong to use RotationHelpers.AdvanceRotationAfterFinished for robust rollover and rotation advancement
+// Edited on Aug 10, 2026 @ 14:18:00 -> Default ActiveSpecialEvent to "None"
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -396,12 +396,22 @@ namespace KSRotation.ViewModels
         }
 
         public ObservableCollection<MonitorItem> AvailableMonitors { get; } = [];
+        public ObservableCollection<MonitorItem> AvailableMonitorsWithAll { get; } = [];
 
         [ObservableProperty]
         public partial string SelectedMonitorDevice { get; set; } = string.Empty;
 
         [ObservableProperty]
         public partial string DjBannerMonitorDevice { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial string ConnectInstructionsScreen { get; set; } = "All Screens / Monitors";
+
+        partial void OnConnectInstructionsScreenChanged(string value)
+        {
+            QueueSaveSettings();
+            RefreshConnectInstructionsBanner();
+        }
 
         [ObservableProperty]
         public partial string SelectedDjBannerPath { get; set; } = string.Empty;
@@ -418,6 +428,74 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool IsDjBannerQrCodeEnabled { get; set; } = true;
+
+        [ObservableProperty]
+        public partial string WifiPassword { get; set; } = string.Empty;
+
+        partial void OnWifiPasswordChanged(string value)
+        {
+            string? ssid = WifiHelper.GetConnectedSsid();
+            if (!string.IsNullOrWhiteSpace(ssid))
+            {
+                WifiPasswordStore.SetPasswordForSsid(ssid, value);
+            }
+            RefreshConnectInstructionsBanner();
+        }
+
+        public void RefreshConnectInstructionsBanner()
+        {
+            try
+            {
+                var (w, h) = GetTargetScreenResolution(ConnectInstructionsScreen);
+                DjBannerFileManager.CreateConnectInstructionsBannerPng(
+                    System.IO.Path.Combine(Globals.EventBannersDir, "ConnectInstructions.png"),
+                    WifiHelper.GetConnectedSsid() ?? string.Empty,
+                    WifiPassword,
+                    ConnectionUrl,
+                    w, h);
+            }
+            catch
+            {
+                // Ignore background rendering exceptions
+            }
+        }
+
+        private static (int Width, int Height) GetTargetScreenResolution(string screenSelection)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(screenSelection) || screenSelection.Equals("None", StringComparison.OrdinalIgnoreCase))
+                {
+                    return (1920, 1080);
+                }
+
+                var monitors = MonitorEnumerator.GetMonitors();
+                if (screenSelection.Equals("All Screens", StringComparison.OrdinalIgnoreCase) ||
+                    screenSelection.Equals("All Screens / Monitors", StringComparison.OrdinalIgnoreCase))
+                {
+                    int maxW = 1920, maxH = 1080;
+                    foreach (var m in monitors)
+                    {
+                        if (m.Width > maxW) maxW = m.Width;
+                        if (m.Height > maxH) maxH = m.Height;
+                    }
+                    return (maxW, maxH);
+                }
+
+                foreach (var m in monitors)
+                {
+                    if (string.Equals(m.DeviceName, screenSelection, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return (m.Width, m.Height);
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore monitor enumeration errors
+            }
+            return (1920, 1080);
+        }
 
         public ObservableCollection<DjBannerItem> AvailableDjBanners { get; } = [];
 
@@ -605,7 +683,11 @@ namespace KSRotation.ViewModels
             SelectedDjBannerPath = settings.SelectedDjBannerPath ?? string.Empty;
             IsDjBannerEnabled = settings.IsDjBannerEnabled;
             IsDjBannerQrCodeEnabled = settings.IsDjBannerQrCodeEnabled;
+            string? currentSsid = WifiHelper.GetConnectedSsid();
+            string savedWifiPassword = !string.IsNullOrWhiteSpace(currentSsid) ? WifiPasswordStore.GetPasswordForSsid(currentSsid) : string.Empty;
+            WifiPassword = !string.IsNullOrEmpty(savedWifiPassword) ? savedWifiPassword : (settings.WifiPassword ?? string.Empty);
             ActiveSpecialEvent = string.IsNullOrEmpty(settings.ActiveSpecialEvent) ? "None" : settings.ActiveSpecialEvent;
+            RefreshConnectInstructionsBanner();
 
             SpecialEvents.Clear();
             if (settings.SpecialEvents != null)
@@ -1841,6 +1923,7 @@ namespace KSRotation.ViewModels
                 SelectedDjBannerPath = SelectedDjBannerPath,
                 IsDjBannerEnabled = IsDjBannerEnabled,
                 IsDjBannerQrCodeEnabled = IsDjBannerQrCodeEnabled,
+                WifiPassword = WifiPassword,
                 ActiveSpecialEvent = ActiveSpecialEvent,
                 SpecialEvents = SpecialEvents.ToList(),
                 RotationTarget = RotationTarget,
@@ -1951,14 +2034,20 @@ namespace KSRotation.ViewModels
             string currentSelection = SelectedMonitorDevice;
 
             AvailableMonitors.Clear();
+            AvailableMonitorsWithAll.Clear();
+            AvailableMonitorsWithAll.Add(new MonitorItem { DeviceName = "None", FriendlyName = "None" });
+            AvailableMonitorsWithAll.Add(new MonitorItem { DeviceName = "All Screens / Monitors", FriendlyName = "All Screens / Monitors" });
+
             foreach (var monitor in monitors)
             {
                 string friendly = $"Monitor {monitor.Index + 1} ({monitor.Width}x{monitor.Height}){(monitor.IsPrimary ? " [Primary]" : "")}";
-                AvailableMonitors.Add(new MonitorItem
+                var item = new MonitorItem
                 {
                     DeviceName = monitor.DeviceName,
                     FriendlyName = friendly
-                });
+                };
+                AvailableMonitors.Add(item);
+                AvailableMonitorsWithAll.Add(item);
             }
 
             if (!string.IsNullOrEmpty(currentSelection) && AvailableMonitors.Any(m => string.Equals(m.DeviceName, currentSelection, StringComparison.OrdinalIgnoreCase)))
@@ -2158,11 +2247,15 @@ namespace KSRotation.ViewModels
 
         public void RebuildSpecialEventOptions()
         {
+            if (string.IsNullOrWhiteSpace(ActiveSpecialEvent))
+            {
+                ActiveSpecialEvent = "None";
+            }
             SpecialEventOptions.Clear();
-            SpecialEventOptions.Add(new SpecialEventOptionViewModel("None", "None", ActiveSpecialEvent == "None", OnSpecialEventOptionChanged));
+            SpecialEventOptions.Add(new SpecialEventOptionViewModel("None", "None", ActiveSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase), OnSpecialEventOptionChanged));
             foreach (var ev in SpecialEvents)
             {
-                SpecialEventOptions.Add(new SpecialEventOptionViewModel(ev.EventName, ev.EventName, ActiveSpecialEvent == ev.EventName, OnSpecialEventOptionChanged));
+                SpecialEventOptions.Add(new SpecialEventOptionViewModel(ev.EventName, ev.EventName, ActiveSpecialEvent.Equals(ev.EventName, StringComparison.OrdinalIgnoreCase), OnSpecialEventOptionChanged));
             }
         }
 

@@ -106,6 +106,8 @@
     <Compile Include="..\Shared\MonitorInfo.cs" Link="MonitorInfo.cs" />
     <Compile Include="..\Shared\MonitorEnumerator.cs" Link="MonitorEnumerator.cs" />
     <Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
+    <Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
+    <Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
   </ItemGroup>
 
   <ItemGroup>

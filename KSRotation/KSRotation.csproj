@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.10.418</AssemblyVersion>
-    <FileVersion>26.8.10.418</FileVersion>
+    <AssemblyVersion>26.8.10.427</AssemblyVersion>
+    <FileVersion>26.8.10.427</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -126,6 +126,8 @@
     <Compile Include="..\Shared\MonitorInfo.cs" Link="MonitorInfo.cs" />
     <Compile Include="..\Shared\MonitorEnumerator.cs" Link="MonitorEnumerator.cs" />
     <Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
+    <Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
+    <Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lyracist.Data\Lyracist.Data.csproj" />

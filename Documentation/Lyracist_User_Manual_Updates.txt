@@ -1,5 +1,28 @@
-// Edited on Aug 9, 2026 @ 17:45:00 -> Add Special Event management, QR code contrast, and 11+ performance updates to manual documentation
-Lyracist Pro & KSRotation - Performer Portal Update (July 2026)
+// Edited on Aug 10, 2026 @ 12:50:00 -> Add Connect Instructions, dynamic screen resolution detection, and wifi_passwords.json store to manual documentation
+Lyracist Pro & KSRotation - Performer Portal Update (August 2026)
+
+Section: Connect & Request Instructions Screen / Wi-Fi Password Manager
+
+[Update Details]
+A dedicated Connect & Request Instructions feature has been added to display scan-to-connect Wi-Fi and song request QR codes directly on projection monitors.
+
+1. Scan-to-Connect Wi-Fi & Song Request Dual QR Code Banner:
+   - Automatically detects active Wi-Fi network SSID and song request portal URL.
+   - Generates a dynamic vector graphic (`ConnectInstructions.png`) featuring a WPA/WPA2/NoPass Wi-Fi scan-to-connect QR code (forest green `#064E3B`) and a song request portal QR code (pure black `#000000`).
+   - Clearly displays Wi-Fi network SSID, password status ("No Password Required" or explicit password), and portal URL.
+
+2. Dynamic Target Screen Resolution Detection:
+   - Automatically detects the physical pixel dimensions (`width` x `height`) of the target display monitor (`1080p`, `1440p`, `4K 3840x2160`, etc.).
+   - Dynamically scales vector paths, fonts, card bounds, and QR code module density (`pixelsPerModule`) to guarantee razor-sharp 1:1 pixel rendering on any screen size.
+
+3. Persistent Wi-Fi Password Store (`wifi_passwords.json`):
+   - Automatically remembers Wi-Fi passwords entered for specific SSIDs (venue Wi-Fi, travel router, mobile hotspot).
+   - Upon detecting a connected Wi-Fi network SSID, the application automatically recalls and populates the saved password into the Wi-Fi password input box.
+   - Entering or updating a password automatically updates `wifi_passwords.json` for that SSID.
+
+4. Dedicated Green GroupBox Layout & Screen Selector:
+   - Located in the Display settings tab inside a dedicated Green GroupBox styled under Column 1 (directly under Display & Projection).
+   - Features a dedicated **Target Screen / Monitor** selection dropdown with options: "None", "All Screens / Monitors", or individual connected display monitors.
 
 Section: Singer Request Board / Patron Request Portal
 

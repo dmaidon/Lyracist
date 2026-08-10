@@ -732,6 +732,18 @@ public static class AppSettings
         set { _data.RotationMusicDelaySeconds = value; Save(); }
     }
 
+    public static string ConnectInstructionsScreen
+    {
+        get => _data.ConnectInstructionsScreen;
+        set { _data.ConnectInstructionsScreen = value; Save(); }
+    }
+
+    public static string WifiPassword
+    {
+        get => _data.WifiPassword;
+        set { _data.WifiPassword = value; Save(); }
+    }
+
     public static List<Lyracist.Shared.SpecialEventConfig> SpecialEvents
     {
         get => _data.SpecialEvents;
@@ -743,6 +755,8 @@ public static class AppSettings
     private sealed class SettingsData
     {
         public Dictionary<string, string> Hotkeys { get; set; } = [];
+        public string WifiPassword { get; set; } = string.Empty;
+        public string ConnectInstructionsScreen { get; set; } = "All Screens / Monitors";
         public bool EnableKillVocal { get; set; } = false;
 
         // Registration data

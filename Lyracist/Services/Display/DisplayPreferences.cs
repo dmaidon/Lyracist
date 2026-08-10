@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 19:17:30 -> Add SelectedSpecialEvent string property to DisplayPreferences
+// Edited on Aug 10, 2026 @ 14:18:00 -> Default SelectedSpecialEvent to "None"
 using Lyracist.Shared;
 
 namespace Lyracist.Services.Display;
@@ -11,7 +11,7 @@ public class DisplayPreferences
     public string RotationViewMode { get; set; } = "Normal List";
     public int? DjBannerScreenIndex { get; set; }
     public string SelectedDjBannerPath { get; set; } = string.Empty;
-    public string SelectedSpecialEvent { get; set; } = string.Empty;
+    public string SelectedSpecialEvent { get; set; } = "None";
     public DisplayTarget RotationTarget { get; set; } = DisplayTarget.Monitor;
     public bool IsLyricsActive { get; set; } = true;
     public bool IsRotationActive { get; set; } = true;

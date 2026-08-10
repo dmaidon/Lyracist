@@ -133,6 +133,43 @@
             </Setter>
         </Style>
 
+        <!-- Green GroupBox theme (Connect & Request Instructions) -->
+        <LinearGradientBrush x:Key="GreenGroupBoxHeaderBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#059669" Offset="0.0" />
+            <GradientStop Color="#047857" Offset="1.0" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="GreenGroupBoxBodyBrush"   Color="#12059669" />
+        <SolidColorBrush x:Key="GreenGroupBoxBorderBrush" Color="#5510B981" />
+
+        <Style x:Key="GreenSettingsGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="{StaticResource GreenGroupBoxBorderBrush}">
+                            <StackPanel>
+                                <Border Background="{StaticResource GreenGroupBoxHeaderBrush}"
+                                        CornerRadius="7,7,0,0"
+                                        Padding="14,9">
+                                    <TextBlock Text="{TemplateBinding Header}"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="13" />
+                                </Border>
+                                <Border Background="{StaticResource GreenGroupBoxBodyBrush}"
+                                        Padding="14"
+                                        CornerRadius="0,0,7,7">
+                                    <ContentPresenter />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Orange GroupBox theme (Scaryoke, Simulation Auto-pilot) -->
         <LinearGradientBrush x:Key="OrangeGroupBoxHeaderBrush" StartPoint="0,0" EndPoint="1,0">
             <GradientStop Color="#e65c00" Offset="0.0" />
@@ -346,7 +383,7 @@
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="8" />
                                                 <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="8" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <ComboBox Grid.Column="0" ItemsSource="{Binding DjBanners}" SelectedItem="{Binding SelectedDjBanner, Mode=TwoWay}" DisplayMemberPath="FileName" HorizontalAlignment="Stretch" />
@@ -430,13 +467,24 @@
                                                     <ColumnDefinition Width="8" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <ui:TextBox Text="{Binding NewSpaceshipSnippetText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="New snippet message..." />
+                                                <ui:TextBox Grid.Column="0" Text="{Binding NewSpaceshipSnippetText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="New snippet message..." />
                                                 <ui:Button Grid.Column="2" Content="Add" Command="{Binding AddSpaceshipSnippetCommand}" Appearance="Primary" />
                                                 <ui:Button Grid.Column="4" Content="Remove" Command="{Binding RemoveSpaceshipSnippetCommand}" Appearance="Secondary" />
                                             </Grid>
                                         </StackPanel>
 
                                         <CheckBox Content="Mirror Lyrics display on control view" IsChecked="{Binding IsLyricsMirrored, Mode=TwoWay}" />
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <!-- Connect & Request Instructions -->
+                                <GroupBox Header="Connect &amp; Request Instructions" Style="{StaticResource GreenSettingsGroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Wi-Fi Password (Optional)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
+                                        <ui:TextBox Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Optional Wi-Fi Password for scan-to-connect QR code" Margin="0,0,0,12" />
+
+                                        <TextBlock Text="Dynamic Banner Status" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <TextBlock Text="Automatically detects connected Wi-Fi SSID and song request portal URL to generate high-resolution ConnectInstructions.png banner automatically." Foreground="#A7F3D0" FontSize="11" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </GroupBox>
                             </StackPanel>

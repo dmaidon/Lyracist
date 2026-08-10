@@ -212,6 +212,7 @@ namespace KSRotation.ViewModels
             QrCodeImage = started ? GenerateQRCode(ConnectionUrl) : null;
             DjQrCodeImage = started ? GenerateQRCode(DjConnectionUrl, [128, 0, 32], [255, 255, 255]) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
+            RefreshConnectInstructionsBanner();
         }
 
         private void RefreshConnectionInfo()
@@ -227,6 +228,7 @@ namespace KSRotation.ViewModels
             QrCodeImage = GenerateQRCode(ConnectionUrl);
             DjQrCodeImage = GenerateQRCode(DjConnectionUrl, [128, 0, 32], [255, 255, 255]);
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
+            RefreshConnectInstructionsBanner();
         }
 
         private string ResolveConnectionHost()

@@ -1,8 +1,20 @@
-<!-- Edited on Aug 10, 2026 @ 14:12:00 -> Add 26.8.10.0 changelog entries for rotation rollover fix and Last Song default event banner -->
-Last Edit: Aug 10, 2026 - Fix rotation sequence rollover and advance when checking off singers; add "Last Song" default event banner
+<!-- Edited on Aug 10, 2026 @ 12:50:00 -> Add 26.8.10.1 changelog entries for Connect Instructions graphic, screen resolution detection, and wifi_passwords.json store -->
+Last Edit: Aug 10, 2026 - Add scan-to-connect Wi-Fi & request instructions graphic, dynamic screen resolution detection, and persistent wifi_passwords.json store
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.10.1] - 2026-08-10
+
+### Added
+- **Scan-to-Connect Wi-Fi & Request Instructions Dynamic Graphic**: Added dynamic vector graphic generator for `ConnectInstructions.png` with dual high-density QR codes: Wi-Fi join (WPA/WPA2/NoPass) and Song Request Portal URL.
+- **Dynamic Resolution Screen Detection**: Automatically detects physical target screen dimensions (`1080p`, `1440p`, `4K 3840x2160`, etc.) and scales vector elements and QR module density (`pixelsPerModule = (int)(40 * scale)`) for 1:1 pixel-sharp rendering.
+- **Persistent Wi-Fi Password Store (`wifi_passwords.json`)**: Created `WifiPasswordStore.cs` in `Shared` layer. Automatically saves and recalls Wi-Fi passwords per connected SSID (venue Wi-Fi, travel router, mobile hotspot) so passwords do not need to be re-entered.
+- **Dedicated Green GroupBox Layout**: Added `GreenSettingsGroupBoxStyle` (Emerald/Forest Green header `#059669` $\rightarrow$ `#047857`) and moved the **Connect & Request Instructions** box into Column 1 under **Display & Projection** in both Lyracist and KSRotation. Added a dedicated **Target Screen / Monitor** selector.
+
+### Fixed
+- **Clean App Shutdown & Process Lingering**: Updated `DjBannerWindow.xaml.cs` with an `IsShuttingDown` flag to ensure closing events are not canceled during application exit, preventing orphaned background processes.
+- **Explicit WPF Application Termination**: Added `Application.Current.Shutdown()` in `MainWindow.xaml.cs` when the main window is closed.
 
 ## [26.8.10.0] - 2026-08-10
 

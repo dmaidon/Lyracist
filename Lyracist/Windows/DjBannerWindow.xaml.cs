@@ -93,8 +93,16 @@ public partial class DjBannerWindow : Window
         base.OnKeyDown(e);
     }
 
+    public bool IsShuttingDown { get; set; }
+
     protected override void OnClosing(CancelEventArgs e)
     {
+        if (IsShuttingDown)
+        {
+            base.OnClosing(e);
+            return;
+        }
+
         e.Cancel = true;
         var displayService = App.AppHost.Services.GetService(typeof(IDisplayService)) as IDisplayService;
         if (displayService != null)

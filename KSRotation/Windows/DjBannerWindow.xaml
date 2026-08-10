@@ -17,7 +17,7 @@
         MouseDoubleClick="OnMouseDoubleClick">
 
     <Grid>
-        <Image x:Name="BannerImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Image x:Name="BannerImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
         <MediaElement x:Name="BannerVideo" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" LoadedBehavior="Manual" UnloadedBehavior="Stop" Visibility="Collapsed" MediaEnded="BannerVideo_MediaEnded" />
 
         <!-- Floating QR Code Overlay for audience scanning (shown in the corner of the screen) -->
@@ -56,7 +56,8 @@
                         Padding="3"
                         HorizontalAlignment="Center">
                     <Image Source="{Binding QrCodeImage}" 
-                           Stretch="Uniform"/>
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor" />
                 </Border>
                 <TextBlock Text="SCAN TO REQUEST"
                            FontWeight="Bold"

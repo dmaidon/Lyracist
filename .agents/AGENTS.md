@@ -1,4 +1,4 @@
-<!-- Edited on Aug 4, 2026 @ 10:52:00 -> Add Error List Cleanliness Rule -->
+<!-- Edited on Aug 10, 2026 @ 14:38:00 -> Add Spitballing / Idea Exploration Rule -->
 # Lyracist Project-Scoped Rules
 
 ## CDG Decoding Reference Repositories
@@ -26,5 +26,8 @@ Whenever changes are made that affect how a user uses the applications in this s
 
 ## Error List Cleanliness Rule
 Whenever writing, editing, or refactoring code, always verify that your changes do not introduce new compiler warnings, analyzer warnings, or messages. Keep the compiler error list (including IDE warnings/messages) completely clean. If any warnings are expected or unavoidable (e.g. cross-platform API compatibility checks that are handled safely), use targeted `#pragma warning disable` and `#pragma warning restore` or local suppressions to keep the error list at zero warnings.
+
+## Spitballing / Idea Exploration Rule
+Whenever the user mentions "spitballing", "thinking out loud", "tossing around ideas", or explores hypothetical features, DO NOT make source code modifications or execute implementation plans automatically. Brainstorm, discuss design options, and answer questions. DO NOT proceed to code execution until explicitly instructed to do so.
 
 

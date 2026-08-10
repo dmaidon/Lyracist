@@ -1,13 +1,47 @@
-// Edited on Aug 10, 2026 @ 13:05:00 -> Add unit tests for FinishSingerSong rollover to top of rotation and AdvanceRotationAfterFinished
-// Edited on Aug 4, 2026 @ 10:20:00 -> Add unit test for FinishSingerSong with a skipped singer
-// Edited on Jul 28, 2026 @ 12:51:00 -> Add unit tests for pause, delete, restore, and set-current validation
-// Last Edit: Jun 29, 2026 13:26 - Initial test suite: SingerEntry round helpers, RotationHelpers, ThemeService.
+// Edited on Aug 10, 2026 @ 12:42:00 -> Add WifiPasswordStore unit tests
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
 using System.Collections.ObjectModel;
 
 namespace KSRotation.Tests;
+
+public class WifiPasswordStoreTests
+{
+    [Fact]
+    public void SetAndGetPasswordForSsid_SavesAndRecallsCorrectly()
+    {
+        string ssid = "TestVenueWiFi_" + Guid.NewGuid().ToString("N")[..6];
+        string password = "SecretPassword123";
+
+        WifiPasswordStore.SetPasswordForSsid(ssid, password);
+        string recalled = WifiPasswordStore.GetPasswordForSsid(ssid);
+
+        Assert.Equal(password, recalled);
+    }
+
+    [Fact]
+    public void SetPasswordForSsid_CaseInsensitiveRecall()
+    {
+        string ssid = "MyTravelRouter_" + Guid.NewGuid().ToString("N")[..6];
+        string password = "RouterPassword999";
+
+        WifiPasswordStore.SetPasswordForSsid(ssid.ToLowerInvariant(), password);
+        string recalled = WifiPasswordStore.GetPasswordForSsid(ssid.ToUpperInvariant());
+
+        Assert.Equal(password, recalled);
+    }
+
+    [Fact]
+    public void UpdatePasswordForSsid_OverwritesExisting()
+    {
+        string ssid = "VenueWiFi_" + Guid.NewGuid().ToString("N")[..6];
+        WifiPasswordStore.SetPasswordForSsid(ssid, "OldPass");
+        WifiPasswordStore.SetPasswordForSsid(ssid, "NewPass");
+
+        Assert.Equal("NewPass", WifiPasswordStore.GetPasswordForSsid(ssid));
+    }
+}
 
 // ---------------------------------------------------------------------------
 // SingerEntry tests
@@ -799,6 +833,41 @@ public class MainViewModelTests
         Assert.False(charlie.IsCurrent);
         Assert.True(alice.IsCurrent);
         Assert.True(bob.IsNext);
+    }
+
+    [Fact]
+    public void WifiHelper_GetConnectedSsid_DoesNotThrow()
+    {
+        // Act
+        string? ssid = WifiHelper.GetConnectedSsid();
+
+        // Assert - Should return a string or null without throwing any exception
+        Assert.True(ssid == null || ssid.Length >= 0);
+    }
+
+    [Fact]
+    public void DjBannerFileManager_CreateConnectInstructionsBannerPng_GeneratesValidImageFile()
+    {
+        // Arrange
+        string tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"test_connect_banner_{Guid.NewGuid():N}.png");
+
+        try
+        {
+            // Act
+            DjBannerFileManager.CreateConnectInstructionsBannerPng(tempPath, "TestWiFi", "secret123", "http://192.168.1.100:8080/request");
+
+            // Assert
+            Assert.True(System.IO.File.Exists(tempPath));
+            var fileInfo = new System.IO.FileInfo(tempPath);
+            Assert.True(fileInfo.Length > 0);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(tempPath))
+            {
+                System.IO.File.Delete(tempPath);
+            }
+        }
     }
 }
 

@@ -1,5 +1,5 @@
-<!-- Edited on Aug 10, 2026 @ 14:12:00 -> Update for robust rotation rollover advancement and Last Song default event banner -->
-Last Edit: Aug 10, 2026 - Fix rotation sequence rollover and advance when checking off singers; add "Last Song" default event banner
+<!-- Edited on Aug 10, 2026 @ 12:50:00 -> Update for Connect Instructions dynamic banner, screen resolution detection, and wifi_passwords.json store -->
+Last Edit: Aug 10, 2026 - Add scan-to-connect Wi-Fi & request instructions graphic, dynamic screen resolution detection, and persistent wifi_passwords.json store
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.
@@ -33,6 +33,8 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **GPU-Accelerated 4K Backdrops**: Beautiful, responsive vector backdrops layered behind transparent lyrics, wrapped in Viewbox controls to fit HD and 4K displays.
 - **Flexible Monitor Assignment & Dropdowns**: Direct dropdown selection in the KJ interface to target specific connected monitors for both the Rotation Display and DJ Banner windows, with real-time dynamic window relocation and automatic fallback to secondary/primary screens if unplugged.
 - **DJ Banner Projection Screen**: Upload, select, delete, and project borderless full-screen custom DJ branding/promotional banners (supporting PNG, JPG, GIF, BMP, and looping MP4 video). Supports overlaying the patron request QR code in the corner of the screen via a settings toggle.
+- **Scan-to-Connect Wi-Fi & Request Instructions Dynamic Graphic**: Auto-detects connected Wi-Fi SSID, request portal URL, and target display resolution (`1080p`, `1440p`, `4K 3840x2160`) to generate custom vector `ConnectInstructions.png` banners with dual high-density QR codes for Wi-Fi join and song requests.
+- **Wi-Fi Password Persistence Manager (`wifi_passwords.json`)**: Automatically saves and recalls Wi-Fi passwords per SSID (venue Wi-Fi, travel router, mobile hotspot) so passwords never have to be re-entered at recurring venues.
 - **Same-Screen Deconfliction Priority**: Automatically disables and hides the DJ Banner if the Rotation Display is targeted or moved to the same monitor.
 - **Wireless Casting Support**: Stream the singer rotation billboard directly to Miracast, Chromecast, AirPlay, Wireless HDMI, or Browser Cast using high-performance off-screen buffer rendering.
 - **Browser Cast Server**: Self-hosts a local web server (http://localhost:8080/rotation/) to allow any browser on the local network to view the singer rotation billboard in real-time.
