@@ -1,3 +1,4 @@
+// Edited on Aug 10, 2026 @ 13:00:00 -> Suppress projection screen auto-activation on load when Debugger.IsAttached in VS IDE, but retain saved settings in the field
 using System;
 using System.IO;
 using System.Text.Json;
@@ -29,7 +30,16 @@ public static class DisplayPreferencesStore
             {
                 string json = File.ReadAllText(FilePath);
                 var prefs = JsonSerializer.Deserialize<DisplayPreferences>(json);
-                if (prefs != null) return prefs;
+                if (prefs != null)
+                {
+                    if (System.Diagnostics.Debugger.IsAttached)
+                    {
+                        prefs.IsDjBannerActive = false;
+                        prefs.IsRotationActive = false;
+                        prefs.IsLyricsActive = false;
+                    }
+                    return prefs;
+                }
             }
         }
         catch (Exception ex)
@@ -37,7 +47,14 @@ public static class DisplayPreferencesStore
             AppLogger.LogError(ex, "DisplayPreferencesStore.Load");
         }
 
-        return new DisplayPreferences();
+        var defaultPrefs = new DisplayPreferences();
+        if (System.Diagnostics.Debugger.IsAttached)
+        {
+            defaultPrefs.IsDjBannerActive = false;
+            defaultPrefs.IsRotationActive = false;
+            defaultPrefs.IsLyricsActive = false;
+        }
+        return defaultPrefs;
     }
 
     public static void Save(DisplayPreferences preferences)
