@@ -507,6 +507,7 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial string SelectedHelpTopic { get; set; } = "🚀 Getting Started";
 
+// Edited on Aug 10, 2026 @ 13:06:00 -> Add Connect & Wi-Fi Instructions topic to HelpTopics
         public List<string> HelpTopics { get; } =
         [
             "🚀 Getting Started",
@@ -514,6 +515,7 @@ namespace KSRotation.ViewModels
             "📺 Display Projection",
             "⚙️ Settings & Venues",
             "📺 Display & DJ Banners",
+            "📡 Connect & Wi-Fi Instructions",
             "❓ FAQ & Shortcuts",
         ];
 

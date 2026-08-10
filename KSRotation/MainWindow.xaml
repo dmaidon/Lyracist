@@ -2018,6 +2018,48 @@
                                 </Border>
                             </StackPanel>
 
+                            <!-- Topic: Connect & Wi-Fi Instructions -->
+                            <StackPanel x:Name="ConnectHelpPanel">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="📡 Connect &amp; Wi-Fi Instructions">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Connect &amp; Wi-Fi Instructions" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="Project scan-to-connect Wi-Fi access and patron song request instructions directly onto your venue projection displays."
+                                           FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="20" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="📱 Dual Scan-to-Connect QR Code Banner" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="• Automatic Network Detection: Automatically scans the host machine's active Wi-Fi connection and resolves the connected SSID network name." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Dual QR Codes: Generates two distinct vector QR codes on the banner — a forest green (#064E3B) Wi-Fi Scan-to-Connect QR code (supporting WPA/WPA2/NoPass) and a pure black (#000000) Song Request Portal QR code." TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Password Display: Displays the exact network password or indicates 'No Password Required' when password is omitted." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="🔑 Persistent Wi-Fi Password Manager (wifi_passwords.json)" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="• Automatic Password Saving: Passwords entered into the Wi-Fi password box are automatically saved per Wi-Fi SSID into 'wifi_passwords.json'." TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Venue Auto-Recall: When you reconnect to a previously saved network (venue Wi-Fi, travel router, mobile hotspot), the application automatically recalls and populates the saved password." TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="🖥️ Dynamic 1:1 Pixel-Sharp Screen Resolution Detection" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="• Auto Resolution Detection: Automatically detects physical target screen dimensions (1080p, 1440p, 4K 3840x2160, custom) and dynamically scales vector paths, card bounds, and QR module sizes (pixelsPerModule) for razor-sharp 1:1 pixel rendering." TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="• Dedicated Display GroupBox: Located under Column 1 of the Display tab inside a dedicated Green GroupBox (GreenSettingsGroupBoxStyle). Select target display options: 'None', 'All Screens / Monitors', or specific connected monitors." TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
                             <!-- Topic 5: FAQ & Shortcuts -->
                             <StackPanel x:Name="FAQPanel">
                                 <StackPanel.Style>

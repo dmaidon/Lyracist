@@ -1,5 +1,5 @@
-<!-- Edited on Aug 10, 2026 @ 12:50:00 -> Add 26.8.10.1 changelog entries for Connect Instructions graphic, screen resolution detection, and wifi_passwords.json store -->
-Last Edit: Aug 10, 2026 - Add scan-to-connect Wi-Fi & request instructions graphic, dynamic screen resolution detection, and persistent wifi_passwords.json store
+<!-- Edited on Aug 10, 2026 @ 13:06:00 -> Add Help System expansion to 26.8.10.1 changelog -->
+Last Edit: Aug 10, 2026 - Add scan-to-connect Wi-Fi & request instructions graphic, dynamic screen resolution detection, persistent wifi_passwords.json store, and Help System expansion
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -11,6 +11,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Dynamic Resolution Screen Detection**: Automatically detects physical target screen dimensions (`1080p`, `1440p`, `4K 3840x2160`, etc.) and scales vector elements and QR module density (`pixelsPerModule = (int)(40 * scale)`) for 1:1 pixel-sharp rendering.
 - **Persistent Wi-Fi Password Store (`wifi_passwords.json`)**: Created `WifiPasswordStore.cs` in `Shared` layer. Automatically saves and recalls Wi-Fi passwords per connected SSID (venue Wi-Fi, travel router, mobile hotspot) so passwords do not need to be re-entered.
 - **Dedicated Green GroupBox Layout**: Added `GreenSettingsGroupBoxStyle` (Emerald/Forest Green header `#059669` $\rightarrow$ `#047857`) and moved the **Connect & Request Instructions** box into Column 1 under **Display & Projection** in both Lyracist and KSRotation. Added a dedicated **Target Screen / Monitor** selector.
+- **Comprehensive Help System Expansion**: Added dedicated `"📡 Connect & Wi-Fi Instructions"` topic in KSRotation and `"15. Connect & Request Instructions Screen"` in Lyracist (`HelpViewModel.cs`), detailing dual QR codes, Wi-Fi password store, dynamic resolution detection, and expanding all 15 help topics for complete clarity.
 
 ### Fixed
 - **Clean App Shutdown & Process Lingering**: Updated `DjBannerWindow.xaml.cs` with an `IsShuttingDown` flag to ensure closing events are not canceled during application exit, preventing orphaned background processes.

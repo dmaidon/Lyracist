@@ -24,6 +24,9 @@ A dedicated Connect & Request Instructions feature has been added to display sca
    - Located in the Display settings tab inside a dedicated Green GroupBox styled under Column 1 (directly under Display & Projection).
    - Features a dedicated **Target Screen / Monitor** selection dropdown with options: "None", "All Screens / Monitors", or individual connected display monitors.
 
+5. Integrated Help System Topic Expansion:
+   - Added dedicated 'Connect & Wi-Fi Instructions' topic in KSRotation and '15. Connect & Request Instructions Screen' topic in Lyracist (`HelpViewModel.cs`), providing step-by-step guidance for dual QR code setup, password management, resolution scaling, and target display selection.
+
 Section: Singer Request Board / Patron Request Portal
 
 [Update Details]
