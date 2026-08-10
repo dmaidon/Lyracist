@@ -442,8 +442,10 @@ namespace KSRotation.ViewModels
             RefreshConnectInstructionsBanner();
         }
 
+// Edited on Aug 10, 2026 @ 12:56:00 -> Guard WPF banner rendering and monitor enumeration in MainViewModel.cs with #if !MAUI for MAUI build compatibility
         public void RefreshConnectInstructionsBanner()
         {
+#if !MAUI
             try
             {
                 var (w, h) = GetTargetScreenResolution(ConnectInstructionsScreen);
@@ -458,10 +460,12 @@ namespace KSRotation.ViewModels
             {
                 // Ignore background rendering exceptions
             }
+#endif
         }
 
         private static (int Width, int Height) GetTargetScreenResolution(string screenSelection)
         {
+#if !MAUI
             try
             {
                 if (string.IsNullOrWhiteSpace(screenSelection) || screenSelection.Equals("None", StringComparison.OrdinalIgnoreCase))
@@ -494,6 +498,7 @@ namespace KSRotation.ViewModels
             {
                 // Ignore monitor enumeration errors
             }
+#endif
             return (1920, 1080);
         }
 

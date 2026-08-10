@@ -1,4 +1,4 @@
-<!-- Edited on Aug 9, 2026 @ 13:52:00 -> Condition PackageOutputPath on non-Android target frameworks to prevent Android SDK clean target errors -->
+<!-- Edited on Aug 10, 2026 @ 12:55:00 -> Add WifiHelper.cs and WifiPasswordStore.cs links to KSRotation.Maui.csproj -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -27,9 +27,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.9.163</AssemblyVersion>
+		<AssemblyVersion>26.8.10.164</AssemblyVersion>
 
-		<FileVersion>26.8.9.163</FileVersion>
+		<FileVersion>26.8.10.164</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
@@ -146,6 +146,8 @@
 		<Compile Include="..\Shared\SpecialEventConfig.cs" Link="SpecialEventConfig.cs" />
 		<Compile Include="..\Shared\DjBannerFileManager.cs" Link="DjBannerFileManager.cs" />
 		<Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
+		<Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
+		<Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
 	</ItemGroup>
 
 	<!-- Workaround for Xamarin.Android directory lock issue on Clean/Rebuild -->
