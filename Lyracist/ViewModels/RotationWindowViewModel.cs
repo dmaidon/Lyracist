@@ -261,9 +261,9 @@ public partial class RotationWindowViewModel : BaseViewModel
         // POPULATE FullRotation exactly like KSRotation does!
         FullRotation.Clear();
         var activeRotation = singers.Where(s => !s.IsInactive && !s.IsPaused).ToList();
-        HasDesignatedCurrentSinger = singers.Any(s => s.IsCurrent && !s.IsInactive && !s.IsPaused);
+        HasDesignatedCurrentSinger = Lyracist.Shared.RotationHelpers.HasActiveCurrentSinger(singers);
 
-        var currentSingerForCrawl = singers.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused)
+        var currentSingerForCrawl = Lyracist.Shared.RotationHelpers.GetCurrentSinger(singers)
                                   ?? singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
 
         if (currentSingerForCrawl != null && activeRotation.Count > 0)
@@ -345,9 +345,9 @@ public partial class RotationWindowViewModel : BaseViewModel
         // POPULATE FullRotation exactly like KSRotation does!
         FullRotation.Clear();
         var activeRotation = Rotation.Where(s => !s.IsInactive && !s.IsPaused).ToList();
-        HasDesignatedCurrentSinger = Rotation.Any(s => s.IsCurrent && !s.IsInactive && !s.IsPaused);
+        HasDesignatedCurrentSinger = Lyracist.Shared.RotationHelpers.HasActiveCurrentSinger(Rotation);
 
-        var currentSingerForCrawl = Rotation.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused)
+        var currentSingerForCrawl = Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation)
                                   ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
 
         if (currentSingerForCrawl != null && activeRotation.Count > 0)

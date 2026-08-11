@@ -233,15 +233,20 @@ public partial class SettingsViewModel
                 AppSettings.ConnectInstructionsScreen = value;
                 OnPropertyChanged();
                 RefreshConnectInstructionsBanner();
+                _display.RefreshActiveBanner();
             }
         }
     }
 
-// Edited on Aug 10, 2026 @ 13:25:00 -> Restore Wi-Fi password auto-population from wifi_passwords.json per SSID
+// Edited on Aug 11, 2026 -> Suppress Wi-Fi password auto-population when Debugger.IsAttached in VS IDE, but retain in the field
     public string WifiPassword
     {
         get
         {
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                return string.Empty;
+            }
             string? ssid = WifiHelper.GetConnectedSsid();
             string savedPwd = !string.IsNullOrWhiteSpace(ssid) ? WifiPasswordStore.GetPasswordForSsid(ssid) : string.Empty;
             return !string.IsNullOrEmpty(savedPwd) ? savedPwd : AppSettings.WifiPassword;
@@ -258,6 +263,7 @@ public partial class SettingsViewModel
                 }
                 OnPropertyChanged();
                 RefreshConnectInstructionsBanner();
+                _display.RefreshActiveBanner();
             }
         }
     }

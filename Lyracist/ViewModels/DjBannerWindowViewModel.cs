@@ -36,6 +36,7 @@ public partial class DjBannerWindowViewModel : ObservableObject
             var image = new BitmapImage();
             image.BeginInit();
             image.CacheOption = BitmapCacheOption.OnLoad;
+            image.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
             image.UriSource = new Uri(path);
             image.EndInit();
             image.Freeze();

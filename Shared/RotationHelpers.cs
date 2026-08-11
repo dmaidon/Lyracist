@@ -1,7 +1,6 @@
-// Edited on Aug 10, 2026 @ 13:05:00 -> Add AdvanceRotationAfterFinished helper for robust rotation rollover
+// Edited on Aug 10, 2026 @ 16:50:00 -> Optimized loops/allocations & added GetCurrentSinger, GetActiveSingerCount, ClearHighlights helpers
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Lyracist.Shared
 {
@@ -12,6 +11,65 @@ namespace Lyracist.Shared
     public static class RotationHelpers
     {
         /// <summary>
+        /// Gets the current active, non-paused singer in <paramref name="singers"/>, or null if none.
+        /// </summary>
+        public static T? GetCurrentSinger<T>(IList<T> singers) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+
+            int count = singers.Count;
+            for (int i = 0; i < count; i++)
+            {
+                T s = singers[i];
+                if (s.IsCurrent && !s.IsInactive && !s.IsPaused)
+                    return s;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns true if there is an active, non-paused current singer in <paramref name="singers"/>.
+        /// </summary>
+        public static bool HasActiveCurrentSinger<T>(IList<T> singers) where T : class, IRotationSinger
+        {
+            return GetCurrentSinger(singers) != null;
+        }
+
+        /// <summary>
+        /// Counts the number of active, non-paused singers in <paramref name="singers"/>.
+        /// </summary>
+        public static int GetActiveSingerCount<T>(IList<T> singers) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+
+            int count = singers.Count;
+            int activeCount = 0;
+            for (int i = 0; i < count; i++)
+            {
+                T s = singers[i];
+                if (!s.IsInactive && !s.IsPaused)
+                    activeCount++;
+            }
+            return activeCount;
+        }
+
+        /// <summary>
+        /// Clears both <see cref="IRotationSinger.IsCurrent"/> and <see cref="IRotationSinger.IsNext"/> flags on all singers.
+        /// </summary>
+        public static void ClearHighlights<T>(IList<T> singers) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+
+            int count = singers.Count;
+            for (int i = 0; i < count; i++)
+            {
+                T s = singers[i];
+                s.IsCurrent = false;
+                s.IsNext = false;
+            }
+        }
+
+        /// <summary>
         /// Sets <see cref="IRotationSinger.IsNext"/> on the first active singer after <paramref name="currentEntry"/>,
         /// wrapping around the list. Clears any previous IsNext flag first.
         /// </summary>
@@ -20,13 +78,14 @@ namespace Lyracist.Shared
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(currentEntry);
 
-            foreach (T s in singers)
-                s.IsNext = false;
+            int count = singers.Count;
+            for (int i = 0; i < count; i++)
+            {
+                singers[i].IsNext = false;
+            }
 
             int startIndex = singers.IndexOf(currentEntry);
             if (startIndex == -1) return;
-
-            int count = singers.Count;
 
             for (int i = 1; i < count; i++)
             {
@@ -48,15 +107,18 @@ namespace Lyracist.Shared
         {
             ArgumentNullException.ThrowIfNull(singers);
 
-            T? current = singers.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused);
+            T? current = GetCurrentSinger(singers);
             if (current != null)
             {
                 MarkNextSinger(singers, current);
             }
             else
             {
-                foreach (T s in singers)
-                    s.IsNext = false;
+                int count = singers.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    singers[i].IsNext = false;
+                }
             }
         }
 
@@ -71,7 +133,7 @@ namespace Lyracist.Shared
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(entry);
 
-            T? previousCurrent = singers.FirstOrDefault(s => s.IsCurrent);
+            T? previousCurrent = GetCurrentSinger(singers);
 
             if (entry.IsInactive)
             {
@@ -82,11 +144,7 @@ namespace Lyracist.Shared
                 entry.IsPaused = false;
             }
 
-            foreach (T s in singers)
-            {
-                s.IsCurrent = false;
-                s.IsNext = false;
-            }
+            ClearHighlights(singers);
 
             entry.IsCurrent = true;
 
@@ -128,11 +186,7 @@ namespace Lyracist.Shared
                 }
             }
 
-            foreach (T s in singers)
-            {
-                s.IsCurrent = false;
-                s.IsNext = false;
-            }
+            ClearHighlights(singers);
 
             if (nextCurrent != null)
             {
@@ -151,11 +205,13 @@ namespace Lyracist.Shared
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(currentEntry);
 
-            var list = new List<T>();
+            if (maxCount <= 0) return new List<T>(0);
+
+            int count = singers.Count;
+            var list = new List<T>(Math.Min(count, maxCount));
             int startIndex = singers.IndexOf(currentEntry);
             if (startIndex == -1) return list;
 
-            int count = singers.Count;
             for (int i = 1; i <= count && list.Count < maxCount; i++)
             {
                 T candidate = singers[(startIndex + i) % count];

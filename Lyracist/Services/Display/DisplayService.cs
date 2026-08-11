@@ -263,6 +263,12 @@ public class DisplayService : IDisplayService
         ScreenAssignmentsChanged?.Invoke();
     }
 
+    public void RefreshActiveBanner()
+    {
+        var vm = _serviceProvider.GetService<DjBannerWindowViewModel>();
+        vm?.UpdateBanner(ResolveActiveBannerPath());
+    }
+
     public DisplayPreferences GetPreferences() => _preferences;
 
     public void UpdateWindowVisibilities()

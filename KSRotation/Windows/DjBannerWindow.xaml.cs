@@ -44,6 +44,7 @@ namespace KSRotation.Windows
                     var image = new System.Windows.Media.Imaging.BitmapImage();
                     image.BeginInit();
                     image.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    image.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.IgnoreImageCache;
                     image.UriSource = new Uri(path);
                     image.EndInit();
                     image.Freeze();

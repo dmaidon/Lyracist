@@ -328,6 +328,73 @@ public class RotationHelpersTests
         Assert.Throws<ArgumentNullException>(() =>
             RotationHelpers.SetCurrentSinger(singers, null!));
     }
+
+    [Fact]
+    public void GetCurrentSinger_ReturnsActiveCurrentSinger()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        var singers = new ObservableCollection<SingerEntry> { alice, bob };
+
+        Assert.Same(alice, RotationHelpers.GetCurrentSinger(singers));
+        Assert.True(RotationHelpers.HasActiveCurrentSinger(singers));
+    }
+
+    [Fact]
+    public void GetCurrentSinger_ReturnsNullWhenCurrentIsInactiveOrPaused()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true, IsPaused = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        var singers = new ObservableCollection<SingerEntry> { alice, bob };
+
+        Assert.Null(RotationHelpers.GetCurrentSinger(singers));
+        Assert.False(RotationHelpers.HasActiveCurrentSinger(singers));
+    }
+
+    [Fact]
+    public void GetActiveSingerCount_CountsOnlyActiveNonPausedSingers()
+    {
+        var singers = new ObservableCollection<SingerEntry>
+        {
+            new() { Name = "Alice" },
+            new() { Name = "Bob", IsPaused = true },
+            new() { Name = "Carol", IsInactive = true },
+            new() { Name = "Dave" }
+        };
+
+        Assert.Equal(2, RotationHelpers.GetActiveSingerCount(singers));
+    }
+
+    [Fact]
+    public void ClearHighlights_ClearsIsCurrentAndIsNextOnAllSingers()
+    {
+        var singers = new ObservableCollection<SingerEntry>
+        {
+            new() { Name = "Alice", IsCurrent = true },
+            new() { Name = "Bob", IsNext = true }
+        };
+
+        RotationHelpers.ClearHighlights(singers);
+
+        Assert.All(singers, s =>
+        {
+            Assert.False(s.IsCurrent);
+            Assert.False(s.IsNext);
+        });
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_SingleActiveSinger_ClearsCurrentAndReturnsNull()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var singers = new ObservableCollection<SingerEntry> { alice };
+
+        var result = RotationHelpers.AdvanceRotationAfterFinished(singers, alice);
+
+        Assert.Null(result);
+        Assert.False(alice.IsCurrent);
+        Assert.False(alice.IsNext);
+    }
 }
 
 // ---------------------------------------------------------------------------

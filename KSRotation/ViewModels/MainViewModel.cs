@@ -440,6 +440,7 @@ namespace KSRotation.ViewModels
                 WifiPasswordStore.SetPasswordForSsid(ssid, value);
             }
             RefreshConnectInstructionsBanner();
+            UpdateDjBannerPath();
         }
 
 // Edited on Aug 10, 2026 @ 12:56:00 -> Guard WPF banner rendering and monitor enumeration in MainViewModel.cs with #if !MAUI for MAUI build compatibility
@@ -686,14 +687,14 @@ namespace KSRotation.ViewModels
                 _ = DiscoverChromecastsAsync();
             }
 
-// Edited on Aug 10, 2026 @ 13:25:00 -> Restore Wi-Fi password auto-population from wifi_passwords.json per SSID
+// Edited on Aug 11, 2026 -> Suppress Wi-Fi password auto-population when running under Visual Studio Debugger, but retain in the field
             DjBannerMonitorDevice = settings.DjBannerMonitorDevice ?? string.Empty;
             SelectedDjBannerPath = settings.SelectedDjBannerPath ?? string.Empty;
             IsDjBannerEnabled = System.Diagnostics.Debugger.IsAttached ? false : settings.IsDjBannerEnabled;
             IsDjBannerQrCodeEnabled = settings.IsDjBannerQrCodeEnabled;
             string? currentSsid = WifiHelper.GetConnectedSsid();
             string savedWifiPassword = !string.IsNullOrWhiteSpace(currentSsid) ? WifiPasswordStore.GetPasswordForSsid(currentSsid) : string.Empty;
-            WifiPassword = !string.IsNullOrEmpty(savedWifiPassword) ? savedWifiPassword : (settings.WifiPassword ?? string.Empty);
+            WifiPassword = System.Diagnostics.Debugger.IsAttached ? string.Empty : (!string.IsNullOrEmpty(savedWifiPassword) ? savedWifiPassword : (settings.WifiPassword ?? string.Empty));
             ActiveSpecialEvent = string.IsNullOrEmpty(settings.ActiveSpecialEvent) ? "None" : settings.ActiveSpecialEvent;
             RefreshConnectInstructionsBanner();
 

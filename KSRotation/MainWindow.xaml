@@ -1566,7 +1566,7 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Wi-Fi Password (Optional): " VerticalAlignment="Center" Foreground="#E9D5FF" Margin="0,0,8,0" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
-                                        <TextBox Grid.Column="1" Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" Padding="6,2" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
+                                        <TextBox Grid.Column="1" Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Style="{StaticResource ModernTextBoxStyle}" Height="28" Padding="6,2" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
                                     </Grid>
                                     <TextBlock Text="Auto-detects active Wi-Fi SSID, and request portal URL." Foreground="#A7F3D0" FontSize="11" TextWrapping="Wrap" TextAlignment="Center" />
                                 </StackPanel>

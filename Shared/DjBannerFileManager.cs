@@ -222,6 +222,17 @@ public static class DjBannerFileManager
                 1.0)
             { TextAlignment = System.Windows.TextAlignment.Center };
             dc.DrawText(footerText, new System.Windows.Point(width / 2.0, 965 * scale));
+
+            var copyrightText = new System.Windows.Media.FormattedText(
+                Globals.Copyright,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Italic, System.Windows.FontWeights.Normal, System.Windows.FontStretches.Normal),
+                14 * scale,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(148, 163, 184)),
+                1.0)
+            { TextAlignment = System.Windows.TextAlignment.Center };
+            dc.DrawText(copyrightText, new System.Windows.Point(width / 2.0, height - 70 * scale));
         }
 
         var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);

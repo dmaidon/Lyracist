@@ -53,6 +53,9 @@ public interface IDisplayService
     void UpdateSpecialEvent(string eventName);
     void HideDjBannerWindow();
 
+    /// <summary>Re-pushes the currently active DJ banner path to the banner window, forcing a fresh image load (e.g. after the underlying file was regenerated in place).</summary>
+    void RefreshActiveBanner();
+
     Task<bool> MoveRotationTo(DisplayTarget target, ChromecastDevice? device = null);
     Task StopRotationCasting();
 

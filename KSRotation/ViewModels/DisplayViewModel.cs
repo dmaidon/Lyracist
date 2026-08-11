@@ -101,13 +101,13 @@ namespace KSRotation.ViewModels
                 return;
             }
 
-            HasDesignatedCurrentSinger = rotation.Any(s => s.IsCurrent && !s.IsInactive);
+            HasDesignatedCurrentSinger = Lyracist.Shared.RotationHelpers.HasActiveCurrentSinger(rotation);
 
             // Find the explicitly-marked current singer; fall back to the first active one.
-            SingerEntry? current = rotation.FirstOrDefault(s => s.IsCurrent && !s.IsInactive)
-                                ?? rotation.FirstOrDefault(s => !s.IsInactive);
+            SingerEntry? current = Lyracist.Shared.RotationHelpers.GetCurrentSinger(rotation)
+                                ?? rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
 
-            List<SingerEntry> activeRotation = [.. rotation.Where(s => !s.IsInactive)];
+            List<SingerEntry> activeRotation = [.. rotation.Where(s => !s.IsInactive && !s.IsPaused)];
 
             if (current == null)
             {
@@ -182,7 +182,7 @@ namespace KSRotation.ViewModels
             }
             else
             {
-                foreach (SingerEntry singer in rotation.Where(s => !s.IsInactive).Take(5))
+                foreach (SingerEntry singer in rotation.Where(s => !s.IsInactive && !s.IsPaused).Take(5))
                 {
                     if (singer.IsMusic)
                     {

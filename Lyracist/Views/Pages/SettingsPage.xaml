@@ -481,7 +481,7 @@
                                 <GroupBox Header="Connect &amp; Request Instructions" Style="{StaticResource GreenSettingsGroupBoxStyle}">
                                     <StackPanel>
                                         <TextBlock Text="Wi-Fi Password (Optional)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
-                                        <ui:TextBox Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Optional Wi-Fi Password for scan-to-connect QR code" Margin="0,0,0,12" />
+                                        <ui:TextBox Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" PlaceholderText="Optional Wi-Fi Password for scan-to-connect QR code" Margin="0,0,0,12" />
 
                                         <TextBlock Text="Dynamic Banner Status" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                         <TextBlock Text="Automatically detects connected Wi-Fi SSID and song request portal URL to generate high-resolution ConnectInstructions.png banner automatically." Foreground="#A7F3D0" FontSize="11" TextWrapping="Wrap" />
