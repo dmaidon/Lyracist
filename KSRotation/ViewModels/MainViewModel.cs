@@ -434,6 +434,11 @@ namespace KSRotation.ViewModels
 
         partial void OnWifiPasswordChanged(string value)
         {
+            // Skip during startup load — ConnectionUrl isn't set until StartRequestServer() runs
+            // later in the constructor, which does its own banner refresh with the real URL. Refreshing
+            // here too would just write a "localhost" placeholder that gets overwritten a moment later.
+            if (_isInitializing) return;
+
             string? ssid = WifiHelper.GetConnectedSsid();
             if (!string.IsNullOrWhiteSpace(ssid))
             {
@@ -457,9 +462,9 @@ namespace KSRotation.ViewModels
                     ConnectionUrl,
                     w, h);
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore background rendering exceptions
+                LoggerService.LogError("MainViewModel.RefreshConnectInstructionsBanner", ex);
             }
 #endif
         }
@@ -581,8 +586,25 @@ namespace KSRotation.ViewModels
             return company;
         }
 
+        // The XAML designer instantiates this ViewModel just to render MainWindow.xaml's design-time
+        // preview (Window.DataContext is set directly in XAML) — with no guard, merely opening the file
+        // in Visual Studio's designer would write settings/banner files to disk, open a real TCP
+        // listener, and potentially spawn the DJ Banner window, none of which should happen unless the
+        // app is actually run.
+        private static bool IsInDesignMode =>
+            System.ComponentModel.DesignerProperties.GetIsInDesignMode(new System.Windows.DependencyObject());
+
         public MainViewModel()
         {
+            _saveDebounceTimer = new DispatcherTimer();
+            _dbDebounceTimer = new DispatcherTimer();
+            _jsonCacheDebounceTimer = new DispatcherTimer();
+
+            if (IsInDesignMode)
+            {
+                return;
+            }
+
             _isInitializing = true;
             LoggerService.CleanupLogs();
             _saveDebounceTimer = new DispatcherTimer
@@ -696,7 +718,9 @@ namespace KSRotation.ViewModels
             string savedWifiPassword = !string.IsNullOrWhiteSpace(currentSsid) ? WifiPasswordStore.GetPasswordForSsid(currentSsid) : string.Empty;
             WifiPassword = System.Diagnostics.Debugger.IsAttached ? string.Empty : (!string.IsNullOrEmpty(savedWifiPassword) ? savedWifiPassword : (settings.WifiPassword ?? string.Empty));
             ActiveSpecialEvent = string.IsNullOrEmpty(settings.ActiveSpecialEvent) ? "None" : settings.ActiveSpecialEvent;
-            RefreshConnectInstructionsBanner();
+            // Not calling RefreshConnectInstructionsBanner() here — ConnectionUrl isn't set until
+            // StartRequestServer() runs at the end of this constructor, which refreshes the banner
+            // itself once the real URL is known.
 
             SpecialEvents.Clear();
             if (settings.SpecialEvents != null)

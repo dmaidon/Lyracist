@@ -1667,9 +1667,9 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Special Event Banners Mapping" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <Button Grid.Column="1" Content="Upload Banner" Command="{Binding UploadEventBannerCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" Margin="6,0,0,0" ToolTip="Upload an image or video file to the EventBanners folder" />
-                                        <Button Grid.Column="2" Content="Add Event" Command="{Binding AddSpecialEventCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" Margin="6,0,0,0" ToolTip="Add a new special event banner entry" />
+                                        <TextBlock Text="Special Event Banners Mapping" FontWeight="SemiBold" VerticalAlignment="Top" Foreground="{DynamicResource AppHeaderBrush}" Margin="24,10,21,0" Width="200" Grid.ColumnSpan="2" />
+                                        <Button Grid.Column="1" Content="Upload Banner" Command="{Binding UploadEventBannerCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" Margin="6,30,0,0" ToolTip="Upload an image or video file to the EventBanners folder" />
+                                        <Button Grid.Column="2" Content="Add Event" Command="{Binding AddSpecialEventCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Padding="6,2" Margin="6,30,0,0" ToolTip="Add a new special event banner entry" />
                                     </Grid>
                                     <ItemsControl ItemsSource="{Binding SpecialEvents}" Margin="0,0,0,12">
                                         <ItemsControl.ItemTemplate>

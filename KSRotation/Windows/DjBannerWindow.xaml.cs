@@ -92,10 +92,15 @@ namespace KSRotation.Windows
 
             try
             {
+                // Open explicitly with FileShare.ReadWrite and dispose deterministically — a Uri-based
+                // BitmapDecoder with DelayCreation can hold the file open until the GC finalizes it,
+                // which then made the next banner regeneration fail to overwrite this same file (silently,
+                // since the caller swallows the exception) because it was still "in use".
+                using var stream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
                 var decoder = System.Windows.Media.Imaging.BitmapDecoder.Create(
-                    new Uri(path),
-                    System.Windows.Media.Imaging.BitmapCreateOptions.DelayCreation,
-                    System.Windows.Media.Imaging.BitmapCacheOption.None);
+                    stream,
+                    System.Windows.Media.Imaging.BitmapCreateOptions.None,
+                    System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
                 int nativeWidth = decoder.Frames.Count > 0 ? decoder.Frames[0].PixelWidth : 0;
                 return nativeWidth > 0 ? Math.Min(monitorCap, nativeWidth) : monitorCap;
             }

@@ -83,10 +83,15 @@ public partial class DjBannerWindowViewModel : ObservableObject
 
         try
         {
+            // Open explicitly with FileShare.ReadWrite and dispose deterministically — a Uri-based
+            // BitmapDecoder with DelayCreation can hold the file open until the GC finalizes it,
+            // which then made the next banner regeneration fail to overwrite this same file (silently,
+            // since the caller swallows the exception) because it was still "in use".
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             var decoder = BitmapDecoder.Create(
-                new Uri(path),
-                BitmapCreateOptions.DelayCreation,
-                BitmapCacheOption.None);
+                stream,
+                BitmapCreateOptions.None,
+                BitmapCacheOption.OnLoad);
             int nativeWidth = decoder.Frames.Count > 0 ? decoder.Frames[0].PixelWidth : 0;
             return nativeWidth > 0 ? Math.Min(monitorCap, nativeWidth) : monitorCap;
         }

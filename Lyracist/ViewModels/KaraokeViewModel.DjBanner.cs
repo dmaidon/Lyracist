@@ -121,9 +121,9 @@ public partial class KaraokeViewModel
                 Lyracist.Core.Helpers.AppSettings.WifiPassword,
                 JoinUrl);
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore background rendering exceptions
+            Lyracist.Core.Helpers.AppLogger.LogError(ex, "KaraokeViewModel.RefreshConnectInstructionsBanner");
         }
     }
 

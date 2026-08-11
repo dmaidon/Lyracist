@@ -241,7 +241,7 @@ public static class DjBannerFileManager
         var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
         encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
 
-        using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+        using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
         encoder.Save(fs);
     }
 
@@ -300,7 +300,7 @@ public static class DjBannerFileManager
         var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
         encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
 
-        using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+        using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
         encoder.Save(fs);
     }
 #endif

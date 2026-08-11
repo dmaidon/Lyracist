@@ -293,9 +293,9 @@ public partial class SettingsViewModel
                 requestUrl,
                 w, h);
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore background rendering exceptions
+            AppLogger.LogError(ex, "SettingsViewModel.RefreshConnectInstructionsBanner");
         }
     }
 
