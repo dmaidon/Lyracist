@@ -10,6 +10,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<DefineConstants>MAUI;$(DefineConstants)</DefineConstants>
+		<NoWarn>$(NoWarn);CA1416;CA1422;0436</NoWarn>
 
 		<!-- Enable XAML source generation for faster build times and improved performance. -->
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
@@ -27,9 +28,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.13.185</AssemblyVersion>
+		<AssemblyVersion>26.8.13.186</AssemblyVersion>
 
-		<FileVersion>26.8.13.185</FileVersion>
+		<FileVersion>26.8.13.186</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
@@ -137,6 +138,8 @@
 	<!-- Ensure resizetizer, designtime & android output directories exist before _ResolveLibraryProjectImports, ResizetizeImages, ProcessMauiSplashScreens, _CompileDex & _CompileToDalvik run across all target platforms (fixes MSB3371/MSB3374/CS7064/MAUIR0001/MAUIR0004/JAVA0000 DirectoryNotFoundExceptions) -->
 	<Target Name="EnsureMauiResizetizerDirectoriesExist" BeforeTargets="_ResolveLibraryProjectImports;ResizetizeImages;ProcessMauiSplashScreens;_CreateDesignTimeResourceDesigner;_CompileDex;_CompileToDalvik">
 		<MakeDir Directories="$(IntermediateOutputPath)designtime\stamp;$(IntermediateOutputPath)android\bin;$(IntermediateOutputPath)android\assets;$(IntermediateOutputPath)resizetizer\r;$(IntermediateOutputPath)resizetizer\sp;$(IntermediateOutputPath)resizetizer\sp\drawable-mdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-hdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xhdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xxhdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xxxhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-mdpi;$(IntermediateOutputPath)resizetizer\r\drawable-hdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xxhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xxxhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-mdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-hdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xxhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xxxhdpi" />
+		<!-- Workaround for XARLP7000/XARLP7024: Safely move/delete locked lp stamp & tmp zip files in lp folder left behind by Visual Studio design-time builds -->
+		<Exec Command="powershell -Command &quot;if (Test-Path '$(IntermediateOutputPath)lp') { Get-ChildItem -Path '$(IntermediateOutputPath)lp' -Filter '*.stamp' -Recurse -ErrorAction SilentlyContinue | ForEach-Object { try { $stale = $_.FullName + '.stale_' + [Guid]::NewGuid().ToString('N'); Rename-Item -Path $_.FullName -NewName $stale -ErrorAction SilentlyContinue; Remove-Item -Path $stale -Force -ErrorAction SilentlyContinue } catch { } }; Get-ChildItem -Path '$(IntermediateOutputPath)' -Filter '*.tmp' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue; exit 0 }&quot;" ContinueOnError="true" Condition="Exists('$(IntermediateOutputPath)')" />
 	</Target>
 
 	<!-- Workaround for MSB3374: Handle Visual Studio background design-time file lock on __Microsoft.Android.Resource.Designer.cs -->

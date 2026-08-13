@@ -11,8 +11,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.8.13.129</AssemblyVersion>
-    <FileVersion>26.8.13.129</FileVersion>
+    <AssemblyVersion>26.8.13.130</AssemblyVersion>
+    <FileVersion>26.8.13.130</FileVersion>
     <ApplicationIcon>..\Lyracist\Assets\db_manager_tp.ico</ApplicationIcon>
     <PackageIcon>db_manager_tp.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
