@@ -27,9 +27,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.13.184</AssemblyVersion>
+		<AssemblyVersion>26.8.13.185</AssemblyVersion>
 
-		<FileVersion>26.8.13.184</FileVersion>
+		<FileVersion>26.8.13.185</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
@@ -134,11 +134,9 @@
 		<Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
 	</ItemGroup>
 
-	<!-- Ensure resizetizer & designtime target output directories exist before _ResolveLibraryProjectImports, ResizetizeImages & ProcessMauiSplashScreens run across all target platforms (fixes MSB3371/MSB3374/CS7064/MAUIR0001/MAUIR0004 DirectoryNotFoundExceptions) -->
-	<Target Name="EnsureMauiResizetizerDirectoriesExist" BeforeTargets="_ResolveLibraryProjectImports;ResizetizeImages;ProcessMauiSplashScreens;_CreateDesignTimeResourceDesigner">
-		<MakeDir Directories="$(IntermediateOutputPath)designtime\stamp;$(IntermediateOutputPath)resizetizer\r;$(IntermediateOutputPath)resizetizer\sp;$(IntermediateOutputPath)resizetizer\sp\drawable-mdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-hdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xhdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xxhdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xxxhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-mdpi;$(IntermediateOutputPath)resizetizer\r\drawable-hdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xxhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xxxhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-mdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-hdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xxhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xxxhdpi" />
-		<!-- Workaround for XARLP7000: Remove stale temporary zip files left behind by interrupted zip operations in ResolveLibraryProjectImports -->
-		<Exec Command="powershell -Command &quot;Get-ChildItem -Path '$(IntermediateOutputPath)' -Filter '*.tmp' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue; exit 0&quot;" ContinueOnError="true" Condition="Exists('$(IntermediateOutputPath)')" />
+	<!-- Ensure resizetizer, designtime & android output directories exist before _ResolveLibraryProjectImports, ResizetizeImages, ProcessMauiSplashScreens, _CompileDex & _CompileToDalvik run across all target platforms (fixes MSB3371/MSB3374/CS7064/MAUIR0001/MAUIR0004/JAVA0000 DirectoryNotFoundExceptions) -->
+	<Target Name="EnsureMauiResizetizerDirectoriesExist" BeforeTargets="_ResolveLibraryProjectImports;ResizetizeImages;ProcessMauiSplashScreens;_CreateDesignTimeResourceDesigner;_CompileDex;_CompileToDalvik">
+		<MakeDir Directories="$(IntermediateOutputPath)designtime\stamp;$(IntermediateOutputPath)android\bin;$(IntermediateOutputPath)android\assets;$(IntermediateOutputPath)resizetizer\r;$(IntermediateOutputPath)resizetizer\sp;$(IntermediateOutputPath)resizetizer\sp\drawable-mdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-hdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xhdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xxhdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xxxhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-mdpi;$(IntermediateOutputPath)resizetizer\r\drawable-hdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xxhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xxxhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-mdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-hdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xxhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xxxhdpi" />
 	</Target>
 
 	<!-- Workaround for MSB3374: Handle Visual Studio background design-time file lock on __Microsoft.Android.Resource.Designer.cs -->
