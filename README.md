@@ -1,5 +1,5 @@
-<!-- Edited on Aug 10, 2026 @ 12:50:00 -> Update for Connect Instructions dynamic banner, screen resolution detection, and wifi_passwords.json store -->
-Last Edit: Aug 10, 2026 - Add scan-to-connect Wi-Fi & request instructions graphic, dynamic screen resolution detection, and persistent wifi_passwords.json store
+<!-- Edited on Aug 13, 2026 @ 05:36:00 -> Update version 26.8.12.0 changelog and theme/UI contrast styling -->
+Last Edit: Aug 13, 2026 - Dynamic theme info text styling, secondary button contrast overrides, singer completion logic simplification, and MAUI resizetizer build fixes
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.

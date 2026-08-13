@@ -1,8 +1,20 @@
-<!-- Edited on Aug 10, 2026 @ 13:06:00 -> Add Help System expansion to 26.8.10.1 changelog -->
-Last Edit: Aug 10, 2026 - Add scan-to-connect Wi-Fi & request instructions graphic, dynamic screen resolution detection, persistent wifi_passwords.json store, and Help System expansion
+<!-- Edited on Aug 13, 2026 @ 05:36:00 -> Add version 26.8.12.0 changelog entry -->
+Last Edit: Aug 13, 2026 - Dynamic theme info text styling, secondary button contrast overrides, singer completion logic simplification, and MAUI resizetizer build fixes
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.12.0] - 2026-08-13
+
+### Added
+- **Dynamic Theme Info Text Brush (`AppInfoTextBrush`)**: Added `AppInfoTextBrush` resource in `LyracistThemeManager` (`#A7F3D0` for Dark / `#047857` for Light) and bound settings info text blocks for optimal contrast in all theme modes.
+- **Secondary Button & Info Theme Overrides**: Extended `ThemeService.cs` in KSRotation with explicit dynamic secondary button border (`#C4B5FD` / `#7C3AED`), foreground (`#E9D5FF` / `#6D28D9`), and info text brush resource overrides across system, light, and dark theme modes.
+
+### Fixed
+- **Simplified Singer Song Completion**: Streamlined `FinishSingerSong` in `MainViewModel.cs` to sequentially check off completed song checkboxes for active singers.
+- **MAUI Resizetizer Build Target (`EnsureMauiResizetizerDirectoriesExist`)**: Added pre-build target to `KSRotation.Maui.csproj` ensuring intermediate resizetizer directories exist to prevent build exceptions (`MSB3371`/`CS7064`).
+- **KeyGen Icon Reference & Package Cleanup**: Corrected icon asset path in `LyracistKeyGen.csproj` pointing to `Assets\lyracist_mic.ico` and removed unused `ProtectedData` package dependency.
+- **Design-Mode Safety**: Added `#if !MAUI` compile guard around `IsInDesignMode` WPF designer property check in `MainViewModel.cs`.
 
 ## [26.8.10.1] - 2026-08-10
 

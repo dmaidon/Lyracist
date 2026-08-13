@@ -1,4 +1,4 @@
-<!-- Edited on Aug 10, 2026 @ 12:55:00 -> Add WifiHelper.cs and WifiPasswordStore.cs links to KSRotation.Maui.csproj -->
+<!-- Edited on Aug 12, 2026 @ 10:31:00 -> Update MauiIcon to Resources\ksr_logo.png per user request -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -27,13 +27,13 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.11.167</AssemblyVersion>
+		<AssemblyVersion>26.8.12.177</AssemblyVersion>
 
-		<FileVersion>26.8.11.167</FileVersion>
+		<FileVersion>26.8.12.177</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
-		<PackageIcon>rotation_m.png</PackageIcon>
+		<PackageIcon>ksr_logo.png</PackageIcon>
 
 		<PackageOutputPath Condition="!$(TargetFramework.Contains('-android'))">C:\VB26\Release\KSRotation.MAUI</PackageOutputPath>
 
@@ -44,13 +44,10 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#512BD4" />
+		<MauiIcon Include="Resources\ksr_logo.png" Link="appicon.png" />
 	</ItemGroup>
 
-	<!-- Platform-specific Splash Screens -->
-	<ItemGroup>
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#12091a" BaseSize="128,128" />
-	</ItemGroup>
+
 
 	<ItemGroup>
 
@@ -58,8 +55,7 @@
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 
-		<!-- App logo, also used as the About-popup image (shares the file packed as the NuGet/MSIX icon below) -->
-		<MauiImage Include="Resources\ksr_logo.png" Resize="True" BaseSize="200,200" />
+
 		
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
@@ -108,18 +104,6 @@
 		<PackageReference Include="PDFsharp" Version="6.2.4" />
 	</ItemGroup>
 
-	<!-- Platform-specific compilation adjustments to ensure Windows platform code is not compiled on Android (and vice-versa) -->
-	<ItemGroup Condition="!$(TargetFramework.Contains('-windows'))">
-		<Compile Remove="Platforms\Windows\**" />
-		<None Include="Platforms\Windows\**" />
-		<MauiXaml Remove="Platforms\Windows\**\*.xaml" />
-	</ItemGroup>
-
-	<ItemGroup Condition="!$(TargetFramework.Contains('-android'))">
-		<Compile Remove="Platforms\Android\**" />
-		<None Include="Platforms\Android\**" />
-	</ItemGroup>
-
 	<ItemGroup>
 	  <Compile Update="Properties\Resources.Designer.cs">
 	    <DesignTime>True</DesignTime>
@@ -149,6 +133,11 @@
 		<Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
 		<Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
 	</ItemGroup>
+
+	<!-- Ensure resizetizer & designtime target output directories exist before _ResolveLibraryProjectImports, ResizetizeImages & ProcessMauiSplashScreens run across all target platforms (fixes MSB3371/MSB3374/CS7064/MAUIR0001/MAUIR0004 DirectoryNotFoundExceptions) -->
+	<Target Name="EnsureMauiResizetizerDirectoriesExist" BeforeTargets="_ResolveLibraryProjectImports;ResizetizeImages;ProcessMauiSplashScreens">
+		<MakeDir Directories="$(IntermediateOutputPath)designtime\stamp;$(IntermediateOutputPath)resizetizer\r;$(IntermediateOutputPath)resizetizer\sp;$(IntermediateOutputPath)resizetizer\sp\drawable-mdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-hdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xhdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xxhdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xxxhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-mdpi;$(IntermediateOutputPath)resizetizer\r\drawable-hdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xxhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xxxhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-mdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-hdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xxhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xxxhdpi" />
+	</Target>
 
 	<!-- Workaround for Xamarin.Android directory lock issue on Clean/Rebuild -->
 	<Target Name="AndroidCleanWorkaround" BeforeTargets="Clean">

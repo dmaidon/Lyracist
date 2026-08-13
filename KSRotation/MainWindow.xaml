@@ -1,4 +1,4 @@
-<!-- Edited on Aug 9, 2026 @ 10:21:00 -> Set RadioButton and Button font foreground to light lavender (#E9D5FF) and hide ComboBox list boxes for standard banners -->
+<!-- Edited on Aug 12, 2026 @ 06:18:00 -> Update button and text foreground/border styles to use dynamic theme resource brushes for Dark/Light mode contrast -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -148,8 +148,8 @@
             <Setter Property="Margin" Value="0,4" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="FontWeight" Value="Medium" />
-            <Setter Property="BorderBrush" Value="#C4B5FD" />
-            <Setter Property="Foreground" Value="#E9D5FF" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppSecondaryButtonBorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppSecondaryButtonForegroundBrush}" />
         </Style>
 
         <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
@@ -167,8 +167,8 @@
             <Setter Property="FontSize" Value="12" />
             <Setter Property="Height" Value="28" />
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="BorderBrush" Value="#C4B5FD" />
-            <Setter Property="Foreground" Value="#E9D5FF" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppSecondaryButtonBorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppSecondaryButtonForegroundBrush}" />
         </Style>
 
         <!-- Purple GroupBox theme (Rotation, DJ, Venues) -->
@@ -1565,10 +1565,10 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Wi-Fi Password (Optional): " VerticalAlignment="Center" Foreground="#E9D5FF" Margin="0,0,8,0" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
+                                        <TextBlock Text="Wi-Fi Password (Optional): " VerticalAlignment="Center" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,8,0" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
                                         <TextBox Grid.Column="1" Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Style="{StaticResource ModernTextBoxStyle}" Height="28" Padding="6,2" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
                                     </Grid>
-                                    <TextBlock Text="Auto-detects active Wi-Fi SSID, and request portal URL." Foreground="#A7F3D0" FontSize="11" TextWrapping="Wrap" TextAlignment="Center" />
+                                    <TextBlock Text="Auto-detects active Wi-Fi SSID, and request portal URL." Foreground="{DynamicResource AppInfoTextBrush}" FontSize="11" TextWrapping="Wrap" TextAlignment="Center" />
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
@@ -1614,7 +1614,7 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <RadioButton Content="{Binding DisplayName}" IsChecked="{Binding IsSelected, Mode=TwoWay}" Margin="0,4,0,4" FontSize="14" Foreground="#E9D5FF" />
+                                                <RadioButton Content="{Binding DisplayName}" IsChecked="{Binding IsSelected, Mode=TwoWay}" Margin="0,4,0,4" FontSize="14" Foreground="{DynamicResource AppContrastTextBrush}" />
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
@@ -1683,10 +1683,10 @@
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
 
-                                                    <TextBlock x:Name="StandardTitleText" Grid.Column="0" Text="{Binding EventName}" FontWeight="SemiBold" Foreground="#E9D5FF" VerticalAlignment="Center" Visibility="Collapsed" />
-                                                    <TextBox x:Name="CustomTitleInput" Grid.Column="0" Text="{Binding EventName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Foreground="#E9D5FF" Height="28" Padding="4,2" />
+                                                    <TextBlock x:Name="StandardTitleText" Grid.Column="0" Text="{Binding EventName}" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                    <TextBox x:Name="CustomTitleInput" Grid.Column="0" Text="{Binding EventName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Foreground="{DynamicResource AppContrastTextBrush}" Height="28" Padding="4,2" />
 
-                                                    <TextBlock x:Name="StandardFileText" Grid.Column="2" Text="{Binding BannerFileName, StringFormat='Standard Graphic ({0})'}" Foreground="#C4B5FD" FontStyle="Italic" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                    <TextBlock x:Name="StandardFileText" Grid.Column="2" Text="{Binding BannerFileName, StringFormat='Standard Graphic ({0})'}" Foreground="{DynamicResource AppHeaderBrush}" FontStyle="Italic" VerticalAlignment="Center" Visibility="Collapsed" />
                                                     <ComboBox x:Name="CustomFileCombo" Grid.Column="2"
                                                                ItemsSource="{Binding DataContext.AvailableEventBannerFiles, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                                SelectedItem="{Binding BannerFileName, Mode=TwoWay}"

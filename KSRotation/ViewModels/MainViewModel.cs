@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 14:18:00 -> Default ActiveSpecialEvent to "None"
+// Edited on Aug 12, 2026 @ 10:42:00 -> Simplify FinishSingerSong to sequentially check off completed song checkboxes per user request
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -591,8 +591,12 @@ namespace KSRotation.ViewModels
         // in Visual Studio's designer would write settings/banner files to disk, open a real TCP
         // listener, and potentially spawn the DJ Banner window, none of which should happen unless the
         // app is actually run.
+#if !MAUI
         private static bool IsInDesignMode =>
             System.ComponentModel.DesignerProperties.GetIsInDesignMode(new System.Windows.DependencyObject());
+#else
+        private static bool IsInDesignMode => false;
+#endif
 
         public MainViewModel()
         {
@@ -1096,59 +1100,6 @@ namespace KSRotation.ViewModels
             if (roundToMark == 0)
             {
                 roundToMark = 10;
-            }
-            else
-            {
-                int index = Singers.IndexOf(entry);
-                if (index >= 0)
-                {
-                    int showRound = 1;
-                    var activeBefore = new System.Collections.Generic.List<SingerEntry>();
-                    for (int j = 0; j < index; j++)
-                    {
-                        var s = Singers[j];
-                        if (!s.IsInactive && !s.IsPaused && !s.IsMusic)
-                        {
-                            activeBefore.Add(s);
-                        }
-                    }
-
-                    if (activeBefore.Count > 0)
-                    {
-                        int maxBefore = 0;
-                        foreach (var s in activeBefore)
-                        {
-                            int highest = s.GetHighestCompletedRound();
-                            if (highest > maxBefore)
-                            {
-                                maxBefore = highest;
-                            }
-                        }
-                        showRound = Math.Max(1, maxBefore);
-                    }
-                    else
-                    {
-                        int maxAll = 0;
-                        foreach (var s in Singers)
-                        {
-                            if (!s.IsInactive && !s.IsPaused && !s.IsMusic)
-                            {
-                                int highest = s.GetHighestCompletedRound();
-                                if (highest > maxAll)
-                                {
-                                    maxAll = highest;
-                                }
-                            }
-                        }
-                        showRound = Math.Max(1, maxAll + 1);
-                    }
-
-                    int calculatedRound = Math.Max(roundToMark, showRound);
-                    if (calculatedRound >= 1 && calculatedRound <= 10)
-                    {
-                        roundToMark = calculatedRound;
-                    }
-                }
             }
 
             if (roundToMark > 0)

@@ -1,4 +1,4 @@
-// Edited on Jul 27, 2026 @ 13:50:00 -> Add theme override keys and values for active/next singer row backgrounds
+// Edited on Aug 12, 2026 @ 06:32:00 -> Set high-contrast LightBodyOverride and LightBodyLightOverride brushes in ThemeService for Light Mode legibility
 using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using System.Windows.Media;
@@ -21,10 +21,16 @@ namespace KSRotation.Services
         private const string AppSplitFlapBorderBrushKey = "AppSplitFlapBorderBrush";
         private const string AppCurrentSingerBackgroundBrushKey = "AppCurrentSingerBackgroundBrush";
         private const string AppNextSingerBackgroundBrushKey = "AppNextSingerBackgroundBrush";
+        private const string AppSecondaryButtonBorderBrushKey = "AppSecondaryButtonBorderBrush";
+        private const string AppSecondaryButtonForegroundBrushKey = "AppSecondaryButtonForegroundBrush";
+        private const string AppInfoTextBrushKey = "AppInfoTextBrush";
+        private const string Vsys = "System";
         private static readonly SolidColorBrush DarkPaperOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x23, 0x26, 0x2E));
         private static readonly SolidColorBrush DarkCardOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x2C, 0x30, 0x39));
         private static readonly SolidColorBrush DarkBodyOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xEE, 0xF2, 0xF7));
         private static readonly SolidColorBrush DarkBodyLightOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xC9, 0xD1, 0xDA));
+        private static readonly SolidColorBrush LightBodyOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x0F, 0x17, 0x2A));
+        private static readonly SolidColorBrush LightBodyLightOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x33, 0x41, 0x55));
         private static readonly SolidColorBrush DarkContrastTextOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xEE, 0xF2, 0xF7));
         private static readonly SolidColorBrush LightContrastTextOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x1E, 0x29, 0x3B));
         private static readonly SolidColorBrush DarkHeaderOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xC4, 0xB5, 0xFD));
@@ -37,9 +43,15 @@ namespace KSRotation.Services
         private static readonly SolidColorBrush LightCurrentSingerBackgroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xF9, 0xC4));
         private static readonly SolidColorBrush DarkNextSingerBackgroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x0A, 0x3E, 0x1A));
         private static readonly SolidColorBrush LightNextSingerBackgroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xC8, 0xE6, 0xC9));
+        private static readonly SolidColorBrush DarkSecondaryButtonBorderOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xC4, 0xB5, 0xFD));
+        private static readonly SolidColorBrush LightSecondaryButtonBorderOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x7C, 0x3A, 0xED));
+        private static readonly SolidColorBrush DarkSecondaryButtonForegroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xE9, 0xD5, 0xFF));
+        private static readonly SolidColorBrush LightSecondaryButtonForegroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x6D, 0x28, 0xD9));
+        private static readonly SolidColorBrush DarkInfoTextOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xA7, 0xF3, 0xD0));
+        private static readonly SolidColorBrush LightInfoTextOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x04, 0x78, 0x57));
 
         /// <summary>The most recently applied theme selection; used to decide whether to react to OS theme changes.</summary>
-        private static string s_currentThemeName = "System";
+        private static string s_currentThemeName = Vsys;
 
         static ThemeService()
         {
@@ -54,7 +66,7 @@ namespace KSRotation.Services
                 return;
             }
 
-            if (!string.Equals(s_currentThemeName, "System", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(s_currentThemeName, Vsys, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
@@ -63,11 +75,11 @@ namespace KSRotation.Services
             var app = System.Windows.Application.Current;
             if (app != null)
             {
-                app.Dispatcher.BeginInvoke(new Action(() => Apply("System")));
+                app.Dispatcher.BeginInvoke(new Action(() => Apply(Vsys)));
             }
             else
             {
-                Apply("System");
+                Apply(Vsys);
             }
         }
 
@@ -126,19 +138,25 @@ namespace KSRotation.Services
                 resources[AppSplitFlapBorderBrushKey] = DarkSplitFlapBorderOverride;
                 resources[AppCurrentSingerBackgroundBrushKey] = DarkCurrentSingerBackgroundOverride;
                 resources[AppNextSingerBackgroundBrushKey] = DarkNextSingerBackgroundOverride;
+                resources[AppSecondaryButtonBorderBrushKey] = DarkSecondaryButtonBorderOverride;
+                resources[AppSecondaryButtonForegroundBrushKey] = DarkSecondaryButtonForegroundOverride;
+                resources[AppInfoTextBrushKey] = DarkInfoTextOverride;
                 return;
             }
 
             resources.Remove(MaterialDesignPaperKey);
             resources.Remove(MaterialDesignCardBackgroundKey);
-            resources.Remove(MaterialDesignBodyKey);
-            resources.Remove(MaterialDesignBodyLightKey);
+            resources[MaterialDesignBodyKey] = LightBodyOverride;
+            resources[MaterialDesignBodyLightKey] = LightBodyLightOverride;
             resources[AppContrastTextBrushKey] = LightContrastTextOverride;
             resources[AppHeaderBrushKey] = LightHeaderOverride;
             resources[AppSplitFlapBackgroundBrushKey] = LightSplitFlapBackgroundOverride;
             resources[AppSplitFlapBorderBrushKey] = LightSplitFlapBorderOverride;
             resources[AppCurrentSingerBackgroundBrushKey] = LightCurrentSingerBackgroundOverride;
             resources[AppNextSingerBackgroundBrushKey] = LightNextSingerBackgroundOverride;
+            resources[AppSecondaryButtonBorderBrushKey] = LightSecondaryButtonBorderOverride;
+            resources[AppSecondaryButtonForegroundBrushKey] = LightSecondaryButtonForegroundOverride;
+            resources[AppInfoTextBrushKey] = LightInfoTextOverride;
         }
 
         private static SolidColorBrush CreateFrozenBrush(System.Windows.Media.Color color)

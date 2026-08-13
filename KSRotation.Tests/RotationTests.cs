@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 12:42:00 -> Add WifiPasswordStore unit tests
+// Edited on Aug 12, 2026 @ 10:42:00 -> Update FinishSingerSong unit test to verify sequential song completion checkbox marking
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -784,7 +784,7 @@ public class MainViewModelTests
     }
 
     [Fact]
-    public void FinishSingerSong_WithSkippedRound_MarksActiveShowRound()
+    public void FinishSingerSong_SequentialCheckboxes_MarksNextIncompleteRound()
     {
         // Arrange
         var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
@@ -798,19 +798,19 @@ public class MainViewModelTests
         vm.Singers.Add(singer2);
         vm.Singers.Add(singer3);
 
-        // Round 1: Alice and Charlie sing. Bob is skipped (no song / decided not to sing).
+        // Alice and Charlie sing. Bob missed a turn.
         singer1.MarkRoundCompleted(1);
         singer3.MarkRoundCompleted(1);
 
-        // Round 2: Alice sings
+        // Alice sings again
         singer1.MarkRoundCompleted(2);
 
-        // Now Bob sings in Round 2!
+        // Now Bob sings his first song!
         vm.FinishSingerSongCommand.Execute(singer2);
 
-        // Assert
-        Assert.False(singer2.Song1Completed); // Round 1 remains unchecked
-        Assert.True(singer2.Song2Completed);  // Round 2 is checked
+        // Assert: Bob's actual 1st completed song checkbox (Song1Completed) is checked
+        Assert.True(singer2.Song1Completed);
+        Assert.False(singer2.Song2Completed);
     }
 
     [Fact]

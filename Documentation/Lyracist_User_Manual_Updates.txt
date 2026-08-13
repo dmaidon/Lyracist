@@ -321,8 +321,8 @@ Updates have been made to Special Event Banner management in KSRotation and the 
    - Standard events are protected from accidental deletion.
    - The mapping grid displays standard events as clean fixed labels, reserving drop-down list boxes and edit inputs exclusively for custom events.
 
-3. High-Contrast Light Lavender UI Styling & Dark Maroon QR Code:
-   - Button text, borders (#C4B5FD), and RadioButton labels use bright light lavender purple (#E9D5FF) for high contrast against dark green/teal backgrounds.
+3. Dual-Theme Dynamic Purple & Light Lavender UI Styling & Dark Maroon QR Code:
+   - Button text, borders, and RadioButton labels dynamically adapt based on theme mode: bright light lavender (#E9D5FF text, #C4B5FD border) for dark backgrounds, and rich deep purple (#6D28D9 text, #7C3AED border) for light backgrounds to ensure high legibility across all theme modes.
    - The DJ QR Code foreground color has been updated from bright crimson to dark maroon/brick-red (RGB 128, 0, 32 / #800020), ensuring high optical contrast against white tiles for scanning by all mobile cameras.
 
 4. 11+ Performance Rotation Advance:

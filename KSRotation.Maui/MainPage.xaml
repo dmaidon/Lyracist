@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Edited on Jul 28, 2026 @ 18:46:00 - Add music request badges and overlay background music labels to queue list -->
-<!-- Edited on Jul 28, 2026 @ 12:46:00 - Add paused state triggers, disable mic when paused/inactive, update pause and delete button triggers -->
+<!-- Edited on Aug 12, 2026 @ 10:31:00 -> Update pause button icon text and layout in queue list -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -205,7 +204,7 @@
                                             <Button Text="▼" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerDownCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
 
                                             <!-- Toggle Paused (Pause/Resume) -->
-                                            <Button Text="❚❚ Pause" Clicked="OnToggleSingerPausedClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#D97706" BorderWidth="1" TextColor="#D97706" FontSize="11" FontAttributes="Bold" HeightRequest="28" Padding="6,0">
+                                            <Button Text="❚❚" Clicked="OnToggleSingerPausedClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#D97706" BorderWidth="1" TextColor="#D97706" FontSize="11" FontAttributes="Bold" HeightRequest="28" Padding="6,0">
                                                 <Button.Triggers>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsPaused}" Value="True">
                                                         <Setter Property="Text" Value="▶ Resume" />

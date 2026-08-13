@@ -1,5 +1,5 @@
+<!-- Edited on Aug 12, 2026 @ 06:57:00 -> Fix missing ico reference; remove redundant ProtectedData package reference -->
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>..\Lyracist\Assets\Sonya-Swarm-Microphone.ico</ApplicationIcon>
+    <ApplicationIcon>..\Lyracist\Assets\lyracist_mic.ico</ApplicationIcon>
     <BaseOutputPath>C:\VB26\Release\LyracistKeyGen</BaseOutputPath>
     <Title>Lyracist Key Generator</Title>
     <Authors>Dennis Maidon</Authors>
@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\Lyracist\Assets\Sonya-Swarm-Microphone.ico" Link="Sonya-Swarm-Microphone.ico" />
+    <Content Include="..\Lyracist\Assets\lyracist_mic.ico" Link="lyracist_mic.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,7 +33,7 @@
     <PackageReference Include="WPF-UI" Version="4.3.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.10" />
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.10" />
+
   </ItemGroup>
 
   <ItemGroup>
