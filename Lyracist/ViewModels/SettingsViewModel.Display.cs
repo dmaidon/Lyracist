@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 19:20:10 -> Add Special Event Banners list and available files properties
+// Edited on Aug 13, 2026 @ 13:46:21 -> Remove dead unreachable branches from GetTargetScreenResolution's monitor match
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -308,8 +308,7 @@ public partial class SettingsViewModel
                 return (1920, 1080);
             }
 
-            if (screenSelection.Equals("All Screens", StringComparison.OrdinalIgnoreCase) ||
-                screenSelection.Equals("All Screens / Monitors", StringComparison.OrdinalIgnoreCase))
+            if (screenSelection.Equals("All Screens / Monitors", StringComparison.OrdinalIgnoreCase))
             {
                 int maxW = 1920, maxH = 1080;
                 foreach (var s in System.Windows.Forms.Screen.AllScreens)
@@ -320,11 +319,11 @@ public partial class SettingsViewModel
                 return (maxW, maxH);
             }
 
+            // screenSelection is a ConnectInstructionScreens entry, formatted as screen.DisplayName
+            // ("Screen {n} - {DeviceName}") — match by checking it embeds the monitor's DeviceName.
             foreach (var s in System.Windows.Forms.Screen.AllScreens)
             {
-                if (s.DeviceName.Equals(screenSelection, StringComparison.OrdinalIgnoreCase) ||
-                    screenSelection.Contains(s.DeviceName) ||
-                    s.Bounds.ToString().Contains(screenSelection))
+                if (screenSelection.Contains(s.DeviceName, StringComparison.OrdinalIgnoreCase))
                 {
                     return (s.Bounds.Width, s.Bounds.Height);
                 }

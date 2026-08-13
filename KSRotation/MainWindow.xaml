@@ -1,4 +1,4 @@
-<!-- Edited on Aug 12, 2026 @ 06:18:00 -> Update button and text foreground/border styles to use dynamic theme resource brushes for Dark/Light mode contrast -->
+<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Add tablet/vertical-mode responsive layout to the rotation list and Incoming Requests sidebar -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -9,6 +9,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:KSRotation.ViewModels"
+        xmlns:converters="clr-namespace:KSRotation.Converters"
         mc:Ignorable="d"
     Title="{Binding WindowTitle}"
     Width="1500"
@@ -25,6 +26,9 @@
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <!-- Drives the rotation list's "vertical mode" 3-row layout — true when the list is narrower
+             than 700px (e.g. window resized tall and thin, or a portrait tablet). -->
+        <converters:NarrowWidthToBooleanConverter x:Key="NarrowWidthConverter" />
         <!-- Custom text box style inside ListView rows to ensure perfect contrast and theme syncing -->
         <Style x:Key="GridTextBoxStyle" TargetType="TextBox">
             <Setter Property="Padding" Value="4,2" />
@@ -445,6 +449,13 @@
             </TabControl.Resources>
             <TabItem Header="Rotation" Width="80" Height="45">
                 <Grid Margin="12">
+                    <!-- Row 1 only holds content in vertical/tablet mode, when the sidebar below stacks
+                         under the rotation list instead of sitting beside it in Column 1. It's Auto-height
+                         so it collapses to nothing when unused in the normal wide layout. -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="360" />
@@ -507,22 +518,9 @@
                         <Grid Grid.Row="1" Margin="0,0,0,6">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="col0" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col1" MinWidth="130" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col2" MinWidth="180" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col3" MinWidth="180" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="colFinish" MinWidth="44" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col4" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col5" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col6" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col7" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col8" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col9" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col10" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col11" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col12_cb" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col13_cb" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col12" MinWidth="34" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="col13" MinWidth="34" />
+                                <ColumnDefinition Width="2*" SharedSizeGroup="col1" MinWidth="130" />
+                                <ColumnDefinition Width="3*" SharedSizeGroup="col2" MinWidth="180" />
+                                <ColumnDefinition Width="3*" SharedSizeGroup="col3" MinWidth="180" />
                             </Grid.ColumnDefinitions>
 
                             <Grid.Resources>
@@ -532,22 +530,9 @@
                             </Grid.Resources>
 
                             <TextBlock Text="★" FontWeight="SemiBold" HorizontalAlignment="Center" ToolTip="Set current singer" />
-                            <TextBlock Grid.Column="1" Text="Singer" FontWeight="SemiBold" />
-                            <TextBlock Grid.Column="2" Text="Song" FontWeight="SemiBold" />
-                            <TextBlock Grid.Column="3" Text="Artist" FontWeight="SemiBold" />
-                            <TextBlock Grid.Column="4" Text="Done" FontWeight="SemiBold" HorizontalAlignment="Center" ToolTip="Mark current song finished" />
-                            <TextBlock Grid.Column="5" Text="1" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="6" Text="2" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="7" Text="3" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="8" Text="4" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="9" Text="5" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="10" Text="6" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="11" Text="7" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="12" Text="8" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="13" Text="9" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="14" Text="10" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="15" Text="▲" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="16" Text="▼" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="Singer" FontWeight="SemiBold" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="2" Text="Song" FontWeight="SemiBold" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="3" Text="Artist" FontWeight="SemiBold" Margin="4,0,0,0" />
                         </Grid>
 
                         <ListView
@@ -555,181 +540,238 @@
                         Grid.Row="2"
                         ItemsSource="{Binding Singers}"
                         ItemContainerStyle="{StaticResource CurrentSingerRowStyle}"
-                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                         HorizontalContentAlignment="Stretch"
                         UseLayoutRounding="True"
                         SnapsToDevicePixels="True"
                         Margin="0,8,0,8">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Margin="0,4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col0" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col1" MinWidth="130" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col2" MinWidth="180" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col3" MinWidth="180" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="colFinish" MinWidth="44" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col4" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col5" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col6" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col7" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col8" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col9" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col10" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col11" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col12_cb" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col13_cb" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col12" MinWidth="34" />
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="col13" MinWidth="34" />
-                                        </Grid.ColumnDefinitions>
+                                    <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,0,1" Padding="0,4,0,6">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
 
-                                        <Button
-                                        Content="★"
-                                        Style="{StaticResource GridButtonStyle}"
-                                        Command="{Binding DataContext.SetCurrentSingerCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                        CommandParameter="{Binding}"
-                                        Grid.Column="0"
-                                        Margin="2"
-                                        ToolTip="Set as current singer" />
+                                            <!-- Row 0: Identity & Song Inputs -->
+                                            <Grid Grid.Row="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="col0" MinWidth="34" />
+                                                    <ColumnDefinition Width="2*" SharedSizeGroup="col1" MinWidth="130" />
+                                                    <ColumnDefinition Width="3*" SharedSizeGroup="col2" MinWidth="180" />
+                                                    <ColumnDefinition Width="3*" SharedSizeGroup="col3" MinWidth="180" />
+                                                </Grid.ColumnDefinitions>
 
-                                        <Grid Grid.Column="1">
-                                            <TextBox
-                                            x:Name="SingerNameInput"
-                                            Text="{Binding Name, UpdateSourceTrigger=LostFocus}"
-                                            GotKeyboardFocus="SingerNameTextBox_GotKeyboardFocus"
-                                            PreviewMouseLeftButtonDown="SingerNameTextBox_PreviewMouseLeftButtonDown"
-                                            TextChanged="SingerNameTextBox_TextChanged"
-                                            PreviewKeyDown="SingerNameTextBox_PreviewKeyDown"
-                                            LostFocus="SingerNameTextBox_LostFocus">
-                                                <TextBox.Style>
-                                                    <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsMusic}" Value="True">
-                                                                <Setter Property="Foreground" Value="#2ECC71" />
-                                                                <Setter Property="FontWeight" Value="Bold" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBox.Style>
-                                            </TextBox>
-                                            <Popup
-                                             x:Name="SuggestionsPopup"
-                                             IsOpen="False"
-                                             Placement="Bottom"
-                                             PlacementTarget="{Binding ElementName=SingerNameInput}"
-                                             StaysOpen="False"
-                                             AllowsTransparency="False"
-                                             Focusable="False"
-                                             Width="220"
-                                             PopupAnimation="None">
-                                                <Border Background="{DynamicResource MaterialDesignPaper}"
-                                                         BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                                         BorderThickness="1"
-                                                         CornerRadius="4"
-                                                         MaxHeight="200">
-                                                    <ListBox
-                                                    x:Name="SuggestionsList"
-                                                    ItemsSource="{Binding DataContext.FilteredSingers, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                    SelectionChanged="SuggestionsList_SelectionChanged"
-                                                    PreviewKeyDown="SuggestionsList_PreviewKeyDown"
-                                                    PreviewMouseLeftButtonDown="SuggestionsList_PreviewMouseLeftButtonDown"
-                                                    Focusable="True"
-                                                    BorderThickness="0">
-                                                        <ListBox.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <TextBlock Text="{Binding}" Padding="8,4" />
-                                                            </DataTemplate>
-                                                        </ListBox.ItemTemplate>
-                                                    </ListBox>
-                                                </Border>
-                                            </Popup>
+                                                <Button
+                                                Content="★"
+                                                Command="{Binding DataContext.SetCurrentSingerCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                CommandParameter="{Binding}"
+                                                Grid.Column="0"
+                                                Margin="2"
+                                                ToolTip="Set as current singer">
+                                                    <!-- In vertical mode this reads as a small badge next to the Name field rather than a
+                                                         full-size column button, even though it stays structurally in its own column. -->
+                                                    <Button.Style>
+                                                        <Style TargetType="Button" BasedOn="{StaticResource GridButtonStyle}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource NarrowWidthConverter}}" Value="True">
+                                                                    <Setter Property="Width" Value="26" />
+                                                                    <Setter Property="Height" Value="26" />
+                                                                    <Setter Property="Padding" Value="0" />
+                                                                    <Setter Property="FontSize" Value="13" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+
+                                                <Grid Grid.Column="1">
+                                                    <TextBox
+                                                    x:Name="SingerNameInput"
+                                                    Text="{Binding Name, UpdateSourceTrigger=LostFocus}"
+                                                    GotKeyboardFocus="SingerNameTextBox_GotKeyboardFocus"
+                                                    PreviewMouseLeftButtonDown="SingerNameTextBox_PreviewMouseLeftButtonDown"
+                                                    TextChanged="SingerNameTextBox_TextChanged"
+                                                    PreviewKeyDown="SingerNameTextBox_PreviewKeyDown"
+                                                    LostFocus="SingerNameTextBox_LostFocus">
+                                                        <TextBox.Style>
+                                                            <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsMusic}" Value="True">
+                                                                        <Setter Property="Foreground" Value="#2ECC71" />
+                                                                        <Setter Property="FontWeight" Value="Bold" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBox.Style>
+                                                    </TextBox>
+                                                    <Popup
+                                                     x:Name="SuggestionsPopup"
+                                                     IsOpen="False"
+                                                     Placement="Bottom"
+                                                     PlacementTarget="{Binding ElementName=SingerNameInput}"
+                                                     StaysOpen="False"
+                                                     AllowsTransparency="False"
+                                                     Focusable="False"
+                                                     Width="220"
+                                                     PopupAnimation="None">
+                                                        <Border Background="{DynamicResource MaterialDesignPaper}"
+                                                                 BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                                                 BorderThickness="1"
+                                                                 CornerRadius="4"
+                                                                 MaxHeight="200">
+                                                            <ListBox
+                                                            x:Name="SuggestionsList"
+                                                            ItemsSource="{Binding DataContext.FilteredSingers, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                            SelectionChanged="SuggestionsList_SelectionChanged"
+                                                            PreviewKeyDown="SuggestionsList_PreviewKeyDown"
+                                                            PreviewMouseLeftButtonDown="SuggestionsList_PreviewMouseLeftButtonDown"
+                                                            Focusable="True"
+                                                            BorderThickness="0">
+                                                                <ListBox.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBlock Text="{Binding}" Padding="8,4" />
+                                                                    </DataTemplate>
+                                                                </ListBox.ItemTemplate>
+                                                            </ListBox>
+                                                        </Border>
+                                                    </Popup>
+                                                </Grid>
+
+                                                <TextBox Text="{Binding Song, UpdateSourceTrigger=LostFocus}" Grid.Column="2">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsMusic}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#2ECC71" />
+                                                                    <Setter Property="FontWeight" Value="Bold" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
+                                                <TextBox Text="{Binding Artist, UpdateSourceTrigger=LostFocus}" Grid.Column="3">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsMusic}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#2ECC71" />
+                                                                    <Setter Property="FontWeight" Value="Bold" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
+                                            </Grid>
+
+                                            <!-- Row 1: Round Checkboxes & Row Actions.
+                                                 Wide layout: checkboxes (left) and action buttons (right) share this one row.
+                                                 Vertical mode (list narrower than 700px): checkboxes take the full row, and action
+                                                 buttons drop to their own row below — giving the 3-row layout (Name+badge / checkboxes / buttons). -->
+                                            <Grid Grid.Row="1" Margin="38,4,4,0">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Round Checkboxes Row -->
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <StackPanel.Style>
+                                                        <Style TargetType="StackPanel">
+                                                            <Setter Property="Grid.Row" Value="0" />
+                                                            <Setter Property="Grid.Column" Value="0" />
+                                                            <Setter Property="Grid.ColumnSpan" Value="1" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource NarrowWidthConverter}}" Value="True">
+                                                                    <Setter Property="Grid.ColumnSpan" Value="2" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
+                                                    <TextBlock Text="Rounds:" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBodyLight}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                                    <CheckBox IsChecked="{Binding Song1Completed}" Foreground="#E74C3C" ToolTip="Round 1 Completed" Margin="0,0,6,0" />
+                                                    <CheckBox IsChecked="{Binding Song2Completed}" Foreground="#E67E22" ToolTip="Round 2 Completed" Margin="0,0,6,0" />
+                                                    <CheckBox IsChecked="{Binding Song3Completed}" Foreground="#F1C40F" ToolTip="Round 3 Completed" Margin="0,0,6,0" />
+                                                    <CheckBox IsChecked="{Binding Song4Completed}" Foreground="#2ECC71" ToolTip="Round 4 Completed" Margin="0,0,6,0" />
+                                                    <CheckBox IsChecked="{Binding Song5Completed}" Foreground="#1ABC9C" ToolTip="Round 5 Completed" Margin="0,0,6,0" />
+                                                    <CheckBox IsChecked="{Binding Song6Completed}" Foreground="#3498DB" ToolTip="Round 6 Completed" Margin="0,0,6,0" />
+                                                    <CheckBox IsChecked="{Binding Song7Completed}" Foreground="#9B59B6" ToolTip="Round 7 Completed" Margin="0,0,6,0" />
+                                                    <CheckBox IsChecked="{Binding Song8Completed}" Foreground="#FF1493" ToolTip="Round 8 Completed" Margin="0,0,6,0" />
+                                                    <CheckBox IsChecked="{Binding Song9Completed}" Foreground="#00E5FF" ToolTip="Round 9 Completed" Margin="0,0,6,0" />
+                                                    <CheckBox IsChecked="{Binding Song10Completed}" Foreground="#E040FB" ToolTip="Round 10 Completed" Margin="0,0,6,0" />
+
+                                                    <!-- Background Music Overlay to hide CheckBoxes -->
+                                                    <Border Background="{Binding Background, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsMusic}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="♪ Background Music Track" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#2ECC71" FontStyle="Italic" FontWeight="Bold" FontSize="11" />
+                                                    </Border>
+                                                </StackPanel>
+
+                                                <!-- Action Buttons Row -->
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                    <StackPanel.Style>
+                                                        <Style TargetType="StackPanel">
+                                                            <Setter Property="Grid.Row" Value="0" />
+                                                            <Setter Property="Grid.Column" Value="1" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource NarrowWidthConverter}}" Value="True">
+                                                                    <Setter Property="Grid.Row" Value="1" />
+                                                                    <Setter Property="Grid.Column" Value="0" />
+                                                                    <Setter Property="Margin" Value="0,6,0,0" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
+                                                    <Button Content="✓ Finish"
+                                                            Command="{Binding DataContext.FinishSingerSongCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                            CommandParameter="{Binding}"
+                                                            Margin="0,0,6,0"
+                                                            Padding="8,2"
+                                                            ToolTip="Finish current song and advance rotation">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource GridButtonStyle}">
+                                                                <Setter Property="MinWidth" Value="60" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsInactive}" Value="True">
+                                                                        <Setter Property="IsEnabled" Value="False" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+
+                                                    <Button Content="▲"
+                                                            Style="{StaticResource GridButtonStyle}"
+                                                            Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                            CommandParameter="{Binding}"
+                                                            Width="30"
+                                                            Margin="0,0,4,0"
+                                                            ToolTip="Move Singer Up" />
+
+                                                    <Button Content="▼"
+                                                            Style="{StaticResource GridButtonStyle}"
+                                                            Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                            CommandParameter="{Binding}"
+                                                            Width="30"
+                                                            ToolTip="Move Singer Down" />
+                                                </StackPanel>
+                                            </Grid>
                                         </Grid>
-
-                                        <TextBox Text="{Binding Song, UpdateSourceTrigger=LostFocus}" Grid.Column="2">
-                                            <TextBox.Style>
-                                                <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsMusic}" Value="True">
-                                                            <Setter Property="Foreground" Value="#2ECC71" />
-                                                            <Setter Property="FontWeight" Value="Bold" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBox.Style>
-                                        </TextBox>
-                                        <TextBox Text="{Binding Artist, UpdateSourceTrigger=LostFocus}" Grid.Column="3">
-                                            <TextBox.Style>
-                                                <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsMusic}" Value="True">
-                                                            <Setter Property="Foreground" Value="#2ECC71" />
-                                                            <Setter Property="FontWeight" Value="Bold" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBox.Style>
-                                        </TextBox>
-
-                                        <Button
-                                         Content="✓"
-                                         Command="{Binding DataContext.FinishSingerSongCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                         CommandParameter="{Binding}"
-                                         Grid.Column="4"
-                                         Margin="2"
-                                         ToolTip="Finish current song and clear inputs">
-                                            <Button.Style>
-                                                <Style TargetType="Button" BasedOn="{StaticResource GridButtonStyle}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsInactive}" Value="True">
-                                                            <Setter Property="IsEnabled" Value="False" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
-
-                                        <CheckBox Grid.Column="5" IsChecked="{Binding Song1Completed}" Foreground="#E74C3C" />
-                                        <CheckBox Grid.Column="6" IsChecked="{Binding Song2Completed}" Foreground="#E67E22" />
-                                        <CheckBox Grid.Column="7" IsChecked="{Binding Song3Completed}" Foreground="#F1C40F" />
-                                        <CheckBox Grid.Column="8" IsChecked="{Binding Song4Completed}" Foreground="#2ECC71" />
-                                        <CheckBox Grid.Column="9" IsChecked="{Binding Song5Completed}" Foreground="#1ABC9C" />
-                                        <CheckBox Grid.Column="10" IsChecked="{Binding Song6Completed}" Foreground="#3498DB" />
-                                        <CheckBox Grid.Column="11" IsChecked="{Binding Song7Completed}" Foreground="#9B59B6" />
-                                        <CheckBox Grid.Column="12" IsChecked="{Binding Song8Completed}" Foreground="#FF1493" />
-                                        <CheckBox Grid.Column="13" IsChecked="{Binding Song9Completed}" Foreground="#00E5FF" />
-                                        <CheckBox Grid.Column="14" IsChecked="{Binding Song10Completed}" Foreground="#E040FB" />
-
-                                        <!-- Background Music Overlay to hide CheckBoxes -->
-                                        <Border Grid.Column="5" Grid.ColumnSpan="10" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsMusic}" Value="True">
-                                                            <Setter Property="Visibility" Value="Visible" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <TextBlock Text="♪ Background Music Track" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#2ECC71" FontStyle="Italic" FontWeight="Bold" FontSize="11" />
-                                        </Border>
-
-                                        <Button
-                                        Content="▲"
-                                        Style="{StaticResource GridButtonStyle}"
-                                        Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                        CommandParameter="{Binding}"
-                                        Grid.Column="15"
-                                        Margin="4" />
-
-                                        <Button
-                                        Content="▼"
-                                        Style="{StaticResource GridButtonStyle}"
-                                        Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                        CommandParameter="{Binding}"
-                                        Grid.Column="16"
-                                        Margin="4" />
-                                    </Grid>
+                                    </Border>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
@@ -758,8 +800,29 @@
                         </StackPanel>
                     </Grid>
 
-                    <!-- Right: Incoming Requests Sidebar -->
-                    <Grid Grid.Column="1" Margin="8,0,0,0">
+                    <!-- Right: Incoming Requests Sidebar.
+                         Wide layout: sits beside the rotation list in Column 1, fixed 360px wide.
+                         Vertical/tablet mode (window narrower than 1050px): drops below the rotation
+                         list in Row 1, spanning the full width, with a fixed height since its own
+                         Height="*" incoming-requests row needs a bounded parent to render into. -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Grid.Row" Value="0" />
+                                <Setter Property="Grid.Column" Value="1" />
+                                <Setter Property="Width" Value="360" />
+                                <Setter Property="Margin" Value="8,0,0,0" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource NarrowWidthConverter}}" Value="True">
+                                        <Setter Property="Grid.Row" Value="1" />
+                                        <Setter Property="Grid.Column" Value="0" />
+                                        <Setter Property="Width" Value="NaN" />
+                                        <Setter Property="Height" Value="320" />
+                                        <Setter Property="Margin" Value="0,16,0,0" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />

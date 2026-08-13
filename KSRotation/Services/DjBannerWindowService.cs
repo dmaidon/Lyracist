@@ -1,4 +1,4 @@
-// Edited on Aug 4, 2026 @ 09:55:00 -> Pass dataContext to Show() and set it on the window to support data binding to QR code and connection info
+// Edited on Aug 13, 2026 @ 13:46:21 -> Set IsShuttingDown before Close() so the DJ banner window actually closes on app exit
 // Edited on Aug 2, 2026 @ 10:14:00 -> Delegate banner updating logic to the window UpdateBanner method
 using KSRotation.Windows;
 using Lyracist.Shared;
@@ -75,6 +75,7 @@ namespace KSRotation.Services
         {
             if (_window == null) return;
             _window.Closed -= OnWindowClosed;
+            _window.IsShuttingDown = true;
             _window.Close();
             _window = null;
         }

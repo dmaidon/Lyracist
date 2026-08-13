@@ -1,8 +1,28 @@
-<!-- Edited on Aug 13, 2026 @ 07:36:00 -> Add version 26.8.13.0 changelog entry -->
-Last Edit: Aug 13, 2026 - Android designtime build file lock workarounds (MSB3374/XARLP7000) and global CA1416 platform warning suppressions
+<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Add version 26.8.13.1 changelog entry -->
+Last Edit: Aug 13, 2026 - KSRotation tablet/vertical-mode rotation list layout, MAUI singer-row overlap fix, and a round of correctness/performance fixes
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.13.1] - 2026-08-13
+
+### Added
+- **Tablet/Vertical-Mode Rotation List Layout (KSRotation)**: The rotation list in `MainWindow.xaml` now responsively reflows into a 3-row per-singer layout (Name + current-singer badge / round checkboxes / action buttons) and stacks the Incoming Requests sidebar below the list instead of beside it, once the window narrows below ~1050px — sized for real 11" tablet portrait use rather than desktop widths. Backed by a new `NarrowWidthToBooleanConverter`.
+
+### Fixed
+- **KSRotation.Maui Singer Row Overlap**: Restructured the per-singer `DataTemplate` in `MainPage.xaml` from a 2-column Grid into a stacked `VerticalStackLayout`. The previous layout centered the (7-button) actions panel vertically across the whole row, which landed it directly on top of the round-checkbox row once that row was added — now each section gets its own full-width row.
+- **DJ Banner Window Not Actually Closing**: The `IsShuttingDown` flag added to gate `OnClosing` cancellation was never set to `true` anywhere, so DJ banner windows were only ever hidden, not closed, on app exit. Now set before `Close()` in KSRotation's `DjBannerWindowService` and during `OnExit` in Lyracist's `App.xaml.cs`.
+- **Doubled DJ Banner Decode on Every Switch**: `GetDecodeTargetWidth`'s width probe used `BitmapCacheOption.OnLoad`, forcing a full eager pixel decode just to read a dimension before the real, capped decode ran right after. Switched to `OnDemand` in both KSRotation and Lyracist.
+- **Per-Keystroke Banner Regeneration**: Typing a host IP in KSRotation triggered a full QR render + PNG encode + disk write on the UI thread on every keystroke. `RefreshConnectInstructionsBanner` is now debounced.
+- **Unescaped Wi-Fi QR Payload**: SSID/passwords containing `;`, `,`, `\`, or `"` could truncate or corrupt the generated `WIFI:` QR code. Reserved characters are now escaped per the WIFI-QR spec.
+- **Fake Wi-Fi QR When SSID Unknown**: When no real SSID was known (fresh install, Ethernet-only), the banner still rendered a scannable QR encoding a placeholder network name. The Wi-Fi QR section is now skipped entirely until a real SSID is detected.
+- **`ConnectInstructionsScreen` Setting Never Persisted**: The target-monitor picker for the Connect Instructions banner was never restored from or saved to `AppSettings`, silently reverting to "All Screens / Monitors" on every restart.
+- **"Connect Instructions" Wrongly Selectable as an Event Banner**: It was included in `StandardEventNames`, the list that seeds the DJ's Special Event Banner picker, letting a DJ accidentally pin the Wi-Fi/QR instructional graphic as the active party banner.
+- **MAUI About-Popup Logo Missing**: The `MauiImage` build item for `ksr_logo.png` was dropped in favor of `MauiIcon` alone; restored it so the About overlay's logo resolves again on Android/Windows.
+- **`WifiPasswordStore` Crash-Safety**: Switched from `File.WriteAllText` to the existing `AtomicJsonFile.Serialize` write-to-temp-then-rename helper, matching every other settings store in the codebase, so a crash mid-write can no longer truncate `wifi_passwords.json`.
+
+### Changed
+- **Dead Branch Cleanup**: Removed two structurally-unreachable OR branches from `GetTargetScreenResolution`'s monitor-match logic in Lyracist's `SettingsViewModel.Display.cs`.
 
 ## [26.8.13.0] - 2026-08-13
 

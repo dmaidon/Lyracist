@@ -1,5 +1,6 @@
-// Edited on Aug 6, 2026 @ 08:39:30 -> Remove PartyTyme DI mapping
+// Edited on Aug 13, 2026 @ 13:46:21 -> Set IsShuttingDown on DJ banner windows during OnExit so they actually close instead of hiding
 using System;
+using System.Linq;
 using System.Windows;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -262,6 +263,11 @@ public partial class App : System.Windows.Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
+        foreach (var djBannerWindow in Windows.OfType<DjBannerWindow>())
+        {
+            djBannerWindow.IsShuttingDown = true;
+        }
+
         if (Host != null)
         {
             var server = Host.Services.GetService<ITabletLyricsServer>();

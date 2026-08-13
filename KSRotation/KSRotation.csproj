@@ -1,4 +1,4 @@
-﻿<!-- Edited on Aug 8, 2026 @ 19:26:40 -> Add SpecialEventConfig link and EventBanners build copy item -->
+﻿<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Bump AssemblyVersion and FileVersion to 26.8.13.462 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.13.461</AssemblyVersion>
-    <FileVersion>26.8.13.461</FileVersion>
+    <AssemblyVersion>26.8.13.462</AssemblyVersion>
+    <FileVersion>26.8.13.462</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>

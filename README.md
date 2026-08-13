@@ -1,5 +1,5 @@
-<!-- Edited on Aug 13, 2026 @ 07:36:00 -> Update version 26.8.13.0 changelog, Android build targets, and CA1416 warning suppression -->
-Last Edit: Aug 13, 2026 - Android designtime build file lock workarounds (MSB3374/XARLP7000) and global CA1416 platform warning suppressions
+<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Add tablet-optimized rotation list note and fix KSRotation Console (MAUI) singer row overlap -->
+Last Edit: Aug 13, 2026 - KSRotation tablet/vertical-mode rotation list layout and MAUI singer-row overlap fix
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.

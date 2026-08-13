@@ -1,4 +1,4 @@
-// Created on Aug 10, 2026 @ 12:42:00 -> Add WifiPasswordStore for persistent SSID password management
+// Edited on Aug 13, 2026 @ 13:46:21 -> Use AtomicJsonFile.Serialize instead of File.WriteAllText to prevent corruption on crash mid-write
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,9 +46,9 @@ namespace Lyracist.Shared
             {
                 try
                 {
-                    Directory.CreateDirectory(Globals.DataDir);
-                    string json = JsonSerializer.Serialize(_passwords, new JsonSerializerOptions { WriteIndented = true });
-                    File.WriteAllText(FilePath, json);
+                    // Write-to-temp-then-rename so a crash/power-loss mid-write can't leave
+                    // wifi_passwords.json truncated and silently wipe every saved venue password.
+                    AtomicJsonFile.Serialize(FilePath, _passwords, new JsonSerializerOptions { WriteIndented = true });
                 }
                 catch
                 {

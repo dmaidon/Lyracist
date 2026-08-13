@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 10:52:00 -> Upgrade banner graphics to 3840x2160 4K UHD master resolution for 1:1 razor-sharp pixel rendering
+// Edited on Aug 13, 2026 @ 13:46:21 -> Escape WIFI-QR reserved characters, skip fake QR when SSID is unknown, exclude Connect Instructions from event picker
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +12,10 @@ namespace Lyracist.Shared;
 public static class DjBannerFileManager
 {
     private static readonly string[] SupportedExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".mp4"];
-    public static readonly string[] StandardEventNames = ["Birthday", "Wedding", "Engagement", "Anniversary", "Last Song", "Connect Instructions"];
+    // "Connect Instructions" is deliberately excluded — it's an auto-generated Wi-Fi/QR instructional
+    // graphic (see ConnectInstructions.png handling below), not a selectable party/event banner, so it
+    // must not appear in the DJ's Special Event Banner picker that this list seeds.
+    public static readonly string[] StandardEventNames = ["Birthday", "Wedding", "Engagement", "Anniversary", "Last Song"];
 
     public static string GetStandardBannerFileName(string eventName)
     {
@@ -64,7 +67,9 @@ public static class DjBannerFileManager
         double scale = width / 1920.0;
         int qrModuleSize = (int)Math.Max(20, Math.Round(40 * scale));
 
-        string activeSsid = string.IsNullOrWhiteSpace(wifiSsid) ? (WifiHelper.GetConnectedSsid() ?? "Wi-Fi Network") : wifiSsid;
+        string? detectedSsid = string.IsNullOrWhiteSpace(wifiSsid) ? WifiHelper.GetConnectedSsid() : wifiSsid;
+        bool hasKnownSsid = !string.IsNullOrWhiteSpace(detectedSsid);
+        string activeSsid = hasKnownSsid ? detectedSsid! : "Ask DJ for Wi-Fi Name";
         string pwdDisplay = string.IsNullOrWhiteSpace(wifiPassword) ? "No Password Required" : wifiPassword;
         string activeUrl = string.IsNullOrWhiteSpace(connectionUrl) ? "http://localhost:8080/request" : connectionUrl;
 
@@ -73,11 +78,13 @@ public static class DjBannerFileManager
 
         try
         {
-            if (!string.IsNullOrWhiteSpace(activeSsid))
+            // Only generate a Wi-Fi QR when we actually know the SSID — otherwise the code would
+            // encode a fake/placeholder network name that fails for anyone who scans it.
+            if (hasKnownSsid)
             {
                 string wifiPayload = string.IsNullOrWhiteSpace(wifiPassword)
-                    ? $"WIFI:S:{activeSsid};T:nopass;;;"
-                    : $"WIFI:S:{activeSsid};T:WPA;P:{wifiPassword};;";
+                    ? $"WIFI:S:{EscapeWifiQrValue(activeSsid)};T:nopass;;;"
+                    : $"WIFI:S:{EscapeWifiQrValue(activeSsid)};T:WPA;P:{EscapeWifiQrValue(wifiPassword)};;";
                 wifiQrSource = GenerateQrBitmap(wifiPayload, System.Windows.Media.Color.FromRgb(6, 78, 59), qrModuleSize);
             }
 
@@ -243,6 +250,18 @@ public static class DjBannerFileManager
 
         using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
         encoder.Save(fs);
+    }
+
+    // Escapes the WIFI-QR reserved characters (\, ;, ,, ") per the spec so an SSID/password
+    // containing them doesn't truncate or corrupt the payload at a field boundary.
+    private static string EscapeWifiQrValue(string value)
+    {
+        return value
+            .Replace("\\", "\\\\")
+            .Replace(";", "\\;")
+            .Replace(",", "\\,")
+            .Replace("\"", "\\\"")
+            .Replace(":", "\\:");
     }
 
     private static System.Windows.Media.ImageSource? GenerateQrBitmap(string payload, System.Windows.Media.Color darkColor, int pixelsPerModule = 40)

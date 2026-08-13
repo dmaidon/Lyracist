@@ -1,4 +1,4 @@
-// Edited on Aug 9, 2026 @ 13:42:00 -> Update DJ QR Code color to dark maroon [128, 0, 32] for optical contrast
+// Edited on Aug 13, 2026 @ 13:46:21 -> Debounce Connect Instructions banner refresh so it no longer regenerates on every keystroke
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -228,7 +228,9 @@ namespace KSRotation.ViewModels
             QrCodeImage = GenerateQRCode(ConnectionUrl);
             DjQrCodeImage = GenerateQRCode(DjConnectionUrl, [128, 0, 32], [255, 255, 255]);
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
-            RefreshConnectInstructionsBanner();
+            // Debounced — this runs on every keystroke of PreferredHostIp (UpdateSourceTrigger=PropertyChanged),
+            // and the banner regeneration underneath is a full QR render + PNG encode + disk write.
+            QueueRefreshConnectInstructionsBanner();
         }
 
         private string ResolveConnectionHost()

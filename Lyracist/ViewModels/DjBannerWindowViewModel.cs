@@ -1,4 +1,4 @@
-// Edited on Aug 2, 2026 @ 10:05:00 -> Add BannerPath property to support video banner playback in code-behind
+// Edited on Aug 13, 2026 @ 13:46:21 -> Use BitmapCacheOption.OnDemand for the width probe so it no longer forces a full eager decode
 using System;
 using System.IO;
 using System.Windows.Media.Imaging;
@@ -88,10 +88,13 @@ public partial class DjBannerWindowViewModel : ObservableObject
             // which then made the next banner regeneration fail to overwrite this same file (silently,
             // since the caller swallows the exception) because it was still "in use".
             using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            // OnDemand (not OnLoad) — we only need the frame's PixelWidth header metadata here,
+            // not the decoded pixel buffer, and the real capped decode happens right after this
+            // returns. OnLoad would force a full-resolution pixel decode just to read a dimension.
             var decoder = BitmapDecoder.Create(
                 stream,
                 BitmapCreateOptions.None,
-                BitmapCacheOption.OnLoad);
+                BitmapCacheOption.OnDemand);
             int nativeWidth = decoder.Frames.Count > 0 ? decoder.Frames[0].PixelWidth : 0;
             return nativeWidth > 0 ? Math.Min(monitorCap, nativeWidth) : monitorCap;
         }

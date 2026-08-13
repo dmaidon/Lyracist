@@ -1,4 +1,4 @@
-// Edited on Aug 12, 2026 @ 10:42:00 -> Simplify FinishSingerSong to sequentially check off completed song checkboxes per user request
+// Edited on Aug 13, 2026 @ 13:46:21 -> Persist ConnectInstructionsScreen setting, debounce banner refresh, and clean up dead resolution-matching branch
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -20,6 +20,7 @@ namespace KSRotation.ViewModels
         private readonly DispatcherTimer _saveDebounceTimer;
         private readonly DispatcherTimer _dbDebounceTimer;
         private readonly DispatcherTimer _jsonCacheDebounceTimer;
+        private readonly DispatcherTimer _connectBannerDebounceTimer;
         private readonly List<SongPerformance> _performanceHistory = [];
         private readonly Lock _performanceHistoryLock = new();
         private readonly Dictionary<SingerEntry, string> _lastSingerNames = [];
@@ -469,6 +470,14 @@ namespace KSRotation.ViewModels
 #endif
         }
 
+        // Debounces banner regeneration (QR render + PNG encode + disk write, up to 3840x2160) so it
+        // doesn't run synchronously on every keystroke of a bound text field (e.g. PreferredHostIp).
+        private void QueueRefreshConnectInstructionsBanner()
+        {
+            _connectBannerDebounceTimer.Stop();
+            _connectBannerDebounceTimer.Start();
+        }
+
         private static (int Width, int Height) GetTargetScreenResolution(string screenSelection)
         {
 #if !MAUI
@@ -480,8 +489,7 @@ namespace KSRotation.ViewModels
                 }
 
                 var monitors = MonitorEnumerator.GetMonitors();
-                if (screenSelection.Equals("All Screens", StringComparison.OrdinalIgnoreCase) ||
-                    screenSelection.Equals("All Screens / Monitors", StringComparison.OrdinalIgnoreCase))
+                if (screenSelection.Equals("All Screens / Monitors", StringComparison.OrdinalIgnoreCase))
                 {
                     int maxW = 1920, maxH = 1080;
                     foreach (var m in monitors)
@@ -603,6 +611,7 @@ namespace KSRotation.ViewModels
             _saveDebounceTimer = new DispatcherTimer();
             _dbDebounceTimer = new DispatcherTimer();
             _jsonCacheDebounceTimer = new DispatcherTimer();
+            _connectBannerDebounceTimer = new DispatcherTimer();
 
             if (IsInDesignMode)
             {
@@ -639,6 +648,16 @@ namespace KSRotation.ViewModels
             {
                 _jsonCacheDebounceTimer.Stop();
                 RebuildRotationJsonCacheNow();
+            };
+
+            _connectBannerDebounceTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(600)
+            };
+            _connectBannerDebounceTimer.Tick += (s, e) =>
+            {
+                _connectBannerDebounceTimer.Stop();
+                RefreshConnectInstructionsBanner();
             };
 
             Singers.CollectionChanged += OnSingersCollectionChanged;
@@ -716,6 +735,9 @@ namespace KSRotation.ViewModels
 // Edited on Aug 11, 2026 -> Suppress Wi-Fi password auto-population when running under Visual Studio Debugger, but retain in the field
             DjBannerMonitorDevice = settings.DjBannerMonitorDevice ?? string.Empty;
             SelectedDjBannerPath = settings.SelectedDjBannerPath ?? string.Empty;
+            ConnectInstructionsScreen = string.IsNullOrWhiteSpace(settings.ConnectInstructionsScreen)
+                ? "All Screens / Monitors"
+                : settings.ConnectInstructionsScreen;
             IsDjBannerEnabled = System.Diagnostics.Debugger.IsAttached ? false : settings.IsDjBannerEnabled;
             IsDjBannerQrCodeEnabled = settings.IsDjBannerQrCodeEnabled;
             string? currentSsid = WifiHelper.GetConnectedSsid();
@@ -1904,6 +1926,7 @@ namespace KSRotation.ViewModels
                 DjPin = string.IsNullOrWhiteSpace(DjPin) ? string.Empty : DjPin.Trim(),
                 SelectedMonitorDevice = SelectedMonitorDevice,
                 DjBannerMonitorDevice = DjBannerMonitorDevice,
+                ConnectInstructionsScreen = ConnectInstructionsScreen,
                 SelectedDjBannerPath = SelectedDjBannerPath,
                 IsDjBannerEnabled = IsDjBannerEnabled,
                 IsDjBannerQrCodeEnabled = IsDjBannerQrCodeEnabled,

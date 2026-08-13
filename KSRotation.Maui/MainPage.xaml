@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Edited on Aug 12, 2026 @ 10:31:00 -> Update pause button icon text and layout in queue list -->
+<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Restructure singer row into a stacked VerticalStackLayout so checkboxes and action buttons no longer overlap -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -74,10 +74,14 @@
                                         </DataTrigger>
                                     </Border.Triggers>
 
-                                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                    <!-- Stacked into its own full-width row per section (name/badges, checkboxes, actions) rather than a
+                                         2-column Grid — the previous Grid.Column="1" actions panel used VerticalOptions="Center", which
+                                         centered it across the whole (now taller, since the checkboxes row was added) left column, landing
+                                         it visually on top of the checkboxes instead of beside the name. -->
+                                    <VerticalStackLayout Spacing="4">
 
                                         <!-- Singer and Song Info (Combined into a single line, uniform size) -->
-                                        <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center">
+                                        <VerticalStackLayout Spacing="4" VerticalOptions="Center">
                                             <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
                                                 <Label Text="{Binding Name}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center" />
 
@@ -178,7 +182,7 @@
                                         </VerticalStackLayout>
 
                                         <!-- Actions Panel -->
-                                        <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                        <HorizontalStackLayout Spacing="4" Margin="0,2,0,0">
                                             <!-- Edit Name/Song/Artist -->
                                             <Button Text="✏" Clicked="OnEditSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#8B5CF6" BorderWidth="1" TextColor="#8B5CF6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Edit Performer" />
 
@@ -229,7 +233,7 @@
                                                 </Button.Triggers>
                                             </Button>
                                         </HorizontalStackLayout>
-                                    </Grid>
+                                    </VerticalStackLayout>
                                 </Border>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
