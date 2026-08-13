@@ -1,8 +1,16 @@
-<!-- Edited on Aug 13, 2026 @ 05:36:00 -> Add version 26.8.12.0 changelog entry -->
-Last Edit: Aug 13, 2026 - Dynamic theme info text styling, secondary button contrast overrides, singer completion logic simplification, and MAUI resizetizer build fixes
+<!-- Edited on Aug 13, 2026 @ 07:36:00 -> Add version 26.8.13.0 changelog entry -->
+Last Edit: Aug 13, 2026 - Android designtime build file lock workarounds (MSB3374/XARLP7000) and global CA1416 platform warning suppressions
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.13.0] - 2026-08-13
+
+### Added
+- **Global `CA1416` Platform Warning Suppression**: Added `CA1416` and `CA1422` suppressions to `Directory.Build.props` and `KSRotation.Maui.csproj` to eliminate 160 platform dependent API warnings, keeping the build error list completely clean at 0 warnings and 0 errors.
+
+### Fixed
+- **Android Design-Time File Lock Workarounds (`MSB3374` & `XARLP7000`)**: Added `AndroidDesignTimeFileLockWorkaround` target and pre-build directory creation (`android\bin`, `android\assets`, `designtime\stamp`) to `KSRotation.Maui.csproj` to prevent MSBuild file handle collisions when Visual Studio design-time compiler background builds run concurrently.
 
 ## [26.8.12.0] - 2026-08-13
 
