@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 13:25:00 -> Add Last Song default event banner to AppSettings
+// Edited on Aug 15, 2026 @ 07:15:00 -> Add IsDjBannerQrCodeEnabled setting
 using System.IO;
 using System.Text.Json;
 
@@ -738,6 +738,12 @@ public static class AppSettings
         set { _data.ConnectInstructionsScreen = value; Save(); }
     }
 
+    public static bool IsDjBannerQrCodeEnabled
+    {
+        get => _data.IsDjBannerQrCodeEnabled;
+        set { _data.IsDjBannerQrCodeEnabled = value; Save(); }
+    }
+
     public static string WifiPassword
     {
         get => _data.WifiPassword;
@@ -757,6 +763,7 @@ public static class AppSettings
         public Dictionary<string, string> Hotkeys { get; set; } = [];
         public string WifiPassword { get; set; } = string.Empty;
         public string ConnectInstructionsScreen { get; set; } = "All Screens / Monitors";
+        public bool IsDjBannerQrCodeEnabled { get; set; } = true;
         public bool EnableKillVocal { get; set; } = false;
 
         // Registration data

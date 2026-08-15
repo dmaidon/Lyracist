@@ -1,4 +1,4 @@
-// Edited on Aug 13, 2026 @ 13:46:21 -> Persist ConnectInstructionsScreen setting, debounce banner refresh, and clean up dead resolution-matching branch
+// Edited on Aug 14, 2026 @ 10:17:40 -> Prompt for performer name on Birthday Special Event selection
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -2268,8 +2268,118 @@ namespace KSRotation.ViewModels
 
         private void OnSpecialEventOptionChanged(string value)
         {
+            if (value.Equals("Birthday", StringComparison.OrdinalIgnoreCase))
+            {
+#if WPF
+                string defaultName = Singers.FirstOrDefault(s => s.IsCurrent && !s.IsMusic)?.Name ?? "";
+                string? performerName = ShowPersonalizedBirthdayPrompt(defaultName);
+                if (performerName != null)
+                {
+                    try
+                    {
+                        string birthdayFilePath = Path.Combine(Globals.EventBannersDir, "Birthday.png");
+                        DjBannerFileManager.CreatePersonalizedBirthdayBannerPng(birthdayFilePath, performerName);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed creating birthday banner: {ex.Message}");
+                    }
+                }
+#endif
+            }
             ActiveSpecialEvent = value;
+            UpdateDjBannerPath();
         }
+
+#if WPF
+        public static string? ShowPersonalizedBirthdayPrompt(string defaultName = "")
+        {
+            var window = new System.Windows.Window
+            {
+                Title = "Birthday Special Event Banner",
+                Width = 440,
+                Height = 220,
+                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen,
+                ResizeMode = System.Windows.ResizeMode.NoResize,
+                WindowStyle = System.Windows.WindowStyle.ToolWindow,
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(24, 24, 32)),
+                Foreground = System.Windows.Media.Brushes.White,
+                Topmost = true
+            };
+
+            var grid = new System.Windows.Controls.Grid { Margin = new System.Windows.Thickness(20) };
+            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = System.Windows.GridLength.Auto });
+            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = System.Windows.GridLength.Auto });
+            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new System.Windows.GridLength(1, System.Windows.GridUnitType.Star) });
+            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = System.Windows.GridLength.Auto });
+
+            var label = new System.Windows.Controls.TextBlock
+            {
+                Text = "Enter Birthday Performer Name:",
+                FontSize = 14,
+                FontWeight = System.Windows.FontWeights.SemiBold,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)),
+                Margin = new System.Windows.Thickness(0, 0, 0, 10)
+            };
+            System.Windows.Controls.Grid.SetRow(label, 0);
+
+            var textBox = new System.Windows.Controls.TextBox
+            {
+                Text = defaultName,
+                FontSize = 16,
+                Padding = new System.Windows.Thickness(8, 6, 8, 6),
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(36, 36, 48)),
+                Foreground = System.Windows.Media.Brushes.White,
+                BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)),
+                Margin = new System.Windows.Thickness(0, 0, 0, 16)
+            };
+            textBox.SelectAll();
+            System.Windows.Controls.Grid.SetRow(textBox, 1);
+
+            var buttonPanel = new System.Windows.Controls.StackPanel
+            {
+                Orientation = System.Windows.Controls.Orientation.Horizontal,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Right
+            };
+
+            var okButton = new System.Windows.Controls.Button
+            {
+                Content = "🎉 Launch Banner",
+                IsDefault = true,
+                Padding = new System.Windows.Thickness(16, 6, 16, 6),
+                Margin = new System.Windows.Thickness(0, 0, 8, 0),
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)),
+                Foreground = System.Windows.Media.Brushes.Black,
+                FontWeight = System.Windows.FontWeights.Bold,
+                Cursor = System.Windows.Input.Cursors.Hand
+            };
+            string? result = null;
+            okButton.Click += (s, e) => { result = textBox.Text; window.DialogResult = true; window.Close(); };
+
+            var cancelButton = new System.Windows.Controls.Button
+            {
+                Content = "Cancel",
+                IsCancel = true,
+                Padding = new System.Windows.Thickness(16, 6, 16, 6),
+                Cursor = System.Windows.Input.Cursors.Hand
+            };
+            cancelButton.Click += (s, e) => { window.DialogResult = false; window.Close(); };
+
+            buttonPanel.Children.Add(okButton);
+            buttonPanel.Children.Add(cancelButton);
+            System.Windows.Controls.Grid.SetRow(buttonPanel, 3);
+
+            grid.Children.Add(label);
+            grid.Children.Add(textBox);
+            grid.Children.Add(buttonPanel);
+
+            window.Content = grid;
+            window.Loaded += (s, e) => textBox.Focus();
+
+            bool? dialogResult = window.ShowDialog();
+            return dialogResult == true ? result : null;
+        }
+#endif
 
         [RelayCommand]
         private void SaveSpecialEventsMapping()

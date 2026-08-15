@@ -1,4 +1,4 @@
-// Edited on Aug 13, 2026 @ 13:46:21 -> Debounce Connect Instructions banner refresh so it no longer regenerates on every keystroke
+// Edited on Aug 14, 2026 @ 10:17:30 -> Handle personalized Birthday banner generation in set-special-event action
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -671,7 +671,21 @@ namespace KSRotation.ViewModels
                     }
                 case "set-special-event":
                     {
+                        string performerName = !string.IsNullOrWhiteSpace(name) ? name : extraData;
+                        if (targetId.Equals("Birthday", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(performerName))
+                        {
+                            try
+                            {
+                                string birthdayFilePath = Path.Combine(Globals.EventBannersDir, "Birthday.png");
+                                DjBannerFileManager.CreatePersonalizedBirthdayBannerPng(birthdayFilePath, performerName);
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Failed creating personalized birthday banner: {ex.Message}");
+                            }
+                        }
                         ActiveSpecialEvent = targetId;
+                        UpdateDjBannerPath();
                         return "";
                     }
                 default:

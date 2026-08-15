@@ -1,4 +1,4 @@
-// Edited on Aug 12, 2026 @ 10:42:00 -> Update FinishSingerSong unit test to verify sequential song completion checkbox marking
+// Edited on Aug 14, 2026 @ 10:18:00 -> Add unit test for CreatePersonalizedBirthdayBannerPng 16:9 banner generation
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -922,6 +922,31 @@ public class MainViewModelTests
         {
             // Act
             DjBannerFileManager.CreateConnectInstructionsBannerPng(tempPath, "TestWiFi", "secret123", "http://192.168.1.100:8080/request");
+
+            // Assert
+            Assert.True(System.IO.File.Exists(tempPath));
+            var fileInfo = new System.IO.FileInfo(tempPath);
+            Assert.True(fileInfo.Length > 0);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(tempPath))
+            {
+                System.IO.File.Delete(tempPath);
+            }
+        }
+    }
+
+    [Fact]
+    public void DjBannerFileManager_CreatePersonalizedBirthdayBannerPng_GeneratesValid16x9ImageFile()
+    {
+        // Arrange
+        string tempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"test_birthday_banner_{Guid.NewGuid():N}.png");
+
+        try
+        {
+            // Act
+            DjBannerFileManager.CreatePersonalizedBirthdayBannerPng(tempPath, "Brenda");
 
             // Assert
             Assert.True(System.IO.File.Exists(tempPath));

@@ -1,4 +1,4 @@
-// Edited on Aug 13, 2026 @ 13:46:21 -> Escape WIFI-QR reserved characters, skip fake QR when SSID is unknown, exclude Connect Instructions from event picker
+// Edited on Aug 15, 2026 @ 06:55:00 -> Add MAUI stub for CreatePersonalizedBirthdayBannerPng
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -321,6 +321,193 @@ public static class DjBannerFileManager
 
         using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
         encoder.Save(fs);
+    }
+
+    public static void CreatePersonalizedBirthdayBannerPng(string filePath, string performerName, int targetWidth = 1920, int targetHeight = 1080)
+    {
+        int width = targetWidth > 0 ? targetWidth : 1920;
+        int height = targetHeight > 0 ? targetHeight : 1080;
+        double scale = width / 1920.0;
+
+        var visual = new System.Windows.Media.DrawingVisual();
+        using (var dc = visual.RenderOpen())
+        {
+            // 1. Festive Background Gradient
+            var backgroundGradient = new System.Windows.Media.LinearGradientBrush(
+                System.Windows.Media.Color.FromRgb(18, 8, 38),
+                System.Windows.Media.Color.FromRgb(70, 22, 115),
+                45);
+            dc.DrawRectangle(backgroundGradient, null, new System.Windows.Rect(0, 0, width, height));
+
+            // Radial Glow in Center
+            var centerGlow = new System.Windows.Media.RadialGradientBrush(
+                System.Windows.Media.Color.FromArgb(120, 255, 215, 0),
+                System.Windows.Media.Color.FromArgb(0, 0, 0, 0));
+            dc.DrawEllipse(centerGlow, null, new System.Windows.Point(width / 2.0, height / 2.0), width * 0.45, height * 0.45);
+
+            // 2. Elegant Outer Gold Border
+            var goldPen = new System.Windows.Media.Pen(
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)), 10 * scale);
+            var innerGoldPen = new System.Windows.Media.Pen(
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 255, 215, 0)), 3 * scale);
+            dc.DrawRectangle(null, goldPen, new System.Windows.Rect(30 * scale, 30 * scale, width - 60 * scale, height - 60 * scale));
+            dc.DrawRectangle(null, innerGoldPen, new System.Windows.Rect(45 * scale, 45 * scale, width - 90 * scale, height - 90 * scale));
+
+            // 3. Vector Fireworks / Starbursts (Top-Left & Top-Right)
+            DrawFireworks(dc, new System.Windows.Point(220 * scale, 220 * scale), scale);
+            DrawFireworks(dc, new System.Windows.Point(width - 220 * scale, 220 * scale), scale);
+
+            // 4. Vector Balloons (Left & Right margins)
+            DrawBalloons(dc, new System.Windows.Point(140 * scale, height * 0.65), scale, System.Windows.Media.Color.FromRgb(236, 72, 153)); // Pink/Magenta
+            DrawBalloons(dc, new System.Windows.Point(230 * scale, height * 0.75), scale * 0.85, System.Windows.Media.Color.FromRgb(6, 182, 212)); // Cyan
+            DrawBalloons(dc, new System.Windows.Point(width - 140 * scale, height * 0.65), scale, System.Windows.Media.Color.FromRgb(245, 158, 11)); // Gold
+            DrawBalloons(dc, new System.Windows.Point(width - 230 * scale, height * 0.75), scale * 0.85, System.Windows.Media.Color.FromRgb(168, 85, 247)); // Purple
+
+            // 5. Floating Music Notes
+            DrawMusicNote(dc, new System.Windows.Point(340 * scale, height * 0.35), scale * 1.2, System.Windows.Media.Color.FromRgb(255, 215, 0));
+            DrawMusicNote(dc, new System.Windows.Point(width - 340 * scale, height * 0.38), scale * 1.1, System.Windows.Media.Color.FromRgb(6, 182, 212));
+            DrawMusicNote(dc, new System.Windows.Point(400 * scale, height * 0.82), scale * 0.9, System.Windows.Media.Color.FromRgb(236, 72, 153));
+            DrawMusicNote(dc, new System.Windows.Point(width - 400 * scale, height * 0.80), scale * 1.0, System.Windows.Media.Color.FromRgb(255, 215, 0));
+
+            // 6. Header Text: "HAPPY BIRTHDAY!"
+            var headerText = new System.Windows.Media.FormattedText(
+                "HAPPY BIRTHDAY!",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.ExtraBold, System.Windows.FontStretches.Normal),
+                100 * scale,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 220, 100)),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center
+            };
+            dc.DrawText(headerText, new System.Windows.Point(width / 2.0, 160 * scale));
+
+            // 7. Performer Name (e.g., "Brenda") - Dynamic Font Size Calculation
+            string displayName = string.IsNullOrWhiteSpace(performerName) ? "VIP" : performerName.Trim();
+            double nameFontSize = 170 * scale;
+            if (displayName.Length > 12) nameFontSize = 120 * scale;
+            if (displayName.Length > 18) nameFontSize = 90 * scale;
+
+            // Name Shadow / 3D Effect
+            var nameShadowText = new System.Windows.Media.FormattedText(
+                displayName.ToUpperInvariant(),
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.Black, System.Windows.FontStretches.Normal),
+                nameFontSize,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 0, 0, 0)),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center
+            };
+            dc.DrawText(nameShadowText, new System.Windows.Point((width / 2.0) + (6 * scale), (height / 2.0 - nameShadowText.Height / 2.0) + (6 * scale)));
+
+            // Name Foreground Text (Gold Gradient / Glow)
+            var nameText = new System.Windows.Media.FormattedText(
+                displayName.ToUpperInvariant(),
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.Black, System.Windows.FontStretches.Normal),
+                nameFontSize,
+                new System.Windows.Media.LinearGradientBrush(
+                    System.Windows.Media.Color.FromRgb(255, 235, 120),
+                    System.Windows.Media.Color.FromRgb(245, 158, 11), 90),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center
+            };
+            dc.DrawText(nameText, new System.Windows.Point(width / 2.0, height / 2.0 - nameText.Height / 2.0));
+
+            // 8. Footer Badge: "VIP KARAOKE CELEBRATION"
+            var footerText = new System.Windows.Media.FormattedText(
+                "★ VIP KARAOKE CELEBRATION ★",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.Bold, System.Windows.FontStretches.Normal),
+                48 * scale,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(6, 182, 212)),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center
+            };
+            dc.DrawText(footerText, new System.Windows.Point(width / 2.0, height - (200 * scale)));
+        }
+
+        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+        rtb.Render(visual);
+
+        var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+
+        using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+        encoder.Save(fs);
+    }
+
+    private static void DrawFireworks(System.Windows.Media.DrawingContext dc, System.Windows.Point center, double scale)
+    {
+        var penGold = new System.Windows.Media.Pen(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 215, 0)), 3 * scale);
+        var penCyan = new System.Windows.Media.Pen(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(6, 182, 212)), 2 * scale);
+        var penPink = new System.Windows.Media.Pen(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(236, 72, 153)), 2 * scale);
+
+        int count = 12;
+        double radius = 90 * scale;
+        for (int i = 0; i < count; i++)
+        {
+            double angle = i * (360.0 / count) * (Math.PI / 180.0);
+            double innerR = 25 * scale;
+            double outerR = radius;
+
+            var p1 = new System.Windows.Point(center.X + Math.Cos(angle) * innerR, center.Y + Math.Sin(angle) * innerR);
+            var p2 = new System.Windows.Point(center.X + Math.Cos(angle) * outerR, center.Y + Math.Sin(angle) * outerR);
+
+            var pen = (i % 3 == 0) ? penGold : (i % 3 == 1) ? penCyan : penPink;
+            dc.DrawLine(pen, p1, p2);
+
+            var sparkBrush = (i % 2 == 0) ? System.Windows.Media.Brushes.Gold : System.Windows.Media.Brushes.White;
+            dc.DrawEllipse(sparkBrush, null, p2, 4 * scale, 4 * scale);
+        }
+    }
+
+    private static void DrawBalloons(System.Windows.Media.DrawingContext dc, System.Windows.Point basePt, double scale, System.Windows.Media.Color balloonColor)
+    {
+        double rx = 45 * scale;
+        double ry = 58 * scale;
+        var center = new System.Windows.Point(basePt.X, basePt.Y - ry);
+
+        var stringPen = new System.Windows.Media.Pen(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 255, 255, 255)), 2 * scale);
+        dc.DrawLine(stringPen, basePt, new System.Windows.Point(basePt.X + (15 * scale), basePt.Y + (110 * scale)));
+
+        var balloonBrush = new System.Windows.Media.RadialGradientBrush(
+            System.Windows.Media.Color.FromRgb((byte)Math.Min(255, balloonColor.R + 60), (byte)Math.Min(255, balloonColor.G + 60), (byte)Math.Min(255, balloonColor.B + 60)),
+            balloonColor)
+        {
+            GradientOrigin = new System.Windows.Point(0.3, 0.3)
+        };
+
+        dc.DrawEllipse(balloonBrush, null, center, rx, ry);
+        dc.DrawEllipse(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 255, 255, 255)), null,
+            new System.Windows.Point(center.X - (rx * 0.35), center.Y - (ry * 0.35)), rx * 0.25, ry * 0.18);
+    }
+
+    private static void DrawMusicNote(System.Windows.Media.DrawingContext dc, System.Windows.Point center, double scale, System.Windows.Media.Color color)
+    {
+        var brush = new System.Windows.Media.SolidColorBrush(color);
+        var pen = new System.Windows.Media.Pen(brush, 4 * scale);
+
+        var headCenter = new System.Windows.Point(center.X, center.Y + (20 * scale));
+        dc.DrawEllipse(brush, null, headCenter, 14 * scale, 10 * scale);
+
+        var stemTop = new System.Windows.Point(center.X + (12 * scale), center.Y - (25 * scale));
+        var stemBottom = new System.Windows.Point(center.X + (12 * scale), center.Y + (20 * scale));
+        dc.DrawLine(pen, stemBottom, stemTop);
+        dc.DrawLine(pen, stemTop, new System.Windows.Point(center.X + (26 * scale), center.Y - (12 * scale)));
+    }
+#endif
+
+#if MAUI
+    public static void CreatePersonalizedBirthdayBannerPng(string filePath, string performerName, int targetWidth = 1920, int targetHeight = 1080)
+    {
     }
 #endif
 

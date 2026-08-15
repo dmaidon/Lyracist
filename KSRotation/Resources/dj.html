@@ -478,93 +478,121 @@
                 padding: 8px 16px;
                 font-size: 0.95rem;
             }
-            .request-card {
-                padding: 12px;
-            }
-            .request-name {
-                font-size: 1.1rem;
-            }
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <!-- Lock Overlay (Passcode modal) -->
-    <div id="lock-screen" class="lock-overlay">
-        <div class="lock-card">
-            <h2>Enter DJ PIN</h2>
-            <p>Access requires the configured administrator PIN</p>
-            <input type="password" id="pin-input" placeholder="••••" autofocus onkeydown="checkPinKey(event)">
-            <button class="btn-primary" style="width: 100%" onclick="submitPin()">Authorize Access</button>
+
+    <div class="container">
+        <!-- PIN Lock Screen -->
+        <div id="lock-screen" class="lock-screen">
+            <div class="pin-box">
+                <h2>KSRotation DJ</h2>
+                <p>Enter DJ Remote Security PIN</p>
+                <input type="password" id="pin-input" class="pin-input" placeholder="••••" maxlength="10" onkeydown="checkPinKey(event)">
+                <button class="btn-primary" style="width: 100%; padding: 12px;" onclick="submitPin()">Unlock Console</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Main Container -->
-    <div class="container" id="dashboard" style="display: none;">
-        <header>
-            <h1>KSRotation - DJ Console</h1>
-            <div class="header-actions">
-                <button class="btn-outline" id="theme-toggle-btn" onclick="toggleTheme()">☀️ Light Mode</button>
-                <button class="btn-outline" onclick="confirmLogout()">Lock Screen</button>
-            </div>
-        </header>
-
-        <div class="main-layout">
+        <!-- DJ Dashboard -->
+        <div id="dashboard" class="dashboard" style="display: none;">
             
-            <!-- LEFT PANEL: ACTIVE ROTATION QUEUE -->
-            <div class="panel">
-                <div class="panel-title">Active Rotation Queue</div>
-                <div id="queue-list" style="display: flex; flex-direction: column; gap: 8px;">
-                    <div class="no-data">Loading rotation queue...</div>
+            <div class="header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <h1>🎧 Remote DJ Control</h1>
+                    <span id="rotation-status-badge" class="badge" style="background-color: var(--border-color); color: var(--text-muted);">Syncing...</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button id="theme-toggle-btn" class="btn-outline" onclick="toggleTheme()" style="padding: 4px 8px; font-size: 0.85rem;">☀️ Theme</button>
+                    <button class="btn-outline" onclick="confirmLogout()" style="padding: 4px 8px; font-size: 0.85rem;">🔒 Lock</button>
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: ADD PERFORMER & INCOMING REQUESTS -->
-            <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="main-layout">
                 
-                <!-- Add Performer Card -->
+                <!-- Left Column: Singer Rotation Queue -->
                 <div class="panel">
-                    <div class="panel-title">Add Performer</div>
-                    <form id="add-singer-form" onsubmit="addPerformer(event)" style="display: flex; flex-direction: column; gap: 10px;">
-                        <div class="form-group">
-                            <label>Singer Name</label>
-                            <input type="text" id="add-name" required placeholder="e.g. Charlie">
+                    <div class="panel-title">
+                        <span>Current Rotation</span>
+                        <div style="display: flex; gap: 6px;">
+                            <button class="btn-outline" style="font-size: 0.8rem; padding: 4px 8px;" onclick="sendAction('previous-singer')">◀ Previous</button>
+                            <button class="btn-primary" style="font-size: 0.8rem; padding: 4px 8px;" onclick="sendAction('next-singer')">Next Singer ▶</button>
                         </div>
-                        <div class="form-group">
-                            <label>Song Title</label>
-                            <input type="text" id="add-song" placeholder="e.g. Yesterday">
-                        </div>
-                        <div class="form-group">
-                            <label>Artist Name</label>
-                            <input type="text" id="add-artist" placeholder="e.g. The Beatles">
-                        </div>
-                        <button type="submit" class="btn-primary" style="margin-top: 4px;">Add to Queue</button>
-                    </form>
-                </div>
-
-                <!-- Special Event Banners Card -->
-                <div class="panel">
-                    <div class="panel-title">Special Event Banners</div>
-                    <div id="special-events-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        <div class="no-data">Loading events...</div>
+                    </div>
+                    <div id="queue-list" class="queue-list">
+                        <div class="no-data">Loading rotation queue...</div>
                     </div>
                 </div>
 
-                <!-- Incoming Requests Card -->
-                <div class="panel">
-                    <div class="panel-title">Incoming Requests</div>
-                    <div id="requests-list" style="display: flex; flex-direction: column; gap: 8px;">
-                        <div class="no-data">No pending requests</div>
+                <!-- Right Column: Controls, Add Singer, Events, Requests -->
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    
+                    <!-- Quick Add Singer Form -->
+                    <div class="panel">
+                        <div class="panel-title">Add Performer to Rotation</div>
+                        <form id="add-singer-form" onsubmit="addPerformer(event)">
+                            <div class="form-group">
+                                <label for="add-name">Singer Name</label>
+                                <input type="text" id="add-name" class="form-control" placeholder="Performer Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="add-song">Song Title (Optional)</label>
+                                <input type="text" id="add-song" class="form-control" placeholder="Song Title">
+                            </div>
+                            <div class="form-group">
+                                <label for="add-artist">Artist (Optional)</label>
+                                <input type="text" id="add-artist" class="form-control" placeholder="Artist Name">
+                            </div>
+                            <button type="submit" class="btn-primary" style="margin-top: 4px;">Add to Queue</button>
+                        </form>
                     </div>
+
+                    <!-- Special Event Banners Card -->
+                    <div class="panel">
+                        <div class="panel-title">Special Event Banners</div>
+                        <div id="special-events-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <div class="no-data">Loading events...</div>
+                        </div>
+                    </div>
+
+                    <!-- Birthday Banner Modal Overlay -->
+                    <div id="birthday-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 9999; justify-content: center; align-items: center; padding: 16px;">
+                        <div class="panel" style="max-width: 400px; width: 100%; border: 1px solid var(--amber); box-shadow: 0 10px 30px rgba(0,0,0,0.8); text-align: center;">
+                            <div class="panel-title" style="color: var(--amber); font-size: 1.2rem; justify-content: center;">🎂 Birthday Special Banner</div>
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">Enter performer's name for the custom birthday banner:</p>
+                            <input type="text" id="birthday-name-input" class="form-control" placeholder="Performer Name (e.g. Brenda)" style="font-size: 1.1rem; text-align: center; margin-bottom: 16px; width: 100%; box-sizing: border-box;" onkeydown="checkBirthdayModalKey(event)" />
+                            <div style="display: flex; gap: 8px; justify-content: center;">
+                                <button type="button" class="btn-outline" onclick="closeBirthdayModal()" style="flex: 1; padding: 10px;">Cancel</button>
+                                <button type="button" class="btn-primary" onclick="submitBirthdayBanner()" style="flex: 1; padding: 10px; font-weight: bold; background-color: var(--amber);">🎉 Launch Banner</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Incoming Requests Card -->
+                    <div class="panel">
+                        <div class="panel-title">Incoming Requests</div>
+                        <div id="requests-list" style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="no-data">No pending requests</div>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
-
         </div>
     </div>
 
     <script>
         let pollInterval = null;
-
         // Auto-check PIN in sessionStorage on page load
         window.addEventListener('load', () => {
             updateThemeToggleLabel();
@@ -671,6 +699,8 @@
             }
         }
 
+        let currentSingerNameForBirthday = "";
+
         function renderSpecialEvents(specialEvents, activeSpecialEvent) {
             const container = document.getElementById("special-events-container");
             if (!container) return;
@@ -694,13 +724,56 @@
                     btn.style.padding = "6px 12px";
                     btn.style.fontSize = "12px";
                     btn.innerText = eventName;
-                    btn.onclick = () => sendAction("set-special-event", eventName);
+                    btn.onclick = () => {
+                        if (eventName.toLowerCase() === "birthday") {
+                            showBirthdayModal();
+                        } else {
+                            sendAction("set-special-event", eventName);
+                        }
+                    };
                     container.appendChild(btn);
                 });
             }
         }
 
+        function showBirthdayModal() {
+            const input = document.getElementById("birthday-name-input");
+            if (input) {
+                input.value = currentSingerNameForBirthday || "";
+            }
+            const modal = document.getElementById("birthday-modal");
+            if (modal) {
+                modal.style.display = "flex";
+                setTimeout(() => input && input.focus(), 100);
+            }
+        }
+
+        function closeBirthdayModal() {
+            const modal = document.getElementById("birthday-modal");
+            if (modal) modal.style.display = "none";
+        }
+
+        function checkBirthdayModalKey(event) {
+            if (event.key === "Enter") {
+                submitBirthdayBanner();
+            } else if (event.key === "Escape") {
+                closeBirthdayModal();
+            }
+        }
+
+        function submitBirthdayBanner() {
+            const input = document.getElementById("birthday-name-input");
+            const performerName = input ? input.value.trim() : "";
+            closeBirthdayModal();
+            sendAction("set-special-event", "Birthday", performerName);
+        }
+
         function renderQueue(singers) {
+            if (singers && singers.length > 0) {
+                const cur = singers.find(s => s.isCurrent && !s.isMusic);
+                if (cur && cur.name) currentSingerNameForBirthday = cur.name;
+            }
+
             const listDiv = document.getElementById("queue-list");
             if (!singers || singers.length === 0) {
                 listDiv.innerHTML = '<div class="no-data">No performers in rotation</div>';

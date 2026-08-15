@@ -1,4 +1,33 @@
-// Edited on Aug 10, 2026 @ 12:50:00 -> Add Connect Instructions, dynamic screen resolution detection, and wifi_passwords.json store to manual documentation
+// Edited on Aug 15, 2026 @ 07:15:00 -> Document Enable DJ Banner Screen checkbox, screen toggles, and request QR Code overlay controls
+Lyracist Pro Update - Settings Display Tab Controls & QR Code Overlay (August 2026)
+
+Section: Settings Page / Display Tab / QR Code & Screen Controls
+
+[Update Details]
+Added explicit screen activation toggles and request QR Code overlay controls on the Display tab:
+
+1. Screen Activation Checkboxes:
+   - "Enable DJ Banner Screen": Toggles the DJ Banner projection window on/off (`IsDjBannerActive`).
+   - "Enable Lyrics Projection Screen": Toggles the Lyrics projection window on/off (`IsLyricsActive`).
+   - "Enable Singer Rotation Billboard Screen": Toggles the Rotation billboard projection window on/off (`IsRotationActive`).
+
+2. Request QR Code Overlay Controls:
+   - "Show request QR Code overlay on DJ Banner": Toggles rendering the patron request portal QR code overlay directly onto active DJ Banners (`IsDjBannerQrCodeEnabled`).
+   - "Connect Instructions & QR Code Screen": Selects the target display screen/monitor for projected Wi-Fi and Song Request dual QR code banners (`ConnectInstructionsScreen`).
+
+Lyracist Pro Update - Settings Display Tab (August 2026)
+
+Section: Settings Page / Display Tab (4 Equal Columns)
+
+[Update Details]
+A dedicated "Display" tab has been added to the Settings screen in Lyracist. Displays & projection monitor assignments, DJ banner images, special event banner mappings, Star Wars crawl & spaceship overlay settings, and Connect & Request Instructions have been consolidated onto the Display screen.
+
+1. 4 Equal Columns Grid Setup (referencing KsRotation layout):
+   - Column 1: Monitors & Screen Assignments (Lyrics Projection Screen, Singer Rotation Billboard Screen, DJ Banner Screen, Billboard View Mode, Mirror Lyrics).
+   - Column 2: DJ & Event Banners (DJ Banner Image upload/select/delete, Special Event Banners Mapping & Save button).
+   - Column 3: Star Wars Crawl & Spaceship Overlay (Crawl Intro Template & preview, Custom Crawl Text, Spaceship Overlay Font Size, Duration, Frequency, Snippets List & controls).
+   - Column 4: Connect & Request Instructions (Wi-Fi Password, Target Screen selector, Dynamic Banner Status info).
+
 Lyracist Pro & KSRotation - Performer Portal Update (August 2026)
 
 Section: Connect & Request Instructions Screen / Wi-Fi Password Manager

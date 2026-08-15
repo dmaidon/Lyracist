@@ -1,4 +1,4 @@
-// Edited on Aug 13, 2026 @ 13:46:21 -> Remove dead unreachable branches from GetTargetScreenResolution's monitor match
+// Edited on Aug 15, 2026 @ 07:15:00 -> Add IsDjBannerQrCodeEnabled property for DJ Banner QR Code overlay toggle
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -51,6 +51,19 @@ public partial class SettingsViewModel
             {
                 _display.IsDjBannerActive = value;
                 OnPropertyChanged(nameof(IsDjBannerActive));
+            }
+        }
+    }
+
+    public bool IsDjBannerQrCodeEnabled
+    {
+        get => AppSettings.IsDjBannerQrCodeEnabled;
+        set
+        {
+            if (AppSettings.IsDjBannerQrCodeEnabled != value)
+            {
+                AppSettings.IsDjBannerQrCodeEnabled = value;
+                OnPropertyChanged();
             }
         }
     }

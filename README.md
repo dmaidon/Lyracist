@@ -1,5 +1,5 @@
-<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Add tablet-optimized rotation list note and fix KSRotation Console (MAUI) singer row overlap -->
-Last Edit: Aug 13, 2026 - KSRotation tablet/vertical-mode rotation list layout and MAUI singer-row overlap fix
+<!-- Edited on Aug 15, 2026 @ 07:45:00 -> Add Display tab 4-column layout, Enable DJ Banner Screen, and request QR Code overlay controls -->
+Last Edit: Aug 15, 2026 - Dedicated 4-column Display tab in Settings with screen activation checkboxes and request QR Code overlay controls
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.
@@ -23,7 +23,9 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Customizable Scaryoke Categories**: Add, edit, or remove categories (2 to 12 total) from the settings page. The Scaryoke wheel will dynamically rebuild its structure, sector colors, play a mechanical pointer clicking sound synchronized to sector crossings, and project the active wheel and category announcement onto the rotation billboard window.
 
 ### 🖥️ Display & Projection Management
-- **Dual-Window Projection**: Supports launching standalone windows for **Lyrics Projection** and the **Rotation Billboard**.
+- **Dedicated 4-Column Display Tab**: Structured into 4 equal columns (*Monitors & Screen Assignments*, *DJ & Event Banners*, *Star Wars Crawl & Spaceship*, *Connect & Request Instructions*) matching KsRotation.
+- **Screen Activation Checkboxes**: Explicit checkboxes for "Enable Lyrics Projection Screen", "Enable Singer Rotation Billboard Screen", and "Enable DJ Banner Screen".
+- **Dual-Window Projection**: Supports launching standalone windows for **Lyrics Projection**, **Singer Rotation Billboard**, and **DJ Banner**.
 - **Four Dynamic Billboard View Modes**:
   - **Normal List**: A standard listing of the current singer and upcoming rotation queue.
   - **Star Wars Crawl**: High-fidelity 3D projection rendering a starry night sky with cool/warm twinkling star layers, and a 3D-angled text block crawling upward in space.
@@ -32,7 +34,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Dynamic Chroma-Keying**: Automatically strips standard `.cdg` file backgrounds and borders (pixel index `0,0`) in real time to render lyrics transparent.
 - **GPU-Accelerated 4K Backdrops**: Beautiful, responsive vector backdrops layered behind transparent lyrics, wrapped in Viewbox controls to fit HD and 4K displays.
 - **Flexible Monitor Assignment & Dropdowns**: Direct dropdown selection in the KJ interface to target specific connected monitors for both the Rotation Display and DJ Banner windows, with real-time dynamic window relocation and automatic fallback to secondary/primary screens if unplugged.
-- **DJ Banner Projection Screen**: Upload, select, delete, and project borderless full-screen custom DJ branding/promotional banners (supporting PNG, JPG, GIF, BMP, and looping MP4 video). Supports overlaying the patron request QR code in the corner of the screen via a settings toggle.
+- **DJ Banner Projection Screen**: Upload, select, delete, and project borderless full-screen custom DJ branding/promotional banners (supporting PNG, JPG, GIF, BMP, and looping MP4 video). Includes **Show request QR Code overlay on DJ Banner** checkbox setting.
 - **Scan-to-Connect Wi-Fi & Request Instructions Dynamic Graphic**: Auto-detects connected Wi-Fi SSID, request portal URL, and target display resolution (`1080p`, `1440p`, `4K 3840x2160`) to generate custom vector `ConnectInstructions.png` banners with dual high-density QR codes for Wi-Fi join and song requests.
 - **Wi-Fi Password Persistence Manager (`wifi_passwords.json`)**: Automatically saves and recalls Wi-Fi passwords per SSID (venue Wi-Fi, travel router, mobile hotspot) so passwords never have to be re-entered at recurring venues.
 - **Same-Screen Deconfliction Priority**: Automatically disables and hides the DJ Banner if the Rotation Display is targeted or moved to the same monitor.

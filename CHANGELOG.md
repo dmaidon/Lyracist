@@ -1,8 +1,23 @@
-<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Add version 26.8.13.1 changelog entry -->
-Last Edit: Aug 13, 2026 - KSRotation tablet/vertical-mode rotation list layout, MAUI singer-row overlap fix, and a round of correctness/performance fixes
+<!-- Edited on Aug 15, 2026 @ 07:45:00 -> Add version 26.8.15.0 changelog entry for Display tab and QR code controls -->
+Last Edit: Aug 15, 2026 - Dedicated 4-column Display tab in Settings with screen activation checkboxes, QR Code overlay controls, and MAUI banner stub
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.15.0] - 2026-08-15
+
+### Added
+- **Dedicated 4-Column "Display" Tab in Settings (`SettingsPage.xaml`)**: Reorganized the Settings page into a clean top-level tab control featuring a dedicated **Display** tab laid out into 4 equal columns (matching `KSRotation` layout):
+  - *Column 1*: Monitors & Screen Assignments (Lyrics Projection, Singer Rotation Billboard, DJ Banner Screen, Billboard View Mode, Mirror Lyrics).
+  - *Column 2*: DJ & Event Banners (DJ Banner Upload/Select/Delete, Request QR Code Overlay toggle, Special Event Banners Mapping & Save).
+  - *Column 3*: Star Wars Crawl & Spaceship Overlay (Crawl intro templates, Custom text, Spaceship font size, duration, frequency, custom snippets).
+  - *Column 4*: Connect & Request Instructions (Connect Instructions & QR Code target screen selector, Wi-Fi Password input, Dynamic banner status info).
+- **Screen Activation Checkboxes**: Added explicit checkboxes for "Enable Lyrics Projection Screen" (`IsLyricsActive`), "Enable Singer Rotation Billboard Screen" (`IsRotationActive`), and "Enable DJ Banner Screen" (`IsDjBannerActive`) to toggle window visibility directly from settings.
+- **Request QR Code Overlay Toggle**: Added "Show request QR Code overlay on DJ Banner" (`IsDjBannerQrCodeEnabled`) setting saved in `AppSettings` and bound to ViewModel.
+- **MAUI Stub for `CreatePersonalizedBirthdayBannerPng`**: Added `#if MAUI` no-op stub in `Shared/DjBannerFileManager.cs` to resolve cross-platform build dependency for `KSRotation.Maui`.
+
+### Updated
+- **Help System & User Manual**: Expanded `HelpViewModel.cs` topic 5 (*Settings: Display & Projectors*) and topic 15 (*Connect & Request Instructions Screen*) and updated `Lyracist_User_Manual_Updates.txt`.
 
 ## [26.8.13.1] - 2026-08-13
 

@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 12:05:00 -> Add RefreshConnectInstructionsBanner helper method
+// Edited on Aug 14, 2026 @ 10:17:50 -> Prompt for performer name on Birthday Special Event selection
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -143,6 +143,25 @@ public partial class KaraokeViewModel
 
     private void OnSpecialEventChanged(string value)
     {
+        if (value.Equals("Birthday", StringComparison.OrdinalIgnoreCase))
+        {
+#if WPF
+            string defaultName = ActiveSinger?.SingerName ?? "";
+            string? performerName = KSRotation.ViewModels.MainViewModel.ShowPersonalizedBirthdayPrompt(defaultName);
+            if (performerName != null)
+            {
+                try
+                {
+                    string birthdayFilePath = System.IO.Path.Combine(Globals.EventBannersDir, "Birthday.png");
+                    DjBannerFileManager.CreatePersonalizedBirthdayBannerPng(birthdayFilePath, performerName);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed creating birthday banner: {ex.Message}");
+                }
+            }
+#endif
+        }
         ActiveSpecialEvent = value;
         _displayService.UpdateSpecialEvent(value);
     }

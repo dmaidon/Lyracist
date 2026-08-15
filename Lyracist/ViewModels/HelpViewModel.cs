@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 13:05:00 -> Add Topic 15 (Connect & Request Instructions Screen) and expand help topics
+// Edited on Aug 15, 2026 @ 07:40:00 -> Update help topics for Display tab 4-column layout, screen toggles, and QR Code controls
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -47,18 +47,18 @@ public partial class HelpViewModel : BaseViewModel
                 DescriptionContent = "• Playlist Channels: Manage Opening Music (plays before the show), Fill-In Music (auto-plays in gaps between performer tracks), and End-of-Rotation Music (plays when the singer list is completed).\n\n• Adding Tracks: Browse indexed files in the Library column and click Add next to the target playlist. Use the playlist grid control to manage files.\n\n• Configurable Fill-In Music Delay: Adjust the delay slider (0-30 seconds) in settings to control exactly when fill-in music begins after a singer track stops.\n\n• Show Flow Automation: BGM players interact automatically with the karaoke player: BGM pauses/ducks when a performer's track starts, and resumes immediately when it stops."
             },
             new() {
-                Title = "4. Requests Page",
-                Icon = "MailInboxArrowDown20",
-                AccentColor = "#E81123",
-                DescriptionHeader = "Mobile Performer Request Approvals",
+                Title = "4. Patron Song Request Portal & DJ Approval Queue",
+                Icon = "Phone24",
+                AccentColor = "#8E8CD8",
+                DescriptionHeader = "Self-Hosted Web Portal & Live Request Ingestion",
                 DescriptionContent = "• Incoming Request Grid: Displays real-time song submissions sent by performers using their mobile portal.\n\n• Karaoke vs. Background Music: Requests are labeled as standard Karaoke (purple badge) or Background Music (green [MUSIC] badge). Singer rotation allows one active karaoke request and one background music request slot concurrently.\n\n• Music Request Automation: Background music requests show up in bold green in the rotation list. Completed music tracks are automatically removed from rotation upon completion and are excluded from standard performer stats.\n\n• Approval Workflow: Review details (Performer, Song, Key offset, notes). Click Approve to instantly queue the singer and song in the main rotation list, or click Decline to reject the submission.\n\n• Auto-Accept Requests: Toggle in the page header to skip manual approval entirely — Karaoke requests go straight into the rotation and Music requests go straight to Approved the moment they arrive."
             },
             new() {
                 Title = "5. Settings: Display & Projectors",
                 Icon = "WindowAd24",
                 AccentColor = "#DFB900",
-                DescriptionHeader = "Dual-Screen Monitor Target Assignments & View Modes",
-                DescriptionContent = "• Lyrics Projection Screen: Choose the target monitor index for the borderless singer lyrics window.\n\n• Rotation Billboard Screen: Choose the monitor index for the audience rotation list.\n\n• Billboard View Modes: Choose between 'Normal List', 'Star Wars Crawl', 'Vegas Marquee', or 'Vinyl Turntable' view modes. Switchable from Settings or Karaoke page.\n\n• Crawl Intro Text Template: Choose from 3 canned templates (Dramatic, Comedic, Over-the-Top) or input a custom template for Star Wars Crawl 3D projection.\n\n• DJ & Venue Variables: Customize DJ / Host Name and manage the Venue listbox. DJ and Venue names display dynamically in the main title bar and projection screens.\n\n• Mirror Lyrics: Enable to horizontally flip the CDG graphics pixels for rear-projection screen setups."
+                DescriptionHeader = "Dedicated 4-Column Display Tab & Screen Activation Toggles",
+                DescriptionContent = "• 4-Column Display Screen Layout: Consolidates all screen assignments, DJ banners, Star Wars crawl, and QR code instructions into 4 equal columns (matching KsRotation layout).\n\n• Screen Activation Checkboxes: Explicitly toggle 'Enable Lyrics Projection Screen', 'Enable Singer Rotation Billboard Screen', and 'Enable DJ Banner Screen' on or off.\n\n• Monitors & Screen Assignments: Assign independent display monitors for borderless Lyrics, Singer Rotation Billboard, and DJ Banner windows.\n\n• Billboard View Modes: Choose between 'Normal List', 'Star Wars Crawl', 'Vegas Marquee', or 'Vinyl Turntable' view modes.\n\n• Crawl & Spaceship Overlay: Select Star Wars crawl intro text templates, custom crawl text, and adjust spaceship overlay font size, duration, frequency, and custom text snippets.\n\n• Mirror Lyrics: Enable to horizontally flip CDG graphics for rear-projection setups."
             },
             new() {
                 Title = "6. Settings: Audio & DSP Engine",
@@ -128,11 +128,10 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "QrCode24",
                 AccentColor = "#059669",
                 DescriptionHeader = "Scan-to-Connect Wi-Fi & Patron Request Portal Dual QR Code Banner",
-                DescriptionContent = "• Dual Scan-to-Connect QR Code Banner: Displays a full-screen or custom projected banner (`ConnectInstructions.png`) featuring two distinct QR codes: Wi-Fi Scan-to-Connect (WPA/WPA2/NoPass) and Song Request Portal URL.\n\n• High-Contrast Color Palette: The Wi-Fi QR code uses forest green (`#064E3B`) and the Song Request Portal QR code uses pure black (`#000000`) for high contrast scan reliability.\n\n• Persistent Wi-Fi Password Store (`wifi_passwords.json`): Wi-Fi passwords entered for detected Wi-Fi SSIDs are automatically saved and recalled whenever the application connects to that network (venue Wi-Fi, travel router, mobile hotspot).\n\n• 1:1 Pixel-Sharp Screen Resolution Detection: Automatically detects the target monitor's physical dimensions (1080p, 1440p, 4K 3840x2160, etc.) and scales vector graphics, text cards, and QR module sizes (`pixelsPerModule`) to guarantee razor-sharp 1:1 pixel rendering on any screen.\n\n• Green Settings GroupBox & Target Monitor Selection: Located in Column 1 under Display & Projection in a dedicated Green GroupBox (`GreenSettingsGroupBoxStyle`). Select target monitor options: 'None', 'All Screens / Monitors', or individual connected display screens."
+                DescriptionContent = "• Dual Scan-to-Connect QR Code Banner: Displays a full-screen or custom projected banner (`ConnectInstructions.png`) featuring two distinct QR codes: Wi-Fi Scan-to-Connect (WPA/WPA2/NoPass) and Song Request Portal URL.\n\n• QR Code Overlay on DJ Banner: Toggle 'Show request QR Code overlay on DJ Banner' in Settings to project the QR code directly onto active DJ Banners.\n\n• Target Monitor Selection: Select the target display screen/monitor using the 'Connect Instructions & QR Code Screen' dropdown in Column 4 of the Display tab.\n\n• High-Contrast Color Palette: Forest green (`#064E3B`) Wi-Fi QR code and pure black (`#000000`) Song Request Portal QR code for high contrast scan reliability.\n\n• Persistent Wi-Fi Password Store (`wifi_passwords.json`): Remembers Wi-Fi passwords entered for detected SSIDs (venue Wi-Fi, travel router, mobile hotspot)."
             }
         ];
 
         _selectedTopic = _helpTopics[0];
     }
 }
-
