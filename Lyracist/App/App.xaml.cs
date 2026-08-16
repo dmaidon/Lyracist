@@ -1,4 +1,4 @@
-// Edited on Aug 13, 2026 @ 13:46:21 -> Set IsShuttingDown on DJ banner windows during OnExit so they actually close instead of hiding
+// Edited on Aug 15, 2026 @ 10:00:00 -> Only resolve and show SplashWindow if ShowSplashOnStartup is enabled
 using System;
 using System.Linq;
 using System.Windows;
@@ -204,10 +204,11 @@ public partial class App : System.Windows.Application
             AppLogger.LogError(ex, "Database migration");
         }
 
-        // Resolve and show the SplashWindow if the setting is enabled
-        var splash = Host.Services.GetRequiredService<SplashWindow>();
+        // Resolve and show the SplashWindow only if the setting is enabled
+        SplashWindow? splash = null;
         if (AppSettings.ShowSplashOnStartup)
         {
+            splash = Host.Services.GetRequiredService<SplashWindow>();
             splash.Show();
 
             // Simulate loading updates
@@ -253,10 +254,7 @@ public partial class App : System.Windows.Application
         mainWindow.Show();
 
         // Close splash window now that MainWindow is ready
-        if (AppSettings.ShowSplashOnStartup)
-        {
-            splash.Close();
-        }
+        splash?.Close();
 
         base.OnStartup(e);
     }

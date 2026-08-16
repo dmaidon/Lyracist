@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 19:23:45 -> Call InitializeSpecialEvents in constructor
+// Edited on Aug 15, 2026 @ 08:16:00 -> Add VenueTitleText and DjTitleText properties to KaraokeViewModel
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -419,6 +419,9 @@ public partial class KaraokeViewModel : BaseViewModel
         }
     }
 
+    public string VenueTitleText => $"Venue: {(string.IsNullOrWhiteSpace(AppSettings.SelectedVenue) ? "None" : AppSettings.SelectedVenue)}";
+    public string DjTitleText => $"DJ: {(string.IsNullOrWhiteSpace(AppSettings.DjName) ? "None" : AppSettings.DjName)}";
+
     public KaraokeViewModel(
         IMediaEngine mediaEngine,
         IDisplayService displayService,
@@ -438,6 +441,15 @@ public partial class KaraokeViewModel : BaseViewModel
         _requests = requests;
         _navigation = navigation;
         _externalLinkService = new ExternalLinkService();
+
+        AppSettings.VenueOrDjChanged += () =>
+        {
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
+            {
+                OnPropertyChanged(nameof(VenueTitleText));
+                OnPropertyChanged(nameof(DjTitleText));
+            });
+        };
 
         // None of the event/timer subscriptions below are ever unsubscribed: KaraokeViewModel
         // is registered AddSingleton in App.xaml.cs, so exactly one instance exists for the

@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 07:15:00 -> Add IsDjBannerQrCodeEnabled setting
+// Edited on Aug 15, 2026 @ 10:00:00 -> Set ShowSplashOnStartup default to false
 using System.IO;
 using System.Text.Json;
 
@@ -317,16 +317,40 @@ public static class AppSettings
 
     // ─── Venues & DJ ─────────────────────────────────────────────────────────
 
+    public static event System.Action? VenueOrDjChanged;
+
     public static string DjName
     {
         get { lock (_lock) { return _data.DjName; } }
-        set { lock (_lock) { _data.DjName = value; Save(); } }
+        set
+        {
+            lock (_lock)
+            {
+                if (_data.DjName != value)
+                {
+                    _data.DjName = value;
+                    Save();
+                    VenueOrDjChanged?.Invoke();
+                }
+            }
+        }
     }
 
     public static string SelectedVenue
     {
         get { lock (_lock) { return _data.SelectedVenue; } }
-        set { lock (_lock) { _data.SelectedVenue = value; Save(); } }
+        set
+        {
+            lock (_lock)
+            {
+                if (_data.SelectedVenue != value)
+                {
+                    _data.SelectedVenue = value;
+                    Save();
+                    VenueOrDjChanged?.Invoke();
+                }
+            }
+        }
     }
 
     public static string CrawlBannerType
@@ -774,7 +798,7 @@ public static class AppSettings
         public string RegLicenseKey { get; set; } = string.Empty;
 
         public string ThemeMode { get; set; } = "Dark";
-        public bool ShowSplashOnStartup { get; set; } = true;
+        public bool ShowSplashOnStartup { get; set; } = false;
         public bool EnableHardwareAcceleration { get; set; } = true;
         public bool EnableNoiseGate { get; set; } = false;
         public bool EnableReverb { get; set; } = false;

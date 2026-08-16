@@ -1,5 +1,5 @@
-<!-- Edited on Aug 15, 2026 @ 07:45:00 -> Add Display tab 4-column layout, Enable DJ Banner Screen, and request QR Code overlay controls -->
-Last Edit: Aug 15, 2026 - Dedicated 4-column Display tab in Settings with screen activation checkboxes and request QR Code overlay controls
+<!-- Edited on Aug 16, 2026 @ 08:08:00 -> Add Session Performed Songs History (5-color rotation) feature to README -->
+Last Edit: Aug 16, 2026 - Session Performed Songs History (5-color rotation), compact queue layout, and solution build order fixes
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.
@@ -10,6 +10,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 
 ### 🎙️ Performer & Rotation Queue
 - **Interactive Singer Queue**: Dynamic list matching performer names with requested song, artist, key changes, and custom notes.
+- **Session Performed Songs History**: Dedicated Column 2 on Singer Rotation page tracking all completed performances with 5-color rotating theme cards (Violet, Cyan, Emerald, Amber, Rose) and multi-line copyable text logs.
 - **Performer XP & Levels**: Automatic XP and Leveling system (`XP = TotalSongsSung * 100 + Score`) that tracks history, displays custom titles (e.g. *Shower Singer*, *Karaoke Legend*), and unlocks visual milestone badges directly in the queue and leaderboard.
 - **Customizable Feedback Ratings**: Symmetrical DJ tab controls allowing hosts to customize positive symbol choices (⭐, ❤️, 🔥, 🏆, 👑) with strict safety guidelines (preventing negative feedback) and regular emoji preset support.
 - **Click-to-Deselect**: Easily toggle current singer selection on/off (highlighted in red) to allow correcting misclicks.

@@ -1,4 +1,35 @@
-// Edited on Aug 15, 2026 @ 07:15:00 -> Document Enable DJ Banner Screen checkbox, screen toggles, and request QR Code overlay controls
+// Edited on Aug 15, 2026 @ 10:20:00 -> Document Session Performed Songs List & Textbox with 5-color rotation in Rotation Page
+Lyracist Pro Update - Session Performed Songs History in Singer Rotation (August 2026)
+
+Section: Singer Rotation / Session Performance History
+
+[Update Details]
+Added a dedicated Session Performed Songs column (Column 2) to the Singer Rotation page:
+- Live Performance Tracking: Automatically records every completed song performance during the session, including performer name, song title, artist, key transposition, and timestamp.
+- Dual Display Modes:
+  1. 5-Color Rotating List: Each performed song entry rotates sequentially through 5 distinct theme-tailored colors (Violet, Cyan, Emerald, Amber, Rose) in both Dark and Light color schemes for high visual clarity.
+  2. Session Textbox: Provides a clean multi-line read-only TextBox containing the complete text log of performed songs.
+- Session Management: Includes 'Copy Session Songs to Clipboard' and 'Clear Session Performed Songs' quick-action buttons.
+
+// Edited on Aug 15, 2026 @ 10:00:00 -> Document startup splash window bypass default
+Lyracist Pro Update - Bypass Startup Splash Window (August 2026)
+
+Section: Application Options / Startup Behavior
+
+[Update Details]
+The startup splash window pop-up has been disabled by default (`ShowSplashOnStartup = false`). Lyracist now launches directly into the main application window without displaying a splash screen or artificial loading delays.
+
+Lyracist Pro Update - Title Bar Venue & DJ Info Block (August 2026)
+
+Section: Main Application Window / Title Bar Integration
+
+[Update Details]
+Added dynamic Venue and DJ name indicators directly to the main window Title Bar:
+- Placement: Positioned after the application title and before the pending request indicator bulbs.
+- Stacked Format:
+  - Top Line: `Venue: <name>` (bound to `VenueTitleText`, updating live when active venue changes in Settings).
+  - Bottom Line: `DJ: <name>` (bound to `DjTitleText`, updating live when active DJ name changes in Settings).
+
 Lyracist Pro Update - Settings Display Tab Controls & QR Code Overlay (August 2026)
 
 Section: Settings Page / Display Tab / QR Code & Screen Controls

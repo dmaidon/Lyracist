@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 16:45:00 -> Update display projection buttons and active sync in MainWindow.xaml.cs
+// Edited on Aug 15, 2026 @ 10:11:00 -> Fix NullReferenceException by triggering navigation in OnMainWindowLoaded
 using System;
 using System.Windows;
 using System.Windows.Media;
@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Wpf.Ui;
 using Wpf.Ui.Abstractions;
 using Wpf.Ui.Controls;
+using Lyracist.Core.Helpers;
 using Lyracist.Services.Display;
 using Lyracist.ViewModels;
 using Lyracist.Views.Pages;
@@ -33,6 +34,9 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
     public IRelayCommand ShowLyricsCommand { get; }
     public IRelayCommand<int> MoveRotationToScreenCommand { get; }
     public IRelayCommand<int> MoveLyricsToScreenCommand { get; }
+
+    public string VenueTitleText => $"Venue: {(string.IsNullOrWhiteSpace(AppSettings.SelectedVenue) ? "None" : AppSettings.SelectedVenue)}";
+    public string DjTitleText => $"DJ: {(string.IsNullOrWhiteSpace(AppSettings.DjName) ? "None" : AppSettings.DjName)}";
 
     // Drive Status Monitoring
     private System.Windows.Threading.DispatcherTimer? _driveCheckTimer;
@@ -88,6 +92,15 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
         ShowLyricsCommand = new RelayCommand(() => _displayService.ShowLyricsWindow());
         MoveRotationToScreenCommand = new RelayCommand<int>(screenIndex => _displayService.MoveRotationToScreen(screenIndex));
         MoveLyricsToScreenCommand = new RelayCommand<int>(screenIndex => _displayService.MoveLyricsToScreen(screenIndex));
+
+        AppSettings.VenueOrDjChanged += () =>
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                OnPropertyChanged(nameof(VenueTitleText));
+                OnPropertyChanged(nameof(DjTitleText));
+            });
+        };
 
         InitializeComponent();
 
@@ -164,23 +177,26 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
                 case "ToggleBanner":
                     _karaokeViewModel.ShowRotationBanner = !_karaokeViewModel.ShowRotationBanner;
                     break;
-                case "ToggleLyricsWindow":
-                    if (ShowLyricsCommand.CanExecute(null))
-                    {
-                        ShowLyricsCommand.Execute(null);
-                    }
+                case "ToggleKillVocal":
+                    _karaokeViewModel.EnableKillVocal = !_karaokeViewModel.EnableKillVocal;
                     break;
-                case "ToggleRotationWindow":
+                case "ShowRotationWindow":
                     if (ShowRotationCommand.CanExecute(null))
                     {
                         ShowRotationCommand.Execute(null);
+                    }
+                    break;
+                case "ShowLyricsWindow":
+                    if (ShowLyricsCommand.CanExecute(null))
+                    {
+                        ShowLyricsCommand.Execute(null);
                     }
                     break;
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to execute hotkey action '{action}': {ex.Message}");
+            AppLogger.LogError(ex, $"ExecuteHotkeyAction: error performing action {action}");
         }
     }
 

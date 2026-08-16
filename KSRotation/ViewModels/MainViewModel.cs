@@ -1,4 +1,4 @@
-// Edited on Aug 14, 2026 @ 10:17:40 -> Prompt for performer name on Birthday Special Event selection
+// Edited on Aug 15, 2026 @ 07:54:00 -> Remove Venue and DJ names from Form WindowTitle
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -563,7 +563,7 @@ namespace KSRotation.ViewModels
         private static readonly string s_appAuthor = ResolveAppAuthor(s_appCompany);
 
         public string AppTitle => s_appTitle;
-        public string WindowTitle => $"{AppTitle} - Venue: {VenueName} | DJ: {DjName}";
+        public string WindowTitle => AppTitle;
         public string AppVersion => s_appVersion;
         public string AppCompany => s_appCompany;
         public string AppCopyright => s_appCopyright;

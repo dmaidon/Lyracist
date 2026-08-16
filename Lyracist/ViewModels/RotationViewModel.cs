@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 13:05:00 -> Update DoneSinger to use RotationHelpers.AdvanceRotationAfterFinished for robust rollover
+// Edited on Aug 15, 2026 @ 10:20:00 -> Add SessionPerformedSongs tracking and commands for Singer Rotation Column 2
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
+using Lyracist.Core.Models;
 using Lyracist.Models;
 using Lyracist.Services.Display;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,51 @@ public partial class RotationViewModel : BaseViewModel
 
     public ObservableCollection<string> SingerNames { get; } = [];
 
+    public ObservableCollection<PerformedSong> SessionPerformedSongs { get; } = [];
+
+    public string SessionPerformedSongsText => SessionPerformedSongs.Count == 0
+        ? "No songs performed in this session yet."
+        : string.Join(Environment.NewLine, SessionPerformedSongs.Select(s => s.FormattedText));
+
+    public void RecordPerformedSong(string singerName, string songTitle, string artist, string key = "0")
+    {
+        if (string.IsNullOrWhiteSpace(singerName)) return;
+
+        var performed = new PerformedSong
+        {
+            OrderNumber = SessionPerformedSongs.Count + 1,
+            SingerName = singerName,
+            SongTitle = string.IsNullOrWhiteSpace(songTitle) ? "Unknown Song" : songTitle,
+            Artist = artist ?? string.Empty,
+            Key = key ?? "0",
+            PerformedAt = DateTime.Now
+        };
+
+        SessionPerformedSongs.Add(performed);
+        OnPropertyChanged(nameof(SessionPerformedSongsText));
+    }
+
+    [RelayCommand]
+    private void ClearPerformedSongs()
+    {
+        SessionPerformedSongs.Clear();
+        OnPropertyChanged(nameof(SessionPerformedSongsText));
+    }
+
+    [RelayCommand]
+    private void CopyPerformedSongs()
+    {
+        if (SessionPerformedSongs.Count == 0) return;
+        try
+        {
+            System.Windows.Clipboard.SetText(SessionPerformedSongsText);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "CopyPerformedSongs: failed to copy to clipboard");
+        }
+    }
+
     private readonly Dictionary<string, ObservableCollection<PendingSong>> _pendingSingerSongs = new(StringComparer.OrdinalIgnoreCase);
 
     public ObservableCollection<PendingSong> SelectedSingerQueue { get; } = [];
@@ -87,6 +133,18 @@ public partial class RotationViewModel : BaseViewModel
     {
         _display = display;
         _mediaEngine = mediaEngine;
+
+        try
+        {
+            Wpf.Ui.Appearance.ApplicationThemeManager.Changed += (theme, accent) =>
+            {
+                OnPropertyChanged(nameof(SessionPerformedSongs));
+            };
+        }
+        catch
+        {
+            // Ignore if theme manager is unattached
+        }
 
         if (AppSettings.IsTestMode)
         {
@@ -612,8 +670,9 @@ public partial class RotationViewModel : BaseViewModel
         singer.CompletedCount = Math.Min(singer.CompletedCount + 1, 10);
         singer.TotalSongsSung++;
 
-        // 2. Log performance history in database
+        // 2. Log performance history in database and session history
         SavePerformanceHistory(name, title, artist);
+        RecordPerformedSong(name, title, artist, singer.Key);
 
         // Advance rotation to next active singer relative to singer
         Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer);

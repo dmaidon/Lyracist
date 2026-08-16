@@ -28,9 +28,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.13.187</AssemblyVersion>
+		<AssemblyVersion>26.8.15.194</AssemblyVersion>
 
-		<FileVersion>26.8.13.187</FileVersion>
+		<FileVersion>26.8.15.194</FileVersion>
 
 		<Authors>Dennis Maidon</Authors>
 
@@ -136,6 +136,11 @@
 		<Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
 		<Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
 		<Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
+	</ItemGroup>
+
+	<!-- Build Dependency: Force Lyracist.Data to build prior to KSRotation.Maui for Windows builds -->
+	<ItemGroup Condition="'$(TargetFramework)' == '' or $(TargetFramework.Contains('-windows'))">
+		<ProjectReference Include="..\Lyracist.Data\Lyracist.Data.csproj" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 	<!-- Ensure resizetizer, designtime & android output directories exist before _ResolveLibraryProjectImports, ResizetizeImages, ProcessMauiSplashScreens, _CompileDex & _CompileToDalvik run across all target platforms (fixes MSB3371/MSB3374/CS7064/MAUIR0001/MAUIR0004/JAVA0000 DirectoryNotFoundExceptions) -->

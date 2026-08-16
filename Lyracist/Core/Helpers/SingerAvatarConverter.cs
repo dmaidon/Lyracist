@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 09:26:30 -> Fix WPF Freezable exception by utilizing local default pack URI and removing remote freeze
+// Edited on Aug 15, 2026 @ 10:56:00 -> Fix TypeInitializationException in SingerAvatarConverter by using safe lazy initialization for DefaultAvatar
 using System;
 using System.Globalization;
 using System.IO;
@@ -11,20 +11,48 @@ namespace Lyracist.Core.Helpers;
 
 public class SingerAvatarConverter : IValueConverter
 {
-    private static readonly BitmapImage DefaultAvatar = CreateDefaultAvatar();
+    private static BitmapImage? _defaultAvatar;
+    private static bool _defaultAvatarAttempted;
+    private static readonly object _lock = new();
 
-    private static BitmapImage CreateDefaultAvatar()
+    private static BitmapImage? DefaultAvatar
     {
-        var bitmap = new BitmapImage();
-        bitmap.BeginInit();
-        bitmap.UriSource = new Uri("pack://application:,,,/Assets/mic_128.png", UriKind.Absolute);
-        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-        bitmap.EndInit();
-        bitmap.Freeze();
-        return bitmap;
+        get
+        {
+            if (!_defaultAvatarAttempted)
+            {
+                lock (_lock)
+                {
+                    if (!_defaultAvatarAttempted)
+                    {
+                        _defaultAvatarAttempted = true;
+                        _defaultAvatar = CreateDefaultAvatar();
+                    }
+                }
+            }
+            return _defaultAvatar;
+        }
     }
 
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    private static BitmapImage? CreateDefaultAvatar()
+    {
+        try
+        {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri("pack://application:,,,/Assets/mic_128.png", UriKind.Absolute);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            bitmap.Freeze();
+            return bitmap;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is Singer singer)
         {
