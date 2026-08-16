@@ -13,7 +13,8 @@ public class PerformedSong
     public DateTime PerformedAt { get; set; } = DateTime.Now;
 
     public string DisplayTime => PerformedAt.ToString("h:mm tt");
-    public string FormattedText => $"#{OrderNumber:D2} | {SingerName} - \"{SongTitle}\"{(string.IsNullOrWhiteSpace(Artist) ? "" : $" ({Artist})")}{(Key != "0" && !string.IsNullOrWhiteSpace(Key) ? $" [Key: {Key}]" : "")} - {DisplayTime}";
+    public bool HasKeyChange => Key != "0" && !string.IsNullOrWhiteSpace(Key);
+    public string FormattedText => $"#{OrderNumber:D2} | {SingerName} - \"{SongTitle}\"{(string.IsNullOrWhiteSpace(Artist) ? "" : $" ({Artist})")}{(HasKeyChange ? $" [Key: {Key}]" : "")} - {DisplayTime}";
 
     /// <summary>
     /// Index (0-4) used for 5-color rotation palettes.

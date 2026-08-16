@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 using Lyracist.Core.Models;
+using MediaBrush = System.Windows.Media.Brush;
 using MediaColor = System.Windows.Media.Color;
 using MediaColorConverter = System.Windows.Media.ColorConverter;
 
@@ -11,73 +12,42 @@ namespace Lyracist.Core.Helpers;
 
 public class PerformedSongColorConverter : IValueConverter
 {
-    // 5 Dark Mode Palettes (Background, Border, Foreground)
-    private static readonly SolidColorBrush[] DarkBackgrounds =
+    private readonly record struct RotationPalette(MediaBrush Background, MediaBrush Border, MediaBrush Foreground);
+
+    private static MediaBrush FrozenBrush(string hex)
+    {
+        var brush = new SolidColorBrush((MediaColor)MediaColorConverter.ConvertFromString(hex));
+        brush.Freeze();
+        return brush;
+    }
+
+    // Indexed 0..4: Violet, Cyan, Emerald, Amber, Rose
+    private static readonly RotationPalette[] DarkPalettes =
     [
-        new((MediaColor)MediaColorConverter.ConvertFromString("#231834")), // Violet
-        new((MediaColor)MediaColorConverter.ConvertFromString("#122A38")), // Cyan
-        new((MediaColor)MediaColorConverter.ConvertFromString("#123322")), // Emerald
-        new((MediaColor)MediaColorConverter.ConvertFromString("#362414")), // Amber
-        new((MediaColor)MediaColorConverter.ConvertFromString("#361426"))  // Rose
+        new(FrozenBrush("#231834"), FrozenBrush("#9333EA"), FrozenBrush("#E9D5FF")), // Violet
+        new(FrozenBrush("#122A38"), FrozenBrush("#0EA5E9"), FrozenBrush("#BAE6FD")), // Cyan
+        new(FrozenBrush("#123322"), FrozenBrush("#10B981"), FrozenBrush("#A7F3D0")), // Emerald
+        new(FrozenBrush("#362414"), FrozenBrush("#F59E0B"), FrozenBrush("#FDE68A")), // Amber
+        new(FrozenBrush("#361426"), FrozenBrush("#EC4899"), FrozenBrush("#FBCFE8"))  // Rose
     ];
 
-    private static readonly SolidColorBrush[] DarkBorders =
+    private static readonly RotationPalette[] LightPalettes =
     [
-        new((MediaColor)MediaColorConverter.ConvertFromString("#9333EA")), // Violet
-        new((MediaColor)MediaColorConverter.ConvertFromString("#0EA5E9")), // Cyan
-        new((MediaColor)MediaColorConverter.ConvertFromString("#10B981")), // Emerald
-        new((MediaColor)MediaColorConverter.ConvertFromString("#F59E0B")), // Amber
-        new((MediaColor)MediaColorConverter.ConvertFromString("#EC4899"))  // Rose
-    ];
-
-    private static readonly SolidColorBrush[] DarkForegrounds =
-    [
-        new((MediaColor)MediaColorConverter.ConvertFromString("#E9D5FF")), // Violet
-        new((MediaColor)MediaColorConverter.ConvertFromString("#BAE6FD")), // Cyan
-        new((MediaColor)MediaColorConverter.ConvertFromString("#A7F3D0")), // Emerald
-        new((MediaColor)MediaColorConverter.ConvertFromString("#FDE68A")), // Amber
-        new((MediaColor)MediaColorConverter.ConvertFromString("#FBCFE8"))  // Rose
-    ];
-
-    // 5 Light Mode Palettes (Background, Border, Foreground)
-    private static readonly SolidColorBrush[] LightBackgrounds =
-    [
-        new((MediaColor)MediaColorConverter.ConvertFromString("#F3E8FF")), // Violet
-        new((MediaColor)MediaColorConverter.ConvertFromString("#E0F2FE")), // Cyan
-        new((MediaColor)MediaColorConverter.ConvertFromString("#DCFCE7")), // Emerald
-        new((MediaColor)MediaColorConverter.ConvertFromString("#FEF3C7")), // Amber
-        new((MediaColor)MediaColorConverter.ConvertFromString("#FCE7F3"))  // Rose
-    ];
-
-    private static readonly SolidColorBrush[] LightBorders =
-    [
-        new((MediaColor)MediaColorConverter.ConvertFromString("#C084FC")), // Violet
-        new((MediaColor)MediaColorConverter.ConvertFromString("#38BDF8")), // Cyan
-        new((MediaColor)MediaColorConverter.ConvertFromString("#4ADE80")), // Emerald
-        new((MediaColor)MediaColorConverter.ConvertFromString("#FBBF24")), // Amber
-        new((MediaColor)MediaColorConverter.ConvertFromString("#F472B6"))  // Rose
-    ];
-
-    private static readonly SolidColorBrush[] LightForegrounds =
-    [
-        new((MediaColor)MediaColorConverter.ConvertFromString("#581C87")), // Violet
-        new((MediaColor)MediaColorConverter.ConvertFromString("#0369A1")), // Cyan
-        new((MediaColor)MediaColorConverter.ConvertFromString("#15803D")), // Emerald
-        new((MediaColor)MediaColorConverter.ConvertFromString("#B45309")), // Amber
-        new((MediaColor)MediaColorConverter.ConvertFromString("#BE185D"))  // Rose
+        new(FrozenBrush("#F3E8FF"), FrozenBrush("#C084FC"), FrozenBrush("#581C87")), // Violet
+        new(FrozenBrush("#E0F2FE"), FrozenBrush("#38BDF8"), FrozenBrush("#0369A1")), // Cyan
+        new(FrozenBrush("#DCFCE7"), FrozenBrush("#4ADE80"), FrozenBrush("#15803D")), // Emerald
+        new(FrozenBrush("#FEF3C7"), FrozenBrush("#FBBF24"), FrozenBrush("#B45309")), // Amber
+        new(FrozenBrush("#FCE7F3"), FrozenBrush("#F472B6"), FrozenBrush("#BE185D"))  // Rose
     ];
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        int index = 0;
-        if (value is int intVal)
+        int index = value switch
         {
-            index = Math.Abs(intVal) % 5;
-        }
-        else if (value is PerformedSong song)
-        {
-            index = Math.Abs(song.ColorIndex) % 5;
-        }
+            int intVal => Math.Abs(intVal) % 5,
+            PerformedSong song => song.ColorIndex,
+            _ => 0
+        };
 
         bool isDark = true;
         try
@@ -89,26 +59,15 @@ public class PerformedSongColorConverter : IValueConverter
             // Default to dark theme if theme manager is unavailable
         }
 
+        var palette = (isDark ? DarkPalettes : LightPalettes)[index];
         string targetTypeParam = parameter as string ?? "Background";
 
-        if (isDark)
+        return targetTypeParam.ToLowerInvariant() switch
         {
-            return targetTypeParam.ToLowerInvariant() switch
-            {
-                "border" => DarkBorders[index],
-                "foreground" or "text" => DarkForegrounds[index],
-                _ => DarkBackgrounds[index]
-            };
-        }
-        else
-        {
-            return targetTypeParam.ToLowerInvariant() switch
-            {
-                "border" => LightBorders[index],
-                "foreground" or "text" => LightForegrounds[index],
-                _ => LightBackgrounds[index]
-            };
-        }
+            "border" => palette.Border,
+            "foreground" or "text" => palette.Foreground,
+            _ => palette.Background
+        };
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

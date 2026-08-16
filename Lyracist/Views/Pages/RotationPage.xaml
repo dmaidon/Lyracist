@@ -379,7 +379,7 @@
                                                 <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="6,0,0,0">
                                                     <TextBlock Text="{Binding DisplayTime}" FontSize="9" FontWeight="SemiBold" HorizontalAlignment="Right"
                                                                Foreground="{Binding Converter={StaticResource PerformedSongColorConverter}, ConverterParameter=Foreground}"/>
-                                                    <Border Visibility="{Binding Key, Converter={StaticResource NotEmptyToVisibilityConverter}}"
+                                                    <Border Visibility="{Binding HasKeyChange, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                             Background="{Binding Converter={StaticResource PerformedSongColorConverter}, ConverterParameter=Border}"
                                                             CornerRadius="4" Padding="3,0" Margin="0,2,0,0" HorizontalAlignment="Right">
                                                         <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="8.5" FontWeight="Bold" Foreground="White"/>

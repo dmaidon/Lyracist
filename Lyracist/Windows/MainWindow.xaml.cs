@@ -180,13 +180,13 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
                 case "ToggleKillVocal":
                     _karaokeViewModel.EnableKillVocal = !_karaokeViewModel.EnableKillVocal;
                     break;
-                case "ShowRotationWindow":
+                case "ToggleRotationWindow":
                     if (ShowRotationCommand.CanExecute(null))
                     {
                         ShowRotationCommand.Execute(null);
                     }
                     break;
-                case "ShowLyricsWindow":
+                case "ToggleLyricsWindow":
                     if (ShowLyricsCommand.CanExecute(null))
                     {
                         ShowLyricsCommand.Execute(null);

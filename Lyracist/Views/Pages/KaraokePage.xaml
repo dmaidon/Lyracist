@@ -382,9 +382,9 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <ProgressBar Grid.Row="0" IsIndeterminate="True" Height="3" Visibility="{Binding IsSearchingCloud, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Margin="0,0,0,4" />
+                                    <ProgressBar Grid.Row="0" IsIndeterminate="True" Height="3" Visibility="{Binding IsExternalLoading, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Margin="0,0,0,4" />
 
-                                    <ListBox Grid.Row="1" ItemsSource="{Binding ExternalSearchResults}" SelectedItem="{Binding SelectedExternalTrack, Mode=TwoWay}" Background="Transparent" BorderThickness="0">
+                                    <ListBox Grid.Row="1" ItemsSource="{Binding ExternalResults}" SelectedItem="{Binding SelectedExternalTrack, Mode=TwoWay}" Background="Transparent" BorderThickness="0">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Border BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="6" Padding="8,6" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
@@ -522,8 +522,78 @@
                         <TextBlock Text="Notes / Song Request" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4" />
                         <ui:TextBox Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Details..." MinLines="2" MaxLines="3" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12" />
 
-                        <ui:Button Content="Add Performer To Rotation" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddSingerCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" HorizontalAlignment="Stretch" />
+                        <ui:Button Content="Add Performer To Rotation" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddToRotationCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" HorizontalAlignment="Stretch" />
                     </StackPanel>
+                </Border>
+
+                <!-- Selected Performer's Pending Songs Card -->
+                <Border Grid.Row="3" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="16" Margin="0,12,0,0">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Rotation.SelectedSinger}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,10">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Songs Queue for: {0}">
+                                    <Binding Path="Rotation.SelectedSinger.Name" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding Rotation.SelectedSingerQueue}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  MaxHeight="180"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Song" Binding="{Binding Title, Mode=TwoWay}" IsReadOnly="False" Width="1.2*" />
+                                <DataGridTextColumn Header="Artist" Binding="{Binding Artist, Mode=TwoWay}" IsReadOnly="False" Width="*" />
+                                <DataGridTextColumn Header="Key" Binding="{Binding Key, Mode=TwoWay}" IsReadOnly="False" Width="40" />
+                                <DataGridTextColumn Header="Notes" Binding="{Binding Notes, Mode=TwoWay}" IsReadOnly="False" Width="1.2*" />
+                                <DataGridTemplateColumn Width="Auto" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <ui:Button Icon="{ui:SymbolIcon ArrowUp16}"
+                                                           Command="{Binding DataContext.Rotation.MovePendingSongUpCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                           CommandParameter="{Binding}"
+                                                           ToolTip="Move Up"
+                                                           Padding="4" Margin="0,0,2,0" />
+                                                <ui:Button Icon="{ui:SymbolIcon ArrowDown16}"
+                                                           Command="{Binding DataContext.Rotation.MovePendingSongDownCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                           CommandParameter="{Binding}"
+                                                           ToolTip="Move Down"
+                                                           Padding="4" Margin="0,0,2,0" />
+                                                <ui:Button Icon="{ui:SymbolIcon Delete16}"
+                                                           Command="{Binding DataContext.Rotation.RemovePendingSongCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                           CommandParameter="{Binding}"
+                                                           ToolTip="Remove"
+                                                           Appearance="Danger"
+                                                           Padding="4" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
                 </Border>
             </Grid>
 
@@ -544,24 +614,39 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" Margin="0,0,0,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Singer Queue" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Singer Queue" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
 
-                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding Rotation.MoveUpCommand}" Margin="0,0,4,0" ToolTip="Move Up" />
-                        <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding Rotation.MoveDownCommand}" Margin="0,0,4,0" ToolTip="Move Down" />
-                        <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding Rotation.RemoveSingerCommand}" Appearance="Danger" Margin="0,0,8,0" ToolTip="Remove Selected Singer" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding Rotation.MoveUpCommand}" Margin="0,0,4,0" ToolTip="Move Up" />
+                            <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding Rotation.MoveDownCommand}" Margin="0,0,4,0" ToolTip="Move Down" />
+                            <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding Rotation.RemoveSingerCommand}" Appearance="Danger" Margin="0,0,8,0" ToolTip="Remove Selected Singer" />
 
-                        <Separator Width="1" Margin="0,0,4,0" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                            <Separator Width="1" Margin="0,0,4,0" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
 
-                        <ui:Button Icon="{ui:SymbolIcon Play24}" Content="Current" Command="{Binding Rotation.MarkAsSingingCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" ToolTip="Mark As Singing" />
-                        <ui:Button Icon="{ui:SymbolIcon Dismiss24}" Content="Clear" Command="{Binding Rotation.ClearRotationCommand}" Appearance="Secondary" ToolTip="Clear Rotation" />
-                    </StackPanel>
-                </Grid>
+                            <ui:Button Icon="{ui:SymbolIcon Play24}" Content="Current" Command="{Binding Rotation.MarkAsSingingCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" ToolTip="Mark As Singing" />
+                            <ui:Button Icon="{ui:SymbolIcon Dismiss24}" Content="Clear" Command="{Binding Rotation.ClearRotationCommand}" Appearance="Secondary" ToolTip="Clear Rotation" />
+                        </StackPanel>
+                    </Grid>
+                    <!-- Queue Service Filters -->
+                    <WrapPanel Margin="0,6,0,0" Orientation="Horizontal">
+                        <CheckBox Content="Local" IsChecked="{Binding ShowLocalFilter, Mode=TwoWay}" Margin="0,0,10,0" FontSize="11" />
+                        <CheckBox Content="Spotify" IsChecked="{Binding ShowSpotifyFilter, Mode=TwoWay}" IsEnabled="{Binding IsSpotifyAvailable}" Margin="0,0,10,0" FontSize="11" />
+                        <CheckBox Content="YouTube" IsChecked="{Binding ShowYouTubeFilter, Mode=TwoWay}" IsEnabled="{Binding IsYouTubeAvailable}" Margin="0,0,10,0" FontSize="11" />
+                        <CheckBox Content="Amazon" IsChecked="{Binding ShowAmazonFilter, Mode=TwoWay}" IsEnabled="{Binding IsAmazonAvailable}" Margin="0,0,0,0" FontSize="11" />
+                    </WrapPanel>
+                    <WrapPanel Margin="0,4,0,0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <CheckBox Content="Auto-Play Rotation Music" IsChecked="{Binding AutoPlayRotationMusic, Mode=TwoWay}" Margin="0,0,12,0" FontSize="11" />
+                        <TextBlock Text="Delay:" VerticalAlignment="Center" Margin="0,0,6,0" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <ComboBox SelectedItem="{Binding RotationMusicDelaySeconds, Mode=TwoWay}" ItemsSource="{Binding MusicDelayOptions}" Width="65" Height="24" FontSize="11" Padding="6,1" VerticalContentAlignment="Center" Margin="0,0,6,0" />
+                        <TextBlock Text="sec" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </WrapPanel>
+                </StackPanel>
 
                 <!-- Queue List Box -->
                 <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="6">
@@ -623,6 +708,23 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Edit Singer Audio Defaults..." Command="{Binding Path=PlacementTarget.Tag.EditSingerSettingsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                            <MenuItem Header="Play Performer's Request" Command="{Binding Path=PlacementTarget.Tag.PlayPerformerRequestCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
+                                            <MenuItem Header="Open External Link in Browser" Command="{Binding Path=PlacementTarget.Tag.OpenExternalLinkInBrowserCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}">
+                                                <MenuItem.Style>
+                                                    <Style TargetType="MenuItem">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Source}" Value="Local">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </MenuItem.Style>
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />

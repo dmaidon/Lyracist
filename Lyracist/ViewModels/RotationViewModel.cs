@@ -138,7 +138,15 @@ public partial class RotationViewModel : BaseViewModel
         {
             Wpf.Ui.Appearance.ApplicationThemeManager.Changed += (theme, accent) =>
             {
-                OnPropertyChanged(nameof(SessionPerformedSongs));
+                // PerformedSong isn't INotifyPropertyChanged, so re-raising PropertyChanged for the
+                // (unchanged) collection reference won't make the ListBox re-run item converters.
+                // Resetting via Clear+re-Add forces WPF to regenerate containers against the new theme.
+                var songs = SessionPerformedSongs.ToList();
+                SessionPerformedSongs.Clear();
+                foreach (var song in songs)
+                {
+                    SessionPerformedSongs.Add(song);
+                }
             };
         }
         catch
