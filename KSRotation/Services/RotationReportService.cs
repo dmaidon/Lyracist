@@ -23,8 +23,10 @@ namespace KSRotation.Services
         /// <param name="venueName">Venue name.</param>
         /// <param name="emailRecipient">Email recipient(s).</param>
         /// <param name="sendEmail">Whether to draft and open the email.</param>
-        /// <returns>A tuple containing the PDF and CSV report paths.</returns>
-        public static Task<(string PdfPath, string CsvPath)> SaveAsync(
+        /// <returns>The PDF and CSV report paths (always written if this method returns normally), plus
+        /// an EmailError message if the report was saved but the optional email draft step failed —
+        /// callers should still treat a non-null EmailError as an overall success for the report itself.</returns>
+        public static Task<(string PdfPath, string CsvPath, string? EmailError)> SaveAsync(
             IEnumerable<SingerEntry> singers,
             IEnumerable<SongPerformance> history,
             string venueName,
@@ -42,12 +44,24 @@ namespace KSRotation.Services
                 string pdfPath = RotationReportGenerator.GeneratePdf(singersList, historyList, venueName);
                 string csvPath = RotationReportGenerator.GenerateCsv(singersList, historyList);
 
+                // The PDF/CSV are already safely on disk at this point. Emailing them is a best-effort
+                // extra step — a mail-client/SMTP-pickup failure here must not make the caller think the
+                // whole save failed and skip flushing the database / clearing the queue.
+                string? emailError = null;
                 if (sendEmail && !string.IsNullOrWhiteSpace(emailRecipient))
                 {
-                    CreateEmlDraft(emailRecipient.Trim(), venueName, pdfPath, csvPath);
+                    try
+                    {
+                        CreateEmlDraft(emailRecipient.Trim(), venueName, pdfPath, csvPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggerService.LogError("RotationReportService.CreateEmlDraft", ex);
+                        emailError = ex.Message;
+                    }
                 }
 
-                return (pdfPath, csvPath);
+                return (pdfPath, csvPath, emailError);
             });
         }
 

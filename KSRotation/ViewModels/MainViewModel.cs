@@ -35,6 +35,7 @@ namespace KSRotation.ViewModels
 
         // Snapshot serialized on the UI thread; read lock-free by the TCP server thread.
         private volatile string _cachedRotationJson = "[]";
+        private volatile string _cachedRequestsJson = "[]";
 
         private static readonly (string Song, string Artist)[] TestPool =
         [
@@ -606,6 +607,17 @@ namespace KSRotation.ViewModels
         private static bool IsInDesignMode => false;
 #endif
 
+        // WPF's MessageBox.Show blocks and returns the user's real answer, so it's safe to wrap
+        // synchronously. MAUI's DisplayAlert is inherently async, so ConfirmAsync must genuinely be
+        // awaited there — see WpfShims.MessageBox.ShowConfirmAsync for why Show() alone can't be trusted.
+#if !MAUI
+        private static Task<bool> ConfirmAsync(string message, string caption) =>
+            Task.FromResult(System.Windows.MessageBox.Show(message, caption, System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes);
+#else
+        private static Task<bool> ConfirmAsync(string message, string caption) =>
+            System.Windows.MessageBox.ShowConfirmAsync(message, caption);
+#endif
+
         public MainViewModel()
         {
             _saveDebounceTimer = new DispatcherTimer();
@@ -661,6 +673,9 @@ namespace KSRotation.ViewModels
             };
 
             Singers.CollectionChanged += OnSingersCollectionChanged;
+            // All IncomingRequests mutations happen on the UI thread (see HandleRequestReceived/HandleDjAction),
+            // so rebuilding the cache here is thread-safe; GetRequestsJson then reads the cache lock-free.
+            IncomingRequests.CollectionChanged += (_, _) => RebuildRequestsJsonCacheNow();
 
             foreach (string venue in VenueService.Load())
             {
@@ -925,20 +940,18 @@ namespace KSRotation.ViewModels
         /// which only hides it). Recorded performance history for the singer is unaffected and still appears in
         /// the night's report. Master-console only — not exposed from the DJ web remote or the MAUI app.</summary>
         [RelayCommand]
-        private void RemoveSinger(SingerEntry entry)
+        private async Task RemoveSinger(SingerEntry entry)
         {
             if (entry == null)
             {
                 return;
             }
 
-            var result = System.Windows.MessageBox.Show(
+            bool confirmed = await ConfirmAsync(
                 $"Permanently remove \"{entry.Name}\" from the rotation? This cannot be undone.",
-                "Confirm Remove",
-                System.Windows.MessageBoxButton.YesNo,
-                System.Windows.MessageBoxImage.Warning);
+                "Confirm Remove");
 
-            if (result != System.Windows.MessageBoxResult.Yes)
+            if (!confirmed)
             {
                 return;
             }
@@ -983,15 +996,13 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
-        private void ClearRotation()
+        private async Task ClearRotation()
         {
-            var result = System.Windows.MessageBox.Show(
+            bool confirmed = await ConfirmAsync(
                 "Are you sure you want to clear the entire rotation list? This cannot be undone.",
-                "Confirm Clear",
-                System.Windows.MessageBoxButton.YesNo,
-                System.Windows.MessageBoxImage.Question);
+                "Confirm Clear");
 
-            if (result == System.Windows.MessageBoxResult.Yes)
+            if (confirmed)
             {
                 Singers.Clear();
                 if (IsDisplayEnabled)
@@ -1480,14 +1491,16 @@ namespace KSRotation.ViewModels
 
                 List<SongPerformance> historySnapshot = GetPerformanceHistorySnapshot();
 
-                var (pdfPath, csvPath) = await RotationReportService.SaveAsync(
+                var (pdfPath, csvPath, emailError) = await RotationReportService.SaveAsync(
                     singersSnapshot,
                     historySnapshot,
                     VenueName,
                     EmailRecipient,
                     SendEmailOnSave);
 
-                // Flush database on Save Rotation
+                // The PDF/CSV are on disk by this point regardless of whether the (optional) email draft
+                // step succeeded, so the night always gets reset — an email failure alone must not leave
+                // the DJ thinking the save failed and skip flushing/clearing.
                 NightDatabaseService.Flush();
                 lock (_performanceHistoryLock)
                 {
@@ -1495,9 +1508,19 @@ namespace KSRotation.ViewModels
                 }
                 Singers.Clear();
 
-                string emailMsg = SendEmailOnSave && !string.IsNullOrWhiteSpace(EmailRecipient)
-                    ? "\n\nAn email draft was also created and opened with the reports attached."
-                    : string.Empty;
+                string emailMsg;
+                if (emailError != null)
+                {
+                    emailMsg = $"\n\nWarning: the reports saved successfully, but the email draft could not be created: {emailError}";
+                }
+                else if (SendEmailOnSave && !string.IsNullOrWhiteSpace(EmailRecipient))
+                {
+                    emailMsg = "\n\nAn email draft was also created and opened with the reports attached.";
+                }
+                else
+                {
+                    emailMsg = string.Empty;
+                }
 
                 System.Windows.MessageBox.Show(
                     $"Rotation reports saved to:\nPDF: {pdfPath}\nCSV: {csvPath}\n\nThe database has been flushed and active queue cleared.{emailMsg}",

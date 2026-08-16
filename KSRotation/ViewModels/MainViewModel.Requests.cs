@@ -419,10 +419,15 @@ namespace KSRotation.ViewModels
                 && System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(provided, expected);
         }
 
-        private string GetRequestsJson()
+        /// <summary>Serializes the pending patron requests as JSON on the UI thread and caches it.
+        /// The TCP server reads the cached string from a background thread without touching the live
+        /// ObservableCollection, which must only be mutated/enumerated from the UI thread.</summary>
+        private void RebuildRequestsJsonCacheNow()
         {
-            return JsonSerializer.Serialize(IncomingRequests.ToList(), AppJsonContext.Default.ListPatronRequest);
+            _cachedRequestsJson = JsonSerializer.Serialize(IncomingRequests.ToList(), AppJsonContext.Default.ListPatronRequest);
         }
+
+        private string GetRequestsJson() => _cachedRequestsJson;
 
         private string HandleDjAction(string action, string targetId, string extraData, string name, string song, string artist)
         {

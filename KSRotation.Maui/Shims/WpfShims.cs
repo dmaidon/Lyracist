@@ -54,6 +54,23 @@ namespace System.Windows
             });
             return MessageBoxResult.Yes;
         }
+
+        /// <summary>
+        /// Shows a real Yes/No confirmation and awaits the user's actual answer, unlike <see cref="Show"/>
+        /// (which fires the alert asynchronously but returns Yes immediately, before the user responds).
+        /// Returns false if there's no current page to host the alert on.
+        /// </summary>
+        public static async Task<bool> ShowConfirmAsync(string messageBoxText, string caption)
+        {
+            var page = Microsoft.Maui.Controls.Shell.Current?.CurrentPage;
+            if (page == null)
+            {
+                return false;
+            }
+
+            return await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(
+                () => page.DisplayAlertAsync(caption, messageBoxText, "Yes", "No"));
+        }
     }
 
     public enum MessageBoxButton

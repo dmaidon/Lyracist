@@ -30,6 +30,10 @@ namespace KSRotation.Services
         private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
         private const int MaxConcurrentConnections = 64;
         private const int MaxPinAttemptsBeforeLockout = 5;
+        // Caps how long a single connection may take to send its full headers+body. Without this, a client
+        // that trickles bytes one at a time (or never sends the final CRLFCRLF) holds a connection slot
+        // forever — with only MaxConcurrentConnections slots, that's enough to starve every real patron/DJ.
+        private static readonly TimeSpan RequestReadTimeout = TimeSpan.FromSeconds(15);
         private static readonly TimeSpan PinLockoutDuration = TimeSpan.FromMinutes(2);
 
         private TcpListener? _listener;
@@ -116,10 +120,11 @@ namespace KSRotation.Services
             // Reads go through a small buffer so header/body parsing isn't one syscall per byte;
             // responses are still written directly to `stream`, unbuffered.
             using (BufferedStream readStream = new(stream, 4096))
+            using (CancellationTokenSource readTimeoutCts = new(RequestReadTimeout))
             {
                 try
                 {
-                    string headers = await ReadHeadersAsync(readStream);
+                    string headers = await ReadHeadersAsync(readStream, readTimeoutCts.Token);
                     if (string.IsNullOrWhiteSpace(headers))
                     {
                         return;
@@ -259,8 +264,8 @@ namespace KSRotation.Services
                                 }
                                 else if (dbSinger.AvatarType == "Uploaded" && !string.IsNullOrEmpty(dbSinger.AvatarSource))
                                 {
-                                    string fullPath = Path.Combine(Lyracist.Shared.Globals.AvatarsDir, dbSinger.AvatarSource);
-                                    if (File.Exists(fullPath))
+                                    string? fullPath = ResolveAvatarPath(Lyracist.Shared.Globals.AvatarsDir, dbSinger.AvatarSource);
+                                    if (fullPath != null && File.Exists(fullPath))
                                     {
                                         try
                                         {
@@ -286,7 +291,7 @@ namespace KSRotation.Services
                     }
                     else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/request", StringComparison.OrdinalIgnoreCase))
                     {
-                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength);
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, readTimeoutCts.Token);
                         string body = Encoding.UTF8.GetString(bodyBytes);
 
                         using JsonDocument doc = JsonDocument.Parse(body);
@@ -341,7 +346,7 @@ namespace KSRotation.Services
                             return;
                         }
 
-                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength);
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, readTimeoutCts.Token);
                         string body = Encoding.UTF8.GetString(bodyBytes);
 
                         using JsonDocument doc = JsonDocument.Parse(body);
@@ -366,7 +371,7 @@ namespace KSRotation.Services
                     else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/singer/login", StringComparison.OrdinalIgnoreCase))
                     {
 #if !MAUI
-                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength);
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, readTimeoutCts.Token);
                         string body = Encoding.UTF8.GetString(bodyBytes);
 
                         using JsonDocument doc = JsonDocument.Parse(body);
@@ -435,7 +440,7 @@ namespace KSRotation.Services
                     else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/singer/profile", StringComparison.OrdinalIgnoreCase))
                     {
 #if !MAUI
-                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength);
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, readTimeoutCts.Token);
                         string body = Encoding.UTF8.GetString(bodyBytes);
 
                         using JsonDocument doc = JsonDocument.Parse(body);
@@ -473,7 +478,7 @@ namespace KSRotation.Services
                     else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/singer/avatar/upload", StringComparison.OrdinalIgnoreCase))
                     {
 #if !MAUI
-                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength);
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, readTimeoutCts.Token);
                         string body = Encoding.UTF8.GetString(bodyBytes);
 
                         using JsonDocument doc = JsonDocument.Parse(body);
@@ -501,13 +506,20 @@ namespace KSRotation.Services
                             string avatarsDir = Lyracist.Shared.Globals.AvatarsDir;
                             Directory.CreateDirectory(avatarsDir);
 
-                            string filename = $"{name.Replace(" ", "_")}_{DateTime.Now.Ticks}.jpg";
-                            string fullPath = Path.Combine(avatarsDir, filename);
+                            // Filename is derived from a GUID, never from patron-controlled input,
+                            // so it cannot contain path-traversal segments.
+                            string filename = $"{Guid.NewGuid():N}.jpg";
+                            string? fullPath = ResolveAvatarPath(avatarsDir, filename);
+                            if (fullPath == null)
+                            {
+                                await SendBadRequestAsync(stream, "{\"error\":\"Invalid avatar file name.\"}");
+                                return;
+                            }
 
                             if (dbSinger.AvatarType == "Uploaded" && !string.IsNullOrEmpty(dbSinger.AvatarSource))
                             {
-                                string oldPath = Path.Combine(avatarsDir, dbSinger.AvatarSource);
-                                if (File.Exists(oldPath))
+                                string? oldPath = ResolveAvatarPath(avatarsDir, dbSinger.AvatarSource);
+                                if (oldPath != null && File.Exists(oldPath))
                                 {
                                     try { File.Delete(oldPath); } catch {}
                                 }
@@ -582,7 +594,7 @@ namespace KSRotation.Services
             return 0;
         }
 
-        private static async Task<string> ReadHeadersAsync(Stream stream)
+        private static async Task<string> ReadHeadersAsync(Stream stream, CancellationToken cancellationToken)
         {
             const int maxHeaderBytes = 16_384;
             using MemoryStream headerBuffer = new();
@@ -590,7 +602,7 @@ namespace KSRotation.Services
 
             while (headerBuffer.Length < maxHeaderBytes)
             {
-                int read = await stream.ReadAsync(singleByte.AsMemory(0, 1));
+                int read = await stream.ReadAsync(singleByte.AsMemory(0, 1), cancellationToken);
                 if (read == 0)
                 {
                     break;
@@ -730,6 +742,25 @@ namespace KSRotation.Services
         }
 
         /// <summary>
+        /// Resolves an avatar file name to a full path guaranteed to stay inside <paramref name="avatarsDir"/>,
+        /// rejecting any path-traversal or rooted-path attempt (e.g. "..\..\Windows\evil.jpg" or "C:\evil.jpg").
+        /// Returns null if the resolved path would escape the avatars directory.
+        /// </summary>
+        private static string? ResolveAvatarPath(string avatarsDir, string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName) || Path.IsPathRooted(fileName))
+            {
+                return null;
+            }
+
+            string fullAvatarsDir = Path.GetFullPath(avatarsDir);
+            string fullPath = Path.GetFullPath(Path.Combine(fullAvatarsDir, fileName));
+
+            string jail = fullAvatarsDir.EndsWith(Path.DirectorySeparatorChar) ? fullAvatarsDir : fullAvatarsDir + Path.DirectorySeparatorChar;
+            return fullPath.StartsWith(jail, StringComparison.OrdinalIgnoreCase) ? fullPath : null;
+        }
+
+        /// <summary>
         /// Verifies the DJ PIN for <paramref name="clientIp"/>, tracking failed attempts per IP and
         /// locking that IP out for <see cref="PinLockoutDuration"/> after <see cref="MaxPinAttemptsBeforeLockout"/>
         /// consecutive failures. Guards against brute-forcing a short numeric PIN over the LAN.
@@ -789,14 +820,14 @@ namespace KSRotation.Services
             return string.Empty;
         }
 
-        private static async Task<byte[]> ReadBodyBytesAsync(Stream stream, int contentLength)
+        private static async Task<byte[]> ReadBodyBytesAsync(Stream stream, int contentLength, CancellationToken cancellationToken)
         {
             byte[] buffer = new byte[contentLength];
             int totalRead = 0;
 
             while (totalRead < contentLength)
             {
-                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalRead, contentLength - totalRead));
+                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalRead, contentLength - totalRead), cancellationToken);
                 if (bytesRead == 0)
                 {
                     throw new InvalidOperationException("Request body ended before all bytes were received.");
