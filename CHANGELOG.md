@@ -1,5 +1,5 @@
-<!-- Edited on Aug 16, 2026 @ 08:08:00 -> Add version 26.8.16.0 changelog entry for Session Performed Songs, Spacing adjustments, and Build Order fixes -->
-Last Edit: Aug 16, 2026 - Session Performed Songs History (5-color rotation), compact queue layout, and solution build order fixes
+<!-- Edited on Aug 16, 2026 @ 12:48:00 -> Add CHANGELOG entry for PAROLE Software company metadata standardization -->
+Last Edit: Aug 16, 2026 - Standardized PAROLE Software company metadata across all project properties and added HasKeyChange helper
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -10,9 +10,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Session Performed Songs History (Singer Rotation Page)**: Added Column 2 to `RotationPage.xaml` featuring live tracking of all performed songs in the current session. Includes:
   - Dual view tabs: **5-Color List Tab** (rotating Violet, Cyan, Emerald, Amber, Rose cards adapting dynamically to Light & Dark themes via `PerformedSongColorConverter`) and **Session Textbox Tab** (multi-line copyable text log).
   - Quick action buttons: **Copy Session Songs to Clipboard** and **Clear Session Performed Songs**.
-- **`PerformedSong` Model (`PerformedSong.cs`)**: Created model tracking performer name, song title, artist, key transposition, timestamp, and order number (`ColorIndex => (OrderNumber - 1) % 5`).
+- **`PerformedSong` Model (`PerformedSong.cs`)**: Created model tracking performer name, song title, artist, key transposition, timestamp, order number (`ColorIndex => (OrderNumber - 1) % 5`), and `HasKeyChange` helper property.
 
 ### Fixed & Improved
+- **Assembly Metadata Standardization**: Standardized `<Authors>` (`Dennis N. Maidon`), `<Company>` (`PAROLE Software`), and `<Copyright>` (`Copyright © 2026 PAROLE Software`) across all solution `.csproj` files (`Lyracist`, `Lyracist.Data`, `KSRotation`, `LyracistDbEditor`, `ScaryokeWheel`, `KSRotation.Maui`, `LyracistKeyGen`).
 - **Compact Queue Layout Spacing (`RotationPage.xaml` & `KaraokePage.xaml`)**: Reduced vertical padding and card margins on performed song cards in Column 2 and active performer queue rows on the Karaoke Control page, fitting more singers on screen without scrolling.
 - **Load & Play Selected Performer Button Positioning**: Restructured middle column `Grid.RowDefinitions` in `KaraokePage.xaml` to 3 explicit rows (`Auto`, `*`, `Auto`), locking the **Load & Play Selected Performer** button to `Grid.Row="2"` at the bottom of the Singer Queue panel.
 - **`SingerAvatarConverter` TypeInitializationException**: Replaced static field initialization of `DefaultAvatar` with a thread-safe, lazy-initialized property wrapped in try-catch fallback handling, preventing WPF startup exceptions.

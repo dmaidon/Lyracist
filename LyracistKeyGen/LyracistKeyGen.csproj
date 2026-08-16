@@ -10,8 +10,9 @@
     <ApplicationIcon>..\Lyracist\Assets\lyracist_mic.ico</ApplicationIcon>
     <BaseOutputPath>C:\VB26\Release\LyracistKeyGen</BaseOutputPath>
     <Title>Lyracist Key Generator</Title>
-    <Authors>Dennis Maidon</Authors>
+    <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
+    <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <PackageIcon>Lyracist_Pro.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
     <AssemblyVersion>26.7.28.39</AssemblyVersion>

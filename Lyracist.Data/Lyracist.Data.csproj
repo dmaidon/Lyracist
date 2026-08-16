@@ -1,5 +1,4 @@
-<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Bump AssemblyVersion and FileVersion to 26.8.13.150 -->
-<!-- Edited on Aug 2, 2026 @ 08:22:00 -> Bump AssemblyVersion and FileVersion to 26.8.2.88 -->
+<!-- Edited on Aug 16, 2026 @ 11:18:00 -> Add Authors, Company, and Copyright metadata properties -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -8,8 +7,11 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>26.8.15.160</AssemblyVersion>
-    <FileVersion>26.8.15.160</FileVersion>
+    <AssemblyVersion>26.8.16.162</AssemblyVersion>
+    <FileVersion>26.8.16.162</FileVersion>
+    <Authors>Dennis N. Maidon</Authors>
+    <Company>PAROLE Software</Company>
+    <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
   </PropertyGroup>

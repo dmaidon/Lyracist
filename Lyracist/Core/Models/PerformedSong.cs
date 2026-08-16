@@ -1,4 +1,4 @@
-// Created on Aug 15, 2026 @ 10:20:00 -> PerformedSong model for session performance history
+// Edited on Aug 16, 2026 @ 10:09:00 -> Added HasKeyChange property
 using System;
 
 namespace Lyracist.Core.Models;

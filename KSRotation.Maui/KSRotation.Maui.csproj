@@ -28,11 +28,15 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.15.194</AssemblyVersion>
+		<AssemblyVersion>26.8.16.196</AssemblyVersion>
 
-		<FileVersion>26.8.15.194</FileVersion>
+		<FileVersion>26.8.16.196</FileVersion>
 
-		<Authors>Dennis Maidon</Authors>
+		<Authors>Dennis N. Maidon</Authors>
+
+		<Company>PAROLE Software</Company>
+
+		<Copyright>Copyright © 2026 PAROLE Software</Copyright>
 
 		<PackageIcon>ksr_logo.png</PackageIcon>
 

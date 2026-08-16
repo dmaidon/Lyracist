@@ -1,4 +1,4 @@
-<!-- Edited on Jul 30, 2026 @ 06:15:00 -> Redirected all icon and PNG references to central Lyracist/Assets folder -->
+<!-- Edited on Aug 16, 2026 @ 11:18:00 -> Add Authors, Company, and Copyright metadata properties -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.8.15.122</AssemblyVersion>
-    <FileVersion>26.8.15.122</FileVersion>
+    <AssemblyVersion>26.8.16.124</AssemblyVersion>
+    <FileVersion>26.8.16.124</FileVersion>
+    <Authors>Dennis N. Maidon</Authors>
+    <Company>PAROLE Software</Company>
+    <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <ApplicationIcon>..\Lyracist\Assets\scaryoke.ico</ApplicationIcon>
     <PackageIcon>scaryoke.png</PackageIcon>
   </PropertyGroup>

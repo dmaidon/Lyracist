@@ -1,5 +1,4 @@
-<!-- Edited on Aug 8, 2026 @ 19:15:32 -> Add SpecialEventConfig link and EventBanners build copy item -->
-<!-- Consolidated icons to Assets/ folder and resolved Downloads folder reference -->
+<!-- Edited on Aug 16, 2026 @ 11:17:00 -> Add Company and Copyright metadata properties -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -12,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.8.15.417</AssemblyVersion>
-    <FileVersion>26.8.15.417</FileVersion>
+    <AssemblyVersion>26.8.16.419</AssemblyVersion>
+    <FileVersion>26.8.16.419</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -23,6 +22,10 @@
     <Title>Lyracist Pro</Title>
     <Product>Lyracist Pro</Product>
     <AssemblyTitle>Lyracist Pro</AssemblyTitle>
+    <Authors>Dennis N. Maidon</Authors>
+    <Company>PAROLE Software</Company>
+    <Copyright>Copyright © 2026 PAROLE Software</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +37,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="Assets\mic_128.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

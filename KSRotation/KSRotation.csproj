@@ -1,4 +1,4 @@
-﻿<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Bump AssemblyVersion and FileVersion to 26.8.13.462 -->
+<!-- Edited on Aug 16, 2026 @ 11:18:00 -> Add Authors, Company, and Copyright metadata properties -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,11 +10,14 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.15.471</AssemblyVersion>
-    <FileVersion>26.8.15.471</FileVersion>
+    <AssemblyVersion>26.8.16.473</AssemblyVersion>
+    <FileVersion>26.8.16.473</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
+    <Authors>Dennis N. Maidon</Authors>
+    <Company>PAROLE Software</Company>
+    <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageIcon>rotation.png</PackageIcon>
