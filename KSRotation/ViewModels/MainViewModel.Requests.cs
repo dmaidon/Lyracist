@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 11:05:00 -> Use high-contrast black-on-white QR code for DJ connect URL to ensure readability on older iPads
+// Edited on Aug 17, 2026 @ 12:10:00 -> Add duet partner parsing and forwarding in HandleRequestReceived and HandleDjAction
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -70,6 +70,11 @@ namespace KSRotation.ViewModels
             var existingSinger = Singers.FirstOrDefault(s => IsSameSingerName(s.Name, normalizedName) && s.IsMusic == (request.RequestType == "Music"));
             if (existingSinger != null)
             {
+                if (!string.IsNullOrWhiteSpace(request.DuetPartnerName))
+                {
+                    existingSinger.DuetPartnerName = request.DuetPartnerName;
+                }
+
                 // Only reposition if the singer was actually paused — reactivating them needs to move
                 // them back into the active section. An already-active singer (including the one
                 // currently performing) accepting a new request should stay exactly where they are.
@@ -102,6 +107,7 @@ namespace KSRotation.ViewModels
                 var newSinger = new SingerEntry
                 {
                     Name = normalizedName,
+                    DuetPartnerName = request.DuetPartnerName,
                     IsMusic = request.RequestType == "Music"
                 };
 
@@ -283,7 +289,7 @@ namespace KSRotation.ViewModels
             }
         }
 
-        private void HandleRequestReceived(string name, List<RequestedSong> songs, string requestType)
+        private void HandleRequestReceived(string name, List<RequestedSong> songs, string requestType, string duetPartner)
         {
             System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -291,6 +297,7 @@ namespace KSRotation.ViewModels
                 var request = new PatronRequest
                 {
                     Name = name,
+                    DuetPartnerName = duetPartner,
                     Song = first?.Song ?? string.Empty,
                     Artist = first?.Artist ?? string.Empty,
                     Songs = songs,
@@ -429,7 +436,7 @@ namespace KSRotation.ViewModels
 
         private string GetRequestsJson() => _cachedRequestsJson;
 
-        private string HandleDjAction(string action, string targetId, string extraData, string name, string song, string artist)
+        private string HandleDjAction(string action, string targetId, string extraData, string name, string song, string artist, string duetPartner)
         {
             var tcs = new TaskCompletionSource<string>();
 
@@ -438,7 +445,7 @@ namespace KSRotation.ViewModels
             {
                 try
                 {
-                    string err = ExecuteDjActionOnUi(action, targetId, extraData, name, song, artist);
+                    string err = ExecuteDjActionOnUi(action, targetId, extraData, name, song, artist, duetPartner);
                     tcs.SetResult(err);
                 }
                 catch (Exception ex)
@@ -451,7 +458,7 @@ namespace KSRotation.ViewModels
             return tcs.Task.Result;
         }
 
-        private string ExecuteDjActionOnUi(string action, string targetId, string extraData, string name, string song, string artist)
+        private string ExecuteDjActionOnUi(string action, string targetId, string extraData, string name, string song, string artist, string duetPartner)
         {
             switch (action.ToLowerInvariant())
             {
@@ -635,8 +642,9 @@ namespace KSRotation.ViewModels
                         return "";
                     }
                 case "add-singer":
+                case "add-performer":
                     {
-                        if (!TryAddPerformer(name, song, artist)) return "Singer name is required.";
+                        if (!TryAddPerformer(name, song, artist, duetPartner)) return "Singer name is required.";
 
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();

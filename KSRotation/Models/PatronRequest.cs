@@ -1,5 +1,4 @@
-// Edited on Jul 28, 2026 @ 18:37:00 -> Add RequestType property to distinguish Karaoke vs Music requests
-// Last Edit: Jul 16, 2026 11:00 - Patron model request data
+// Edited on Aug 17, 2026 @ 12:08:30 -> Add DuetPartnerName property for backup/duet partner support
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +26,7 @@ namespace KSRotation.Models
 
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Name { get; set; } = string.Empty;
+        public string DuetPartnerName { get; set; } = string.Empty;
 
         public string Song
         {

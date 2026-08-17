@@ -599,7 +599,12 @@
                                     <ui:TextBox Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" PlaceholderText="Wi-Fi Password for QR code" Margin="0,0,0,12" />
 
                                     <TextBlock Text="Dynamic Banner &amp; Dual QR Code Status" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                                    <TextBlock Text="Automatically detects connected Wi-Fi SSID and song request portal URL to generate high-resolution ConnectInstructions.png with dual scan-to-connect Wi-Fi and portal QR codes." Foreground="{DynamicResource AppInfoTextBrush}" FontSize="11" TextWrapping="Wrap" />
+                                    <TextBlock Text="Automatically detects connected Wi-Fi SSID and song request portal URL to generate high-resolution ConnectInstructions.png with dual scan-to-connect Wi-Fi and portal QR codes." Foreground="{DynamicResource AppInfoTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,12" />
+                                    
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <ui:Button Content="👁️ Preview Connect Screen" Command="{Binding PreviewConnectInstructionsCommand}" Margin="0,0,8,0" />
+                                        <ui:Button Content="🎯 Launch Trivia Night" Command="{Binding LaunchTriviaCommand}" Appearance="Primary" FontWeight="Bold" />
+                                    </StackPanel>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>

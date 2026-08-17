@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 09:50:00 -> Update ResolveActiveBannerPath and UpdateLastSongState to prioritize Last Song banner on all non-lyric screens
+// Edited on Aug 17, 2026 @ 15:50:00 -> Added InitializeTrivia and CheckAndSyncTriviaPause synchronization
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -151,6 +151,7 @@ namespace KSRotation.ViewModels
                         _displayWindowService.Hide();
                         CheckRestoreDjBanner();
                     }
+                    CheckAndSyncTriviaPause();
                     QueueSaveSettings();
                     break;
 
@@ -221,6 +222,7 @@ namespace KSRotation.ViewModels
                         }
                         _djBannerWindowService.Hide();
                     }
+                    CheckAndSyncTriviaPause();
                     QueueSaveSettings();
                     break;
 
@@ -351,6 +353,7 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(WindowTitle))]
+        [NotifyPropertyChangedFor(nameof(TriviaVenueName))]
         public partial string VenueName { get; set; } = "Karaoke Night";
 
         [ObservableProperty]
@@ -361,6 +364,7 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(WindowTitle))]
+        [NotifyPropertyChangedFor(nameof(TriviaHostName))]
         public partial string DjName { get; set; } = "Guest DJ";
 
         [ObservableProperty]
@@ -518,12 +522,70 @@ namespace KSRotation.ViewModels
             return (1920, 1080);
         }
 
+        [RelayCommand]
+        private void LaunchTrivia()
+        {
+            try
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string exePath = System.IO.Path.Combine(baseDir, "Lyracist.Trivia.exe");
+
+                if (!System.IO.File.Exists(exePath))
+                {
+                    string devPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(baseDir, "..", "..", "..", "..", "Lyracist.Trivia", "bin", "Debug", "net9.0-windows", "Lyracist.Trivia.exe"));
+                    if (System.IO.File.Exists(devPath))
+                    {
+                        exePath = devPath;
+                    }
+                    else
+                    {
+                        exePath = "Lyracist.Trivia.exe";
+                    }
+                }
+
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exePath)
+                {
+                    UseShellExecute = true,
+                    WorkingDirectory = System.IO.Path.GetDirectoryName(exePath) ?? baseDir
+                });
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogError("MainViewModel.LaunchTrivia", ex);
+            }
+        }
+
+        [RelayCommand]
+        private void PreviewConnectInstructions()
+        {
+            try
+            {
+                string bannerPath = System.IO.Path.Combine(Globals.EventBannersDir, "ConnectInstructions.png");
+                if (System.IO.File.Exists(bannerPath))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(bannerPath) { UseShellExecute = true });
+                }
+                else
+                {
+                    RefreshConnectInstructionsBanner();
+                    if (System.IO.File.Exists(bannerPath))
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(bannerPath) { UseShellExecute = true });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogError("MainViewModel.PreviewConnectInstructions", ex);
+            }
+        }
+
         public ObservableCollection<DjBannerItem> AvailableDjBanners { get; } = [];
 
         [ObservableProperty]
         public partial string SelectedHelpTopic { get; set; } = "🚀 Getting Started";
 
-// Edited on Aug 10, 2026 @ 13:06:00 -> Add Connect & Wi-Fi Instructions topic to HelpTopics
+// Edited on Aug 17, 2026 @ 16:18:00 -> Add Trivia Night Pro topic to HelpTopics
         public List<string> HelpTopics { get; } =
         [
             "🚀 Getting Started",
@@ -532,6 +594,7 @@ namespace KSRotation.ViewModels
             "⚙️ Settings & Venues",
             "📺 Display & DJ Banners",
             "📡 Connect & Wi-Fi Instructions",
+            "🎯 Trivia Night Pro",
             "❓ FAQ & Shortcuts",
         ];
 
@@ -830,6 +893,7 @@ namespace KSRotation.ViewModels
             SaveSettings();
             StartRequestServer();
             RebuildRotationJsonCacheNow();
+            InitializeTrivia();
         }
 
         [RelayCommand]
@@ -1067,7 +1131,7 @@ namespace KSRotation.ViewModels
             return singer.QueuedSongs.Any(qs => IsSameSong(qs.Song, qs.Artist, song, artist));
         }
 
-        public bool TryAddPerformer(string? name, string? song, string? artist)
+        public bool TryAddPerformer(string? name, string? song, string? artist, string? duetPartner = "")
         {
             string trimmedName = name?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(trimmedName))
@@ -1092,6 +1156,11 @@ namespace KSRotation.ViewModels
                     EnforceActiveInactiveOrder(existingSinger);
                 }
 
+                if (!string.IsNullOrWhiteSpace(duetPartner))
+                {
+                    existingSinger.DuetPartnerName = duetPartner.Trim();
+                }
+
                 string trimmedSong = song?.Trim() ?? string.Empty;
                 string trimmedArtist = artist?.Trim() ?? string.Empty;
 
@@ -1113,6 +1182,7 @@ namespace KSRotation.ViewModels
                 AddActiveSinger(new SingerEntry
                 {
                     Name = trimmedName,
+                    DuetPartnerName = duetPartner?.Trim() ?? string.Empty,
                     Song = song?.Trim() ?? string.Empty,
                     Artist = artist?.Trim() ?? string.Empty,
                 });
@@ -1142,10 +1212,13 @@ namespace KSRotation.ViewModels
                 // 1. Mark completed (triggers HandleSongCompletionChanged to record the current song details)
                 entry.MarkRoundCompleted(roundToMark);
 
-                // 2. Temporarily set flag so that clearing Song/Artist does not overwrite performance history
+                // 2. Temporarily set flag so that clearing Song/Artist/Duet does not overwrite performance history
                 _isFinishingSong = true;
                 try
                 {
+                    // Clear the duet partner for subsequent songs in the rotation unless a pending request specifies one
+                    entry.DuetPartnerName = string.Empty;
+
                     var pendingRequest = IncomingRequests.FirstOrDefault(r =>
                         string.Equals(r.Name?.Trim(), entry.Name?.Trim(), StringComparison.OrdinalIgnoreCase)
                         && string.Equals(r.RequestType, "Music", StringComparison.OrdinalIgnoreCase) == entry.IsMusic);
@@ -1184,6 +1257,10 @@ namespace KSRotation.ViewModels
 
                         entry.Song = string.Empty;
                         entry.Artist = string.Empty;
+                        if (!string.IsNullOrWhiteSpace(pendingRequest.DuetPartnerName))
+                        {
+                            entry.DuetPartnerName = pendingRequest.DuetPartnerName;
+                        }
 
                         bool isFirst = true;
                         foreach (var reqSong in reqSongs)
@@ -1851,6 +1928,7 @@ namespace KSRotation.ViewModels
                         {
                             SingerId = entry.Id,
                             SingerName = entry.Name,
+                            DuetPartnerName = entry.DuetPartnerName,
                             SongTitle = entry.Song,
                             ArtistName = entry.Artist,
                             Round = round,
@@ -1921,6 +1999,7 @@ namespace KSRotation.ViewModels
                     {
                         SingerId = p.SingerId,
                         SingerName = p.SingerName,
+                        DuetPartnerName = p.DuetPartnerName,
                         SongTitle = p.SongTitle,
                         ArtistName = p.ArtistName,
                         Round = p.Round,

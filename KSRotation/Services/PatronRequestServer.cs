@@ -1,4 +1,4 @@
-// Edited on Aug 9, 2026 @ 13:31:00 -> Fix GET route dispatching for /api/special-events in PatronRequestServer
+// Edited on Aug 17, 2026 @ 12:09:00 -> Add duet partner parsing and forwarding to PatronRequestServer
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,11 +19,11 @@ namespace KSRotation.Services
 {
     public class PatronRequestServer(
         int port, 
-        Action<string, List<RequestedSong>, string> onRequestReceived, 
+        Action<string, List<RequestedSong>, string, string> onRequestReceived, 
         Func<string> onGetRotationJson,
         Func<string, bool> onVerifyPin,
         Func<string> onGetRequestsJson,
-        Func<string, string, string, string, string, string, string> onHandleDjAction,
+        Func<string, string, string, string, string, string, string, string> onHandleDjAction,
         Func<string> onGetSpecialEventsJson,
         Func<string> onGetActiveSpecialEvent)
     {
@@ -39,11 +39,11 @@ namespace KSRotation.Services
         private TcpListener? _listener;
         private CancellationTokenSource? _cts;
         private readonly int _port = port;
-        private readonly Action<string, List<RequestedSong>, string> _onRequestReceived = onRequestReceived;
+        private readonly Action<string, List<RequestedSong>, string, string> _onRequestReceived = onRequestReceived;
         private readonly Func<string> _onGetRotationJson = onGetRotationJson;
         private readonly Func<string, bool> _onVerifyPin = onVerifyPin;
         private readonly Func<string> _onGetRequestsJson = onGetRequestsJson;
-        private readonly Func<string, string, string, string, string, string, string> _onHandleDjAction = onHandleDjAction;
+        private readonly Func<string, string, string, string, string, string, string, string> _onHandleDjAction = onHandleDjAction;
         private readonly Func<string> _onGetSpecialEventsJson = onGetSpecialEventsJson;
         private readonly Func<string> _onGetActiveSpecialEvent = onGetActiveSpecialEvent;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
@@ -297,6 +297,7 @@ namespace KSRotation.Services
                         using JsonDocument doc = JsonDocument.Parse(body);
                         JsonElement root = doc.RootElement;
                         string name = root.TryGetProperty("name", out var nProp) ? (nProp.GetString() ?? "") : "";
+                        string duetPartner = root.TryGetProperty("duetPartner", out var dpProp) ? (dpProp.GetString() ?? "") : (root.TryGetProperty("duetPartnerName", out var dpnProp) ? (dpnProp.GetString() ?? "") : "");
                         string song = root.TryGetProperty("song", out var sProp) ? (sProp.GetString() ?? "") : "";
                         string artist = root.TryGetProperty("artist", out var aProp) ? (aProp.GetString() ?? "") : "";
                         string requestType = root.TryGetProperty("requestType", out var rtProp) ? (rtProp.GetString() ?? "Karaoke") : "Karaoke";
@@ -322,7 +323,7 @@ namespace KSRotation.Services
 
                         if (!string.IsNullOrWhiteSpace(name) && songs.Count > 0)
                         {
-                            _onRequestReceived(name.Trim(), songs, requestType);
+                            _onRequestReceived(name.Trim(), songs, requestType, duetPartner.Trim());
                             await SendJsonResponseAsync(stream, "{\"success\":true}");
                         }
                         else
@@ -355,10 +356,11 @@ namespace KSRotation.Services
                         string targetId = root.TryGetProperty("targetId", out var tgtProp) ? (tgtProp.GetString() ?? "") : "";
                         string extraData = root.TryGetProperty("extraData", out var extProp) ? (extProp.GetString() ?? "") : "";
                         string name = root.TryGetProperty("name", out var nameProp) ? (nameProp.GetString() ?? "") : "";
+                        string duetPartner = root.TryGetProperty("duetPartner", out var dpProp) ? (dpProp.GetString() ?? "") : (root.TryGetProperty("duetPartnerName", out var dpnProp) ? (dpnProp.GetString() ?? "") : "");
                         string song = root.TryGetProperty("song", out var songProp) ? (songProp.GetString() ?? "") : "";
                         string artist = root.TryGetProperty("artist", out var artProp) ? (artProp.GetString() ?? "") : "";
 
-                        string error = _onHandleDjAction(action, targetId, extraData, name, song, artist);
+                        string error = _onHandleDjAction(action, targetId, extraData, name, song, artist, duetPartner);
                         if (string.IsNullOrEmpty(error))
                         {
                             await SendJsonResponseAsync(stream, "{\"success\":true}");

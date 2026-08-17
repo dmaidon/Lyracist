@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Restructure singer row into a stacked VerticalStackLayout so checkboxes and action buttons no longer overlap -->
+<!-- Edited on Aug 17, 2026 @ 12:15:00 -> Add Duet Partner input, edit fields, and queue labels in MAUI MainPage -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -16,11 +15,12 @@
 
             <!-- Top Panel: Add New Singer -->
             <Border Grid.Row="0" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="12">
-                <Grid ColumnDefinitions="*, *, *, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                <Grid ColumnDefinitions="*, *, *, *, Auto" ColumnSpacing="8" VerticalOptions="Center">
                     <Entry x:Name="NameEntry" Placeholder="Performer Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="0" VerticalOptions="Center" />
-                    <Entry x:Name="SongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="1" VerticalOptions="Center" />
-                    <Entry x:Name="ArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="2" VerticalOptions="Center" />
-                    <Button Text="Add Performer" Clicked="OnAddPerformerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" Grid.Column="3" Padding="16,0" HeightRequest="40" VerticalOptions="Center" />
+                    <Entry x:Name="DuetEntry" Placeholder="Duet Partner (Optional)" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="1" VerticalOptions="Center" />
+                    <Entry x:Name="SongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="2" VerticalOptions="Center" />
+                    <Entry x:Name="ArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="3" VerticalOptions="Center" />
+                    <Button Text="Add Performer" Clicked="OnAddPerformerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" Grid.Column="4" Padding="16,0" HeightRequest="40" VerticalOptions="Center" />
                 </Grid>
             </Border>
 
@@ -84,6 +84,16 @@
                                         <VerticalStackLayout Spacing="4" VerticalOptions="Center">
                                             <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
                                                 <Label Text="{Binding Name}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center" />
+                                                <Label Text="{Binding DuetPartnerName, StringFormat='(with {0})'}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" VerticalOptions="Center">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding DuetPartnerName}" Value="">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding DuetPartnerName}" Value="{x:Null}">
+                                                            <Setter Property="IsVisible" Value="False" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
 
                                                 <!-- Indicator badges (Now Singing [Orange], Next [Blue], Music [Green]) -->
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#F97316" Padding="4,2" IsVisible="{Binding IsCurrent}" StrokeThickness="0">
@@ -314,6 +324,16 @@
                                     <VerticalStackLayout Grid.Row="0" Spacing="1">
                                         <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
                                             <Label Text="{Binding Name}" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="12" FontAttributes="Bold" VerticalOptions="Center" />
+                                            <Label Text="{Binding DuetPartnerName, StringFormat='(with {0})'}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="11" FontAttributes="Bold" VerticalOptions="Center">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding DuetPartnerName}" Value="">
+                                                        <Setter Property="IsVisible" Value="False" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding DuetPartnerName}" Value="{x:Null}">
+                                                        <Setter Property="IsVisible" Value="False" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
                                             <!-- Music Badge -->
                                             <Border StrokeShape="RoundRectangle 4" BackgroundColor="#10B981" Padding="4,2" StrokeThickness="0" VerticalOptions="Center">
                                                 <Border.Style>
@@ -428,6 +448,9 @@
 
                     <Label Text="Name" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
                     <Entry x:Name="EditNameEntry" Placeholder="Performer Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
+
+                    <Label Text="Duet Partner (Optional)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                    <Entry x:Name="EditDuetEntry" Placeholder="Partner Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
 
                     <Label Text="Song" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
                     <Entry x:Name="EditSongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />

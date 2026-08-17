@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 10:00:00 -> Only resolve and show SplashWindow if ShowSplashOnStartup is enabled
+// Edited on Aug 17, 2026 @ 15:48:00 -> Registered TriviaViewModel, TriviaSettingsViewModel, TriviaPage, and TriviaSettingsPage in DI
 using System;
 using System.Linq;
 using System.Windows;
@@ -116,6 +116,8 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<LyricsWindowViewModel>();
                 services.AddSingleton<DjBannerWindowViewModel>();
                 services.AddSingleton<SettingsViewModel>();
+                services.AddSingleton<TriviaViewModel>();
+                services.AddSingleton<TriviaSettingsViewModel>();
                 services.AddSingleton<PlaylistsViewModel>();
                 services.AddSingleton<RequestsViewModel>();
                 services.AddSingleton<ScaryokeViewModel>();
@@ -145,7 +147,9 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<KaraokePage>();
                 services.AddSingleton<RotationPage>();
                 services.AddSingleton<LyricsPage>();
+                services.AddSingleton<TriviaPage>();
                 services.AddSingleton<SettingsPage>();
+                services.AddSingleton<TriviaSettingsPage>();
                 services.AddSingleton<CastingPage>();
                 services.AddSingleton<PlaylistsPage>();
                 services.AddSingleton<RequestsPage>();

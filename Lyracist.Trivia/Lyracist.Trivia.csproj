@@ -1,0 +1,40 @@
+<!-- Edited on Aug 17, 2026 @ 14:48:30 -> Link Shared WifiHelper.cs for Wi-Fi QR Code generation -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Company>PAROLE Software</Company>
+    <Copyright>Copyright © 2026 PAROLE Software</Copyright>
+    <Title>Lyracist Trivia Host</Title>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
+    <AssemblyVersion>26.8.17.12</AssemblyVersion>
+    <FileVersion>26.8.17.12</FileVersion>
+    <Authors>Dennis N. Maidon</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="MaterialDesignThemes" Version="5.3.2" />
+    <PackageReference Include="QRCoder" Version="1.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lyracist.Trivia.Core\Lyracist.Trivia.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\MonitorInfo.cs" Link="Shared\MonitorInfo.cs" />
+    <Compile Include="..\Shared\MonitorDpiHelper.cs" Link="Shared\MonitorDpiHelper.cs" />
+    <Compile Include="..\Shared\WindowPositioner.cs" Link="Shared\WindowPositioner.cs" />
+    <Compile Include="..\Shared\LocalNetworkHelper.cs" Link="Shared\LocalNetworkHelper.cs" />
+    <Compile Include="..\Shared\WifiHelper.cs" Link="Shared\WifiHelper.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-// Edited on Aug 14, 2026 @ 10:18:00 -> Add unit test for CreatePersonalizedBirthdayBannerPng 16:9 banner generation
+// Edited on Aug 17, 2026 @ 12:32:00 -> Update InvokeDjAction reflection parameter count and add duet partner completion test
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -632,7 +632,7 @@ public class MainViewModelTests
         var method = typeof(KSRotation.ViewModels.MainViewModel).GetMethod(
             "ExecuteDjActionOnUi",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
-        return (string)method.Invoke(vm, [action, targetId, "", "", "", ""])!;
+        return (string)method.Invoke(vm, [action, targetId, "", "", "", "", ""])!;
     }
 
     [Fact]
@@ -874,6 +874,42 @@ public class MainViewModelTests
         Assert.True(alice.IsCurrent);
         Assert.False(alice.IsNext);
         Assert.True(bob.IsNext);
+    }
+
+    [Fact]
+    public void FinishSingerSong_WithDuetPartner_SavesToHistoryAndClearsPartner()
+    {
+        // Arrange
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var singer = new SingerEntry
+        {
+            Name = "John",
+            DuetPartnerName = "Jane",
+            Song = "Endless Love",
+            Artist = "Lionel & Diana",
+            IsCurrent = true
+        };
+        vm.Singers.Add(singer);
+
+        // Act - finish the song
+        vm.FinishSingerSongCommand.Execute(singer);
+
+        // Assert - duet partner should be cleared from active queue for next turn
+        Assert.Equal(string.Empty, singer.DuetPartnerName);
+
+        // Assert - history should capture John and Jane's duet performance
+        var getHistoryMethod = typeof(KSRotation.ViewModels.MainViewModel).GetMethod(
+            "GetPerformanceHistorySnapshot",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        var history = (List<SongPerformance>)getHistoryMethod.Invoke(vm, null)!;
+
+        Assert.Single(history);
+        Assert.Equal("John", history[0].SingerName);
+        Assert.Equal("Jane", history[0].DuetPartnerName);
+        Assert.Equal("Endless Love", history[0].SongTitle);
+        Assert.True(history[0].IsDuet);
     }
 
     [Fact]

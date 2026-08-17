@@ -1,0 +1,27 @@
+<!-- Edited on Aug 17, 2026 @ 13:04:00 -> Update SQLite packages and suppress warnings -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Company>PAROLE Software</Company>
+    <Copyright>Copyright © 2026 PAROLE Software</Copyright>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
+    <AssemblyVersion>26.8.17.2</AssemblyVersion>
+    <FileVersion>26.8.17.2</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.1" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
+    <PackageReference Include="QRCoder" Version="1.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\trivia.html" />
+  </ItemGroup>
+
+</Project>

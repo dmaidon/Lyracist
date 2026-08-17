@@ -1,5 +1,5 @@
-<!-- Edited on Aug 17, 2026 @ 11:12:00 -> Add CHANGELOG entry for DJ QR Code popout window -->
-Last Edit: Aug 17, 2026 - DJ QR Code popout window and optical contrast enhancement
+<!-- Edited on Aug 17, 2026 @ 16:10:30 -> Updated Trivia Settings to 3-column no-scroll layout and synchronized Venue/DJ from app settings -->
+Last Edit: Aug 17, 2026 - Trivia Settings 3-Column No-Scroll Dashboard & Venue/DJ Synchronization
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -7,6 +7,90 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.17.0] - 2026-08-17
 
 ### Added
+- **Full Trivia Engine & Host Deck Integration into `Lyracist` and `KSRotation`**:
+  - **`Lyracist` App**: Added primary navigation items **`Trivia`** (interactive Game Master host console) and **`Trivia Settings`** (dedicated separate settings page for question timers, scoring rules, bonuses, and local Wi-Fi credentials).
+  - **`KSRotation` App**: Added dedicated top-level tabs **`TabItem Header="Trivia"`** and **`TabItem Header="Trivia Settings"`**, backed by the `MainViewModel.Trivia.cs` partial class.
+  - **Deduplicated Venue & Game Master / DJ Settings**:
+    - Trivia in both `Lyracist` and `KSRotation` directly pulls the active Venue and Host / DJ names from existing application settings (`AppSettings.SelectedVenue` / `AppSettings.DjName` in Lyracist, `MainViewModel.VenueName` / `MainViewModel.DjName` in KSRotation).
+    - Removed redundant text input fields from the Trivia Settings pages, replacing them with live synchronized indicator badges.
+  - **3-Column No-Scroll Trivia Settings Dashboard**:
+    - Redesigned the Trivia Settings tab into an efficient 3-column layout (Column 0: Timers & Flow, Scoring & Multipliers; Column 1: Active Venue & Host info, Intermission & Pre-Game; Column 2: Local Network & Wi-Fi Access, Save/Reset Actions) allowing users to see and configure all settings on screen without scrolling.
+  - **Automated Game Pause & Resume Synchronization**:
+    - When a DJ Banner, Special Event, or Rotation Projection window is opened or brought active on the projection monitor, the trivia game engine automatically pauses with a descriptive reason banner (e.g. `"DJ Banner Active"`, `"Rotation Screen Active"`), freezing countdown clocks and safely blocking mobile buzzer submissions.
+    - Dismissing or closing the overlay immediately resumes the trivia game session right where it was paused.
+- **`Lyracist.Trivia` Standalone App & `Lyracist.Trivia.Core` Hybrid Engine**: Introduced a complete pub/bar trivia system designed for both dedicated Trivia Night events and karaoke intermission / rotation fill-in games:
+  - **Venue & Game Master Branding Configuration**: Added dedicated input fields on the **⚙️ Settings & Display** tab for **Venue Name** and **Game Master / Host Name**, with live two-way synchronization to the projection display window, scoreboard, and mobile buzzer web portal.
+  - **Enlarged Venue QR Codes & Connect Screen Typography**: Expanded QR code image dimensions from 220×220 to 380×380 with enhanced high-contrast borders and scaled typography for Wi-Fi credentials and mobile buzzer links, ensuring patrons can effortlessly scan codes from across the room on large venue monitors and TVs.
+  - **Multi-Monitor Display Resolution & Placement**: Corrected display window initialization by maintaining `WindowState.Normal` with borderless bounds placement (`targetScreen.Bounds`), ensuring `TriviaDisplayWindow` opens directly onto the selected secondary TV/projector without being forced to Monitor 0.
+  - **Projection Cast Timer Synchronization**: Configured the pre-game countdown timer to start strictly when the host casts the projection screen to the TV monitor (or manually clicks Start), preventing background timer expiration before the host connects the venue display.
+  - **Reliable Connect Instructions Screen Initialization**: Guaranteed that the dual QR code Connect Instructions screen (with Wi-Fi credentials and game join links) loads immediately upon opening the venue projection display in Lobby state.
+  - **Projection Screen Dismissal & Controls (`TriviaDisplayWindow`)**:
+    - **Escape Key (`Esc`)**: Pressing Escape immediately closes and exits the projection display window.
+    - **Floating Close Button (`✕`)**: Sleek translucent circular close button in the top-right corner, illuminating red on hover for instant 1-click closure.
+    - **Right-Click Context Menu**: Right-clicking anywhere on the screen displays quick options to close (`✕ Close Projection (Esc)`) or toggle fullscreen (`🗖 Toggle Fullscreen (F11)`).
+    - **Double-Click & Drag**: Double-clicking the display toggles between windowed and fullscreen maximized modes, with click-and-drag window repositioning.
+  - **Dedicated Venue Connect Instructions Screen (`TriviaDisplayWindow`)**:
+    - **Dual QR Code Architecture**: Full-screen high-contrast visual display featuring:
+      1. **1. CONNECT TO WI-FI**: High-resolution scan-to-connect Wi-Fi QR code (`WIFI:S:...;T:WPA;P:...;;` or `nopass`), auto-detected/configured SSID name, and password.
+      2. **2. JOIN TRIVIA GAME**: High-resolution mobile buzzer QR code (`http://<ip>:<port>/`), browser link, and clear 3-step instructions on joining and forming teams.
+    - **Pre-Game Countdown Clock**: Large prominent ticking countdown banner (`"⏱ TRIVIA GAME STARTS IN: mm:ss"`), announcing when the round begins and automatically launching the game when the countdown reaches 00:00.
+    - **Game Master Console Controls**: Host can easily toggle the connect instructions screen, set the pre-game countdown (e.g. 5 minutes), quickly add minutes (`+1m`, `+5m`, `Reset`), pause/resume, and configure Wi-Fi credentials with one-click auto-detection.
+  - **Top Scrolling Player & Score Marquee**: Added a continuous horizontal marquee ticker running along the top of `TriviaDisplayWindow`, displaying all registered players and teams with live scores, and highlighting the leading scorer with a gold crown badge (`"👑 1. Player (Team): 3,450 pts"`).
+  - **3-Tab Game Master Console & Dedicated Settings Page**:
+    - **🎯 Live Game Master Tab**: Streamlined 3-column live command deck with question pack selection, auto-run switch, live question & 2x2 options visualizer, QR connection code, live scoreboard, and round flow controls.
+    - **⚙️ Settings & Display Tab**: Full configuration page for Intermission delay (configurable minutes), auto-start toggle, display monitor selector, question timers (15s), wrong answer elimination speed (5s), post-reveal buffer (5s), base points, speed bonus toggle, sound effects, server port, venue branding, and persistent "Save All Settings" button.
+    - **👥 Players & Teams Tab**: Roster grid showing player names, team names, total points, streaks, correct answer counts, total answered, and individual player kick/removal controls.
+  - **Post-Game Intermission Countdown & Automatic Next Game Start**:
+    - When a game finishes, if auto-start is enabled, an intermission countdown runs for the configured duration (e.g. 3 minutes).
+    - Venue display, GM console, and mobile web app display a live ticking countdown banner (`"🎮 NEXT TRIVIA ROUND STARTS IN: mm:ss"`).
+    - Host can click `"▶ Start Now (Skip)"` to bypass the intermission, and once expired, the engine automatically selects the next question pack (or reshuffles) and launches the new round.
+  - **Trivia & Connect Instruction Screen Links in `Lyracist` and `KSRotation`**:
+    - **`Lyracist`**: Added quick-access `"👁️ Preview Connect Screen"` and `"🎯 Launch Trivia Night"` action buttons in `SettingsPage` (Column 4: Connect & Request Instructions).
+    - **`KSRotation`**: Added `"📡 Connect Screen"` and `"🎯 Trivia Night"` quick-launch buttons on the primary Rotation toolbar as well as in the `Connect & Request Instructions` display settings.
+  - **Configurable Questions Per Game**: Added a game length selector in the Game Master console (with editable presets: 5, 10, 15, 20, 25, 50, 100, or any custom count) saved directly into `trivia_settings.json`. Slices the shuffled question pack to the exact number of desired questions per game session.
+  - **Game Complete Winner Celebration & Team Roster Announcements**:
+    - **Venue Big Screen (`TriviaDisplayWindow`)**: Upon completing all allotted questions, automatically transitions to a celebration screen with gold trophy graphics, announcing the champion with their final score. If a team wins, prominently displays `"👑 WINNING TEAM: {TeamName} ({Score} pts)"` and lists all team members (`"Team Players: Alice, Bob, Charlie"`).
+    - **Mobile Player App (`trivia.html`)**: Mobile devices display the winner announcement, full team member breakdown, the player's personal placement and final score, and the complete top 10 leaderboard.
+    - **Game Master Host Console (`MainWindow`)**: Displays the winner announcement banner with team roster and score breakdown when the game completes, with one-click options to start the next game.
+  - **Zero-Config LAN Mobile Web Server (`TcpListener`)**: Replaced Windows `HttpListener` with an asynchronous raw `TcpListener(IPAddress.Any, port)` and HTTP/1.1 pipeline. This completely bypasses Windows HTTP.sys URL reservation restrictions, allowing smartphones, tablets, and mobile devices on the same Wi-Fi network to connect immediately without Administrator permissions.
+  - **Accurate LAN IPv4 Resolution (`LocalNetworkHelper`)**: Integrated `LocalNetworkHelper.GetLocalIPv4()` to automatically pick the primary Wi-Fi or Ethernet adapter with gateway routing, preventing virtual adapter (WSL, Hyper-V, VPN) misdirections in the QR code and connect URL.
+  - **Dynamic Question Shuffling**: When a category or question pack is selected or a game is started, all questions in the pack are automatically shuffled using a non-deterministic randomization algorithm so that each play session offers a unique question sequence.
+  - **Dynamic Multi-Monitor Display Selection**: Added target monitor selector dropdown directly in the Game Master header and settings (`Monitor 1`, `Monitor 2`, `Monitor 3` with true physical resolution and DPI awareness), enabling seamless placement and dynamic relocation of `TriviaDisplayWindow` onto any connected venue TV or projector.
+  - **Auto-Running Gameplay & 5-Second Sequential Answer Elimination**:
+    - **15-Second Answering Window**: Automatically starts questions with a live 15-second answering timer on both venue display and mobile player buzzers.
+    - **5-Second Wrong Answer Elimination**: Once the answering window expires, incorrect answers progressively fade out one every 5 seconds (`opacity: 0.12`, grayscale, and scaled down) across the venue display and player phones until only the single correct answer remains illuminated.
+    - **5-Second Post-Reveal Buffer & Auto-Progression**: After the correct answer is revealed with full explanation and point calculations, the game waits exactly 5 seconds before automatically advancing to the next question/round, running unattended without manual host clicks. Hosts can toggle auto-run or pause/resume anytime.
+  - **Dedicated Data Layer (`TriviaData/`)**: Solution root folder storing SQLite database `trivia.db`, settings `trivia_settings.json`, and curated JSON question packs in `TriviaData/packs/`.
+  - **13 Comprehensive 100+ Question Category Databases (1,300 Questions Total, No Duplicates)**:
+    1. `rock_and_roll.json`: 100 questions covering classic rock, 70s/80s bands, legendary albums, guitarists, and rock history.
+    2. `country_music.json`: 100 questions covering outlaw country, classic honky-tonk, 90s country, and Grand Ole Opry legends.
+    3. `geography.json`: 100 questions spanning world continents, oceans, mountain peaks, rivers, borders, islands, and famous landmarks.
+    4. `state_capitals.json`: 100 questions covering all 50 U.S. state capitals, territorial capitals, and major world capitals.
+    5. `history.json`: 100 questions spanning ancient civilizations, American revolutions, world wars, and monumental events.
+    6. `complete_the_lyric.json`: 100 questions across iconic rock, pop, 80s/90s singalongs, and karaoke crowd favorites.
+    7. `tv_shows.json`: 100 questions covering classic sitcoms, prestige dramas, 90s nostalgia, and Emmy-winning television.
+    8. `sports.json`: 100 questions covering NFL football, MLB baseball, NBA basketball, NHL hockey, soccer, and Olympics.
+    9. `logos_and_slogans.json`: 100 questions covering advertising taglines, company mascots, brand history, and logos.
+    10. `music_legends.json`: 100 questions celebrating iconic vocalists, chart-topping legends, and karaoke hall-of-fame artists.
+    11. `pop_culture_80s_90s.json`: 100 questions on retro toys, video game classics, 80s/90s movies, and nostalgic trends.
+    12. `movie_soundtracks.json`: 100 questions covering blockbuster film scores, Oscar-winning theme songs, and needle-drops.
+    13. `pub_general_knowledge.json`: 100 questions spanning science, literature, food & drink, myths, idioms, and pub favorites.
+  - **Deduplication**: Removed duplicate starter packs (`classic_rock.json`, `country_hits.json`, `finish_the_lyric.json`) in favor of the full 100-question category databases.
+  - **Shared Core Engine (`Lyracist.Trivia.Core`)**: Full game state machine (Lobby, Countdown, QuestionActive, AnsweringLocked, EliminatingAnswers, RevealAnswer, RoundLeaderboard, GameComplete), speed-bonus scoring calculations, streak multipliers, SQLite persistence (`TriviaDatabaseService`), pack manager (`TriviaPackManager`), and embedded HTTP server (`TriviaWebServer`).
+  - **Mobile Player Portal (`trivia.html`)**: Zero-install, high-contrast mobile web app allowing patrons to join via on-screen QR code, answer on 4 color-coded responsive touch buzzers (▲ Violet, ◆ Cyan, ● Amber, ■ Rose), receive haptic vibration, and track real-time score, streak bonuses, and live sequential answer elimination.
+  - **Configurable Countdown Timer**: Configurable question timer with a distinct 3-second warning countdown and answer reveal buffer.
+  - **16:9 Venue Projection Screen (`TriviaDisplayWindow.xaml`)**: Multi-monitor projection window with category banners, animated timer badges, 4-color answer option cards with opacity elimination fading, and live team leaderboard podium.
+  - **Game Master Host Console (`MainWindow.xaml`)**: Standalone host console with monitor target picker, auto-progression toggle, pack loader, round triggers, player score management, timer controls, and live answer distribution charts.
+  - **Automated Test Suite (`Lyracist.Trivia.Tests`)**: Comprehensive unit tests validating state machine transitions, progressive elimination math, speed scoring, single-player auto-locking, and SQLite persistence.
+- **Backup & Duet Partner Support Across All Applications**: Added comprehensive support for specifying, managing, and projecting duet and backup vocal partners across `Lyracist`, `KSRotation` (WPF), `KSRotation.Maui` (.NET MAUI), the Patron Request Portal, and the Remote DJ Web Board:
+  - **Single-Song Duet Auto-Clearing**: Automatically clears the duet partner field once the current song is finished (`FinishSingerSong` / `AdvanceToNextSinger`), since performers typically use a partner for a single song rather than all rotation rounds. If a performer submits a subsequent request with a partner, that request reinstates the partner when accepted.
+  - **Session History & Night Reports Persistence**: Preserves completed duet performance history across `SongPerformance` (KSRotation), `PerformedSong` (Lyracist), Night Database snapshots, CSV exports (`Duet Partner` column), and PDF reports (`(with {PartnerName})`).
+  - **Patron Request Portal (`PatronPortal.html`)**: Added an optional "Duet / Backup Partner (Optional)" input field to the song submission form (dynamically shown for Karaoke requests and hidden for Music requests), sending `duetPartner` alongside songs to the request server.
+  - **Remote DJ Web Board (`dj.html`)**: Added "Duet / Backup Partner (Optional)" input to the "Add Performer to Rotation" form, and added `(with {PartnerName})` badges to both the rotation queue items and incoming patron request cards.
+  - **KSRotation Desktop (`MainWindow.xaml` & `SingerEntry.cs`)**: Added dedicated "Duet Partner" column to the active rotation queue grid, enabling direct inline editing of duet partners. Incoming requests display `(with {PartnerName})` when present.
+  - **KSRotation.Maui (`MainPage.xaml` & `MainPage.xaml.cs`)**: Added "Duet Partner (Optional)" input in the top Add Performer bar, an edit field in the Edit Performer modal dialog, and `(with {PartnerName})` labels on queue rows and incoming requests.
+  - **Billboard Display Projection (`DisplayViewModel.cs` & `SingerDisplayWindow.xaml`)**: Formats performers as `{Name} & {DuetPartnerName}` on Current Performer, Up Next, Full Rotation crawls, and marquee displays when a duet partner is present.
+  - **Server & Ingestion Pipeline (`PatronRequestServer.cs` & `MainViewModel.Requests.cs`)**: Extended TCP socket server JSON parsing and request delegates to route `duetPartner` through `HandleRequestReceived`, `AcceptRequest`, and `TryAddPerformer`.
 - **Enlarged DJ Control QR Code Popout Window (`DjQrCodePopoutWindow.xaml`)**: Added an enlarged popout modal when clicking the DJ control QR code on the main window request panel:
   - Displays a large 280x280 crisp QR code with `NearestNeighbor` scaling for scanning across the room with tablets/phones.
   - Shows full URL with a one-click **Copy URL** button and prominent 24pt bold **DJ Security PIN** badge with **Copy PIN** button.
@@ -17,6 +101,11 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Added high-fidelity vector banner generator `CreateLastSongBannerPng` in `DjBannerFileManager.cs` with deep velvet gradients, radial golden glow, starburst fireworks, music notes, and glowing "LAST SONG OF THE NIGHT" typography.
 
 ### Fixed & Improved
+- **Rotation Queue Editable Input Boxes Standout Styling (`GridTextBoxStyle`)**: Enhanced the rotation queue editable textboxes (Singer Name, Duet Partner, Song, Artist) to be distinctly outlined and visible without having to focus or click into them:
+  - Added a visible 1px card container border (`{DynamicResource MaterialDesignDivider}`) and card background (`{DynamicResource MaterialDesignCardBackground}`) with rounded corners (`CornerRadius="4"`).
+  - Added clear column margin separation (`Margin="2,1"`) and comfortable padding (`Padding="6,3"`).
+  - Added hover highlights (`IsMouseOver` trigger) and focus elevation (`IsKeyboardFocused` trigger).
+  - Adapted contrast automatically for Now Performing (`IsCurrent`) and Up Next (`IsNext`) highlighted rows with semi-transparent frosted surfaces and crisp borders.
 - **High-Contrast DJ Connect QR Code Optical Contrast**: Resolved QR code camera recognition issues on older iPad/tablet sensors (such as iPad Air):
   - Changed `DjQrCodeImage` generation from maroon (`[128, 0, 32]`) to pure high-contrast black on white (`[0, 0, 0]` on `[255, 255, 255]`) with `RenderOptions.BitmapScalingMode="NearestNeighbor"`.
   - Replaced Wi-Fi QR code color on the `ConnectInstructions.png` graphic with crisp black-on-white.

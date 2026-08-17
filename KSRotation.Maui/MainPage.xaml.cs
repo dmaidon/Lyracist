@@ -1,4 +1,4 @@
-// Edited on Jul 28, 2026 @ 12:48:00 -> Implement delete/restore logic and paused state transitions
+// Edited on Aug 17, 2026 @ 12:15:00 -> Add duet partner support to add and edit performer in MAUI MainPage
 using System;
 using System.Linq;
 using Microsoft.Maui.Controls;
@@ -39,10 +39,11 @@ public partial class MainPage : ContentPage
     {
         var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
         string name = NameEntry.Text?.Trim() ?? string.Empty;
+        string duet = DuetEntry.Text?.Trim() ?? string.Empty;
         string song = SongEntry.Text?.Trim() ?? string.Empty;
         string artist = ArtistEntry.Text?.Trim() ?? string.Empty;
 
-        if (!vm.TryAddPerformer(name, song, artist))
+        if (!vm.TryAddPerformer(name, song, artist, duet))
         {
             await DisplayAlertAsync("Required", "Singer name is required.", "OK");
             return;
@@ -50,6 +51,7 @@ public partial class MainPage : ContentPage
 
         // Clear entry fields
         NameEntry.Text = string.Empty;
+        DuetEntry.Text = string.Empty;
         SongEntry.Text = string.Empty;
         ArtistEntry.Text = string.Empty;
     }
@@ -309,6 +311,7 @@ public partial class MainPage : ContentPage
         {
             _editingSinger = entry;
             EditNameEntry.Text = entry.Name;
+            EditDuetEntry.Text = entry.DuetPartnerName;
             EditSongEntry.Text = entry.Song;
             EditArtistEntry.Text = entry.Artist;
             EditSingerOverlay.IsVisible = true;
@@ -330,6 +333,7 @@ public partial class MainPage : ContentPage
         }
 
         _editingSinger.Name = name;
+        _editingSinger.DuetPartnerName = EditDuetEntry.Text?.Trim() ?? string.Empty;
         _editingSinger.Song = EditSongEntry.Text?.Trim() ?? string.Empty;
         _editingSinger.Artist = EditArtistEntry.Text?.Trim() ?? string.Empty;
 

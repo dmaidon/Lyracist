@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 10:20:00 -> Add SessionPerformedSongs tracking and commands for Singer Rotation Column 2
+// Edited on Aug 17, 2026 @ 12:29:45 -> Log duet partner in session history and clear partner upon song completion
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -54,7 +54,7 @@ public partial class RotationViewModel : BaseViewModel
         ? "No songs performed in this session yet."
         : string.Join(Environment.NewLine, SessionPerformedSongs.Select(s => s.FormattedText));
 
-    public void RecordPerformedSong(string singerName, string songTitle, string artist, string key = "0")
+    public void RecordPerformedSong(string singerName, string songTitle, string artist, string key = "0", string duetPartner = "")
     {
         if (string.IsNullOrWhiteSpace(singerName)) return;
 
@@ -62,6 +62,7 @@ public partial class RotationViewModel : BaseViewModel
         {
             OrderNumber = SessionPerformedSongs.Count + 1,
             SingerName = singerName,
+            DuetPartnerName = duetPartner ?? string.Empty,
             SongTitle = string.IsNullOrWhiteSpace(songTitle) ? "Unknown Song" : songTitle,
             Artist = artist ?? string.Empty,
             Key = key ?? "0",
@@ -680,7 +681,10 @@ public partial class RotationViewModel : BaseViewModel
 
         // 2. Log performance history in database and session history
         SavePerformanceHistory(name, title, artist);
-        RecordPerformedSong(name, title, artist, singer.Key);
+        RecordPerformedSong(name, title, artist, singer.Key, singer.DuetPartnerName);
+
+        // Clear duet partner for subsequent rounds/songs in rotation
+        singer.DuetPartnerName = string.Empty;
 
         // Advance rotation to next active singer relative to singer
         Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer);

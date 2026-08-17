@@ -1,8 +1,9 @@
-// Edited on Aug 8, 2026 @ 19:18:20 -> Add UpdateSpecialEvent to IDisplayService
+// Edited on Aug 17, 2026 @ 15:44:00 -> Added TriviaGameEngine registration and pause synchronization to IDisplayService
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lyracist.Shared;
+using Lyracist.Trivia.Core.Services;
 
 namespace Lyracist.Services.Display;
 
@@ -60,5 +61,8 @@ public interface IDisplayService
     Task StopRotationCasting();
 
     void UpdateWindowVisibilities();
+
+    void SetTriviaGameEngine(TriviaGameEngine? engine);
+    TriviaGameEngine? GetTriviaGameEngine();
 }
 

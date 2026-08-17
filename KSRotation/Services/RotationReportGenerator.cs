@@ -1,4 +1,4 @@
-// Edited on Jul 31, 2026 @ 12:08:52 -> Separate Karaoke and Music in reports and count totals separately
+// Edited on Aug 17, 2026 @ 12:29:00 -> Include Duet Partner in PDF and CSV reports
 using KSRotation.Models;
 using PdfSharp;
 using PdfSharp.Drawing;
@@ -100,7 +100,7 @@ namespace KSRotation.Services
             List<SongPerformance> history)
         {
             StringBuilder sb = new();
-            sb.AppendLine("Singer,Type,Total Completed Songs,Round,Song Title,Artist,Timestamp");
+            sb.AppendLine("Singer,Duet Partner,Type,Total Completed Songs,Round,Song Title,Artist,Timestamp");
 
             var rows = BuildReportRows(singers, history);
 
@@ -111,12 +111,12 @@ namespace KSRotation.Services
                 {
                     foreach (var perf in row.Performances)
                     {
-                        sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"Karaoke\",{row.Performances.Count},{perf.Round},\"{EscapeCsv(perf.SongTitle)}\",\"{EscapeCsv(perf.ArtistName)}\",\"{perf.Timestamp:yyyy-MM-dd HH:mm:ss}\"");
+                        sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"{EscapeCsv(perf.DuetPartnerName)}\",\"Karaoke\",{row.Performances.Count},{perf.Round},\"{EscapeCsv(perf.SongTitle)}\",\"{EscapeCsv(perf.ArtistName)}\",\"{perf.Timestamp:yyyy-MM-dd HH:mm:ss}\"");
                     }
                 }
                 else
                 {
-                    sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"Karaoke\",0,,,");
+                    sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"\",\"Karaoke\",0,,,");
                 }
             }
 
@@ -127,12 +127,12 @@ namespace KSRotation.Services
                 {
                     foreach (var perf in row.Performances)
                     {
-                        sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"Music\",{row.Performances.Count},{perf.Round},\"{EscapeCsv(perf.SongTitle)}\",\"{EscapeCsv(perf.ArtistName)}\",\"{perf.Timestamp:yyyy-MM-dd HH:mm:ss}\"");
+                        sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"\",\"Music\",{row.Performances.Count},{perf.Round},\"{EscapeCsv(perf.SongTitle)}\",\"{EscapeCsv(perf.ArtistName)}\",\"{perf.Timestamp:yyyy-MM-dd HH:mm:ss}\"");
                     }
                 }
                 else
                 {
-                    sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"Music\",0,,,");
+                    sb.AppendLine(CultureInfo.InvariantCulture, $"\"{EscapeCsv(row.SingerName)}\",\"\",\"Music\",0,,,");
                 }
             }
 
@@ -320,7 +320,10 @@ namespace KSRotation.Services
 
                 foreach (var song in songs)
                 {
-                    string detail = $"Round {song.Round}: {Truncate(song.SongTitle, 40)} - {Truncate(song.ArtistName, 30)}";
+                    string duetSuffix = !string.IsNullOrWhiteSpace(song.DuetPartnerName) && song.DuetPartnerName != "None"
+                        ? $" (with {song.DuetPartnerName})"
+                        : "";
+                    string detail = $"Round {song.Round}: {Truncate(song.SongTitle, 40)} - {Truncate(song.ArtistName, 30)}{duetSuffix}";
                     _gfx.DrawString($"  • {detail}", SongFont, XBrushes.DimGray, _margin + 15, _yPos, _leftAlign);
                     _yPos += 14;
                 }

@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 09:12:45 -> Add Email, PinCode, AvatarType, AvatarSource, VocalRange, and CustomTitle properties
+// Edited on Aug 17, 2026 @ 12:08:30 -> Add DuetPartnerName and IsDuet properties for backup/duet partner support
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -28,6 +28,24 @@ namespace KSRotation.Models
 
         [ObservableProperty]
         public partial string CustomTitle { get; set; } = string.Empty;
+
+        private string _duetPartnerName = string.Empty;
+        public string DuetPartnerName
+        {
+            get => _duetPartnerName;
+            set
+            {
+                if (SetProperty(ref _duetPartnerName, ProperCase(value)))
+                {
+                    OnPropertyChanged(nameof(IsDuet));
+                    OnPropertyChanged(nameof(DisplayNameWithDuet));
+                }
+            }
+        }
+
+        public bool IsDuet => !string.IsNullOrWhiteSpace(DuetPartnerName) && !DuetPartnerName.Equals("None", StringComparison.OrdinalIgnoreCase);
+
+        public string DisplayNameWithDuet => IsDuet ? $"{Name} (with {DuetPartnerName})" : Name;
         /// <summary>Stable identity assigned once at construction; never changes even when Name is edited.
         /// Declared as <c>init</c> so JSON deserialization can round-trip it, while preventing accidental mutation in code.</summary>
         public Guid Id { get; init; } = Guid.NewGuid();
@@ -38,7 +56,13 @@ namespace KSRotation.Models
         public string Name
         {
             get => _name;
-            set => SetProperty(ref _name, ProperCase(value));
+            set
+            {
+                if (SetProperty(ref _name, ProperCase(value)))
+                {
+                    OnPropertyChanged(nameof(DisplayNameWithDuet));
+                }
+            }
         }
 
         private string _song = string.Empty;

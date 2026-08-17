@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 09:07:00 -> Update DJ dashboard to single column scrollable layout and fix flex container styles -->
+<!-- Edited on Aug 17, 2026 @ 12:13:00 -> Add Duet / Backup Partner support to DJ web console -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -561,6 +561,10 @@
                                 <input type="text" id="add-name" class="form-control" placeholder="Performer Name" required>
                             </div>
                             <div class="form-group">
+                                <label for="add-duet">Duet / Backup Partner (Optional)</label>
+                                <input type="text" id="add-duet" class="form-control" placeholder="Partner Name">
+                            </div>
+                            <div class="form-group">
                                 <label for="add-song">Song Title (Optional)</label>
                                 <input type="text" id="add-song" class="form-control" placeholder="Song Title">
                             </div>
@@ -887,11 +891,15 @@
                     : `<button class="btn-circle red" title="Delete" onclick="sendAction('delete', '${s.id}')">🗑</button>`;
 
                 const nameStyle = s.isMusic ? 'style="color: var(--green); font-weight: bold;"' : '';
+                let nameWithDuet = escapeHtml(s.name);
+                if (s.duetPartnerName && s.duetPartnerName !== "None" && !s.isMusic) {
+                    nameWithDuet += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(s.duetPartnerName)})</span>`;
+                }
 
                 const innerHTML = `
                     <div class="singer-details">
                         <div class="singer-info">
-                            <span class="singer-name" ${nameStyle}>${escapeHtml(s.name)}</span>
+                            <span class="singer-name" ${nameStyle}>${nameWithDuet}</span>
                             ${detailsText}
                             ${badges}
                         </div>
@@ -970,10 +978,15 @@
                 const badgeText = isMusic ? "Music" : "Karaoke";
                 const badgeHtml = `<span class="badge" style="background-color: ${badgeColor}; color: white; margin-left: 8px; font-size: 0.65rem; vertical-align: middle;">${badgeText}</span>`;
 
+                let reqNameDisplay = escapeHtml(r.name);
+                if (r.duetPartnerName && r.duetPartnerName !== "None" && !isMusic) {
+                    reqNameDisplay += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(r.duetPartnerName)})</span>`;
+                }
+
                 html += `
                     <div class="request-card">
                         <div class="request-details">
-                            <div class="request-name">${escapeHtml(r.name)}${badgeHtml}</div>
+                            <div class="request-name">${reqNameDisplay}${badgeHtml}</div>
                             ${songsHtml}
                         </div>
                         <div class="request-actions">
@@ -1039,6 +1052,7 @@
         async function addPerformer(event) {
             event.preventDefault();
             const name = document.getElementById("add-name").value;
+            const duetPartner = document.getElementById("add-duet") ? document.getElementById("add-duet").value : "";
             const song = document.getElementById("add-song").value;
             const artist = document.getElementById("add-artist").value;
 
@@ -1053,6 +1067,7 @@
                     body: JSON.stringify({
                         action: 'add-singer',
                         name,
+                        duetPartner,
                         song,
                         artist
                     })

@@ -85,6 +85,7 @@
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.Requests.cs" Link="ViewModels\MainViewModel.Requests.cs" />
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.KnownSingers.cs" Link="ViewModels\MainViewModel.KnownSingers.cs" />
+		<Compile Include="..\KSRotation\ViewModels\MainViewModel.Trivia.cs" Link="ViewModels\MainViewModel.Trivia.cs" />
 	</ItemGroup>
 
 	<!-- Shared Embedded Resources (Patron Web Portal HTML) -->
@@ -140,6 +141,11 @@
 		<Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
 		<Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
 		<Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
+	</ItemGroup>
+
+	<!-- Project References -->
+	<ItemGroup>
+		<ProjectReference Include="..\Lyracist.Trivia.Core\Lyracist.Trivia.Core.csproj" />
 	</ItemGroup>
 
 	<!-- Build Dependency: Force Lyracist.Data to build prior to KSRotation.Maui for Windows builds -->

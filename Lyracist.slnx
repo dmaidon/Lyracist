@@ -10,4 +10,7 @@
   </Project>
   <Project Path="KSRotation.Tests/KSRotation.Tests.csproj" />
   <Project Path="Lyracist.Tests/Lyracist.Tests.csproj" />
+  <Project Path="Lyracist.Trivia.Core/Lyracist.Trivia.Core.csproj" />
+  <Project Path="Lyracist.Trivia/Lyracist.Trivia.csproj" />
+  <Project Path="Lyracist.Trivia.Tests/Lyracist.Trivia.Tests.csproj" />
 </Solution>

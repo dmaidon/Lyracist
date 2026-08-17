@@ -1,6 +1,4 @@
-// Edited on Jul 30, 2026 @ 07:50:00 -> Remove FlipTileEntries observable collection, populate logic, and DisplayFlipTileEntry class
-// Edited on Jul 28, 2026 @ 18:41:00 -> Add support for formatting music requests differently on master screens
-// Last Edit: Jul 02, 2026 16:54 - Added designated-current state tracking to support First Performer labels before a current singer is set.
+// Edited on Aug 17, 2026 @ 12:11:00 -> Format singer names with duet partner for billboard projection
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System.Collections.Generic;
@@ -138,11 +136,12 @@ namespace KSRotation.ViewModels
                 }
                 else
                 {
+                    string currentName = current.IsDuet ? $"{current.Name} & {current.DuetPartnerName}" : current.Name;
                     CurrentSinger = string.IsNullOrWhiteSpace(current.Song)
-                        ? current.Name
-                        : $"{current.Name} - {current.Song}";
+                        ? currentName
+                        : $"{currentName} - {current.Song}";
 
-                    CurrentSingerName = current.Name;
+                    CurrentSingerName = currentName;
                     CurrentSongTitle = current.Song ?? string.Empty;
                     CurrentSingerSong = string.IsNullOrWhiteSpace(current.Song)
                         ? string.Empty
@@ -174,9 +173,10 @@ namespace KSRotation.ViewModels
                     }
                     else
                     {
+                        string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                         NextSingers.Add(string.IsNullOrWhiteSpace(singer.Song)
-                            ? singer.Name
-                            : $"{singer.Name} - {singer.Song}");
+                            ? sName
+                            : $"{sName} - {singer.Song}");
                     }
                 }
             }
@@ -193,9 +193,10 @@ namespace KSRotation.ViewModels
                     }
                     else
                     {
+                        string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                         NextSingers.Add(string.IsNullOrWhiteSpace(singer.Song)
-                            ? singer.Name
-                            : $"{singer.Name} - {singer.Song}");
+                            ? sName
+                            : $"{sName} - {singer.Song}");
                     }
                 }
             }
@@ -217,9 +218,10 @@ namespace KSRotation.ViewModels
                     SingerEntry singer = activeRotation[(currentIndex + offset) % count];
                     FullRotation.Add(singer);
 
+                    string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                     string prefixAndSinger = singer.IsMusic 
                         ? $"{(offset == 0 ? "★" : $"{offset + 1}")}. [MUSIC]"
-                        : $"{(offset == 0 ? "★" : $"{offset + 1}")}. {singer.Name}";
+                        : $"{(offset == 0 ? "★" : $"{offset + 1}")}. {sName}";
 
                     string songSeparatorAndTitle = string.IsNullOrWhiteSpace(singer.Song)
                         ? string.Empty
@@ -240,9 +242,10 @@ namespace KSRotation.ViewModels
                 {
                     FullRotation.Add(singer);
 
+                    string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                     string prefixAndSinger = singer.IsMusic
                         ? $"{index}. [MUSIC]"
-                        : $"{index}. {singer.Name}";
+                        : $"{index}. {sName}";
 
                     string songSeparatorAndTitle = string.IsNullOrWhiteSpace(singer.Song)
                         ? string.Empty

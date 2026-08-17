@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 11:10:00 -> Wire up OnQrCodeBorderClicked to open enlarged DJ QR popout window -->
+<!-- Edited on Aug 17, 2026 @ 16:18:30 -> Added Trivia Night Pro documentation in Help tab and 3-column no-scroll layout in Trivia Settings -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -26,32 +26,41 @@
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <!-- Drives the rotation list's "vertical mode" 3-row layout — true when the list is narrower
              than 700px (e.g. window resized tall and thin, or a portrait tablet). -->
         <converters:NarrowWidthToBooleanConverter x:Key="NarrowWidthConverter" />
         <!-- Custom text box style inside ListView rows to ensure perfect contrast and theme syncing -->
         <Style x:Key="GridTextBoxStyle" TargetType="TextBox">
-            <Setter Property="Padding" Value="4,2" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="6,3" />
+            <Setter Property="Margin" Value="2,1" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
-            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontSize" Value="14" />
             <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border x:Name="border"
-                                BorderBrush="Transparent"
+                                BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="4">
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True">
                             <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" VerticalAlignment="Center" Margin="2,0" />
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}" />
+                            </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="true">
                                 <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}" />
-                                <Setter TargetName="border" Property="BorderThickness" Value="1" />
-                                <Setter TargetName="border" Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+                                <Setter TargetName="border" Property="BorderThickness" Value="1.5" />
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -60,13 +69,18 @@
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                     <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                    <Setter Property="BorderBrush" Value="#80FFFFFF" />
+                    <Setter Property="Background" Value="#33FFFFFF" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsNext}" Value="True">
                     <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                    <Setter Property="BorderBrush" Value="#80FFFFFF" />
+                    <Setter Property="Background" Value="#33FFFFFF" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsInactive}" Value="True">
                     <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBodyLight}" />
                     <Setter Property="IsEnabled" Value="False" />
+                    <Setter Property="Opacity" Value="0.6" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -513,14 +527,36 @@
                             Style="{StaticResource ModernComboBoxStyle}"
                             FontSize="14"
                             VerticalAlignment="Center" />
+
+                            <Button
+                            Content="📡 Connect Screen"
+                            Command="{Binding PreviewConnectInstructionsCommand}"
+                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                            Height="32"
+                            Padding="10,0"
+                            Margin="16,0,8,0"
+                            VerticalAlignment="Center"
+                            ToolTip="Show/Preview the Wi-Fi and Song Request Connect Instructions QR Screen" />
+
+                            <Button
+                            Content="🎯 Trivia Night"
+                            Command="{Binding LaunchTriviaCommand}"
+                            Background="#8B5CF6"
+                            Foreground="#FFFFFF"
+                            FontWeight="Bold"
+                            Height="32"
+                            Padding="12,0"
+                            VerticalAlignment="Center"
+                            ToolTip="Launch Lyracist Trivia Pro interactive audience game" />
                         </WrapPanel>
 
                         <Grid Grid.Row="1" Margin="0,0,0,6">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="col0" MinWidth="34" />
-                                <ColumnDefinition Width="2*" SharedSizeGroup="col1" MinWidth="130" />
-                                <ColumnDefinition Width="3*" SharedSizeGroup="col2" MinWidth="180" />
-                                <ColumnDefinition Width="3*" SharedSizeGroup="col3" MinWidth="180" />
+                                <ColumnDefinition Width="2*" SharedSizeGroup="col1" MinWidth="110" />
+                                <ColumnDefinition Width="1.8*" SharedSizeGroup="colDuet" MinWidth="95" />
+                                <ColumnDefinition Width="2.5*" SharedSizeGroup="col2" MinWidth="140" />
+                                <ColumnDefinition Width="2.5*" SharedSizeGroup="col3" MinWidth="140" />
                             </Grid.ColumnDefinitions>
 
                             <Grid.Resources>
@@ -531,8 +567,9 @@
 
                             <TextBlock Text="★" FontWeight="SemiBold" HorizontalAlignment="Center" ToolTip="Set current singer" />
                             <TextBlock Grid.Column="1" Text="Singer" FontWeight="SemiBold" Margin="4,0,0,0" />
-                            <TextBlock Grid.Column="2" Text="Song" FontWeight="SemiBold" Margin="4,0,0,0" />
-                            <TextBlock Grid.Column="3" Text="Artist" FontWeight="SemiBold" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="2" Text="Duet Partner" FontWeight="SemiBold" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="3" Text="Song" FontWeight="SemiBold" Margin="4,0,0,0" />
+                            <TextBlock Grid.Column="4" Text="Artist" FontWeight="SemiBold" Margin="4,0,0,0" />
                         </Grid>
 
                         <ListView
@@ -558,9 +595,10 @@
                                             <Grid Grid.Row="0">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" SharedSizeGroup="col0" MinWidth="34" />
-                                                    <ColumnDefinition Width="2*" SharedSizeGroup="col1" MinWidth="130" />
-                                                    <ColumnDefinition Width="3*" SharedSizeGroup="col2" MinWidth="180" />
-                                                    <ColumnDefinition Width="3*" SharedSizeGroup="col3" MinWidth="180" />
+                                                    <ColumnDefinition Width="2*" SharedSizeGroup="col1" MinWidth="110" />
+                                                    <ColumnDefinition Width="1.8*" SharedSizeGroup="colDuet" MinWidth="95" />
+                                                    <ColumnDefinition Width="2.5*" SharedSizeGroup="col2" MinWidth="140" />
+                                                    <ColumnDefinition Width="2.5*" SharedSizeGroup="col3" MinWidth="140" />
                                                 </Grid.ColumnDefinitions>
 
                                                 <Button
@@ -639,7 +677,20 @@
                                                     </Popup>
                                                 </Grid>
 
-                                                <TextBox Text="{Binding Song, UpdateSourceTrigger=LostFocus}" Grid.Column="2">
+                                                <TextBox Text="{Binding DuetPartnerName, UpdateSourceTrigger=LostFocus}" Grid.Column="2">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsMusic}" Value="True">
+                                                                    <Setter Property="IsEnabled" Value="False" />
+                                                                    <Setter Property="Opacity" Value="0.3" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
+
+                                                <TextBox Text="{Binding Song, UpdateSourceTrigger=LostFocus}" Grid.Column="3">
                                                     <TextBox.Style>
                                                         <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
                                                             <Style.Triggers>
@@ -651,7 +702,7 @@
                                                         </Style>
                                                     </TextBox.Style>
                                                 </TextBox>
-                                                <TextBox Text="{Binding Artist, UpdateSourceTrigger=LostFocus}" Grid.Column="3">
+                                                <TextBox Text="{Binding Artist, UpdateSourceTrigger=LostFocus}" Grid.Column="4">
                                                     <TextBox.Style>
                                                         <Style TargetType="TextBox" BasedOn="{StaticResource GridTextBoxStyle}">
                                                             <Style.Triggers>
@@ -1033,6 +1084,21 @@
                                                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                                         <StackPanel Orientation="Horizontal">
                                                             <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource MaterialDesignBody}" VerticalAlignment="Center" />
+                                                            <TextBlock Text="{Binding DuetPartnerName, StringFormat=' (with {0})'}" FontWeight="Normal" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" VerticalAlignment="Center">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding DuetPartnerName}" Value="">
+                                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding DuetPartnerName}" Value="{x:Null}">
+                                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
                                                             <!-- Music Badge -->
                                                             <Border CornerRadius="3" Background="#2ECC71" Margin="6,0,0,0" Padding="4,2" VerticalAlignment="Center">
                                                                 <Border.Style>
@@ -1647,7 +1713,18 @@
                                         <TextBlock Text="Wi-Fi Password (Optional): " VerticalAlignment="Center" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,8,0" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
                                         <TextBox Grid.Column="1" Text="{Binding WifiPassword, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Style="{StaticResource ModernTextBoxStyle}" Height="28" Padding="6,2" ToolTip="Enter password for travel router or venue Wi-Fi to generate scan-to-connect Wi-Fi QR code" />
                                     </Grid>
-                                    <TextBlock Text="Auto-detects active Wi-Fi SSID, and request portal URL." Foreground="{DynamicResource AppInfoTextBrush}" FontSize="11" TextWrapping="Wrap" TextAlignment="Center" />
+                                    <TextBlock Text="Auto-detects active Wi-Fi SSID, and request portal URL." Foreground="{DynamicResource AppInfoTextBrush}" FontSize="11" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,8" />
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Content="👁️ Preview Connect Screen"
+                                                Command="{Binding PreviewConnectInstructionsCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Height="30" Padding="8,2" Margin="0,0,8,0" />
+                                        <Button Content="🎯 Launch Trivia Night"
+                                                Command="{Binding LaunchTriviaCommand}"
+                                                Background="#8B5CF6" Foreground="#FFFFFF"
+                                                Height="30" Padding="8,2" FontWeight="Bold" />
+                                    </StackPanel>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
@@ -1790,6 +1867,367 @@
                                 </StackPanel>
                             </Grid>
                         </GroupBox>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- 5. Live Trivia Host Console Tab -->
+            <TabItem Header="Trivia" Width="70" Height="45">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="280" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left Column: Pack Picker & Controls -->
+                    <Border Grid.Column="0" Background="{DynamicResource MaterialDesignCardBackground}"
+                            BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="10" Padding="14">
+                        <StackPanel>
+                            <TextBlock Text="🎯 Trivia Game Control" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,12" />
+
+                            <TextBlock Text="Question Pack" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0" ItemsSource="{Binding TriviaAvailablePacks}" SelectedItem="{Binding SelectedTriviaPack}" Style="{StaticResource ModernComboBoxStyle}" />
+                                <Button Grid.Column="1" Content="🔄" Command="{Binding RefreshTriviaPacksCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Margin="4,0,0,0" ToolTip="Refresh Packs" Height="28" Width="32" Padding="0" />
+                            </Grid>
+
+                            <!-- Game State Pill -->
+                            <Border Background="#2563EB" CornerRadius="6" Padding="10,6" Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding TriviaGameStateText, StringFormat='State: {0}'}" Foreground="White" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding TriviaRemainingSeconds, StringFormat='⏱ {0}s'}" Foreground="#FDE047" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+
+                            <Button Content="▶ Start Game" Command="{Binding StartTriviaCommand}"
+                                    Background="#10B981" Foreground="White" FontWeight="Bold" Height="36" Margin="0,0,0,8" />
+
+                            <Button Content="{Binding TriviaPauseButtonText}" Command="{Binding ToggleTriviaPauseCommand}"
+                                    Background="#F59E0B" Foreground="White" FontWeight="Bold" Height="34" Margin="0,0,0,8" />
+
+                            <Button Content="🔒 Lock &amp; Reveal Answer" Command="{Binding LockAndRevealTriviaCommand}"
+                                    Background="#8B5CF6" Foreground="White" FontWeight="Bold" Height="34" Margin="0,0,0,8" />
+
+                            <Button Content="⏭ Next Question" Command="{Binding NextTriviaQuestionCommand}"
+                                    Style="{StaticResource ModernSecondaryButtonStyle}" Height="34" Margin="0,0,0,8" />
+
+                            <Button Content="🔄 Reset Game" Command="{Binding ResetTriviaCommand}"
+                                    Style="{StaticResource ModernSecondaryButtonStyle}" Height="30" Margin="0,0,0,16" />
+
+                            <!-- Server & Join URL Card -->
+                            <Border Background="{DynamicResource MaterialDesignDivider}" CornerRadius="6" Padding="8">
+                                <StackPanel>
+                                    <TextBlock Text="📱 Patron Mobile Portal" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,2" />
+                                    <TextBlock Text="{Binding TriviaServerStatusText}" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource PrimaryHueMidBrush}" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding TriviaPauseReason}" Foreground="#EF4444" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,0"
+                                               Visibility="{Binding IsTriviaPaused, Converter={StaticResource BoolToVis}}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Center Column: Live Question & Option Cards -->
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Question Header Card -->
+                        <Border Grid.Row="0" Background="{DynamicResource MaterialDesignCardBackground}"
+                                BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="10" Padding="16">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding TriviaActiveRoundTitle}" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding TriviaRemainingSeconds, StringFormat='⏱ {0}s left'}" FontWeight="Bold" FontSize="14" Foreground="#F59E0B" />
+                                </Grid>
+
+                                <TextBlock Text="{Binding TriviaCurrentQuestionPrompt}" FontSize="18" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource MaterialDesignBody}" TextWrapping="Wrap" LineHeight="26" MinHeight="60" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 2x2 Answer Grid -->
+                        <Grid Grid.Row="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="10" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Option A (Red) -->
+                            <Border Grid.Row="0" Grid.Column="0" Background="#DC2626" CornerRadius="8" Padding="12">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="▲ Option A" FontWeight="Bold" FontSize="11" Foreground="#FCA5A5" Margin="0,0,0,4" />
+                                    <TextBlock Text="{Binding TriviaOptionA}" FontWeight="SemiBold" FontSize="15" Foreground="White" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Option B (Blue) -->
+                            <Border Grid.Row="0" Grid.Column="2" Background="#2563EB" CornerRadius="8" Padding="12">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="◆ Option B" FontWeight="Bold" FontSize="11" Foreground="#93C5FD" Margin="0,0,0,4" />
+                                    <TextBlock Text="{Binding TriviaOptionB}" FontWeight="SemiBold" FontSize="15" Foreground="White" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Option C (Yellow) -->
+                            <Border Grid.Row="2" Grid.Column="0" Background="#D97706" CornerRadius="8" Padding="12">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="● Option C" FontWeight="Bold" FontSize="11" Foreground="#FDE68A" Margin="0,0,0,4" />
+                                    <TextBlock Text="{Binding TriviaOptionC}" FontWeight="SemiBold" FontSize="15" Foreground="White" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Option D (Green) -->
+                            <Border Grid.Row="2" Grid.Column="2" Background="#059669" CornerRadius="8" Padding="12">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="■ Option D" FontWeight="Bold" FontSize="11" Foreground="#A7F3D0" Margin="0,0,0,4" />
+                                    <TextBlock Text="{Binding TriviaOptionD}" FontWeight="SemiBold" FontSize="15" Foreground="White" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Grid>
+
+                    <!-- Right Column: Live Players & Leaderboard -->
+                    <Border Grid.Column="4" Background="{DynamicResource MaterialDesignCardBackground}"
+                            BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="10" Padding="14">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0" Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="🏆 Live Leaderboard" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding TriviaPlayers.Count, StringFormat='{}{0} Players'}" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <ListView Grid.Row="1" ItemsSource="{Binding TriviaPlayers}" BorderThickness="0" Background="Transparent">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource MaterialDesignBody}" />
+                                                <TextBlock Text="{Binding TeamName, StringFormat='Team: {0}'}" FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding TotalScore, StringFormat='{}{0} pts'}" FontWeight="Bold" Foreground="#38BDF8" FontSize="13" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- 6. Dedicated Separate Trivia Settings Tab -->
+            <TabItem Header="Trivia Settings" Width="128" Height="45">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="16,12">
+                    <Grid HorizontalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Header & Notification Banner -->
+                        <Grid Grid.Row="0" Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="🎯 Trivia Rules &amp; Configuration" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBlock Text="Configure gameplay timers, scoring rules, speed multipliers, and local Wi-Fi credentials for mobile buzzer gameplay."
+                                           FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,2,0,0" />
+                            </StackPanel>
+
+                            <Border Grid.Column="1" Background="#10B981" CornerRadius="6" Padding="12,6" VerticalAlignment="Center"
+                                    Visibility="{Binding IsTriviaSettingsStatusVisible, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="{Binding TriviaSettingsStatusMessage}" Foreground="White" FontWeight="Bold" FontSize="12" />
+                            </Border>
+                        </Grid>
+
+                        <!-- 3-Column Dashboard Content Grid -->
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- COLUMN 0: Timers & Scoring -->
+                            <StackPanel Grid.Column="0">
+                                <!-- ⏱️ Timers & Flow Card -->
+                                <GroupBox Header="⏱️ Question Timers &amp; Flow" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12" Height="263">
+                                    <StackPanel Margin="0,4,0,0">
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Time Limit (Sec)" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
+                                                <TextBox Text="{Binding TriviaDefaultQuestionSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Warning (Sec)" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
+                                                <TextBox Text="{Binding TriviaWarningCountdownSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                            </StackPanel>
+                                        </Grid>
+                                        <StackPanel Margin="0,0,0,8">
+                                            <TextBlock Text="Wrong Option Fade (Sec)" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
+                                            <TextBox Text="{Binding TriviaAnswerEliminationIntervalSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                        </StackPanel>
+                                        <CheckBox Content="Auto-advance questions"
+                                                  IsChecked="{Binding TriviaAutoAdvance, UpdateSourceTrigger=PropertyChanged}"
+                                                  FontWeight="SemiBold" FontSize="11" />
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <!-- 🏆 Scoring & Multipliers Card -->
+                                <GroupBox Header="🏆 Scoring &amp; Bonus Multipliers" Style="{StaticResource PurpleSettingsGroupBoxStyle}" Margin="0,0,0,12" Height="238">
+                                    <StackPanel Margin="0,4,0,0">
+                                        <StackPanel Margin="0,0,0,8">
+                                            <TextBlock Text="Base Points Per Question" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
+                                            <TextBox Text="{Binding TriviaBasePoints, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                        </StackPanel>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <CheckBox Content="Speed Bonus" IsChecked="{Binding TriviaSpeedBonusEnabled, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
+                                                <TextBox Text="{Binding TriviaMaxSpeedBonus, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="{Binding TriviaSpeedBonusEnabled}" Height="28" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <CheckBox Content="Streak Bonus" IsChecked="{Binding TriviaStreakBonusEnabled, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
+                                                <TextBox Text="{Binding TriviaStreakMultiplier, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="{Binding TriviaStreakBonusEnabled}" Height="28" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+
+                            <!-- COLUMN 1: Active Venue/Host & Intermission -->
+                            <StackPanel Grid.Column="2">
+                                <!-- 🏢 Active Venue & Game Master (Inherited from App Settings) -->
+                                <GroupBox Header="🏢 Active Venue &amp; Host" Style="{StaticResource PurpleSettingsGroupBoxStyle}" Margin="0,0,0,12">
+                                    <StackPanel Margin="0,4,0,0">
+                                        <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="4" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="6" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Row="0" Grid.Column="0" Text="🏢 Venue:" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding TriviaVenueName}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryHueMidBrush}" TextTrimming="CharacterEllipsis" />
+
+                                                <TextBlock Grid.Row="2" Grid.Column="0" Text="🎧 Host/DJ:" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                                <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding TriviaHostName}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryHueMidBrush}" TextTrimming="CharacterEllipsis" />
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock Text="ℹ️ Automatically synchronized from primary Venue and DJ settings in KSRotation."
+                                                   FontSize="10" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <!-- 🔄 Intermission & Countdown Card -->
+                                <GroupBox Header="🔄 Intermission &amp; Pre-Game" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12" Height="273">
+                                    <StackPanel Margin="0,4,0,0">
+                                        <StackPanel Margin="0,0,0,8" Height="89">
+                                            <CheckBox Content="Auto-start Next Round (Min)" IsChecked="{Binding TriviaAutoStartNextGame, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
+                                            <TextBox Text="{Binding TriviaNextGameDelayMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="{Binding TriviaAutoStartNextGame}" Height="43" />
+                                        </StackPanel>
+                                        <StackPanel Margin="0,0,0,2">
+                                            <CheckBox Content="Pre-Game Countdown (Min)" IsChecked="{Binding TriviaAutoStartAfterCountdown, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
+                                            <TextBox Text="{Binding TriviaPreGameCountdownMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="{Binding TriviaAutoStartAfterCountdown}" Height="46" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+
+                            <!-- COLUMN 2: Network, Wi-Fi & Save Actions -->
+                            <StackPanel Grid.Column="4">
+                                <!-- 📶 Wi-Fi & Network Card -->
+                                <GroupBox Header="📶 Local Network &amp; Wi-Fi Access" Style="{StaticResource PurpleSettingsGroupBoxStyle}" Margin="0,0,0,12">
+                                    <StackPanel Margin="0,4,0,0">
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Port" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
+                                                <TextBox Text="{Binding TriviaPort, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Wi-Fi SSID" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
+                                                <TextBox Text="{Binding TriviaWifiSsid, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                            </StackPanel>
+                                        </Grid>
+                                        <StackPanel Margin="0,0,0,6">
+                                            <TextBlock Text="Wi-Fi Password" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
+                                            <TextBox Text="{Binding TriviaWifiPassword, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                        </StackPanel>
+                                        <Button Content="Auto-Detect Wi-Fi" Command="{Binding AutoDetectTriviaWifiCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}" Height="30" FontSize="11" ToolTip="Auto-detect current connected Wi-Fi and saved password" />
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <!-- 💾 Action Card -->
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="10">
+                                    <StackPanel>
+                                        <Button Content="Save Settings" Command="{Binding SaveTriviaSettingsCommand}"
+                                                Background="#8B5CF6" Foreground="#FFFFFF" Height="34" Margin="0,0,0,6" FontWeight="Bold" FontSize="12" />
+                                        <Button Content="Reset Defaults" Command="{Binding ResetTriviaSettingsCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" FontSize="11" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
                     </Grid>
                 </ScrollViewer>
             </TabItem>
@@ -2139,7 +2577,35 @@
                                 </Border>
                             </StackPanel>
 
-                            <!-- Topic 5: FAQ & Shortcuts -->
+                            <!-- Topic 6: Trivia Night Pro -->
+                            <StackPanel x:Name="TriviaHelpPanel">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="🎯 Trivia Night Pro">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="🎯 Trivia Night Pro" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="Host interactive live pub and bar trivia games directly from KSRotation during intermissions or as a standalone entertainment module."
+                                           FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="20" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="🎮 Trivia Quick Start" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="1. Go to the Trivia tab, choose a category question pack, and click 'Start Game'." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="2. Patrons scan the Wi-Fi and Game Join QR codes on their smartphones to open their live buzzer." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="3. Questions run with 15-second answering windows and progressive 5-second wrong-option eliminations." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="4. Configure timers, scoring rules, bonuses, and Wi-Fi credentials in the 3-column 'Trivia Settings' tab." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="5. Automatic Pause: When DJ Banners or Rotation screens are cast, Trivia automatically freezes and resumes when closed." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Topic 7: FAQ & Shortcuts -->
                             <StackPanel x:Name="FAQPanel">
                                 <StackPanel.Style>
                                     <Style TargetType="StackPanel">

@@ -1,4 +1,4 @@
-<!-- Edited on Aug 6, 2026 @ 09:12:55 -> Add Vocal Range and Custom Title fields to profile management UI and logic -->
+<!-- Edited on Aug 17, 2026 @ 12:12:00 -> Add Duet / Backup Partner field to patron request portal -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -489,6 +489,10 @@
                     <label for="name">Your Name</label>
                     <input type="text" id="name" required placeholder="e.g. Charlie">
                 </div>
+                <div class="form-group" id="duet-group">
+                    <label for="duet-partner">Duet / Backup Partner (Optional)</label>
+                    <input type="text" id="duet-partner" placeholder="e.g. Dana">
+                </div>
                 <div class="form-group">
                     <label>Request Type</label>
                     <div class="tabs request-type-tabs" style="margin-bottom: 0px; padding: 2px; border-radius: 8px;">
@@ -611,6 +615,11 @@
             document.getElementById('type-karaoke').classList.toggle('active', type === 'Karaoke');
             document.getElementById('type-music').classList.toggle('active', type === 'Music');
             
+            const duetGroup = document.getElementById('duet-group');
+            if (duetGroup) {
+                duetGroup.style.display = type === 'Karaoke' ? 'block' : 'none';
+            }
+
             const titleLabel = document.querySelector('#songs-container .song-entry label');
             if (titleLabel) {
                 titleLabel.textContent = type === 'Karaoke' ? 'Song 1' : 'Track Details';
@@ -723,6 +732,8 @@
         async function submitForm(event) {
             event.preventDefault();
             const name = document.getElementById('name').value;
+            const duetPartnerInput = document.getElementById('duet-partner');
+            const duetPartner = (currentRequestType === 'Karaoke' && duetPartnerInput) ? duetPartnerInput.value.trim() : '';
             const alertDiv = document.getElementById('status-alert');
 
             alertDiv.className = 'alert';
@@ -749,6 +760,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         name, 
+                        duetPartner,
                         song: songs[0].song, 
                         artist: songs[0].artist, 
                         songs: songs,
@@ -762,6 +774,7 @@
                     alertDiv.className = 'alert success';
                     saveRequestToLocal(name, songs);
                     document.getElementById('name').value = '';
+                    if (duetPartnerInput) duetPartnerInput.value = '';
                     resetSongsContainer();
                 } else {
                     alertDiv.textContent = data.error || "Failed to submit request.";
@@ -793,6 +806,9 @@
                     }
                     
                     let nameHtml = escapeHtml(singer.name);
+                    if (singer.duetPartnerName && singer.duetPartnerName !== "None" && !singer.isMusic) {
+                        nameHtml += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(singer.duetPartnerName)})</span>`;
+                    }
                     let songHtml = `${escapeHtml(singer.song)} - ${escapeHtml(singer.artist)}`;
 
                     if (singer.isMusic) {
@@ -811,8 +827,8 @@
                             : '<span class="badge current">Current</span>';
                     } else if (singer.isNext) {
                         cssClass += ' next';
-                        badge = singer.isMusic
-                            ? '<span class="badge next">Up Next</span>'
+                        badge = singer.isMusic 
+                            ? '<span class="badge next" style="background-color: var(--green); color: white;">Next Track</span>'
                             : '<span class="badge next">Next</span>';
                     }
 

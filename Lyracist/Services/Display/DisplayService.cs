@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 09:50:00 -> Update ResolveActiveBannerPath and UpdateRotationLastSongBanner to prioritize Last Song banner on all non-lyric screens
+// Edited on Aug 17, 2026 @ 15:44:30 -> Added TriviaGameEngine registration and pause synchronization to DisplayService
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lyracist.Shared;
+using Lyracist.Trivia.Core.Services;
 
 namespace Lyracist.Services.Display;
 
@@ -21,8 +22,12 @@ public class DisplayService : IDisplayService
     private RotationWindow? _rotationWindow;
     private LyricsWindow? _lyricsWindow;
     private DjBannerWindow? _djBannerWindow;
+    private TriviaGameEngine? _triviaEngine;
     private readonly DisplayPreferences _preferences;
     private bool _rotationHadSingers;
+
+    public void SetTriviaGameEngine(TriviaGameEngine? engine) => _triviaEngine = engine;
+    public TriviaGameEngine? GetTriviaGameEngine() => _triviaEngine;
 
 
     public event Action? RotationCompleted;
@@ -391,6 +396,22 @@ public class DisplayService : IDisplayService
         else
         {
             HideDjBannerWindowInternal();
+        }
+
+        // Auto-pause Trivia Game when special events, DJ banner, lyrics, or rotation take over the screen
+        bool isScreenOccupied = showLyrics || showRotation || showDjBanner ||
+            (!string.IsNullOrEmpty(_preferences.SelectedSpecialEvent) && !_preferences.SelectedSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase));
+
+        if (isScreenOccupied)
+        {
+            string reason = showLyrics ? "Karaoke Performance" :
+                            showDjBanner ? "DJ Banner Display" :
+                            showRotation ? "Rotation Display" : "Special Event";
+            _triviaEngine?.PauseGame(reason);
+        }
+        else
+        {
+            _triviaEngine?.ResumeGame();
         }
     }
 

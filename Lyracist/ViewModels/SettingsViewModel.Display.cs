@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 07:15:00 -> Add IsDjBannerQrCodeEnabled property for DJ Banner QR Code overlay toggle
+// Edited on Aug 17, 2026 @ 14:38:40 -> Add LaunchTrivia and PreviewConnectInstructions commands
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -378,5 +378,63 @@ public partial class SettingsViewModel
         AppSettings.SpecialEvents = SpecialEventsList.ToList();
         // Notify display service
         _display.UpdateSpecialEvent(_display.GetPreferences().SelectedSpecialEvent);
+    }
+
+    [RelayCommand]
+    private void LaunchTrivia()
+    {
+        try
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string exePath = System.IO.Path.Combine(baseDir, "Lyracist.Trivia.exe");
+
+            if (!System.IO.File.Exists(exePath))
+            {
+                string devPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(baseDir, "..", "..", "..", "..", "Lyracist.Trivia", "bin", "Debug", "net9.0-windows", "Lyracist.Trivia.exe"));
+                if (System.IO.File.Exists(devPath))
+                {
+                    exePath = devPath;
+                }
+                else
+                {
+                    exePath = "Lyracist.Trivia.exe";
+                }
+            }
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exePath)
+            {
+                UseShellExecute = true,
+                WorkingDirectory = System.IO.Path.GetDirectoryName(exePath) ?? baseDir
+            });
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "SettingsViewModel.LaunchTrivia");
+        }
+    }
+
+    [RelayCommand]
+    private void PreviewConnectInstructions()
+    {
+        try
+        {
+            string bannerPath = System.IO.Path.Combine(Globals.EventBannersDir, "ConnectInstructions.png");
+            if (System.IO.File.Exists(bannerPath))
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(bannerPath) { UseShellExecute = true });
+            }
+            else
+            {
+                RefreshConnectInstructionsBanner();
+                if (System.IO.File.Exists(bannerPath))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(bannerPath) { UseShellExecute = true });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "SettingsViewModel.PreviewConnectInstructions");
+        }
     }
 }
