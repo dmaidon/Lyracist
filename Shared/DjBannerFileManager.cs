@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 06:55:00 -> Add MAUI stub for CreatePersonalizedBirthdayBannerPng
+// Edited on Aug 17, 2026 @ 11:05:00 -> Update Wi-Fi QR code to high-contrast black on white
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -44,6 +44,10 @@ public static class DjBannerFileManager
                     {
                         CreateConnectInstructionsBannerPng(fullPath, string.Empty, string.Empty, string.Empty);
                     }
+                    else if (standardFiles[i] == "LastSong.png")
+                    {
+                        CreateLastSongBannerPng(fullPath);
+                    }
                     else
                     {
                         CreateDefaultBannerPng(fullPath, StandardEventNames[i]);
@@ -85,7 +89,7 @@ public static class DjBannerFileManager
                 string wifiPayload = string.IsNullOrWhiteSpace(wifiPassword)
                     ? $"WIFI:S:{EscapeWifiQrValue(activeSsid)};T:nopass;;;"
                     : $"WIFI:S:{EscapeWifiQrValue(activeSsid)};T:WPA;P:{EscapeWifiQrValue(wifiPassword)};;";
-                wifiQrSource = GenerateQrBitmap(wifiPayload, System.Windows.Media.Color.FromRgb(6, 78, 59), qrModuleSize);
+                wifiQrSource = GenerateQrBitmap(wifiPayload, System.Windows.Media.Colors.Black, qrModuleSize);
             }
 
             portalQrSource = GenerateQrBitmap(activeUrl, System.Windows.Media.Colors.Black, qrModuleSize);
@@ -503,10 +507,143 @@ public static class DjBannerFileManager
         dc.DrawLine(pen, stemBottom, stemTop);
         dc.DrawLine(pen, stemTop, new System.Windows.Point(center.X + (26 * scale), center.Y - (12 * scale)));
     }
+
+    public static void CreateLastSongBannerPng(string filePath, int targetWidth = 1920, int targetHeight = 1080)
+    {
+        int width = targetWidth > 0 ? targetWidth : 1920;
+        int height = targetHeight > 0 ? targetHeight : 1080;
+        double scale = width / 1920.0;
+
+        var visual = new System.Windows.Media.DrawingVisual();
+        using (var dc = visual.RenderOpen())
+        {
+            // 1. Deep Midnight Velvet Gradient
+            var backgroundGradient = new System.Windows.Media.LinearGradientBrush(
+                System.Windows.Media.Color.FromRgb(12, 6, 26),
+                System.Windows.Media.Color.FromRgb(45, 14, 80),
+                45);
+            dc.DrawRectangle(backgroundGradient, null, new System.Windows.Rect(0, 0, width, height));
+
+            // Radial Glow in Center (Gold / Amber Warmth)
+            var centerGlow = new System.Windows.Media.RadialGradientBrush(
+                System.Windows.Media.Color.FromArgb(130, 255, 200, 50),
+                System.Windows.Media.Color.FromArgb(0, 0, 0, 0));
+            dc.DrawEllipse(centerGlow, null, new System.Windows.Point(width / 2.0, height / 2.0), width * 0.5, height * 0.5);
+
+            // 2. Elegant Dual Gold Borders
+            var goldPen = new System.Windows.Media.Pen(
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)), 10 * scale);
+            var innerGoldPen = new System.Windows.Media.Pen(
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(190, 255, 215, 0)), 3 * scale);
+            dc.DrawRectangle(null, goldPen, new System.Windows.Rect(30 * scale, 30 * scale, width - 60 * scale, height - 60 * scale));
+            dc.DrawRectangle(null, innerGoldPen, new System.Windows.Rect(45 * scale, 45 * scale, width - 90 * scale, height - 90 * scale));
+
+            // 3. Ornate Fireworks / Starbursts (All 4 corners)
+            DrawFireworks(dc, new System.Windows.Point(220 * scale, 220 * scale), scale);
+            DrawFireworks(dc, new System.Windows.Point(width - 220 * scale, 220 * scale), scale);
+            DrawFireworks(dc, new System.Windows.Point(220 * scale, height - 220 * scale), scale * 0.85);
+            DrawFireworks(dc, new System.Windows.Point(width - 220 * scale, height - 220 * scale), scale * 0.85);
+
+            // 4. Floating Music Notes
+            DrawMusicNote(dc, new System.Windows.Point(360 * scale, height * 0.38), scale * 1.3, System.Windows.Media.Color.FromRgb(255, 215, 0));
+            DrawMusicNote(dc, new System.Windows.Point(width - 360 * scale, height * 0.38), scale * 1.3, System.Windows.Media.Color.FromRgb(255, 215, 0));
+            DrawMusicNote(dc, new System.Windows.Point(420 * scale, height * 0.78), scale * 1.0, System.Windows.Media.Color.FromRgb(6, 182, 212));
+            DrawMusicNote(dc, new System.Windows.Point(width - 420 * scale, height * 0.78), scale * 1.0, System.Windows.Media.Color.FromRgb(6, 182, 212));
+
+            // 5. Header: "★ FINALE PERFORMANCE ★"
+            var headerText = new System.Windows.Media.FormattedText(
+                "★ FINALE PERFORMANCE ★",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.ExtraBold, System.Windows.FontStretches.Normal),
+                70 * scale,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(6, 182, 212)),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center
+            };
+            dc.DrawText(headerText, new System.Windows.Point(width / 2.0, 180 * scale));
+
+            // 6. Main Title: "LAST SONG OF THE NIGHT"
+            string mainTitle = "LAST SONG OF THE NIGHT";
+            double titleFontSize = 125 * scale;
+
+            // Shadow / 3D Depth
+            var titleShadow = new System.Windows.Media.FormattedText(
+                mainTitle,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.Black, System.Windows.FontStretches.Normal),
+                titleFontSize,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(190, 0, 0, 0)),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center
+            };
+            dc.DrawText(titleShadow, new System.Windows.Point((width / 2.0) + (6 * scale), (height / 2.0 - titleShadow.Height / 2.0 - 40 * scale) + (6 * scale)));
+
+            // Foreground Text (Golden/Amber Glow Gradient)
+            var titleText = new System.Windows.Media.FormattedText(
+                mainTitle,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.Black, System.Windows.FontStretches.Normal),
+                titleFontSize,
+                new System.Windows.Media.LinearGradientBrush(
+                    System.Windows.Media.Color.FromRgb(255, 245, 160),
+                    System.Windows.Media.Color.FromRgb(245, 158, 11), 90),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center
+            };
+            dc.DrawText(titleText, new System.Windows.Point(width / 2.0, height / 2.0 - titleText.Height / 2.0 - 40 * scale));
+
+            // 7. Subtitle: "THANK YOU FOR SINGING WITH US!"
+            var subtitleText = new System.Windows.Media.FormattedText(
+                "THANK YOU FOR SINGING & PARTYING WITH US TONIGHT!",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.Bold, System.Windows.FontStretches.Normal),
+                42 * scale,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(241, 245, 249)),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center
+            };
+            dc.DrawText(subtitleText, new System.Windows.Point(width / 2.0, height / 2.0 + 80 * scale));
+
+            // 8. Footer: "★ DRIVE SAFE • SEE YOU NEXT TIME! ★"
+            var footerText = new System.Windows.Media.FormattedText(
+                "★ DRIVE SAFE • SEE YOU NEXT TIME! ★",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily("Arial"), System.Windows.FontStyles.Normal, System.Windows.FontWeights.ExtraBold, System.Windows.FontStretches.Normal),
+                46 * scale,
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 215, 0)),
+                1.0)
+            {
+                TextAlignment = System.Windows.TextAlignment.Center
+            };
+            dc.DrawText(footerText, new System.Windows.Point(width / 2.0, height - (200 * scale)));
+        }
+
+        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+        rtb.Render(visual);
+
+        var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+
+        using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+        encoder.Save(fs);
+    }
 #endif
 
 #if MAUI
     public static void CreatePersonalizedBirthdayBannerPng(string filePath, string performerName, int targetWidth = 1920, int targetHeight = 1080)
+    {
+    }
+
+    public static void CreateLastSongBannerPng(string filePath, int targetWidth = 1920, int targetHeight = 1080)
     {
     }
 #endif

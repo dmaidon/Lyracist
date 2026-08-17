@@ -1,0 +1,181 @@
+<!-- Created on Aug 17, 2026 @ 11:10:00 -> Add enlarged DJ Remote Control QR code popout window -->
+<Window x:Class="KSRotation.Windows.DjQrCodePopoutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:KSRotation.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="DJ Remote Control Portal"
+        Width="480"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource MaterialDesignPaper}"
+        Foreground="{DynamicResource MaterialDesignBody}"
+        Icon="/mic_64.png">
+
+    <Window.Resources>
+        <Style x:Key="PopoutCardBorder" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+            <Setter Property="BorderBrush" Value="#33CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="Auto" /> <!-- Large QR Container -->
+            <RowDefinition Height="Auto" /> <!-- URL and Copy -->
+            <RowDefinition Height="Auto" /> <!-- PIN Code Box -->
+            <RowDefinition Height="Auto" /> <!-- Warning / Notice -->
+            <RowDefinition Height="Auto" /> <!-- Action Button -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <materialDesign:PackIcon Kind="CellphoneWireless" Width="26" Height="26" Foreground="#EF4444" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Text="DJ REMOTE CONTROL PORTAL"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Foreground="#EF4444"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock Text="Scan code or visit URL on any mobile device to control rotation &amp; banners"
+                       FontSize="12"
+                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                       HorizontalAlignment="Center"
+                       Margin="0,4,0,0"
+                       TextAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Large QR Container -->
+        <Border Grid.Row="1"
+                Width="280"
+                Height="280"
+                Background="White"
+                BorderBrush="#EF4444"
+                BorderThickness="3"
+                CornerRadius="10"
+                Padding="8"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,16">
+            <Image Source="{Binding DjQrCodeImage}"
+                   Stretch="Uniform"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- URL and Copy -->
+        <Border Grid.Row="2"
+                Style="{StaticResource PopoutCardBorder}"
+                Padding="12,10"
+                Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="DJ WEB ADDRESS"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                    <TextBox Text="{Binding DjConnectionUrl, Mode=OneWay}"
+                             FontSize="14"
+                             FontWeight="SemiBold"
+                             Foreground="#38BDF8"
+                             IsReadOnly="True"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Padding="0"
+                             Margin="0,2,0,0" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Padding="10,4"
+                        Height="32"
+                        Margin="8,0,0,0"
+                        Click="OnCopyUrlClicked"
+                        ToolTip="Copy URL to Clipboard">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentCopy" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="Copy URL" FontSize="12" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- PIN Code Box -->
+        <Border Grid.Row="3"
+                Background="#1AEF4444"
+                BorderBrush="#EF4444"
+                BorderThickness="1.5"
+                CornerRadius="8"
+                Padding="14,10"
+                Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="DJ SECURITY PIN"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               Foreground="#EF4444" />
+                    <TextBlock Text="{Binding DjPin, Mode=OneWay}"
+                               FontSize="24"
+                               FontWeight="Black"
+                               Foreground="#EF4444"
+                               Margin="0,2,0,0" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Background="#EF4444"
+                        BorderBrush="#EF4444"
+                        Foreground="White"
+                        Padding="12,4"
+                        Height="34"
+                        Margin="8,0,0,0"
+                        Click="OnCopyPinClicked"
+                        ToolTip="Copy PIN to Clipboard">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Key" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="Copy PIN" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Warning Notice -->
+        <TextBlock Grid.Row="4"
+                   Text="⚠️ Keep this QR code and PIN confidential. Do not share with public singers."
+                   FontSize="11"
+                   Foreground="{DynamicResource MaterialDesignBodyLight}"
+                   HorizontalAlignment="Center"
+                   TextAlignment="Center"
+                   Margin="0,0,0,16" />
+
+        <!-- Close Button -->
+        <Button Grid.Row="5"
+                IsCancel="True"
+                Style="{StaticResource MaterialDesignRaisedButton}"
+                Background="{DynamicResource MaterialDesignCardBackground}"
+                BorderBrush="#44CBD5E1"
+                Foreground="{DynamicResource MaterialDesignBody}"
+                HorizontalAlignment="Center"
+                Width="120"
+                Height="36"
+                Click="OnCloseClicked">
+            <TextBlock Text="Close" FontWeight="SemiBold" />
+        </Button>
+    </Grid>
+</Window>

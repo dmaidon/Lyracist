@@ -1,3 +1,31 @@
+// Edited on Aug 17, 2026 @ 11:22:00 -> Document DJ QR Code enlarged popout modal and optical contrast enhancements
+Lyracist Pro & KSRotation Update - DJ QR Code Enlarged Popout & Optical Contrast (August 2026)
+
+Section: Singer Request Board / DJ Remote Control Portal
+
+[Update Details]
+1. Enlarged DJ Control QR Code Popout Modal:
+   - Clicking the DJ Control QR code on the main request panel opens a dedicated popout dialog (`DjQrCodePopoutWindow`).
+   - Features an extra-large (280x280) high-resolution QR code rendering with `NearestNeighbor` pixel scaling for easy optical scanning across the room.
+   - Prominently displays the active DJ Security PIN in large 24pt bold red font with a one-click "Copy PIN" button.
+   - Displays the full DJ web portal address with a one-click "Copy URL" button.
+   - Targeted Interaction: Popout activates only when the DJ Control Portal mode is active (`IsDjQrVisible`), leaving the singer song request QR code unaffected.
+
+2. High-Contrast QR Code Optical Scanning:
+   - Standardized DJ and Wi-Fi QR codes to pure black on white (`[0, 0, 0]` on `[255, 255, 255]`) with a 21:1 contrast ratio, ensuring instant scanning on older tablet cameras (such as iPad Air).
+   - Added a red accent border (`#EF4444`, 2.5px) around the request panel container when DJ mode is active to clearly distinguish DJ mode.
+
+// Edited on Aug 17, 2026 @ 09:55:00 -> Document Last Song priority banner display on all non-lyric screens
+Lyracist Pro Update - Priority "Last Song" Banner on All Non-Lyric Screens (August 2026)
+
+Section: Display & DJ Banners / Special Event Banners
+
+[Update Details]
+Added priority display handling for the "Last Song" event banner (`LastSong.png`):
+- Highest Banner Precedence: When the "Last Song" event banner is selected or activated (via Settings, Karaoke Controls, or Remote DJ Board), it takes immediate priority over all other DJ and party banners.
+- Multi-Screen Projection: The Last Song banner automatically projects on all non-lyric projection displays (the DJ Banner Screen and the Singer Rotation Billboard Screen), ensuring the entire venue sees the finale announcement.
+- Uninterrupted Lyrics: The dedicated Lyric Projection screen continues rendering transparent CDG/scrolling lyrics without disruption so the final performer can complete their performance.
+
 // Edited on Aug 15, 2026 @ 10:20:00 -> Document Session Performed Songs List & Textbox with 5-color rotation in Rotation Page
 Lyracist Pro Update - Session Performed Songs History in Singer Rotation (August 2026)
 

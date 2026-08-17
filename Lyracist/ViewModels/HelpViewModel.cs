@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 07:40:00 -> Update help topics for Display tab 4-column layout, screen toggles, and QR Code controls
+// Edited on Aug 17, 2026 @ 11:22:00 -> Update help topics for Last Song banner priority and high-contrast QR codes
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -100,7 +100,7 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "Calendar24",
                 AccentColor = "#00B294",
                 DescriptionHeader = "Background Music Channels & Occasion Jingle Settings",
-                DescriptionContent = "• BGM Volumes: Adjust default audio volumes specifically for Opening, Fill-In, and End-of-Rotation music players.\n\n• Special Occasion Audio & Banners: Add custom sound bites and pre-saved event banners ('Birthday', 'Wedding', 'Engagement', 'Anniversary', 'Last Song'). Assign local audio files and set individual Bass, Treble, and Gain overrides."
+                DescriptionContent = "• BGM Volumes: Adjust default audio volumes specifically for Opening, Fill-In, and End-of-Rotation music players.\n\n• Special Occasion Audio & Banners: Add custom sound bites and pre-saved event banners ('Birthday', 'Wedding', 'Engagement', 'Anniversary', 'Last Song'). Assign local audio files and set individual Bass, Treble, and Gain overrides.\n\n• Priority 'Last Song' Banner: Activating 'Last Song' displays `LastSong.png` on all non-lyric screens (DJ banner and rotation billboard) with top priority while continuing uninterrupted lyrics projection on the lyric screen."
             },
             new() {
                 Title = "12. Settings: Scaryoke Customization",
@@ -128,7 +128,7 @@ public partial class HelpViewModel : BaseViewModel
                 Icon = "QrCode24",
                 AccentColor = "#059669",
                 DescriptionHeader = "Scan-to-Connect Wi-Fi & Patron Request Portal Dual QR Code Banner",
-                DescriptionContent = "• Dual Scan-to-Connect QR Code Banner: Displays a full-screen or custom projected banner (`ConnectInstructions.png`) featuring two distinct QR codes: Wi-Fi Scan-to-Connect (WPA/WPA2/NoPass) and Song Request Portal URL.\n\n• QR Code Overlay on DJ Banner: Toggle 'Show request QR Code overlay on DJ Banner' in Settings to project the QR code directly onto active DJ Banners.\n\n• Target Monitor Selection: Select the target display screen/monitor using the 'Connect Instructions & QR Code Screen' dropdown in Column 4 of the Display tab.\n\n• High-Contrast Color Palette: Forest green (`#064E3B`) Wi-Fi QR code and pure black (`#000000`) Song Request Portal QR code for high contrast scan reliability.\n\n• Persistent Wi-Fi Password Store (`wifi_passwords.json`): Remembers Wi-Fi passwords entered for detected SSIDs (venue Wi-Fi, travel router, mobile hotspot)."
+                DescriptionContent = "• Dual Scan-to-Connect QR Code Banner: Displays a full-screen or custom projected banner (`ConnectInstructions.png`) featuring two distinct QR codes: Wi-Fi Scan-to-Connect (WPA/WPA2/NoPass) and Song Request Portal URL.\n\n• QR Code Overlay on DJ Banner: Toggle 'Show request QR Code overlay on DJ Banner' in Settings to project the QR code directly onto active DJ Banners.\n\n• Target Monitor Selection: Select the target display screen/monitor using the 'Connect Instructions & QR Code Screen' dropdown in Column 4 of the Display tab.\n\n• High-Contrast Color Palette: High-contrast pure black on white QR codes with NearestNeighbor pixel scaling for maximum scanning readability across all tablet and phone camera sensors.\n\n• DJ Control QR Code Enlarged Popout: Clicking the DJ Control QR code opens a dedicated enlarged popout dialog with 280x280 QR display, large bold security PIN badge, and one-click URL & PIN copy.\n\n• Persistent Wi-Fi Password Store (`wifi_passwords.json`): Remembers Wi-Fi passwords entered for detected SSIDs (venue Wi-Fi, travel router, mobile hotspot)."
             }
         ];
 

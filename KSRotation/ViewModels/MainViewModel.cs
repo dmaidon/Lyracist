@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 07:54:00 -> Remove Venue and DJ names from Form WindowTitle
+// Edited on Aug 17, 2026 @ 09:50:00 -> Update ResolveActiveBannerPath and UpdateLastSongState to prioritize Last Song banner on all non-lyric screens
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -252,6 +252,7 @@ namespace KSRotation.ViewModels
                         }
                     }
                     UpdateDjBannerPath();
+                    UpdateLastSongState();
                     QueueSaveSettings();
                     RebuildRotationJsonCacheNow();
                     break;
@@ -789,6 +790,7 @@ namespace KSRotation.ViewModels
 
             _djBannerWindowService.SetSelectedMonitor(DjBannerMonitorDevice);
             _djBannerWindowService.SetBannerPath(ResolveActiveBannerPath());
+            UpdateLastSongState();
 
             RefreshAvailableDjBanners();
 
@@ -2246,6 +2248,15 @@ namespace KSRotation.ViewModels
             if (!string.IsNullOrEmpty(ActiveSpecialEvent) && 
                 !ActiveSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
+                if (ActiveSpecialEvent.Equals("Last Song", StringComparison.OrdinalIgnoreCase))
+                {
+                    string lastSongPath = Path.Combine(Globals.EventBannersDir, "LastSong.png");
+                    if (File.Exists(lastSongPath))
+                    {
+                        return lastSongPath;
+                    }
+                }
+
                 var eventConfig = SpecialEvents.FirstOrDefault(e => e.EventName.Equals(ActiveSpecialEvent, StringComparison.OrdinalIgnoreCase));
                 if (eventConfig != null)
                 {
@@ -2257,6 +2268,17 @@ namespace KSRotation.ViewModels
                 }
             }
             return SelectedDjBannerPath;
+        }
+
+        private void UpdateLastSongState()
+        {
+            bool isLastSong = !string.IsNullOrEmpty(ActiveSpecialEvent) && 
+                              ActiveSpecialEvent.Equals("Last Song", StringComparison.OrdinalIgnoreCase);
+
+            string lastSongPath = Path.Combine(Globals.EventBannersDir, "LastSong.png");
+            string? activePath = (isLastSong && File.Exists(lastSongPath)) ? lastSongPath : null;
+
+            _displayWindowService.SetLastSongBanner(activePath);
         }
 
         private void UpdateDjBannerPath()

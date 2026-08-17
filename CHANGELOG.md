@@ -1,12 +1,26 @@
-<!-- Edited on Aug 17, 2026 @ 09:08:00 -> Add entry for Remote DJ Board single column scrollable layout update -->
-Last Edit: Aug 17, 2026 - Remote DJ Board (dj.html) layout updated to single column scrollable layout with responsive controls
+<!-- Edited on Aug 17, 2026 @ 11:12:00 -> Add CHANGELOG entry for DJ QR Code popout window -->
+Last Edit: Aug 17, 2026 - DJ QR Code popout window and optical contrast enhancement
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [26.8.17.0] - 2026-08-17
 
+### Added
+- **Enlarged DJ Control QR Code Popout Window (`DjQrCodePopoutWindow.xaml`)**: Added an enlarged popout modal when clicking the DJ control QR code on the main window request panel:
+  - Displays a large 280x280 crisp QR code with `NearestNeighbor` scaling for scanning across the room with tablets/phones.
+  - Shows full URL with a one-click **Copy URL** button and prominent 24pt bold **DJ Security PIN** badge with **Copy PIN** button.
+  - Activates exclusively when the DJ Control Portal mode is active (`IsDjQrVisible`), leaving the patron song request QR unaffected.
+- **Priority "Last Song" Banner on All Non-Lyric Screens (`LastSong.png`)**: Added dedicated system-wide priority handling for the `"Last Song"` event banner:
+  - When `"Last Song"` is activated (via KJ Display Settings, Karaoke Page, or Remote DJ Board), the `LastSong.png` banner takes top priority over all other banners and displays on **all non-lyric projection screens** (`DjBannerWindow` and `RotationWindow` / `SingerDisplayWindow`).
+  - Added `LastSongBannerOverlay` to `RotationWindow.xaml` (Lyracist) and `SingerDisplayWindow.xaml` (KSRotation), instantly displaying the full-screen finale banner over rotation billboard content while preserving continuous lyrics projection on the lyric screen (`LyricsWindow`).
+  - Added high-fidelity vector banner generator `CreateLastSongBannerPng` in `DjBannerFileManager.cs` with deep velvet gradients, radial golden glow, starburst fireworks, music notes, and glowing "LAST SONG OF THE NIGHT" typography.
+
 ### Fixed & Improved
+- **High-Contrast DJ Connect QR Code Optical Contrast**: Resolved QR code camera recognition issues on older iPad/tablet sensors (such as iPad Air):
+  - Changed `DjQrCodeImage` generation from maroon (`[128, 0, 32]`) to pure high-contrast black on white (`[0, 0, 0]` on `[255, 255, 255]`) with `RenderOptions.BitmapScalingMode="NearestNeighbor"`.
+  - Replaced Wi-Fi QR code color on the `ConnectInstructions.png` graphic with crisp black-on-white.
+  - Added a distinctive `#EF4444` crimson border indicator around the QR container in `MainWindow.xaml` to visually distinguish DJ mode without degrading camera barcode scan reliability.
 - **Remote DJ Board Single Column Layout (`dj.html`)**: Resolved layout issue where the dashboard flex container defaulted to horizontal layout, causing the header (title, theme toggle, lock button) to display on the left side while scrunched rotation queue and controls rendered on the right.
   - Refactored `.dashboard` and `.main-layout` to a single column vertical flex layout (`flex-direction: column; width: 100%;`).
   - Stacked Current Rotation Queue, Add Performer, Special Event Banners, and Incoming Requests in a clean scrollable single-column flow.

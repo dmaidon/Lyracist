@@ -1,6 +1,4 @@
-// Edited on Aug 4, 2026 @ 09:56:00 -> Update DjBannerWindowService.Show shim signature to accept dataContext
-// Edited on Aug 1, 2026 @ 14:02:00 -> Add SelectedDevice property to DisplayWindowService shim
-// Edited on Jul 27, 2026 @ 13:50:00 -> Update MessageBox shim to support YesNo buttons and MessageBoxResult for compilation compatibility
+// Edited on Aug 17, 2026 @ 09:50:00 -> Add SetLastSongBanner stub to DisplayWindowService shim
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -135,6 +133,7 @@ namespace KSRotation.Services
         public void SetBannerText(string template, string venueName, string djName) { }
         public void SetCrawlBannerText(string template, string venueName, string djName) { }
         public void SetSelectedMonitor(string deviceName) { }
+        public void SetLastSongBanner(string? path) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
         public Task StopCastingAsync() => Task.CompletedTask;

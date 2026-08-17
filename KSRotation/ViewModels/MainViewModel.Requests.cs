@@ -1,4 +1,4 @@
-// Edited on Aug 14, 2026 @ 10:17:30 -> Handle personalized Birthday banner generation in set-special-event action
+// Edited on Aug 17, 2026 @ 11:05:00 -> Use high-contrast black-on-white QR code for DJ connect URL to ensure readability on older iPads
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -210,7 +210,7 @@ namespace KSRotation.ViewModels
             _activeServerPort = activePort;
  
             QrCodeImage = started ? GenerateQRCode(ConnectionUrl) : null;
-            DjQrCodeImage = started ? GenerateQRCode(DjConnectionUrl, [128, 0, 32], [255, 255, 255]) : null;
+            DjQrCodeImage = started ? GenerateQRCode(DjConnectionUrl) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             RefreshConnectInstructionsBanner();
         }
@@ -226,7 +226,7 @@ namespace KSRotation.ViewModels
             ConnectionUrl = $"http://{host}:{_activeServerPort}";
             DjConnectionUrl = $"http://{host}:{_activeServerPort}/dj.html";
             QrCodeImage = GenerateQRCode(ConnectionUrl);
-            DjQrCodeImage = GenerateQRCode(DjConnectionUrl, [128, 0, 32], [255, 255, 255]);
+            DjQrCodeImage = GenerateQRCode(DjConnectionUrl);
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             // Debounced — this runs on every keystroke of PreferredHostIp (UpdateSourceTrigger=PropertyChanged),
             // and the banner regeneration underneath is a full QR render + PNG encode + disk write.
@@ -691,6 +691,7 @@ namespace KSRotation.ViewModels
                         }
                         ActiveSpecialEvent = targetId;
                         UpdateDjBannerPath();
+                        UpdateLastSongState();
                         return "";
                     }
                 default:

@@ -28,9 +28,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.16.196</AssemblyVersion>
+		<AssemblyVersion>26.8.17.197</AssemblyVersion>
 
-		<FileVersion>26.8.16.196</FileVersion>
+		<FileVersion>26.8.17.197</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 

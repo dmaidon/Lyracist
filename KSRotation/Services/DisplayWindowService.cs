@@ -1,4 +1,4 @@
-// Edited on Aug 1, 2026 @ 14:00:00 -> Add SelectedDevice property to DisplayWindowService
+// Edited on Aug 17, 2026 @ 09:50:00 -> Add SetLastSongBanner to manage Last Song overlay on SingerDisplayWindow
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -20,6 +20,16 @@ namespace KSRotation.Services
         private string _connectionUrl = string.Empty;
         private ImageSource? _qrCodeImage;
         private string _selectedMonitorDevice = string.Empty;
+        private string? _lastSongBannerPath;
+
+        public void SetLastSongBanner(string? path)
+        {
+            _lastSongBannerPath = path;
+            if (_window != null)
+            {
+                _window.Dispatcher.InvokeAsync(() => _window.UpdateLastSongBanner(_lastSongBannerPath));
+            }
+        }
 
         private readonly ICastingService _casting;
         private DisplayTarget _rotationTarget = DisplayTarget.Monitor;
@@ -149,6 +159,8 @@ namespace KSRotation.Services
             _viewModel.ConnectionUrl = _connectionUrl;
             _viewModel.QrCodeImage = _qrCodeImage;
             _viewModel.UpdateFromRotation(rotation);
+
+            _window.UpdateLastSongBanner(_lastSongBannerPath);
 
             if (_rotationTarget != DisplayTarget.Monitor && _rotationTarget != DisplayTarget.WirelessHDMI)
             {

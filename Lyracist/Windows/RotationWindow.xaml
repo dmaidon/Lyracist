@@ -1,4 +1,4 @@
-<!-- Edited on Jul 31, 2026 @ 12:31:08 -> Increased Vegas Marquee font sizes for 1440p displays -->
+<!-- Edited on Aug 17, 2026 @ 09:50:00 -> Add LastSongBannerOverlay for priority display on rotation billboard -->
 <Window x:Class="Lyracist.Windows.RotationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -685,5 +685,17 @@
 
         <!-- Floating Emoji Reactions Overlay -->
         <Canvas x:Name="ReactionsCanvas" IsHitTestVisible="False" Background="Transparent" />
+
+        <!-- Last Song Banner Overlay (shown on all non-lyric screens when Last Song is activated) -->
+        <Grid x:Name="LastSongBannerOverlay"
+              Panel.ZIndex="130"
+              Background="Black"
+              Visibility="Collapsed">
+            <Image x:Name="LastSongBannerImage"
+                   Stretch="Uniform"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   RenderOptions.BitmapScalingMode="HighQuality" />
+        </Grid>
     </Grid>
 </Window>

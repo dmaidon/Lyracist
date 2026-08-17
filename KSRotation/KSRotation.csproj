@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.17.476</AssemblyVersion>
-    <FileVersion>26.8.17.476</FileVersion>
+    <AssemblyVersion>26.8.17.481</AssemblyVersion>
+    <FileVersion>26.8.17.481</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>

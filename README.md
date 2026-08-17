@@ -1,5 +1,5 @@
-<!-- Edited on Aug 17, 2026 @ 09:08:00 -> Update README note for Remote DJ Board single column scrollable layout -->
-Last Edit: Aug 17, 2026 - Remote DJ Board (dj.html) single-column scrollable layout and responsive controls
+<!-- Edited on Aug 17, 2026 @ 11:22:00 -> Update README note for DJ QR Code popout modal and optical contrast enhancements -->
+Last Edit: Aug 17, 2026 - DJ QR Code popout modal, high-contrast QR codes, Priority LastSong.png banner, and Remote DJ single-column layout
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, and an integrated mobile tablet server for performer lyrics.

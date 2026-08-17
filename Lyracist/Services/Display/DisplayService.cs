@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 19:19:15 -> Add UpdateSpecialEvent and ResolveActiveBannerPath helper to DisplayService
+// Edited on Aug 17, 2026 @ 09:50:00 -> Update ResolveActiveBannerPath and UpdateRotationLastSongBanner to prioritize Last Song banner on all non-lyric screens
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
@@ -155,6 +155,7 @@ public class DisplayService : IDisplayService
             }
         }
         _rotationWindow!.Show();
+        UpdateRotationLastSongBanner();
     }
 
     private void HideRotationWindowInternal()
@@ -213,6 +214,15 @@ public class DisplayService : IDisplayService
         if (!string.IsNullOrEmpty(_preferences.SelectedSpecialEvent) && 
             !_preferences.SelectedSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase))
         {
+            if (_preferences.SelectedSpecialEvent.Equals("Last Song", StringComparison.OrdinalIgnoreCase))
+            {
+                string lastSongPath = System.IO.Path.Combine(Globals.EventBannersDir, "LastSong.png");
+                if (System.IO.File.Exists(lastSongPath))
+                {
+                    return lastSongPath;
+                }
+            }
+
             var eventConfig = Lyracist.Core.Helpers.AppSettings.SpecialEvents.FirstOrDefault(e => e.EventName.Equals(_preferences.SelectedSpecialEvent, StringComparison.OrdinalIgnoreCase));
             if (eventConfig != null)
             {
@@ -224,6 +234,20 @@ public class DisplayService : IDisplayService
             }
         }
         return _preferences.SelectedDjBannerPath;
+    }
+
+    private void UpdateRotationLastSongBanner()
+    {
+        if (_rotationWindow != null && _rotationWindow.IsLoaded)
+        {
+            bool isLastSong = !string.IsNullOrEmpty(_preferences.SelectedSpecialEvent) &&
+                              _preferences.SelectedSpecialEvent.Equals("Last Song", StringComparison.OrdinalIgnoreCase);
+
+            string lastSongPath = System.IO.Path.Combine(Globals.EventBannersDir, "LastSong.png");
+            string? activePath = (isLastSong && System.IO.File.Exists(lastSongPath)) ? lastSongPath : null;
+
+            _rotationWindow.Dispatcher.InvokeAsync(() => _rotationWindow.UpdateLastSongBanner(activePath));
+        }
     }
 
     public void RestoreAssignments()
@@ -239,6 +263,7 @@ public class DisplayService : IDisplayService
         string activePath = ResolveActiveBannerPath();
         var vm = _serviceProvider.GetService<DjBannerWindowViewModel>();
         vm?.UpdateBanner(activePath);
+        UpdateRotationLastSongBanner();
 
         UpdateWindowVisibilities();
         ScreenAssignmentsChanged?.Invoke();
@@ -260,6 +285,7 @@ public class DisplayService : IDisplayService
 
         var vm = _serviceProvider.GetService<DjBannerWindowViewModel>();
         vm?.UpdateBanner(ResolveActiveBannerPath());
+        UpdateRotationLastSongBanner();
         ScreenAssignmentsChanged?.Invoke();
     }
 
@@ -267,6 +293,7 @@ public class DisplayService : IDisplayService
     {
         var vm = _serviceProvider.GetService<DjBannerWindowViewModel>();
         vm?.UpdateBanner(ResolveActiveBannerPath());
+        UpdateRotationLastSongBanner();
     }
 
     public DisplayPreferences GetPreferences() => _preferences;

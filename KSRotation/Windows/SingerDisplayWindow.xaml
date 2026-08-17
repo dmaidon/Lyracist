@@ -1,4 +1,4 @@
-<!-- Edited on Jul 31, 2026 @ 12:31:08 -> Increased Vegas Marquee font sizes for 1440p displays -->
+<!-- Edited on Aug 17, 2026 @ 09:50:00 -> Add LastSongBannerOverlay for priority display on rotation screen -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -467,5 +467,18 @@
                            Margin="0,4,0,0"/>
             </StackPanel>
         </Border>
+
+        <!-- Last Song Banner Overlay (shown on all non-lyric screens when Last Song is activated) -->
+        <Grid x:Name="LastSongBannerOverlay"
+              Grid.RowSpan="2"
+              Panel.ZIndex="120"
+              Background="Black"
+              Visibility="Collapsed">
+            <Image x:Name="LastSongBannerImage"
+                   Stretch="Uniform"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   RenderOptions.BitmapScalingMode="HighQuality" />
+        </Grid>
     </Grid>
 </Window>

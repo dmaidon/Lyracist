@@ -1,4 +1,4 @@
-// Edited on Jul 27, 2026 @ 13:15:00 -> Add OnPortalTitleClicked mouse event handler to toggle DJ PIN and QR code visibility
+// Edited on Aug 17, 2026 @ 11:10:00 -> Add OnQrCodeBorderClicked to open enlarged DjQrCodePopoutWindow when DJ QR code is clicked
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -37,6 +37,19 @@ namespace KSRotation
             if (DataContext is ViewModels.MainViewModel vm)
             {
                 vm.IsDjQrVisible = !vm.IsDjQrVisible;
+            }
+        }
+
+        private void OnQrCodeBorderClicked(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is ViewModels.MainViewModel vm && vm.IsDjQrVisible)
+            {
+                var popout = new Windows.DjQrCodePopoutWindow
+                {
+                    Owner = this,
+                    DataContext = vm
+                };
+                popout.ShowDialog();
             }
         }
 

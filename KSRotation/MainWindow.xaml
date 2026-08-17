@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 09:39:00 -> Adjust Incoming Requests header layout alignment and margins -->
+<!-- Edited on Aug 17, 2026 @ 11:10:00 -> Wire up OnQrCodeBorderClicked to open enlarged DJ QR popout window -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -924,8 +924,24 @@
                                          Background="White"
                                          CornerRadius="4"
                                          Padding="2"
-                                         VerticalAlignment="Center">
-                                    <Image Stretch="Uniform">
+                                         VerticalAlignment="Center"
+                                         PreviewMouseLeftButtonDown="OnQrCodeBorderClicked">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="#CBD5E1" />
+                                            <Setter Property="Cursor" Value="Arrow" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                    <Setter Property="BorderThickness" Value="2.5" />
+                                                    <Setter Property="BorderBrush" Value="#EF4444" />
+                                                    <Setter Property="Cursor" Value="Hand" />
+                                                    <Setter Property="ToolTip" Value="Click to open enlarged DJ Remote Control QR Code &amp; PIN" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Image Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor">
                                         <Image.Style>
                                             <Style TargetType="Image">
                                                 <Setter Property="Source" Value="{Binding QrCodeImage}" />

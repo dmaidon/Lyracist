@@ -1,16 +1,18 @@
-// Edited on Aug 9, 2026 @ 09:28:00 -> Set _marqueeTimer to DispatcherPriority.Background to prevent UI input/cursor flickering
+// Edited on Aug 17, 2026 @ 09:50:00 -> Add UpdateLastSongBanner to show Last Song banner overlay on rotation screen
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
@@ -80,6 +82,33 @@ namespace KSRotation.Windows
             DataContextChanged += OnDataContextChanged;
             SizeChanged += OnSizeChanged;
             PreviewKeyDown += OnPreviewKeyDown;
+        }
+
+        public void UpdateLastSongBanner(string? bannerPath)
+        {
+            if (!string.IsNullOrWhiteSpace(bannerPath) && File.Exists(bannerPath))
+            {
+                try
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(bannerPath, UriKind.Absolute);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+
+                    LastSongBannerImage.Source = bitmap;
+                    LastSongBannerOverlay.Visibility = Visibility.Visible;
+                    return;
+                }
+                catch
+                {
+                    // Fallback on decode failure
+                }
+            }
+
+            LastSongBannerOverlay.Visibility = Visibility.Collapsed;
+            LastSongBannerImage.Source = null;
         }
 
         private void OnClosed(object? sender, EventArgs e)
