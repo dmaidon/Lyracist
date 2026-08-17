@@ -1,4 +1,4 @@
-<!-- Edited on Aug 16, 2026 @ 11:18:00 -> Add Authors, Company, and Copyright metadata properties -->
+<!-- Edited on Aug 17, 2026 @ 09:39:00 -> Update AssemblyVersion and FileVersion build stamps -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.16.473</AssemblyVersion>
-    <FileVersion>26.8.16.473</FileVersion>
+    <AssemblyVersion>26.8.17.476</AssemblyVersion>
+    <FileVersion>26.8.17.476</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>

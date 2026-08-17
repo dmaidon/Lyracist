@@ -1,4 +1,4 @@
-<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Add tablet/vertical-mode responsive layout to the rotation list and Incoming Requests sidebar -->
+<!-- Edited on Aug 17, 2026 @ 09:39:00 -> Adjust Incoming Requests header layout alignment and margins -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -949,12 +949,12 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <Grid Margin="0,4,0,8">
+                            <Grid Margin="0,4,0,8" HorizontalAlignment="Left" Width="328">
                                 <TextBlock Text="Incoming Requests"
                                            FontWeight="Bold"
                                            FontSize="16"
                                            Foreground="{DynamicResource AppHeaderBrush}"
-                                           VerticalAlignment="Center" />
+                                           VerticalAlignment="Center" Margin="0,0,37,0" />
                                 <materialDesign:Badged Badge="{Binding IncomingRequests.Count}"
                                                        HorizontalAlignment="Right"
                                                        VerticalAlignment="Center"

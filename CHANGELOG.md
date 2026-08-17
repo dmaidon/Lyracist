@@ -1,8 +1,17 @@
-<!-- Edited on Aug 16, 2026 @ 12:48:00 -> Add CHANGELOG entry for PAROLE Software company metadata standardization -->
-Last Edit: Aug 16, 2026 - Standardized PAROLE Software company metadata across all project properties and added HasKeyChange helper
+<!-- Edited on Aug 17, 2026 @ 09:08:00 -> Add entry for Remote DJ Board single column scrollable layout update -->
+Last Edit: Aug 17, 2026 - Remote DJ Board (dj.html) layout updated to single column scrollable layout with responsive controls
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.17.0] - 2026-08-17
+
+### Fixed & Improved
+- **Remote DJ Board Single Column Layout (`dj.html`)**: Resolved layout issue where the dashboard flex container defaulted to horizontal layout, causing the header (title, theme toggle, lock button) to display on the left side while scrunched rotation queue and controls rendered on the right.
+  - Refactored `.dashboard` and `.main-layout` to a single column vertical flex layout (`flex-direction: column; width: 100%;`).
+  - Stacked Current Rotation Queue, Add Performer, Special Event Banners, and Incoming Requests in a clean scrollable single-column flow.
+  - Enhanced mobile responsiveness for singer cards and action buttons under narrow viewports (< 600px).
+  - Aligned `.lock-screen` / `.lock-overlay` and `.pin-box` / `.lock-card` styles for consistent PIN unlock screen rendering across themes.
 
 ## [26.8.16.0] - 2026-08-16
 
