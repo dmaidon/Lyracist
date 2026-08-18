@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 19:21:40 -> Initialize Special Events and Event Banners collections on load
+// Edited on Aug 18, 2026 @ 13:24:00 -> Add FloatCurrentSingerToTop setting property
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -39,6 +39,15 @@ public partial class SettingsViewModel : BaseViewModel
 
     [ObservableProperty]
     private bool _isTestMode = AppSettings.IsTestMode;
+
+    [ObservableProperty]
+    private bool _floatCurrentSingerToTop = AppSettings.FloatCurrentSingerToTop;
+
+    partial void OnFloatCurrentSingerToTopChanged(bool value)
+    {
+        AppSettings.FloatCurrentSingerToTop = value;
+        _rotation.FloatCurrentSingerToTop = value;
+    }
 
     // Audio
     [ObservableProperty]

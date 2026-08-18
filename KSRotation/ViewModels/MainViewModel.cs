@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 15:50:00 -> Added InitializeTrivia and CheckAndSyncTriviaPause synchronization
+// Edited on Aug 18, 2026 @ 13:48:00 -> Ensure FloatCurrentSingerToTop promotes and floats singer on startup, checkbox toggle, and SetRotationStartSinger
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -79,6 +79,40 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool IsTestMode { get; set; }
+
+        /// <summary>When true, the current singer always floats to index 0 of the active rotation list.</summary>
+        [ObservableProperty]
+        public partial bool FloatCurrentSingerToTop { get; set; }
+
+        partial void OnFloatCurrentSingerToTopChanged(bool value)
+        {
+            if (_isInitializing) return;
+
+            if (value)
+            {
+                var current = RotationHelpers.GetCurrentSinger(Singers);
+                if (current == null)
+                {
+                    var first = Singers.FirstOrDefault(s => s.IsRotationStart && !s.IsInactive && !s.IsPaused)
+                                ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+                    if (first != null)
+                    {
+                        RotationHelpers.SetCurrentSinger(Singers, first, floatCurrentToTop: true);
+                    }
+                }
+                else
+                {
+                    RotationHelpers.FloatCurrentSingerToTop(Singers);
+                }
+                RebuildRotationJsonCacheNow();
+                QueueSaveDatabase();
+                if (IsDisplayEnabled)
+                {
+                    _displayWindowService.Update(Singers);
+                }
+            }
+            QueueSaveSettings();
+        }
 
         public DisplayTarget[] AvailableDisplayTargets { get; } = (DisplayTarget[])Enum.GetValues(typeof(DisplayTarget));
 
@@ -791,6 +825,7 @@ namespace KSRotation.ViewModels
                 ? string.Empty
                 : settings.DjPin.Trim();
             AutoAcceptRequests = settings.AutoAcceptRequests;
+            FloatCurrentSingerToTop = settings.FloatCurrentSingerToTop;
             _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
             SelectedProjectionView = "Normal List";
             _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
@@ -890,6 +925,23 @@ namespace KSRotation.ViewModels
             }
 
             _isInitializing = false;
+            if (FloatCurrentSingerToTop && Singers.Count > 0)
+            {
+                var current = RotationHelpers.GetCurrentSinger(Singers);
+                if (current == null)
+                {
+                    var first = Singers.FirstOrDefault(s => s.IsRotationStart && !s.IsInactive && !s.IsPaused)
+                                ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+                    if (first != null)
+                    {
+                        RotationHelpers.SetCurrentSinger(Singers, first, floatCurrentToTop: true);
+                    }
+                }
+                else
+                {
+                    RotationHelpers.FloatCurrentSingerToTop(Singers);
+                }
+            }
             SaveSettings();
             StartRequestServer();
             RebuildRotationJsonCacheNow();
@@ -1022,6 +1074,11 @@ namespace KSRotation.ViewModels
                 return;
             }
 
+            if (entry.IsRotationStart)
+            {
+                RotationHelpers.HandleSingerRetiredOrRemoved(Singers, entry);
+            }
+
             if (entry.IsCurrent)
             {
                 // 1. Try the singer already flagged as Next (manual next-singer override)
@@ -1046,12 +1103,12 @@ namespace KSRotation.ViewModels
                 entry.IsCurrent = false;
                 if (nextCurrent != null)
                 {
-                    nextCurrent.IsCurrent = true;
-                    nextCurrent.IsNext = false;
+                    RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop);
                 }
             }
 
             Singers.Remove(entry);
+            RotationHelpers.EnsureRotationStartFlag(Singers);
             UpdateNextSingerHighlight();
             RebuildRotationJsonCacheNow();
             QueueSaveDatabase();
@@ -1087,6 +1144,57 @@ namespace KSRotation.ViewModels
         /// Single implementation shared by every UI entry point that lets an operator add a performer
         /// with song details in one step (DJ web portal, MAUI console) so the insertion rules can't drift.
         /// </remarks>
+        public bool AddPatronSongRequest(string name, string? duetPartner, string? song, string? artist)
+        {
+            string trimmedName = name.Trim();
+            if (string.IsNullOrWhiteSpace(trimmedName))
+            {
+                return false;
+            }
+
+            string trimmedSong = song?.Trim() ?? string.Empty;
+            string trimmedArtist = artist?.Trim() ?? string.Empty;
+
+            var existingSinger = Singers.FirstOrDefault(s => IsSameSingerName(s.Name, trimmedName));
+            if (existingSinger != null)
+            {
+                if (existingSinger.IsInactive)
+                {
+                    existingSinger.IsInactive = false;
+                    existingSinger.Song = trimmedSong;
+                    existingSinger.Artist = trimmedArtist;
+                    existingSinger.DuetPartnerName = duetPartner?.Trim() ?? string.Empty;
+                    EnforceActiveInactiveOrder(existingSinger);
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(existingSinger.Song))
+                    {
+                        existingSinger.Song = trimmedSong;
+                        existingSinger.Artist = trimmedArtist;
+                    }
+                    else
+                    {
+                        existingSinger.QueuedSongs.Add(new QueuedSong(trimmedSong, trimmedArtist));
+                    }
+                }
+            }
+            else
+            {
+                AddActiveSinger(new SingerEntry
+                {
+                    Name = trimmedName,
+                    DuetPartnerName = duetPartner?.Trim() ?? string.Empty,
+                    Song = trimmedSong,
+                    Artist = trimmedArtist,
+                });
+            }
+
+            AddKnownSinger(trimmedName);
+            QueueSaveDatabase();
+            return true;
+        }
+
         private static bool IsSameSingerName(string? name1, string? name2)
         {
             if (name1 == null || name2 == null) return false;
@@ -1306,7 +1414,7 @@ namespace KSRotation.ViewModels
                     }
 
                     // Advance rotation sequentially after entry (wraps around to top of rotation if last singer)
-                    RotationHelpers.AdvanceRotationAfterFinished(Singers, entry);
+                    RotationHelpers.AdvanceRotationAfterFinished(Singers, entry, FloatCurrentSingerToTop);
 
                     // A music request with nothing left queued (and no further pending request merged in above)
                     // has been fully played — unlike a karaoke singer, it doesn't wait around in the rotation for
@@ -1322,6 +1430,12 @@ namespace KSRotation.ViewModels
                 {
                     _isFinishingSong = false;
                 }
+
+                // Re-establishes the 1st-singer invariant now that _isFinishingSong is suppressing
+                // OnSingersCollectionChanged's own reentrant call — matters when a fully-played music
+                // request holding the flag was just removed above, since nothing else in this method
+                // reassigns it (unlike the RotationHelpers.HandleSingerRetiredOrRemoved calls elsewhere).
+                RotationHelpers.EnsureRotationStartFlag(Singers);
 
                 // 3. Save state and notify displays
                 RebuildRotationJsonCacheNow();
@@ -1345,10 +1459,16 @@ namespace KSRotation.ViewModels
             _isFinishingSong = true;
             try
             {
-                bool pausing = !entry.IsInactive && entry.IsCurrent;
+                bool retiring = !entry.IsInactive;
+                if (retiring && entry.IsRotationStart)
+                {
+                    RotationHelpers.HandleSingerRetiredOrRemoved(Singers, entry);
+                }
+
+                bool wasCurrent = !entry.IsInactive && entry.IsCurrent;
                 SingerEntry? nextCurrent = null;
 
-                if (pausing)
+                if (wasCurrent)
                 {
                     // 1. Try the singer already flagged as Next (manual next-singer override)
                     nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused);
@@ -1377,13 +1497,13 @@ namespace KSRotation.ViewModels
                     entry.IsCurrent = false;
                 }
 
-                if (pausing && nextCurrent != null)
+                if (wasCurrent && nextCurrent != null)
                 {
-                    nextCurrent.IsCurrent = true;
-                    nextCurrent.IsNext = false;
+                    RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop);
                 }
 
                 EnforceActiveInactiveOrder(entry);
+                RotationHelpers.EnsureRotationStartFlag(Singers);
                 UpdateNextSingerHighlight();
             }
             finally
@@ -1525,7 +1645,7 @@ namespace KSRotation.ViewModels
             _isFinishingSong = true;
             try
             {
-                RotationHelpers.SetCurrentSinger(Singers, entry);
+                RotationHelpers.SetCurrentSinger(Singers, entry, FloatCurrentSingerToTop);
             }
             finally
             {
@@ -1534,6 +1654,33 @@ namespace KSRotation.ViewModels
 
             // IsCurrent/IsNext changes made above were suppressed by _isFinishingSong, so rebuild explicitly
             // — patron/DJ web clients read this cache and shouldn't see a stale rotation after this action.
+            RebuildRotationJsonCacheNow();
+            QueueSaveDatabase();
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
+            }
+        }
+
+        /// <summary>
+        /// Toggles the 1st singer (round start) designation on the selected singer: designates them if they
+        /// don't already hold it, or clears it (auto-reassigning to the first active singer) if they do — so
+        /// a mis-flagged singer can be undone without picking a specific replacement.
+        /// </summary>
+        [RelayCommand]
+        private void SetRotationStartSinger(SingerEntry entry)
+        {
+            if (entry == null)
+            {
+                return;
+            }
+
+            bool wasRotationStart = entry.IsRotationStart;
+            RotationHelpers.ToggleRotationStartSinger(Singers, entry);
+            if (!wasRotationStart && FloatCurrentSingerToTop)
+            {
+                RotationHelpers.SetCurrentSinger(Singers, entry, floatCurrentToTop: true);
+            }
             RebuildRotationJsonCacheNow();
             QueueSaveDatabase();
             if (IsDisplayEnabled)
@@ -1652,8 +1799,14 @@ namespace KSRotation.ViewModels
                 }
             }
 
-            if (!_isInitializing)
+            // _isFinishingSong guards the same window here as everywhere else in this class: several
+            // RotationHelpers operations (e.g. AdvanceRotationAfterFinished's float branch) reorder
+            // Singers via internal RemoveAt+Insert pairs, which fire this handler mid-operation. Reacting
+            // to those intermediate states here would be redundant at best — the outer operation already
+            // calls EnsureRotationStartFlag/UpdateNextSingerHighlight itself once it's done.
+            if (!_isInitializing && !_isFinishingSong)
             {
+                RotationHelpers.EnsureRotationStartFlag(Singers);
                 UpdateNextSingerHighlight();
             }
 
@@ -1858,6 +2011,11 @@ namespace KSRotation.ViewModels
                 _displayWindowService.Update(Singers);
             }
 
+            if (e.PropertyName == nameof(SingerEntry.IsCurrent) && entry.IsCurrent && FloatCurrentSingerToTop)
+            {
+                RotationHelpers.FloatCurrentSingerToTop(Singers);
+            }
+
             if (e.PropertyName == nameof(SingerEntry.Name)
                 || e.PropertyName == nameof(SingerEntry.Song)
                 || e.PropertyName == nameof(SingerEntry.Artist)
@@ -2038,7 +2196,8 @@ namespace KSRotation.ViewModels
                 ActiveSpecialEvent = ActiveSpecialEvent,
                 SpecialEvents = SpecialEvents.ToList(),
                 RotationTarget = RotationTarget,
-                AutoAcceptRequests = AutoAcceptRequests
+                AutoAcceptRequests = AutoAcceptRequests,
+                FloatCurrentSingerToTop = FloatCurrentSingerToTop
             };
 
             try

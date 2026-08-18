@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 12:08:30 -> Add DuetPartnerName and IsDuet properties for backup/duet partner support
+// Edited on Aug 18, 2026 @ 13:24:00 -> Add IsRotationStart property to track rotation round starting anchor
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -102,6 +102,10 @@ namespace KSRotation.Models
 
         [ObservableProperty]
         public partial bool IsMusic { get; set; }
+
+        /// <summary>True when this singer marks the start / 1st position of the rotation round.</summary>
+        [ObservableProperty]
+        public partial bool IsRotationStart { get; set; }
 
         [ObservableProperty] public partial bool Song1Completed { get; set; }
         [ObservableProperty] public partial bool Song2Completed { get; set; }

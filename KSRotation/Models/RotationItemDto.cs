@@ -1,7 +1,4 @@
-// Edited on Aug 6, 2026 @ 09:12:55 -> Add vocalRange and customTitle properties
-// Edited on Jul 31, 2026 @ 12:00:00 -> Add queuedSongs so patron/DJ web clients can see and remove individual queued songs
-// Edited on Jul 28, 2026 @ 18:38:00 -> Add isMusic property to RotationItemDto
-// Last Edit: Jul 28, 2026 12:42 - Add isPaused property to DTO
+// Edited on Aug 18, 2026 @ 13:24:00 -> Add isRotationStart property to RotationItemDto
 using System.Collections.Generic;
 
 namespace KSRotation.Models
@@ -25,6 +22,7 @@ namespace KSRotation.Models
         public bool isInactive { get; set; }
         public bool isPaused { get; set; }
         public bool isMusic { get; set; }
+        public bool isRotationStart { get; set; }
         public string vocalRange { get; set; } = string.Empty;
         public string customTitle { get; set; } = string.Empty;
         public List<QueuedSongDto> queuedSongs { get; set; } = [];
@@ -41,3 +39,4 @@ namespace KSRotation.Models
         public bool song10Completed { get; set; }
     }
 }
+

@@ -1,8 +1,37 @@
-<!-- Edited on Aug 17, 2026 @ 16:10:30 -> Updated Trivia Settings to 3-column no-scroll layout and synchronized Venue/DJ from app settings -->
-Last Edit: Aug 17, 2026 - Trivia Settings 3-Column No-Scroll Dashboard & Venue/DJ Synchronization
+<!-- Edited on Aug 18, 2026 @ 15:30:00 -> Document 1st Singer badge red row highlight, clear-badge toggle, and rotation reentrancy fixes -->
+Last Edit: Aug 18, 2026 - Float Current Singer to Top & 1st Singer Round Flag in Rotation
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.18.0] - 2026-08-18
+
+### Added
+- **Float Current Singer to Top of Rotation Option**:
+  - Added a togglable option in `Lyracist`, `KSRotation` (WPF), and `KSRotation.Maui`:
+    - **`Lyracist`**: Checkbox on the **Rotation** page toolbar, the **Karaoke** control page queue options bar, and persistent toggle under **Settings -> Monitors & Screen Assignments**.
+    - **`KSRotation` (WPF)**: Checkbox in the top rotation toolbar with automatic settings persistence.
+    - **`KSRotation.Maui`**: Dedicated `Float to Top` checkbox in the Active Rotation Queue header bar.
+  - **Dynamic Top-Floating Queue Mechanics**:
+    - When enabled, the currently performing singer always automatically floats to index 0 (top of the rotation list).
+    - As songs finish, the completed performer moves to the back of the active queue and the next active performer automatically floats to the top (index 0), completely eliminating the need for the DJ/KJ to scroll down long rotation lists during shows.
+    - Selecting any singer as current immediately promotes and shifts them to the top of the queue.
+- **1st Singer in Rotation (Round Start Anchor Flag)**:
+  - **Visual 🚩 Round Start Badge & Red Row Highlight**:
+    - Added a red `🚩 1ST` badge next to the 1st singer in the active rotation across `Lyracist`, `KSRotation` (WPF), and `KSRotation.Maui`.
+    - Added a matching red row background/highlight (alongside the existing yellow current-singer and blue next-singer row highlights) so the 1st singer stands out at a glance, not just from the badge text.
+    - Allows the DJ to instantly identify the start of the round cycle and know when the full rotation has completed as the 1st singer returns to the top.
+  - **Designate / Clear 1st Singer Action**:
+    - Added `"Set as 1st Singer (Round Start)"` context menu items and quick-action buttons (`🚩`) across `Lyracist`, `KSRotation`, and `KSRotation.Maui`.
+    - The action now toggles: clicking it again on the singer who already holds the flag clears it and hands it to the next active singer in rotation order, so an accidental flag can be undone without picking a specific replacement.
+    - Automatically guarantees that exactly one active singer holds the start anchor flag at all times.
+  - **Sync & Web Portal Integration**:
+    - `isRotationStart` is included in the REST/WebSocket `/api/rotation` payload and synchronized between `KSRotation` and `Lyracist`.
+
+### Fixed
+- **`Lyracist`: Float Current Singer to Top not floating the new current singer after "Finish Song"**: A `Rotation.CollectionChanged` handler re-triggered the float-to-top logic on every intermediate list mutation performed internally by the shared rotation-advance helper, undoing its own "move the finished singer to the bottom" step before it completed. The song would advance, but the rotation order never visibly changed. Fixed by suppressing that auto-sync handler while a rotation-reordering operation is already in progress and syncing once after it completes.
+- **"Clear 1st Singer Badge" appearing to do nothing**: Clearing the badge fell back to reassigning it to "the first active singer in list order" — which, with Float Current Singer to Top enabled, is almost always the very singer you just cleared it from (they're floated to the top). Clearing now hands the flag to the next active singer in rotation order instead, so it can no longer reassign back to the singer being cleared.
+- **`KSRotation`**: Closed a related reentrancy gap where `EnsureRotationStartFlag` could re-run mid-operation during rotation-advance/reorder calls; it's now suppressed during those operations (matching the rest of the class's existing reentrancy guard) and re-run once explicitly afterward, including when a fully-played music request holding the flag is auto-removed from the rotation.
 
 ## [26.8.17.0] - 2026-08-17
 

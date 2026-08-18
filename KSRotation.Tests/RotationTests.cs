@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 12:32:00 -> Update InvokeDjAction reflection parameter count and add duet partner completion test
+// Edited on Aug 18, 2026 @ 13:56:00 -> Add tests for HandleSingerRetiredOrRemoved and EnsureRotationStartFlag
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -913,6 +913,55 @@ public class MainViewModelTests
     }
 
     [Fact]
+    public void FinishSingerSong_WithFloatCurrentSingerToTop_DropsFinishedSingerToBottom()
+    {
+        // ViewModel-level coverage (not just the shared helper in isolation) for "finish the current
+        // singer's song, and they should drop to the bottom of the rotation instead of staying put."
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
+        vm.Singers.Clear();
+        vm.FloatCurrentSingerToTop = true;
+
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        vm.Singers.Add(alice);
+        vm.Singers.Add(bob);
+        vm.Singers.Add(carol);
+
+        RotationHelpers.SetCurrentSinger(vm.Singers, alice, floatCurrentToTop: true);
+        Assert.Equal(alice, vm.Singers[0]);
+
+        vm.FinishSingerSongCommand.Execute(alice);
+
+        Assert.False(alice.IsCurrent);
+        Assert.True(bob.IsCurrent);
+        Assert.Equal(bob, vm.Singers[0]);
+        Assert.Equal(alice, vm.Singers[^1]);
+    }
+
+    [Fact]
+    public void FinishSingerSong_RemovesFlaggedMusicSingerWithNoQueuedSongs_ReassignsRotationStartFlag()
+    {
+        // A fully-played music request holding the 1st-singer flag gets removed from Singers entirely
+        // inside FinishSingerSong's own _isFinishingSong-guarded block, which suppresses
+        // OnSingersCollectionChanged's usual reentrant EnsureRotationStartFlag call. Nothing else in
+        // FinishSingerSong reassigns the flag for this specific path, so it must do so explicitly once
+        // the guarded block completes — otherwise nobody holds it after the removal.
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
+        vm.Singers.Clear();
+
+        var alice = new SingerEntry { Name = "Alice", IsMusic = true, Song = "Some Song", IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        vm.Singers.Add(alice);
+        vm.Singers.Add(bob);
+
+        vm.FinishSingerSongCommand.Execute(alice);
+
+        Assert.DoesNotContain(alice, vm.Singers);
+        Assert.True(bob.IsRotationStart);
+    }
+
+    [Fact]
     public void FinishSingerSong_WhenSingerNotMarkedCurrent_StillAdvancesToNextSinger()
     {
         var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
@@ -997,5 +1046,173 @@ public class MainViewModelTests
             }
         }
     }
+
+    [Fact]
+    public void EnsureRotationStartFlag_SetsFirstActiveSingerWhenNoneFlagged()
+    {
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob };
+
+        RotationHelpers.EnsureRotationStartFlag(list);
+
+        Assert.True(alice.IsRotationStart);
+        Assert.False(bob.IsRotationStart);
+    }
+
+    [Fact]
+    public void SetRotationStartSinger_ClearsOtherFlagsAndSetsTargetSinger()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob };
+
+        RotationHelpers.SetRotationStartSinger(list, bob);
+
+        Assert.False(alice.IsRotationStart);
+        Assert.True(bob.IsRotationStart);
+    }
+
+    [Fact]
+    public void ToggleRotationStartSinger_OnUnflaggedSinger_SetsFlagAndClearsOthers()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob };
+
+        RotationHelpers.ToggleRotationStartSinger(list, bob);
+
+        Assert.False(alice.IsRotationStart);
+        Assert.True(bob.IsRotationStart);
+    }
+
+    [Fact]
+    public void ToggleRotationStartSinger_OnAlreadyFlaggedSinger_ClearsAndReassignsToNextActiveSequentially()
+    {
+        // Regression coverage for "accidentally flagged the wrong singer": toggling the badge
+        // action again on the singer who already holds it must undo the mistake, not be a no-op.
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob", IsRotationStart = true };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        RotationHelpers.ToggleRotationStartSinger(list, bob);
+
+        Assert.False(bob.IsRotationStart);
+        Assert.False(alice.IsRotationStart);
+        Assert.True(carol.IsRotationStart);
+    }
+
+    [Fact]
+    public void ToggleRotationStartSinger_OnAlreadyFlaggedSingerAtTopOfList_DoesNotReassignBackToSameSinger()
+    {
+        // The real-world shape of the reported bug: with FloatCurrentSingerToTop on, the current singer
+        // sits at list[0] — the row a DJ is most likely to accidentally flag. A naive "reassign to first
+        // active singer in list order" fallback would hand the flag right back to the same singer still
+        // at index 0, making "Clear 1st Singer Badge" look like it did nothing.
+        var alice = new SingerEntry { Name = "Alice", IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        RotationHelpers.ToggleRotationStartSinger(list, alice);
+
+        Assert.False(alice.IsRotationStart);
+        Assert.True(bob.IsRotationStart);
+    }
+
+    [Fact]
+    public void SetCurrentSinger_WithFloatCurrentToTop_MovesToTopIndex()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        RotationHelpers.SetCurrentSinger(list, bob, floatCurrentToTop: true);
+
+        Assert.Equal(bob, list[0]);
+        Assert.True(bob.IsCurrent);
+        Assert.True(alice.IsRotationStart);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_WithFloatCurrentToTop_AdvancesAndFloatsNextToTop()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true, IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        RotationHelpers.AdvanceRotationAfterFinished(list, alice, floatCurrentToTop: true);
+
+        Assert.Equal(bob, list[0]);
+        Assert.True(bob.IsCurrent);
+        Assert.Equal(alice, list[2]);
+        Assert.False(alice.IsCurrent);
+        Assert.True(alice.IsRotationStart);
+    }
+
+    [Fact]
+    public void HandleSingerRetiredOrRemoved_Moves1stFlagToNextActiveSinger()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        RotationHelpers.HandleSingerRetiredOrRemoved(list, alice);
+
+        Assert.False(alice.IsRotationStart);
+        Assert.True(bob.IsRotationStart);
+        Assert.False(carol.IsRotationStart);
+    }
+
+    [Fact]
+    public void HandleSingerRetiredOrRemoved_SkipsInactiveAndPausedSingers()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob", IsInactive = true };
+        var carol = new SingerEntry { Name = "Carol", IsPaused = true };
+        var dave = new SingerEntry { Name = "Dave" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol, dave };
+
+        RotationHelpers.HandleSingerRetiredOrRemoved(list, alice);
+
+        Assert.False(alice.IsRotationStart);
+        Assert.False(bob.IsRotationStart);
+        Assert.False(carol.IsRotationStart);
+        Assert.True(dave.IsRotationStart);
+    }
+
+    [Fact]
+    public void HandleSingerRetiredOrRemoved_WrapsToBeginningIfAtEndOfList()
+    {
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol", IsRotationStart = true };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        RotationHelpers.HandleSingerRetiredOrRemoved(list, carol);
+
+        Assert.False(carol.IsRotationStart);
+        Assert.True(alice.IsRotationStart);
+    }
+
+    [Fact]
+    public void EnsureRotationStartFlag_ClearsInactiveSingerAndAssignsToFirstActive()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsInactive = true, IsRotationStart = true };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        RotationHelpers.EnsureRotationStartFlag(list);
+
+        Assert.False(alice.IsRotationStart);
+        Assert.True(bob.IsRotationStart);
+        Assert.False(carol.IsRotationStart);
+    }
 }
+
 

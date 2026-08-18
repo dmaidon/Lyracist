@@ -1,4 +1,4 @@
-<!-- Edited on Aug 15, 2026 @ 07:15:00 -> Add Enable DJ Banner Screen, QR Code overlay controls, and screen enable checkboxes -->
+<!-- Edited on Aug 18, 2026 @ 13:24:00 -> Add Float Current Singer to Top of Rotation setting checkbox -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -474,6 +474,7 @@
                                     <TextBlock Text="Billboard View Mode" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                     <ComboBox ItemsSource="{Binding ProjectionViews}" SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}" Margin="0,0,0,12" />
 
+                                    <CheckBox Content="Float Current Singer to Top of Rotation" IsChecked="{Binding FloatCurrentSingerToTop, Mode=TwoWay}" Margin="0,0,0,4" ToolTip="When enabled, the current active performer automatically floats to index 0 of the rotation queue." />
                                     <CheckBox Content="Mirror Lyrics display on control view" IsChecked="{Binding IsLyricsMirrored, Mode=TwoWay}" Margin="0,4,0,4" />
                                 </StackPanel>
                             </GroupBox>

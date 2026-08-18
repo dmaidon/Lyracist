@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 16:18:30 -> Added Trivia Night Pro documentation in Help tab and 3-column no-scroll layout in Trivia Settings -->
+<!-- Edited on Aug 18, 2026 @ 13:48:00 -> Update Star button to display dynamic filled gold / outline state and ensure Float Current to Top functionality -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -98,6 +98,19 @@
                         <MenuItem Header="Set as Current Singer"
                                   Command="{Binding Path=PlacementTarget.Tag.SetCurrentSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                   CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Command="{Binding Path=PlacementTarget.Tag.SetRotationStartSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="Set as 1st Singer (Round Start)" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=PlacementTarget.DataContext.IsRotationStart, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Value="True">
+                                            <Setter Property="Header" Value="Clear 1st Singer Badge" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
                         <MenuItem Header="Finish Current Song"
                                   Command="{Binding Path=PlacementTarget.Tag.FinishSingerSongCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                   CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
@@ -132,6 +145,12 @@
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
+                <!-- Lowest priority: 1st Singer red tint, overridden below by Next (green) / Current (amber) -->
+                <DataTrigger Binding="{Binding IsRotationStart}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AppRotationStartBackgroundBrush}" />
+                    <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
                 <DataTrigger Binding="{Binding IsNext}" Value="True">
                     <Setter Property="Background" Value="{DynamicResource AppNextSingerBackgroundBrush}" />
                     <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
@@ -482,7 +501,6 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-
                         <WrapPanel Margin="0,0,0,12" Orientation="Horizontal">
                             <CheckBox
                             Content="Enable Display Window"
@@ -490,6 +508,13 @@
                             Style="{StaticResource ModernCheckBoxStyle}"
                             FontSize="16"
                             Margin="0,0,24,0" />
+                            <CheckBox
+                            Content="Float Current to Top"
+                            IsChecked="{Binding FloatCurrentSingerToTop}"
+                            Style="{StaticResource ModernCheckBoxStyle}"
+                            FontSize="16"
+                            Margin="0,0,24,0"
+                            ToolTip="When checked, the current singer always floats to the top of the rotation list." />
                             <ComboBox
                             Width="180"
                             Margin="0,0,24,0"
@@ -522,7 +547,7 @@
                             Foreground="{DynamicResource MaterialDesignBody}" />
                             <ComboBox
                             Width="110"
-                             ItemsSource="{Binding Themes}"
+                            ItemsSource="{Binding Themes}"
                             SelectedItem="{Binding SelectedTheme, UpdateSourceTrigger=PropertyChanged}"
                             Style="{StaticResource ModernComboBoxStyle}"
                             FontSize="14"
@@ -602,7 +627,6 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <Button
-                                                Content="★"
                                                 Command="{Binding DataContext.SetCurrentSingerCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                 CommandParameter="{Binding}"
                                                 Grid.Column="0"
@@ -612,7 +636,16 @@
                                                          full-size column button, even though it stays structurally in its own column. -->
                                                     <Button.Style>
                                                         <Style TargetType="Button" BasedOn="{StaticResource GridButtonStyle}">
+                                                            <Setter Property="Content" Value="☆" />
+                                                            <Setter Property="Foreground" Value="#888888" />
+                                                            <Setter Property="FontSize" Value="14" />
+                                                            <Setter Property="FontWeight" Value="Bold" />
                                                             <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                                    <Setter Property="Content" Value="★" />
+                                                                    <Setter Property="Foreground" Value="#F5D042" />
+                                                                    <Setter Property="BorderBrush" Value="#F5D042" />
+                                                                </DataTrigger>
                                                                 <DataTrigger Binding="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource NarrowWidthConverter}}" Value="True">
                                                                     <Setter Property="Width" Value="26" />
                                                                     <Setter Property="Height" Value="26" />
@@ -625,7 +658,22 @@
                                                 </Button>
 
                                                 <Grid Grid.Column="1">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0"
+                                                            Background="#DC2626"
+                                                            CornerRadius="4"
+                                                            Padding="4,2"
+                                                            Margin="0,0,4,0"
+                                                            VerticalAlignment="Center"
+                                                            ToolTip="1st Singer in Rotation (Round Start)"
+                                                            Visibility="{Binding IsRotationStart, Converter={StaticResource BoolToVis}}">
+                                                        <TextBlock Text="🚩 1st" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                                                    </Border>
                                                     <TextBox
+                                                    Grid.Column="1"
                                                     x:Name="SingerNameInput"
                                                     Text="{Binding Name, UpdateSourceTrigger=LostFocus}"
                                                     GotKeyboardFocus="SingerNameTextBox_GotKeyboardFocus"

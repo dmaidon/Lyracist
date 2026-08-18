@@ -1,4 +1,4 @@
-// Edited on Aug 9, 2026 @ 09:15:00 -> Sync active special event banner from KSRotation API
+// Edited on Aug 18, 2026 @ 13:24:00 -> Sync isRotationStart property from KSRotation API
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -110,7 +110,7 @@ namespace Lyracist.Services.Integration
                 if (response.IsSuccessStatusCode)
                 {
                     string json = await response.Content.ReadAsStringAsync(token);
-                    var syncedItems = JsonSerializer.Deserialize<List<RotationItemDto>>(json);
+                    var syncedItems = JsonSerializer.Deserialize<List<RotationItemDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (syncedItems != null)
                     {
@@ -122,6 +122,7 @@ namespace Lyracist.Services.Integration
 
                         await UpdateRotationDataAsync(syncedItems);
                     }
+                    _lastConnectSuccess = true;
                 }
                 else
                 {
@@ -199,6 +200,7 @@ namespace Lyracist.Services.Integration
                     singer.IsNext = item.isNext;
                     singer.IsInactive = item.isInactive;
                     singer.IsMusic = item.isMusic;
+                    singer.IsRotationStart = item.isRotationStart;
 
                     newRotation.Add(singer);
                 }
@@ -246,7 +248,8 @@ namespace Lyracist.Services.Integration
                     s.isCurrent != c.IsCurrent ||
                     s.isNext != c.IsNext ||
                     s.isInactive != c.IsInactive ||
-                    s.isMusic != c.IsMusic)
+                    s.isMusic != c.IsMusic ||
+                    s.isRotationStart != c.IsRotationStart)
                 {
                     return false;
                 }
@@ -263,6 +266,7 @@ namespace Lyracist.Services.Integration
             public bool isNext { get; set; }
             public bool isInactive { get; set; }
             public bool isMusic { get; set; }
+            public bool isRotationStart { get; set; }
         }
     }
 }

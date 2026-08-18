@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 09:12:40 -> Add Email, PinCode, AvatarType, AvatarSource, VocalRange, and CustomTitle properties
+// Edited on Aug 18, 2026 @ 13:24:00 -> Add IsRotationStart property to Singer
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Lyracist.Models;
@@ -56,6 +56,9 @@ public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
 
     [ObservableProperty]
     private bool _isInactive = false;
+
+    [ObservableProperty]
+    private bool _isRotationStart = false;
 
     [ObservableProperty]
     private bool _isCurrent = false;

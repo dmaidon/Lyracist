@@ -21,6 +21,7 @@ namespace KSRotation.Services
         private const string AppSplitFlapBorderBrushKey = "AppSplitFlapBorderBrush";
         private const string AppCurrentSingerBackgroundBrushKey = "AppCurrentSingerBackgroundBrush";
         private const string AppNextSingerBackgroundBrushKey = "AppNextSingerBackgroundBrush";
+        private const string AppRotationStartBackgroundBrushKey = "AppRotationStartBackgroundBrush";
         private const string AppSecondaryButtonBorderBrushKey = "AppSecondaryButtonBorderBrush";
         private const string AppSecondaryButtonForegroundBrushKey = "AppSecondaryButtonForegroundBrush";
         private const string AppInfoTextBrushKey = "AppInfoTextBrush";
@@ -43,6 +44,8 @@ namespace KSRotation.Services
         private static readonly SolidColorBrush LightCurrentSingerBackgroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xF9, 0xC4));
         private static readonly SolidColorBrush DarkNextSingerBackgroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x0A, 0x3E, 0x1A));
         private static readonly SolidColorBrush LightNextSingerBackgroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xC8, 0xE6, 0xC9));
+        private static readonly SolidColorBrush DarkRotationStartBackgroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x4A, 0x14, 0x14));
+        private static readonly SolidColorBrush LightRotationStartBackgroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xCD, 0xD2));
         private static readonly SolidColorBrush DarkSecondaryButtonBorderOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xC4, 0xB5, 0xFD));
         private static readonly SolidColorBrush LightSecondaryButtonBorderOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0x7C, 0x3A, 0xED));
         private static readonly SolidColorBrush DarkSecondaryButtonForegroundOverride = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(0xE9, 0xD5, 0xFF));
@@ -138,6 +141,7 @@ namespace KSRotation.Services
                 resources[AppSplitFlapBorderBrushKey] = DarkSplitFlapBorderOverride;
                 resources[AppCurrentSingerBackgroundBrushKey] = DarkCurrentSingerBackgroundOverride;
                 resources[AppNextSingerBackgroundBrushKey] = DarkNextSingerBackgroundOverride;
+                resources[AppRotationStartBackgroundBrushKey] = DarkRotationStartBackgroundOverride;
                 resources[AppSecondaryButtonBorderBrushKey] = DarkSecondaryButtonBorderOverride;
                 resources[AppSecondaryButtonForegroundBrushKey] = DarkSecondaryButtonForegroundOverride;
                 resources[AppInfoTextBrushKey] = DarkInfoTextOverride;
@@ -154,6 +158,7 @@ namespace KSRotation.Services
             resources[AppSplitFlapBorderBrushKey] = LightSplitFlapBorderOverride;
             resources[AppCurrentSingerBackgroundBrushKey] = LightCurrentSingerBackgroundOverride;
             resources[AppNextSingerBackgroundBrushKey] = LightNextSingerBackgroundOverride;
+            resources[AppRotationStartBackgroundBrushKey] = LightRotationStartBackgroundOverride;
             resources[AppSecondaryButtonBorderBrushKey] = LightSecondaryButtonBorderOverride;
             resources[AppSecondaryButtonForegroundBrushKey] = LightSecondaryButtonForegroundOverride;
             resources[AppInfoTextBrushKey] = LightInfoTextOverride;

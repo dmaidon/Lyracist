@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 12:15:00 -> Add Duet Partner input, edit fields, and queue labels in MAUI MainPage -->
+<!-- Edited on Aug 18, 2026 @ 13:24:00 -> Add Float to Top toggle, 1st Singer round flag badge, and Set 1st Singer action -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -28,6 +28,10 @@
             <Grid Grid.Row="1" RowDefinitions="Auto, *">
                 <HorizontalStackLayout Spacing="8" Margin="0,0,0,6" VerticalOptions="Center">
                     <Label Text="ACTIVE ROTATION QUEUE" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" VerticalOptions="Center" />
+                    <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                        <CheckBox IsChecked="{Binding FloatCurrentSingerToTop}" Color="#7C3AED" Scale="0.8" VerticalOptions="Center" />
+                        <Label Text="Float to Top" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
                     <Button Text="Clear Queue" Clicked="OnClearQueueClicked" BackgroundColor="Transparent" TextColor="#F87171" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#F87171" VerticalOptions="Center" />
                     <Button x:Name="LoadTestDataBtn" Text="Load Test Data" Clicked="OnLoadTestDataClicked" BackgroundColor="Transparent" TextColor="#3B82F6" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#3B82F6" VerticalOptions="Center" />
                     <Button x:Name="ThemeBtn" Text="☀️ Light Mode" Clicked="OnThemeToggled" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
@@ -49,6 +53,14 @@
                                     </Border.Stroke>
 
                                     <Border.Triggers>
+                                        <!-- Red border outline and pink/maroon background for the 1st singer (round start) — lowest
+                                             priority, overridden below by Inactive/Paused (grey), Current (orange), and Next (blue) -->
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsRotationStart}" Value="True">
+                                            <Setter Property="StrokeThickness" Value="2" />
+                                            <Setter Property="Stroke" Value="#DC2626" />
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FEF2F2, Dark=#2D1414}" />
+                                        </DataTrigger>
+
                                         <!-- Grey out item if inactive/paused, but keep it in the list layout and position -->
                                         <DataTrigger TargetType="Border" Binding="{Binding IsInactive}" Value="True">
                                             <Setter Property="Opacity" Value="0.4" />
@@ -95,7 +107,10 @@
                                                     </Label.Triggers>
                                                 </Label>
 
-                                                <!-- Indicator badges (Now Singing [Orange], Next [Blue], Music [Green]) -->
+                                                <!-- Indicator badges (1st Singer [Red], Now Singing [Orange], Next [Blue], Music [Green]) -->
+                                                <Border StrokeShape="RoundRectangle 4" BackgroundColor="#DC2626" Padding="4,2" IsVisible="{Binding IsRotationStart}" StrokeThickness="0" ToolTipProperties.Text="1st Singer in Rotation (Round Start)">
+                                                    <Label Text="🚩 1ST" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                                                </Border>
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#F97316" Padding="4,2" IsVisible="{Binding IsCurrent}" StrokeThickness="0">
                                                     <Label Text="NOW PERFORMING" TextColor="White" FontSize="9" FontAttributes="Bold" />
                                                 </Border>
@@ -212,6 +227,17 @@
 
                                             <!-- Complete current round -->
                                             <Button Text="✓" Clicked="OnFinishSingerSongClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#3B82F6" BorderWidth="1" TextColor="#3B82F6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Song Completed" />
+
+                                            <!-- Set/Clear 1st Singer in rotation -->
+                                            <Button Text="🚩" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=SetRotationStartSingerCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#DC2626" BorderWidth="1" TextColor="#DC2626" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Set as 1st Singer (Round Start)">
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsRotationStart}" Value="True">
+                                                        <Setter Property="BackgroundColor" Value="#DC2626" />
+                                                        <Setter Property="TextColor" Value="White" />
+                                                        <Setter Property="ToolTipProperties.Text" Value="Clear 1st Singer badge (accidental flag? tap to remove)" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
 
                                             <!-- Up/Down buttons -->
                                             <Button Text="▲" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerUpCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />

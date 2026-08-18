@@ -1,4 +1,32 @@
-// Edited on Aug 17, 2026 @ 16:11:30 -> Document 3-column no-scroll Trivia Settings layout and Venue/DJ deduplication
+// Edited on Aug 18, 2026 @ 13:24:00 -> Document Float Current Singer to Top and 1st Singer Round Flag features
+Rotation Management & Round Cycle Tracking (`Lyracist`, `KSRotation`, & `KSRotation.Maui`) - (August 2026)
+
+Section: Performance & Rotation Operations / Singer Queue Management
+
+[System Details]
+1. Float Current Singer to Top of Rotation:
+   - **User Interface Controls**:
+     * `Lyracist`: Checkbox on the **Rotation** page queue toolbar, **Karaoke** page queue bar, and persistent toggle under **Settings -> Monitors & Screen Assignments**.
+     * `KSRotation` (WPF): Checkbox on the main rotation toolbar with automatic settings persistence.
+     * `KSRotation.Maui`: Checkbox in the Active Rotation Queue header bar.
+   - **Queue Behavior**:
+     * When enabled, the performer currently at the microphone automatically floats to the very top (index 0) of the list.
+     * Upon song completion (`Done` / `✓`), the finished performer is moved to the back of the active queue and the next active performer automatically floats to the top (index 0).
+     * Eliminates the need for the DJ/KJ to scroll down long lists during active shows.
+
+2. 1st Singer in Rotation (Round Start Anchor Flag):
+   - **Visual Indicator**:
+     * A red `🚩 1ST` badge is displayed next to the singer designated as the first performer of the rotation round, and that singer's row is also highlighted with a red background (alongside the existing yellow "now performing" and blue "up next" row highlights), so the 1st singer stands out at a glance.
+     * When the 1st singer returns to index 0 / current status, the DJ knows a complete rotation cycle has been completed.
+   - **Manual Re-anchoring & Clearing**:
+     * Right-clicking any singer and selecting `"Set as 1st Singer (Round Start)"` or clicking the `🚩` button reassigns the anchor to that singer, clearing it from previous holders.
+     * Clicking the same action again on the singer who already holds the flag (the button turns red / the menu item changes to `"Clear 1st Singer Badge"`) undoes the mistake — it hands the flag to the next active singer in rotation order rather than leaving nobody flagged, so an accidental click never needs a specific replacement singer picked.
+     * When new singers are added, the system automatically ensures exactly one active singer holds the start flag.
+   - **Cross-App Sync**:
+     * The `isRotationStart` flag is synchronized via the REST/WebSocket `/api/rotation` feed between `KSRotation` and `Lyracist`.
+
+--------------------------------------------------------------------------------
+
 Lyracist Live Trivia (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`) - Integrated Game Master & Intermission System (August 2026)
 
 Section: Entertainment Modules / Lyracist.Trivia & Pub Trivia Game Master

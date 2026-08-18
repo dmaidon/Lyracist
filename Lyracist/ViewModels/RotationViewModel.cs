@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 12:29:45 -> Log duet partner in session history and clear partner upon song completion
+// Edited on Aug 18, 2026 @ 13:48:00 -> Ensure FloatCurrentSingerToTop promotes and floats singer on checkbox toggle and SetRotationStartSinger
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,6 +40,36 @@ public partial class RotationViewModel : BaseViewModel
     private readonly IDisplayService _display;
     private readonly IMediaEngine _mediaEngine;
 
+    // Guards against the Rotation.CollectionChanged handler reacting mid-operation to the
+    // intermediate RemoveAt+Insert pairs that RotationHelpers performs internally (e.g. inside
+    // AdvanceRotationAfterFinished's float branch), which would otherwise fight the helper's own
+    // reordering before it finishes and leave the current singer stuck instead of at the top.
+    private bool _suppressRotationOrderSync;
+
+    /// <summary>
+    /// Runs <paramref name="action"/> with the CollectionChanged auto-sync handler suppressed, then
+    /// re-syncs the rotation-start flag and (if enabled) floats the current singer to the top once,
+    /// after the action's own list mutations have all completed.
+    /// </summary>
+    private void RunRotationOrderChange(Action action)
+    {
+        _suppressRotationOrderSync = true;
+        try
+        {
+            action();
+        }
+        finally
+        {
+            _suppressRotationOrderSync = false;
+        }
+
+        Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
+        if (FloatCurrentSingerToTop)
+        {
+            Lyracist.Shared.RotationHelpers.FloatCurrentSingerToTop(Rotation);
+        }
+    }
+
     public event Action? RotationStateChanged;
 
     public ObservableCollection<Singer> Rotation { get; } = [];
@@ -49,6 +79,36 @@ public partial class RotationViewModel : BaseViewModel
     public ObservableCollection<string> SingerNames { get; } = [];
 
     public ObservableCollection<PerformedSong> SessionPerformedSongs { get; } = [];
+
+    [ObservableProperty]
+    private bool _floatCurrentSingerToTop;
+
+    partial void OnFloatCurrentSingerToTopChanged(bool value)
+    {
+        AppSettings.FloatCurrentSingerToTop = value;
+        if (value)
+        {
+            RunRotationOrderChange(() =>
+            {
+                var current = Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation);
+                if (current == null)
+                {
+                    var first = Rotation.FirstOrDefault(s => s.IsRotationStart && !s.IsInactive && !s.IsPaused)
+                                ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+                    if (first != null)
+                    {
+                        Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, first, floatCurrentToTop: true);
+                    }
+                }
+                else
+                {
+                    Lyracist.Shared.RotationHelpers.FloatCurrentSingerToTop(Rotation);
+                }
+            });
+            RotationStateChanged?.Invoke();
+            _display.UpdateRotation([.. Rotation]);
+        }
+    }
 
     public string SessionPerformedSongsText => SessionPerformedSongs.Count == 0
         ? "No songs performed in this session yet."
@@ -134,6 +194,17 @@ public partial class RotationViewModel : BaseViewModel
     {
         _display = display;
         _mediaEngine = mediaEngine;
+        _floatCurrentSingerToTop = AppSettings.FloatCurrentSingerToTop;
+        Rotation.CollectionChanged += (_, _) =>
+        {
+            if (_suppressRotationOrderSync) return;
+
+            Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
+            if (FloatCurrentSingerToTop)
+            {
+                Lyracist.Shared.RotationHelpers.FloatCurrentSingerToTop(Rotation);
+            }
+        };
 
         try
         {
@@ -530,6 +601,11 @@ public partial class RotationViewModel : BaseViewModel
                 }
             }
 
+            if (removed.IsRotationStart)
+            {
+                Lyracist.Shared.RotationHelpers.HandleSingerRetiredOrRemoved(Rotation, removed);
+            }
+
             // Promote before removing: Rotation.Remove below fires CollectionChanged synchronously,
             // which KaraokeViewModel resyncs off of. If nobody were IsCurrent yet at that instant, its
             // resync would race our own promotion and pick a different singer (first-in-list-order)
@@ -537,11 +613,12 @@ public partial class RotationViewModel : BaseViewModel
             // simultaneously flagged current.
             if (wasCurrent && nextCurrent != null)
             {
-                nextCurrent.IsCurrent = true;
-                nextCurrent.IsNext = false;
+                RunRotationOrderChange(() =>
+                    Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, nextCurrent, FloatCurrentSingerToTop));
             }
 
             Rotation.Remove(removed);
+            Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
             SelectedSinger = null;
 
             if (wasCurrent)
@@ -597,8 +674,11 @@ public partial class RotationViewModel : BaseViewModel
         if (index > 0)
         {
             var singer = SelectedSinger;
-            Rotation.RemoveAt(index);
-            Rotation.Insert(index - 1, singer);
+            RunRotationOrderChange(() =>
+            {
+                Rotation.RemoveAt(index);
+                Rotation.Insert(index - 1, singer);
+            });
             SelectedSinger = singer;
 
             RotationStateChanged?.Invoke();
@@ -616,8 +696,11 @@ public partial class RotationViewModel : BaseViewModel
         if (index < Rotation.Count - 1)
         {
             var singer = SelectedSinger;
-            Rotation.RemoveAt(index);
-            Rotation.Insert(index + 1, singer);
+            RunRotationOrderChange(() =>
+            {
+                Rotation.RemoveAt(index);
+                Rotation.Insert(index + 1, singer);
+            });
             SelectedSinger = singer;
 
             RotationStateChanged?.Invoke();
@@ -651,7 +734,28 @@ public partial class RotationViewModel : BaseViewModel
         if (singer == null)
             return;
 
-        Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, singer);
+        RunRotationOrderChange(() =>
+            Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, singer, FloatCurrentSingerToTop));
+
+        RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
+    }
+
+    [RelayCommand]
+    private void SetRotationStartSinger(Singer singer)
+    {
+        if (singer == null)
+            return;
+
+        bool wasRotationStart = singer.IsRotationStart;
+        RunRotationOrderChange(() =>
+        {
+            Lyracist.Shared.RotationHelpers.ToggleRotationStartSinger(Rotation, singer);
+            if (!wasRotationStart && FloatCurrentSingerToTop)
+            {
+                Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, singer, floatCurrentToTop: true);
+            }
+        });
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
@@ -664,7 +768,8 @@ public partial class RotationViewModel : BaseViewModel
 
         if (singer.IsMusic)
         {
-            Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer);
+            RunRotationOrderChange(() =>
+                Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop));
             Rotation.Remove(singer);
             RotationStateChanged?.Invoke();
             _display.UpdateRotation([.. Rotation]);
@@ -687,7 +792,8 @@ public partial class RotationViewModel : BaseViewModel
         singer.DuetPartnerName = string.Empty;
 
         // Advance rotation to next active singer relative to singer
-        Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer);
+        RunRotationOrderChange(() =>
+            Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop));
 
         // 3. Check for pending songs
         if (_pendingSingerSongs.TryGetValue(name, out var list) && list.Count > 0)
@@ -801,6 +907,11 @@ public partial class RotationViewModel : BaseViewModel
                 }
             }
 
+            if (singer.IsRotationStart)
+            {
+                Lyracist.Shared.RotationHelpers.HandleSingerRetiredOrRemoved(Rotation, singer);
+            }
+
             singer.IsInactive = true;
 
             // Promote before removing from Rotation below (which fires CollectionChanged
@@ -810,12 +921,13 @@ public partial class RotationViewModel : BaseViewModel
                 singer.IsCurrent = false;
                 if (nextCurrent != null)
                 {
-                    nextCurrent.IsCurrent = true;
-                    nextCurrent.IsNext = false;
+                    RunRotationOrderChange(() =>
+                        Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, nextCurrent, FloatCurrentSingerToTop));
                 }
             }
 
             Rotation.Remove(singer);
+            Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
             InactiveSingers.Add(singer);
 
             // If they are currently singing and we set them inactive, stop playback

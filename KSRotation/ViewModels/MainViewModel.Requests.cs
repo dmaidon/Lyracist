@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 12:10:00 -> Add duet partner parsing and forwarding in HandleRequestReceived and HandleDjAction
+// Edited on Aug 18, 2026 @ 13:56:00 -> Update delete/mark_inactive to transfer 1st singer flag and float next current singer to top
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -338,6 +338,7 @@ namespace KSRotation.ViewModels
                 isInactive = s.IsInactive,
                 isPaused = s.IsPaused,
                 isMusic = s.IsMusic,
+                isRotationStart = s.IsRotationStart,
                 vocalRange = s.VocalRange,
                 customTitle = s.CustomTitle,
                 queuedSongs = s.QueuedSongs.Select(q => new QueuedSongDto { song = q.Song, artist = q.Artist }).ToList(),
@@ -564,6 +565,11 @@ namespace KSRotation.ViewModels
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
                         if (singer == null) return "Singer not found.";
 
+                        if (singer.IsRotationStart)
+                        {
+                            RotationHelpers.HandleSingerRetiredOrRemoved(Singers, singer);
+                        }
+
                         bool wasCurrent = singer.IsCurrent;
                         SingerEntry? nextCurrent = null;
 
@@ -600,15 +606,12 @@ namespace KSRotation.ViewModels
                             Singers.Move(oldIdx, Singers.Count - 1);
                         }
 
-                        if (wasCurrent)
+                        if (wasCurrent && nextCurrent != null)
                         {
-                            if (nextCurrent != null)
-                            {
-                                nextCurrent.IsCurrent = true;
-                                nextCurrent.IsNext = false;
-                            }
+                            RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop);
                         }
 
+                        RotationHelpers.EnsureRotationStartFlag(Singers);
                         RotationHelpers.UpdateNextSingerHighlight(Singers);
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();

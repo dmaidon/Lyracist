@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 10:00:00 -> Set ShowSplashOnStartup default to false
+// Edited on Aug 18, 2026 @ 13:24:00 -> Add FloatCurrentSingerToTop setting to AppSettings
 using System.IO;
 using System.Text.Json;
 
@@ -780,6 +780,12 @@ public static class AppSettings
         set { _data.SpecialEvents = value; Save(); }
     }
 
+    public static bool FloatCurrentSingerToTop
+    {
+        get => _data.FloatCurrentSingerToTop;
+        set { _data.FloatCurrentSingerToTop = value; Save(); }
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
@@ -789,6 +795,7 @@ public static class AppSettings
         public string ConnectInstructionsScreen { get; set; } = "All Screens / Monitors";
         public bool IsDjBannerQrCodeEnabled { get; set; } = true;
         public bool EnableKillVocal { get; set; } = false;
+        public bool FloatCurrentSingerToTop { get; set; } = false;
 
         // Registration data
         public string RegFirstName { get; set; } = string.Empty;

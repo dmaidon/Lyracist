@@ -1,6 +1,7 @@
-// Edited on Aug 10, 2026 @ 16:50:00 -> Optimized loops/allocations & added GetCurrentSinger, GetActiveSingerCount, ClearHighlights helpers
+// Edited on Aug 18, 2026 @ 13:56:00 -> Add HandleSingerRetiredOrRemoved, improve EnsureRotationStartFlag, and optimize MoveSingerInList
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Lyracist.Shared
 {
@@ -10,6 +11,180 @@ namespace Lyracist.Shared
     /// </summary>
     public static class RotationHelpers
     {
+        /// <summary>
+        /// Moves an item from <paramref name="oldIndex"/> to <paramref name="newIndex"/> in <paramref name="list"/>.
+        /// Uses RemoveAt + Insert to ensure visual collection containers update deterministically across all platforms.
+        /// </summary>
+        public static void MoveSingerInList<T>(IList<T> list, int oldIndex, int newIndex)
+        {
+            if (oldIndex == newIndex || oldIndex < 0 || newIndex < 0 || oldIndex >= list.Count || newIndex >= list.Count)
+                return;
+
+            T item = list[oldIndex];
+            list.RemoveAt(oldIndex);
+            list.Insert(newIndex, item);
+        }
+
+        /// <summary>
+        /// Ensures exactly one active singer in <paramref name="singers"/> has <see cref="IRotationSinger.IsRotationStart"/> set.
+        /// If no singer has the flag, sets it on the first active singer (or first singer in list).
+        /// If an inactive or paused singer has the flag, clears it and reassigns to the first active singer.
+        /// If multiple singers have the flag, clears duplicates and preserves only the first.
+        /// </summary>
+        public static void EnsureRotationStartFlag<T>(IList<T> singers) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+
+            int count = singers.Count;
+            if (count == 0) return;
+
+            int firstActiveStartIdx = -1;
+            for (int i = 0; i < count; i++)
+            {
+                if (singers[i].IsRotationStart)
+                {
+                    if (singers[i].IsInactive || singers[i].IsPaused)
+                    {
+                        singers[i].IsRotationStart = false;
+                    }
+                    else if (firstActiveStartIdx == -1)
+                    {
+                        firstActiveStartIdx = i;
+                    }
+                    else
+                    {
+                        singers[i].IsRotationStart = false;
+                    }
+                }
+            }
+
+            if (firstActiveStartIdx == -1)
+            {
+                // Assign to the first active non-paused singer, or first singer in the list
+                for (int i = 0; i < count; i++)
+                {
+                    if (!singers[i].IsInactive && !singers[i].IsPaused)
+                    {
+                        singers[i].IsRotationStart = true;
+                        return;
+                    }
+                }
+                singers[0].IsRotationStart = true;
+            }
+        }
+
+        /// <summary>
+        /// Handles moving the 1st singer flag (IsRotationStart) to the next active singer when <paramref name="entry"/>
+        /// is retired (made inactive) or deleted from the rotation list.
+        /// </summary>
+        public static void HandleSingerRetiredOrRemoved<T>(IList<T> singers, T entry) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            ArgumentNullException.ThrowIfNull(entry);
+
+            if (!entry.IsRotationStart) return;
+
+            entry.IsRotationStart = false;
+
+            int count = singers.Count;
+            int startIndex = singers.IndexOf(entry);
+            if (startIndex >= 0 && count > 1)
+            {
+                for (int i = 1; i < count; i++)
+                {
+                    T candidate = singers[(startIndex + i) % count];
+                    if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused)
+                    {
+                        candidate.IsRotationStart = true;
+                        return;
+                    }
+                }
+            }
+
+            EnsureRotationStartFlag(singers);
+        }
+
+        /// <summary>
+        /// Explicitly designates <paramref name="entry"/> as the 1st singer (round start) in the rotation,
+        /// clearing the flag on all other singers.
+        /// </summary>
+        public static void SetRotationStartSinger<T>(IList<T> singers, T entry) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            ArgumentNullException.ThrowIfNull(entry);
+
+            int count = singers.Count;
+            for (int i = 0; i < count; i++)
+            {
+                singers[i].IsRotationStart = (singers[i] == entry);
+            }
+        }
+
+        /// <summary>
+        /// Toggles <paramref name="entry"/>'s 1st singer (round start) designation. If <paramref name="entry"/>
+        /// already holds the flag, clears it and reassigns it to the next active singer sequentially after
+        /// <paramref name="entry"/> (wrapping around, same search <see cref="HandleSingerRetiredOrRemoved{T}"/>
+        /// uses) — so a DJ who flagged the wrong singer by accident can undo it without having to pick a specific
+        /// replacement. Reassigning to anyone OTHER than <paramref name="entry"/> matters here: falling back to
+        /// <see cref="EnsureRotationStartFlag{T}"/> alone would reassign to the first active singer in list
+        /// order, which is often <paramref name="entry"/> itself (e.g. the current singer floated to the top —
+        /// the row most likely to be clicked by accident), making the "clear" a no-op. Otherwise, designates
+        /// <paramref name="entry"/> explicitly via <see cref="SetRotationStartSinger{T}"/>, clearing the flag on
+        /// everyone else.
+        /// </summary>
+        public static void ToggleRotationStartSinger<T>(IList<T> singers, T entry) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            ArgumentNullException.ThrowIfNull(entry);
+
+            if (entry.IsRotationStart)
+            {
+                entry.IsRotationStart = false;
+
+                int count = singers.Count;
+                int startIndex = singers.IndexOf(entry);
+                if (startIndex >= 0 && count > 1)
+                {
+                    for (int i = 1; i < count; i++)
+                    {
+                        T candidate = singers[(startIndex + i) % count];
+                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused)
+                        {
+                            candidate.IsRotationStart = true;
+                            return;
+                        }
+                    }
+                }
+
+                // No other active singer exists to hand the flag to — fall back to the invariant-preserving
+                // default, which will land back on entry itself if it's genuinely the only eligible singer.
+                EnsureRotationStartFlag(singers);
+            }
+            else
+            {
+                SetRotationStartSinger(singers, entry);
+            }
+        }
+
+        /// <summary>
+        /// Moves the current active singer to index 0 of <paramref name="singers"/> if not already at the top.
+        /// </summary>
+        public static void FloatCurrentSingerToTop<T>(IList<T> singers) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+
+            T? current = GetCurrentSinger(singers);
+            if (current != null)
+            {
+                int index = singers.IndexOf(current);
+                if (index > 0)
+                {
+                    MoveSingerInList(singers, index, 0);
+                    UpdateNextSingerHighlight(singers);
+                }
+            }
+        }
+
         /// <summary>
         /// Gets the current active, non-paused singer in <paramref name="singers"/>, or null if none.
         /// </summary>
@@ -127,8 +302,9 @@ namespace Lyracist.Shared
         /// IsCurrent/IsNext on every other singer, and — if there was a previous current singer — marks
         /// that singer as IsNext so they resume right after. Falls back to standard rotation order when
         /// there was no previous current singer (or it was inactive).
+        /// If <paramref name="floatCurrentToTop"/> is true, moves <paramref name="entry"/> to index 0.
         /// </summary>
-        public static void SetCurrentSinger<T>(IList<T> singers, T entry) where T : class, IRotationSinger
+        public static void SetCurrentSinger<T>(IList<T> singers, T entry, bool floatCurrentToTop = false) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(entry);
@@ -148,13 +324,25 @@ namespace Lyracist.Shared
 
             entry.IsCurrent = true;
 
-            if (previousCurrent != null && previousCurrent != entry && !previousCurrent.IsInactive && !previousCurrent.IsPaused)
+            if (floatCurrentToTop)
             {
-                previousCurrent.IsNext = true;
+                int index = singers.IndexOf(entry);
+                if (index > 0)
+                {
+                    MoveSingerInList(singers, index, 0);
+                }
+                UpdateNextSingerHighlight(singers);
             }
             else
             {
-                UpdateNextSingerHighlight(singers);
+                if (previousCurrent != null && previousCurrent != entry && !previousCurrent.IsInactive && !previousCurrent.IsPaused)
+                {
+                    previousCurrent.IsNext = true;
+                }
+                else
+                {
+                    UpdateNextSingerHighlight(singers);
+                }
             }
         }
 
@@ -163,38 +351,93 @@ namespace Lyracist.Shared
         /// Clears IsCurrent on all singers, finds the first active non-paused singer sequentially AFTER
         /// <paramref name="finishedEntry"/> (wrapping around the list to the top), promotes that singer to
         /// current, and updates <see cref="IRotationSinger.IsNext"/> highlights accordingly.
+        /// If <paramref name="floatCurrentToTop"/> is true, moves <paramref name="finishedEntry"/> to the end of the active queue
+        /// and ensures the next promoted singer is positioned at index 0.
         /// </summary>
-        public static T? AdvanceRotationAfterFinished<T>(IList<T> singers, T finishedEntry) where T : class, IRotationSinger
+        public static T? AdvanceRotationAfterFinished<T>(IList<T> singers, T finishedEntry, bool floatCurrentToTop = false) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(finishedEntry);
 
-            int currentIndex = singers.IndexOf(finishedEntry);
-            int count = singers.Count;
-            T? nextCurrent = null;
-
-            if (currentIndex >= 0 && count > 0)
+            if (!floatCurrentToTop)
             {
-                for (int i = 1; i < count; i++)
+                int currentIndex = singers.IndexOf(finishedEntry);
+                int count = singers.Count;
+                T? nextCurrent = null;
+
+                if (currentIndex >= 0 && count > 0)
                 {
-                    T candidate = singers[(currentIndex + i) % count];
-                    if (candidate != finishedEntry && !candidate.IsInactive && !candidate.IsPaused)
+                    for (int i = 1; i < count; i++)
+                    {
+                        T candidate = singers[(currentIndex + i) % count];
+                        if (candidate != finishedEntry && !candidate.IsInactive && !candidate.IsPaused)
+                        {
+                            nextCurrent = candidate;
+                            break;
+                        }
+                    }
+                }
+
+                ClearHighlights(singers);
+
+                if (nextCurrent != null)
+                {
+                    nextCurrent.IsCurrent = true;
+                    MarkNextSinger(singers, nextCurrent);
+                }
+
+                return nextCurrent;
+            }
+            else
+            {
+                int oldIdx = singers.IndexOf(finishedEntry);
+                int count = singers.Count;
+
+                // Move finishedEntry to the bottom of the active queue (before any inactive singers)
+                if (oldIdx >= 0 && count > 1)
+                {
+                    int targetIdx = count - 1;
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (singers[i].IsInactive)
+                        {
+                            targetIdx = (oldIdx < i) ? (i - 1) : i;
+                            break;
+                        }
+                    }
+                    if (oldIdx != targetIdx && targetIdx >= 0 && targetIdx < count)
+                    {
+                        MoveSingerInList(singers, oldIdx, targetIdx);
+                    }
+                }
+
+                ClearHighlights(singers);
+
+                // Find the first active non-paused singer in the reordered list
+                T? nextCurrent = null;
+                for (int i = 0; i < singers.Count; i++)
+                {
+                    T candidate = singers[i];
+                    if (!candidate.IsInactive && !candidate.IsPaused)
                     {
                         nextCurrent = candidate;
                         break;
                     }
                 }
+
+                if (nextCurrent != null)
+                {
+                    int nextIdx = singers.IndexOf(nextCurrent);
+                    if (nextIdx > 0)
+                    {
+                        MoveSingerInList(singers, nextIdx, 0);
+                    }
+                    nextCurrent.IsCurrent = true;
+                    MarkNextSinger(singers, nextCurrent);
+                }
+
+                return nextCurrent;
             }
-
-            ClearHighlights(singers);
-
-            if (nextCurrent != null)
-            {
-                nextCurrent.IsCurrent = true;
-                MarkNextSinger(singers, nextCurrent);
-            }
-
-            return nextCurrent;
         }
 
         /// <summary>
@@ -224,3 +467,4 @@ namespace Lyracist.Shared
         }
     }
 }
+

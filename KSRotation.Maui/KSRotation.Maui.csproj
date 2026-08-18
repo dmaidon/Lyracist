@@ -1,4 +1,4 @@
-<!-- Edited on Aug 13, 2026 @ 13:46:21 -> Restore MauiImage entry for ksr_logo.png so the About-popup logo resolves correctly again -->
+<!-- Edited on Aug 18, 2026 @ 15:30:00 -> Bump AssemblyVersion and FileVersion to 26.8.18.198 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -28,9 +28,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.17.197</AssemblyVersion>
+		<AssemblyVersion>26.8.18.198</AssemblyVersion>
 
-		<FileVersion>26.8.17.197</FileVersion>
+		<FileVersion>26.8.18.198</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 

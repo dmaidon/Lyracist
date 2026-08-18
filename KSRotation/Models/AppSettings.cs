@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 12:25:00 -> Add ConnectInstructionsScreen monitor setting
+// Edited on Aug 18, 2026 @ 13:24:00 -> Add FloatCurrentSingerToTop setting to AppSettings
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -76,5 +76,9 @@ namespace KSRotation.Models
 
         /// <summary>When true, incoming patron requests are added straight to the rotation instead of waiting for DJ approval.</summary>
         public bool AutoAcceptRequests { get; init; } = false;
+
+        /// <summary>When true, the current singer always floats to the top of the rotation list.</summary>
+        public bool FloatCurrentSingerToTop { get; init; } = false;
     }
-}
+}
+

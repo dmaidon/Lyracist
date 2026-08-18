@@ -30,6 +30,20 @@ public class KaraokeRotationRegressionTests
         return vm;
     }
 
+    // Sets FloatCurrentSingerToTop via reflection on the backing field rather than the public
+    // property, because the property setter's generated OnFloatCurrentSingerToTopChanged hook
+    // persists the value to AppSettings (a static, file-backed singleton at
+    // %AppData%\Lyracist\settings.json) — which would leak across tests within the same process
+    // and write to the real user's settings file, exactly what TestAppBootstrap's module
+    // initializer says this suite avoids.
+    private static void SetFloatCurrentSingerToTop(RotationViewModel vm, bool value)
+    {
+        var field = typeof(RotationViewModel).GetField("_floatCurrentSingerToTop",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?? throw new InvalidOperationException("RotationViewModel._floatCurrentSingerToTop field not found.");
+        field.SetValue(vm, value);
+    }
+
     private static KaraokeViewModel CreateKaraokeViewModel(RotationViewModel rotationVm, out Mock<IMediaEngine> mediaEngine)
     {
         var display = new Mock<IDisplayService>();
@@ -117,6 +131,58 @@ public class KaraokeRotationRegressionTests
         // KaraokeViewModel's resync must not leave a paused singer flagged as next.
         Assert.False(bob.IsNext);
         Assert.True(carol.IsNext);
+    }
+
+    [Fact]
+    public void SetRotationStartSingerCommand_OnAlreadyFlaggedSinger_ClearsTheAccidentalBadge()
+    {
+        var rotationVm = CreateRotationViewModel();
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        var carol = MakeSinger("Carol");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+        rotationVm.Rotation.Add(carol);
+
+        // DJ meant to flag Alice but fat-fingered Bob instead.
+        rotationVm.SetRotationStartSingerCommand.Execute(bob);
+        Assert.True(bob.IsRotationStart);
+
+        // Clicking the same badge action again on Bob should undo the mistake, not be a no-op —
+        // it hands the flag to whoever sequentially follows Bob (Carol), not back to Bob himself.
+        rotationVm.SetRotationStartSingerCommand.Execute(bob);
+        Assert.False(bob.IsRotationStart);
+        Assert.False(alice.IsRotationStart);
+        Assert.True(carol.IsRotationStart);
+
+        // DJ can now flag the singer they actually intended.
+        rotationVm.SetRotationStartSingerCommand.Execute(alice);
+        Assert.True(alice.IsRotationStart);
+        Assert.False(bob.IsRotationStart);
+        Assert.False(carol.IsRotationStart);
+    }
+
+    [Fact]
+    public void SetRotationStartSingerCommand_OnFlaggedCurrentSingerFloatedToTop_ClearsInsteadOfReassigningToSelf()
+    {
+        // The real-world shape of the reported bug: with FloatCurrentSingerToTop on, the current singer
+        // sits at Rotation[0] — the row a DJ is most likely to accidentally flag. Reassigning to "first
+        // active singer in list order" on clear would hand the flag right back to the same singer.
+        var rotationVm = CreateRotationViewModel();
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+        RotationHelpers.SetCurrentSinger(rotationVm.Rotation, alice, floatCurrentToTop: true);
+
+        // Adding singers above auto-assigns the flag to the first active singer (Alice) via
+        // EnsureRotationStartFlag; explicitly (re)confirm the "already flagged" starting state the
+        // rest of this test exercises, rather than relying on that incidental side effect.
+        Assert.True(alice.IsRotationStart);
+
+        rotationVm.SetRotationStartSingerCommand.Execute(alice);
+        Assert.False(alice.IsRotationStart);
+        Assert.True(bob.IsRotationStart);
     }
 
     [Fact]
@@ -237,6 +303,37 @@ public class KaraokeRotationRegressionTests
         Assert.Equal(2, rotationVm.Rotation.Count);
         Assert.True(bob.IsCurrent);
         Assert.True(carol.IsNext);
+    }
+
+    [Fact]
+    public void DoneSinger_WithFloatCurrentSingerToTop_MovesNewCurrentSingerToTopOfList()
+    {
+        // Regression test: RotationViewModel's Rotation.CollectionChanged handler used to re-invoke
+        // RotationHelpers.FloatCurrentSingerToTop on every mutation, including the intermediate
+        // RemoveAt/Insert pair that AdvanceRotationAfterFinished's float branch performs internally
+        // while the finishing singer's IsCurrent flag was still true. That reentrant call floated the
+        // finishing singer straight back to the top mid-operation, so AdvanceRotationAfterFinished's own
+        // "find next singer starting from index 0" scan re-selected the finishing singer as its own
+        // replacement — the rotation never advanced and nothing visibly moved.
+        var rotationVm = CreateRotationViewModel();
+        SetFloatCurrentSingerToTop(rotationVm, true);
+
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        var carol = MakeSinger("Carol");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+        rotationVm.Rotation.Add(carol);
+
+        RotationHelpers.SetCurrentSinger(rotationVm.Rotation, alice, floatCurrentToTop: true);
+        Assert.Equal(alice, rotationVm.Rotation[0]);
+
+        rotationVm.DoneSingerCommand.Execute(alice);
+
+        Assert.False(alice.IsCurrent);
+        Assert.True(bob.IsCurrent);
+        Assert.Equal(bob, rotationVm.Rotation[0]);
+        Assert.Equal(alice, rotationVm.Rotation[^1]);
     }
 
     [Fact]

@@ -1,4 +1,4 @@
-<!-- Edited on Aug 16, 2026 @ 11:17:00 -> Add Company and Copyright metadata properties -->
+<!-- Edited on Aug 18, 2026 @ 15:30:00 -> Bump AssemblyVersion and FileVersion to 26.8.18.422 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.8.17.421</AssemblyVersion>
-    <FileVersion>26.8.17.421</FileVersion>
+    <AssemblyVersion>26.8.18.422</AssemblyVersion>
+    <FileVersion>26.8.18.422</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->

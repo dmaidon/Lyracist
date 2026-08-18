@@ -1,12 +1,21 @@
-<!-- Edited on Aug 17, 2026 @ 16:11:00 -> Update README for 3-column Trivia Settings layout and Venue/DJ deduplication -->
-Last Edit: Aug 17, 2026 - Trivia Settings 3-Column No-Scroll Dashboard & Venue/DJ Synchronization
+<!-- Edited on Aug 18, 2026 @ 13:24:00 -> Update README for Float Current Singer to Top and 1st Singer Round Flag features in Lyracist and KSRotation -->
+Last Edit: Aug 18, 2026 - Float Current Singer to Top & 1st Singer Round Flag in Rotation
 # Lyracist Pro
 
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, and integrated interactive pub/bar trivia with dedicated separate settings and automated projection pause synchronization.
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, and integrated interactive pub/bar trivia with dedicated separate settings and automated projection pause synchronization.
 
 ---
 
 ## Key Features
+
+### 🎤 Singer Rotation & Queue Management (`Lyracist`, `KSRotation`, `KSRotation.Maui`)
+- **Float Current Singer to Top Option**:
+  - Toggling `"Float Current to Top"` keeps the currently performing singer at index 0 (top of the rotation list).
+  - When songs finish, the performer shifts to the end of the queue and the next active singer automatically floats to the top, eliminating scrolling down long rotation queues during busy live shows.
+- **1st Singer in Rotation (Round Start Anchor Flag)**:
+  - Displays a visual red `🚩 1ST` badge next to the anchor performer who started the rotation round.
+  - Allows the DJ to instantly see when a full rotation cycle/round has completed once that singer returns to the top.
+  - Any singer can be designated as the 1st singer anchor via the `"Set as 1st Singer (Round Start)"` context action or `🚩` button.
 
 ### 🎯 Lyracist Live Trivia (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`)
 - **Integrated Host Console & Dedicated 3-Column Settings in `Lyracist` & `KSRotation`**:
