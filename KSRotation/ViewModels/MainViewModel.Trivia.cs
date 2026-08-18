@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 16:09:00 -> Pulled Trivia Venue and Host directly from existing MainViewModel properties
+// Edited on Aug 18, 2026 @ 19:35:00 -> Added TriviaDisplayWindow management, toggle command, and auto-casting to secondary monitor
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,6 +17,11 @@ namespace KSRotation.ViewModels
         private TriviaGameEngine? _triviaEngine;
         private TriviaWebServer? _triviaWebServer;
         private DispatcherTimer? _triviaSettingsStatusTimer;
+        private KSRotation.Windows.TriviaDisplayWindow? _triviaDisplayWindow;
+        private TriviaDisplayViewModel? _triviaDisplayVm;
+
+        [ObservableProperty]
+        public partial bool IsTriviaDisplayOpen { get; set; }
 
         [ObservableProperty]
         public partial TriviaSettings TriviaSettings { get; set; } = new();
@@ -88,6 +93,9 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial int TriviaBasePoints { get; set; } = 1000;
+
+        [ObservableProperty]
+        public partial int TriviaWrongAnswerDeduction { get; set; } = 0;
 
         [ObservableProperty]
         public partial bool TriviaSpeedBonusEnabled { get; set; } = true;
@@ -285,6 +293,7 @@ namespace KSRotation.ViewModels
             TriviaWarningCountdownSeconds = TriviaSettings.WarningCountdownSeconds;
             TriviaAnswerEliminationIntervalSeconds = TriviaSettings.AnswerEliminationIntervalSeconds;
             TriviaBasePoints = TriviaSettings.BasePointsPerQuestion;
+            TriviaWrongAnswerDeduction = TriviaSettings.WrongAnswerDeductionPoints;
             TriviaSpeedBonusEnabled = TriviaSettings.SpeedBonusEnabled;
             TriviaMaxSpeedBonus = TriviaSettings.MaxSpeedBonus;
             TriviaStreakBonusEnabled = TriviaSettings.StreakBonusMultiplier > 0;
@@ -307,6 +316,7 @@ namespace KSRotation.ViewModels
             TriviaSettings.WarningCountdownSeconds = TriviaWarningCountdownSeconds;
             TriviaSettings.AnswerEliminationIntervalSeconds = TriviaAnswerEliminationIntervalSeconds;
             TriviaSettings.BasePointsPerQuestion = TriviaBasePoints;
+            TriviaSettings.WrongAnswerDeductionPoints = TriviaWrongAnswerDeduction;
             TriviaSettings.SpeedBonusEnabled = TriviaSpeedBonusEnabled;
             TriviaSettings.MaxSpeedBonus = TriviaMaxSpeedBonus;
             TriviaSettings.StreakBonusMultiplier = TriviaStreakBonusEnabled ? TriviaStreakMultiplier : 0;
@@ -355,10 +365,92 @@ namespace KSRotation.ViewModels
                 _triviaEngine.StartGame(rounds, SelectedTriviaPack);
                 TriviaActiveRoundTitle = rounds[0].Title;
                 _triviaEngine.StartCurrentQuestion();
+
+                // Automatically launch or focus the 16:9 big-screen display window on the selected monitor
+                OpenTriviaDisplay();
             }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"Error starting trivia game: {ex.Message}", "KSRotation Trivia", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        [RelayCommand]
+        public void ToggleTriviaDisplay()
+        {
+            if (_triviaDisplayWindow != null && _triviaDisplayWindow.IsLoaded)
+            {
+                CloseTriviaDisplay();
+            }
+            else
+            {
+                OpenTriviaDisplay();
+            }
+        }
+
+        [RelayCommand]
+        public void OpenTriviaDisplay()
+        {
+            if (_triviaEngine == null) return;
+
+            if (_triviaDisplayWindow == null || !_triviaDisplayWindow.IsLoaded)
+            {
+                _triviaDisplayVm = new TriviaDisplayViewModel(
+                    _triviaEngine,
+                    TriviaVenueName,
+                    TriviaPatronUrl,
+                    null,
+                    TriviaWifiSsid,
+                    TriviaWifiPassword,
+                    TriviaPreGameCountdownMinutes * 60);
+
+                _triviaDisplayWindow = new KSRotation.Windows.TriviaDisplayWindow
+                {
+                    DataContext = _triviaDisplayVm
+                };
+
+                _triviaDisplayWindow.Closed += (s, e) =>
+                {
+                    _triviaDisplayWindow = null;
+                    _triviaDisplayVm = null;
+                    IsTriviaDisplayOpen = false;
+                };
+
+                PositionTriviaDisplayWindow(SelectedMonitorDevice);
+                _triviaDisplayWindow.Show();
+                PositionTriviaDisplayWindow(SelectedMonitorDevice);
+                IsTriviaDisplayOpen = true;
+            }
+            else
+            {
+                PositionTriviaDisplayWindow(SelectedMonitorDevice);
+                _triviaDisplayWindow.Activate();
+            }
+        }
+
+        [RelayCommand]
+        public void CloseTriviaDisplay()
+        {
+            if (_triviaDisplayWindow != null && _triviaDisplayWindow.IsLoaded)
+            {
+                _triviaDisplayWindow.Close();
+                _triviaDisplayWindow = null;
+                _triviaDisplayVm = null;
+                IsTriviaDisplayOpen = false;
+            }
+        }
+
+        public void PositionTriviaDisplayWindow(string? deviceName)
+        {
+            if (_triviaDisplayWindow == null || !_triviaDisplayWindow.IsLoaded) return;
+
+            var screens = System.Windows.Forms.Screen.AllScreens;
+            var targetScreen = WindowPositioner.ResolveByDeviceName(screens, deviceName);
+            if (targetScreen != null)
+            {
+                _triviaDisplayWindow.WindowState = System.Windows.WindowState.Normal;
+                _triviaDisplayWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.Manual;
+                WindowPositioner.FillArea(_triviaDisplayWindow, targetScreen.Bounds);
             }
         }
 

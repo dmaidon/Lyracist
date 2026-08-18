@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:24:00 -> Document Float Current Singer to Top and 1st Singer Round Flag features
+// Edited on Aug 18, 2026 @ 19:35:00 -> Document Multi-Monitor Big Screen Projection in KSRotation
 Rotation Management & Round Cycle Tracking (`Lyracist`, `KSRotation`, & `KSRotation.Maui`) - (August 2026)
 
 Section: Performance & Rotation Operations / Singer Queue Management
@@ -32,7 +32,16 @@ Lyracist Live Trivia (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`) - Integrate
 Section: Entertainment Modules / Lyracist.Trivia & Pub Trivia Game Master
 
 [System Details]
-1. Hybrid Game Engine Architecture & Integrated Host Decks:
+1. Multi-Monitor Big Screen Projection & Auto-Casting in `KSRotation`:
+   - **"📡 Open Big Screen" Button**:
+     * Directly on the **`🎯 Trivia Game Control`** tab in `KSRotation`.
+     * Toggles and focuses the full-screen 16:9 venue projection window (`TriviaDisplayWindow`) on the selected target monitor.
+   - **Automatic Projection on Game Start**:
+     * Clicking **"▶ Start Game"** in `KSRotation` automatically opens and positions the trivia projection window onto the designated secondary monitor/TV so patrons can immediately see questions, timer countdowns, and options.
+   - **Dynamic Repositioning**:
+     * If the target monitor is switched in display settings, `TriviaDisplayWindow` dynamically relocates to the newly selected monitor.
+
+2. Hybrid Game Engine Architecture & Integrated Host Decks:
    - **`Lyracist` Application Integration**:
      * Top-level navigation items for **`Trivia`** (interactive host deck) and **`Trivia Settings`** (3-column no-scroll dashboard for timers, points, bonuses, and Wi-Fi credentials).
    - **`KSRotation` Application Integration**:
@@ -42,7 +51,7 @@ Section: Entertainment Modules / Lyracist.Trivia & Pub Trivia Game Master
      * Duplicate textboxes were removed and replaced with clean synchronized information badges.
    - **3-Column No-Scroll Trivia Settings Dashboard**:
      * Divided into 3 horizontal columns:
-       - Column 0: Question Timers & Flow, Scoring & Bonus Multipliers
+       - Column 0: Question Timers & Flow, Scoring & Bonus Multipliers (Base Points, Wrong Answer Deduction Points [Default: 0], Speed Bonus, Streak Multipliers)
        - Column 1: Active Venue & Host Information Badge, Intermission & Pre-Game Countdown
        - Column 2: Local Network & Wi-Fi Access, Save / Reset Action Cards
      * Eliminates vertical scrolling on standard desktop resolutions.
@@ -80,9 +89,9 @@ Section: Entertainment Modules / Lyracist.Trivia & Pub Trivia Game Master
      * When a game finishes, if auto-start is enabled, an intermission countdown runs for the configured duration (e.g. 3 minutes).
      * Venue display, GM console, and mobile web app display a live ticking countdown banner (`"🎮 NEXT TRIVIA ROUND STARTS IN: mm:ss"`).
      * Host can click `"▶ Start Now (Skip)"` to bypass the intermission, and once expired, the engine automatically selects the next question pack (or reshuffles) and launches the new round.
-   - **Trivia & Connect Instruction Screen Links in `Lyracist` and `KSRotation`**:
-     * **`Lyracist`**: Added quick-access `"👁️ Preview Connect Screen"` and `"🎯 Launch Trivia Night"` action buttons in `SettingsPage` (Column 4: Connect & Request Instructions).
-     * **`KSRotation`**: Added `"📡 Connect Screen"` and `"🎯 Trivia Night"` quick-launch buttons on the primary Rotation toolbar as well as in the `Connect & Request Instructions` display settings.
+   - **Connect Instruction Screen & Dedicated Trivia Navigation in `Lyracist` and `KSRotation`**:
+     * **`Lyracist`**: Access `"👁️ Preview Connect Screen"` in `SettingsPage` (Column 4: Connect & Request Instructions), with full Trivia controls and rules configuration residing in dedicated **Trivia** and **Trivia Settings** navigation pages.
+     * **`KSRotation`**: Preview the Wi-Fi and Request Connect screen directly from `Connect & Request Instructions` under the **Display** settings tab, while Trivia rounds and configuration remain cleanly dedicated to the **Trivia** and **Trivia Settings** tabs without toolbar clutter.
    - **Configurable Questions Per Game**: Set the number of questions per game round (5, 10, 15, 20, 25, 50, 100, or custom editable value in the host console) stored in `trivia_settings.json`. Slices the shuffled question pack to the exact number of desired questions.
    - **Game Complete Winner Celebration & Team Announcements**:
      * Upon completing all allotted questions, the game transitions to a celebration screen on venue big screens (`TriviaDisplayWindow`) and player mobile devices (`trivia.html`).

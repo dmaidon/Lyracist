@@ -1,4 +1,4 @@
-<!-- Edited on Aug 18, 2026 @ 13:48:00 -> Update Star button to display dynamic filled gold / outline state and ensure Float Current to Top functionality -->
+<!-- Edited on Aug 18, 2026 @ 18:30:00 -> Prevent auto-focus on first textbox on tab load to keep border colors uniform -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -8,8 +8,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:KSRotation.ViewModels"
         xmlns:converters="clr-namespace:KSRotation.Converters"
+        xmlns:vm="clr-namespace:KSRotation.ViewModels"
         mc:Ignorable="d"
     Title="{Binding WindowTitle}"
     Width="1500"
@@ -196,6 +196,49 @@
 
         <Style x:Key="ModernCheckBoxStyle" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+        </Style>
+
+        <!-- Compact TextBox style with clean vertical centering for small inputs (28px height) -->
+        <Style x:Key="ModernCompactTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Focusable="False"
+                                          HorizontalScrollBarVisibility="Hidden"
+                                          VerticalScrollBarVisibility="Hidden"
+                                          VerticalAlignment="Center"
+                                          Padding="{TemplateBinding Padding}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}" />
+                                <Setter TargetName="border" Property="BorderThickness" Value="1.5" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Custom button style inside ListView rows to ensure perfect sizing and selection contrast -->
@@ -552,27 +595,6 @@
                             Style="{StaticResource ModernComboBoxStyle}"
                             FontSize="14"
                             VerticalAlignment="Center" />
-
-                            <Button
-                            Content="📡 Connect Screen"
-                            Command="{Binding PreviewConnectInstructionsCommand}"
-                            Style="{StaticResource ModernSecondaryButtonStyle}"
-                            Height="32"
-                            Padding="10,0"
-                            Margin="16,0,8,0"
-                            VerticalAlignment="Center"
-                            ToolTip="Show/Preview the Wi-Fi and Song Request Connect Instructions QR Screen" />
-
-                            <Button
-                            Content="🎯 Trivia Night"
-                            Command="{Binding LaunchTriviaCommand}"
-                            Background="#8B5CF6"
-                            Foreground="#FFFFFF"
-                            FontWeight="Bold"
-                            Height="32"
-                            Padding="12,0"
-                            VerticalAlignment="Center"
-                            ToolTip="Launch Lyracist Trivia Pro interactive audience game" />
                         </WrapPanel>
 
                         <Grid Grid.Row="1" Margin="0,0,0,6">
@@ -1763,16 +1785,10 @@
                                     </Grid>
                                     <TextBlock Text="Auto-detects active Wi-Fi SSID, and request portal URL." Foreground="{DynamicResource AppInfoTextBrush}" FontSize="11" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,8" />
 
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Content="👁️ Preview Connect Screen"
-                                                Command="{Binding PreviewConnectInstructionsCommand}"
-                                                Style="{StaticResource ModernSecondaryButtonStyle}"
-                                                Height="30" Padding="8,2" Margin="0,0,8,0" />
-                                        <Button Content="🎯 Launch Trivia Night"
-                                                Command="{Binding LaunchTriviaCommand}"
-                                                Background="#8B5CF6" Foreground="#FFFFFF"
-                                                Height="30" Padding="8,2" FontWeight="Bold" />
-                                    </StackPanel>
+                                    <Button Content="👁️ Preview Connect Screen"
+                                            Command="{Binding PreviewConnectInstructionsCommand}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Height="30" Padding="12,2" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
@@ -1934,7 +1950,7 @@
                     <Border Grid.Column="0" Background="{DynamicResource MaterialDesignCardBackground}"
                             BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="10" Padding="14">
                         <StackPanel>
-                            <TextBlock Text="🎯 Trivia Game Control" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,12" />
+                            <TextBlock Text="🎯 Trivia Game Control" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" Margin="0,0,0,12" />
 
                             <TextBlock Text="Question Pack" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource MaterialDesignBody}" />
                             <Grid Margin="0,0,0,12">
@@ -1957,6 +1973,9 @@
                                     <TextBlock Grid.Column="1" Text="{Binding TriviaRemainingSeconds, StringFormat='⏱ {0}s'}" Foreground="#FDE047" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" />
                                 </Grid>
                             </Border>
+
+                            <Button Content="📡 Open Big Screen" Command="{Binding ToggleTriviaDisplayCommand}"
+                                    Background="#6366F1" Foreground="White" FontWeight="Bold" Height="36" Margin="0,0,0,8" ToolTip="Open or focus the 16:9 Trivia Projection Window on the venue monitor" />
 
                             <Button Content="▶ Start Game" Command="{Binding StartTriviaCommand}"
                                     Background="#10B981" Foreground="White" FontWeight="Bold" Height="36" Margin="0,0,0,8" />
@@ -2072,7 +2091,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="🏆 Live Leaderboard" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="🏆 Live Leaderboard" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="1" Text="{Binding TriviaPlayers.Count, StringFormat='{}{0} Players'}" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" VerticalAlignment="Center" />
                             </Grid>
 
@@ -2099,8 +2118,8 @@
             </TabItem>
 
             <!-- 6. Dedicated Separate Trivia Settings Tab -->
-            <TabItem Header="Trivia Settings" Width="128" Height="45">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="16,12">
+            <TabItem Header="Trivia Settings" Width="128" Height="45" FocusManager.IsFocusScope="True">
+                <ScrollViewer Focusable="True" FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="16,12">
                     <Grid HorizontalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -2114,7 +2133,7 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="🎯 Trivia Rules &amp; Configuration" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBlock Text="🎯 Trivia Rules &amp; Configuration" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" />
                                 <TextBlock Text="Configure gameplay timers, scoring rules, speed multipliers, and local Wi-Fi credentials for mobile buzzer gameplay."
                                            FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,2,0,0" />
                             </StackPanel>
@@ -2137,8 +2156,40 @@
 
                             <!-- COLUMN 0: Timers & Scoring -->
                             <StackPanel Grid.Column="0">
-                                <!-- ⏱️ Timers & Flow Card -->
-                                <GroupBox Header="⏱️ Question Timers &amp; Flow" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12" Height="263">
+                                <!-- ⏱️ Question Timers & Flow -->
+                                <GroupBox Header="⏱️ Question Timers &amp; Flow" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12">
+                                    <StackPanel Margin="0,4,0,0">
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="6" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="6" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Time Limit (Sec)" FontWeight="semiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource MaterialDesignBody}" />
+                                                <TextBox Text="{Binding TriviaDefaultQuestionSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" Width="65" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Warning (Sec)" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource MaterialDesignBody}" />
+                                                <TextBox Text="{Binding TriviaWarningCountdownSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" Width="65" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Text="Wrong Fade (Sec)" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource MaterialDesignBody}" ToolTip="Wrong option elimination fade speed (seconds)" />
+                                                <TextBox Text="{Binding TriviaAnswerEliminationIntervalSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" Width="65" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
+                                            </StackPanel>
+                                        </Grid>
+                                        <CheckBox Content="Auto-advance questions"
+                                                  Style="{StaticResource ModernCheckBoxStyle}"
+                                                  Foreground="{DynamicResource MaterialDesignBody}"
+                                                  IsChecked="{Binding TriviaAutoAdvance, UpdateSourceTrigger=PropertyChanged}"
+                                                  FontWeight="SemiBold" FontSize="11" />
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <!-- 🏆 Scoring & Multipliers Card -->
+                                <GroupBox Header="🏆 Scoring &amp; Bonus Multipliers" Style="{StaticResource PurpleSettingsGroupBoxStyle}" Margin="0,0,0,12">
                                     <StackPanel Margin="0,4,0,0">
                                         <Grid Margin="0,0,0,8">
                                             <Grid.ColumnDefinitions>
@@ -2147,31 +2198,14 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Time Limit (Sec)" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
-                                                <TextBox Text="{Binding TriviaDefaultQuestionSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                                <TextBlock Text="Base Points Per Question" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource MaterialDesignBody}" />
+                                                <TextBox Text="{Binding TriviaBasePoints, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" Width="75" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <TextBlock Text="Warning (Sec)" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
-                                                <TextBox Text="{Binding TriviaWarningCountdownSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                                <TextBlock Text="Wrong Answer Deduction" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource MaterialDesignBody}" ToolTip="Points to deduct for wrong answer. Default: 0" />
+                                                <TextBox Text="{Binding TriviaWrongAnswerDeduction, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" Width="75" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
                                             </StackPanel>
                                         </Grid>
-                                        <StackPanel Margin="0,0,0,8">
-                                            <TextBlock Text="Wrong Option Fade (Sec)" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
-                                            <TextBox Text="{Binding TriviaAnswerEliminationIntervalSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
-                                        </StackPanel>
-                                        <CheckBox Content="Auto-advance questions"
-                                                  IsChecked="{Binding TriviaAutoAdvance, UpdateSourceTrigger=PropertyChanged}"
-                                                  FontWeight="SemiBold" FontSize="11" />
-                                    </StackPanel>
-                                </GroupBox>
-
-                                <!-- 🏆 Scoring & Multipliers Card -->
-                                <GroupBox Header="🏆 Scoring &amp; Bonus Multipliers" Style="{StaticResource PurpleSettingsGroupBoxStyle}" Margin="0,0,0,12" Height="238">
-                                    <StackPanel Margin="0,4,0,0">
-                                        <StackPanel Margin="0,0,0,8">
-                                            <TextBlock Text="Base Points Per Question" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
-                                            <TextBox Text="{Binding TriviaBasePoints, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
-                                        </StackPanel>
                                         <Grid Margin="0,0,0,4">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
@@ -2179,12 +2213,20 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <CheckBox Content="Speed Bonus" IsChecked="{Binding TriviaSpeedBonusEnabled, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
-                                                <TextBox Text="{Binding TriviaMaxSpeedBonus, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="{Binding TriviaSpeedBonusEnabled}" Height="28" />
+                                                <CheckBox Content="Speed Bonus"
+                                                          Style="{StaticResource ModernCheckBoxStyle}"
+                                                          Foreground="{DynamicResource MaterialDesignBody}"
+                                                          IsChecked="{Binding TriviaSpeedBonusEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                                          FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
+                                                <TextBox Text="{Binding TriviaMaxSpeedBonus, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" IsEnabled="{Binding TriviaSpeedBonusEnabled}" Width="75" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <CheckBox Content="Streak Bonus" IsChecked="{Binding TriviaStreakBonusEnabled, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
-                                                <TextBox Text="{Binding TriviaStreakMultiplier, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="{Binding TriviaStreakBonusEnabled}" Height="28" />
+                                                <CheckBox Content="Streak Bonus"
+                                                          Style="{StaticResource ModernCheckBoxStyle}"
+                                                          Foreground="{DynamicResource MaterialDesignBody}"
+                                                          IsChecked="{Binding TriviaStreakBonusEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                                          FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
+                                                <TextBox Text="{Binding TriviaStreakMultiplier, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" IsEnabled="{Binding TriviaStreakBonusEnabled}" Width="75" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
                                             </StackPanel>
                                         </Grid>
                                     </StackPanel>
@@ -2210,10 +2252,10 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="🏢 Venue:" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding TriviaVenueName}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryHueMidBrush}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding TriviaVenueName}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource MaterialDesignBody}" TextTrimming="CharacterEllipsis" />
 
                                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="🎧 Host/DJ:" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                                <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding TriviaHostName}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryHueMidBrush}" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding TriviaHostName}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource MaterialDesignBody}" TextTrimming="CharacterEllipsis" />
                                             </Grid>
                                         </Border>
                                         <TextBlock Text="ℹ️ Automatically synchronized from primary Venue and DJ settings in KSRotation."
@@ -2222,16 +2264,31 @@
                                 </GroupBox>
 
                                 <!-- 🔄 Intermission & Countdown Card -->
-                                <GroupBox Header="🔄 Intermission &amp; Pre-Game" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12" Height="273">
+                                <GroupBox Header="🔄 Intermission &amp; Pre-Game" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12">
                                     <StackPanel Margin="0,4,0,0">
-                                        <StackPanel Margin="0,0,0,8" Height="89">
-                                            <CheckBox Content="Auto-start Next Round (Min)" IsChecked="{Binding TriviaAutoStartNextGame, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
-                                            <TextBox Text="{Binding TriviaNextGameDelayMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="{Binding TriviaAutoStartNextGame}" Height="43" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,0,0,2">
-                                            <CheckBox Content="Pre-Game Countdown (Min)" IsChecked="{Binding TriviaAutoStartAfterCountdown, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
-                                            <TextBox Text="{Binding TriviaPreGameCountdownMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" IsEnabled="{Binding TriviaAutoStartAfterCountdown}" Height="46" />
-                                        </StackPanel>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <CheckBox Content="Auto-start Next (Min)"
+                                                          Style="{StaticResource ModernCheckBoxStyle}"
+                                                          Foreground="{DynamicResource MaterialDesignBody}"
+                                                          IsChecked="{Binding TriviaAutoStartNextGame, UpdateSourceTrigger=PropertyChanged}"
+                                                          FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
+                                                <TextBox Text="{Binding TriviaNextGameDelayMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" IsEnabled="{Binding TriviaAutoStartNextGame}" Width="65" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <CheckBox Content="Pre-Game Delay (Min)"
+                                                          Style="{StaticResource ModernCheckBoxStyle}"
+                                                          Foreground="{DynamicResource MaterialDesignBody}"
+                                                          IsChecked="{Binding TriviaAutoStartAfterCountdown, UpdateSourceTrigger=PropertyChanged}"
+                                                          FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" />
+                                                <TextBox Text="{Binding TriviaPreGameCountdownMinutes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" IsEnabled="{Binding TriviaAutoStartAfterCountdown}" Width="65" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
+                                            </StackPanel>
+                                        </Grid>
                                     </StackPanel>
                                 </GroupBox>
                             </StackPanel>
@@ -2248,17 +2305,17 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Port" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
-                                                <TextBox Text="{Binding TriviaPort, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                                <TextBlock Text="Port" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource MaterialDesignBody}" />
+                                                <TextBox Text="{Binding TriviaPort, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" Width="65" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <TextBlock Text="Wi-Fi SSID" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
-                                                <TextBox Text="{Binding TriviaWifiSsid, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                                <TextBlock Text="Wi-Fi SSID" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource MaterialDesignBody}" />
+                                                <TextBox Text="{Binding TriviaWifiSsid, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" Height="28" />
                                             </StackPanel>
                                         </Grid>
                                         <StackPanel Margin="0,0,0,6">
-                                            <TextBlock Text="Wi-Fi Password" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource AppHeaderBrush}" />
-                                            <TextBox Text="{Binding TriviaWifiPassword, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBoxStyle}" Height="28" />
+                                            <TextBlock Text="Wi-Fi Password" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource MaterialDesignBody}" />
+                                            <TextBox Text="{Binding TriviaWifiPassword, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" Height="28" />
                                         </StackPanel>
                                         <Button Content="Auto-Detect Wi-Fi" Command="{Binding AutoDetectTriviaWifiCommand}"
                                                 Style="{StaticResource ModernSecondaryButtonStyle}" Height="30" FontSize="11" ToolTip="Auto-detect current connected Wi-Fi and saved password" />

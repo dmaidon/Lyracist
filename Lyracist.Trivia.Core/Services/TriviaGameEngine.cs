@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 15:42:00 -> Added PauseGame, ResumeGame, TogglePause, and IsPaused lifecycle management
+// Edited on Aug 18, 2026 @ 17:48:00 -> Deduct WrongAnswerDeductionPoints for incorrect answers in LockAndRevealAnswer
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -229,7 +229,9 @@ public class TriviaGameEngine : IDisposable
                     else
                     {
                         p.CurrentStreak = 0;
-                        p.LastPointsEarned = 0;
+                        int deduction = Math.Max(0, Settings.WrongAnswerDeductionPoints);
+                        p.LastPointsEarned = -deduction;
+                        p.TotalScore -= deduction;
                     }
                 }
                 else

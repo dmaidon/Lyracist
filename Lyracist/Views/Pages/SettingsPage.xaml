@@ -1,4 +1,4 @@
-<!-- Edited on Aug 18, 2026 @ 13:24:00 -> Add Float Current Singer to Top of Rotation setting checkbox -->
+<!-- Edited on Aug 18, 2026 @ 17:38:00 -> Remove Launch Trivia Night button from display settings connect instructions groupbox -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -602,10 +602,7 @@
                                     <TextBlock Text="Dynamic Banner &amp; Dual QR Code Status" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                     <TextBlock Text="Automatically detects connected Wi-Fi SSID and song request portal URL to generate high-resolution ConnectInstructions.png with dual scan-to-connect Wi-Fi and portal QR codes." Foreground="{DynamicResource AppInfoTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,12" />
                                     
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <ui:Button Content="👁️ Preview Connect Screen" Command="{Binding PreviewConnectInstructionsCommand}" Margin="0,0,8,0" />
-                                        <ui:Button Content="🎯 Launch Trivia Night" Command="{Binding LaunchTriviaCommand}" Appearance="Primary" FontWeight="Bold" />
-                                    </StackPanel>
+                                    <ui:Button Content="👁️ Preview Connect Screen" Command="{Binding PreviewConnectInstructionsCommand}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>

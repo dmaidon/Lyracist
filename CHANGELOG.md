@@ -1,10 +1,26 @@
-<!-- Edited on Aug 18, 2026 @ 15:30:00 -> Document 1st Singer badge red row highlight, clear-badge toggle, and rotation reentrancy fixes -->
-Last Edit: Aug 18, 2026 - Float Current Singer to Top & 1st Singer Round Flag in Rotation
+<!-- Edited on Aug 18, 2026 @ 19:35:00 -> Document Multi-Monitor Big Screen Projection in KSRotation in CHANGELOG.md -->
+Last Edit: Aug 18, 2026 - Multi-Monitor Big Screen Projection & Auto-Casting in KSRotation Trivia
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [26.8.18.0] - 2026-08-18
+
+### Added
+- **Multi-Monitor Big Screen Projection & Auto-Casting (`KSRotation`)**:
+  - Integrated full-screen 16:9 venue projection (`TriviaDisplayWindow` & `TriviaDisplayViewModel`) into `KSRotation`.
+  - Added **"📡 Open Big Screen"** button to the `🎯 Trivia Game Control` tab, allowing hosts to toggle and focus the big-screen display window on the configured target monitor.
+  - Automatically launches and positions the 16:9 projection window onto the designated secondary monitor whenever `"▶ Start Game"` is clicked.
+  - Dynamically repositions `TriviaDisplayWindow` if the target monitor changes during runtime.
+- **Configurable Wrong Answer Point Deduction (`WrongAnswerDeductionPoints`)**:
+  - Added dedicated configuration input boxes under **🏆 Scoring & Bonus Multipliers** / **Scoring & Multipliers** in `Lyracist` (**Trivia Settings**), `KSRotation` (**Trivia Settings**), and standalone `Lyracist.Trivia` (**Settings & Display**).
+  - Defaults to `0` (standard pub trivia rules), allowing Game Masters / hosts to penalize incorrect guesses or wild buzzer spam by deducting configured point amounts (e.g. -250, -500).
+  - Synchronized scoring engine (`TriviaGameEngine`), SQLite persistence, and mobile player buzzer feedback displaying deducted points (e.g., `"❌ Incorrect (-250 pts)"`).
+
+### Changed / Cleaned Up
+- **Toolbar & Settings Streamlining**:
+  - **`KSRotation`**: Removed the redundant `"📡 Connect Screen"` and `"🎯 Trivia Night"` quick-launch buttons from the primary Rotation page toolbar. The Connect Instructions screen remains accessible directly within `Connect & Request Instructions` under the **Display** settings tab, while Trivia Night controls remain cleanly dedicated to the **Trivia** and **Trivia Settings** tabs.
+  - **`Lyracist` & `KSRotation` Display Settings**: Removed the `"🎯 Launch Trivia Night"` button from the `Connect & Request Instructions` groupbox on the settings pages, keeping Trivia configuration exclusively on dedicated Trivia pages.
 
 ### Added
 - **Float Current Singer to Top of Rotation Option**:

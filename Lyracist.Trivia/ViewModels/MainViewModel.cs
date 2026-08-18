@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 14:53:30 -> Added Wi-Fi credentials, Pre-Game countdown controls, and Connect Instructions screen synchronization
+// Edited on Aug 18, 2026 @ 17:48:00 -> Added WrongAnswerDeductionPoints setting for wrong answer penalty configuration
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -111,6 +111,9 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private int _basePointsPerQuestion = 1000;
 
     [ObservableProperty]
+    private int _wrongAnswerDeductionPoints = 0;
+
+    [ObservableProperty]
     private bool _speedBonusEnabled = true;
 
     [ObservableProperty]
@@ -200,6 +203,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _answerEliminationIntervalSeconds = _settings.AnswerEliminationIntervalSeconds > 0 ? _settings.AnswerEliminationIntervalSeconds : 5;
         _postRevealDelaySeconds = _settings.PostRevealDelaySeconds > 0 ? _settings.PostRevealDelaySeconds : 5;
         _basePointsPerQuestion = _settings.BasePointsPerQuestion > 0 ? _settings.BasePointsPerQuestion : 1000;
+        _wrongAnswerDeductionPoints = _settings.WrongAnswerDeductionPoints;
         _speedBonusEnabled = _settings.SpeedBonusEnabled;
         _maxSpeedBonus = _settings.MaxSpeedBonus;
         _streakBonusMultiplier = _settings.StreakBonusMultiplier;
@@ -593,6 +597,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Settings.AnswerEliminationIntervalSeconds = AnswerEliminationIntervalSeconds;
         Settings.PostRevealDelaySeconds = PostRevealDelaySeconds;
         Settings.BasePointsPerQuestion = BasePointsPerQuestion;
+        Settings.WrongAnswerDeductionPoints = WrongAnswerDeductionPoints;
         Settings.SpeedBonusEnabled = SpeedBonusEnabled;
         Settings.MaxSpeedBonus = MaxSpeedBonus;
         Settings.StreakBonusMultiplier = StreakBonusMultiplier;
@@ -722,5 +727,3 @@ public partial class MainViewModel : ObservableObject, IDisposable
         GC.SuppressFinalize(this);
     }
 }
-
-public record AnswerDistributionItem(string Label, string Text, int Count, bool IsCorrect);

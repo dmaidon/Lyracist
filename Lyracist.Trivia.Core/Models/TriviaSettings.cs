@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 14:48:45 -> Added WifiSsid, WifiPassword, PreGameCountdownMinutes settings
+// Edited on Aug 18, 2026 @ 17:48:00 -> Added WrongAnswerDeductionPoints setting defaulting to 0
 using System;
 
 namespace Lyracist.Trivia.Core.Models;
@@ -19,6 +19,7 @@ public class TriviaSettings
     public int PostRevealDelaySeconds { get; set; } = 5;
     public int RevealBufferSeconds { get; set; } = 5;
     public int BasePointsPerQuestion { get; set; } = 1000;
+    public int WrongAnswerDeductionPoints { get; set; } = 0;
     public bool SpeedBonusEnabled { get; set; } = true;
     public int MaxSpeedBonus { get; set; } = 500;
     public double StreakBonusMultiplier { get; set; } = 0.1;

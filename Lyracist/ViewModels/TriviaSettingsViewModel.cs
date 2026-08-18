@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 16:08:00 -> Pull Venue and Host from existing AppSettings and remove duplicate settings
+// Edited on Aug 18, 2026 @ 17:48:00 -> Added WrongAnswerDeductionPoints property for wrong answer penalty configuration
 using System;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -33,6 +33,9 @@ public partial class TriviaSettingsViewModel : BaseViewModel
 
     [ObservableProperty]
     private int _baseQuestionPoints = 1000;
+
+    [ObservableProperty]
+    private int _wrongAnswerDeductionPoints = 0;
 
     [ObservableProperty]
     private bool _speedBonusEnabled = true;
@@ -94,6 +97,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
         WarningCountdownSeconds = Settings.WarningCountdownSeconds;
         AnswerEliminationIntervalSeconds = Settings.AnswerEliminationIntervalSeconds;
         BaseQuestionPoints = Settings.BasePointsPerQuestion;
+        WrongAnswerDeductionPoints = Settings.WrongAnswerDeductionPoints;
         SpeedBonusEnabled = Settings.SpeedBonusEnabled;
         MaxSpeedBonusPoints = Settings.MaxSpeedBonus;
         StreakBonusEnabled = Settings.StreakBonusMultiplier > 0;
@@ -117,6 +121,7 @@ public partial class TriviaSettingsViewModel : BaseViewModel
         Settings.WarningCountdownSeconds = WarningCountdownSeconds;
         Settings.AnswerEliminationIntervalSeconds = AnswerEliminationIntervalSeconds;
         Settings.BasePointsPerQuestion = BaseQuestionPoints;
+        Settings.WrongAnswerDeductionPoints = WrongAnswerDeductionPoints;
         Settings.SpeedBonusEnabled = SpeedBonusEnabled;
         Settings.MaxSpeedBonus = MaxSpeedBonusPoints;
         Settings.StreakBonusMultiplier = StreakBonusEnabled ? StreakMultiplier : 0;

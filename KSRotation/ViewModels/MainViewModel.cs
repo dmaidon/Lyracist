@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:48:00 -> Ensure FloatCurrentSingerToTop promotes and floats singer on startup, checkbox toggle, and SetRotationStartSinger
+// Edited on Aug 18, 2026 @ 19:35:00 -> Reposition TriviaDisplayWindow when SelectedMonitorDevice changes
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -211,6 +211,7 @@ namespace KSRotation.ViewModels
                     {
                         _displayWindowService.RepositionWindow();
                     }
+                    PositionTriviaDisplayWindow(SelectedMonitorDevice);
                     QueueSaveSettings();
                     break;
 

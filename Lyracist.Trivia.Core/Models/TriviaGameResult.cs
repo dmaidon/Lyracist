@@ -1,8 +1,10 @@
-// Created on Aug 17, 2026 @ 14:20:30 -> TriviaGameResult model for team & individual winner announcements
+// Edited on Aug 18, 2026 @ 19:35:00 -> Added AnswerDistributionItem record for room answer distribution stats
 using System;
 using System.Collections.Generic;
 
 namespace Lyracist.Trivia.Core.Models;
+
+public record AnswerDistributionItem(string Label, string Text, int Count, bool IsCorrect);
 
 public class TriviaTeamSummary
 {

@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 15:43:30 -> Added PauseGame and ResumeGame unit tests
+// Edited on Aug 18, 2026 @ 17:48:00 -> Added wrong answer points deduction unit test
 using System;
 using System.Collections.Generic;
 using Lyracist.Trivia.Core.Models;
@@ -125,6 +125,32 @@ public class GameEngineTests
 
         Assert.Equal(2500, bob.TotalScore); // No points added
         Assert.Equal(0, bob.CurrentStreak); // Streak reset
+    }
+
+    [Fact]
+    public void SubmitAnswer_IncorrectAnswer_DeductsPointsWhenConfigured()
+    {
+        var settings = new TriviaSettings
+        {
+            WrongAnswerDeductionPoints = 250
+        };
+        using var engine = new TriviaGameEngine(settings);
+        var bob = engine.RegisterPlayer("Bob");
+        var alice = engine.RegisterPlayer("Alice");
+
+        engine.StartGame([CreateSampleRound()]);
+        bob.CurrentStreak = 3;
+        bob.TotalScore = 2500;
+
+        engine.StartCurrentQuestion();
+
+        // Bob picks wrong option (0 instead of 1)
+        engine.SubmitAnswer("Bob", 0, 1000);
+        engine.LockAndRevealAnswer();
+
+        Assert.Equal(2250, bob.TotalScore); // 2500 - 250
+        Assert.Equal(-250, bob.LastPointsEarned);
+        Assert.Equal(0, bob.CurrentStreak);
     }
 
     [Fact]

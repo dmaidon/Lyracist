@@ -1,8 +1,8 @@
-<!-- Edited on Aug 18, 2026 @ 13:24:00 -> Update README for Float Current Singer to Top and 1st Singer Round Flag features in Lyracist and KSRotation -->
-Last Edit: Aug 18, 2026 - Float Current Singer to Top & 1st Singer Round Flag in Rotation
+<!-- Edited on Aug 18, 2026 @ 19:35:00 -> Document Open Big Screen and auto-casting feature in KSRotation in README.md -->
+Last Edit: Aug 18, 2026 - Multi-Monitor Big Screen Projection & Auto-Casting in KSRotation Trivia
 # Lyracist Pro
 
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, and integrated interactive pub/bar trivia with dedicated separate settings and automated projection pause synchronization.
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, and integrated interactive pub/bar trivia with dedicated separate settings, multi-monitor auto-casting, and automated projection pause synchronization.
 
 ---
 
@@ -18,11 +18,18 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Any singer can be designated as the 1st singer anchor via the `"Set as 1st Singer (Round Start)"` context action or `🚩` button.
 
 ### 🎯 Lyracist Live Trivia (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`)
+- **Multi-Monitor Projection & Auto-Casting in `KSRotation`**:
+  - Direct **"📡 Open Big Screen"** button on the `🎯 Trivia Game Control` tab to open and focus the 16:9 full-screen venue display (`TriviaDisplayWindow`) on the selected target monitor.
+  - Automatically opens and positions the trivia projection window on the secondary display when `"▶ Start Game"` is clicked.
 - **Integrated Host Console & Dedicated 3-Column Settings in `Lyracist` & `KSRotation`**:
   - **`Lyracist`**: Direct top navigation tabs for **Trivia** (live Game Master controls) and **Trivia Settings** (3-column no-scroll dashboard for rules, timers, scoring bonuses, and Wi-Fi credentials).
   - **`KSRotation`**: Dedicated top-level tabs for **Trivia** and **Trivia Settings**.
   - **Deduplicated Venue & DJ Settings**: Pulls Venue and Host / DJ names directly from existing application settings with live synchronized badges, avoiding redundant configuration fields.
   - **Automated Game Pause & Resume**: Automatically pauses the running trivia round whenever DJ Banners, Special Events, or Rotation screens take over the projection display, and resumes instantly upon closing or dismissing them.
+- **Scoring Rules, Bonus Multipliers & Wrong Answer Deduction**:
+  - **Base Points**: Configurable base reward per question (default: 1000 pts).
+  - **Wrong Answer Deduction**: Configurable points to deduct when a player submits an incorrect answer (default: 0 pts).
+  - **Speed Bonuses & Streak Multipliers**: Optional fast-buzzer scoring curve and progressive correct answer streak bonuses.
 - **Hybrid Standalone & Intermission Trivia**: Complete pub and bar trivia hosting system runnable as a dedicated standalone app (`Lyracist.Trivia`) or during karaoke session fill-ins.
 - **Accurate Multi-Monitor Projection**: Select any connected monitor (TV, secondary HDMI, projector) from the host console and cast seamlessly with physical resolution DPI awareness without forcing to Monitor 0.
 - **Venue & Game Master Customization**: Customize Venue Name and Game Master / Host Name directly in the **⚙️ Settings & Display** tab with instant two-way live update across projection monitors and mobile buzzer devices.
@@ -42,9 +49,9 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - When a game finishes, if auto-start is enabled, an intermission countdown runs for the configured duration (e.g. 3 minutes).
   - Venue display, GM console, and mobile web app display a live ticking countdown banner (`"🎮 NEXT TRIVIA ROUND STARTS IN: mm:ss"`).
   - Host can click `"▶ Start Now (Skip)"` to bypass the intermission, and once expired, the engine automatically selects the next question pack (or reshuffles) and launches the new round.
-- **Trivia & Connect Instruction Screen Links in `Lyracist` and `KSRotation`**:
-  - **`Lyracist`**: Added quick-access `"👁️ Preview Connect Screen"` and `"🎯 Launch Trivia Night"` action buttons in `SettingsPage` (Column 4: Connect & Request Instructions).
-  - **`KSRotation`**: Added `"📡 Connect Screen"` and `"🎯 Trivia Night"` quick-launch buttons on the primary Rotation toolbar as well as in the `Connect & Request Instructions` display settings.
+- **Connect Instructions Screen & Dedicated Trivia Pages**:
+  - **`Lyracist`**: Access `"👁️ Preview Connect Screen"` in `SettingsPage` (Column 4: Connect & Request Instructions), with full Trivia controls and configuration cleanly located in dedicated **Trivia** and **Trivia Settings** pages.
+  - **`KSRotation`**: Preview the Wi-Fi and Request Connect screen directly from the `Connect & Request Instructions` display settings, while Trivia rounds and configuration remain organized in dedicated **Trivia** and **Trivia Settings** tabs without cluttering the primary Rotation toolbar.
 - **Configurable Questions Per Game**: Set the number of questions per game round (5, 10, 15, 20, 25, 50, 100, or custom). Slices the randomized question pack to the exact number desired.
 - **Game Complete Winner Celebration & Team Announcements**:
   - Automatically calculates final rankings upon completing the allotted questions.
