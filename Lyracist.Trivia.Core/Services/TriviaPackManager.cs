@@ -98,4 +98,15 @@ public static class TriviaPackManager
         var candidatePool = pool.OrderBy(_ => Random.Shared.Next()).Take(candidateSize).ToList();
         return candidatePool.OrderBy(_ => Random.Shared.Next()).Take(Math.Min(gameSize, candidatePool.Count)).ToList();
     }
+
+    /// <summary>
+    /// Builds the pre-game lobby's featured-category header, e.g. "TONIGHT'S GAME FEATURES 10
+    /// QUESTIONS FROM THE FOLLOWING CATEGORY:" (singular pack) or "...CATEGORIES:" (2+ packs
+    /// mixed together). Shared by every display ViewModel so the wording can't drift between apps.
+    /// </summary>
+    public static string BuildFeaturedCategoryHeader(int questionCount, int categoryCount)
+    {
+        string categoryWord = categoryCount == 1 ? "CATEGORY" : "CATEGORIES";
+        return $"⭐ TONIGHT'S GAME FEATURES {questionCount} QUESTIONS FROM THE FOLLOWING {categoryWord}:";
+    }
 }

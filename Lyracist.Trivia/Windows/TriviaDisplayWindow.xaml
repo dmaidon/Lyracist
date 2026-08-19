@@ -178,10 +178,8 @@
                             </Grid.RowDefinitions>
 
                             <!-- Header Badge -->
-                            <Border Grid.Row="0" Background="#2E1065" CornerRadius="12" Padding="18,8" HorizontalAlignment="Center" Margin="0,0,0,16" BorderBrush="#A78BFA" BorderThickness="1.5">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <TextBlock Text="⭐ TONIGHT'S FEATURED CATEGORY" FontSize="18" FontWeight="Black" Foreground="#FBBF24" />
-                                </StackPanel>
+                            <Border Grid.Row="0" Background="#2E1065" CornerRadius="12" Padding="18,8" HorizontalAlignment="Stretch" Margin="0,0,0,16" BorderBrush="#A78BFA" BorderThickness="1.5">
+                                <TextBlock Text="{Binding FeaturedCategoryHeaderText}" FontSize="18" FontWeight="Black" Foreground="#FBBF24" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
                             </Border>
 
                             <!-- 16:9 Banner Display Container -->

@@ -308,6 +308,9 @@ namespace KSRotation.ViewModels
             var checkedPacks = GetCheckedTriviaPacks();
             if (checkedPacks.Count == 0) return;
 
+            int questionCount = Math.Clamp(TriviaSettings.QuestionsPerGame > 0 ? TriviaSettings.QuestionsPerGame : 10, 1, checkedPacks.Sum(p => p.Questions.Count));
+            _triviaDisplayVm?.UpdateFeaturedCategoryHeader(questionCount, checkedPacks.Count);
+
             if (checkedPacks.Count == 1)
             {
                 _triviaDisplayVm?.UpdateCategory(checkedPacks[0].Title);
@@ -487,6 +490,12 @@ namespace KSRotation.ViewModels
                 _triviaDisplayVm.UpdateInstructionBannerTemplate(TriviaInstructionBannerText);
 
                 var checkedPacksForDisplay = GetCheckedTriviaPacks();
+                if (checkedPacksForDisplay.Count > 0)
+                {
+                    int questionCountForDisplay = Math.Clamp(TriviaSettings.QuestionsPerGame > 0 ? TriviaSettings.QuestionsPerGame : 10, 1, checkedPacksForDisplay.Sum(p => p.Questions.Count));
+                    _triviaDisplayVm.UpdateFeaturedCategoryHeader(questionCountForDisplay, checkedPacksForDisplay.Count);
+                }
+
                 if (checkedPacksForDisplay.Count == 1)
                 {
                     _triviaDisplayVm.UpdateCategory(checkedPacksForDisplay[0].Title);

@@ -42,6 +42,9 @@ namespace KSRotation.ViewModels
         private string _categorySubtitle = string.Empty;
 
         [ObservableProperty]
+        private string _featuredCategoryHeaderText = "⭐ TONIGHT'S FEATURED CATEGORY";
+
+        [ObservableProperty]
         private string _welcomeBannerText = TriviaSettings.DefaultInstructionBannerText;
 
         private string _instructionBannerTemplate = TriviaSettings.DefaultInstructionBannerText;
@@ -301,6 +304,16 @@ namespace KSRotation.ViewModels
             }
 
             OnPropertyChanged(nameof(HasCategoryBanner));
+        }
+
+        /// <summary>
+        /// Refreshes the lobby's "TONIGHT'S GAME FEATURES N QUESTIONS FROM THE FOLLOWING
+        /// CATEGORY/CATEGORIES:" header. Called alongside UpdateCategory/UpdateMixedCategory
+        /// whenever the game master's pack checklist or question-count setting changes.
+        /// </summary>
+        public void UpdateFeaturedCategoryHeader(int questionCount, int categoryCount)
+        {
+            FeaturedCategoryHeaderText = TriviaPackManager.BuildFeaturedCategoryHeader(questionCount, categoryCount);
         }
 
         public void UpdatePreGameCountdown(int secondsRemaining)

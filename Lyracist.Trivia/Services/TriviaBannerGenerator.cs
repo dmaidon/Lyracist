@@ -462,6 +462,12 @@ public static class TriviaBannerGenerator
                 DrawChip(dc, packs[i].Title, ResolveChipStyle(packs[i]), x, y, chipWidth, chipHeight);
             }
 
+            // Everything below the grid (the overflow line, the QR callout, the footer) has to be
+            // positioned relative to the grid's actual bottom edge, not a fixed pixel - with 4+
+            // categories checked the grid grows to two rows, and a fixed callout position used to
+            // sit on top of that second row.
+            double contentBottom = gridY + gridHeight;
+
             if (packs.Count > chipCount)
             {
                 var moreText = new FormattedText(
@@ -469,11 +475,13 @@ public static class TriviaBannerGenerator
                     CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight,
                     new Typeface(new MediaFontFamily("Segoe UI"), FontStyles.Italic, FontWeights.SemiBold, FontStretches.Normal),
                     22, new SolidColorBrush(MediaColor.FromRgb(0x94, 0xA3, 0xB8)), 1.0);
-                dc.DrawText(moreText, new WpfPoint((width - moreText.Width) / 2.0, gridY + gridHeight + 16));
+                dc.DrawText(moreText, new WpfPoint((width - moreText.Width) / 2.0, contentBottom + 16));
+                contentBottom += 46;
             }
 
             // 6. Bottom callout + footer
-            DrawCallout(dc, width, "📱  SCAN QR CODE ON SCREEN TO JOIN  •  GET READY TO BUZZ IN!", 720, accentPrimary);
+            double calloutY = Math.Min(contentBottom + 40, height - 170);
+            DrawCallout(dc, width, "📱  SCAN QR CODE ON SCREEN TO JOIN  •  GET READY TO BUZZ IN!", calloutY, accentPrimary);
 
             var footerText = new FormattedText(
                 "LYRACIST PUB TRIVIA NIGHT  •  LIVE VENUE MULTI-PLAYER GAME",

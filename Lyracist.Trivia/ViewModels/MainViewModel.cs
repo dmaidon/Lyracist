@@ -336,6 +336,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Settings.QuestionsPerGame = value;
         _engine.Settings.QuestionsPerGame = value;
         SaveSettings();
+        UpdateSelectedPacksPreview();
     }
 
     private void SaveSettings()
@@ -431,6 +432,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
         CurrentQuestionNumber = 1;
         TotalQuestionsInRound = Math.Clamp(QuestionsPerGame, 1, checkedPacks.Sum(p => p.Questions.Count));
+        _activeDisplayVm?.UpdateFeaturedCategoryHeader(TotalQuestionsInRound, checkedPacks.Count);
 
         if (checkedPacks.Count == 1)
         {
