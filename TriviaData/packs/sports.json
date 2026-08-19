@@ -2,107 +2,2407 @@
   "PackId": "sports",
   "Title": "World & American Sports",
   "Category": "Sports",
-  "Description": "100 trivia questions covering NFL football, MLB baseball, NBA basketball, NHL hockey, soccer/football, Olympics, golf, and motorsport.",
+  "Description": "150 curated questions covering Sports.",
   "Questions": [
-    {"Id":"SP-001","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which NFL quarterback has won the most Super Bowl rings in history with seven titles?","Options":["Tom Brady","Joe Montana","Terry Bradshaw","Peyton Manning"],"CorrectAnswerIndex":0,"Explanation":"Tom Brady won six Super Bowls with the New England Patriots and one with the Tampa Bay Buccaneers.","TimeLimitSeconds":15},
-    {"Id":"SP-002","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the regulation height of a basketball rim in the NBA?","Options":["10 feet (3.05 m)","9.5 feet","10.5 feet","11 feet"],"CorrectAnswerIndex":0,"Explanation":"James Naismith set the basket height at 10 feet in 1891.","TimeLimitSeconds":15},
-    {"Id":"SP-003","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which country has won the most FIFA Men's World Cup tournaments with 5 titles?","Options":["Brazil","Germany","Italy","Argentina"],"CorrectAnswerIndex":0,"Explanation":"Brazil won the World Cup in 1958, 1962, 1970, 1994, and 2002.","TimeLimitSeconds":15},
-    {"Id":"SP-004","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who holds the record for the most home runs in a single MLB season with 73 home runs in 2001?","Options":["Barry Bonds","Mark McGwire","Sammy Sosa","Babe Ruth"],"CorrectAnswerIndex":0,"Explanation":"Barry Bonds hit 73 home runs for the San Francisco Giants in 2001.","TimeLimitSeconds":15},
-    {"Id":"SP-005","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"How many players are on the ice for one team during standard play in ice hockey?","Options":["6 (5 skaters + 1 goalie)","5","7","4"],"CorrectAnswerIndex":0,"Explanation":"A standard ice hockey lineup includes a goaltender, two defensemen, and three forwards.","TimeLimitSeconds":15},
-    {"Id":"SP-006","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"In golf, what is the term for scoring one stroke under par on a hole?","Options":["Birdie","Eagle","Bogey","Albatross"],"CorrectAnswerIndex":0,"Explanation":"Birdie is 1 under par, Eagle is 2 under par, and Bogey is 1 over par.","TimeLimitSeconds":15},
-    {"Id":"SP-007","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who is known as 'The Greatest' in professional heavyweight boxing?","Options":["Muhammad Ali","Mike Tyson","Joe Frazier","George Foreman"],"CorrectAnswerIndex":0,"Explanation":"Muhammad Ali won the world heavyweight championship three times.","TimeLimitSeconds":15},
-    {"Id":"SP-008","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which tennis player has won 24 Grand Slam men's singles titles (as of 2024)?","Options":["Novak Djokovic","Rafael Nadal","Roger Federer","Pete Sampras"],"CorrectAnswerIndex":0,"Explanation":"Novak Djokovic holds the all-time men's record for major singles titles.","TimeLimitSeconds":15},
-    {"Id":"SP-009","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the diameter of a standard basketball hoop in inches?","Options":["18 inches","16 inches","20 inches","22 inches"],"CorrectAnswerIndex":0,"Explanation":"An 18-inch rim allows almost two standard 9.5-inch basketballs to fit side-by-side.","TimeLimitSeconds":15},
-    {"Id":"SP-010","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What famous annual horse race is run at Churchill Downs in Louisville, Kentucky?","Options":["The Kentucky Derby","The Preakness Stakes","The Belmont Stakes","The Breeders' Cup"],"CorrectAnswerIndex":0,"Explanation":"The Kentucky Derby is known as 'The Most Exciting Two Minutes in Sports'.","TimeLimitSeconds":15},
-    {"Id":"SP-011","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which baseball team has won the most World Series championships with 27 titles?","Options":["New York Yankees","St. Louis Cardinals","Boston Red Sox","Los Angeles Dodgers"],"CorrectAnswerIndex":0,"Explanation":"The New York Yankees have won 27 World Series titles.","TimeLimitSeconds":15},
-    {"Id":"SP-012","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who is the legendary Jamaican sprinter who holds world records in both the 100m and 200m?","Options":["Usain Bolt","Asafa Powell","Yohan Blake","Tyson Gay"],"CorrectAnswerIndex":0,"Explanation":"Usain Bolt ran 9.58 seconds in the 100m and 19.19 in the 200m at the 2009 World Championships.","TimeLimitSeconds":15},
-    {"Id":"SP-013","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"How many holes are played in a standard full round of golf?","Options":["18 holes","9 holes","12 holes","20 holes"],"CorrectAnswerIndex":0,"Explanation":"St Andrews Links in Scotland established the 18-hole standard in 1764.","TimeLimitSeconds":15},
-    {"Id":"SP-014","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which NBA legend scored 100 points in a single game on March 2, 1962?","Options":["Wilt Chamberlain","Kobe Bryant","Michael Jordan","Bill Russell"],"CorrectAnswerIndex":0,"Explanation":"Wilt Chamberlain scored 100 points for the Philadelphia Warriors against the Knicks.","TimeLimitSeconds":15},
-    {"Id":"SP-015","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the term used in bowling for knocking down all 10 pins with two consecutive balls in a frame?","Options":["Spare","Strike","Split","Mark"],"CorrectAnswerIndex":0,"Explanation":"A strike knocks down all 10 on the first ball; a spare cleans up the remainder on the second.","TimeLimitSeconds":15},
-    {"Id":"SP-016","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which city hosted the 1996 Summer Olympic Games?","Options":["Atlanta, USA","Barcelona, Spain","Sydney, Australia","Athens, Greece"],"CorrectAnswerIndex":0,"Explanation":"Atlanta hosted the Centennial Olympic Games in 1996.","TimeLimitSeconds":15},
-    {"Id":"SP-017","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"In American football, how many points is a touchdown worth?","Options":["6 points","7 points","3 points","2 points"],"CorrectAnswerIndex":0,"Explanation":"A touchdown earns 6 points, followed by a point-after attempt (PAT) or 2-point conversion.","TimeLimitSeconds":15},
-    {"Id":"SP-018","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who won six NBA Championships with the Chicago Bulls in the 1990s?","Options":["Michael Jordan","LeBron James","Magic Johnson","Larry Bird"],"CorrectAnswerIndex":0,"Explanation":"Michael Jordan led the Bulls to two 'three-peats' (1991–1993, 1996–1998).","TimeLimitSeconds":15},
-    {"Id":"SP-019","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What Grand Slam tennis tournament is played annually on grass courts in London?","Options":["Wimbledon","The US Open","The French Open (Roland Garros)","The Australian Open"],"CorrectAnswerIndex":0,"Explanation":"Wimbledon is the oldest tennis tournament in the world, founded in 1877.","TimeLimitSeconds":15},
-    {"Id":"SP-020","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the distance of an official marathon race?","Options":["26.2 miles (42.195 km)","25 miles","20 miles","30 miles"],"CorrectAnswerIndex":0,"Explanation":"The 26 miles 385 yards standard was established at the 1908 London Olympics.","TimeLimitSeconds":15},
-    {"Id":"SP-021","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who holds the all-time NHL record for career goals, assists, and points?","Options":["Wayne Gretzky","Gordie Howe","Mario Lemieux","Jaromir Jagr"],"CorrectAnswerIndex":0,"Explanation":"Wayne Gretzky ('The Great One') scored 894 goals and 2,857 total points.","TimeLimitSeconds":15},
-    {"Id":"SP-022","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which MLB player broke Lou Gehrig's streak by playing 2,632 consecutive games?","Options":["Cal Ripken Jr.","Pete Rose","Derek Jeter","Barry Bonds"],"CorrectAnswerIndex":0,"Explanation":"Cal Ripken Jr. played 2,632 consecutive games for the Baltimore Orioles from 1982 to 1998.","TimeLimitSeconds":15},
-    {"Id":"SP-023","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the only NFL team to achieve a completely undefeated season including the Super Bowl?","Options":["1972 Miami Dolphins (17-0)","2007 New England Patriots","1985 Chicago Bears","1989 San Francisco 49ers"],"CorrectAnswerIndex":0,"Explanation":"The 1972 Dolphins, coached by Don Shula, went 14-0 in regular season and won Super Bowl VII.","TimeLimitSeconds":15},
-    {"Id":"SP-024","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In soccer, how long is a standard regulation match without extra time?","Options":["90 minutes (two 45-minute halves)","80 minutes","100 minutes","60 minutes"],"CorrectAnswerIndex":0,"Explanation":"A standard match consists of two 45-minute halves plus stoppage time.","TimeLimitSeconds":15},
-    {"Id":"SP-025","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who was the first African American player to play in Major League Baseball in 1947?","Options":["Jackie Robinson","Satchel Paige","Hank Aaron","Willie Mays"],"CorrectAnswerIndex":0,"Explanation":"Jackie Robinson debuted for the Brooklyn Dodgers on April 15, 1947 wearing #42.","TimeLimitSeconds":15},
-    {"Id":"SP-026","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What trophy is awarded annually to the championship team of the National Hockey League?","Options":["The Stanley Cup","The Vince Lombardi Trophy","The Larry O'Brien Trophy","The Commissioner's Trophy"],"CorrectAnswerIndex":0,"Explanation":"The Stanley Cup was donated in 1892 by Lord Stanley of Preston.","TimeLimitSeconds":15},
-    {"Id":"SP-027","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which golfer has won 15 major championships, second only to Jack Nicklaus's 18?","Options":["Tiger Woods","Arnold Palmer","Phil Mickelson","Walter Hagen"],"CorrectAnswerIndex":0,"Explanation":"Tiger Woods won his 15th major title at the 2019 Masters Tournament.","TimeLimitSeconds":15},
-    {"Id":"SP-028","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which Formula 1 driver is tied with Michael Schumacher for the most World Championships with 7 titles?","Options":["Lewis Hamilton","Max Verstappen","Sebastian Vettel","Ayrton Senna"],"CorrectAnswerIndex":0,"Explanation":"Sir Lewis Hamilton won championships in 2008, 2014, 2015, 2017, 2018, 2019, and 2020.","TimeLimitSeconds":15},
-    {"Id":"SP-029","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In what year did the 'Miracle on Ice' occur, when the US men's hockey team beat the USSR?","Options":["1980","1976","1984","1988"],"CorrectAnswerIndex":0,"Explanation":"Herb Brooks' amateur US team defeated the dominant Soviets at the Lake Placid Winter Games.","TimeLimitSeconds":15},
-    {"Id":"SP-030","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who holds the all-time NBA regular-season scoring record?","Options":["LeBron James","Kareem Abdul-Jabbar","Karl Malone","Kobe Bryant"],"CorrectAnswerIndex":0,"Explanation":"LeBron James surpassed Kareem Abdul-Jabbar's 38,387 points in February 2023.","TimeLimitSeconds":15},
-    {"Id":"SP-031","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What famous baseball stadium features a 37-foot-tall left field wall called 'The Green Monster'?","Options":["Fenway Park (Boston)","Wrigley Field","Yankee Stadium","Dodger Stadium"],"CorrectAnswerIndex":0,"Explanation":"Fenway Park opened in 1912 and is the oldest ballpark in Major League Baseball.","TimeLimitSeconds":15},
-    {"Id":"SP-032","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which team won the first two Super Bowls (Super Bowl I and II) coached by Vince Lombardi?","Options":["Green Bay Packers","Kansas City Chiefs","Oakland Raiders","Dallas Cowboys"],"CorrectAnswerIndex":0,"Explanation":"The Packers won Super Bowl I (1967) and Super Bowl II (1968).","TimeLimitSeconds":15},
-    {"Id":"SP-033","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What Olympic swimmer holds the all-time record for the most Olympic gold medals with 23 golds?","Options":["Michael Phelps","Mark Spitz","Caeleb Dressel","Ryan Lochte"],"CorrectAnswerIndex":0,"Explanation":"Michael Phelps won 28 total Olympic medals across five Olympic Games (2000–2016).","TimeLimitSeconds":15},
-    {"Id":"SP-034","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which college basketball coach won 10 NCAA Division I Championships at UCLA?","Options":["John Wooden","Mike Krzyzewski","Bobby Knight","Dean Smith"],"CorrectAnswerIndex":0,"Explanation":"John Wooden ('The Wizard of Westwood') won 10 national championships in 12 years (1964–1975).","TimeLimitSeconds":15},
-    {"Id":"SP-035","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In tennis, what is the score called when both players are tied at 40-40?","Options":["Deuce","Advantage","Love","Break point"],"CorrectAnswerIndex":0,"Explanation":"A player must win two consecutive points from deuce to win the game.","TimeLimitSeconds":15},
-    {"Id":"SP-036","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the oldest continuous sporting event in the United States, first held in 1875?","Options":["The Kentucky Derby","The World Series","The US Open Tennis","The Boston Marathon"],"CorrectAnswerIndex":0,"Explanation":"The Kentucky Derby has been run uninterrupted every year since May 17, 1875.","TimeLimitSeconds":15},
-    {"Id":"SP-037","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which country invented the sport of cricket?","Options":["England","Australia","India","South Africa"],"CorrectAnswerIndex":0,"Explanation":"Cricket originated in south-east England during the medieval period.","TimeLimitSeconds":15},
-    {"Id":"SP-038","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In the NFL, how many yards is a defense penalized for a standard 'pass interference' foul?","Options":["Spot of the foul","15 yards","10 yards","5 yards"],"CorrectAnswerIndex":0,"Explanation":"In the NFL, defensive pass interference is a spot foul resulting in an automatic first down.","TimeLimitSeconds":15},
-    {"Id":"SP-039","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who won 5 consecutive Tour de France titles from 1991 to 1995?","Options":["Miguel Indurain","Bernard Hinault","Eddy Merckx","Greg LeMond"],"CorrectAnswerIndex":0,"Explanation":"Spanish cyclist Miguel Indurain dominated time trials and the Tour de France.","TimeLimitSeconds":15},
-    {"Id":"SP-040","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which NBA franchise has won the most championships in league history (tied at 17 with the Celtics)?","Options":["Los Angeles Lakers","Chicago Bulls","Golden State Warriors","San Antonio Spurs"],"CorrectAnswerIndex":0,"Explanation":"The Lakers and Celtics are the two most decorated franchises in NBA history.","TimeLimitSeconds":15},
-    {"Id":"SP-041","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the only pitcher in MLB history to throw a perfect game in the World Series (1956)?","Options":["Don Larsen","Sandy Koufax","Whitey Ford","Bob Gibson"],"CorrectAnswerIndex":0,"Explanation":"Don Larsen threw 97 pitches for the New York Yankees in Game 5 against the Brooklyn Dodgers.","TimeLimitSeconds":15},
-    {"Id":"SP-042","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the final score of the highest-scoring game in NFL history, played between the Redskins and Giants in 1966?","Options":["72-41 (113 total points)","65-50","59-52","70-35"],"CorrectAnswerIndex":0,"Explanation":"The Washington Redskins defeated the New York Giants 72-41 on November 27, 1966.","TimeLimitSeconds":15},
-    {"Id":"SP-043","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What country won the very first FIFA World Cup tournament held in 1930?","Options":["Uruguay","Argentina","Brazil","Italy"],"CorrectAnswerIndex":0,"Explanation":"Uruguay defeated Argentina 4-2 in the final at Estadio Centenario in Montevideo.","TimeLimitSeconds":15},
-    {"Id":"SP-044","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who holds the record for the most career strikeouts by an MLB pitcher with 5,714 strikeouts?","Options":["Nolan Ryan","Randy Johnson","Roger Clemens","Steve Carlton"],"CorrectAnswerIndex":0,"Explanation":"Nolan Ryan pitched for 27 seasons and threw an MLB-record seven no-hitters.","TimeLimitSeconds":15},
-    {"Id":"SP-045","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"In track and field, what is the weight of a standard men's shot put in competition?","Options":["16 pounds (7.26 kg)","12 pounds","14 pounds","18 pounds"],"CorrectAnswerIndex":0,"Explanation":"The men's shot weighs 7.26 kilograms (16 lb), while the women's shot weighs 4 kg (8.8 lb).","TimeLimitSeconds":15},
-    {"Id":"SP-046","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What famous racecar driver was known as 'The Intimidator' and drove the black #3 Chevrolet in NASCAR?","Options":["Dale Earnhardt Sr.","Richard Petty","Jeff Gordon","Cale Yarborough"],"CorrectAnswerIndex":0,"Explanation":"Dale Earnhardt won seven NASCAR Cup Series championships.","TimeLimitSeconds":15},
-    {"Id":"SP-047","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the youngest heavyweight boxing champion in history, winning the title at age 20 in 1986?","Options":["Mike Tyson","Floyd Patterson","Cassius Clay","Evander Holyfield"],"CorrectAnswerIndex":0,"Explanation":"Mike Tyson knocked out Trevor Berbick in the second round in November 1986.","TimeLimitSeconds":15},
-    {"Id":"SP-048","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the maximum 147 break called in snooker?","Options":["A Maximum Break","A Century","A Perfect Frame","A Grand Slam"],"CorrectAnswerIndex":0,"Explanation":"A maximum break consists of potting all 15 reds with 15 blacks, followed by all 6 colors.","TimeLimitSeconds":15},
-    {"Id":"SP-049","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which college football team has won the most claimed national championships in NCAA history?","Options":["Yale (18 titles) / Alabama","Notre Dame","Michigan","USC"],"CorrectAnswerIndex":0,"Explanation":"Yale dominated early college football history in the late 19th and early 20th centuries.","TimeLimitSeconds":15},
-    {"Id":"SP-050","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the official distance from the pitcher's rubber to home plate in Major League Baseball?","Options":["60 feet, 6 inches","60 feet","62 feet","58 feet, 6 inches"],"CorrectAnswerIndex":0,"Explanation":"The distance was established at 60 feet 6 inches in 1893.","TimeLimitSeconds":15},
-    {"Id":"SP-051","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What country hosts the prestigious 24-hour sports car endurance race '24 Hours of Le Mans'?","Options":["France","Germany","Italy","Belgium"],"CorrectAnswerIndex":0,"Explanation":"The Circuit de la Sarthe near Le Mans has hosted the race since 1923.","TimeLimitSeconds":15},
-    {"Id":"SP-052","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which NFL team plays its home games at Lambeau Field?","Options":["Green Bay Packers","Chicago Bears","Minnesota Vikings","Detroit Lions"],"CorrectAnswerIndex":0,"Explanation":"Lambeau Field in Green Bay, Wisconsin is known as 'The Frozen Tundra'.","TimeLimitSeconds":15},
-    {"Id":"SP-053","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"How many points is a shot made from behind the arc in basketball?","Options":["3 points","2 points","4 points","1 point"],"CorrectAnswerIndex":0,"Explanation":"The NBA adopted the three-point line for the 1979-80 season.","TimeLimitSeconds":15},
-    {"Id":"SP-054","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the nickname of the New Zealand national rugby union team?","Options":["All Blacks","Wallabies","Springboks","British Lions"],"CorrectAnswerIndex":0,"Explanation":"The All Blacks perform the ceremonial Haka before every international test match.","TimeLimitSeconds":15},
-    {"Id":"SP-055","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What piece in chess can only move diagonally?","Options":["Bishop","Rook","Knight","Queen"],"CorrectAnswerIndex":0,"Explanation":"Each player starts with two bishops (one on light squares, one on dark squares).","TimeLimitSeconds":15},
-    {"Id":"SP-056","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who won the 2022 FIFA World Cup with Argentina in Qatar?","Options":["Lionel Messi","Cristiano Ronaldo","Kylian Mbappe","Neymar"],"CorrectAnswerIndex":0,"Explanation":"Lionel Messi captained Argentina to victory over France in a penalty shootout.","TimeLimitSeconds":15},
-    {"Id":"SP-057","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What piece of equipment do MLB batters wear on their heads for protection?","Options":["Batting helmet","Cap","Visor","Headband"],"CorrectAnswerIndex":0,"Explanation":"Batting helmets became mandatory in Major League Baseball in 1971.","TimeLimitSeconds":15},
-    {"Id":"SP-058","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which major golf tournament awards the champion a prestigious Green Jacket?","Options":["The Masters Tournament","The PGA Championship","The US Open","The Open Championship"],"CorrectAnswerIndex":0,"Explanation":"The Masters is held annually at Augusta National Golf Club in Georgia.","TimeLimitSeconds":15},
-    {"Id":"SP-059","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who holds the record for the most Olympic medals by a female gymnast with 11 medals?","Options":["Simone Biles / Larisa Latynina","Nadia Comaneci","Gabby Douglas","Mary Lou Retton"],"CorrectAnswerIndex":0,"Explanation":"Simone Biles is the most decorated gymnast in world championship and Olympic history.","TimeLimitSeconds":15},
-    {"Id":"SP-060","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the maximum number of clubs a golfer can carry in their bag during an official round?","Options":["14 clubs","12 clubs","15 clubs","10 clubs"],"CorrectAnswerIndex":0,"Explanation":"USGA Rule 4.1b limits a player to a maximum of 14 clubs during a stipulated round.","TimeLimitSeconds":15},
-    {"Id":"SP-061","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who was the legendary Brazilian soccer forward nicknamed 'O Rei' (The King) who won 3 World Cups?","Options":["Pelé","Zico","Ronaldo Nazário","Romário"],"CorrectAnswerIndex":0,"Explanation":"Pelé scored 1,279 goals in 1,363 games and won World Cups in 1958, 1962, and 1970.","TimeLimitSeconds":15},
-    {"Id":"SP-062","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In what year did the Boston Red Sox break the 86-year-old 'Curse of the Bambino' to win the World Series?","Options":["2004","2000","2007","1999"],"CorrectAnswerIndex":0,"Explanation":"The Red Sox swept the St. Louis Cardinals 4-0 in October 2004.","TimeLimitSeconds":15},
-    {"Id":"SP-063","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who was the first gymnast to be awarded a perfect score of 10.0 at the Olympic Games in 1976?","Options":["Nadia Comăneci","Olga Korbut","Mary Lou Retton","Svetlana Khorkina"],"CorrectAnswerIndex":0,"Explanation":"14-year-old Romanian gymnast Nadia Comaneci scored seven perfect 10s in Montreal.","TimeLimitSeconds":15},
-    {"Id":"SP-064","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What NBA player famously wore #24 and #8 for the Los Angeles Lakers across a 20-year career?","Options":["Kobe Bryant","Shaquille O'Neal","Magic Johnson","Jerry West"],"CorrectAnswerIndex":0,"Explanation":"The Lakers retired both #8 and #24 in honor of the 'Black Mamba'.","TimeLimitSeconds":15},
-    {"Id":"SP-065","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the name of the annual championship game of Canadian football?","Options":["The Grey Cup","The Stanley Cup","The Vanier Cup","The Memorial Cup"],"CorrectAnswerIndex":0,"Explanation":"The Grey Cup was commissioned by Earl Grey, Governor General of Canada, in 1909.","TimeLimitSeconds":15},
-    {"Id":"SP-066","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who holds the record for the fastest goal in FIFA World Cup history (10.8 seconds in 2002)?","Options":["Hakan Şükür (Turkey)","Bryan Robson","Clint Dempsey","Vaclav Masek"],"CorrectAnswerIndex":0,"Explanation":"Hakan Sukur scored 10.8 seconds into the third-place match against South Korea.","TimeLimitSeconds":15},
-    {"Id":"SP-067","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which baseball pitcher was nicknamed 'The Big Unit' and stood 6 feet 10 inches tall?","Options":["Randy Johnson","Curt Schilling","Pedro Martinez","Roger Clemens"],"CorrectAnswerIndex":0,"Explanation":"Randy Johnson won five Cy Young Awards and struck out 4,875 batters.","TimeLimitSeconds":15},
-    {"Id":"SP-068","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In American football, how wide is an official NFL football field from sideline to sideline?","Options":["53 1/3 yards (160 feet)","50 yards","60 yards","55 yards"],"CorrectAnswerIndex":0,"Explanation":"A standard field is 120 yards long (including end zones) and 53.33 yards wide.","TimeLimitSeconds":15},
-    {"Id":"SP-069","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What tennis star won 23 Grand Slam singles titles in the Open Era?","Options":["Serena Williams","Steffi Graf","Martina Navratilova","Chris Evert"],"CorrectAnswerIndex":0,"Explanation":"Serena Williams dominated women's tennis for over two decades.","TimeLimitSeconds":15},
-    {"Id":"SP-070","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What NFL coach has the most career regular season and playoff wins in history?","Options":["Don Shula (347 total wins)","Bill Belichick","George Halas","Tom Landry"],"CorrectAnswerIndex":0,"Explanation":"Don Shula coached the Baltimore Colts and Miami Dolphins to 347 total victories.","TimeLimitSeconds":15},
-    {"Id":"SP-071","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the only team to win the European Cup/Champions League with a team of players born within 30 miles of their stadium?","Options":["Celtic (1967 'Lisbon Lions')","Ajax","Real Madrid","Bayern Munich"],"CorrectAnswerIndex":0,"Explanation":"Jock Stein's Celtic team won the 1967 European Cup with all Scottish players from Greater Glasgow.","TimeLimitSeconds":15},
-    {"Id":"SP-072","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What year did Roger Bannister become the first person to run a mile in under four minutes (3:59.4)?","Options":["1954","1952","1956","1960"],"CorrectAnswerIndex":0,"Explanation":"Bannister broke the four-minute barrier at Iffley Road Track in Oxford on May 6, 1954.","TimeLimitSeconds":15},
-    {"Id":"SP-073","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the first driver to win the Indianapolis 500 four times?","Options":["A.J. Foyt","Al Unser Sr.","Rick Mears","Helio Castroneves"],"CorrectAnswerIndex":0,"Explanation":"A.J. Foyt won the Indy 500 in 1961, 1964, 1967, and 1977.","TimeLimitSeconds":15},
-    {"Id":"SP-074","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the only NFL team with a plant logo on its helmet?","Options":["New Orleans Saints (Fleur-de-lis)","Green Bay Packers","Philadelphia Eagles","Miami Dolphins"],"CorrectAnswerIndex":0,"Explanation":"The fleur-de-lis is a stylized lily symbol representing New Orleans' French heritage.","TimeLimitSeconds":15},
-    {"Id":"SP-075","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the first pitcher in MLB history to record 40 saves and 40 strikeouts in the same season?","Options":["Lee Smith / Rollie Fingers","Mariano Rivera","Trevor Hoffman","Dennis Eckersley"],"CorrectAnswerIndex":0,"Explanation":"Dennis Eckersley revolutionized the modern one-inning closer role for the Oakland A's.","TimeLimitSeconds":15},
-    {"Id":"SP-076","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the nickname of the 1970s Pittsburgh Steelers defensive lineup?","Options":["The Steel Curtain","The Purple People Eaters","The Fearsome Foursome","The Doomsday Defense"],"CorrectAnswerIndex":0,"Explanation":"Joe Greene, L.C. Greenwood, Ernie Holmes, and Dwight White anchored the Steel Curtain.","TimeLimitSeconds":15},
-    {"Id":"SP-077","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which country won the first Olympic gold medal in men's basketball in 1936?","Options":["United States","Canada","Mexico","Soviet Union"],"CorrectAnswerIndex":0,"Explanation":"The US defeated Canada 19-8 in the gold medal game on an outdoor clay court in Berlin.","TimeLimitSeconds":15},
-    {"Id":"SP-078","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What heavyweight boxer fought Muhammad Ali in the famous 'Rumble in the Jungle' in Zaire in 1974?","Options":["George Foreman","Joe Frazier","Ken Norton","Sonny Liston"],"CorrectAnswerIndex":0,"Explanation":"Ali utilized his 'rope-a-dope' strategy to knock out Foreman in the 8th round.","TimeLimitSeconds":15},
-    {"Id":"SP-079","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the maximum number of players allowed on a regulation rugby union field for both teams combined?","Options":["30 players (15 per side)","26 players","28 players","32 players"],"CorrectAnswerIndex":0,"Explanation":"Rugby union is played with 15 players per team on the pitch.","TimeLimitSeconds":15},
-    {"Id":"SP-080","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the only player to win MVP, Coach of the Year, and Executive of the Year in NBA history?","Options":["Larry Bird","Pat Riley","Phil Jackson","Jerry West"],"CorrectAnswerIndex":0,"Explanation":"Larry Bird won all three prestigious honors with the Boston Celtics and Indiana Pacers.","TimeLimitSeconds":15},
-    {"Id":"SP-081","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"In what sport is the term 'hat trick' used when a player scores three goals in a single game?","Options":["Soccer & Hockey","Basketball","Baseball","Tennis"],"CorrectAnswerIndex":0,"Explanation":"Hat tricks originate from cricket when bowlers were awarded a hat for taking three wickets.","TimeLimitSeconds":15},
-    {"Id":"SP-082","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the name of the annual American football championship game played on the first Sunday in February?","Options":["The Super Bowl","The Pro Bowl","The Rose Bowl","The Sugar Bowl"],"CorrectAnswerIndex":0,"Explanation":"The Super Bowl is the most watched television broadcast in the United States annually.","TimeLimitSeconds":15},
-    {"Id":"SP-083","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which country is traditionally credited with creating modern association football (soccer)?","Options":["England","Scotland","Brazil","France"],"CorrectAnswerIndex":0,"Explanation":"The Football Association was established in London in 1863 to codify the rules.","TimeLimitSeconds":15},
-    {"Id":"SP-084","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"How many strikes in a row make up a 'turkey' in bowling?","Options":["3 strikes","4 strikes","5 strikes","2 strikes"],"CorrectAnswerIndex":0,"Explanation":"Three consecutive strikes in bowling is known as a turkey.","TimeLimitSeconds":15},
-    {"Id":"SP-085","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What color card does a referee in soccer show to immediately eject a player from the match?","Options":["Red card","Yellow card","Black card","Blue card"],"CorrectAnswerIndex":0,"Explanation":"A red card results in immediate expulsion and the team playing down a player.","TimeLimitSeconds":15},
-    {"Id":"SP-086","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which baseball legend held the career home run record of 755 for over three decades?","Options":["Hank Aaron","Babe Ruth","Willie Mays","Frank Robinson"],"CorrectAnswerIndex":0,"Explanation":"Hank 'Hammerin' Hank' Aaron broke Babe Ruth's record of 714 in 1974.","TimeLimitSeconds":15},
-    {"Id":"SP-087","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who was the head coach of the 1985 Chicago Bears during their dominant Super Bowl XX run?","Options":["Mike Ditka","Buddy Ryan","Bill Parcells","Chuck Noll"],"CorrectAnswerIndex":0,"Explanation":"Mike Ditka coached the legendary 46 Defense Bears to a 15-1 regular season.","TimeLimitSeconds":15},
-    {"Id":"SP-088","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which NBA player was nicknamed 'The Round Mound of Rebound'?","Options":["Charles Barkley","Karl Malone","Dennis Rodman","Moses Malone"],"CorrectAnswerIndex":0,"Explanation":"Charles Barkley led the NBA in rebounding despite standing 6'6\".","TimeLimitSeconds":15},
-    {"Id":"SP-089","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the oldest trophy in international sports, contested since 1851 in sailing?","Options":["The America's Cup","The Davis Cup","The Ryder Cup","The Ashes"],"CorrectAnswerIndex":0,"Explanation":"The America's Cup is the oldest trophy in international sport.","TimeLimitSeconds":15},
-    {"Id":"SP-090","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which tennis player achieved the 'Golden Slam' in 1988, winning all four Grand Slams and Olympic Gold in the same year?","Options":["Steffi Graf","Serena Williams","Martina Navratilova","Monica Seles"],"CorrectAnswerIndex":0,"Explanation":"Steffi Graf is the only tennis player in history to achieve the Golden Slam.","TimeLimitSeconds":15},
-    {"Id":"SP-091","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who holds the record for the longest hitting streak in Major League Baseball history at 56 games?","Options":["Joe DiMaggio (1941)","Pete Rose","Ted Williams","Ty Cobb"],"CorrectAnswerIndex":0,"Explanation":"Joe DiMaggio hit safely in 56 consecutive games for the Yankees from May 15 to July 16, 1941.","TimeLimitSeconds":15},
-    {"Id":"SP-092","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the original name of the New York Jets before 1963?","Options":["New York Titans","New York Americans","New York Bulldogs","New York Yanks"],"CorrectAnswerIndex":0,"Explanation":"The franchise was founded in 1960 as the Titans of New York in the AFL.","TimeLimitSeconds":15},
-    {"Id":"SP-093","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"In what year did the Chicago White Sox 'Black Sox' scandal occur during the World Series?","Options":["1919","1920","1917","1924"],"CorrectAnswerIndex":0,"Explanation":"Eight White Sox players were accused of throwing the 1919 World Series against Cincinnati.","TimeLimitSeconds":15},
-    {"Id":"SP-094","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the only boxer to retire undefeated as world heavyweight champion with a 49-0 record?","Options":["Rocky Marciano","Gene Tunney","Joe Louis","Floyd Mayweather Jr."],"CorrectAnswerIndex":0,"Explanation":"Rocky Marciano held the heavyweight title from 1952 to 1956, retiring at 49-0 with 43 KOs.","TimeLimitSeconds":15},
-    {"Id":"SP-095","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the highest possible individual score in a single game of ten-pin bowling?","Options":["300 points (12 strikes)","290 points","310 points","280 points"],"CorrectAnswerIndex":0,"Explanation":"A perfect game consists of 12 consecutive strikes for a maximum score of 300.","TimeLimitSeconds":15},
-    {"Id":"SP-096","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What sport uses a shuttlecock (or birdie) hit back and forth across a high net?","Options":["Badminton","Tennis","Squash","Racquetball"],"CorrectAnswerIndex":0,"Explanation":"Badminton is an Olympic racquet sport played with lightweight shuttlecocks.","TimeLimitSeconds":15},
-    {"Id":"SP-097","Category":"Sports","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"How many players are on the field for one team in a regulation soccer match?","Options":["11 players","10 players","12 players","9 players"],"CorrectAnswerIndex":0,"Explanation":"Each team fields 11 players including the goalkeeper.","TimeLimitSeconds":15},
-    {"Id":"SP-098","Category":"Sports","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which Formula 1 team has the famous Prancing Horse (Cavallino Rampante) logo?","Options":["Ferrari","McLaren","Red Bull","Mercedes"],"CorrectAnswerIndex":0,"Explanation":"Scuderia Ferrari is the oldest and most successful team in Formula 1 history.","TimeLimitSeconds":15},
-    {"Id":"SP-099","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the official nickname of the 1992 US Olympic Men's Basketball Team?","Options":["The Dream Team","The Redeem Team","The Gold Standard","The All-Stars"],"CorrectAnswerIndex":0,"Explanation":"The Dream Team included Michael Jordan, Magic Johnson, Larry Bird, and Charles Barkley.","TimeLimitSeconds":15},
-    {"Id":"SP-100","Category":"Sports","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the first quarterback in NFL history to pass for over 5,000 yards in a single season (1984)?","Options":["Dan Marino","Dan Fouts","Drew Brees","Peyton Manning"],"CorrectAnswerIndex":0,"Explanation":"Dan Marino threw for 5,084 yards and 48 touchdowns for the Miami Dolphins in 1984.","TimeLimitSeconds":15}
+    {
+      "Id": "SP-001",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which NFL quarterback has won the most Super Bowl rings in history with seven titles?",
+      "Options": [
+        "Tom Brady",
+        "Terry Bradshaw",
+        "Joe Montana",
+        "Peyton Manning"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tom Brady won six Super Bowls with the New England Patriots and one with the Tampa Bay Buccaneers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-002",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the regulation height of a basketball rim in the NBA?",
+      "Options": [
+        "9.5 feet",
+        "10 feet (3.05 m)",
+        "11 feet",
+        "10.5 feet"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "James Naismith set the basket height at 10 feet in 1891.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-003",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country has won the most FIFA Men's World Cup tournaments with 5 titles?",
+      "Options": [
+        "Italy",
+        "Argentina",
+        "Germany",
+        "Brazil"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Brazil won the World Cup in 1958, 1962, 1970, 1994, and 2002.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-004",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who holds the record for the most home runs in a single MLB season with 73 home runs in 2001?",
+      "Options": [
+        "Babe Ruth",
+        "Barry Bonds",
+        "Sammy Sosa",
+        "Mark McGwire"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Barry Bonds hit 73 home runs for the San Francisco Giants in 2001.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-005",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "How many players are on the ice for one team during standard play in ice hockey?",
+      "Options": [
+        "5",
+        "4",
+        "7",
+        "6 (5 skaters + 1 goalie)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "A standard ice hockey lineup includes a goaltender, two defensemen, and three forwards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-006",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In golf, what is the term for scoring one stroke under par on a hole?",
+      "Options": [
+        "Albatross",
+        "Birdie",
+        "Eagle",
+        "Bogey"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Birdie is 1 under par, Eagle is 2 under par, and Bogey is 1 over par.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-007",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as 'The Greatest' in professional heavyweight boxing?",
+      "Options": [
+        "Muhammad Ali",
+        "Joe Frazier",
+        "Mike Tyson",
+        "George Foreman"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Muhammad Ali won the world heavyweight championship three times.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-008",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which tennis player has won 24 Grand Slam men's singles titles (as of 2024)?",
+      "Options": [
+        "Pete Sampras",
+        "Roger Federer",
+        "Rafael Nadal",
+        "Novak Djokovic"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Novak Djokovic holds the all-time men's record for major singles titles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-009",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the diameter of a standard basketball hoop in inches?",
+      "Options": [
+        "22 inches",
+        "16 inches",
+        "20 inches",
+        "18 inches"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "An 18-inch rim allows almost two standard 9.5-inch basketballs to fit side-by-side.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-010",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous annual horse race is run at Churchill Downs in Louisville, Kentucky?",
+      "Options": [
+        "The Preakness Stakes",
+        "The Kentucky Derby",
+        "The Breeders' Cup",
+        "The Belmont Stakes"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Kentucky Derby is known as 'The Most Exciting Two Minutes in Sports'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-011",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which baseball team has won the most World Series championships with 27 titles?",
+      "Options": [
+        "Los Angeles Dodgers",
+        "New York Yankees",
+        "St. Louis Cardinals",
+        "Boston Red Sox"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The New York Yankees have won 27 World Series titles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-012",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is the legendary Jamaican sprinter who holds world records in both the 100m and 200m?",
+      "Options": [
+        "Tyson Gay",
+        "Usain Bolt",
+        "Asafa Powell",
+        "Yohan Blake"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Usain Bolt ran 9.58 seconds in the 100m and 19.19 in the 200m at the 2009 World Championships.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-013",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "How many holes are played in a standard full round of golf?",
+      "Options": [
+        "18 holes",
+        "12 holes",
+        "9 holes",
+        "20 holes"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "St Andrews Links in Scotland established the 18-hole standard in 1764.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-014",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which NBA legend scored 100 points in a single game on March 2, 1962?",
+      "Options": [
+        "Michael Jordan",
+        "Kobe Bryant",
+        "Bill Russell",
+        "Wilt Chamberlain"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Wilt Chamberlain scored 100 points for the Philadelphia Warriors against the Knicks.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-015",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the term used in bowling for knocking down all 10 pins with two consecutive balls in a frame?",
+      "Options": [
+        "Mark",
+        "Split",
+        "Spare",
+        "Strike"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "A strike knocks down all 10 on the first ball; a spare cleans up the remainder on the second.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-016",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which city hosted the 1996 Summer Olympic Games?",
+      "Options": [
+        "Atlanta, USA",
+        "Athens, Greece",
+        "Barcelona, Spain",
+        "Sydney, Australia"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Atlanta hosted the Centennial Olympic Games in 1996.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-017",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In American football, how many points is a touchdown worth?",
+      "Options": [
+        "7 points",
+        "2 points",
+        "3 points",
+        "6 points"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "A touchdown earns 6 points, followed by a point-after attempt (PAT) or 2-point conversion.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-018",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who won six NBA Championships with the Chicago Bulls in the 1990s?",
+      "Options": [
+        "Michael Jordan",
+        "Larry Bird",
+        "LeBron James",
+        "Magic Johnson"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Michael Jordan led the Bulls to two 'three-peats' (1991–1993, 1996–1998).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-019",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Grand Slam tennis tournament is played annually on grass courts in London?",
+      "Options": [
+        "Wimbledon",
+        "The Australian Open",
+        "The French Open (Roland Garros)",
+        "The US Open"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Wimbledon is the oldest tennis tournament in the world, founded in 1877.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-020",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the distance of an official marathon race?",
+      "Options": [
+        "20 miles",
+        "30 miles",
+        "26.2 miles (42.195 km)",
+        "25 miles"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The 26 miles 385 yards standard was established at the 1908 London Olympics.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-021",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who holds the all-time NHL record for career goals, assists, and points?",
+      "Options": [
+        "Wayne Gretzky",
+        "Jaromir Jagr",
+        "Gordie Howe",
+        "Mario Lemieux"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Wayne Gretzky ('The Great One') scored 894 goals and 2,857 total points.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-022",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which MLB player broke Lou Gehrig's streak by playing 2,632 consecutive games?",
+      "Options": [
+        "Cal Ripken Jr.",
+        "Derek Jeter",
+        "Pete Rose",
+        "Barry Bonds"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Cal Ripken Jr. played 2,632 consecutive games for the Baltimore Orioles from 1982 to 1998.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-023",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the only NFL team to achieve a completely undefeated season including the Super Bowl?",
+      "Options": [
+        "1972 Miami Dolphins (17-0)",
+        "1985 Chicago Bears",
+        "1989 San Francisco 49ers",
+        "2007 New England Patriots"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The 1972 Dolphins, coached by Don Shula, went 14-0 in regular season and won Super Bowl VII.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-024",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In soccer, how long is a standard regulation match without extra time?",
+      "Options": [
+        "80 minutes",
+        "60 minutes",
+        "90 minutes (two 45-minute halves)",
+        "100 minutes"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "A standard match consists of two 45-minute halves plus stoppage time.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-025",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first African American player to play in Major League Baseball in 1947?",
+      "Options": [
+        "Jackie Robinson",
+        "Satchel Paige",
+        "Willie Mays",
+        "Hank Aaron"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Jackie Robinson debuted for the Brooklyn Dodgers on April 15, 1947 wearing #42.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-026",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What trophy is awarded annually to the championship team of the National Hockey League?",
+      "Options": [
+        "The Commissioner's Trophy",
+        "The Stanley Cup",
+        "The Vince Lombardi Trophy",
+        "The Larry O'Brien Trophy"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Stanley Cup was donated in 1892 by Lord Stanley of Preston.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-027",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which golfer has won 15 major championships, second only to Jack Nicklaus's 18?",
+      "Options": [
+        "Phil Mickelson",
+        "Walter Hagen",
+        "Tiger Woods",
+        "Arnold Palmer"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Tiger Woods won his 15th major title at the 2019 Masters Tournament.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-028",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Formula 1 driver is tied with Michael Schumacher for the most World Championships with 7 titles?",
+      "Options": [
+        "Lewis Hamilton",
+        "Sebastian Vettel",
+        "Max Verstappen",
+        "Ayrton Senna"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sir Lewis Hamilton won championships in 2008, 2014, 2015, 2017, 2018, 2019, and 2020.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-029",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year did the 'Miracle on Ice' occur, when the US men's hockey team beat the USSR?",
+      "Options": [
+        "1984",
+        "1980",
+        "1976",
+        "1988"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Herb Brooks' amateur US team defeated the dominant Soviets at the Lake Placid Winter Games.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-030",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who holds the all-time NBA regular-season scoring record?",
+      "Options": [
+        "Karl Malone",
+        "Kobe Bryant",
+        "LeBron James",
+        "Kareem Abdul-Jabbar"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "LeBron James surpassed Kareem Abdul-Jabbar's 38,387 points in February 2023.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-031",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous baseball stadium features a 37-foot-tall left field wall called 'The Green Monster'?",
+      "Options": [
+        "Dodger Stadium",
+        "Wrigley Field",
+        "Yankee Stadium",
+        "Fenway Park (Boston)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Fenway Park opened in 1912 and is the oldest ballpark in Major League Baseball.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-032",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which team won the first two Super Bowls (Super Bowl I and II) coached by Vince Lombardi?",
+      "Options": [
+        "Oakland Raiders",
+        "Kansas City Chiefs",
+        "Green Bay Packers",
+        "Dallas Cowboys"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Packers won Super Bowl I (1967) and Super Bowl II (1968).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-033",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Olympic swimmer holds the all-time record for the most Olympic gold medals with 23 golds?",
+      "Options": [
+        "Caeleb Dressel",
+        "Mark Spitz",
+        "Michael Phelps",
+        "Ryan Lochte"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Michael Phelps won 28 total Olympic medals across five Olympic Games (2000–2016).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-034",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which college basketball coach won 10 NCAA Division I Championships at UCLA?",
+      "Options": [
+        "John Wooden",
+        "Dean Smith",
+        "Mike Krzyzewski",
+        "Bobby Knight"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "John Wooden ('The Wizard of Westwood') won 10 national championships in 12 years (1964–1975).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-035",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In tennis, what is the score called when both players are tied at 40-40?",
+      "Options": [
+        "Break point",
+        "Love",
+        "Deuce",
+        "Advantage"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "A player must win two consecutive points from deuce to win the game.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-036",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the oldest continuous sporting event in the United States, first held in 1875?",
+      "Options": [
+        "The World Series",
+        "The Kentucky Derby",
+        "The US Open Tennis",
+        "The Boston Marathon"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Kentucky Derby has been run uninterrupted every year since May 17, 1875.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-037",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country invented the sport of cricket?",
+      "Options": [
+        "South Africa",
+        "India",
+        "England",
+        "Australia"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Cricket originated in south-east England during the medieval period.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-038",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In the NFL, how many yards is a defense penalized for a standard 'pass interference' foul?",
+      "Options": [
+        "15 yards",
+        "Spot of the foul",
+        "10 yards",
+        "5 yards"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "In the NFL, defensive pass interference is a spot foul resulting in an automatic first down.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-039",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who won 5 consecutive Tour de France titles from 1991 to 1995?",
+      "Options": [
+        "Miguel Indurain",
+        "Bernard Hinault",
+        "Greg LeMond",
+        "Eddy Merckx"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Spanish cyclist Miguel Indurain dominated time trials and the Tour de France.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-040",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which NBA franchise has won the most championships in league history (tied at 17 with the Celtics)?",
+      "Options": [
+        "Los Angeles Lakers",
+        "Chicago Bulls",
+        "San Antonio Spurs",
+        "Golden State Warriors"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Lakers and Celtics are the two most decorated franchises in NBA history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-041",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the only pitcher in MLB history to throw a perfect game in the World Series (1956)?",
+      "Options": [
+        "Bob Gibson",
+        "Sandy Koufax",
+        "Don Larsen",
+        "Whitey Ford"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Don Larsen threw 97 pitches for the New York Yankees in Game 5 against the Brooklyn Dodgers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-042",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the final score of the highest-scoring game in NFL history, played between the Redskins and Giants in 1966?",
+      "Options": [
+        "72-41 (113 total points)",
+        "65-50",
+        "59-52",
+        "70-35"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Washington Redskins defeated the New York Giants 72-41 on November 27, 1966.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-043",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What country won the very first FIFA World Cup tournament held in 1930?",
+      "Options": [
+        "Uruguay",
+        "Italy",
+        "Argentina",
+        "Brazil"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Uruguay defeated Argentina 4-2 in the final at Estadio Centenario in Montevideo.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-044",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who holds the record for the most career strikeouts by an MLB pitcher with 5,714 strikeouts?",
+      "Options": [
+        "Steve Carlton",
+        "Nolan Ryan",
+        "Roger Clemens",
+        "Randy Johnson"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Nolan Ryan pitched for 27 seasons and threw an MLB-record seven no-hitters.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-045",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In track and field, what is the weight of a standard men's shot put in competition?",
+      "Options": [
+        "12 pounds",
+        "14 pounds",
+        "18 pounds",
+        "16 pounds (7.26 kg)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The men's shot weighs 7.26 kilograms (16 lb), while the women's shot weighs 4 kg (8.8 lb).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-046",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous racecar driver was known as 'The Intimidator' and drove the black #3 Chevrolet in NASCAR?",
+      "Options": [
+        "Dale Earnhardt Sr.",
+        "Cale Yarborough",
+        "Richard Petty",
+        "Jeff Gordon"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Dale Earnhardt won seven NASCAR Cup Series championships.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-047",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the youngest heavyweight boxing champion in history, winning the title at age 20 in 1986?",
+      "Options": [
+        "Evander Holyfield",
+        "Cassius Clay",
+        "Mike Tyson",
+        "Floyd Patterson"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Mike Tyson knocked out Trevor Berbick in the second round in November 1986.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-048",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the maximum 147 break called in snooker?",
+      "Options": [
+        "A Perfect Frame",
+        "A Maximum Break",
+        "A Grand Slam",
+        "A Century"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "A maximum break consists of potting all 15 reds with 15 blacks, followed by all 6 colors.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-049",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which college football team has won the most claimed national championships in NCAA history?",
+      "Options": [
+        "Notre Dame",
+        "USC",
+        "Yale (18 titles) / Alabama",
+        "Michigan"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Yale dominated early college football history in the late 19th and early 20th centuries.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-050",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the official distance from the pitcher's rubber to home plate in Major League Baseball?",
+      "Options": [
+        "62 feet",
+        "60 feet, 6 inches",
+        "58 feet, 6 inches",
+        "60 feet"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The distance was established at 60 feet 6 inches in 1893.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-051",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What country hosts the prestigious 24-hour sports car endurance race '24 Hours of Le Mans'?",
+      "Options": [
+        "Germany",
+        "Italy",
+        "France",
+        "Belgium"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Circuit de la Sarthe near Le Mans has hosted the race since 1923.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-052",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which NFL team plays its home games at Lambeau Field?",
+      "Options": [
+        "Green Bay Packers",
+        "Detroit Lions",
+        "Minnesota Vikings",
+        "Chicago Bears"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Lambeau Field in Green Bay, Wisconsin is known as 'The Frozen Tundra'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-053",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "How many points is a shot made from behind the arc in basketball?",
+      "Options": [
+        "4 points",
+        "1 point",
+        "3 points",
+        "2 points"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The NBA adopted the three-point line for the 1979-80 season.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-054",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the nickname of the New Zealand national rugby union team?",
+      "Options": [
+        "Wallabies",
+        "British Lions",
+        "All Blacks",
+        "Springboks"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The All Blacks perform the ceremonial Haka before every international test match.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-055",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What piece in chess can only move diagonally?",
+      "Options": [
+        "Rook",
+        "Bishop",
+        "Knight",
+        "Queen"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Each player starts with two bishops (one on light squares, one on dark squares).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-056",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who won the 2022 FIFA World Cup with Argentina in Qatar?",
+      "Options": [
+        "Kylian Mbappe",
+        "Lionel Messi",
+        "Neymar",
+        "Cristiano Ronaldo"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Lionel Messi captained Argentina to victory over France in a penalty shootout.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-057",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What piece of equipment do MLB batters wear on their heads for protection?",
+      "Options": [
+        "Cap",
+        "Batting helmet",
+        "Headband",
+        "Visor"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Batting helmets became mandatory in Major League Baseball in 1971.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-058",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which major golf tournament awards the champion a prestigious Green Jacket?",
+      "Options": [
+        "The PGA Championship",
+        "The US Open",
+        "The Open Championship",
+        "The Masters Tournament"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Masters is held annually at Augusta National Golf Club in Georgia.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-059",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who holds the record for the most Olympic medals by a female gymnast with 11 medals?",
+      "Options": [
+        "Mary Lou Retton",
+        "Nadia Comaneci",
+        "Gabby Douglas",
+        "Simone Biles / Larisa Latynina"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Simone Biles is the most decorated gymnast in world championship and Olympic history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-060",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the maximum number of clubs a golfer can carry in their bag during an official round?",
+      "Options": [
+        "12 clubs",
+        "14 clubs",
+        "10 clubs",
+        "15 clubs"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "USGA Rule 4.1b limits a player to a maximum of 14 clubs during a stipulated round.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-061",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the legendary Brazilian soccer forward nicknamed 'O Rei' (The King) who won 3 World Cups?",
+      "Options": [
+        "Ronaldo Nazário",
+        "Zico",
+        "Romário",
+        "Pelé"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Pelé scored 1,279 goals in 1,363 games and won World Cups in 1958, 1962, and 1970.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-062",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year did the Boston Red Sox break the 86-year-old 'Curse of the Bambino' to win the World Series?",
+      "Options": [
+        "1999",
+        "2004",
+        "2000",
+        "2007"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Red Sox swept the St. Louis Cardinals 4-0 in October 2004.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-063",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first gymnast to be awarded a perfect score of 10.0 at the Olympic Games in 1976?",
+      "Options": [
+        "Olga Korbut",
+        "Mary Lou Retton",
+        "Svetlana Khorkina",
+        "Nadia Comăneci"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "14-year-old Romanian gymnast Nadia Comaneci scored seven perfect 10s in Montreal.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-064",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What NBA player famously wore #24 and #8 for the Los Angeles Lakers across a 20-year career?",
+      "Options": [
+        "Kobe Bryant",
+        "Shaquille O'Neal",
+        "Magic Johnson",
+        "Jerry West"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Lakers retired both #8 and #24 in honor of the 'Black Mamba'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-065",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the annual championship game of Canadian football?",
+      "Options": [
+        "The Grey Cup",
+        "The Memorial Cup",
+        "The Stanley Cup",
+        "The Vanier Cup"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Grey Cup was commissioned by Earl Grey, Governor General of Canada, in 1909.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-066",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who holds the record for the fastest goal in FIFA World Cup history (10.8 seconds in 2002)?",
+      "Options": [
+        "Bryan Robson",
+        "Clint Dempsey",
+        "Vaclav Masek",
+        "Hakan Şükür (Turkey)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Hakan Sukur scored 10.8 seconds into the third-place match against South Korea.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-067",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which baseball pitcher was nicknamed 'The Big Unit' and stood 6 feet 10 inches tall?",
+      "Options": [
+        "Roger Clemens",
+        "Pedro Martinez",
+        "Curt Schilling",
+        "Randy Johnson"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Randy Johnson won five Cy Young Awards and struck out 4,875 batters.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-068",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In American football, how wide is an official NFL football field from sideline to sideline?",
+      "Options": [
+        "50 yards",
+        "55 yards",
+        "53 1/3 yards (160 feet)",
+        "60 yards"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "A standard field is 120 yards long (including end zones) and 53.33 yards wide.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-069",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What tennis star won 23 Grand Slam singles titles in the Open Era?",
+      "Options": [
+        "Martina Navratilova",
+        "Steffi Graf",
+        "Serena Williams",
+        "Chris Evert"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Serena Williams dominated women's tennis for over two decades.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-070",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What NFL coach has the most career regular season and playoff wins in history?",
+      "Options": [
+        "Tom Landry",
+        "Bill Belichick",
+        "George Halas",
+        "Don Shula (347 total wins)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Don Shula coached the Baltimore Colts and Miami Dolphins to 347 total victories.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-071",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the only team to win the European Cup/Champions League with a team of players born within 30 miles of their stadium?",
+      "Options": [
+        "Ajax",
+        "Celtic (1967 'Lisbon Lions')",
+        "Bayern Munich",
+        "Real Madrid"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Jock Stein's Celtic team won the 1967 European Cup with all Scottish players from Greater Glasgow.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-072",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What year did Roger Bannister become the first person to run a mile in under four minutes (3:59.4)?",
+      "Options": [
+        "1960",
+        "1956",
+        "1954",
+        "1952"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Bannister broke the four-minute barrier at Iffley Road Track in Oxford on May 6, 1954.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-073",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first driver to win the Indianapolis 500 four times?",
+      "Options": [
+        "Al Unser Sr.",
+        "Helio Castroneves",
+        "Rick Mears",
+        "A.J. Foyt"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "A.J. Foyt won the Indy 500 in 1961, 1964, 1967, and 1977.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-074",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the only NFL team with a plant logo on its helmet?",
+      "Options": [
+        "New Orleans Saints (Fleur-de-lis)",
+        "Philadelphia Eagles",
+        "Miami Dolphins",
+        "Green Bay Packers"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The fleur-de-lis is a stylized lily symbol representing New Orleans' French heritage.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-075",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first pitcher in MLB history to record 40 saves and 40 strikeouts in the same season?",
+      "Options": [
+        "Mariano Rivera",
+        "Trevor Hoffman",
+        "Dennis Eckersley",
+        "Lee Smith / Rollie Fingers"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Dennis Eckersley revolutionized the modern one-inning closer role for the Oakland A's.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-076",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the nickname of the 1970s Pittsburgh Steelers defensive lineup?",
+      "Options": [
+        "The Doomsday Defense",
+        "The Purple People Eaters",
+        "The Fearsome Foursome",
+        "The Steel Curtain"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Joe Greene, L.C. Greenwood, Ernie Holmes, and Dwight White anchored the Steel Curtain.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-077",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country won the first Olympic gold medal in men's basketball in 1936?",
+      "Options": [
+        "Mexico",
+        "Soviet Union",
+        "Canada",
+        "United States"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The US defeated Canada 19-8 in the gold medal game on an outdoor clay court in Berlin.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-078",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What heavyweight boxer fought Muhammad Ali in the famous 'Rumble in the Jungle' in Zaire in 1974?",
+      "Options": [
+        "Ken Norton",
+        "Sonny Liston",
+        "George Foreman",
+        "Joe Frazier"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Ali utilized his 'rope-a-dope' strategy to knock out Foreman in the 8th round.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-079",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the maximum number of players allowed on a regulation rugby union field for both teams combined?",
+      "Options": [
+        "26 players",
+        "30 players (15 per side)",
+        "32 players",
+        "28 players"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Rugby union is played with 15 players per team on the pitch.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-080",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the only player to win MVP, Coach of the Year, and Executive of the Year in NBA history?",
+      "Options": [
+        "Pat Riley",
+        "Jerry West",
+        "Phil Jackson",
+        "Larry Bird"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Larry Bird won all three prestigious honors with the Boston Celtics and Indiana Pacers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-081",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what sport is the term 'hat trick' used when a player scores three goals in a single game?",
+      "Options": [
+        "Basketball",
+        "Baseball",
+        "Tennis",
+        "Soccer & Hockey"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Hat tricks originate from cricket when bowlers were awarded a hat for taking three wickets.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-082",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the annual American football championship game played on the first Sunday in February?",
+      "Options": [
+        "The Sugar Bowl",
+        "The Super Bowl",
+        "The Rose Bowl",
+        "The Pro Bowl"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Super Bowl is the most watched television broadcast in the United States annually.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-083",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country is traditionally credited with creating modern association football (soccer)?",
+      "Options": [
+        "Brazil",
+        "Scotland",
+        "England",
+        "France"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Football Association was established in London in 1863 to codify the rules.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-084",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "How many strikes in a row make up a 'turkey' in bowling?",
+      "Options": [
+        "3 strikes",
+        "2 strikes",
+        "4 strikes",
+        "5 strikes"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Three consecutive strikes in bowling is known as a turkey.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-085",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What color card does a referee in soccer show to immediately eject a player from the match?",
+      "Options": [
+        "Yellow card",
+        "Blue card",
+        "Red card",
+        "Black card"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "A red card results in immediate expulsion and the team playing down a player.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-086",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which baseball legend held the career home run record of 755 for over three decades?",
+      "Options": [
+        "Hank Aaron",
+        "Babe Ruth",
+        "Willie Mays",
+        "Frank Robinson"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Hank 'Hammerin' Hank' Aaron broke Babe Ruth's record of 714 in 1974.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-087",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the head coach of the 1985 Chicago Bears during their dominant Super Bowl XX run?",
+      "Options": [
+        "Chuck Noll",
+        "Mike Ditka",
+        "Bill Parcells",
+        "Buddy Ryan"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Mike Ditka coached the legendary 46 Defense Bears to a 15-1 regular season.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-088",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which NBA player was nicknamed 'The Round Mound of Rebound'?",
+      "Options": [
+        "Charles Barkley",
+        "Moses Malone",
+        "Karl Malone",
+        "Dennis Rodman"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Charles Barkley led the NBA in rebounding despite standing 6'6\".",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-089",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the oldest trophy in international sports, contested since 1851 in sailing?",
+      "Options": [
+        "The America's Cup",
+        "The Ryder Cup",
+        "The Ashes",
+        "The Davis Cup"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The America's Cup is the oldest trophy in international sport.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-090",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which tennis player achieved the 'Golden Slam' in 1988, winning all four Grand Slams and Olympic Gold in the same year?",
+      "Options": [
+        "Serena Williams",
+        "Martina Navratilova",
+        "Steffi Graf",
+        "Monica Seles"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Steffi Graf is the only tennis player in history to achieve the Golden Slam.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-091",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who holds the record for the longest hitting streak in Major League Baseball history at 56 games?",
+      "Options": [
+        "Pete Rose",
+        "Ty Cobb",
+        "Ted Williams",
+        "Joe DiMaggio (1941)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Joe DiMaggio hit safely in 56 consecutive games for the Yankees from May 15 to July 16, 1941.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-092",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the original name of the New York Jets before 1963?",
+      "Options": [
+        "New York Americans",
+        "New York Bulldogs",
+        "New York Yanks",
+        "New York Titans"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The franchise was founded in 1960 as the Titans of New York in the AFL.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-093",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year did the Chicago White Sox 'Black Sox' scandal occur during the World Series?",
+      "Options": [
+        "1917",
+        "1924",
+        "1919",
+        "1920"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Eight White Sox players were accused of throwing the 1919 World Series against Cincinnati.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-094",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the only boxer to retire undefeated as world heavyweight champion with a 49-0 record?",
+      "Options": [
+        "Gene Tunney",
+        "Floyd Mayweather Jr.",
+        "Rocky Marciano",
+        "Joe Louis"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Rocky Marciano held the heavyweight title from 1952 to 1956, retiring at 49-0 with 43 KOs.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-095",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the highest possible individual score in a single game of ten-pin bowling?",
+      "Options": [
+        "310 points",
+        "300 points (12 strikes)",
+        "290 points",
+        "280 points"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "A perfect game consists of 12 consecutive strikes for a maximum score of 300.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-096",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What sport uses a shuttlecock (or birdie) hit back and forth across a high net?",
+      "Options": [
+        "Racquetball",
+        "Tennis",
+        "Badminton",
+        "Squash"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Badminton is an Olympic racquet sport played with lightweight shuttlecocks.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-097",
+      "Category": "Sports",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "How many players are on the field for one team in a regulation soccer match?",
+      "Options": [
+        "11 players",
+        "10 players",
+        "9 players",
+        "12 players"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Each team fields 11 players including the goalkeeper.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-098",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Formula 1 team has the famous Prancing Horse (Cavallino Rampante) logo?",
+      "Options": [
+        "Ferrari",
+        "Red Bull",
+        "McLaren",
+        "Mercedes"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Scuderia Ferrari is the oldest and most successful team in Formula 1 history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-099",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the official nickname of the 1992 US Olympic Men's Basketball Team?",
+      "Options": [
+        "The Redeem Team",
+        "The Gold Standard",
+        "The Dream Team",
+        "The All-Stars"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Dream Team included Michael Jordan, Magic Johnson, Larry Bird, and Charles Barkley.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SP-100",
+      "Category": "Sports",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first quarterback in NFL history to pass for over 5,000 yards in a single season (1984)?",
+      "Options": [
+        "Peyton Manning",
+        "Dan Marino",
+        "Dan Fouts",
+        "Drew Brees"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Dan Marino threw for 5,084 yards and 48 touchdowns for the Miami Dolphins in 1984.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which NBA player won six championships with the Chicago Bulls and was named Finals MVP in all six?",
+      "Options": [
+        "Michael Jordan",
+        "LeBron James",
+        "Scottie Pippen",
+        "Kobe Bryant"
+      ],
+      "Explanation": "Michael Jordan led the Bulls to two separate three-peats in 1991-93 and 1996-98.",
+      "Id": "SPT-101",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who holds the MLB record for most career home runs with 762?",
+      "Options": [
+        "Babe Ruth",
+        "Alex Rodriguez",
+        "Hank Aaron",
+        "Barry Bonds"
+      ],
+      "Explanation": "Barry Bonds surpassed Hank Aaron's long-standing mark of 755 in 2007.",
+      "Id": "SPT-102",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country has won the most FIFA Men's World Cup titles in soccer history with 5 trophies?",
+      "Options": [
+        "Italy",
+        "Brazil",
+        "Argentina",
+        "Germany"
+      ],
+      "Explanation": "Brazil won the World Cup in 1958, 1962, 1970, 1994, and 2002.",
+      "Id": "SPT-103",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who won 7 Super Bowl titles as quarterback for the New England Patriots and Tampa Bay Buccaneers?",
+      "Options": [
+        "Joe Montana",
+        "Patrick Mahomes",
+        "Tom Brady",
+        "Peyton Manning"
+      ],
+      "Explanation": "Tom Brady played in 10 Super Bowls, winning six with New England and one with Tampa Bay.",
+      "Id": "SPT-104",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which swimmer holds the all-time Olympic record with 28 total medals, including 23 gold medals?",
+      "Options": [
+        "Ian Thorpe",
+        "Mark Spitz",
+        "Ryan Lochte",
+        "Michael Phelps"
+      ],
+      "Explanation": "Michael Phelps won eight gold medals in a single Olympics at Beijing 2008.",
+      "Id": "SPT-105",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In golf, what term describes scoring three strokes under par on a single hole?",
+      "Options": [
+        "Albatross (Double Eagle)",
+        "Eagle",
+        "Birdie",
+        "Condor"
+      ],
+      "Explanation": "An albatross is one of the rarest feats in championship golf.",
+      "Id": "SPT-106",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which boxing icon proclaimed himself 'The Greatest' and won the heavyweight title three times?",
+      "Options": [
+        "Joe Frazier",
+        "George Foreman",
+        "Mike Tyson",
+        "Muhammad Ali"
+      ],
+      "Explanation": "Muhammad Ali defeated Sonny Liston, George Foreman, and Joe Frazier in legendary bouts.",
+      "Id": "SPT-107",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who is the NHL's all-time leading scorer nicknamed 'The Great One' with 2,857 career points?",
+      "Options": [
+        "Wayne Gretzky",
+        "Jaromir Jagr",
+        "Mario Lemieux",
+        "Alex Ovechkin"
+      ],
+      "Explanation": "Wayne Gretzky has more career assists (1,963) than any other player has total points.",
+      "Id": "SPT-108",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which tennis legend has won a record 14 French Open (Roland Garros) men's singles titles on clay?",
+      "Options": [
+        "Roger Federer",
+        "Novak Djokovic",
+        "Rafael Nadal",
+        "Björn Borg"
+      ],
+      "Explanation": "Rafael Nadal is revered as the undisputed 'King of Clay'.",
+      "Id": "SPT-109",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In American football, how many points is a touchdown worth before any extra-point conversion?",
+      "Options": [
+        "2 points",
+        "6 points",
+        "7 points",
+        "3 points"
+      ],
+      "Explanation": "A team earns 6 points for reaching the end zone, with option for a 1-point kick or 2-point try.",
+      "Id": "SPT-110",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which track and field superstar won 8 Olympic gold medals and set the 100m world record of 9.58 seconds?",
+      "Options": [
+        "Yohan Blake",
+        "Usain Bolt",
+        "Carl Lewis",
+        "Tyson Gay"
+      ],
+      "Explanation": "Jamaican sprinter Usain Bolt set world records in both the 100m and 200m in Berlin in 2009.",
+      "Id": "SPT-111",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What horse race held on the first Saturday in May at Churchill Downs is called 'The Run for the Roses'?",
+      "Options": [
+        "Belmont Stakes",
+        "Kentucky Derby",
+        "Breeders' Cup",
+        "Preakness Stakes"
+      ],
+      "Explanation": "The Kentucky Derby is the opening and most famous leg of the American Triple Crown.",
+      "Id": "SPT-112",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who holds the NBA single-game scoring record with 100 points scored in 1962?",
+      "Options": [
+        "Michael Jordan",
+        "David Thompson",
+        "Wilt Chamberlain",
+        "Kobe Bryant"
+      ],
+      "Explanation": "Wilt Chamberlain scored 100 points for the Philadelphia Warriors against the Knicks in Hershey, PA.",
+      "Id": "SPT-113",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country hosted the first modern Olympic Games in 1896?",
+      "Options": [
+        "France (Paris)",
+        "United Kingdom (London)",
+        "United States (St. Louis)",
+        "Greece (Athens)"
+      ],
+      "Explanation": "Pierre de Coubertin revived the Olympic Games in Athens, Greece.",
+      "Id": "SPT-114",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In baseball, what is it called when a pitcher completes a full game without allowing a single batter to reach base?",
+      "Options": [
+        "A No-Hitter",
+        "A Complete Game",
+        "A Perfect Game",
+        "A Shutout"
+      ],
+      "Explanation": "A perfect game requires retiring all 27 consecutive batters without hits, walks, or errors.",
+      "Id": "SPT-115",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which NFL coach led the 1972 Miami Dolphins to the only undefeated, untied season and Super Bowl title in NFL history?",
+      "Options": [
+        "Chuck Noll",
+        "Vince Lombardi",
+        "Don Shula",
+        "Tom Landry"
+      ],
+      "Explanation": "Don Shula's Dolphins finished the 1972 season with a perfect 17-0 record.",
+      "Id": "SPT-116",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the regulation height of an NBA basketball hoop from the floor to the rim?",
+      "Options": [
+        "11 feet",
+        "10.5 feet",
+        "9.5 feet",
+        "10 feet (3.05 meters)"
+      ],
+      "Explanation": "James Naismith mounted the original peach baskets exactly 10 feet high in 1891.",
+      "Id": "SPT-117",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which female gymnast won four Olympic gold medals in 2016 and is the most decorated gymnast in World Championship history?",
+      "Options": [
+        "Gabby Douglas",
+        "Aly Raisman",
+        "Nastia Liukin",
+        "Simone Biles"
+      ],
+      "Explanation": "Simone Biles has won over 30 Olympic and World Championship medals.",
+      "Id": "SPT-118",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In bowling, what term is used when a player throws three consecutive strikes?",
+      "Options": [
+        "A Triple",
+        "A Turkey",
+        "A Ham-bone",
+        "A Hat Trick"
+      ],
+      "Explanation": "The term originated when bowling alleys awarded a real holiday turkey for three straight strikes.",
+      "Id": "SPT-119",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which driver holds the record for most Formula One Grand Prix race victories and seven World Championships alongside Michael Schumacher?",
+      "Options": [
+        "Sebastian Vettel",
+        "Ayrton Senna",
+        "Lewis Hamilton",
+        "Max Verstappen"
+      ],
+      "Explanation": "Lewis Hamilton has won over 100 Formula One Grand Prix races.",
+      "Id": "SPT-120",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the standard distance of an official marathon race?",
+      "Options": [
+        "24.5 miles",
+        "26.2 miles (42.195 km)",
+        "25 miles",
+        "27.3 miles"
+      ],
+      "Explanation": "The distance was standardized for the 1908 London Olympics from Windsor Castle to White City Stadium.",
+      "Id": "SPT-121",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who is the all-time leading scorer in NBA regular season history, passing Kareem Abdul-Jabbar in 2023?",
+      "Options": [
+        "Kobe Bryant",
+        "Michael Jordan",
+        "LeBron James",
+        "Karl Malone"
+      ],
+      "Explanation": "LeBron James surpassed Kareem's 38,387 points on February 7, 2023.",
+      "Id": "SPT-122",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which NHL franchise has won the most Stanley Cup championships in history with 24 titles?",
+      "Options": [
+        "Boston Bruins",
+        "Montreal Canadiens",
+        "Detroit Red Wings",
+        "Toronto Maple Leafs"
+      ],
+      "Explanation": "The Montreal Canadiens have won 24 Stanley Cups since 1916.",
+      "Id": "SPT-123",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What color jersey is worn by the overall race leader in the Tour de France?",
+      "Options": [
+        "White Jersey",
+        "Polka Dot Jersey",
+        "Yellow Jersey (Maillot Jaune)",
+        "Green Jersey"
+      ],
+      "Explanation": "The yellow jersey was chosen in 1919 to match the yellow pages of the sponsoring newspaper L'Auto.",
+      "Id": "SPT-124",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which female tennis icon has won 23 Grand Slam singles titles in the Open Era?",
+      "Options": [
+        "Serena Williams",
+        "Steffi Graf",
+        "Martina Navratilova",
+        "Chris Evert"
+      ],
+      "Explanation": "Serena Williams dominated women's tennis across four separate decades.",
+      "Id": "SPT-125",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In soccer, what penalty card is shown by the referee to immediately eject a player from the match?",
+      "Options": [
+        "Black Card",
+        "Yellow Card",
+        "Blue Card",
+        "Red Card"
+      ],
+      "Explanation": "A red card forces the player off the pitch and leaves their team playing with 10 players.",
+      "Id": "SPT-126",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which NFL franchise has won 6 Super Bowls, tied with the Pittsburgh Steelers for the most in history?",
+      "Options": [
+        "San Francisco 49ers",
+        "New England Patriots",
+        "Dallas Cowboys",
+        "Green Bay Packers"
+      ],
+      "Explanation": "The Patriots won six Super Bowl titles under Bill Belichick and Tom Brady.",
+      "Id": "SPT-127",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who broke baseball's color barrier by debuting with the Brooklyn Dodgers on April 15, 1947?",
+      "Options": [
+        "Satchel Paige",
+        "Larry Doby",
+        "Jackie Robinson",
+        "Roy Campanella"
+      ],
+      "Explanation": "Jackie Robinson's jersey #42 was universally retired across all Major League Baseball teams in 1997.",
+      "Id": "SPT-128",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In cricket, what is it called when a bowler dismisses three batsmen with three consecutive deliveries?",
+      "Options": [
+        "A Googly",
+        "A Maiden",
+        "A Century",
+        "A Hat-Trick"
+      ],
+      "Explanation": "The club traditionally presented a hat to a bowler who took three wickets on successive balls.",
+      "Id": "SPT-129",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which college football rivalry game plays for the Paul Bunyan's Axe trophy?",
+      "Options": [
+        "Army vs. Navy",
+        "Alabama vs. Auburn",
+        "Michigan vs. Ohio State",
+        "Wisconsin vs. Minnesota"
+      ],
+      "Explanation": "The Badgers and Golden Gophers have played the most-played rivalry in FBS history.",
+      "Id": "SPT-130",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was known as 'The Sultan of Swat' and 'The Great Bambino'?",
+      "Options": [
+        "Ted Williams",
+        "Babe Ruth",
+        "Lou Gehrig",
+        "Ty Cobb"
+      ],
+      "Explanation": "Babe Ruth led the New York Yankees 'Murderers' Row' in the 1920s.",
+      "Id": "SPT-131",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In tennis, what score follows 'Deuce' when the server wins the point?",
+      "Options": [
+        "Advantage In (Ad-In)",
+        "40-Love",
+        "Game",
+        "Advantage Out (Ad-Out)"
+      ],
+      "Explanation": "A player must score two consecutive points after deuce to win the game.",
+      "Id": "SPT-132",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country won the inaugural FIFA Men's World Cup in 1930 as host nation?",
+      "Options": [
+        "Uruguay",
+        "Brazil",
+        "Argentina",
+        "Italy"
+      ],
+      "Explanation": "Uruguay defeated Argentina 4-2 in the final in Montevideo.",
+      "Id": "SPT-133",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who won the men's 100m, 200m, long jump, and 4x100m relay at the 1936 Berlin Olympics, defying Adolf Hitler's racial theories?",
+      "Options": [
+        "Mack Robinson",
+        "Jesse Owens",
+        "Cornelius Johnson",
+        "Ralph Metcalfe"
+      ],
+      "Explanation": "Jesse Owens won four gold medals in Berlin, cementing his legacy in sports history.",
+      "Id": "SPT-134",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the maximum possible score in a single game of ten-pin bowling with 12 consecutive strikes?",
+      "Options": [
+        "300",
+        "350",
+        "280",
+        "290"
+      ],
+      "Explanation": "A 300 game is a 'perfect game' in bowling.",
+      "Id": "SPT-135",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which cyclist won the Tour de France five consecutive times from 1991 to 1995?",
+      "Options": [
+        "Eddy Merckx",
+        "Miguel Induráin",
+        "Jacques Anquetil",
+        "Bernard Hinault"
+      ],
+      "Explanation": "Spanish champion Miguel Induráin dominated time trials and mountains in the 1990s.",
+      "Id": "SPT-136",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the diameter of a standard golf hole on a putting green?",
+      "Options": [
+        "4.25 inches (108 mm)",
+        "4.0 inches",
+        "5.0 inches",
+        "4.5 inches"
+      ],
+      "Explanation": "The Royal and Ancient Golf Club of St Andrews standardized the 4.25-inch hole in 1891.",
+      "Id": "SPT-137",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which NBA team won 73 regular-season games in the 2015-16 season, setting an all-time NBA record?",
+      "Options": [
+        "Golden State Warriors",
+        "Chicago Bulls",
+        "San Antonio Spurs",
+        "Los Angeles Lakers"
+      ],
+      "Explanation": "Led by Stephen Curry, the Warriors broke the 1995-96 Bulls' 72-10 record.",
+      "Id": "SPT-138",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In Major League Baseball, what is the distance between the pitcher's rubber and home plate?",
+      "Options": [
+        "58 feet, 6 inches",
+        "62 feet",
+        "60 feet, 6 inches",
+        "60 feet"
+      ],
+      "Explanation": "The distance was established in 1893.",
+      "Id": "SPT-139",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which heavyweight boxing champion retired undefeated with a record of 49-0 in 1956?",
+      "Options": [
+        "Joe Louis",
+        "Rocky Marciano",
+        "Jack Dempsey",
+        "Floyd Patterson"
+      ],
+      "Explanation": "Rocky Marciano defended his heavyweight title six times without a single loss or draw.",
+      "Id": "SPT-140",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the highest possible break in a single frame of standard snooker without fouls?",
+      "Options": [
+        "147 (Maximum break)",
+        "140",
+        "155",
+        "150"
+      ],
+      "Explanation": "A 147 break involves potting 15 reds with 15 blacks, followed by the six colors.",
+      "Id": "SPT-141",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which NFL player holds the record for most career rushing yards with 18,355?",
+      "Options": [
+        "Barry Sanders",
+        "Frank Gore",
+        "Walter Payton",
+        "Emmitt Smith"
+      ],
+      "Explanation": "Emmitt Smith won three Super Bowls with the Dallas Cowboys and broke Walter Payton's record.",
+      "Id": "SPT-142",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In rugby union, how many points is a try worth?",
+      "Options": [
+        "4 points",
+        "3 points",
+        "5 points",
+        "6 points"
+      ],
+      "Explanation": "A try awards 5 points, with an opportunity for a 2-point conversion kick.",
+      "Id": "SPT-143",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Italian football club is known as 'The Old Lady' (La Vecchia Signora)?",
+      "Options": [
+        "AC Milan",
+        "AS Roma",
+        "Inter Milan",
+        "Juventus"
+      ],
+      "Explanation": "Juventus was founded in Turin in 1897 and has won the most Serie A titles.",
+      "Id": "SPT-144",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the first woman to officially run the Boston Marathon with a bib number in 1967?",
+      "Options": [
+        "Grete Waitz",
+        "Joan Benoit Samuelson",
+        "Bobbi Gibb",
+        "Kathrine Switzer"
+      ],
+      "Explanation": "Race official Jock Semple famously tried to pull Switzer off the course during the race.",
+      "Id": "SPT-145",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country has won the most Olympic gold medals in men's ice hockey with 9 titles?",
+      "Options": [
+        "United States",
+        "Sweden",
+        "Soviet Union / Russia",
+        "Canada"
+      ],
+      "Explanation": "Canada won the first Olympic hockey tournament in 1920 and dominates the sport.",
+      "Id": "SPT-146",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In darts, what is the highest single score that can be achieved with three darts?",
+      "Options": [
+        "150",
+        "180 (Triple 20 x 3)",
+        "200",
+        "170"
+      ],
+      "Explanation": "Hitting three treble 20s produces the maximum checkout score of 180.",
+      "Id": "SPT-147",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who won the 1980 Olympic Men's Ice Hockey gold medal after the famous 'Miracle on Ice' victory against the Soviet Union?",
+      "Options": [
+        "United States",
+        "Canada",
+        "Sweden",
+        "Finland"
+      ],
+      "Explanation": "Herb Brooks coached the amateur American college team to the greatest upset in hockey history.",
+      "Id": "SPT-148",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which MLB player holds the record for the longest consecutive game hitting streak at 56 games in 1941?",
+      "Options": [
+        "Pete Rose",
+        "Ted Williams",
+        "Ty Cobb",
+        "Joe DiMaggio"
+      ],
+      "Explanation": "Joe DiMaggio's 56-game streak for the New York Yankees remains baseball's most unbreakable record.",
+      "Id": "SPT-149",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What trophy is awarded annually to the champion of the Canadian Football League (CFL)?",
+      "Options": [
+        "The Vanier Cup",
+        "The Grey Cup",
+        "The Stanley Cup",
+        "The Memorial Cup"
+      ],
+      "Explanation": "Donated by Governor General Earl Grey in 1909, it is Canada's oldest sports trophy.",
+      "Id": "SPT-150",
+      "Category": "Sports",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    }
   ]
 }

@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 09:45:00 -> Added LaunchPreGameLobbyCommand and automatic Category Banner sync to projection display
+// Edited on Aug 19, 2026 @ 11:47:00 -> Added Topic 8 JSON Database Format & Schema Guide to help system
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -169,6 +169,17 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public ObservableCollection<TriviaQuestionPack> AvailablePacks { get; } = [];
     public ObservableCollection<TriviaPlayer> Players { get; } = [];
     public ObservableCollection<AnswerDistributionItem> AnswerDistribution { get; } = [];
+    public ObservableCollection<TriviaHelpTopic> HelpTopics { get; } = [];
+
+    [ObservableProperty]
+    private TriviaHelpTopic? _selectedHelpTopic;
+
+    public string AppName => "Lyracist Trivia Pro";
+    public string AppVersion => "26.8.19.20";
+    public string Company => "PAROLE Software";
+    public string Author => "Dennis N. Maidon";
+    public string Copyright => "Copyright © 2026 PAROLE Software. All rights reserved.";
+    public string AppDescription => "Interactive live pub & bar trivia hosting engine with synchronized mobile player buzzers, dynamic custom database auto-discovery, 14 starter curated category databases (2,100 questions), dual-screen 70:30 pre-game lobby with 16:9 category announcement banners, multi-monitor projection, dynamic speed/streak scoring, and seamless karaoke integration.";
 
     public TriviaGameEngine Engine => _engine;
 
@@ -240,6 +251,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         DetermineConnectUrl();
         RefreshMonitors();
         LoadQuestionPacks();
+        InitializeHelpTopics();
     }
 
     public void RefreshMonitors()
@@ -741,6 +753,84 @@ public partial class MainViewModel : ObservableObject, IDisposable
             Players.Add(p);
         }
         ConnectedPlayerCount = Players.Count(p => p.IsConnected);
+    }
+
+    private void InitializeHelpTopics()
+    {
+        HelpTopics.Clear();
+        HelpTopics.Add(new TriviaHelpTopic
+        {
+            Title = "🎯 1. Game Master Command Deck",
+            Icon = "🎯",
+            AccentColor = "#38BDF8",
+            DescriptionHeader = "Live Trivia Host Controls, Auto-Advance & Game Flow",
+            DescriptionContent = "• Category Pack Selection: Choose from any of the 14 built-in categories or custom JSON packs in TriviaData/packs/. The pack's questions, rules, and banner load immediately.\n\n• 🎯 1-Click Launch Pre-Game Lobby: Automatically opens and focuses the TV projection window on the configured monitor, syncs the 16:9 category banner, starts the pre-game countdown clock, and activates the lobby marquee.\n\n• ▶ Start Game Now (Skip Countdown): Immediately starts Question #1 without waiting for the pre-game countdown to expire.\n\n• 🔄 Auto-Advance Questions: When enabled, the game engine automatically runs the question timer, reveals the correct answer for 5 seconds with point awards, and smoothly transitions to the next question.\n\n• Manual Advance Controls: The host can pause/resume the game at any moment, manually reveal answers, or skip ahead.\n\n• Live Option Visualizer: Displays player response distribution bars (A, B, C, D) in real-time as submissions arrive from mobile devices."
+        });
+
+        HelpTopics.Add(new TriviaHelpTopic
+        {
+            Title = "📺 2. 70:30 Pre-Game Lobby & 16:9 Banners",
+            Icon = "📺",
+            AccentColor = "#A78BFA",
+            DescriptionHeader = "High-Impact Projection Layout with Dual QR Codes",
+            DescriptionContent = "• 70:30 Proportional Screen Layout: Specifically engineered for 16:9 and ultrawide projector screens:\n  - Left Hero Column (70%): Displays high-resolution 1920x1080 category announcement banners (TriviaData/Banners/*.png) at maximum size with glow borders and ambient theme lighting.\n  - Right Onboarding Stack (30%): Features a high-contrast digital countdown clock, Wi-Fi Scan-to-Connect QR card, and Mobile Buzzer Join QR card stacked vertically for effortless phone scanning.\n\n• Bottom Connection & Copyright Bar: Shows the direct mobile URL (http://<LAN-IP>:8085/trivia) and company copyright banner across the bottom.\n\n• Full-Width Scrolling Ticker: Continuously scrolls custom venue announcements, host branding, rules, and buzzer tips along the top/bottom."
+        });
+
+        HelpTopics.Add(new TriviaHelpTopic
+        {
+            Title = "⚙️ 3. Settings & Timer Override Rules",
+            Icon = "⚙️",
+            AccentColor = "#F59E0B",
+            DescriptionHeader = "Authoritative Timer Control, Scoring Options & Game Customization",
+            DescriptionContent = "• ⏱️ Question Answer Window (Game Master Override):\n  - The 'Question Answer Window' setting in the Settings tab (default: 15s) is authoritative for the live game.\n  - If the Game Master changes this setting to 10s, 20s, 25s, 30s, etc., all questions will count down using the Game Master's configured duration, overriding the 15s factory default in the question JSON files.\n\n• ❌ 5-Second Wrong Answer Elimination: Automatically eliminates incorrect answer choices at 5-second intervals during the countdown, narrowing choices for remaining players.\n\n• ⏳ 5-Second Reveal Buffer: Displays the correct answer, points breakdown, and explanation for 5 seconds before advancing.\n\n• 🎯 Scoring & Speed Bonuses: Base score of 1,000 pts per correct answer, with up to +500 speed bonus for fast buzzers, and a +10% streak multiplier for consecutive correct answers.\n\n• ⚠️ Wrong Answer Deductions: Optional point deduction (0 to -500 pts) for incorrect submissions to discourage blind guessing.\n\n• 🔄 Auto-Start Next Game: Configurable intermission timer (e.g. 3 minutes) that automatically launches the next game when the current session concludes."
+        });
+
+        HelpTopics.Add(new TriviaHelpTopic
+        {
+            Title = "📱 4. Mobile Buzzer Web App",
+            Icon = "📱",
+            AccentColor = "#10B981",
+            DescriptionHeader = "Zero-Install Web App for Phones & Tablets (http://<IP>:8085/trivia)",
+            DescriptionContent = "• Zero App Store Downloads: Players simply connect to the venue Wi-Fi and scan the Join QR code or open http://<IP>:8085/trivia in Safari, Chrome, Edge, or Firefox.\n\n• One-Click Registration: Players enter their name and optional Team Name to join the live session instantly.\n\n• 4-Button Color Buzzer: Responsive touch buttons (Red A, Blue B, Green C, Yellow D) with instant haptic vibration and locked-in confirmation.\n\n• Real-Time Answer Elimination: Eliminated incorrect options visually fade and disable on players' screens in real-time.\n\n• Personal Leaderboard & Ranking: After each question and at game completion, players see their current placement, streak bonus, total points, and team standings."
+        });
+
+        HelpTopics.Add(new TriviaHelpTopic
+        {
+            Title = "👥 5. Players & Teams Management",
+            Icon = "👥",
+            AccentColor = "#EC4899",
+            DescriptionHeader = "Live Roster, Team Aggregation & Player Moderation",
+            DescriptionContent = "• Live Player Roster: Displays all connected players with real-time total scores, active answer streaks, correct count, and total answers attempted.\n\n• Team Scoring: Players can group into teams under a shared team name. Team scores aggregate automatically on the leaderboard.\n\n• Kick Player Control: Game Masters can click 'Kick' next to any player row to instantly disconnect and remove disruptive or test entries."
+        });
+
+        HelpTopics.Add(new TriviaHelpTopic
+        {
+            Title = "🗄️ 6. Category Databases & Custom Packs",
+            Icon = "🗄️",
+            AccentColor = "#6366F1",
+            DescriptionHeader = "Starter Categories, Auto-Discovery & Adding Custom Databases",
+            DescriptionContent = "• Dynamic Auto-Discovery: The game engine dynamically scans the TriviaData/packs/ folder on startup and loads all available JSON question packs into the category selector.\n\n• Adding Custom Databases:\n  - Users can add their own custom category databases at any time. Simply place a new JSON file (e.g. disney_trivia.json) into the TriviaData/packs/ directory.\n  - Each question requires a Prompt, 4 Options, CorrectAnswerIndex (0-3), and an optional Explanation.\n  - To display a custom 16:9 pre-game banner, place a matching PNG or JPG image (e.g. disney_trivia.png) in TriviaData/Banners/. If no image is provided, the lobby automatically generates a sleek category card.\n\n• Pre-Loaded Starter Library:\n  - Includes 14 starter categories with 150 questions each (2,100 total curated questions) spanning Bikers, Rock & Roll, Country, Pop Culture, Movies, TV, Geography, Capitals, History, Sports, Slogans, and Pub Trivia.\n\n• Automatic SQLite Database Seeding: Discovered questions are synchronized into TriviaData/trivia.db with full offline capability."
+        });
+
+        HelpTopics.Add(new TriviaHelpTopic
+        {
+            Title = "🖥️ 7. Multi-Monitor & Shortcut Keys",
+            Icon = "🖥️",
+            AccentColor = "#14B8A6",
+            DescriptionHeader = "Projection Controls, Display Management & Deconfliction",
+            DescriptionContent = "• Target Monitor Selection: Select the projection screen from the monitor dropdown (supports primary, secondary, and projector screens with per-monitor DPI scaling).\n\n• Quick Window Controls:\n  - Esc Key: Closes the TV projection window immediately.\n  - Floating ✕ Button: Discreet close button in the upper-right corner of the projection screen.\n  - F11 Key: Toggles borderless fullscreen mode.\n\n• Karaoke Integration: If run alongside Lyracist or KsRotation, trivia games automatically pause with a 'DJ Banner Active' notice whenever full-screen DJ banners are projected."
+        });
+
+        HelpTopics.Add(new TriviaHelpTopic
+        {
+            Title = "📝 8. JSON Database Format & Schema",
+            Icon = "📝",
+            AccentColor = "#10B981",
+            DescriptionHeader = "Complete JSON Schema Reference for Custom Question Packs",
+            DescriptionContent = "• Custom Question Pack JSON File Structure:\nSave as UTF-8 `.json` file inside `TriviaData/packs/` (e.g. `disney_trivia.json`):\n\n{\n  \"PackId\": \"disney-trivia\",\n  \"Title\": \"Disney Animation Classics\",\n  \"Category\": \"Disney Movies\",\n  \"Description\": \"Family-friendly questions spanning animated classics and Pixar films.\",\n  \"Questions\": [\n    {\n      \"Id\": \"DIS-001\",\n      \"Category\": \"Disney Movies\",\n      \"Difficulty\": \"Easy\",\n      \"QuestionType\": \"MultipleChoice\",\n      \"Prompt\": \"What is the name of Simba's father in The Lion King?\",\n      \"Options\": [\n        \"Scar\",\n        \"Mufasa\",\n        \"Rafiki\",\n        \"Pumbaa\"\n      ],\n      \"CorrectAnswerIndex\": 1,\n      \"Explanation\": \"Mufasa was voiced by James Earl Jones in the 1994 classic.\",\n      \"TimeLimitSeconds\": 15\n    }\n  ]\n}\n\n• Key Field Definitions:\n  - PackId: Unique identifier slug (e.g. 'rock-and-roll', 'movie-soundtracks').\n  - Title: Display name shown in Game Master category dropdowns.\n  - Difficulty: 'Easy', 'Medium', or 'Hard'.\n  - QuestionType: 'MultipleChoice' (standard 4-choice buzzer).\n  - Prompt: The question text displayed on TVs and mobile phones.\n  - Options: Array of exactly 4 strings for choices A, B, C, D.\n  - CorrectAnswerIndex: Zero-based integer (0=A, 1=B, 2=C, 3=D).\n  - Explanation: Brief educational snippet shown during answer reveal.\n  - TimeLimitSeconds: Factory fallback timer (15s); Game Master Settings take precedence during live games."
+        });
+
+        SelectedHelpTopic = HelpTopics.FirstOrDefault();
     }
 
     public void Dispose()

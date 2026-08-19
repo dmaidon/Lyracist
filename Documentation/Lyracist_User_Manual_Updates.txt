@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 10:04:30 -> Added Copyright notice to bottom of Trivia Display screen in Lyracist_User_Manual_Updates.txt
+// Edited on Aug 19, 2026 @ 11:24:00 -> Added Help & About tabs in LyracistTrivia and timer override documentation
 Rotation Management & Round Cycle Tracking (`Lyracist`, `KSRotation`, & `KSRotation.Maui`) - (August 2026)
 
 Section: Performance & Rotation Operations / Singer Queue Management
@@ -105,7 +105,7 @@ Section: Entertainment Modules / Lyracist.Trivia & Pub Trivia Game Master
      * If the winner is a team, prominently displays `"👑 WINNING TEAM: {TeamName}"` and lists all players on that team (`"Team Players: Alice, Bob, Charlie"`).
      * Mobile phones display the winning team/player, team member list, the player's personal placement and final score, and the complete top 10 leaderboard.
    - **Zero-Config LAN Mobile Web Server (`TcpListener`)**: Direct socket HTTP server listening on `0.0.0.0` (all interfaces) with RFC 1918 LAN IP resolution, allowing smartphones and tablets on local Wi-Fi to load buzzers and buzz in without Windows URL reservation restrictions or admin privileges.
-   - **Dynamic Question Shuffling**: When any category is selected or played, the entire question list (100+ questions) is dynamically shuffled, ensuring questions appear in a fresh, non-repeating order each time a category is chosen.
+   - **Dynamic Question Shuffling & 2,100 Total Questions**: When any category is selected or played, the entire question database (150 curated questions per pack across all 14 categories, totaling 2,100 questions) is dynamically shuffled, ensuring questions appear in a fresh, non-repeating order each time a category is chosen.
    - **Target Monitor Selector**: Host console features a monitor selection dropdown (Monitor 1, Monitor 2, TV/HDMI) allowing dynamic window positioning and DPI-aware full-screen projection onto any connected venue monitor.
    - **Auto-Running Game Loop**:
      * **15-Second Answering Window**: When a question begins, players have 15 seconds to buzz in on their smartphones or venue screens.
@@ -115,20 +115,22 @@ Section: Entertainment Modules / Lyracist.Trivia & Pub Trivia Game Master
 2. Centralized Trivia Storage (`TriviaData/`):
    - Located directly in the solution root at `TriviaData/`.
    - Contains SQLite database `trivia.db`, host settings `trivia_settings.json`, and question pack directory `TriviaData/packs/`.
-   - **13 Comprehensive 100+ Question Category Databases (1,300 Questions Total, No Duplicates)**:
-     * **Rock & Roll** (`rock_and_roll.json`): 100 questions covering classic rock, 70s/80s bands, albums, and guitar legends.
-     * **Country Music** (`country_music.json`): 100 questions covering outlaw country, 90s hits, and Opry legends.
-     * **Geography** (`geography.json`): 100 questions on continents, oceans, mountains, rivers, and landmarks.
-     * **State Capitals** (`state_capitals.json`): 100 questions covering all 50 US State Capitals + world capitals.
-     * **History** (`history.json`): 100 questions on world & US history, ancient civilizations, and major milestones.
-     * **Complete the Lyric** (`complete_the_lyric.json`): 100 singalong lyric questions across rock, pop, and karaoke favorites.
-     * **TV Shows** (`tv_shows.json`): 100 questions covering classic sitcoms, 90s hits, drama series, and cartoons.
-     * **Sports** (`sports.json`): 100 questions covering NFL, MLB, NBA, NHL, soccer, Olympics, and golf.
-     * **Logos & Brand Slogans** (`logos_and_slogans.json`): 100 questions covering advertising taglines, mascots, and brand history.
-     * **Music & Karaoke Legends** (`music_legends.json`): 100 questions celebrating iconic vocalists, chart-topping legends, and karaoke hall-of-fame artists.
-     * **80s & 90s Pop Culture** (`pop_culture_80s_90s.json`): 100 questions on retro toys, video game classics, 80s/90s movies, and nostalgic trends.
-     * **Blockbuster Movie Soundtracks** (`movie_soundtracks.json`): 100 questions covering blockbuster film scores, Oscar-winning theme songs, and needle-drops.
-     * **Pub Trivia All-Stars** (`pub_general_knowledge.json`): 100 questions spanning science, literature, food & drink, myths, idioms, and pub favorites.
+   - **15 Comprehensive 150-Question Category Databases (2,250 Questions Total, No Duplicates)**:
+     * **Famous Lines & Sayings From Movies** (`famous_movie_quotes.json`): 150 questions covering AFI Top 100 movie quotes, iconic catchphrases, and unforgettable dialogue across Hollywood history.
+     * **Bikers & Motorcycles** (`biker_trivia.json`): 150 questions covering Harley-Davidson engines, Indian heritage, European/Japanese classics, rallies, and chopper mechanical lore.
+     * **Rock & Roll** (`rock_and_roll.json`): 150 questions covering classic rock, 70s/80s bands, albums, and guitar legends.
+     * **Country Music** (`country_music.json`): 150 questions covering outlaw country, 90s hits, and Opry legends.
+     * **Geography** (`geography.json`): 150 questions on continents, oceans, mountains, rivers, and landmarks.
+     * **State Capitals** (`state_capitals.json`): 150 questions covering all 50 US State Capitals + world capitals.
+     * **History** (`history.json`): 150 questions on world & US history, ancient civilizations, and major milestones.
+     * **Complete the Lyric** (`complete_the_lyric.json`): 150 singalong lyric questions across rock, pop, and karaoke favorites.
+     * **TV Shows** (`tv_shows.json`): 150 questions covering classic sitcoms, 90s hits, drama series, and cartoons.
+     * **Sports** (`sports.json`): 150 questions covering NFL, MLB, NBA, NHL, soccer, Olympics, and golf.
+     * **Logos & Brand Slogans** (`logos_and_slogans.json`): 150 questions covering advertising taglines, mascots, and brand history.
+     * **Music & Karaoke Legends** (`music_legends.json`): 150 questions celebrating iconic vocalists, chart-topping legends, and karaoke hall-of-fame artists.
+     * **80s & 90s Pop Culture** (`pop_culture_80s_90s.json`): 150 questions on retro toys, video game classics, 80s/90s movies, and nostalgic trends.
+     * **Blockbuster Movie Soundtracks** (`movie_soundtracks.json`): 150 questions covering blockbuster film scores, Oscar-winning theme songs, and needle-drops.
+     * **Pub Trivia All-Stars** (`pub_general_knowledge.json`): 150 questions spanning science, literature, food & drink, myths, idioms, and pub favorites.
 
 3. Mobile Player Portal (`trivia.html`):
    - Zero-installation mobile web app hosted directly by the embedded web server (default port 8085).
@@ -602,3 +604,60 @@ Updates have been made to rotation sequence advancement and standard default eve
 2. "Last Song" Default Event Banner:
    - Added "Last Song" (`LastSong.png`) to the standard pre-saved event banners list alongside Birthday, Wedding, Engagement, and Anniversary.
    - Standard pre-saved events are protected from deletion and automatically mapped to their respective graphics.
+
+
+Section: Lyracist Live Trivia / In-App Help, About Tabs & Authoritative Timer Controls
+
+[Update Details]
+Dedicated Help and About systems have been added to the LyracistTrivia host application, and help topics across Lyracist and KSRotation have been updated with full trivia operations, pre-game lobby features, and timer rules.
+
+1. LyracistTrivia "Help" and "About" Tabs:
+   - **Help Tab (`❓ Help`)**: Features a split-pane interactive index menu with 7 comprehensive documentation topics:
+     * `🎯 1. Game Master Command Deck`: Pack loading, 1-click pre-game lobby launch, skip countdown, auto-advance loop, manual reveals, and live response visualizer.
+     * `📺 2. 70:30 Pre-Game Lobby & 16:9 Banners`: Widescreen 70:30 projection layout, 16:9 category banners, countdown clock, stacked Wi-Fi & Mobile Join QR codes, bottom connection bar, and scrolling ticker.
+     * `⚙️ 3. Settings & Timer Override Rules`: Game Master Question Answer Window timer override, 5s wrong answer elimination, 5s reveal buffer, 1,000 base points, +500 speed bonus, +10% streak multiplier, and wrong answer deductions.
+     * `📱 4. Mobile Buzzer Web App`: Zero-install player buzzer portal (`http://<LAN-IP>:8085/trivia`), player/team registration, 4-button color buzzer, haptic feedback, real-time elimination fading, and personal ranking.
+     * `👥 5. Players & Teams Management`: Real-time roster table, score tracking, answer streaks, accuracy stats, and instant player kick moderation.
+     * `🗄️ 6. 14 Category Packs (2,100 Questions)`: 14 curated packs (150 questions each), SQLite database seeding, and custom JSON packs.
+     * `🖥️ 7. Multi-Monitor & Shortcut Keys`: Multi-monitor selection, Esc / floating close button, F11 fullscreen, and DJ banner auto-pause deconfliction.
+   - **About Tab (`ℹ️ About`)**: Displays application logo, version info (`v26.8.19.20`), company (`PAROLE Software`), author (`Dennis N. Maidon`), copyright, and system specifications summary.
+
+2. Authoritative Question Answer Window Timer Rule:
+   - The Game Master's configured Question Answer Window in Settings (`DefaultQuestionSeconds`, default: 15s) is authoritative for all live rounds.
+   - If the Game Master changes the timer to 10s, 20s, 25s, 30s, etc., the game engine executes every question using the Game Master's custom duration, overriding the 15s default written in the JSON files.
+
+3. Cross-Application Help System Updates:
+   - **Lyracist Help Screen (`HelpViewModel.cs`)**: Added Topics 16 ("Lyracist Live Trivia"), 17 ("Trivia Settings, Timers & Scoring Rules"), and 18 ("Trivia JSON Database Schema & Custom Pack Guide").
+   - **KSRotation Help Screen (`MainWindow.xaml`)**: Updated "🎯 Trivia Night Pro" topic with 70:30 pre-game lobby, 16:9 category banners, 14 categories (2,100 questions), timer override rules, and custom JSON packs.
+
+
+Section: Trivia Database Creator & Pack Studio (`TriviaDbCreator.exe`)
+
+[Update Details]
+A dedicated standalone question authoring and category management studio (`TriviaDbCreator.exe`) has been introduced to the Lyracist suite.
+
+1. Fluent UI / MVVM Architecture:
+   - Built with WPF .NET 10, CommunityToolkit.Mvvm, and WPF-UI (Fluent Dark Theme / Mica styling).
+   - Real-time dirty state tracking, auto-save validation, and clean navigation.
+
+2. Pack & Question Management Features:
+   - **Left Sidebar Pack Explorer**: Auto-discovers and navigates all JSON question packs in `TriviaData/packs/` with search filtering and question count indicators.
+   - **Pack Metadata Editor**: Configure Pack Title, ID slug, Category, and Theme Description.
+   - **Center Panel Questions Table**: Filterable table listing Question #, ID, Prompt, Difficulty badge (`Easy`/`Medium`/`Hard`), and Correct Option indicator (`▲ A`, `◆ B`, `● C`, `■ D`).
+   - **Right Panel Question Editor**: Edit question prompt, 4 distinct multiple-choice options (A, B, C, D), radio selector for correct answer, difficulty rating, and reveal explanation note.
+   - **1-Click Option Balancing**: Automatically shuffles option positions across all questions in a pack to guarantee an even ~25% distribution across choices A, B, C, and D without altering question accuracy.
+   - **16:9 Banner Studio**: Generates matching high-resolution 16:9 Category Announcement Banners (`TriviaData/Banners/{pack}.png`) with one click.
+   - **Direct SQLite Seeding**: 1-click database synchronization updating `TriviaData/trivia.db`.
+
+3. In-App Help & Documentation System (`❓ Help & Instructions`):
+   - Built-in split-pane documentation browser covering 8 in-depth topics:
+     * **1. Quick Start & Overview**: General workflow and 3-column workspace orientation.
+     * **2. Creating & Managing Databases**: How to add, configure, rename, and delete category packs.
+     * **3. Adding, Editing & Duplicating Questions**: Multi-choice option inputs, radio toggles for correct answer, difficulty ratings, and reveal explanations.
+     * **4. Balancing Answer Distributions (25% Rule)**: Real-time distribution analysis and 1-click option shuffling.
+     * **5. 16:9 Category Announcement Banners**: Widescreen banner rendering into `TriviaData/Banners/`.
+     * **6. SQLite Database Sync & Live Hosting**: Cross-application sharing with `LyracistTrivia`, `Lyracist`, and `KSRotation`.
+     * **7. Importing & Exporting Databases**: Backup, restore, and pack exchange.
+     * **8. JSON Database Format & Schema Reference**: Syntax rules, sample JSON code, and field specifications.
+   - **ℹ️ About Tab**: Displays official brand logo, version, company, author, copyright, and technology stack.
+

@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 17:48:00 -> Added wrong answer points deduction unit test
+// Edited on Aug 19, 2026 @ 11:16:30 -> Added unit test verifying Game Master custom question time limit override
 using System;
 using System.Collections.Generic;
 using Lyracist.Trivia.Core.Models;
@@ -374,5 +374,23 @@ public class GameEngineTests
         // Submissions can proceed after resume
         bool submittedAfterResume = engine.SubmitAnswer("Alice", 1);
         Assert.True(submittedAfterResume);
+    }
+
+    [Fact]
+    public void GameEngine_RespectsGameMasterCustomTimeLimit()
+    {
+        var settings = new TriviaSettings
+        {
+            DefaultQuestionSeconds = 30
+        };
+
+        using var engine = new TriviaGameEngine(settings);
+        engine.StartGame([CreateSampleRound()], "Custom Time Limit Game");
+
+        // Question in sample round has TimeLimitSeconds = 15, but GameMaster settings configured 30
+        engine.StartCurrentQuestion();
+
+        Assert.Equal(30, engine.TotalCountdownSeconds);
+        Assert.Equal(30, engine.RemainingSeconds);
     }
 }

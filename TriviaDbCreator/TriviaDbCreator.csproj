@@ -1,0 +1,47 @@
+<!-- Created on Aug 19, 2026 @ 15:10:00 -> TriviaDbCreator project configuration -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>TriviaDbCreator</AssemblyName>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
+    <AssemblyVersion>26.8.19.8</AssemblyVersion>
+    <FileVersion>26.8.19.8</FileVersion>
+    <Authors>Dennis N. Maidon</Authors>
+    <Company>PAROLE Software</Company>
+    <Copyright>Copyright © 2026 PAROLE Software</Copyright>
+    <ApplicationIcon>..\Lyracist.Trivia\LyracistTrivia.ico</ApplicationIcon>
+    <PackageIcon>LyracistTrivia_128.png</PackageIcon>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="..\Lyracist.Trivia\LyracistTrivia.ico" Link="LyracistTrivia.ico" />
+    <Resource Include="..\Lyracist.Trivia\LyracistTrivia_128.png" Link="LyracistTrivia_128.png" />
+    <Resource Include="..\Lyracist.Trivia\LyracistTrivia_logo.png" Link="LyracistTrivia_logo.png" />
+    <None Include="..\Lyracist.Trivia\LyracistTrivia_128.png" Link="LyracistTrivia_128.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lyracist.Trivia.Core\Lyracist.Trivia.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -2,107 +2,2407 @@
   "PackId": "pop-culture-80s-90s",
   "Title": "80s & 90s Pop Culture Rewind",
   "Category": "80s & 90s Pop Culture",
-  "Description": "100 nostalgia-packed trivia questions covering retro toys, video game classics, blockbusters, trends, fashion fads, and iconic moments from the 1980s and 1990s.",
+  "Description": "150 curated questions covering 80s & 90s Pop Culture.",
   "Questions": [
-    {"Id":"POP-001","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What colorful 3D combination puzzle cube became a worldwide craze in 1980?","Options":["Rubik's Cube","Snake Cube","Pyraminx","Megaminx"],"CorrectAnswerIndex":0,"Explanation":"Invented by Ernő Rubik in 1974, the Rubik's Cube sold over 350 million units worldwide.","TimeLimitSeconds":15},
-    {"Id":"POP-002","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What was the name of the portable cassette player introduced by Sony in 1979 that dominated the 1980s?","Options":["The Walkman","The Discman","The Boombox","The Soundabout"],"CorrectAnswerIndex":0,"Explanation":"The Sony Walkman revolutionized personal music listening on the go.","TimeLimitSeconds":15},
-    {"Id":"POP-003","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What time-traveling car was built into a time machine by Doc Brown in 'Back to the Future' (1985)?","Options":["DeLorean DMC-12","Pontiac Firebird","Chevrolet Corvette","Ford Mustang"],"CorrectAnswerIndex":0,"Explanation":"Doc Brown built the time machine into a DeLorean because 'if you're gonna build a time machine into a car, why not do it with some style?'","TimeLimitSeconds":15},
-    {"Id":"POP-004","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What popular 1990s digital handheld virtual pet toy required feeding and cleaning up after?","Options":["Tamagotchi","Furby","Giga Pet","Digimon"],"CorrectAnswerIndex":0,"Explanation":"Bandai launched the Tamagotchi in Japan in 1996, selling tens of millions worldwide.","TimeLimitSeconds":15},
-    {"Id":"POP-005","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What was the name of the 8-bit home video game console released by Nintendo in North America in 1985?","Options":["Nintendo Entertainment System (NES)","Super Nintendo (SNES)","Sega Genesis","Atari 2600"],"CorrectAnswerIndex":0,"Explanation":"The NES revived the American video game industry following the video game crash of 1983.","TimeLimitSeconds":15},
-    {"Id":"POP-006","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What popular 1980s stuffed toy doll craze caused literal riots in department stores during Christmas 1983?","Options":["Cabbage Patch Kids","Beanie Babies","Care Bears","Strawberry Shortcake"],"CorrectAnswerIndex":0,"Explanation":"Cabbage Patch Kids came with unique adoption certificates and individual names.","TimeLimitSeconds":15},
-    {"Id":"POP-007","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who was the blue hedgehog introduced by Sega in 1991 to compete with Nintendo's Mario?","Options":["Sonic the Hedgehog","Crash Bandicoot","Spyro the Dragon","Mega Man"],"CorrectAnswerIndex":0,"Explanation":"Sonic became Sega's flagship mascot on the Genesis console with his blazing speed.","TimeLimitSeconds":15},
-    {"Id":"POP-008","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What dance and hit song by Los del Río became an international wedding and sporting event craze in 1996?","Options":["Macarena","The Twist","Lambada","Cha Cha Slide"],"CorrectAnswerIndex":0,"Explanation":"The Bayside Boys remix of 'Macarena' spent 14 weeks at #1 on the Billboard Hot 100.","TimeLimitSeconds":15},
-    {"Id":"POP-009","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1993 Steven Spielberg dinosaur blockbuster shattered worldwide box office records?","Options":["Jurassic Park","The Lost World","Godzilla","King Kong"],"CorrectAnswerIndex":0,"Explanation":"Jurassic Park combined animatronics by Stan Winston with revolutionary CGI by Industrial Light & Magic.","TimeLimitSeconds":15},
-    {"Id":"POP-010","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What toy craze of the late 1990s featured small plush animals with heart-shaped tags produced by Ty Inc.?","Options":["Beanie Babies","Webkinz","Pillow Pets","Squishmallows"],"CorrectAnswerIndex":0,"Explanation":"Beanie Babies sparked a massive secondary collectors' speculative market in the late 90s.","TimeLimitSeconds":15},
-    {"Id":"POP-011","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What was the name of the four pizza-loving mutant reptile heroes: Leonardo, Michelangelo, Donatello, and Raphael?","Options":["Teenage Mutant Ninja Turtles","Battletoads","Street Sharks","Biker Mice from Mars"],"CorrectAnswerIndex":0,"Explanation":"Created by Kevin Eastman and Peter Laird, the TMNT became a multi-billion dollar 80s/90s franchise.","TimeLimitSeconds":15},
-    {"Id":"POP-012","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1984 comedy film starred Bill Murray, Dan Aykroyd, and Harold Ramis catching supernatural spooks in NYC?","Options":["Ghostbusters","Beetlejuice","Gremlins","The Goonies"],"CorrectAnswerIndex":0,"Explanation":"Ghostbusters coined the famous tagline 'Who ya gonna call?'","TimeLimitSeconds":15},
-    {"Id":"POP-013","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What handheld 8-bit gaming device was released by Nintendo in 1989 bundled with the puzzle game 'Tetris'?","Options":["Game Boy","Game Gear","Atari Lynx","Neo Geo Pocket"],"CorrectAnswerIndex":0,"Explanation":"Designed by Gunpei Yokoi, the original Game Boy sold over 118 million units worldwide.","TimeLimitSeconds":15},
-    {"Id":"POP-014","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What hairstyle, characterized by 'business in the front, party in the back', was wildly popular in the 1980s?","Options":["The Mullet","The Rat Tail","The Bowl Cut","The Feathered Flip"],"CorrectAnswerIndex":0,"Explanation":"The mullet was worn by rock stars, athletes, and movie heroes throughout the 1980s.","TimeLimitSeconds":15},
-    {"Id":"POP-015","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1990 holiday comedy film made Macaulay Culkin a superstar as 8-year-old Kevin McCallister?","Options":["Home Alone","Uncle Buck","Richie Rich","Dennis the Menace"],"CorrectAnswerIndex":0,"Explanation":"Home Alone held the record as the highest-grossing live-action comedy for over two decades.","TimeLimitSeconds":15},
-    {"Id":"POP-016","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What popular 1980s toy line featured robotic alien vehicles that could convert into humanoid robots?","Options":["Transformers","GoBots","Voltron","G.I. Joe"],"CorrectAnswerIndex":0,"Explanation":"Hasbro partnered with Takara to launch the Autobots and Decepticons in 1984.","TimeLimitSeconds":15},
-    {"Id":"POP-017","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1990s TV sitcom featured Will Smith being sent from West Philadelphia to live with wealthy relatives?","Options":["The Fresh Prince of Bel-Air","Family Matters","Step by Step","Boy Meets World"],"CorrectAnswerIndex":0,"Explanation":"The Fresh Prince of Bel-Air aired from 1990 to 1996 and popularized 'The Carlton Dance'.","TimeLimitSeconds":15},
-    {"Id":"POP-018","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1997 James Cameron film became the first movie in history to gross over $1 billion at the box office?","Options":["Titanic","Avatar","Star Wars: The Phantom Menace","Jurassic Park"],"CorrectAnswerIndex":0,"Explanation":"Titanic won 11 Academy Awards including Best Picture and Best Director.","TimeLimitSeconds":15},
-    {"Id":"POP-019","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What popular 1990s collectible disc game used milk cap-style cardboard circles flipped with heavy slammers?","Options":["POGs","Crazy Bones","Tazos","Marbles"],"CorrectAnswerIndex":0,"Explanation":"POGs originated in Hawaii and became a massive schoolyard fad in the mid-1990s.","TimeLimitSeconds":15},
-    {"Id":"POP-020","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What electronic owl-like robotic creature was the must-have holiday toy craze of Christmas 1998?","Options":["Furby","Poo-Chi","Teddy Ruxpin","AIBO"],"CorrectAnswerIndex":0,"Explanation":"Tiger Electronics sold over 40 million Furbies during its peak three-year run.","TimeLimitSeconds":15},
-    {"Id":"POP-021","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What was the name of the talkative alien from the planet Melmac who lived with the Tanner family on 80s TV?","Options":["ALF (Gordon Shumway)","E.T.","Mork","Paul"],"CorrectAnswerIndex":0,"Explanation":"ALF (Alien Life Form) had a notorious fondness for trying to eat the family cat, Lucky.","TimeLimitSeconds":15},
-    {"Id":"POP-022","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What popular 1990s hairdo, worn by Jennifer Aniston on 'Friends', became one of the most requested haircuts in history?","Options":["The Rachel","The Pixie","The Poodle Perm","The Feathers"],"CorrectAnswerIndex":0,"Explanation":"Created by stylist Chris McMillan in 1995, 'The Rachel' defined mid-90s women's hairstyles.","TimeLimitSeconds":15},
-    {"Id":"POP-023","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What was the name of the animatronic storytelling bear with a cassette player in his back, released in 1985?","Options":["Teddy Ruxpin","Care Bear","Care-a-lot Bear","Grubby"],"CorrectAnswerIndex":0,"Explanation":"Teddy Ruxpin's eyes and mouth moved synchronously with the audio cassette stories.","TimeLimitSeconds":15},
-    {"Id":"POP-024","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which 1995 Pixar film was the first entirely computer-animated feature film in cinema history?","Options":["Toy Story","A Bug's Life","Monsters, Inc.","Shrek"],"CorrectAnswerIndex":0,"Explanation":"Toy Story starred Tom Hanks as Woody and Tim Allen as Buzz Lightyear.","TimeLimitSeconds":15},
-    {"Id":"POP-025","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What arcade fighting game caused widespread controversy and led to the creation of the ESRB rating system in 1993?","Options":["Mortal Kombat","Street Fighter II","Tekken","Virtua Fighter"],"CorrectAnswerIndex":0,"Explanation":"Mortal Kombat's gory 'Fatality' finishing moves prompted US Congressional hearings on video game violence.","TimeLimitSeconds":15},
-    {"Id":"POP-026","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What popular 1980s fitness fad was popularized by Jane Fonda's best-selling 1982 home workout VHS tape?","Options":["Aerobics with Leg Warmers","Pilates","Zumba","Tae Bo"],"CorrectAnswerIndex":0,"Explanation":"Jane Fonda's Workout became the highest-selling VHS tape of the 20th century.","TimeLimitSeconds":15},
-    {"Id":"POP-027","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1989 movie featured Rick Moranis accidentally shrinking his and the neighbor's children?","Options":["Honey, I Shrunk the Kids","Innerspace","Big","Little Monsters"],"CorrectAnswerIndex":0,"Explanation":"The shrunken kids had to navigate their giant backyard across giant blades of grass and oatmeal cookies.","TimeLimitSeconds":15},
-    {"Id":"POP-028","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What beverage company released 'Crystal Pepsi' in 1992, sparking a short-lived clear beverage fad?","Options":["PepsiCo","The Coca-Cola Company","Dr Pepper","7-Up"],"CorrectAnswerIndex":0,"Explanation":"Crystal Pepsi was a clear, caffeine-free cola marketed with Van Halen's 'Right Now'.","TimeLimitSeconds":15},
-    {"Id":"POP-029","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1980s cartoon featured Prince Adam holding up his Power Sword to transform into 'He-Man'?","Options":["He-Man and the Masters of the Universe","Thundercats","Voltron","SilverHawks"],"CorrectAnswerIndex":0,"Explanation":"'By the Power of Grayskull... I HAVE THE POWER!'","TimeLimitSeconds":15},
-    {"Id":"POP-030","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What popular 1990s action figure line by Bandai featured five teenagers with attitude summoning Megazords?","Options":["Mighty Morphin Power Rangers","VR Troopers","Big Bad Beetleborgs","Captain Planet"],"CorrectAnswerIndex":0,"Explanation":"Adapted from the Japanese Super Sentai series, Power Rangers debuted on Fox Kids in 1993.","TimeLimitSeconds":15},
-    {"Id":"POP-031","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1984 martial arts drama popularized the training quote 'Wax on, wax off'?","Options":["The Karate Kid","Bloodspot","Kickboxer","No Retreat, No Surrender"],"CorrectAnswerIndex":0,"Explanation":"Mr. Miyagi (Pat Morita) taught Daniel LaRusso (Ralph Macchio) karate fundamentals through household chores.","TimeLimitSeconds":15},
-    {"Id":"POP-032","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What was the name of the internet service provider that mailed millions of free trial CD-ROMs in the 1990s with the voice 'You've Got Mail!'?","Options":["America Online (AOL)","CompuServe","Prodigy","EarthLink"],"CorrectAnswerIndex":0,"Explanation":"Voice actor Elwood Edwards recorded AOL's iconic greetings ('Welcome', 'You've got mail!').","TimeLimitSeconds":15},
-    {"Id":"POP-033","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1995 teen comedy starred Alicia Silverstone as Beverly Hills high schooler Cher Horowitz?","Options":["Clueless","Mean Girls","10 Things I Hate About You","Can't Hardly Wait"],"CorrectAnswerIndex":0,"Explanation":"Amy Heckerling directed Clueless as a loose modernization of Jane Austen's 1815 novel Emma.","TimeLimitSeconds":15},
-    {"Id":"POP-034","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What was the secret code entered on a Nintendo controller to get 30 lives in 'Contra' (1988)?","Options":["Up Up Down Down Left Right Left Right B A Start","Up Down Left Right A B Start","Down Up Left Right B A Select Start","A B A B Up Down Left Right"],"CorrectAnswerIndex":0,"Explanation":"The Konami Code was created by Kazuhisa Hashimoto for Gradius and popularized in Contra.","TimeLimitSeconds":15},
-    {"Id":"POP-035","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What popular 1990s fashion accessory was made of springy steel bands covered in colorful neon fabric that slapped onto wrists?","Options":["Slap Bracelets","Jelly Bracelets","Friendship Bracelets","Snap Bands"],"CorrectAnswerIndex":0,"Explanation":"Invented by teacher Stuart Anders, Slap Wraps became a nationwide fad in 1990.","TimeLimitSeconds":15},
-    {"Id":"POP-036","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1985 adventure film followed a group of Oregon kids following a pirate treasure map to find One-Eyed Willy's gold?","Options":["The Goonies","Stand by Me","Flight of the Navigator","The Monster Squad"],"CorrectAnswerIndex":0,"Explanation":"Richard Donner directed The Goonies from a story by Steven Spielberg and screenplay by Chris Columbus.","TimeLimitSeconds":15},
-    {"Id":"POP-037","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1990s card game and anime phenomenon created by Satoshi Tajiri invited kids to 'Catch 'Em All'?","Options":["Pokémon","Yu-Gi-Oh!","Digimon","Magic: The Gathering"],"CorrectAnswerIndex":0,"Explanation":"Pokémon Red and Blue launched in North America in September 1998, sparking 'Pokémania'.","TimeLimitSeconds":15},
-    {"Id":"POP-038","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1986 action film starring Tom Cruise as naval aviator Pete 'Maverick' Mitchell boosted US Navy recruitment?","Options":["Top Gun","Iron Eagle","Flight of the Intruder","Days of Thunder"],"CorrectAnswerIndex":0,"Explanation":"Top Gun featured the hit soundtrack anthem 'Danger Zone' by Kenny Loggins.","TimeLimitSeconds":15},
-    {"Id":"POP-039","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1990s snack food consisted of a yellow plastic tray with three compartments of crackers, cheese, and lunch meat?","Options":["Lunchables","Handi-Snacks","Dunkaroos","Kid Cuisine"],"CorrectAnswerIndex":0,"Explanation":"Oscar Mayer launched Lunchables in 1988, expanding to mini pizzas and nacho packs in the 90s.","TimeLimitSeconds":15},
-    {"Id":"POP-040","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1988 film combined live action with animation and starred Bob Hoskins alongside Roger Rabbit?","Options":["Who Framed Roger Rabbit","Space Jam","Cool World","Song of the South"],"CorrectAnswerIndex":0,"Explanation":"Robert Zemeckis directed the film, bringing Disney and Warner Bros. cartoon characters together on screen for the first time.","TimeLimitSeconds":15},
-    {"Id":"POP-041","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the discontinued citrus-flavored soda from The Coca-Cola Company launched in 1996 to compete with Mountain Dew?","Options":["Surge","Jolt Cola","Vault","Citra"],"CorrectAnswerIndex":0,"Explanation":"Surge featured intense extreme-sports marketing and a bright radioactive-green color palette.","TimeLimitSeconds":15},
-    {"Id":"POP-042","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"In the original 1984 movie 'The Terminator', what exact date in 1997 was designated as 'Judgment Day'?","Options":["August 29, 1997","July 4, 1997","October 31, 1997","December 31, 1999"],"CorrectAnswerIndex":0,"Explanation":"Skynet was predicted to become self-aware on August 29, 1997 in Terminator 2: Judgment Day.","TimeLimitSeconds":15},
-    {"Id":"POP-043","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the interactive VHS board game from 1991 featuring the video Gatekeeper shouting 'Answer ME!'?","Options":["Nightmare (Atmosfear)","Party Mania","DragonStrike","VCR Clue"],"CorrectAnswerIndex":0,"Explanation":"Players had 60 minutes to collect keys and face their worst fears before the timer expired.","TimeLimitSeconds":15},
-    {"Id":"POP-044","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What famous sneaker line debuted in 1989 featuring an inflatable tongue air bladder pumped with a basketball-shaped button?","Options":["Reebok Pump","Nike Air Pressure","LA Gear Lights","Converse React"],"CorrectAnswerIndex":0,"Explanation":"Dee Brown famously pumped up his Reebok Pumps before winning the 1991 NBA Slam Dunk Contest.","TimeLimitSeconds":15},
-    {"Id":"POP-045","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What 1982 fantasy film featured a mechanical owl named Bubo and Harry Hamlin as Perseus?","Options":["Clash of the Titans","Conan the Barbarian","The Dark Crystal","Krull"],"CorrectAnswerIndex":0,"Explanation":"Clash of the Titans was the final feature film featuring the stop-motion animation of master Ray Harryhausen.","TimeLimitSeconds":15},
-    {"Id":"POP-046","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the popular 1990s kids' game show on Nickelodeon featuring the Aggro Crag?","Options":["Nickelodeon GUTS","Legends of the Hidden Temple","Double Dare","Wild & Crazy Kids"],"CorrectAnswerIndex":0,"Explanation":"Hosted by Mike O'Malley and referee Moira Quirk ('Let's go to the leaderboard, Mo!').","TimeLimitSeconds":15},
-    {"Id":"POP-047","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the original retail price of the Sony PlayStation when launched in North America in September 1995?","Options":["$299","$399","$199","$499"],"CorrectAnswerIndex":0,"Explanation":"Steve Race famously gave a one-word keynote speech at E3 1995: '299', undercutting Sega Saturn's $399 price.","TimeLimitSeconds":15},
-    {"Id":"POP-048","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the high-caffeine cola launched in 1985 with the slogan 'All the sugar and twice the caffeine'?","Options":["Jolt Cola","Josta","BAWLS","Tab Clear"],"CorrectAnswerIndex":0,"Explanation":"Jolt Cola became a favorite beverage of early computer hackers and collegiate all-nighters.","TimeLimitSeconds":15},
-    {"Id":"POP-049","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What popular 1980s cartoon featured feline humanoid aliens from the dying planet Thundera: Lion-O, Cheetara, and Panthro?","Options":["ThunderCats","SilverHawks","TigerSharks","Swat Kats"],"CorrectAnswerIndex":0,"Explanation":"Lion-O commanded the Sword of Omens and the Eye of Thundera ('Thunder, Thunder, ThunderCats, HO!').","TimeLimitSeconds":15},
-    {"Id":"POP-050","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the talking skull hosted game show 'Legends of the Hidden Temple' on Nickelodeon?","Options":["Olmec","Quetzal","Kukulkan","Montezuma"],"CorrectAnswerIndex":0,"Explanation":"Olmec was voiced by Dee Bradley Baker and opened the gates to the Temple Run.","TimeLimitSeconds":15},
-    {"Id":"POP-051","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1982 Steven Spielberg film told the heartwarming story of an alien stranded on Earth who loved Reese's Pieces?","Options":["E.T. the Extra-Terrestrial","Close Encounters of the Third Kind","Flight of the Navigator","Cocoon"],"CorrectAnswerIndex":0,"Explanation":"E.T. surpassed Star Wars to become the highest-grossing film of all time up to that point.","TimeLimitSeconds":15},
-    {"Id":"POP-052","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What popular 1990s snack featured kangaroo-shaped cookies meant to be dunked in sweet frosting?","Options":["Dunkaroos","Teddy Grahams","Gushers","Fruit Roll-Ups"],"CorrectAnswerIndex":0,"Explanation":"Betty Crocker debuted Dunkaroos in 1990 with mascot Sydney the Kangaroo.","TimeLimitSeconds":15},
-    {"Id":"POP-053","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1980s arcade phenomenon featured a yellow pizza-shaped character eating dots while evading ghosts?","Options":["Pac-Man","Ms. Pac-Man","Dig Dug","Q*bert"],"CorrectAnswerIndex":0,"Explanation":"Toru Iwatani created Pac-Man for Namco, debuting in Japan in May 1980.","TimeLimitSeconds":15},
-    {"Id":"POP-054","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What popular 1980s sunglasses style was worn by Tom Cruise in 'Risky Business' and 'Top Gun'?","Options":["Ray-Ban Wayfarers & Aviators","Oakley Blades","Foster Grants","Carrera"],"CorrectAnswerIndex":0,"Explanation":"Tom Cruise's movies single-handedly revived Ray-Ban's classic eyewear sales in the mid-1980s.","TimeLimitSeconds":15},
-    {"Id":"POP-055","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What was the name of the fictional suburban town in Indiana where the 1980s kids' bike adventure in 'Stranger Things' is homage to?","Options":["Hawkins","Stars Hollow","Dillon","Springfield"],"CorrectAnswerIndex":0,"Explanation":"Hawkins, Indiana pays tribute to classic 1980s Amblin and Stephen King storytelling.","TimeLimitSeconds":15},
-    {"Id":"POP-056","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1990s sitcom featured six twenty-somethings living in New York City: Monica, Rachel, Phoebe, Chandler, Joey, and Ross?","Options":["Friends","Seinfeld","Mad About You","Living Single"],"CorrectAnswerIndex":0,"Explanation":"Friends aired for 10 seasons on NBC and became one of the most-watched TV shows of all time.","TimeLimitSeconds":15},
-    {"Id":"POP-057","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1985 John Hughes teen movie followed five high school students spending Saturday detention together in the library?","Options":["The Breakfast Club","Ferris Bueller's Day Off","Pretty in Pink","Sixteen Candles"],"CorrectAnswerIndex":0,"Explanation":"The five students represented high school archetypes: a brain, an athlete, a basket case, a princess, and a criminal.","TimeLimitSeconds":15},
-    {"Id":"POP-058","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What was the name of the popular toy line of colorful mini bears with special symbols embroidered on their bellies?","Options":["Care Bears","Popples","Gummi Bears","Pound Puppies"],"CorrectAnswerIndex":0,"Explanation":"American Greetings launched Care Bears in 1981, living in the cloud kingdom of Care-a-lot.","TimeLimitSeconds":15},
-    {"Id":"POP-059","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1996 live-action/animated sports comedy starred Michael Jordan playing basketball with the Looney Tunes?","Options":["Space Jam","Who Framed Roger Rabbit","Like Mike","Air Bud"],"CorrectAnswerIndex":0,"Explanation":"Space Jam pitted the Tune Squad against the alien Monstars to secure the Looney Tunes' freedom.","TimeLimitSeconds":15},
-    {"Id":"POP-060","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1980s video game made players jump over rolling barrels thrown by a giant ape?","Options":["Donkey Kong","Super Mario Bros.","Popeye","Jungle Hunt"],"CorrectAnswerIndex":0,"Explanation":"Donkey Kong marked the debut of both the titular ape and Mario (originally known as 'Jumpman').","TimeLimitSeconds":15},
-    {"Id":"POP-061","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1986 John Hughes comedy featured a charming high school senior skipping school in Chicago in a 1961 Ferrari?","Options":["Ferris Bueller's Day Off","Weird Science","Risky Business","Fast Times at Ridgemont High"],"CorrectAnswerIndex":0,"Explanation":"Matthew Broderick starred as Ferris Bueller ('Life moves pretty fast. If you don't stop and look around once in a while, you could miss it').","TimeLimitSeconds":15},
-    {"Id":"POP-062","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1990s snack food consisted of puffed corn snacks coated in intensely radioactive neon orange cheese dust?","Options":["Cheetos (Flamin' Hot)","Doritos","Bugles","Fritos"],"CorrectAnswerIndex":0,"Explanation":"Flamin' Hot Cheetos were developed in the early 1990s and became a massive cultural phenomenon.","TimeLimitSeconds":15},
-    {"Id":"POP-063","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1980s television series featured a heavily customized talking black Pontiac Firebird Trans Am called KITT?","Options":["Knight Rider","Miami Vice","Airwolf","The A-Team"],"CorrectAnswerIndex":0,"Explanation":"David Hasselhoff starred as crime fighter Michael Knight alongside KITT (voiced by William Daniels).","TimeLimitSeconds":15},
-    {"Id":"POP-064","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1994 Disney animated film featured Simba, Mufasa, Scar, and the song 'Circle of Life'?","Options":["The Lion King","Aladdin","Beauty and the Beast","The Little Mermaid"],"CorrectAnswerIndex":0,"Explanation":"The Lion King was the highest-grossing film of 1994 and a pinnacle of the Disney Renaissance.","TimeLimitSeconds":15},
-    {"Id":"POP-065","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1990s gaming console introduced the rumble feature and four built-in controller ports with games like 'GoldenEye 007'?","Options":["Nintendo 64","Sega Saturn","Sony PlayStation","Sega Dreamcast"],"CorrectAnswerIndex":0,"Explanation":"The N64 launched in 1996 with revolutionary 3D analog stick control and Super Mario 64.","TimeLimitSeconds":15},
-    {"Id":"POP-066","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1984 fantasy movie warned never to get Mogwai wet, expose them to bright light, or feed them after midnight?","Options":["Gremlins","Critters","Ghoulies","The Dark Crystal"],"CorrectAnswerIndex":0,"Explanation":"Joe Dante directed Gremlins, introducing Gizmo the friendly Mogwai.","TimeLimitSeconds":15},
-    {"Id":"POP-067","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What popular 1990s TV channel featured game shows, slime, and orange blimps at the Kids' Choice Awards?","Options":["Nickelodeon","Cartoon Network","Disney Channel","Fox Kids"],"CorrectAnswerIndex":0,"Explanation":"Nickelodeon's green slime originated on 'You Can't Do That on Television' in 1979.","TimeLimitSeconds":15},
-    {"Id":"POP-068","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What popular 1980s horror icon stalked teenagers in their dreams on Elm Street with a bladed glove?","Options":["Freddy Krueger","Jason Voorhees","Michael Myers","Leatherface"],"CorrectAnswerIndex":0,"Explanation":"Robert Englund played Freddy Krueger in Wes Craven's 'A Nightmare on Elm Street' franchise.","TimeLimitSeconds":15},
-    {"Id":"POP-069","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1999 sci-fi action film starred Keanu Reeves choosing between the red pill and the blue pill?","Options":["The Matrix","Dark City","The Fifth Element","Johnny Mnemonic"],"CorrectAnswerIndex":0,"Explanation":"The Wachowskis popularized 'bullet time' visual effects with The Matrix in 1999.","TimeLimitSeconds":15},
-    {"Id":"POP-070","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1980s music channel launched on August 1, 1981 with the words 'Ladies and gentlemen, rock and roll'?","Options":["MTV (Music Television)","VH1","MuchMusic","BET"],"CorrectAnswerIndex":0,"Explanation":"MTV revolutionized the music industry, youth fashion, and commercial advertising.","TimeLimitSeconds":15},
-    {"Id":"POP-071","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the discontinued 1990s McDonald's burger targeted specifically at adults with a fancy sourdough bun and peppered bacon?","Options":["Arch Deluxe","Big N' Tasty","McDLT","Cheddar Melt"],"CorrectAnswerIndex":0,"Explanation":"McDonald's spent over $100 million marketing the Arch Deluxe in 1996, making it one of the costliest fast-food flops.","TimeLimitSeconds":15},
-    {"Id":"POP-072","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the two-sided styrofoam container McDonald's used in the 1980s to keep 'the hot side hot, and the cool side cool'?","Options":["The McDLT","The Big Mac Box","The Arch Container","The Quarter Pounder Pack"],"CorrectAnswerIndex":0,"Explanation":"Jason Alexander starred in a famous Broadway-style commercial singing about the McDLT.","TimeLimitSeconds":15},
-    {"Id":"POP-073","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What year did the original World Wide Web become publicly available to the world through CERN and Tim Berners-Lee?","Options":["1991","1989","1995","1984"],"CorrectAnswerIndex":0,"Explanation":"Tim Berners-Lee posted a summary of the World Wide Web project to the alt.hypertext newsgroup on August 6, 1991.","TimeLimitSeconds":15},
-    {"Id":"POP-074","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the interactive talking skull from the 1990s that could read scary stories and answer yes/no questions?","Options":["Mr. Creepy / Skull","Ask Bones","Bonesly","Crypt Keeper Toy"],"CorrectAnswerIndex":0,"Explanation":"Halloween and toy companies produced numerous interactive skull animatronics in the 1990s.","TimeLimitSeconds":15},
-    {"Id":"POP-075","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What 1980s cartoon featured crime-fighting human-cyborgs with metallic wings and laser weapons in the 29th century?","Options":["SilverHawks","TigerSharks","Bionic Six","Centurions"],"CorrectAnswerIndex":0,"Explanation":"Rankin/Bass produced SilverHawks in 1986 following the success of ThunderCats.","TimeLimitSeconds":15},
-    {"Id":"POP-076","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the discontinued multi-colored chalky powdered candy in a pouch with a candy stick used for dipping?","Options":["Fun Dip (Lik-M-Aid)","Pixy Stix","Pop Rocks","Bottle Caps"],"CorrectAnswerIndex":0,"Explanation":"Fun Dip featured 'Lik-A-Stix' dipping sticks and colorful sour powder pouches.","TimeLimitSeconds":15},
-    {"Id":"POP-077","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What 1989 Nintendo-sponsored Hollywood adventure film served as an extended commercial for 'Super Mario Bros. 3'?","Options":["The Wizard","Cloak & Dagger","WarGames","Flight of the Navigator"],"CorrectAnswerIndex":0,"Explanation":"Fred Savage starred in The Wizard, featuring the famous line 'I love the Power Glove. It's so bad.'","TimeLimitSeconds":15},
-    {"Id":"POP-078","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the discontinued layered pudding snack by Jell-O that featured two contrasting colors in a plastic cup?","Options":["Jell-O Pudding Pops / Pudding Snacks","Dunkaroos","Snack Pack Swirl","Kozy Shack"],"CorrectAnswerIndex":0,"Explanation":"Bill Cosby famously advertised frozen Jell-O Pudding Pops throughout the 1980s.","TimeLimitSeconds":15},
-    {"Id":"POP-079","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the female lead singer of the 1990s Eurodance group Aqua who sang 'Barbie Girl' in 1997?","Options":["Lene Nystrøm","Whigfield","Gina G","Gala"],"CorrectAnswerIndex":0,"Explanation":"Danish-Norwegian band Aqua topped charts worldwide with 'Barbie Girl', prompting a trademark lawsuit by Mattel.","TimeLimitSeconds":15},
-    {"Id":"POP-080","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What popular 1980s toy line featured mini trucks with oversized monster-truck tires that climbed over books and obstacles?","Options":["Stomper 4x4s","Rough Riders","Micro Machines","Tonka 4x4"],"CorrectAnswerIndex":0,"Explanation":"Schaper Toys introduced battery-powered 4WD Stomper trucks in 1980.","TimeLimitSeconds":15},
-    {"Id":"POP-081","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1993 comedy starred Robin Williams as a divorced father who disguises himself as a Scottish nanny?","Options":["Mrs. Doubtfire","Hook","Jumanji","Patch Adams"],"CorrectAnswerIndex":0,"Explanation":"Mrs. Doubtfire won the Academy Award for Best Makeup and grossed over $440 million worldwide.","TimeLimitSeconds":15},
-    {"Id":"POP-082","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What popular 1990s TV drama followed lifeguards patrolling the beaches of Los Angeles County, starring David Hasselhoff and Pamela Anderson?","Options":["Baywatch","Pacific Blue","Melrose Place","Beverly Hills 90210"],"CorrectAnswerIndex":0,"Explanation":"Baywatch became the most-watched television show in the world in the mid-1990s with over 1 billion viewers.","TimeLimitSeconds":15},
-    {"Id":"POP-083","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1989 Disney animated movie initiated the 'Disney Renaissance' era?","Options":["The Little Mermaid","Beauty and the Beast","Aladdin","The Lion King"],"CorrectAnswerIndex":0,"Explanation":"The Little Mermaid featuring songs by Alan Menken and Howard Ashman restored Disney's animation studio.","TimeLimitSeconds":15},
-    {"Id":"POP-084","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What dance move popularized by Michael Jackson during his 1983 'Motown 25' performance made him appear to glide backwards?","Options":["The Moonwalk","The Robot","The Worm","The Glide"],"CorrectAnswerIndex":0,"Explanation":"Michael Jackson performed the Moonwalk for the first time on television during 'Billie Jean'.","TimeLimitSeconds":15},
-    {"Id":"POP-085","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What fast-talking toy spokesman hosted commercials for miniature toy vehicles: 'Micro Machines, if it doesn't say Micro Machines...'?","Options":["John Moschitta Jr. (The Fast Talking Guy)","Billy Mays","Vince Offer","Don LaFontaine"],"CorrectAnswerIndex":0,"Explanation":"John Moschitta Jr. was listed in the Guinness Book of World Records as the world's fastest talker (586 wpm).","TimeLimitSeconds":15},
-    {"Id":"POP-086","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1987 sci-fi action movie starred Arnold Schwarzenegger as Major 'Dutch' Schaefer battling an extraterrestrial trophy hunter in a Central American jungle?","Options":["Predator","Commando","Total Recall","The Running Man"],"CorrectAnswerIndex":0,"Explanation":"'Get to the choppa!' became one of Schwarzenegger's most famous quotes.","TimeLimitSeconds":15},
-    {"Id":"POP-087","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1990s FPS computer game developed by id Software featured space marines blasting demons on Mars?","Options":["DOOM","Quake","Wolfenstein 3D","Duke Nukem 3D"],"CorrectAnswerIndex":0,"Explanation":"DOOM pioneered 3D graphics, networked multiplayer deathmatches, and PC modding in 1993.","TimeLimitSeconds":15},
-    {"Id":"POP-088","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1991 comedy starred Mike Myers and Dana Carvey as cable-access TV hosts in Aurora, Illinois?","Options":["Wayne's World","Bill & Ted's Excellent Adventure","Dumb and Dumber","Tommy Boy"],"CorrectAnswerIndex":0,"Explanation":"'Party on, Wayne! Party on, Garth!' - Wayne's World resurrected Queen's 'Bohemian Rhapsody' on the pop charts.","TimeLimitSeconds":15},
-    {"Id":"POP-089","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1980s toy line featured small plastic figures inside vehicles that could transform with spring-loaded hidden weapons?","Options":["M.A.S.K. (Mobile Armored Strike Kommand)","C.O.P.S.","Centurions","Sectaurs"],"CorrectAnswerIndex":0,"Explanation":"Kenner's M.A.S.K. combined elements of G.I. Joe action figures with Transformers-style converting vehicles.","TimeLimitSeconds":15},
-    {"Id":"POP-090","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1994 action movie featured Keanu Reeves and Sandra Bullock on a Los Angeles city bus rigged to explode if it dropped below 50 mph?","Options":["Speed","Point Break","The Rock","Con Air"],"CorrectAnswerIndex":0,"Explanation":"Jan de Bont directed Speed, which grossed $350 million and won two Academy Awards.","TimeLimitSeconds":15},
-    {"Id":"POP-091","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the discontinued battery-powered water gun introduced in 1990 by Larami and inventor Lonnie Johnson?","Options":["The Super Soaker (originally Power Drencher)","Water Cannon","Hydro Strike","Aqua Bazooka"],"CorrectAnswerIndex":0,"Explanation":"NASA engineer Lonnie Johnson invented the pressurized air Super Soaker 50 in his basement.","TimeLimitSeconds":15},
-    {"Id":"POP-092","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the talking skull host of the 1990s Saturday morning horror anthology cartoon 'Tales from the Cryptkeeper'?","Options":["The Cryptkeeper","The Old Witch","The Vault-Keeper","Sir Arthur"],"CorrectAnswerIndex":0,"Explanation":"John Kassir voiced the Cryptkeeper with his signature cackling pun-filled laugh.","TimeLimitSeconds":15},
-    {"Id":"POP-093","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What 1989 home video game accessory for the NES was a wearable black glove sensor featured in 'The Wizard'?","Options":["The Power Glove","The U-Force","The Roll 'n Rocker","The NES Zapper"],"CorrectAnswerIndex":0,"Explanation":"Manufactured by Mattel, the Power Glove used ultrasonic sound sensors to detect hand movements.","TimeLimitSeconds":15},
-    {"Id":"POP-094","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What popular 1990s TV commercial featured two grandmothers in a convertible driving around challenging teen street racers for 'Mentos: The Freshmaker'?","Options":["Mentos Mints","Tic Tacs","Certi-fresh","Altoids"],"CorrectAnswerIndex":0,"Explanation":"Mentos commercials became famous for cheesy European actors solving absurd problems with a mint.","TimeLimitSeconds":15},
-    {"Id":"POP-095","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What 1980s board game by Milton Bradley asked players to remember and repeat sequences of four flashing colored tones (Red, Green, Blue, Yellow)?","Options":["Simon","Bop It","Perfection","Operation"],"CorrectAnswerIndex":0,"Explanation":"Ralph Baer and Howard Morrison invented Simon, which launched at Studio 54 in 1978 and dominated the 80s.","TimeLimitSeconds":15},
-    {"Id":"POP-096","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1998 Disney animated film featured a Chinese heroine who disguises herself as a male soldier to save her father?","Options":["Mulan","Pocahontas","Hercules","Tarzan"],"CorrectAnswerIndex":0,"Explanation":"Mulan featured Ming-Na Wen and Lea Salonga performing 'Reflection'.","TimeLimitSeconds":15},
-    {"Id":"POP-097","Category":"80s & 90s Pop Culture","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1980s cartoon featured five robotic lions that combined to form a mighty warrior robot?","Options":["Voltron: Defender of the Universe","Robotech","Transformers","Tranzor Z"],"CorrectAnswerIndex":0,"Explanation":"'Form feet and legs! Form arms and torso! And I'll form the head!'","TimeLimitSeconds":15},
-    {"Id":"POP-098","Category":"80s & 90s Pop Culture","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1993 family comedy movie featured six neighborhood kids playing baseball in an empty lot in 1962 ('You're killing me, Smalls!')?","Options":["The Sandlot","Rookie of the Year","Little Big League","Angels in the Outfield"],"CorrectAnswerIndex":0,"Explanation":"The Sandlot followed Scotty Smalls, Benny 'The Jet' Rodriguez, and 'The Beast' English Mastiff.","TimeLimitSeconds":15},
-    {"Id":"POP-099","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the discontinued candy from 1992 that turned your mouth and tongue bright blue, red, or green?","Options":["Tongue Splashers (bubble gum)","Mouth Morsels","Color Pops","Glow Drops"],"CorrectAnswerIndex":0,"Explanation":"Tongue Splashers was marketed specifically for its ability to stain children's tongues vivid shades.","TimeLimitSeconds":15},
-    {"Id":"POP-100","Category":"80s & 90s Pop Culture","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What 1984 movie featured a boy named Bastian Balthazar Bux who enters the magical world of Fantastica through an antique book?","Options":["The NeverEnding Story","The Princess Bride","Labyrinth","Legend"],"CorrectAnswerIndex":0,"Explanation":"Directed by Wolfgang Petersen, featuring Falkor the luckdragon and Atreyu's horse Artax.","TimeLimitSeconds":15}
+    {
+      "Id": "POP-001",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What colorful 3D combination puzzle cube became a worldwide craze in 1980?",
+      "Options": [
+        "Megaminx",
+        "Rubik's Cube",
+        "Snake Cube",
+        "Pyraminx"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Invented by Ernő Rubik in 1974, the Rubik's Cube sold over 350 million units worldwide.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-002",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the portable cassette player introduced by Sony in 1979 that dominated the 1980s?",
+      "Options": [
+        "The Boombox",
+        "The Discman",
+        "The Walkman",
+        "The Soundabout"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Sony Walkman revolutionized personal music listening on the go.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-003",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What time-traveling car was built into a time machine by Doc Brown in 'Back to the Future' (1985)?",
+      "Options": [
+        "Ford Mustang",
+        "Pontiac Firebird",
+        "Chevrolet Corvette",
+        "DeLorean DMC-12"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Doc Brown built the time machine into a DeLorean because 'if you're gonna build a time machine into a car, why not do it with some style?'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-004",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1990s digital handheld virtual pet toy required feeding and cleaning up after?",
+      "Options": [
+        "Tamagotchi",
+        "Giga Pet",
+        "Digimon",
+        "Furby"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Bandai launched the Tamagotchi in Japan in 1996, selling tens of millions worldwide.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-005",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the 8-bit home video game console released by Nintendo in North America in 1985?",
+      "Options": [
+        "Atari 2600",
+        "Sega Genesis",
+        "Nintendo Entertainment System (NES)",
+        "Super Nintendo (SNES)"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The NES revived the American video game industry following the video game crash of 1983.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-006",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1980s stuffed toy doll craze caused literal riots in department stores during Christmas 1983?",
+      "Options": [
+        "Care Bears",
+        "Cabbage Patch Kids",
+        "Strawberry Shortcake",
+        "Beanie Babies"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Cabbage Patch Kids came with unique adoption certificates and individual names.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-007",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the blue hedgehog introduced by Sega in 1991 to compete with Nintendo's Mario?",
+      "Options": [
+        "Spyro the Dragon",
+        "Sonic the Hedgehog",
+        "Mega Man",
+        "Crash Bandicoot"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Sonic became Sega's flagship mascot on the Genesis console with his blazing speed.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-008",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What dance and hit song by Los del Río became an international wedding and sporting event craze in 1996?",
+      "Options": [
+        "Macarena",
+        "Lambada",
+        "The Twist",
+        "Cha Cha Slide"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Bayside Boys remix of 'Macarena' spent 14 weeks at #1 on the Billboard Hot 100.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-009",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1993 Steven Spielberg dinosaur blockbuster shattered worldwide box office records?",
+      "Options": [
+        "Jurassic Park",
+        "Godzilla",
+        "King Kong",
+        "The Lost World"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Jurassic Park combined animatronics by Stan Winston with revolutionary CGI by Industrial Light & Magic.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-010",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What toy craze of the late 1990s featured small plush animals with heart-shaped tags produced by Ty Inc.?",
+      "Options": [
+        "Webkinz",
+        "Pillow Pets",
+        "Beanie Babies",
+        "Squishmallows"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Beanie Babies sparked a massive secondary collectors' speculative market in the late 90s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-011",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the four pizza-loving mutant reptile heroes: Leonardo, Michelangelo, Donatello, and Raphael?",
+      "Options": [
+        "Street Sharks",
+        "Battletoads",
+        "Teenage Mutant Ninja Turtles",
+        "Biker Mice from Mars"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Created by Kevin Eastman and Peter Laird, the TMNT became a multi-billion dollar 80s/90s franchise.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-012",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1984 comedy film starred Bill Murray, Dan Aykroyd, and Harold Ramis catching supernatural spooks in NYC?",
+      "Options": [
+        "Beetlejuice",
+        "Gremlins",
+        "The Goonies",
+        "Ghostbusters"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ghostbusters coined the famous tagline 'Who ya gonna call?'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-013",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What handheld 8-bit gaming device was released by Nintendo in 1989 bundled with the puzzle game 'Tetris'?",
+      "Options": [
+        "Neo Geo Pocket",
+        "Atari Lynx",
+        "Game Gear",
+        "Game Boy"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Designed by Gunpei Yokoi, the original Game Boy sold over 118 million units worldwide.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-014",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What hairstyle, characterized by 'business in the front, party in the back', was wildly popular in the 1980s?",
+      "Options": [
+        "The Mullet",
+        "The Feathered Flip",
+        "The Rat Tail",
+        "The Bowl Cut"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The mullet was worn by rock stars, athletes, and movie heroes throughout the 1980s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-015",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990 holiday comedy film made Macaulay Culkin a superstar as 8-year-old Kevin McCallister?",
+      "Options": [
+        "Richie Rich",
+        "Uncle Buck",
+        "Home Alone",
+        "Dennis the Menace"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Home Alone held the record as the highest-grossing live-action comedy for over two decades.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-016",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1980s toy line featured robotic alien vehicles that could convert into humanoid robots?",
+      "Options": [
+        "GoBots",
+        "Transformers",
+        "G.I. Joe",
+        "Voltron"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Hasbro partnered with Takara to launch the Autobots and Decepticons in 1984.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-017",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990s TV sitcom featured Will Smith being sent from West Philadelphia to live with wealthy relatives?",
+      "Options": [
+        "Step by Step",
+        "Family Matters",
+        "The Fresh Prince of Bel-Air",
+        "Boy Meets World"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Fresh Prince of Bel-Air aired from 1990 to 1996 and popularized 'The Carlton Dance'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-018",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1997 James Cameron film became the first movie in history to gross over $1 billion at the box office?",
+      "Options": [
+        "Titanic",
+        "Star Wars: The Phantom Menace",
+        "Jurassic Park",
+        "Avatar"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Titanic won 11 Academy Awards including Best Picture and Best Director.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-019",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1990s collectible disc game used milk cap-style cardboard circles flipped with heavy slammers?",
+      "Options": [
+        "Crazy Bones",
+        "POGs",
+        "Tazos",
+        "Marbles"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "POGs originated in Hawaii and became a massive schoolyard fad in the mid-1990s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-020",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What electronic owl-like robotic creature was the must-have holiday toy craze of Christmas 1998?",
+      "Options": [
+        "Furby",
+        "Poo-Chi",
+        "Teddy Ruxpin",
+        "AIBO"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tiger Electronics sold over 40 million Furbies during its peak three-year run.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-021",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the talkative alien from the planet Melmac who lived with the Tanner family on 80s TV?",
+      "Options": [
+        "Mork",
+        "ALF (Gordon Shumway)",
+        "Paul",
+        "E.T."
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "ALF (Alien Life Form) had a notorious fondness for trying to eat the family cat, Lucky.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-022",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1990s hairdo, worn by Jennifer Aniston on 'Friends', became one of the most requested haircuts in history?",
+      "Options": [
+        "The Rachel",
+        "The Feathers",
+        "The Pixie",
+        "The Poodle Perm"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Created by stylist Chris McMillan in 1995, 'The Rachel' defined mid-90s women's hairstyles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-023",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the animatronic storytelling bear with a cassette player in his back, released in 1985?",
+      "Options": [
+        "Grubby",
+        "Care Bear",
+        "Care-a-lot Bear",
+        "Teddy Ruxpin"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Teddy Ruxpin's eyes and mouth moved synchronously with the audio cassette stories.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-024",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which 1995 Pixar film was the first entirely computer-animated feature film in cinema history?",
+      "Options": [
+        "Toy Story",
+        "Shrek",
+        "Monsters, Inc.",
+        "A Bug's Life"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Toy Story starred Tom Hanks as Woody and Tim Allen as Buzz Lightyear.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-025",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What arcade fighting game caused widespread controversy and led to the creation of the ESRB rating system in 1993?",
+      "Options": [
+        "Virtua Fighter",
+        "Street Fighter II",
+        "Mortal Kombat",
+        "Tekken"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Mortal Kombat's gory 'Fatality' finishing moves prompted US Congressional hearings on video game violence.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-026",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1980s fitness fad was popularized by Jane Fonda's best-selling 1982 home workout VHS tape?",
+      "Options": [
+        "Zumba",
+        "Tae Bo",
+        "Aerobics with Leg Warmers",
+        "Pilates"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Jane Fonda's Workout became the highest-selling VHS tape of the 20th century.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-027",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1989 movie featured Rick Moranis accidentally shrinking his and the neighbor's children?",
+      "Options": [
+        "Little Monsters",
+        "Innerspace",
+        "Big",
+        "Honey, I Shrunk the Kids"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The shrunken kids had to navigate their giant backyard across giant blades of grass and oatmeal cookies.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-028",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What beverage company released 'Crystal Pepsi' in 1992, sparking a short-lived clear beverage fad?",
+      "Options": [
+        "Dr Pepper",
+        "The Coca-Cola Company",
+        "PepsiCo",
+        "7-Up"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Crystal Pepsi was a clear, caffeine-free cola marketed with Van Halen's 'Right Now'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-029",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s cartoon featured Prince Adam holding up his Power Sword to transform into 'He-Man'?",
+      "Options": [
+        "Voltron",
+        "SilverHawks",
+        "He-Man and the Masters of the Universe",
+        "Thundercats"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'By the Power of Grayskull... I HAVE THE POWER!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-030",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1990s action figure line by Bandai featured five teenagers with attitude summoning Megazords?",
+      "Options": [
+        "Big Bad Beetleborgs",
+        "Captain Planet",
+        "Mighty Morphin Power Rangers",
+        "VR Troopers"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Adapted from the Japanese Super Sentai series, Power Rangers debuted on Fox Kids in 1993.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-031",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1984 martial arts drama popularized the training quote 'Wax on, wax off'?",
+      "Options": [
+        "Bloodspot",
+        "No Retreat, No Surrender",
+        "The Karate Kid",
+        "Kickboxer"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Mr. Miyagi (Pat Morita) taught Daniel LaRusso (Ralph Macchio) karate fundamentals through household chores.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-032",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the internet service provider that mailed millions of free trial CD-ROMs in the 1990s with the voice 'You've Got Mail!'?",
+      "Options": [
+        "America Online (AOL)",
+        "EarthLink",
+        "CompuServe",
+        "Prodigy"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Voice actor Elwood Edwards recorded AOL's iconic greetings ('Welcome', 'You've got mail!').",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-033",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1995 teen comedy starred Alicia Silverstone as Beverly Hills high schooler Cher Horowitz?",
+      "Options": [
+        "Clueless",
+        "10 Things I Hate About You",
+        "Can't Hardly Wait",
+        "Mean Girls"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Amy Heckerling directed Clueless as a loose modernization of Jane Austen's 1815 novel Emma.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-034",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the secret code entered on a Nintendo controller to get 30 lives in 'Contra' (1988)?",
+      "Options": [
+        "A B A B Up Down Left Right",
+        "Up Up Down Down Left Right Left Right B A Start",
+        "Up Down Left Right A B Start",
+        "Down Up Left Right B A Select Start"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Konami Code was created by Kazuhisa Hashimoto for Gradius and popularized in Contra.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-035",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1990s fashion accessory was made of springy steel bands covered in colorful neon fabric that slapped onto wrists?",
+      "Options": [
+        "Jelly Bracelets",
+        "Snap Bands",
+        "Friendship Bracelets",
+        "Slap Bracelets"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Invented by teacher Stuart Anders, Slap Wraps became a nationwide fad in 1990.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-036",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1985 adventure film followed a group of Oregon kids following a pirate treasure map to find One-Eyed Willy's gold?",
+      "Options": [
+        "Stand by Me",
+        "The Goonies",
+        "The Monster Squad",
+        "Flight of the Navigator"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Richard Donner directed The Goonies from a story by Steven Spielberg and screenplay by Chris Columbus.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-037",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990s card game and anime phenomenon created by Satoshi Tajiri invited kids to 'Catch 'Em All'?",
+      "Options": [
+        "Magic: The Gathering",
+        "Yu-Gi-Oh!",
+        "Digimon",
+        "Pokémon"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Pokémon Red and Blue launched in North America in September 1998, sparking 'Pokémania'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-038",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1986 action film starring Tom Cruise as naval aviator Pete 'Maverick' Mitchell boosted US Navy recruitment?",
+      "Options": [
+        "Iron Eagle",
+        "Days of Thunder",
+        "Top Gun",
+        "Flight of the Intruder"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Top Gun featured the hit soundtrack anthem 'Danger Zone' by Kenny Loggins.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-039",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990s snack food consisted of a yellow plastic tray with three compartments of crackers, cheese, and lunch meat?",
+      "Options": [
+        "Kid Cuisine",
+        "Handi-Snacks",
+        "Dunkaroos",
+        "Lunchables"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Oscar Mayer launched Lunchables in 1988, expanding to mini pizzas and nacho packs in the 90s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-040",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1988 film combined live action with animation and starred Bob Hoskins alongside Roger Rabbit?",
+      "Options": [
+        "Song of the South",
+        "Cool World",
+        "Space Jam",
+        "Who Framed Roger Rabbit"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Robert Zemeckis directed the film, bringing Disney and Warner Bros. cartoon characters together on screen for the first time.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-041",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the discontinued citrus-flavored soda from The Coca-Cola Company launched in 1996 to compete with Mountain Dew?",
+      "Options": [
+        "Vault",
+        "Surge",
+        "Jolt Cola",
+        "Citra"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Surge featured intense extreme-sports marketing and a bright radioactive-green color palette.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-042",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In the original 1984 movie 'The Terminator', what exact date in 1997 was designated as 'Judgment Day'?",
+      "Options": [
+        "December 31, 1999",
+        "August 29, 1997",
+        "July 4, 1997",
+        "October 31, 1997"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Skynet was predicted to become self-aware on August 29, 1997 in Terminator 2: Judgment Day.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-043",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the interactive VHS board game from 1991 featuring the video Gatekeeper shouting 'Answer ME!'?",
+      "Options": [
+        "Nightmare (Atmosfear)",
+        "VCR Clue",
+        "DragonStrike",
+        "Party Mania"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Players had 60 minutes to collect keys and face their worst fears before the timer expired.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-044",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous sneaker line debuted in 1989 featuring an inflatable tongue air bladder pumped with a basketball-shaped button?",
+      "Options": [
+        "Converse React",
+        "Reebok Pump",
+        "Nike Air Pressure",
+        "LA Gear Lights"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Dee Brown famously pumped up his Reebok Pumps before winning the 1991 NBA Slam Dunk Contest.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-045",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1982 fantasy film featured a mechanical owl named Bubo and Harry Hamlin as Perseus?",
+      "Options": [
+        "The Dark Crystal",
+        "Conan the Barbarian",
+        "Krull",
+        "Clash of the Titans"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Clash of the Titans was the final feature film featuring the stop-motion animation of master Ray Harryhausen.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-046",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the popular 1990s kids' game show on Nickelodeon featuring the Aggro Crag?",
+      "Options": [
+        "Nickelodeon GUTS",
+        "Wild & Crazy Kids",
+        "Double Dare",
+        "Legends of the Hidden Temple"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Hosted by Mike O'Malley and referee Moira Quirk ('Let's go to the leaderboard, Mo!').",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-047",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the original retail price of the Sony PlayStation when launched in North America in September 1995?",
+      "Options": [
+        "$499",
+        "$399",
+        "$299",
+        "$199"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Steve Race famously gave a one-word keynote speech at E3 1995: '299', undercutting Sega Saturn's $399 price.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-048",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the high-caffeine cola launched in 1985 with the slogan 'All the sugar and twice the caffeine'?",
+      "Options": [
+        "Tab Clear",
+        "BAWLS",
+        "Josta",
+        "Jolt Cola"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Jolt Cola became a favorite beverage of early computer hackers and collegiate all-nighters.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-049",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1980s cartoon featured feline humanoid aliens from the dying planet Thundera: Lion-O, Cheetara, and Panthro?",
+      "Options": [
+        "ThunderCats",
+        "TigerSharks",
+        "SilverHawks",
+        "Swat Kats"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Lion-O commanded the Sword of Omens and the Eye of Thundera ('Thunder, Thunder, ThunderCats, HO!').",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-050",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the talking skull hosted game show 'Legends of the Hidden Temple' on Nickelodeon?",
+      "Options": [
+        "Olmec",
+        "Quetzal",
+        "Kukulkan",
+        "Montezuma"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Olmec was voiced by Dee Bradley Baker and opened the gates to the Temple Run.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-051",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1982 Steven Spielberg film told the heartwarming story of an alien stranded on Earth who loved Reese's Pieces?",
+      "Options": [
+        "Cocoon",
+        "E.T. the Extra-Terrestrial",
+        "Flight of the Navigator",
+        "Close Encounters of the Third Kind"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "E.T. surpassed Star Wars to become the highest-grossing film of all time up to that point.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-052",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1990s snack featured kangaroo-shaped cookies meant to be dunked in sweet frosting?",
+      "Options": [
+        "Gushers",
+        "Fruit Roll-Ups",
+        "Teddy Grahams",
+        "Dunkaroos"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Betty Crocker debuted Dunkaroos in 1990 with mascot Sydney the Kangaroo.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-053",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s arcade phenomenon featured a yellow pizza-shaped character eating dots while evading ghosts?",
+      "Options": [
+        "Pac-Man",
+        "Q*bert",
+        "Dig Dug",
+        "Ms. Pac-Man"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Toru Iwatani created Pac-Man for Namco, debuting in Japan in May 1980.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-054",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1980s sunglasses style was worn by Tom Cruise in 'Risky Business' and 'Top Gun'?",
+      "Options": [
+        "Ray-Ban Wayfarers & Aviators",
+        "Foster Grants",
+        "Carrera",
+        "Oakley Blades"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tom Cruise's movies single-handedly revived Ray-Ban's classic eyewear sales in the mid-1980s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-055",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the fictional suburban town in Indiana where the 1980s kids' bike adventure in 'Stranger Things' is homage to?",
+      "Options": [
+        "Springfield",
+        "Dillon",
+        "Hawkins",
+        "Stars Hollow"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Hawkins, Indiana pays tribute to classic 1980s Amblin and Stephen King storytelling.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-056",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990s sitcom featured six twenty-somethings living in New York City: Monica, Rachel, Phoebe, Chandler, Joey, and Ross?",
+      "Options": [
+        "Mad About You",
+        "Seinfeld",
+        "Friends",
+        "Living Single"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Friends aired for 10 seasons on NBC and became one of the most-watched TV shows of all time.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-057",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1985 John Hughes teen movie followed five high school students spending Saturday detention together in the library?",
+      "Options": [
+        "The Breakfast Club",
+        "Ferris Bueller's Day Off",
+        "Pretty in Pink",
+        "Sixteen Candles"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The five students represented high school archetypes: a brain, an athlete, a basket case, a princess, and a criminal.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-058",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the popular toy line of colorful mini bears with special symbols embroidered on their bellies?",
+      "Options": [
+        "Gummi Bears",
+        "Popples",
+        "Care Bears",
+        "Pound Puppies"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "American Greetings launched Care Bears in 1981, living in the cloud kingdom of Care-a-lot.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-059",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1996 live-action/animated sports comedy starred Michael Jordan playing basketball with the Looney Tunes?",
+      "Options": [
+        "Like Mike",
+        "Space Jam",
+        "Who Framed Roger Rabbit",
+        "Air Bud"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Space Jam pitted the Tune Squad against the alien Monstars to secure the Looney Tunes' freedom.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-060",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s video game made players jump over rolling barrels thrown by a giant ape?",
+      "Options": [
+        "Popeye",
+        "Super Mario Bros.",
+        "Jungle Hunt",
+        "Donkey Kong"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Donkey Kong marked the debut of both the titular ape and Mario (originally known as 'Jumpman').",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-061",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1986 John Hughes comedy featured a charming high school senior skipping school in Chicago in a 1961 Ferrari?",
+      "Options": [
+        "Weird Science",
+        "Risky Business",
+        "Fast Times at Ridgemont High",
+        "Ferris Bueller's Day Off"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Matthew Broderick starred as Ferris Bueller ('Life moves pretty fast. If you don't stop and look around once in a while, you could miss it').",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-062",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990s snack food consisted of puffed corn snacks coated in intensely radioactive neon orange cheese dust?",
+      "Options": [
+        "Cheetos (Flamin' Hot)",
+        "Bugles",
+        "Doritos",
+        "Fritos"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Flamin' Hot Cheetos were developed in the early 1990s and became a massive cultural phenomenon.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-063",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s television series featured a heavily customized talking black Pontiac Firebird Trans Am called KITT?",
+      "Options": [
+        "The A-Team",
+        "Knight Rider",
+        "Miami Vice",
+        "Airwolf"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "David Hasselhoff starred as crime fighter Michael Knight alongside KITT (voiced by William Daniels).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-064",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1994 Disney animated film featured Simba, Mufasa, Scar, and the song 'Circle of Life'?",
+      "Options": [
+        "The Little Mermaid",
+        "Beauty and the Beast",
+        "Aladdin",
+        "The Lion King"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Lion King was the highest-grossing film of 1994 and a pinnacle of the Disney Renaissance.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-065",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990s gaming console introduced the rumble feature and four built-in controller ports with games like 'GoldenEye 007'?",
+      "Options": [
+        "Sony PlayStation",
+        "Sega Dreamcast",
+        "Sega Saturn",
+        "Nintendo 64"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The N64 launched in 1996 with revolutionary 3D analog stick control and Super Mario 64.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-066",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1984 fantasy movie warned never to get Mogwai wet, expose them to bright light, or feed them after midnight?",
+      "Options": [
+        "Gremlins",
+        "Ghoulies",
+        "Critters",
+        "The Dark Crystal"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Joe Dante directed Gremlins, introducing Gizmo the friendly Mogwai.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-067",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1990s TV channel featured game shows, slime, and orange blimps at the Kids' Choice Awards?",
+      "Options": [
+        "Disney Channel",
+        "Nickelodeon",
+        "Cartoon Network",
+        "Fox Kids"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Nickelodeon's green slime originated on 'You Can't Do That on Television' in 1979.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-068",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1980s horror icon stalked teenagers in their dreams on Elm Street with a bladed glove?",
+      "Options": [
+        "Michael Myers",
+        "Leatherface",
+        "Jason Voorhees",
+        "Freddy Krueger"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Robert Englund played Freddy Krueger in Wes Craven's 'A Nightmare on Elm Street' franchise.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-069",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1999 sci-fi action film starred Keanu Reeves choosing between the red pill and the blue pill?",
+      "Options": [
+        "The Matrix",
+        "Johnny Mnemonic",
+        "Dark City",
+        "The Fifth Element"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Wachowskis popularized 'bullet time' visual effects with The Matrix in 1999.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-070",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s music channel launched on August 1, 1981 with the words 'Ladies and gentlemen, rock and roll'?",
+      "Options": [
+        "VH1",
+        "MTV (Music Television)",
+        "BET",
+        "MuchMusic"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "MTV revolutionized the music industry, youth fashion, and commercial advertising.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-071",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the discontinued 1990s McDonald's burger targeted specifically at adults with a fancy sourdough bun and peppered bacon?",
+      "Options": [
+        "McDLT",
+        "Arch Deluxe",
+        "Big N' Tasty",
+        "Cheddar Melt"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "McDonald's spent over $100 million marketing the Arch Deluxe in 1996, making it one of the costliest fast-food flops.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-072",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the two-sided styrofoam container McDonald's used in the 1980s to keep 'the hot side hot, and the cool side cool'?",
+      "Options": [
+        "The Big Mac Box",
+        "The Arch Container",
+        "The Quarter Pounder Pack",
+        "The McDLT"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Jason Alexander starred in a famous Broadway-style commercial singing about the McDLT.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-073",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What year did the original World Wide Web become publicly available to the world through CERN and Tim Berners-Lee?",
+      "Options": [
+        "1991",
+        "1995",
+        "1984",
+        "1989"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tim Berners-Lee posted a summary of the World Wide Web project to the alt.hypertext newsgroup on August 6, 1991.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-074",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the interactive talking skull from the 1990s that could read scary stories and answer yes/no questions?",
+      "Options": [
+        "Ask Bones",
+        "Bonesly",
+        "Crypt Keeper Toy",
+        "Mr. Creepy / Skull"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Halloween and toy companies produced numerous interactive skull animatronics in the 1990s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-075",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s cartoon featured crime-fighting human-cyborgs with metallic wings and laser weapons in the 29th century?",
+      "Options": [
+        "Centurions",
+        "SilverHawks",
+        "TigerSharks",
+        "Bionic Six"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Rankin/Bass produced SilverHawks in 1986 following the success of ThunderCats.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-076",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the discontinued multi-colored chalky powdered candy in a pouch with a candy stick used for dipping?",
+      "Options": [
+        "Pixy Stix",
+        "Pop Rocks",
+        "Fun Dip (Lik-M-Aid)",
+        "Bottle Caps"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Fun Dip featured 'Lik-A-Stix' dipping sticks and colorful sour powder pouches.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-077",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1989 Nintendo-sponsored Hollywood adventure film served as an extended commercial for 'Super Mario Bros. 3'?",
+      "Options": [
+        "Cloak & Dagger",
+        "Flight of the Navigator",
+        "WarGames",
+        "The Wizard"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Fred Savage starred in The Wizard, featuring the famous line 'I love the Power Glove. It's so bad.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-078",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the discontinued layered pudding snack by Jell-O that featured two contrasting colors in a plastic cup?",
+      "Options": [
+        "Snack Pack Swirl",
+        "Kozy Shack",
+        "Dunkaroos",
+        "Jell-O Pudding Pops / Pudding Snacks"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Bill Cosby famously advertised frozen Jell-O Pudding Pops throughout the 1980s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-079",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the female lead singer of the 1990s Eurodance group Aqua who sang 'Barbie Girl' in 1997?",
+      "Options": [
+        "Gala",
+        "Whigfield",
+        "Gina G",
+        "Lene Nystrøm"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Danish-Norwegian band Aqua topped charts worldwide with 'Barbie Girl', prompting a trademark lawsuit by Mattel.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-080",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1980s toy line featured mini trucks with oversized monster-truck tires that climbed over books and obstacles?",
+      "Options": [
+        "Rough Riders",
+        "Stomper 4x4s",
+        "Tonka 4x4",
+        "Micro Machines"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Schaper Toys introduced battery-powered 4WD Stomper trucks in 1980.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-081",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1993 comedy starred Robin Williams as a divorced father who disguises himself as a Scottish nanny?",
+      "Options": [
+        "Mrs. Doubtfire",
+        "Patch Adams",
+        "Jumanji",
+        "Hook"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Mrs. Doubtfire won the Academy Award for Best Makeup and grossed over $440 million worldwide.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-082",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1990s TV drama followed lifeguards patrolling the beaches of Los Angeles County, starring David Hasselhoff and Pamela Anderson?",
+      "Options": [
+        "Pacific Blue",
+        "Baywatch",
+        "Melrose Place",
+        "Beverly Hills 90210"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Baywatch became the most-watched television show in the world in the mid-1990s with over 1 billion viewers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-083",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1989 Disney animated movie initiated the 'Disney Renaissance' era?",
+      "Options": [
+        "Aladdin",
+        "Beauty and the Beast",
+        "The Lion King",
+        "The Little Mermaid"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Little Mermaid featuring songs by Alan Menken and Howard Ashman restored Disney's animation studio.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-084",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What dance move popularized by Michael Jackson during his 1983 'Motown 25' performance made him appear to glide backwards?",
+      "Options": [
+        "The Worm",
+        "The Moonwalk",
+        "The Glide",
+        "The Robot"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Michael Jackson performed the Moonwalk for the first time on television during 'Billie Jean'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-085",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What fast-talking toy spokesman hosted commercials for miniature toy vehicles: 'Micro Machines, if it doesn't say Micro Machines...'?",
+      "Options": [
+        "John Moschitta Jr. (The Fast Talking Guy)",
+        "Vince Offer",
+        "Don LaFontaine",
+        "Billy Mays"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "John Moschitta Jr. was listed in the Guinness Book of World Records as the world's fastest talker (586 wpm).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-086",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1987 sci-fi action movie starred Arnold Schwarzenegger as Major 'Dutch' Schaefer battling an extraterrestrial trophy hunter in a Central American jungle?",
+      "Options": [
+        "The Running Man",
+        "Commando",
+        "Predator",
+        "Total Recall"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Get to the choppa!' became one of Schwarzenegger's most famous quotes.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-087",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990s FPS computer game developed by id Software featured space marines blasting demons on Mars?",
+      "Options": [
+        "Quake",
+        "Duke Nukem 3D",
+        "Wolfenstein 3D",
+        "DOOM"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "DOOM pioneered 3D graphics, networked multiplayer deathmatches, and PC modding in 1993.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-088",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1991 comedy starred Mike Myers and Dana Carvey as cable-access TV hosts in Aurora, Illinois?",
+      "Options": [
+        "Bill & Ted's Excellent Adventure",
+        "Dumb and Dumber",
+        "Wayne's World",
+        "Tommy Boy"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Party on, Wayne! Party on, Garth!' - Wayne's World resurrected Queen's 'Bohemian Rhapsody' on the pop charts.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-089",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s toy line featured small plastic figures inside vehicles that could transform with spring-loaded hidden weapons?",
+      "Options": [
+        "Sectaurs",
+        "M.A.S.K. (Mobile Armored Strike Kommand)",
+        "C.O.P.S.",
+        "Centurions"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Kenner's M.A.S.K. combined elements of G.I. Joe action figures with Transformers-style converting vehicles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-090",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1994 action movie featured Keanu Reeves and Sandra Bullock on a Los Angeles city bus rigged to explode if it dropped below 50 mph?",
+      "Options": [
+        "Con Air",
+        "Point Break",
+        "The Rock",
+        "Speed"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Jan de Bont directed Speed, which grossed $350 million and won two Academy Awards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-091",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the discontinued battery-powered water gun introduced in 1990 by Larami and inventor Lonnie Johnson?",
+      "Options": [
+        "Water Cannon",
+        "The Super Soaker (originally Power Drencher)",
+        "Hydro Strike",
+        "Aqua Bazooka"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "NASA engineer Lonnie Johnson invented the pressurized air Super Soaker 50 in his basement.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-092",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the talking skull host of the 1990s Saturday morning horror anthology cartoon 'Tales from the Cryptkeeper'?",
+      "Options": [
+        "Sir Arthur",
+        "The Vault-Keeper",
+        "The Cryptkeeper",
+        "The Old Witch"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "John Kassir voiced the Cryptkeeper with his signature cackling pun-filled laugh.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-093",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1989 home video game accessory for the NES was a wearable black glove sensor featured in 'The Wizard'?",
+      "Options": [
+        "The Power Glove",
+        "The NES Zapper",
+        "The U-Force",
+        "The Roll 'n Rocker"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Manufactured by Mattel, the Power Glove used ultrasonic sound sensors to detect hand movements.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-094",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1990s TV commercial featured two grandmothers in a convertible driving around challenging teen street racers for 'Mentos: The Freshmaker'?",
+      "Options": [
+        "Tic Tacs",
+        "Altoids",
+        "Certi-fresh",
+        "Mentos Mints"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Mentos commercials became famous for cheesy European actors solving absurd problems with a mint.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-095",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s board game by Milton Bradley asked players to remember and repeat sequences of four flashing colored tones (Red, Green, Blue, Yellow)?",
+      "Options": [
+        "Perfection",
+        "Operation",
+        "Simon",
+        "Bop It"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Ralph Baer and Howard Morrison invented Simon, which launched at Studio 54 in 1978 and dominated the 80s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-096",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1998 Disney animated film featured a Chinese heroine who disguises herself as a male soldier to save her father?",
+      "Options": [
+        "Tarzan",
+        "Mulan",
+        "Hercules",
+        "Pocahontas"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Mulan featured Ming-Na Wen and Lea Salonga performing 'Reflection'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-097",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s cartoon featured five robotic lions that combined to form a mighty warrior robot?",
+      "Options": [
+        "Robotech",
+        "Transformers",
+        "Voltron: Defender of the Universe",
+        "Tranzor Z"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Form feet and legs! Form arms and torso! And I'll form the head!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-098",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1993 family comedy movie featured six neighborhood kids playing baseball in an empty lot in 1962 ('You're killing me, Smalls!')?",
+      "Options": [
+        "Little Big League",
+        "The Sandlot",
+        "Rookie of the Year",
+        "Angels in the Outfield"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Sandlot followed Scotty Smalls, Benny 'The Jet' Rodriguez, and 'The Beast' English Mastiff.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-099",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the discontinued candy from 1992 that turned your mouth and tongue bright blue, red, or green?",
+      "Options": [
+        "Glow Drops",
+        "Color Pops",
+        "Mouth Morsels",
+        "Tongue Splashers (bubble gum)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Tongue Splashers was marketed specifically for its ability to stain children's tongues vivid shades.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "POP-100",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1984 movie featured a boy named Bastian Balthazar Bux who enters the magical world of Fantastica through an antique book?",
+      "Options": [
+        "The NeverEnding Story",
+        "The Princess Bride",
+        "Legend",
+        "Labyrinth"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Directed by Wolfgang Petersen, featuring Falkor the luckdragon and Atreyu's horse Artax.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What popular 1990s handheld virtual pet keychain required users to feed and clean up after it?",
+      "Options": [
+        "Furby",
+        "Tamagotchi",
+        "Digimon",
+        "Giga Pet"
+      ],
+      "Explanation": "Bandai released the Tamagotchi in 1996, selling tens of millions worldwide.",
+      "Id": "POP-101",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which toy craze of the late 1990s led to people treating stuffed plush animals with 'heart tags' as investment collectibles?",
+      "Options": [
+        "Teddy Ruxpin",
+        "Beanie Babies",
+        "Cabbage Patch Kids",
+        "Pound Puppies"
+      ],
+      "Explanation": "Ty Warner's Beanie Babies created a massive speculative collecting frenzy.",
+      "Id": "POP-102",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What dance craze swept the world in 1996 following the release of a remix by Los del Río?",
+      "Options": [
+        "The Electric Slide",
+        "The Cha Cha Slide",
+        "The Macarena",
+        "The Lambada"
+      ],
+      "Explanation": "'Macarena' spent 14 consecutive weeks at #1 on the Billboard Hot 100.",
+      "Id": "POP-103",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which portable cassette tape player introduced by Sony in 1979 revolutionized music listening in the 1980s?",
+      "Options": [
+        "iPod",
+        "Sony Discman",
+        "Sony Walkman",
+        "Boombox"
+      ],
+      "Explanation": "The Sony Walkman allowed listeners to carry personalized music anywhere for the first time.",
+      "Id": "POP-104",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What collectible circular cardboard discs did 1990s schoolkids flip with heavy metal 'slammers'?",
+      "Options": [
+        "Pogs",
+        "Tazos",
+        "Marbles",
+        "Crazy Bones"
+      ],
+      "Explanation": "The Pog craze originated in Hawaii using milk cap liners and exploded globally in 1994-1996.",
+      "Id": "POP-105",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s hairstyle featured short hair on the front and sides and long hair in the back?",
+      "Options": [
+        "Bowl cut",
+        "Mullet ('Business in the front, party in the back')",
+        "Rat tail",
+        "Feathered shag"
+      ],
+      "Explanation": "The mullet was ubiquitous across 80s rock bands, athletes, and movie stars.",
+      "Id": "POP-106",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What colorful rubber wrist accessories did kids wear and trade in the late 1980s, snapping them onto their wrists?",
+      "Options": [
+        "Friendship Bracelets",
+        "Jelly Bracelets",
+        "Slap Bracelets",
+        "Scrunchies"
+      ],
+      "Explanation": "Invented by teacher Stuart Anders, slap bracelets were a massive pop fad in 1990.",
+      "Id": "POP-107",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s animated series featured He-Man protecting Castle Grayskull from Skeletor on planet Eternia?",
+      "Options": [
+        "Masters of the Universe",
+        "Voltron",
+        "SilverHawks",
+        "ThunderCats"
+      ],
+      "Explanation": "He-Man held up the Power Sword and proclaimed 'By the Power of Grayskull!'",
+      "Id": "POP-108",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1990s toy was an animatronic robotic creature that spoke 'Furbish' and learned English words over time?",
+      "Options": [
+        "Furby",
+        "Tickle Me Elmo",
+        "Poo-Chi",
+        "AIBO"
+      ],
+      "Explanation": "Tiger Electronics launched Furby during the 1998 holiday shopping season.",
+      "Id": "POP-109",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1985 blockbuster movie featured the DeLorean sports car modified with a 'flux capacitor' for time travel?",
+      "Options": [
+        "Back to the Future",
+        "Tron",
+        "Ghostbusters",
+        "Short Circuit"
+      ],
+      "Explanation": "Doc Brown (Christopher Lloyd) built the time machine into a stainless steel DeLorean DMC-12.",
+      "Id": "POP-110",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What video game console released in North America in 1989 popularized 16-bit gaming and 'Blast Processing'?",
+      "Options": [
+        "Atari Jaguar",
+        "Sega Genesis",
+        "TurboGrafx-16",
+        "Super Nintendo"
+      ],
+      "Explanation": "Sega Genesis challenged Nintendo's dominance with Sonic the Hedgehog.",
+      "Id": "POP-111",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which plush doll triggered holiday shopping riots in 1983 with customers desperate to 'adopt' one with a birth certificate?",
+      "Options": [
+        "Strawberry Shortcake",
+        "Care Bears",
+        "Rainbow Brite",
+        "Cabbage Patch Kids"
+      ],
+      "Explanation": "Xavier Roberts' Cabbage Patch Kids created unprecedented consumer frenzy.",
+      "Id": "POP-112",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What color was the famous tracksuit worn by Uma Thurman in 'Kill Bill' honoring Bruce Lee?",
+      "Options": [
+        "Red with white stripes",
+        "Green and gold",
+        "All black leather",
+        "Yellow with black stripes"
+      ],
+      "Explanation": "The yellow and black tracksuit paid homage to Bruce Lee's outfit in 'Game of Death'.",
+      "Id": "POP-113",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1990s coffeehouse sitcom spawned 'The Rachel' haircut requested at salons worldwide?",
+      "Options": [
+        "Seinfeld",
+        "Will & Grace",
+        "Frasier",
+        "Friends"
+      ],
+      "Explanation": "Jennifer Aniston's layered bob cut in Friends Season 1 became a decade-defining hairstyle.",
+      "Id": "POP-114",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What popular 1980s candy was shaped like miniature baby pacifiers and came in tart, chalky flavors?",
+      "Options": [
+        "Fun Dip",
+        "Runts",
+        "Sweetarts / Tart 'n Tinys",
+        "Bottle Caps"
+      ],
+      "Explanation": "Novelty candies flourished in the 1980s candy aisles and arcade vending machines.",
+      "Id": "POP-115",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1993 film by Steven Spielberg revolutionized CGI special effects with realistic dinosaurs on Isla Nublar?",
+      "Options": [
+        "Twister",
+        "The Lost World",
+        "Terminator 2",
+        "Jurassic Park"
+      ],
+      "Explanation": "Jurassic Park combined Stan Winston animatronics with groundbreaking ILM computer graphics.",
+      "Id": "POP-116",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1980s animated series featured Lion-O, Cheetara, and Panthro fighting against Mumm-Ra?",
+      "Options": [
+        "ThunderCats",
+        "G.I. Joe",
+        "M.A.S.K.",
+        "Transformers"
+      ],
+      "Explanation": "Lion-O summoned his allies with the Sword of Omens shouting 'ThunderCats, Ho!'",
+      "Id": "POP-117",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1990s fashion trend included baggy flannel shirts, ripped jeans, and combat boots originating in Seattle?",
+      "Options": [
+        "Preppy",
+        "Grunge",
+        "Cyberpunk",
+        "Rave"
+      ],
+      "Explanation": "Grunge fashion crossed from indie rock bands like Nirvana and Soundgarden to haute couture runways.",
+      "Id": "POP-118",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What was the name of the talking teddy bear introduced in 1985 that read stories using built-in cassette tapes?",
+      "Options": [
+        "Yogi Bear",
+        "Care Bear",
+        "Fozzie Bear",
+        "Teddy Ruxpin"
+      ],
+      "Explanation": "Teddy Ruxpin's eyes and mouth moved in sync with audio encoded on the cassette.",
+      "Id": "POP-119",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which video game character debuted in 1981 in arcade Donkey Kong under the initial name 'Jumpman'?",
+      "Options": [
+        "Luigi",
+        "Mega Man",
+        "Mario",
+        "Pac-Man"
+      ],
+      "Explanation": "Created by Shigeru Miyamoto, Jumpman was renamed Mario after Nintendo's warehouse landlord.",
+      "Id": "POP-120",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1990s soft drink by Coca-Cola featured extreme marketing and the tagline 'Kick in the Can'?",
+      "Options": [
+        "Jolt Cola",
+        "Surge",
+        "Citra",
+        "OK Soda"
+      ],
+      "Explanation": "Surge was launched in 1997 to compete directly with PepsiCo's Mountain Dew.",
+      "Id": "POP-121",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s toy line featured robotic action figures that converted from vehicles and appliances into robots?",
+      "Options": [
+        "Mighty Orbots",
+        "Robotech",
+        "GoBots",
+        "Transformers"
+      ],
+      "Explanation": "Hasbro released Transformers in 1984 with the tagline 'More Than Meets the Eye'.",
+      "Id": "POP-122",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What popular 1990s shoes featured flashing LED lights embedded in the heels that lit up when walking?",
+      "Options": [
+        "LA Gear Lights",
+        "Nike Air Max",
+        "Converse All-Stars",
+        "Reebok Pumps"
+      ],
+      "Explanation": "LA Gear introduced light-up sneakers in 1992, becoming an instant playground hit.",
+      "Id": "POP-123",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which fast food marketing campaign in the late 1990s featured a talking Chihuahua saying '¡Yo quiero Taco Bell!'?",
+      "Options": [
+        "Jack in the Box",
+        "Taco Bell",
+        "Del Taco",
+        "Burger King"
+      ],
+      "Explanation": "Gidget the Chihuahua became a pop culture phenomenon voiced by Carlos Alazraqui.",
+      "Id": "POP-124",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What was the name of the 1980s puzzle cube invented by a Hungarian architect that sold hundreds of millions of units?",
+      "Options": [
+        "Rubik's Cube",
+        "Pyraminx",
+        "Megaminx",
+        "Snake Puzzle"
+      ],
+      "Explanation": "Ernő Rubik invented the 3x3 twisty puzzle cube in 1974.",
+      "Id": "POP-125",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1990s television personality known as 'The Crocodile Hunter' made 'Crikey!' a household catchphrase?",
+      "Options": [
+        "Jack Hanna",
+        "Steve Irwin",
+        "Bear Grylls",
+        "Jeff Corwin"
+      ],
+      "Explanation": "Steve Irwin and his wife Terri hosted the wildlife documentary series worldwide.",
+      "Id": "POP-126",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1989 handheld Nintendo system packaged with 'Tetris' became the king of portable gaming?",
+      "Options": [
+        "Atari Lynx",
+        "Game Gear",
+        "Game Boy",
+        "Neo Geo Pocket"
+      ],
+      "Explanation": "Gunpei Yokoi designed the original monochrome Game Boy for Nintendo.",
+      "Id": "POP-127",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s workout video by an Oscar-winning actress sold over 17 million copies on VHS?",
+      "Options": [
+        "Richard Simmons: Sweatin' to the Oldies",
+        "Jane Fonda's Workout",
+        "Cindy Crawford: Shape Your Body",
+        "CherFitness"
+      ],
+      "Explanation": "Jane Fonda popularized aerobics and leg warmers across the 1980s.",
+      "Id": "POP-128",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1990s doll line featured miniature plastic pocket-sized compacts that opened into tiny doll houses?",
+      "Options": [
+        "Shopkins",
+        "Mighty Max",
+        "Littlest Pet Shop",
+        "Polly Pocket"
+      ],
+      "Explanation": "Chris Wiggs created Polly Pocket for his daughter using a powder compact.",
+      "Id": "POP-129",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1997 comedy film popularized the catchphrases 'Yeah, baby, yeah!' and 'Oh, behave!'?",
+      "Options": [
+        "Ace Ventura: Pet Detective",
+        "Wayne's World",
+        "Austin Powers: International Man of Mystery",
+        "The Mask"
+      ],
+      "Explanation": "Mike Myers created and starred as the flamboyant 1960s British secret agent.",
+      "Id": "POP-130",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1980s computer manufacturer used the catchy commercial slogan 'Where's the beef?' for Wendy's in 1984?",
+      "Options": [
+        "Clara Peller for Wendy's",
+        "Apple Computer",
+        "Commodore",
+        "IBM"
+      ],
+      "Explanation": "84-year-old Clara Peller shouting 'Where's the beef?' became one of advertising's most famous lines.",
+      "Id": "POP-131",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1990s collectible trading card game created by Richard Garfield featured Mana and Tap mechanics?",
+      "Options": [
+        "Yu-Gi-Oh!",
+        "Pokémon TCG",
+        "Vampire: The Eternal Struggle",
+        "Magic: The Gathering"
+      ],
+      "Explanation": "Wizards of the Coast released Magic: The Gathering in 1993, creating the TCG genre.",
+      "Id": "POP-132",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1980s Saturday morning cartoon featured small blue humanoids who lived in mushroom houses in the forest?",
+      "Options": [
+        "The Snorks",
+        "Care Bears",
+        "The Smurfs",
+        "Gummi Bears"
+      ],
+      "Explanation": "Belgian comic artist Peyo created The Smurfs (Les Schtroumpfs).",
+      "Id": "POP-133",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which basketball shoe introduced by Reebok in 1989 allowed players to inflate air cushions using a tongue button?",
+      "Options": [
+        "Converse Weapon",
+        "Reebok Pump",
+        "Nike Air Force 1",
+        "LA Gear Regulator"
+      ],
+      "Explanation": "Dee Brown famously pumped up his shoes before winning the 1991 NBA Slam Dunk Contest.",
+      "Id": "POP-134",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1990s animated movie soundtrack made 'Hakuna Matata' (meaning 'no worries') a global catchphrase?",
+      "Options": [
+        "Aladdin",
+        "Tarzan",
+        "The Lion King",
+        "Mulan"
+      ],
+      "Explanation": "Timon and Pumbaa sang the Swahili phrase composed by Elton John and Tim Rice.",
+      "Id": "POP-135",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s nighttime soap opera featured the infamous cliffhanger 'Who shot J.R.?' in 1980?",
+      "Options": [
+        "Dallas",
+        "Dynasty",
+        "Knots Landing",
+        "Falcon Crest"
+      ],
+      "Explanation": "350 million viewers worldwide tuned in to learn that Kristin Shepard shot J.R. Ewing.",
+      "Id": "POP-136",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1990s electronic desktop toy featured a dancing green alien and flower that danced to music vibrations?",
+      "Options": [
+        "Big Mouth Billy Bass",
+        "Rock 'n Flowers",
+        "Dancing Baby",
+        "Furby"
+      ],
+      "Explanation": "Takara's Rock 'n Flowers were a massive late 80s / early 90s novelty.",
+      "Id": "POP-137",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1996 movie starring Tom Cruise made the line 'Show me the money!' an iconic pop culture quote?",
+      "Options": [
+        "Jerry Maguire",
+        "Top Gun",
+        "Mission: Impossible",
+        "A Few Good Men"
+      ],
+      "Explanation": "Cuba Gooding Jr. won an Academy Award for Best Supporting Actor for his role as Rod Tidwell.",
+      "Id": "POP-138",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1980s candy consisted of colorful sugar powder packaged in a paper straw pouch with a candy dipping stick?",
+      "Options": [
+        "Pixy Stix",
+        "Fun Dip (Lik-M-Aid)",
+        "Ring Pop",
+        "Pop Rocks"
+      ],
+      "Explanation": "Fun Dip featured the white chalky candy dipping stick called the 'Lik-A-Stix'.",
+      "Id": "POP-139",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1990s animated MTV series created by Mike Judge featured two heavy metal slacker teenagers on a couch?",
+      "Options": [
+        "Celebrity Deathmatch",
+        "Daria",
+        "Beavis and Butt-Head",
+        "King of the Hill"
+      ],
+      "Explanation": "Beavis and Butt-Head critiqued real music videos and coined catchphrases like 'This rocks!' and 'This sucks!'.",
+      "Id": "POP-140",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What popular 1980s fashion accessory was a brightly colored fabric hair tie with an internal elastic band?",
+      "Options": [
+        "Banana clip",
+        "Scrunchie",
+        "Headband",
+        "Butterfly clip"
+      ],
+      "Explanation": "Rommy Revson patented the Scünci / Scrunchie in 1987.",
+      "Id": "POP-141",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1994 video game on the Super Nintendo was groundbreaking for its pre-rendered 3D silicon graphics and DK Island setting?",
+      "Options": [
+        "Donkey Kong Country",
+        "Super Mario World",
+        "Star Fox",
+        "Chrono Trigger"
+      ],
+      "Explanation": "Developed by British studio Rare, Donkey Kong Country was a massive holiday smash.",
+      "Id": "POP-142",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1990s novelty item was an animatronic latex fish mounted on a plaque that sang 'Take Me to the River'?",
+      "Options": [
+        "Big Mouth Billy Bass",
+        "Singing Trout",
+        "Boogie Bass",
+        "Chatty Catfish"
+      ],
+      "Explanation": "Created by Gemmy Industries in 1999, Billy Bass was a ubiquitous gift fad.",
+      "Id": "POP-143",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s neon footwear consisted of open-toed rubber jelly shoes?",
+      "Options": [
+        "Crocs",
+        "Uggs",
+        "Espadrilles",
+        "Jelly Shoes"
+      ],
+      "Explanation": "Jelly shoes made from PVC plastic were a signature 1980s summer footwear trend.",
+      "Id": "POP-144",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1990s dial-up internet service provider sent millions of free CD-ROM trials in the mail offering '1000 Hours Free'?",
+      "Options": [
+        "AOL (America Online)",
+        "Prodigy",
+        "CompuServe",
+        "EarthLink"
+      ],
+      "Explanation": "AOL's iconic voice prompt declared 'You've Got Mail!' when users connected.",
+      "Id": "POP-145",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s fantasy adventure movie featured the characters Atreyu, Bastian, and the luckdragon Falkor?",
+      "Options": [
+        "Labyrinth",
+        "The Dark Crystal",
+        "The NeverEnding Story",
+        "Legend"
+      ],
+      "Explanation": "Based on Michael Ende's novel, the film featured the theme song by Limahl.",
+      "Id": "POP-146",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1990s martial arts fighting game sparked moral panic and congressional hearings over its graphic 'Fatalities'?",
+      "Options": [
+        "Street Fighter II",
+        "Killer Instinct",
+        "Mortal Kombat",
+        "Tekken"
+      ],
+      "Explanation": "Midway released Mortal Kombat in arcades in 1992, prompting the creation of the ESRB rating system.",
+      "Id": "POP-147",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s candy was famous for carbon dioxide gas bubbles that popped and crackled on the tongue?",
+      "Options": [
+        "Atomic Fireballs",
+        "Nerds",
+        "Zotz",
+        "Pop Rocks"
+      ],
+      "Explanation": "General Foods chemist William A. Mitchell patented Pop Rocks.",
+      "Id": "POP-148",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1990s catchphrase was popularized by Steve Urkel on the sitcom 'Family Matters' after causing a disaster?",
+      "Options": [
+        "'You got it, dude!'",
+        "'How you doin'?'",
+        "'Did I do that?'",
+        "'Eat my shorts!'"
+      ],
+      "Explanation": "Jaleel White's portrayal of nerd Steve Urkel became the breakout star of Family Matters.",
+      "Id": "POP-149",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s action comedy movie featured the ghost-catching proton packs and the giant Stay Puft Marshmallow Man?",
+      "Options": [
+        "Gremlins",
+        "The Goonies",
+        "Ghostbusters",
+        "Beetlejuice"
+      ],
+      "Explanation": "Bill Murray, Dan Aykroyd, and Harold Ramis starred as the paranormal exterminators in NYC.",
+      "Id": "POP-150",
+      "Category": "80s & 90s Pop Culture",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    }
   ]
 }

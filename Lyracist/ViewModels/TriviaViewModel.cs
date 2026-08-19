@@ -1,4 +1,4 @@
-// Created on Aug 17, 2026 @ 15:48:30 -> Game Master ViewModel for Lyracist interactive Trivia host console
+// Edited on Aug 19, 2026 @ 11:15:30 -> Respect GameMaster DefaultQuestionSeconds over question JSON default
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -130,7 +130,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
                 OptionC = q.Options.Count > 2 ? q.Options[2] : "";
                 OptionD = q.Options.Count > 3 ? q.Options[3] : "";
                 CorrectAnswerIndex = -1; // Hidden until reveal
-                TotalSeconds = q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : Settings.DefaultQuestionSeconds;
+                TotalSeconds = Settings.DefaultQuestionSeconds > 0 ? Settings.DefaultQuestionSeconds : (q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : 15);
                 RemainingSeconds = TotalSeconds;
             });
         };

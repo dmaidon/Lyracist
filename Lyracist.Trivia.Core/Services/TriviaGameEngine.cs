@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 17:48:00 -> Deduct WrongAnswerDeductionPoints for incorrect answers in LockAndRevealAnswer
+// Edited on Aug 19, 2026 @ 11:15:30 -> Respect GameMaster DefaultQuestionSeconds over question JSON default
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -136,7 +136,7 @@ public class TriviaGameEngine : IDisposable
             EliminatedAnswerIndices.Clear();
             _pendingWrongIndices.Clear();
 
-            TotalCountdownSeconds = q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : Settings.DefaultQuestionSeconds;
+            TotalCountdownSeconds = Settings.DefaultQuestionSeconds > 0 ? Settings.DefaultQuestionSeconds : (q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : 15);
             RemainingSeconds = TotalCountdownSeconds;
 
             SetState(TriviaGameState.QuestionActive);

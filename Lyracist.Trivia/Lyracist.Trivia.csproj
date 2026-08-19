@@ -1,9 +1,10 @@
-<!-- Edited on Aug 19, 2026 @ 10:02:00 -> Include Shared\Globals.cs link -->
+<!-- Edited on Aug 19, 2026 @ 11:51:00 -> Include LyracistTrivia_logo.png official logo resource -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>LyracistTrivia</AssemblyName>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -14,9 +15,11 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
-    <AssemblyVersion>26.8.19.18</AssemblyVersion>
-    <FileVersion>26.8.19.18</FileVersion>
+    <AssemblyVersion>26.8.19.27</AssemblyVersion>
+    <FileVersion>26.8.19.27</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
+    <PackageIcon>LyracistTrivia_128.png</PackageIcon>
+    <ApplicationIcon>LyracistTrivia.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,9 +49,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="..\TriviaData\trivia_settings.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="LyracistTrivia.ico" />
+    <Resource Include="LyracistTrivia_128.png" />
+    <Resource Include="LyracistTrivia_logo.png" />
+    <None Include="LyracistTrivia_128.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

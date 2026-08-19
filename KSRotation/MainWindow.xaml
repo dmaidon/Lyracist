@@ -1,4 +1,4 @@
-<!-- Edited on Aug 18, 2026 @ 18:30:00 -> Prevent auto-focus on first textbox on tab load to keep border colors uniform -->
+<!-- Edited on Aug 19, 2026 @ 11:23:00 -> Update Trivia Night Pro help topic in KSRotation -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -2698,14 +2698,16 @@
                                 <TextBlock Text="Host interactive live pub and bar trivia games directly from KSRotation during intermissions or as a standalone entertainment module."
                                            FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="20" Foreground="{DynamicResource MaterialDesignBodyLight}" />
 
-                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,16">
                                     <StackPanel>
-                                        <TextBlock Text="🎮 Trivia Quick Start" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <TextBlock Text="1. Go to the Trivia tab, choose a category question pack, and click 'Start Game'." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                        <TextBlock Text="2. Patrons scan the Wi-Fi and Game Join QR codes on their smartphones to open their live buzzer." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                        <TextBlock Text="3. Questions run with 15-second answering windows and progressive 5-second wrong-option eliminations." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                        <TextBlock Text="4. Configure timers, scoring rules, bonuses, and Wi-Fi credentials in the 3-column 'Trivia Settings' tab." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                        <TextBlock Text="5. Automatic Pause: When DJ Banners or Rotation screens are cast, Trivia automatically freezes and resumes when closed." Margin="0,2" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="🎮 Trivia Quick Start &amp; Pre-Game Lobby" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="1. Category Selection: Choose from 14 starter curated categories (150 questions each / 2,100 total questions) or add unlimited custom JSON packs into TriviaData/packs/." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="2. 1-Click Lobby Launch: Click 'Launch Pre-Game Lobby' to project the 70:30 widescreen lobby featuring 16:9 Category Announcement Banners, countdown clock, and stacked Wi-Fi &amp; Join QR codes." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="3. Zero-Install Mobile Buzzers: Patrons scan the Join QR code (http://&lt;LAN-IP&gt;:8085/trivia) to register their name/team and receive an instant 4-button color buzzer with real-time answer elimination." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="4. Authoritative Timer Control: The 'Question Answer Window' in Trivia Settings (default: 15s) is authoritative. Changing this setting to 10s, 20s, 30s, etc., overrides the question default across all rounds." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="5. Scoring &amp; Penalties: 1,000 base points, +500 speed bonus, +10% streak multiplier, and optional wrong answer point deductions (0 to -500 pts)." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="6. Automatic Pause: When DJ Banners or Rotation screens are cast, Trivia automatically freezes and resumes when closed." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="7. Custom JSON Packs: Place any custom JSON file in TriviaData/packs/ (with PackId, Title, Category, Description, and Questions array with Prompt, 4 Options, and CorrectAnswerIndex) to auto-discover and load new categories." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

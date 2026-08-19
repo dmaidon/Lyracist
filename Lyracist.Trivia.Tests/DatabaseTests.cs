@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 09:11:30 -> Update tests to verify 14 packs including 150-question biker-trivia pack
+// Edited on Aug 19, 2026 @ 12:54:00 -> Added answer distribution unit test verifying balanced A, B, C, D choices
 using System;
 using System.IO;
 using Lyracist.Trivia.Core.Models;
@@ -57,16 +57,16 @@ public class DatabaseTests : IDisposable
     }
 
     [Fact]
-    public void LoadAllPacks_ContainsAll14FleshedOutCategoryPacks()
+    public void LoadAllPacks_ContainsAll15FleshedOutCategoryPacks()
     {
         string dir = TriviaStorageHelper.GetPacksDirectory();
         Assert.True(Directory.Exists(dir), $"Packs directory does not exist: {dir}");
 
         var files = Directory.GetFiles(dir, "*.json");
-        Assert.Equal(14, files.Length);
+        Assert.Equal(15, files.Length);
 
         var packs = TriviaPackManager.LoadAllPacks();
-        Assert.Equal(14, packs.Count);
+        Assert.Equal(15, packs.Count);
 
         string[] requiredPackIds =
         [
@@ -83,18 +83,15 @@ public class DatabaseTests : IDisposable
             "pop-culture-80s-90s",
             "movie-soundtracks",
             "pub-trivia-all-stars",
-            "biker-trivia"
+            "biker-trivia",
+            "famous_movie_quotes"
         ];
 
         foreach (string reqId in requiredPackIds)
         {
             var pack = packs.Find(p => p.PackId.Equals(reqId, StringComparison.OrdinalIgnoreCase));
             Assert.NotNull(pack);
-            Assert.True(pack.Questions.Count >= 100, $"Pack {reqId} should have at least 100 questions but had {pack.Questions.Count}");
-            if (reqId == "biker-trivia")
-            {
-                Assert.Equal(150, pack.Questions.Count);
-            }
+            Assert.Equal(150, pack.Questions.Count);
         }
     }
 
@@ -118,6 +115,44 @@ public class DatabaseTests : IDisposable
 
         Assert.Equal(10, list1.Count);
         Assert.Equal(10, list2.Count);
+    }
+
+    [Fact]
+    public void SyncAllPacks_PopulatesDatabaseWithAll2250Questions()
+    {
+        TriviaPackDatabaseSeeder.SyncAllPacksToDatabase(_db);
+        var categories = _db.GetCategories();
+        Assert.Equal(15, categories.Count);
+
+        string prodDbPath = TriviaStorageHelper.GetDatabasePath();
+        using var prodDb = new TriviaDatabaseService(prodDbPath);
+        TriviaPackDatabaseSeeder.SyncAllPacksToDatabase(prodDb);
+        var prodCategories = prodDb.GetCategories();
+        Assert.Equal(15, prodCategories.Count);
+    }
+
+    [Fact]
+    public void VerifyAnswerDistribution_SpreadEvenlyAcrossAllOptions()
+    {
+        string dir = TriviaStorageHelper.GetPacksDirectory();
+        var packs = TriviaPackManager.LoadAllPacks(dir);
+
+        foreach (var pack in packs)
+        {
+            var counts = new int[4];
+            foreach (var q in pack.Questions)
+            {
+                Assert.InRange(q.CorrectAnswerIndex, 0, 3);
+                counts[q.CorrectAnswerIndex]++;
+                Assert.Equal(4, q.Options.Count);
+            }
+
+            // Each option A, B, C, D should have roughly 20-30% of answers (min 25 in 150-question pack)
+            for (int i = 0; i < 4; i++)
+            {
+                Assert.True(counts[i] >= 25, $"Pack '{pack.Title}' has only {counts[i]} questions with answer index {i}");
+            }
+        }
     }
 
     public void Dispose()

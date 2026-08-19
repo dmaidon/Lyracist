@@ -1,5 +1,5 @@
-<!-- Edited on Aug 19, 2026 @ 10:04:30 -> Added Copyright notice to bottom of Trivia Display screen -->
-Last Edit: Aug 19, 2026 - Bottom Bar Copyright Notice & 70:30 Pre-Game Lobby
+<!-- Edited on Aug 19, 2026 @ 15:53:00 -> Added Famous Movie Lines & Sayings 15th pack with 150 questions (2,250 total questions) -->
+Last Edit: Aug 19, 2026 - Famous Movie Lines & Sayings 15th Category Added (2,250 Total Questions)
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -7,6 +7,45 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.19.0] - 2026-08-19
 
 ### Added
+- **New Category Pack: "Famous Lines & Sayings From Movies" (150 Questions)**:
+  - Created a dedicated 150-question database (`TriviaData/packs/famous_movie_quotes.json`) packed with iconic cinematic catchphrases, memorable movie quotes, AFI Top 100 quotes, and legendary film lines.
+  - Covers golden age classics (*Casablanca, Gone with the Wind, The Wizard of Oz, Citizen Kane, Sunset Boulevard*), blockbuster sci-fi (*Star Wars, The Godfather, Jaws, Terminator, Matrix, Alien, Blade Runner*), 80s/90s hits (*Top Gun, Dirty Harry, Die Hard, Forrest Gump, Pulp Fiction, Jerry Maguire, A Few Good Men, Silence of the Lambs, Goodfellas, Titanic, The Big Lebowski, Fight Club*), and hilarious comedies (*Airplane!, Monty Python, Ghostbusters, Caddyshack, Anchorman, Groundhog Day, The Princess Bride, Mean Girls, Ferris Bueller*).
+  - Evenly balanced option choices (~25% each for A, B, C, and D) and custom 16:9 Category Announcement Banner (`famous_movie_quotes.png`).
+  - Indexed and synchronized into SQLite database `TriviaData/trivia.db` (**15 categories, 2,250 total curated questions**).
+- **New `TriviaDbCreator` Project (Fluent UI / MVVM Question Pack Authoring Tool)**:
+  - Created a dedicated standalone desktop application (`TriviaDbCreator.exe`) for creating, authoring, and managing trivia category databases and question packs.
+  - Built with **CommunityToolkit.Mvvm** and **WPF-UI (Fluent Design / Dark Theme)**.
+  - **Left Sidebar**: Auto-discovers and navigates all category packs in `TriviaData/packs/`, with search filtering, question count badges, and New/Import actions.
+  - **Center Panel**: Pack metadata configuration (Title, ID slug, Category, Description) and interactive filterable Questions Table with difficulty and correct answer indicators.
+  - **Right Panel**: Real-time Question Editor with stylized option cards (▲ A Purple, ◆ B Cyan, ● C Amber, ■ D Rose), radio toggles to select the correct answer, difficulty dropdown, and explanation notes.
+  - **Option Balancing Tool**: 1-click option shuffler that redistributes correct answer positions evenly across options A, B, C, D (~25% each) across the entire pack while preserving correct answer strings.
+  - **16:9 Banner Studio**: 1-click automated high-resolution category banner generator into `TriviaData/Banners/{pack}.png`.
+  - **SQLite Database Sync**: 1-click direct database synchronization to `TriviaData/trivia.db`.
+  - **Comprehensive In-App Help & About Tabs**: Added a dedicated **`❓ Help & Instructions`** tab with an interactive 8-topic index covering Quick Start, Creating Databases, Question Authoring, 25% Option Balancing, 16:9 Banners, SQLite Sync, JSON Import/Export, and complete JSON Schema specification, as well as an **`ℹ️ About`** tab with official branding.
+- **Balanced Answer Option Distribution Across All 2,100 Questions**:
+  - Shuffled multiple-choice answer option positions across all 14 category databases so that correct answers are evenly distributed across all 4 choices (**A: ~25%, B: ~25%, C: ~25%, D: ~25%** / exactly 37-38 questions per option in every 150-question pack).
+  - Synchronized and verified all re-balanced questions into SQLite database `TriviaData/trivia.db`.
+  - Added automated unit test (`VerifyAnswerDistribution_SpreadEvenlyAcrossAllOptions`) asserting that every pack maintains balanced option distributions.
+- **Dedicated In-App Help & About Tabs in `LyracistTrivia`**:
+  - Added a **`❓ Help`** tab with a split-pane interactive index covering 8 detailed topics: Game Master Command Deck, 70:30 Pre-Game Lobby, Authoritative Timer Rules, Mobile Buzzer App, Players & Teams, Dynamic Databases & Auto-Discovery, Multi-Monitor Projection, and JSON Database Schema.
+  - Added an **`ℹ️ About`** tab featuring the official `LyracistTrivia_logo.png`, versioning (`v26.8.19.20`), company (`PAROLE Software`), author (`Dennis N. Maidon`), copyright, and system specifications.
+  - Updated in-app help systems in `Lyracist` and `KSRotation` with full trivia night operations, timer override rules, and JSON pack creation guides.
+- **Expanded All 14 Trivia Category Databases to 150 Questions (2,100 Total Curated Questions)**:
+  - Fleshed out every single trivia category database in `TriviaData/packs/` and synchronized to `trivia.db`, providing 150 curated, accurate questions per category:
+    1. `biker_trivia.json`: 150 questions (Harley-Davidson, Indian, European/Japanese classics, rallies, chopper lore).
+    2. `rock_and_roll.json`: 150 questions (Classic rock, progressive rock, metal, grunge, legendary guitarists, and iconic albums).
+    3. `country_music.json`: 150 questions (Outlaw country, 90s country classics, female country royalty, bluegrass, and Grand Ole Opry history).
+    4. `complete_the_lyric.json`: 150 questions (Singalong lyric completions across rock, pop, 80s/90s, and karaoke anthems).
+    5. `music_legends.json`: 150 questions (Motown, Soul, Jazz, Pop icons, Rock pioneers, and legendary songwriters).
+    6. `movie_soundtracks.json`: 150 questions (Oscar-winning theme songs, blockbuster movie anthems, musicals, and soundtrack trivia).
+    7. `pop_culture_80s_90s.json`: 150 questions (Fads, toys, retro video games, iconic commercials, fashion, and memorable decade moments).
+    8. `tv_shows.json`: 150 questions (Classic and modern sitcoms, primetime dramas, animated favorites, and catchphrases).
+    9. `logos_and_slogans.json`: 150 questions (Famous brand slogans, hidden logo symbols, automotive badges, and corporate emblems).
+    10. `geography.json`: 150 questions (World geography, natural landmarks, rivers, oceans, mountain peaks, and world wonders).
+    11. `state_capitals.json`: 150 questions (All 50 US state capitals, world capitals, territory seats, and historical capital trivia).
+    12. `history.json`: 150 questions (Ancient civilizations, world wars, American history, revolutions, discoveries, and famous rulers).
+    13. `sports.json`: 150 questions (Championships, Olympic feats, legends, records, rules, and classic sporting events).
+    14. `pub_general_knowledge.json`: 150 questions (Science, nature, literature, art, mathematics, and all-around pub trivia essentials).
 - **Unified 16:9 Pre-Game Lobby & Category Showcase Screen (`TriviaDisplayWindow`)**:
   - Re-architected the pre-game big screen into a unified, high-impact lobby layout combining all pre-game elements onto one screen:
     - **Left Hero Column (70% width)**: Displays the high-resolution 16:9 Category Announcement Banner (`TriviaData/Banners/{pack}.png`) at maximum size with ambient border glow, theme tagline, and dynamic cross-pack syncing whenever the host selects a new category dropdown.

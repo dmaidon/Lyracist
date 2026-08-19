@@ -3,7 +3,7 @@
   "VenueName": "Plan B",
   "HostName": "Dennis Maidon",
   "WifiSsid": "dmlink",
-  "WifiPassword": "",
+  "WifiPassword": "xanthic1",
   "PreGameCountdownMinutes": 5,
   "AutoStartAfterCountdown": true,
   "QuestionsPerGame": 10,

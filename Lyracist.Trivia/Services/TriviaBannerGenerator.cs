@@ -169,6 +169,16 @@ public static class TriviaBannerGenerator
             MediaColor.FromRgb(0x29, 0x25, 0x24),
             MediaColor.FromRgb(0xF5, 0x9E, 0x0B),
             MediaColor.FromRgb(0x10, 0xB9, 0x81)
+        ),
+        new(
+            "famous_movie_quotes.png",
+            "FAMOUS QUOTES FROM MOVIES",
+            "Iconic Catchphrases, Memorable Movie Quotes & Legendary Film Lines",
+            "🍿",
+            MediaColor.FromRgb(0x2E, 0x10, 0x65),
+            MediaColor.FromRgb(0x3B, 0x07, 0x64),
+            MediaColor.FromRgb(0xA8, 0x55, 0xF7),
+            MediaColor.FromRgb(0x38, 0xBD, 0xF8)
         )
     ];
 

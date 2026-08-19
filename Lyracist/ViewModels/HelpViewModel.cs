@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 11:22:00 -> Update help topics for Last Song banner priority and high-contrast QR codes
+// Edited on Aug 19, 2026 @ 11:47:00 -> Added Topic 18 Trivia JSON Database Schema & Pack Formatting
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -129,6 +129,27 @@ public partial class HelpViewModel : BaseViewModel
                 AccentColor = "#059669",
                 DescriptionHeader = "Scan-to-Connect Wi-Fi & Patron Request Portal Dual QR Code Banner",
                 DescriptionContent = "• Dual Scan-to-Connect QR Code Banner: Displays a full-screen or custom projected banner (`ConnectInstructions.png`) featuring two distinct QR codes: Wi-Fi Scan-to-Connect (WPA/WPA2/NoPass) and Song Request Portal URL.\n\n• QR Code Overlay on DJ Banner: Toggle 'Show request QR Code overlay on DJ Banner' in Settings to project the QR code directly onto active DJ Banners.\n\n• Target Monitor Selection: Select the target display screen/monitor using the 'Connect Instructions & QR Code Screen' dropdown in Column 4 of the Display tab.\n\n• High-Contrast Color Palette: High-contrast pure black on white QR codes with NearestNeighbor pixel scaling for maximum scanning readability across all tablet and phone camera sensors.\n\n• DJ Control QR Code Enlarged Popout: Clicking the DJ Control QR code opens a dedicated enlarged popout dialog with 280x280 QR display, large bold security PIN badge, and one-click URL & PIN copy.\n\n• Persistent Wi-Fi Password Store (`wifi_passwords.json`): Remembers Wi-Fi passwords entered for detected SSIDs (venue Wi-Fi, travel router, mobile hotspot)."
+            },
+            new() {
+                Title = "16. Lyracist Live Trivia (Interactive Pub & Bar Trivia)",
+                Icon = "BrainCircuit24",
+                AccentColor = "#38BDF8",
+                DescriptionHeader = "Real-Time Multi-Player Trivia with Mobile Buzzers & 70:30 Pre-Game Lobby",
+                DescriptionContent = "• Zero-Install Mobile Buzzers: Patrons connect to local Wi-Fi and open http://<LAN-IP>:8085/trivia on their smartphones to join with an instant 4-button color buzzer (A, B, C, D), real-time answer elimination, and haptic feedback.\n\n• 70:30 Pre-Game Lobby Showcase: 1-click launch projects a dual-purpose lobby screen featuring 16:9 high-resolution Category Announcement Banners (70% width) alongside a live countdown timer and stacked Wi-Fi & Join QR codes (30% width).\n\n• Dynamic Category Databases & Starter Library: Includes 14 starter curated categories (150 questions each / 2,100 questions total). Users can add unlimited custom category packs simply by placing new JSON files into `TriviaData/packs/` (auto-discovered on launch without code changes).\n\n• Auto-Advance & Live Visualizer: Automatic countdown timers, 5s wrong answer elimination, 5s answer reveals, and real-time response distribution graphs for the Game Master."
+            },
+            new() {
+                Title = "17. Trivia Settings, Timers & Scoring Rules",
+                Icon = "Clock24",
+                AccentColor = "#F59E0B",
+                DescriptionHeader = "Authoritative Timer Control, Scoring Bonuses & Intermission Automation",
+                DescriptionContent = "• Question Answer Window (Game Master Override): The 'Question Answer Window' in Trivia Settings (default: 15s) is authoritative. If the host sets it to 10s, 20s, 30s, etc., all questions count down with the host's configured duration, overriding the 15s default in the question JSON databases.\n\n• Dynamic Scoring & Speed Bonuses: Base score of 1,000 pts per correct answer, with up to +500 speed bonus for fast submissions, and a +10% streak multiplier for consecutive correct answers.\n\n• Wrong Answer Deduction Points: Optional penalty (0 to -500 pts) for incorrect submissions to discourage blind guessing.\n\n• Automated Intermissions & Rotations: Seamlessly runs automated 3-minute intermissions between games, and pauses with a 'DJ Banner Active' notice whenever full-screen DJ banners are projected."
+            },
+            new() {
+                Title = "18. Trivia JSON Database Schema & Custom Pack Guide",
+                Icon = "Code24",
+                AccentColor = "#10B981",
+                DescriptionHeader = "JSON Structure Reference for Building & Importing Custom Category Packs",
+                DescriptionContent = "• Custom Question Pack JSON File Schema:\nSave as UTF-8 `.json` files inside `TriviaData/packs/`:\n\n{\n  \"PackId\": \"unique-pack-id\",\n  \"Title\": \"Display Category Title\",\n  \"Category\": \"Category Name\",\n  \"Description\": \"Description of pack content.\",\n  \"Questions\": [\n    {\n      \"Id\": \"Q-001\",\n      \"Category\": \"Category Name\",\n      \"Difficulty\": \"Easy\",\n      \"QuestionType\": \"MultipleChoice\",\n      \"Prompt\": \"Question text here?\",\n      \"Options\": [ \"Choice A\", \"Choice B\", \"Choice C\", \"Choice D\" ],\n      \"CorrectAnswerIndex\": 0,\n      \"Explanation\": \"Explanation snippet for answer reveal.\",\n      \"TimeLimitSeconds\": 15\n    }\n  ]\n}\n\n• Custom Banners: Place a matching image file (e.g. `unique-pack-id.png` or `.jpg`) in `TriviaData/Banners/` for 16:9 lobby projection.\n• Auto-Discovery: All files in `TriviaData/packs/` load automatically on startup and sync to SQLite `trivia.db`."
             }
         ];
 

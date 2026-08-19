@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 09:48:00 -> Guarded TriviaDisplayWindow and TriviaDisplayViewModel with #if !MAUI for MAUI cross-platform build
+// Edited on Aug 19, 2026 @ 11:15:30 -> Respect GameMaster TriviaSettings.DefaultQuestionSeconds over question JSON default
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -200,7 +200,7 @@ namespace KSRotation.ViewModels
                     TriviaOptionC = q.Options.Count > 2 ? q.Options[2] : "";
                     TriviaOptionD = q.Options.Count > 3 ? q.Options[3] : "";
                     TriviaCorrectAnswerIndex = -1;
-                    TriviaTotalSeconds = q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : TriviaSettings.DefaultQuestionSeconds;
+                    TriviaTotalSeconds = TriviaSettings.DefaultQuestionSeconds > 0 ? TriviaSettings.DefaultQuestionSeconds : (q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : 15);
                     TriviaRemainingSeconds = TriviaTotalSeconds;
                 });
             };

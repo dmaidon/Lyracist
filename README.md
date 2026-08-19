@@ -1,12 +1,20 @@
-<!-- Edited on Aug 19, 2026 @ 10:07:00 -> Update README.md with 70:30 Pre-Game Lobby, Category Banners, and Biker Trivia -->
-Last Edit: Aug 19, 2026 - 70:30 Pre-Game Lobby, Category Banners & Biker Trivia
+<!-- Edited on Aug 19, 2026 @ 15:16:00 -> Added TriviaDbCreator application details -->
+Last Edit: Aug 19, 2026 - TriviaDbCreator Project Added
 # Lyracist Pro
 
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, and integrated interactive pub/bar trivia with dedicated separate settings, multi-monitor auto-casting, and automated projection pause synchronization.
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, integrated interactive pub/bar trivia with dedicated separate settings, multi-monitor auto-casting, automated projection pause synchronization, and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
 
 ---
 
 ## Key Features
+
+### 🛠️ Trivia Database Creator & Pack Studio (`TriviaDbCreator.exe`)
+- **Visual Category & Question Authoring**: Standalone WPF MVVM desktop app using Fluent UI (`WPF-UI`) for creating, editing, and expanding trivia question databases.
+- **Left Sidebar Pack Explorer**: Auto-discovers and navigates all JSON question packs in `TriviaData/packs/` with search filtering and question count indicators.
+- **Interactive Question Editor**: Real-time editor with colored option cards (▲ Purple, ◆ Cyan, ● Amber, ■ Rose), correct answer radio toggles, difficulty dropdown, and explanation notes.
+- **1-Click Option Balancing**: Automatically shuffles option positions across all questions in a pack to guarantee an even ~25% distribution across choices A, B, C, and D.
+- **16:9 Banner Studio**: Generates high-resolution 16:9 Category Announcement Banners (`TriviaData/Banners/{pack}.png`) with one click.
+- **Direct SQLite Seeding**: 1-click database synchronization updating `TriviaData/trivia.db`.
 
 ### 🎤 Singer Rotation & Queue Management (`Lyracist`, `KSRotation`, `KSRotation.Maui`)
 - **Float Current Singer to Top Option**:
@@ -18,6 +26,24 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Any singer can be designated as the 1st singer anchor via the `"Set as 1st Singer (Round Start)"` context action or `🚩` button.
 
 ### 🎯 Lyracist Live Trivia (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`)
+- **15 Category Starter Databases (2,250 Questions) with Balanced Option Distribution**:
+  - Every single category database contains 150 curated, accurate questions with explanations, and multiple-choice answers evenly distributed across all 4 options (**~25% A, ~25% B, ~25% C, ~25% D**).
+  - Dynamic Auto-Discovery: Users can create and drop unlimited custom JSON question packs into `TriviaData/packs/` with automatic database seeding on startup:
+    1. **Famous Lines & Sayings From Movies** (`famous_movie_quotes.json`) - 150 questions
+    2. **Bikers & Motorcycles** (`biker_trivia.json`) - 150 questions
+    3. **Rock & Roll** (`rock_and_roll.json`) - 150 questions
+    4. **Country Music** (`country_music.json`) - 150 questions
+    5. **Complete the Lyric** (`complete_the_lyric.json`) - 150 questions
+    6. **Music Legends** (`music_legends.json`) - 150 questions
+    7. **Blockbuster Movie Soundtracks** (`movie_soundtracks.json`) - 150 questions
+    8. **80s & 90s Pop Culture** (`pop_culture_80s_90s.json`) - 150 questions
+    9. **TV Shows** (`tv_shows.json`) - 150 questions
+    10. **Logos & Slogans** (`logos_and_slogans.json`) - 150 questions
+    11. **World Geography** (`geography.json`) - 150 questions
+    12. **State & World Capitals** (`state_capitals.json`) - 150 questions
+    13. **World History** (`history.json`) - 150 questions
+    14. **Sports & Athletes** (`sports.json`) - 150 questions
+    15. **Pub Trivia All-Stars** (`pub_general_knowledge.json`) - 150 questions
 - **Unified 70:30 Pre-Game Lobby & Category Showcase (`TriviaDisplayWindow`)**:
   - **70% Left Hero Column**: High-resolution 16:9 Category Announcement Banner (`TriviaData/Banners/{pack}.png`) with ambient illuminated border, tonight's category theme title, and topic subtitle. Dynamic cross-pack syncing automatically updates the big screen whenever the Game Master selects a category from the dropdown.
   - **30% Right Onboarding Stack**:
@@ -30,8 +56,6 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - A single primary action button in the Game Master console that opens/focuses the big screen, locks the category banner, starts the pre-game countdown, and activates the lobby with one click. Accompanied by `"▶ Start Game Now (Skip Countdown)"` for instant kickoff.
 - **16:9 Category Announcement Banners (`TriviaData/Banners/`)**:
   - Clean 1920x1080 (16:9) graphic banners generated for all 14 categories, focusing on category branding and theme callouts without hardcoded question counts or timers so banners stay accurate regardless of host configuration.
-- **150-Question Bikers & Motorcycles Trivia Database (`biker_trivia.json`)**:
-  - Comprehensive, curated 150-question category covering Harley-Davidson engines and heritage, Indian Motorcycle history, British/European/Japanese classics, and legendary rallies (Sturgis, Daytona, Laconia, Tail of the Dragon).
 - **Automated `TriviaData` Build Output Copying**:
   - Configured `TriviaData\**\*` with `CopyToOutputDirectory=PreserveNewest` across all projects, ensuring category packs, announcement banners, databases, and configuration automatically copy to build outputs.
 - **Accurate Multi-Monitor Projection**: Select any connected monitor (TV, secondary HDMI, projector) from the host console and cast seamlessly with physical resolution DPI awareness without forcing to Monitor 0.

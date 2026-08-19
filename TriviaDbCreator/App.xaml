@@ -1,0 +1,21 @@
+<!-- Created on Aug 19, 2026 @ 15:10:00 -> TriviaDbCreator application resources with Fluent UI Dark theme -->
+<Application x:Class="TriviaDbCreator.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:local="clr-namespace:TriviaDbCreator"
+             StartupUri="Windows/MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemesDictionary Theme="Dark" />
+                <ui:ControlsDictionary />
+            </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="OptionABrush" Color="#8B5CF6" />
+            <SolidColorBrush x:Key="OptionBBrush" Color="#06B6D4" />
+            <SolidColorBrush x:Key="OptionCBrush" Color="#F59E0B" />
+            <SolidColorBrush x:Key="OptionDBrush" Color="#F43F5E" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

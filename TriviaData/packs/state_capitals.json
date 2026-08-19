@@ -2,107 +2,2407 @@
   "PackId": "state-capitals",
   "Title": "U.S. State & World Capitals",
   "Category": "State Capitals",
-  "Description": "100 capital city questions covering all 50 U.S. states, state nicknames, territorial capitals, and major world capitals.",
+  "Description": "150 curated questions covering State Capitals.",
   "Questions": [
-    {"Id":"SC-001","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Texas?","Options":["Austin","Houston","Dallas","San Antonio"],"CorrectAnswerIndex":0,"Explanation":"Austin has been the capital of Texas since 1839.","TimeLimitSeconds":15},
-    {"Id":"SC-002","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of California?","Options":["Sacramento","Los Angeles","San Francisco","San Diego"],"CorrectAnswerIndex":0,"Explanation":"Sacramento became the permanent capital of California in 1854.","TimeLimitSeconds":15},
-    {"Id":"SC-003","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of New York?","Options":["Albany","New York City","Buffalo","Rochester"],"CorrectAnswerIndex":0,"Explanation":"Albany has served as the capital of New York State since 1797.","TimeLimitSeconds":15},
-    {"Id":"SC-004","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Florida?","Options":["Tallahassee","Miami","Orlando","Tampa"],"CorrectAnswerIndex":0,"Explanation":"Tallahassee was selected as the territory's capital in 1824 midway between Pensacola and St. Augustine.","TimeLimitSeconds":15},
-    {"Id":"SC-005","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Illinois?","Options":["Springfield","Chicago","Peoria","Rockford"],"CorrectAnswerIndex":0,"Explanation":"Springfield is famous as the home and resting place of Abraham Lincoln.","TimeLimitSeconds":15},
-    {"Id":"SC-006","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Georgia?","Options":["Atlanta","Savannah","Augusta","Macon"],"CorrectAnswerIndex":0,"Explanation":"Atlanta has been Georgia's capital since 1868.","TimeLimitSeconds":15},
-    {"Id":"SC-007","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Washington State?","Options":["Olympia","Seattle","Spokane","Tacoma"],"CorrectAnswerIndex":0,"Explanation":"Olympia is located at the southern end of Puget Sound.","TimeLimitSeconds":15},
-    {"Id":"SC-008","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Massachusetts?","Options":["Boston","Worcester","Cambridge","Salem"],"CorrectAnswerIndex":0,"Explanation":"Boston is one of the oldest municipalities in the United States, founded in 1630.","TimeLimitSeconds":15},
-    {"Id":"SC-009","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Pennsylvania?","Options":["Harrisburg","Philadelphia","Pittsburgh","Allentown"],"CorrectAnswerIndex":0,"Explanation":"Harrisburg on the Susquehanna River became the capital in 1812.","TimeLimitSeconds":15},
-    {"Id":"SC-010","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Colorado?","Options":["Denver","Colorado Springs","Boulder","Aurora"],"CorrectAnswerIndex":0,"Explanation":"Denver is known as the 'Mile High City' at exactly 5,280 feet above sea level.","TimeLimitSeconds":15},
-    {"Id":"SC-011","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Hawaii?","Options":["Honolulu","Hilo","Kailua","Kahului"],"CorrectAnswerIndex":0,"Explanation":"Honolulu is located on the island of Oahu and was the capital of the Hawaiian Kingdom.","TimeLimitSeconds":15},
-    {"Id":"SC-012","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Arizona?","Options":["Phoenix","Tucson","Mesa","Scottsdale"],"CorrectAnswerIndex":0,"Explanation":"Phoenix is the most populous state capital in the United States.","TimeLimitSeconds":15},
-    {"Id":"SC-013","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Ohio?","Options":["Columbus","Cleveland","Cincinnati","Toledo"],"CorrectAnswerIndex":0,"Explanation":"Columbus was founded in 1812 specifically to serve as the state capital.","TimeLimitSeconds":15},
-    {"Id":"SC-014","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Michigan?","Options":["Lansing","Detroit","Grand Rapids","Ann Arbor"],"CorrectAnswerIndex":0,"Explanation":"Lansing was chosen in 1847 to move the capital safely away from British-controlled Canada.","TimeLimitSeconds":15},
-    {"Id":"SC-015","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of North Carolina?","Options":["Raleigh","Charlotte","Greensboro","Durham"],"CorrectAnswerIndex":0,"Explanation":"Raleigh was planned and established as the state capital in 1792.","TimeLimitSeconds":15},
-    {"Id":"SC-016","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Tennessee?","Options":["Nashville","Memphis","Knoxville","Chattanooga"],"CorrectAnswerIndex":0,"Explanation":"Nashville became the permanent capital of Tennessee in 1843.","TimeLimitSeconds":15},
-    {"Id":"SC-017","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Virginia?","Options":["Richmond","Virginia Beach","Norfolk","Alexandria"],"CorrectAnswerIndex":0,"Explanation":"Richmond replaced Williamsburg as the capital of Virginia in 1780.","TimeLimitSeconds":15},
-    {"Id":"SC-018","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Indiana?","Options":["Indianapolis","Fort Wayne","Evansville","South Bend"],"CorrectAnswerIndex":0,"Explanation":"Indianapolis was planned in the center of the state in 1821.","TimeLimitSeconds":15},
-    {"Id":"SC-019","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Missouri?","Options":["Jefferson City","Kansas City","St. Louis","Springfield"],"CorrectAnswerIndex":0,"Explanation":"Jefferson City on the Missouri River was named after Thomas Jefferson.","TimeLimitSeconds":15},
-    {"Id":"SC-020","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Wisconsin?","Options":["Madison","Milwaukee","Green Bay","Kenosha"],"CorrectAnswerIndex":0,"Explanation":"Madison was chosen as capital in 1836, named for James Madison.","TimeLimitSeconds":15},
-    {"Id":"SC-021","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Alaska, accessible only by boat or plane?","Options":["Juneau","Anchorage","Fairbanks","Sitka"],"CorrectAnswerIndex":0,"Explanation":"Juneau has no road connections to the rest of Alaska or North America.","TimeLimitSeconds":15},
-    {"Id":"SC-022","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Kentucky?","Options":["Frankfort","Louisville","Lexington","Bowling Green"],"CorrectAnswerIndex":0,"Explanation":"Frankfort is one of the smallest state capitals in the US.","TimeLimitSeconds":15},
-    {"Id":"SC-023","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Louisiana?","Options":["Baton Rouge","New Orleans","Shreveport","Lafayette"],"CorrectAnswerIndex":0,"Explanation":"Baton Rouge is home to the tallest state capitol building in the United States (450 ft).","TimeLimitSeconds":15},
-    {"Id":"SC-024","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Maryland?","Options":["Annapolis","Baltimore","Frederick","Rockville"],"CorrectAnswerIndex":0,"Explanation":"Annapolis was briefly the capital of the United States in 1783-1784.","TimeLimitSeconds":15},
-    {"Id":"SC-025","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Minnesota?","Options":["Saint Paul","Minneapolis","Duluth","Rochester"],"CorrectAnswerIndex":0,"Explanation":"Saint Paul forms the 'Twin Cities' alongside Minneapolis.","TimeLimitSeconds":15},
-    {"Id":"SC-026","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Nevada?","Options":["Carson City","Las Vegas","Reno","Henderson"],"CorrectAnswerIndex":0,"Explanation":"Carson City was named after mountain man Kit Carson.","TimeLimitSeconds":15},
-    {"Id":"SC-027","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of New Jersey?","Options":["Trenton","Newark","Jersey City","Princeton"],"CorrectAnswerIndex":0,"Explanation":"Trenton was the site of George Washington's famous surprise crossing of the Delaware.","TimeLimitSeconds":15},
-    {"Id":"SC-028","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of New Mexico?","Options":["Santa Fe","Albuquerque","Las Cruces","Roswell"],"CorrectAnswerIndex":0,"Explanation":"Santa Fe is the oldest state capital in the United States, founded in 1610.","TimeLimitSeconds":15},
-    {"Id":"SC-029","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Oregon?","Options":["Salem","Portland","Eugene","Bend"],"CorrectAnswerIndex":0,"Explanation":"Salem is located in the Willamette Valley south of Portland.","TimeLimitSeconds":15},
-    {"Id":"SC-030","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of South Carolina?","Options":["Columbia","Charleston","Greenville","Myrtle Beach"],"CorrectAnswerIndex":0,"Explanation":"Columbia was planned as one of the first planned cities in the US in 1786.","TimeLimitSeconds":15},
-    {"Id":"SC-031","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Utah?","Options":["Salt Lake City","Provo","West Valley City","Ogdene"],"CorrectAnswerIndex":0,"Explanation":"Salt Lake City was founded in 1847 by Brigham Young and early pioneers.","TimeLimitSeconds":15},
-    {"Id":"SC-032","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Alabama?","Options":["Montgomery","Birmingham","Mobile","Huntsville"],"CorrectAnswerIndex":0,"Explanation":"Montgomery was the birthplace of the Civil Rights movement with the bus boycott.","TimeLimitSeconds":15},
-    {"Id":"SC-033","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Arkansas?","Options":["Little Rock","Fayetteville","Fort Smith","Hot Springs"],"CorrectAnswerIndex":0,"Explanation":"Little Rock is situated on the south bank of the Arkansas River.","TimeLimitSeconds":15},
-    {"Id":"SC-034","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Connecticut?","Options":["Hartford","New Haven","Bridgeport","Stamford"],"CorrectAnswerIndex":0,"Explanation":"Hartford is known as the 'Insurance Capital of the World'.","TimeLimitSeconds":15},
-    {"Id":"SC-035","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Delaware?","Options":["Dover","Wilmington","Newark","Rehoboth Beach"],"CorrectAnswerIndex":0,"Explanation":"Dover was named by William Penn for Dover in Kent, England.","TimeLimitSeconds":15},
-    {"Id":"SC-036","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Idaho?","Options":["Boise","Meridian","Nampa","Idaho Falls"],"CorrectAnswerIndex":0,"Explanation":"Boise is the largest city in Idaho, nicknamed the 'City of Trees'.","TimeLimitSeconds":15},
-    {"Id":"SC-037","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Iowa?","Options":["Des Moines","Cedar Rapids","Davenport","Sioux City"],"CorrectAnswerIndex":0,"Explanation":"Des Moines is derived from the French name for the Des Moines River.","TimeLimitSeconds":15},
-    {"Id":"SC-038","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Kansas?","Options":["Topeka","Wichita","Overland Park","Kansas City"],"CorrectAnswerIndex":0,"Explanation":"Topeka was chosen as capital when Kansas entered the Union in 1861.","TimeLimitSeconds":15},
-    {"Id":"SC-039","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Maine?","Options":["Augusta","Portland","Bangor","Lewiston"],"CorrectAnswerIndex":0,"Explanation":"Augusta is the easternmost state capital in the United States.","TimeLimitSeconds":15},
-    {"Id":"SC-040","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Mississippi?","Options":["Jackson","Gulfport","Biloxi","Hattiesburg"],"CorrectAnswerIndex":0,"Explanation":"Jackson was named in honor of General Andrew Jackson.","TimeLimitSeconds":15},
-    {"Id":"SC-041","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Montana?","Options":["Helena","Billings","Missoula","Bozeman"],"CorrectAnswerIndex":0,"Explanation":"Helena was established as a gold boomtown during the 1864 gold rush.","TimeLimitSeconds":15},
-    {"Id":"SC-042","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Nebraska?","Options":["Lincoln","Omaha","Grand Island","Kearney"],"CorrectAnswerIndex":0,"Explanation":"Lincoln was originally named Lancaster and renamed in honor of Abraham Lincoln.","TimeLimitSeconds":15},
-    {"Id":"SC-043","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of New Hampshire?","Options":["Concord","Manchester","Nashua","Portsmouth"],"CorrectAnswerIndex":0,"Explanation":"Concord has served as New Hampshire's capital since 1808.","TimeLimitSeconds":15},
-    {"Id":"SC-044","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of North Dakota?","Options":["Bismarck","Fargo","Grand Forks","Minot"],"CorrectAnswerIndex":0,"Explanation":"Bismarck was named in honor of German Chancellor Otto von Bismarck to attract German settlers.","TimeLimitSeconds":15},
-    {"Id":"SC-045","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Oklahoma?","Options":["Oklahoma City","Tulsa","Norman","Broken Arrow"],"CorrectAnswerIndex":0,"Explanation":"Oklahoma City was founded during the Land Run of April 22, 1889.","TimeLimitSeconds":15},
-    {"Id":"SC-046","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Rhode Island?","Options":["Providence","Warwick","Cranston","Newport"],"CorrectAnswerIndex":0,"Explanation":"Providence was founded in 1636 by Roger Williams as a refuge for religious freedom.","TimeLimitSeconds":15},
-    {"Id":"SC-047","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of South Dakota?","Options":["Pierre","Sioux Falls","Rapid City","Aberdeen"],"CorrectAnswerIndex":0,"Explanation":"Pierre (pronounced 'peer') sits on the east bank of the Missouri River.","TimeLimitSeconds":15},
-    {"Id":"SC-048","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Vermont?","Options":["Montpelier","Burlington","Rutland","South Burlington"],"CorrectAnswerIndex":0,"Explanation":"Montpelier is the least populous state capital in the United States (approx. 8,000 residents).","TimeLimitSeconds":15},
-    {"Id":"SC-049","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of West Virginia?","Options":["Charleston","Huntington","Morgantown","Parkersburg"],"CorrectAnswerIndex":0,"Explanation":"Charleston is located at the confluence of the Elk and Kanawha rivers.","TimeLimitSeconds":15},
-    {"Id":"SC-050","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Wyoming?","Options":["Cheyenne","Casper","Laramie","Gillette"],"CorrectAnswerIndex":0,"Explanation":"Cheyenne was founded in 1867 along the Union Pacific Railroad.","TimeLimitSeconds":15},
-    {"Id":"SC-051","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of the United States?","Options":["Washington, D.C.","New York City","Philadelphia","Baltimore"],"CorrectAnswerIndex":0,"Explanation":"Washington, D.C. was established by the US Constitution as the federal district in 1790.","TimeLimitSeconds":15},
-    {"Id":"SC-052","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Canada?","Options":["Ottawa","Toronto","Montreal","Vancouver"],"CorrectAnswerIndex":0,"Explanation":"Ottawa is located in the province of Ontario on the border with Quebec.","TimeLimitSeconds":15},
-    {"Id":"SC-053","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Mexico?","Options":["Mexico City","Guadalajara","Monterrey","Puebla"],"CorrectAnswerIndex":0,"Explanation":"Mexico City is the most populous city in North America.","TimeLimitSeconds":15},
-    {"Id":"SC-054","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Japan?","Options":["Tokyo","Kyoto","Osaka","Yokohama"],"CorrectAnswerIndex":0,"Explanation":"Tokyo became the capital of Japan in 1868 when Emperor Meiji moved the court from Kyoto.","TimeLimitSeconds":15},
-    {"Id":"SC-055","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Spain?","Options":["Madrid","Barcelona","Seville","Valencia"],"CorrectAnswerIndex":0,"Explanation":"King Philip II declared Madrid the capital of Spain in 1561.","TimeLimitSeconds":15},
-    {"Id":"SC-056","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of France?","Options":["Paris","Lyon","Marseille","Bordeaux"],"CorrectAnswerIndex":0,"Explanation":"Paris is the historic and economic capital of France.","TimeLimitSeconds":15},
-    {"Id":"SC-057","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Germany?","Options":["Berlin","Munich","Frankfurt","Hamburg"],"CorrectAnswerIndex":0,"Explanation":"Berlin was restored as the capital of reunified Germany in 1990.","TimeLimitSeconds":15},
-    {"Id":"SC-058","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Italy?","Options":["Rome","Milan","Florence","Venice"],"CorrectAnswerIndex":0,"Explanation":"Rome became the capital of unified Italy in 1871.","TimeLimitSeconds":15},
-    {"Id":"SC-059","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of the United Kingdom?","Options":["London","Manchester","Birmingham","Edinburgh"],"CorrectAnswerIndex":0,"Explanation":"London has been the capital of England and the UK for centuries.","TimeLimitSeconds":15},
-    {"Id":"SC-060","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Australia?","Options":["Canberra","Sydney","Melbourne","Brisbane"],"CorrectAnswerIndex":0,"Explanation":"Canberra was chosen as the compromise capital between Sydney and Melbourne.","TimeLimitSeconds":15},
-    {"Id":"SC-061","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Puerto Rico?","Options":["San Juan","Ponce","Bayamon","Carolina"],"CorrectAnswerIndex":0,"Explanation":"San Juan was founded by Spanish colonists in 1521.","TimeLimitSeconds":15},
-    {"Id":"SC-062","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Guam?","Options":["Hagåtña","Dededo","Tamuning","Yigo"],"CorrectAnswerIndex":0,"Explanation":"Hagåtña is the seat of government of the US territory of Guam.","TimeLimitSeconds":15},
-    {"Id":"SC-063","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of the U.S. Virgin Islands?","Options":["Charlotte Amalie","Christiansted","Frederiksted","Cruz Bay"],"CorrectAnswerIndex":0,"Explanation":"Charlotte Amalie is located on the island of Saint Thomas.","TimeLimitSeconds":15},
-    {"Id":"SC-064","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of American Samoa?","Options":["Pago Pago","Tafuna","Nu'uuli","Fagatogo"],"CorrectAnswerIndex":0,"Explanation":"Pago Pago is located on the island of Tutuila.","TimeLimitSeconds":15},
-    {"Id":"SC-065","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Russia?","Options":["Moscow","Saint Petersburg","Novosibirsk","Yekaterinburg"],"CorrectAnswerIndex":0,"Explanation":"Moscow is the largest city on the European continent.","TimeLimitSeconds":15},
-    {"Id":"SC-066","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of China?","Options":["Beijing","Shanghai","Guangzhou","Shenzhen"],"CorrectAnswerIndex":0,"Explanation":"Beijing serves as the political center of China.","TimeLimitSeconds":15},
-    {"Id":"SC-067","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of India?","Options":["New Delhi","Mumbai","Bangalore","Kolkata"],"CorrectAnswerIndex":0,"Explanation":"New Delhi was designed by British architects Edwin Lutyens and Herbert Baker.","TimeLimitSeconds":15},
-    {"Id":"SC-068","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of South Korea?","Options":["Seoul","Busan","Incheon","Daegu"],"CorrectAnswerIndex":0,"Explanation":"Seoul has been the historic capital of Korea since 1394.","TimeLimitSeconds":15},
-    {"Id":"SC-069","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Brazil?","Options":["Brasília","Rio de Janeiro","São Paulo","Salvador"],"CorrectAnswerIndex":0,"Explanation":"Brasília is an entirely planned federal capital inaugurated in 1960.","TimeLimitSeconds":15},
-    {"Id":"SC-070","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Argentina?","Options":["Buenos Aires","Cordoba","Rosario","La Plata"],"CorrectAnswerIndex":0,"Explanation":"Buenos Aires is an autonomous federal city on the Rio de la Plata.","TimeLimitSeconds":15},
-    {"Id":"SC-071","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which state capital's name translates to 'A place to dig wild potatoes' in the Kansa language?","Options":["Topeka, Kansas","Pierre, South Dakota","Boise, Idaho","Bismarck, North Dakota"],"CorrectAnswerIndex":0,"Explanation":"Topeka is derived from a Kaw/Kansa Indian word meaning 'good place to dig potatoes'.","TimeLimitSeconds":15},
-    {"Id":"SC-072","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the only U.S. state capital that shares its name with the state itself?","Options":["Oklahoma City, Oklahoma","Indianapolis, Indiana","Iowa City, Iowa","New York City, New York"],"CorrectAnswerIndex":0,"Explanation":"Oklahoma City is the only US state capital to have the exact state name in its name.","TimeLimitSeconds":15},
-    {"Id":"SC-073","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which U.S. state capital has the highest elevation at 7,199 feet above sea level?","Options":["Santa Fe, New Mexico","Denver, Colorado","Cheyenne, Wyoming","Carson City, Nevada"],"CorrectAnswerIndex":0,"Explanation":"Santa Fe is the highest altitude state capital in the United States.","TimeLimitSeconds":15},
-    {"Id":"SC-074","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the only U.S. state capital with a population under 10,000 residents?","Options":["Montpelier, Vermont","Pierre, South Dakota","Augusta, Maine","Frankfort, Kentucky"],"CorrectAnswerIndex":0,"Explanation":"Montpelier has approximately 8,000 residents.","TimeLimitSeconds":15},
-    {"Id":"SC-075","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Egypt?","Options":["Cairo","Alexandria","Giza","Luxor"],"CorrectAnswerIndex":0,"Explanation":"Cairo sits on the Nile Delta and has been Egypt's capital for over a millennium.","TimeLimitSeconds":15},
-    {"Id":"SC-076","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Saudi Arabia?","Options":["Riyadh","Jeddah","Mecca","Medina"],"CorrectAnswerIndex":0,"Explanation":"Riyadh is the political capital and largest city in Saudi Arabia.","TimeLimitSeconds":15},
-    {"Id":"SC-077","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Turkey?","Options":["Ankara","Istanbul","Izmir","Bursa"],"CorrectAnswerIndex":0,"Explanation":"Ankara was chosen by Mustafa Kemal Atatürk in 1923.","TimeLimitSeconds":15},
-    {"Id":"SC-078","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of New Zealand?","Options":["Wellington","Auckland","Christchurch","Queenstown"],"CorrectAnswerIndex":0,"Explanation":"Wellington replaced Auckland as the capital in 1865.","TimeLimitSeconds":15},
-    {"Id":"SC-079","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Norway?","Options":["Oslo","Bergen","Trondheim","Stavanger"],"CorrectAnswerIndex":0,"Explanation":"Oslo sits at the northern end of the Oslofjord.","TimeLimitSeconds":15},
-    {"Id":"SC-080","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Sweden?","Options":["Stockholm","Gothenburg","Malmo","Uppsala"],"CorrectAnswerIndex":0,"Explanation":"Stockholm is spread across 14 islands on Lake Mälaren.","TimeLimitSeconds":15},
-    {"Id":"SC-081","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Ireland?","Options":["Dublin","Cork","Galway","Limerick"],"CorrectAnswerIndex":0,"Explanation":"Dublin is located on Dublin Bay at the mouth of the River Liffey.","TimeLimitSeconds":15},
-    {"Id":"SC-082","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Scotland?","Options":["Edinburgh","Glasgow","Aberdeen","Dundee"],"CorrectAnswerIndex":0,"Explanation":"Edinburgh has been the capital of Scotland since at least the 15th century.","TimeLimitSeconds":15},
-    {"Id":"SC-083","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Poland?","Options":["Warsaw","Krakow","Gdansk","Wroclaw"],"CorrectAnswerIndex":0,"Explanation":"Warsaw is situated on the Vistula River.","TimeLimitSeconds":15},
-    {"Id":"SC-084","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Portugal?","Options":["Lisbon","Porto","Faro","Braga"],"CorrectAnswerIndex":0,"Explanation":"Lisbon is one of the oldest cities in Western Europe.","TimeLimitSeconds":15},
-    {"Id":"SC-085","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Greece?","Options":["Athens","Thessaloniki","Sparta","Corinth"],"CorrectAnswerIndex":0,"Explanation":"Athens is the cradle of Western civilization and capital of Greece.","TimeLimitSeconds":15},
-    {"Id":"SC-086","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Austria?","Options":["Vienna","Salzburg","Innsbruck","Graz"],"CorrectAnswerIndex":0,"Explanation":"Vienna was the historic capital of the Holy Roman and Austro-Hungarian empires.","TimeLimitSeconds":15},
-    {"Id":"SC-087","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of the Netherlands?","Options":["Amsterdam","The Hague","Rotterdam","Utrecht"],"CorrectAnswerIndex":0,"Explanation":"Amsterdam is the constitutional capital, while The Hague hosts parliament.","TimeLimitSeconds":15},
-    {"Id":"SC-088","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Belgium?","Options":["Brussels","Antwerp","Ghent","Bruges"],"CorrectAnswerIndex":0,"Explanation":"Brussels serves as the headquarters of the European Union and NATO.","TimeLimitSeconds":15},
-    {"Id":"SC-089","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Denmark?","Options":["Copenhagen","Aarhus","Odense","Aalborg"],"CorrectAnswerIndex":0,"Explanation":"Copenhagen is situated on the eastern coast of the island of Zealand.","TimeLimitSeconds":15},
-    {"Id":"SC-090","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Finland?","Options":["Helsinki","Espoo","Tampere","Turku"],"CorrectAnswerIndex":0,"Explanation":"Helsinki is Finland's southern seaside capital.","TimeLimitSeconds":15},
-    {"Id":"SC-091","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Vietnam?","Options":["Hanoi","Ho Chi Minh City","Da Nang","Hai Phong"],"CorrectAnswerIndex":0,"Explanation":"Hanoi has been the capital of reunified Vietnam since 1976.","TimeLimitSeconds":15},
-    {"Id":"SC-092","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Thailand?","Options":["Bangkok","Chiang Mai","Phuket","Pattaya"],"CorrectAnswerIndex":0,"Explanation":"Bangkok's ceremonial name is the longest city name in the world.","TimeLimitSeconds":15},
-    {"Id":"SC-093","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of the Philippines?","Options":["Manila","Quezon City","Cebu City","Davao"],"CorrectAnswerIndex":0,"Explanation":"Manila is located on the eastern shore of Manila Bay on Luzon island.","TimeLimitSeconds":15},
-    {"Id":"SC-094","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Indonesia?","Options":["Jakarta (Nusantara)","Surabaya","Bandung","Medan"],"CorrectAnswerIndex":0,"Explanation":"Jakarta is the longtime capital; Nusantara is under construction as the new capital.","TimeLimitSeconds":15},
-    {"Id":"SC-095","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Morocco?","Options":["Rabat","Casablanca","Marrakesh","Fez"],"CorrectAnswerIndex":0,"Explanation":"Rabat is located on the Atlantic Ocean at the mouth of the Bou Regreg river.","TimeLimitSeconds":15},
-    {"Id":"SC-096","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Cuba?","Options":["Havana","Santiago de Cuba","Camaguey","Holguin"],"CorrectAnswerIndex":0,"Explanation":"Havana was founded by the Spanish in the 16th century.","TimeLimitSeconds":15},
-    {"Id":"SC-097","Category":"State Capitals","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the capital of Jamaica?","Options":["Kingston","Montego Bay","Ocho Rios","Negril"],"CorrectAnswerIndex":0,"Explanation":"Kingston is the largest city and capital of Jamaica.","TimeLimitSeconds":15},
-    {"Id":"SC-098","Category":"State Capitals","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the capital of Chile?","Options":["Santiago","Valparaiso","Concepcion","Vina del Mar"],"CorrectAnswerIndex":0,"Explanation":"Santiago is located in the central valley between the Andes and the Chilean Coast Range.","TimeLimitSeconds":15},
-    {"Id":"SC-099","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Iceland?","Options":["Reykjavik","Akureyri","Keflavik","Selfoss"],"CorrectAnswerIndex":0,"Explanation":"Reykjavik translates to 'Smoky Bay' from early geothermal steam sightings.","TimeLimitSeconds":15},
-    {"Id":"SC-100","Category":"State Capitals","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the capital of Switzerland?","Options":["Bern","Zurich","Geneva","Lucerne"],"CorrectAnswerIndex":0,"Explanation":"Bern serves as the federal de facto capital of Switzerland.","TimeLimitSeconds":15}
+    {
+      "Id": "SC-001",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Texas?",
+      "Options": [
+        "Dallas",
+        "Houston",
+        "San Antonio",
+        "Austin"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Austin has been the capital of Texas since 1839.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-002",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of California?",
+      "Options": [
+        "San Diego",
+        "San Francisco",
+        "Los Angeles",
+        "Sacramento"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Sacramento became the permanent capital of California in 1854.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-003",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of New York?",
+      "Options": [
+        "Albany",
+        "New York City",
+        "Buffalo",
+        "Rochester"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Albany has served as the capital of New York State since 1797.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-004",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Florida?",
+      "Options": [
+        "Tampa",
+        "Miami",
+        "Orlando",
+        "Tallahassee"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Tallahassee was selected as the territory's capital in 1824 midway between Pensacola and St. Augustine.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-005",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Illinois?",
+      "Options": [
+        "Chicago",
+        "Rockford",
+        "Peoria",
+        "Springfield"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Springfield is famous as the home and resting place of Abraham Lincoln.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-006",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Georgia?",
+      "Options": [
+        "Atlanta",
+        "Augusta",
+        "Macon",
+        "Savannah"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Atlanta has been Georgia's capital since 1868.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-007",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Washington State?",
+      "Options": [
+        "Seattle",
+        "Spokane",
+        "Tacoma",
+        "Olympia"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Olympia is located at the southern end of Puget Sound.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-008",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Massachusetts?",
+      "Options": [
+        "Salem",
+        "Cambridge",
+        "Boston",
+        "Worcester"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Boston is one of the oldest municipalities in the United States, founded in 1630.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-009",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Pennsylvania?",
+      "Options": [
+        "Allentown",
+        "Philadelphia",
+        "Pittsburgh",
+        "Harrisburg"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Harrisburg on the Susquehanna River became the capital in 1812.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-010",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Colorado?",
+      "Options": [
+        "Denver",
+        "Boulder",
+        "Colorado Springs",
+        "Aurora"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Denver is known as the 'Mile High City' at exactly 5,280 feet above sea level.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-011",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Hawaii?",
+      "Options": [
+        "Kailua",
+        "Honolulu",
+        "Hilo",
+        "Kahului"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Honolulu is located on the island of Oahu and was the capital of the Hawaiian Kingdom.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-012",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Arizona?",
+      "Options": [
+        "Tucson",
+        "Phoenix",
+        "Scottsdale",
+        "Mesa"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Phoenix is the most populous state capital in the United States.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-013",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Ohio?",
+      "Options": [
+        "Toledo",
+        "Cleveland",
+        "Cincinnati",
+        "Columbus"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Columbus was founded in 1812 specifically to serve as the state capital.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-014",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Michigan?",
+      "Options": [
+        "Ann Arbor",
+        "Grand Rapids",
+        "Detroit",
+        "Lansing"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Lansing was chosen in 1847 to move the capital safely away from British-controlled Canada.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-015",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of North Carolina?",
+      "Options": [
+        "Durham",
+        "Charlotte",
+        "Greensboro",
+        "Raleigh"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Raleigh was planned and established as the state capital in 1792.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-016",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Tennessee?",
+      "Options": [
+        "Knoxville",
+        "Nashville",
+        "Memphis",
+        "Chattanooga"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Nashville became the permanent capital of Tennessee in 1843.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-017",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Virginia?",
+      "Options": [
+        "Richmond",
+        "Norfolk",
+        "Virginia Beach",
+        "Alexandria"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Richmond replaced Williamsburg as the capital of Virginia in 1780.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-018",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Indiana?",
+      "Options": [
+        "Evansville",
+        "Indianapolis",
+        "Fort Wayne",
+        "South Bend"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Indianapolis was planned in the center of the state in 1821.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-019",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Missouri?",
+      "Options": [
+        "Kansas City",
+        "St. Louis",
+        "Jefferson City",
+        "Springfield"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Jefferson City on the Missouri River was named after Thomas Jefferson.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-020",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Wisconsin?",
+      "Options": [
+        "Madison",
+        "Kenosha",
+        "Milwaukee",
+        "Green Bay"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Madison was chosen as capital in 1836, named for James Madison.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-021",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Alaska, accessible only by boat or plane?",
+      "Options": [
+        "Anchorage",
+        "Juneau",
+        "Sitka",
+        "Fairbanks"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Juneau has no road connections to the rest of Alaska or North America.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-022",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Kentucky?",
+      "Options": [
+        "Frankfort",
+        "Bowling Green",
+        "Lexington",
+        "Louisville"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Frankfort is one of the smallest state capitals in the US.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-023",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Louisiana?",
+      "Options": [
+        "Lafayette",
+        "Shreveport",
+        "Baton Rouge",
+        "New Orleans"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Baton Rouge is home to the tallest state capitol building in the United States (450 ft).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-024",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Maryland?",
+      "Options": [
+        "Frederick",
+        "Annapolis",
+        "Rockville",
+        "Baltimore"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Annapolis was briefly the capital of the United States in 1783-1784.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-025",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Minnesota?",
+      "Options": [
+        "Duluth",
+        "Rochester",
+        "Minneapolis",
+        "Saint Paul"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Saint Paul forms the 'Twin Cities' alongside Minneapolis.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-026",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Nevada?",
+      "Options": [
+        "Henderson",
+        "Las Vegas",
+        "Reno",
+        "Carson City"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Carson City was named after mountain man Kit Carson.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-027",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of New Jersey?",
+      "Options": [
+        "Jersey City",
+        "Trenton",
+        "Newark",
+        "Princeton"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Trenton was the site of George Washington's famous surprise crossing of the Delaware.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-028",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of New Mexico?",
+      "Options": [
+        "Santa Fe",
+        "Las Cruces",
+        "Roswell",
+        "Albuquerque"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Santa Fe is the oldest state capital in the United States, founded in 1610.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-029",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Oregon?",
+      "Options": [
+        "Salem",
+        "Portland",
+        "Eugene",
+        "Bend"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Salem is located in the Willamette Valley south of Portland.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-030",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of South Carolina?",
+      "Options": [
+        "Greenville",
+        "Charleston",
+        "Columbia",
+        "Myrtle Beach"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Columbia was planned as one of the first planned cities in the US in 1786.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-031",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Utah?",
+      "Options": [
+        "West Valley City",
+        "Salt Lake City",
+        "Ogdene",
+        "Provo"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Salt Lake City was founded in 1847 by Brigham Young and early pioneers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-032",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Alabama?",
+      "Options": [
+        "Mobile",
+        "Huntsville",
+        "Montgomery",
+        "Birmingham"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Montgomery was the birthplace of the Civil Rights movement with the bus boycott.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-033",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Arkansas?",
+      "Options": [
+        "Little Rock",
+        "Fayetteville",
+        "Fort Smith",
+        "Hot Springs"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Little Rock is situated on the south bank of the Arkansas River.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-034",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Connecticut?",
+      "Options": [
+        "Stamford",
+        "Hartford",
+        "Bridgeport",
+        "New Haven"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Hartford is known as the 'Insurance Capital of the World'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-035",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Delaware?",
+      "Options": [
+        "Wilmington",
+        "Rehoboth Beach",
+        "Dover",
+        "Newark"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Dover was named by William Penn for Dover in Kent, England.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-036",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Idaho?",
+      "Options": [
+        "Idaho Falls",
+        "Boise",
+        "Nampa",
+        "Meridian"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Boise is the largest city in Idaho, nicknamed the 'City of Trees'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-037",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Iowa?",
+      "Options": [
+        "Des Moines",
+        "Cedar Rapids",
+        "Davenport",
+        "Sioux City"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Des Moines is derived from the French name for the Des Moines River.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-038",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Kansas?",
+      "Options": [
+        "Overland Park",
+        "Kansas City",
+        "Wichita",
+        "Topeka"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Topeka was chosen as capital when Kansas entered the Union in 1861.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-039",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Maine?",
+      "Options": [
+        "Augusta",
+        "Bangor",
+        "Lewiston",
+        "Portland"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Augusta is the easternmost state capital in the United States.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-040",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Mississippi?",
+      "Options": [
+        "Hattiesburg",
+        "Gulfport",
+        "Biloxi",
+        "Jackson"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Jackson was named in honor of General Andrew Jackson.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-041",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Montana?",
+      "Options": [
+        "Bozeman",
+        "Billings",
+        "Helena",
+        "Missoula"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Helena was established as a gold boomtown during the 1864 gold rush.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-042",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Nebraska?",
+      "Options": [
+        "Lincoln",
+        "Grand Island",
+        "Kearney",
+        "Omaha"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Lincoln was originally named Lancaster and renamed in honor of Abraham Lincoln.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-043",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of New Hampshire?",
+      "Options": [
+        "Manchester",
+        "Portsmouth",
+        "Nashua",
+        "Concord"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Concord has served as New Hampshire's capital since 1808.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-044",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of North Dakota?",
+      "Options": [
+        "Grand Forks",
+        "Bismarck",
+        "Fargo",
+        "Minot"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Bismarck was named in honor of German Chancellor Otto von Bismarck to attract German settlers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-045",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Oklahoma?",
+      "Options": [
+        "Tulsa",
+        "Norman",
+        "Oklahoma City",
+        "Broken Arrow"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Oklahoma City was founded during the Land Run of April 22, 1889.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-046",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Rhode Island?",
+      "Options": [
+        "Newport",
+        "Warwick",
+        "Providence",
+        "Cranston"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Providence was founded in 1636 by Roger Williams as a refuge for religious freedom.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-047",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of South Dakota?",
+      "Options": [
+        "Sioux Falls",
+        "Pierre",
+        "Rapid City",
+        "Aberdeen"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Pierre (pronounced 'peer') sits on the east bank of the Missouri River.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-048",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Vermont?",
+      "Options": [
+        "Burlington",
+        "Rutland",
+        "Montpelier",
+        "South Burlington"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Montpelier is the least populous state capital in the United States (approx. 8,000 residents).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-049",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of West Virginia?",
+      "Options": [
+        "Charleston",
+        "Morgantown",
+        "Parkersburg",
+        "Huntington"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Charleston is located at the confluence of the Elk and Kanawha rivers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-050",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Wyoming?",
+      "Options": [
+        "Cheyenne",
+        "Casper",
+        "Laramie",
+        "Gillette"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Cheyenne was founded in 1867 along the Union Pacific Railroad.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-051",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of the United States?",
+      "Options": [
+        "Philadelphia",
+        "Washington, D.C.",
+        "Baltimore",
+        "New York City"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Washington, D.C. was established by the US Constitution as the federal district in 1790.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-052",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Canada?",
+      "Options": [
+        "Montreal",
+        "Toronto",
+        "Ottawa",
+        "Vancouver"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Ottawa is located in the province of Ontario on the border with Quebec.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-053",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Mexico?",
+      "Options": [
+        "Mexico City",
+        "Guadalajara",
+        "Monterrey",
+        "Puebla"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Mexico City is the most populous city in North America.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-054",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Japan?",
+      "Options": [
+        "Tokyo",
+        "Osaka",
+        "Kyoto",
+        "Yokohama"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tokyo became the capital of Japan in 1868 when Emperor Meiji moved the court from Kyoto.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-055",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Spain?",
+      "Options": [
+        "Barcelona",
+        "Madrid",
+        "Seville",
+        "Valencia"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "King Philip II declared Madrid the capital of Spain in 1561.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-056",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of France?",
+      "Options": [
+        "Bordeaux",
+        "Marseille",
+        "Paris",
+        "Lyon"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Paris is the historic and economic capital of France.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-057",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Germany?",
+      "Options": [
+        "Munich",
+        "Berlin",
+        "Hamburg",
+        "Frankfurt"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Berlin was restored as the capital of reunified Germany in 1990.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-058",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Italy?",
+      "Options": [
+        "Venice",
+        "Milan",
+        "Rome",
+        "Florence"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Rome became the capital of unified Italy in 1871.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-059",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of the United Kingdom?",
+      "Options": [
+        "London",
+        "Manchester",
+        "Edinburgh",
+        "Birmingham"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "London has been the capital of England and the UK for centuries.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-060",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Australia?",
+      "Options": [
+        "Canberra",
+        "Brisbane",
+        "Melbourne",
+        "Sydney"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Canberra was chosen as the compromise capital between Sydney and Melbourne.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-061",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Puerto Rico?",
+      "Options": [
+        "San Juan",
+        "Ponce",
+        "Carolina",
+        "Bayamon"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "San Juan was founded by Spanish colonists in 1521.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-062",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Guam?",
+      "Options": [
+        "Yigo",
+        "Hagåtña",
+        "Dededo",
+        "Tamuning"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Hagåtña is the seat of government of the US territory of Guam.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-063",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of the U.S. Virgin Islands?",
+      "Options": [
+        "Charlotte Amalie",
+        "Christiansted",
+        "Frederiksted",
+        "Cruz Bay"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Charlotte Amalie is located on the island of Saint Thomas.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-064",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of American Samoa?",
+      "Options": [
+        "Nu'uuli",
+        "Tafuna",
+        "Pago Pago",
+        "Fagatogo"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Pago Pago is located on the island of Tutuila.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-065",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Russia?",
+      "Options": [
+        "Saint Petersburg",
+        "Novosibirsk",
+        "Moscow",
+        "Yekaterinburg"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Moscow is the largest city on the European continent.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-066",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of China?",
+      "Options": [
+        "Shanghai",
+        "Beijing",
+        "Guangzhou",
+        "Shenzhen"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Beijing serves as the political center of China.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-067",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of India?",
+      "Options": [
+        "Bangalore",
+        "Kolkata",
+        "New Delhi",
+        "Mumbai"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "New Delhi was designed by British architects Edwin Lutyens and Herbert Baker.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-068",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of South Korea?",
+      "Options": [
+        "Seoul",
+        "Daegu",
+        "Busan",
+        "Incheon"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Seoul has been the historic capital of Korea since 1394.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-069",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Brazil?",
+      "Options": [
+        "Salvador",
+        "Rio de Janeiro",
+        "São Paulo",
+        "Brasília"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Brasília is an entirely planned federal capital inaugurated in 1960.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-070",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Argentina?",
+      "Options": [
+        "Rosario",
+        "Cordoba",
+        "Buenos Aires",
+        "La Plata"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Buenos Aires is an autonomous federal city on the Rio de la Plata.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-071",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which state capital's name translates to 'A place to dig wild potatoes' in the Kansa language?",
+      "Options": [
+        "Boise, Idaho",
+        "Topeka, Kansas",
+        "Pierre, South Dakota",
+        "Bismarck, North Dakota"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Topeka is derived from a Kaw/Kansa Indian word meaning 'good place to dig potatoes'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-072",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the only U.S. state capital that shares its name with the state itself?",
+      "Options": [
+        "New York City, New York",
+        "Indianapolis, Indiana",
+        "Oklahoma City, Oklahoma",
+        "Iowa City, Iowa"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Oklahoma City is the only US state capital to have the exact state name in its name.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-073",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which U.S. state capital has the highest elevation at 7,199 feet above sea level?",
+      "Options": [
+        "Carson City, Nevada",
+        "Santa Fe, New Mexico",
+        "Cheyenne, Wyoming",
+        "Denver, Colorado"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Santa Fe is the highest altitude state capital in the United States.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-074",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the only U.S. state capital with a population under 10,000 residents?",
+      "Options": [
+        "Pierre, South Dakota",
+        "Augusta, Maine",
+        "Frankfort, Kentucky",
+        "Montpelier, Vermont"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Montpelier has approximately 8,000 residents.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-075",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Egypt?",
+      "Options": [
+        "Alexandria",
+        "Giza",
+        "Luxor",
+        "Cairo"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Cairo sits on the Nile Delta and has been Egypt's capital for over a millennium.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-076",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Saudi Arabia?",
+      "Options": [
+        "Medina",
+        "Jeddah",
+        "Mecca",
+        "Riyadh"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Riyadh is the political capital and largest city in Saudi Arabia.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-077",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Turkey?",
+      "Options": [
+        "Istanbul",
+        "Ankara",
+        "Izmir",
+        "Bursa"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Ankara was chosen by Mustafa Kemal Atatürk in 1923.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-078",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of New Zealand?",
+      "Options": [
+        "Auckland",
+        "Wellington",
+        "Queenstown",
+        "Christchurch"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Wellington replaced Auckland as the capital in 1865.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-079",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Norway?",
+      "Options": [
+        "Stavanger",
+        "Bergen",
+        "Trondheim",
+        "Oslo"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Oslo sits at the northern end of the Oslofjord.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-080",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Sweden?",
+      "Options": [
+        "Malmo",
+        "Gothenburg",
+        "Stockholm",
+        "Uppsala"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Stockholm is spread across 14 islands on Lake Mälaren.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-081",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Ireland?",
+      "Options": [
+        "Galway",
+        "Cork",
+        "Limerick",
+        "Dublin"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Dublin is located on Dublin Bay at the mouth of the River Liffey.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-082",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Scotland?",
+      "Options": [
+        "Edinburgh",
+        "Glasgow",
+        "Aberdeen",
+        "Dundee"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Edinburgh has been the capital of Scotland since at least the 15th century.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-083",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Poland?",
+      "Options": [
+        "Krakow",
+        "Warsaw",
+        "Wroclaw",
+        "Gdansk"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Warsaw is situated on the Vistula River.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-084",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Portugal?",
+      "Options": [
+        "Braga",
+        "Lisbon",
+        "Faro",
+        "Porto"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Lisbon is one of the oldest cities in Western Europe.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-085",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Greece?",
+      "Options": [
+        "Sparta",
+        "Corinth",
+        "Athens",
+        "Thessaloniki"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Athens is the cradle of Western civilization and capital of Greece.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-086",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Austria?",
+      "Options": [
+        "Salzburg",
+        "Vienna",
+        "Graz",
+        "Innsbruck"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Vienna was the historic capital of the Holy Roman and Austro-Hungarian empires.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-087",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of the Netherlands?",
+      "Options": [
+        "Amsterdam",
+        "Rotterdam",
+        "Utrecht",
+        "The Hague"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Amsterdam is the constitutional capital, while The Hague hosts parliament.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-088",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Belgium?",
+      "Options": [
+        "Antwerp",
+        "Bruges",
+        "Brussels",
+        "Ghent"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Brussels serves as the headquarters of the European Union and NATO.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-089",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Denmark?",
+      "Options": [
+        "Aalborg",
+        "Odense",
+        "Copenhagen",
+        "Aarhus"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Copenhagen is situated on the eastern coast of the island of Zealand.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-090",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Finland?",
+      "Options": [
+        "Helsinki",
+        "Turku",
+        "Tampere",
+        "Espoo"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Helsinki is Finland's southern seaside capital.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-091",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Vietnam?",
+      "Options": [
+        "Hai Phong",
+        "Da Nang",
+        "Hanoi",
+        "Ho Chi Minh City"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Hanoi has been the capital of reunified Vietnam since 1976.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-092",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Thailand?",
+      "Options": [
+        "Phuket",
+        "Pattaya",
+        "Bangkok",
+        "Chiang Mai"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Bangkok's ceremonial name is the longest city name in the world.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-093",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of the Philippines?",
+      "Options": [
+        "Davao",
+        "Quezon City",
+        "Manila",
+        "Cebu City"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Manila is located on the eastern shore of Manila Bay on Luzon island.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-094",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Indonesia?",
+      "Options": [
+        "Bandung",
+        "Surabaya",
+        "Medan",
+        "Jakarta (Nusantara)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Jakarta is the longtime capital; Nusantara is under construction as the new capital.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-095",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Morocco?",
+      "Options": [
+        "Rabat",
+        "Marrakesh",
+        "Casablanca",
+        "Fez"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Rabat is located on the Atlantic Ocean at the mouth of the Bou Regreg river.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-096",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Cuba?",
+      "Options": [
+        "Santiago de Cuba",
+        "Camaguey",
+        "Havana",
+        "Holguin"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Havana was founded by the Spanish in the 16th century.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-097",
+      "Category": "State Capitals",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Jamaica?",
+      "Options": [
+        "Kingston",
+        "Ocho Rios",
+        "Negril",
+        "Montego Bay"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Kingston is the largest city and capital of Jamaica.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-098",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Chile?",
+      "Options": [
+        "Valparaiso",
+        "Santiago",
+        "Vina del Mar",
+        "Concepcion"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Santiago is located in the central valley between the Andes and the Chilean Coast Range.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-099",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Iceland?",
+      "Options": [
+        "Keflavik",
+        "Reykjavik",
+        "Akureyri",
+        "Selfoss"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Reykjavik translates to 'Smoky Bay' from early geothermal steam sightings.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "SC-100",
+      "Category": "State Capitals",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Switzerland?",
+      "Options": [
+        "Geneva",
+        "Zurich",
+        "Bern",
+        "Lucerne"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Bern serves as the federal de facto capital of Switzerland.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital city of Florida, located in the state's panhandle?",
+      "Options": [
+        "Tallahassee",
+        "Miami",
+        "Tampa",
+        "Orlando"
+      ],
+      "Explanation": "Tallahassee became the capital of Florida Territory in 1824.",
+      "Id": "STA-101",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of California?",
+      "Options": [
+        "San Diego",
+        "Los Angeles",
+        "Sacramento",
+        "San Francisco"
+      ],
+      "Explanation": "Sacramento was chosen as California's permanent capital during the Gold Rush in 1854.",
+      "Id": "STA-102",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Texas, famous for its live music and state capitol building larger than the US Capitol?",
+      "Options": [
+        "Dallas",
+        "San Antonio",
+        "Austin",
+        "Houston"
+      ],
+      "Explanation": "Austin was named in honor of Stephen F. Austin, the 'Father of Texas'.",
+      "Id": "STA-103",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of New York State?",
+      "Options": [
+        "Buffalo",
+        "New York City",
+        "Albany",
+        "Rochester"
+      ],
+      "Explanation": "Albany has been the capital of New York since 1797.",
+      "Id": "STA-104",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Illinois, where Abraham Lincoln lived and practiced law for 24 years?",
+      "Options": [
+        "Rockford",
+        "Chicago",
+        "Peoria",
+        "Springfield"
+      ],
+      "Explanation": "Springfield is home to the Abraham Lincoln Presidential Library and Museum.",
+      "Id": "STA-105",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of Pennsylvania, located along the Susquehanna River?",
+      "Options": [
+        "Pittsburgh",
+        "Philadelphia",
+        "Allentown",
+        "Harrisburg"
+      ],
+      "Explanation": "Harrisburg became the capital of Pennsylvania in 1812.",
+      "Id": "STA-106",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Washington State, situated at the southern tip of Puget Sound?",
+      "Options": [
+        "Tacoma",
+        "Spokane",
+        "Olympia",
+        "Seattle"
+      ],
+      "Explanation": "Olympia was incorporated as the capital of Washington Territory in 1859.",
+      "Id": "STA-107",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Ohio, and also the state's most populous city?",
+      "Options": [
+        "Cleveland",
+        "Columbus",
+        "Dayton",
+        "Cincinnati"
+      ],
+      "Explanation": "Columbus was designed specifically to serve as Ohio's state capital in 1812.",
+      "Id": "STA-108",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Michigan, located in the lower peninsula northwest of Detroit?",
+      "Options": [
+        "Detroit",
+        "Ann Arbor",
+        "Grand Rapids",
+        "Lansing"
+      ],
+      "Explanation": "Lansing became Michigan's capital in 1847 to move government away from British Canada.",
+      "Id": "STA-109",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of Georgia, famous for the Centennial Olympic Park and World of Coca-Cola?",
+      "Options": [
+        "Atlanta",
+        "Macon",
+        "Augusta",
+        "Savannah"
+      ],
+      "Explanation": "Atlanta became Georgia's capital following the American Civil War in 1868.",
+      "Id": "STA-110",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of North Carolina, forming the Research Triangle with Durham and Chapel Hill?",
+      "Options": [
+        "Charlotte",
+        "Winston-Salem",
+        "Greensboro",
+        "Raleigh"
+      ],
+      "Explanation": "Raleigh was established as North Carolina's planned capital in 1792.",
+      "Id": "STA-111",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Arizona, the only state capital with over 1.6 million residents?",
+      "Options": [
+        "Mesa",
+        "Phoenix",
+        "Scottsdale",
+        "Tucson"
+      ],
+      "Explanation": "Phoenix is the most populous state capital in the United States.",
+      "Id": "STA-112",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Massachusetts, founded in 1630 on the Shawmut Peninsula?",
+      "Options": [
+        "Springfield",
+        "Boston",
+        "Worcester",
+        "Cambridge"
+      ],
+      "Explanation": "Boston is one of the oldest municipalities in the United States.",
+      "Id": "STA-113",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of Tennessee, known worldwide as 'Music City'?",
+      "Options": [
+        "Chattanooga",
+        "Nashville",
+        "Memphis",
+        "Knoxville"
+      ],
+      "Explanation": "Nashville is the epicenter of country music and home to the Grand Ole Opry.",
+      "Id": "STA-114",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Colorado, nicknamed the 'Mile High City' for its official elevation of 5,280 feet?",
+      "Options": [
+        "Denver",
+        "Colorado Springs",
+        "Boulder",
+        "Fort Collins"
+      ],
+      "Explanation": "Denver was founded in 1858 during the Pikes Peak Gold Rush.",
+      "Id": "STA-115",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Minnesota, paired alongside Minneapolis as the 'Twin Cities'?",
+      "Options": [
+        "Duluth",
+        "Rochester",
+        "Minneapolis",
+        "Saint Paul"
+      ],
+      "Explanation": "Saint Paul is the state capital and county seat of Ramsey County.",
+      "Id": "STA-116",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Indiana, known for hosting the world-famous Indianapolis 500 auto race?",
+      "Options": [
+        "Indianapolis",
+        "Fort Wayne",
+        "Evansville",
+        "South Bend"
+      ],
+      "Explanation": "Indianapolis is the second-most populous state capital in the US.",
+      "Id": "STA-117",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of Missouri, located along the Missouri River?",
+      "Options": [
+        "Jefferson City",
+        "Kansas City",
+        "St. Louis",
+        "Columbia"
+      ],
+      "Explanation": "Jefferson City was named after President Thomas Jefferson.",
+      "Id": "STA-118",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Maryland, home to the United States Naval Academy?",
+      "Options": [
+        "Baltimore",
+        "Frederick",
+        "Rockville",
+        "Annapolis"
+      ],
+      "Explanation": "Annapolis briefly served as the temporary capital of the United States in 1783–1784.",
+      "Id": "STA-119",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Wisconsin, situated on an isthmus between Lake Mendota and Lake Monona?",
+      "Options": [
+        "Kenosha",
+        "Milwaukee",
+        "Green Bay",
+        "Madison"
+      ],
+      "Explanation": "Madison was named after James Madison, the fourth US President.",
+      "Id": "STA-120",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Kentucky, famous for bourbon distilleries along the Kentucky River?",
+      "Options": [
+        "Bowling Green",
+        "Louisville",
+        "Lexington",
+        "Frankfort"
+      ],
+      "Explanation": "Frankfort is one of the smallest state capitals in the country by population.",
+      "Id": "STA-121",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of Oregon, situated in the fertile Willamette Valley?",
+      "Options": [
+        "Eugene",
+        "Portland",
+        "Salem",
+        "Bend"
+      ],
+      "Explanation": "Salem was named from the Hebrew word 'Shalom' meaning peace.",
+      "Id": "STA-122",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Virginia, located on the James River fall line?",
+      "Options": [
+        "Charlottesville",
+        "Richmond",
+        "Virginia Beach",
+        "Norfolk"
+      ],
+      "Explanation": "Richmond served as the capital of the Confederacy during the American Civil War.",
+      "Id": "STA-123",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Louisiana, located on the eastern bank of the Mississippi River?",
+      "Options": [
+        "New Orleans",
+        "Baton Rouge",
+        "Lafayette",
+        "Shreveport"
+      ],
+      "Explanation": "Baton Rouge is home to the tallest state capitol building in the US (450 feet).",
+      "Id": "STA-124",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Alabama, where Rosa Parks ignited the Montgomery Bus Boycott in 1955?",
+      "Options": [
+        "Mobile",
+        "Montgomery",
+        "Huntsville",
+        "Birmingham"
+      ],
+      "Explanation": "Montgomery was central to the American Civil Rights Movement.",
+      "Id": "STA-125",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of South Carolina, situated in the geographic center of the state?",
+      "Options": [
+        "Greenville",
+        "Myrtle Beach",
+        "Columbia",
+        "Charleston"
+      ],
+      "Explanation": "Columbia was chosen as the planned capital in 1786.",
+      "Id": "STA-126",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Iowa, located at the confluence of the Des Moines River and Raccoon River?",
+      "Options": [
+        "Davenport",
+        "Iowa City",
+        "Cedar Rapids",
+        "Des Moines"
+      ],
+      "Explanation": "Des Moines is a major hub for the US insurance and financial services industry.",
+      "Id": "STA-127",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Oklahoma, where the state capitol features an oil rig on its grounds?",
+      "Options": [
+        "Oklahoma City",
+        "Broken Arrow",
+        "Tulsa",
+        "Norman"
+      ],
+      "Explanation": "Oklahoma City grew rapidly overnight during the Land Run of 1889.",
+      "Id": "STA-128",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Connecticut, known historically as the 'Insurance Capital of the World'?",
+      "Options": [
+        "Bridgeport",
+        "Hartford",
+        "Stamford",
+        "New Haven"
+      ],
+      "Explanation": "Hartford is one of the oldest cities in the US, founded in 1635.",
+      "Id": "STA-129",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of Arkansas, home to the William J. Clinton Presidential Library?",
+      "Options": [
+        "Fayetteville",
+        "Fort Smith",
+        "Little Rock",
+        "Springdale"
+      ],
+      "Explanation": "Little Rock was named after a small rock formation on the Arkansas River ('La Petite Roche').",
+      "Id": "STA-130",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Mississippi, located along the Pearl River?",
+      "Options": [
+        "Gulfport",
+        "Hattiesburg",
+        "Biloxi",
+        "Jackson"
+      ],
+      "Explanation": "Jackson was named in honor of General Andrew Jackson.",
+      "Id": "STA-131",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Kansas, famous as the namesake of the landmark Supreme Court desegregation case?",
+      "Options": [
+        "Kansas City",
+        "Overland Park",
+        "Wichita",
+        "Topeka"
+      ],
+      "Explanation": "Brown v. Board of Education originated in Topeka in 1954.",
+      "Id": "STA-132",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Utah, founded in 1847 by Mormon pioneers led by Brigham Young?",
+      "Options": [
+        "Ogden",
+        "Salt Lake City",
+        "West Valley City",
+        "Provo"
+      ],
+      "Explanation": "Salt Lake City hosted the 2002 Winter Olympic Games.",
+      "Id": "STA-133",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of Nevada, located just east of Lake Tahoe?",
+      "Options": [
+        "Carson City",
+        "Las Vegas",
+        "Henderson",
+        "Reno"
+      ],
+      "Explanation": "Carson City was named after legendary American frontiersman Kit Carson.",
+      "Id": "STA-134",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of New Mexico, the oldest state capital in the United States founded in 1610?",
+      "Options": [
+        "Roswell",
+        "Albuquerque",
+        "Santa Fe",
+        "Las Cruces"
+      ],
+      "Explanation": "Santa Fe was founded by Spanish conquistador Don Pedro de Peralta.",
+      "Id": "STA-135",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Nebraska, home to the University of Nebraska Cornhuskers?",
+      "Options": [
+        "Lincoln",
+        "Grand Island",
+        "Omaha",
+        "Bellevue"
+      ],
+      "Explanation": "Lincoln was renamed in 1867 to honor assassinated President Abraham Lincoln.",
+      "Id": "STA-136",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of West Virginia, located at the confluence of the Elk and Kanawha Rivers?",
+      "Options": [
+        "Morgantown",
+        "Wheeling",
+        "Huntington",
+        "Charleston"
+      ],
+      "Explanation": "Charleston is the most populous city in West Virginia.",
+      "Id": "STA-137",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of Idaho, nicknamed the 'City of Trees'?",
+      "Options": [
+        "Boise",
+        "Idaho Falls",
+        "Meridian",
+        "Nampa"
+      ],
+      "Explanation": "Boise's name comes from the French 'les bois' ('the trees').",
+      "Id": "STA-138",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Hawaii, located on the southeast coast of the island of Oahu?",
+      "Options": [
+        "Honolulu",
+        "Lahaina",
+        "Hilo",
+        "Kailua"
+      ],
+      "Explanation": "Honolulu is home to Iolani Palace, the only royal palace on US soil.",
+      "Id": "STA-139",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Maine, the easternmost state capital in the United States?",
+      "Options": [
+        "Lewiston",
+        "Augusta",
+        "Bangor",
+        "Portland"
+      ],
+      "Explanation": "Augusta became the capital of Maine in 1827.",
+      "Id": "STA-140",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of New Hampshire, located on the Merrimack River?",
+      "Options": [
+        "Portsmouth",
+        "Manchester",
+        "Nashua",
+        "Concord"
+      ],
+      "Explanation": "Concord's state house features the oldest legislative chambers in continuous use in the US.",
+      "Id": "STA-141",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of Rhode Island, home to Brown University and the Rhode Island School of Design?",
+      "Options": [
+        "Warwick",
+        "Newport",
+        "Cranston",
+        "Providence"
+      ],
+      "Explanation": "Providence was founded in 1636 by Roger Williams as a refuge for religious dissidents.",
+      "Id": "STA-142",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Montana, founded during an 1864 gold rush at Last Chance Gulch?",
+      "Options": [
+        "Missoula",
+        "Bozeman",
+        "Helena",
+        "Billings"
+      ],
+      "Explanation": "Helena was once home to more millionaires per capita than any city in the world.",
+      "Id": "STA-143",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Delaware, the first state to ratify the US Constitution?",
+      "Options": [
+        "Newark",
+        "Rehoboth Beach",
+        "Wilmington",
+        "Dover"
+      ],
+      "Explanation": "Dover was established in 1683 by William Penn.",
+      "Id": "STA-144",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of South Dakota, located on the Missouri River?",
+      "Options": [
+        "Rapid City",
+        "Pierre",
+        "Sioux Falls",
+        "Aberdeen"
+      ],
+      "Explanation": "Pierre is the second least-populous state capital in the country after Montpelier.",
+      "Id": "STA-145",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city serves as the capital of North Dakota, founded in 1872 on the east bank of the Missouri River?",
+      "Options": [
+        "Bismarck",
+        "Minot",
+        "Fargo",
+        "Grand Forks"
+      ],
+      "Explanation": "Bismarck was named after German Chancellor Otto von Bismarck to attract German immigrants.",
+      "Id": "STA-146",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Alaska, which is completely inaccessible by road and reached only by boat or plane?",
+      "Options": [
+        "Juneau",
+        "Anchorage",
+        "Sitka",
+        "Fairbanks"
+      ],
+      "Explanation": "Juneau is the only US state capital located on an international border (with British Columbia, Canada).",
+      "Id": "STA-147",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Vermont, the smallest state capital by population in the US (under 8,000 residents)?",
+      "Options": [
+        "Barre",
+        "Montpelier",
+        "Burlington",
+        "Rutland"
+      ],
+      "Explanation": "Montpelier is the only US state capital without a McDonald's restaurant.",
+      "Id": "STA-148",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Wyoming, home to the world's largest outdoor rodeo and Western celebration (Cheyenne Frontier Days)?",
+      "Options": [
+        "Laramie",
+        "Casper",
+        "Jackson",
+        "Cheyenne"
+      ],
+      "Explanation": "Cheyenne was founded in 1867 during the construction of the Union Pacific Railroad.",
+      "Id": "STA-149",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which city is the capital of Canada, located on the border of Ontario and Quebec?",
+      "Options": [
+        "Vancouver",
+        "Toronto",
+        "Ottawa",
+        "Montreal"
+      ],
+      "Explanation": "Queen Victoria chose Ottawa as the capital of the Province of Canada in 1857.",
+      "Id": "STA-150",
+      "Category": "State Capitals",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    }
   ]
 }

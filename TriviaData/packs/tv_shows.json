@@ -2,107 +2,2407 @@
   "PackId": "tv-shows",
   "Title": "Classic & Modern TV Shows",
   "Category": "TV Shows",
-  "Description": "100 trivia questions covering sitcoms, drama series, sci-fi, 90s nostalgia, reality TV, and Emmy-winning television.",
+  "Description": "150 curated questions covering TV Shows.",
   "Questions": [
-    {"Id":"TV-001","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the name of the coffee shop where the main characters hang out in 'Friends'?","Options":["Central Perk","Monk's Diner","MacLaren's Pub","Luke's Diner"],"CorrectAnswerIndex":0,"Explanation":"Central Perk in Greenwich Village was managed by Gunther.","TimeLimitSeconds":15},
-    {"Id":"TV-002","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the fictional paper company in the US version of 'The Office'?","Options":["Dunder Mifflin","Initech","Wernham Hogg","Vandelay Industries"],"CorrectAnswerIndex":0,"Explanation":"Dunder Mifflin Paper Company, Inc. was based in Scranton, Pennsylvania.","TimeLimitSeconds":15},
-    {"Id":"TV-003","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who plays the chemistry teacher turned drug lord Walter White in 'Breaking Bad'?","Options":["Bryan Cranston","Aaron Paul","Bob Odenkirk","Dean Norris"],"CorrectAnswerIndex":0,"Explanation":"Bryan Cranston won four Primetime Emmy Awards for Outstanding Lead Actor for the role.","TimeLimitSeconds":15},
-    {"Id":"TV-004","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the name of the fictional continent where most of 'Game of Thrones' takes place?","Options":["Westeros","Essos","Middle-earth","Narnia"],"CorrectAnswerIndex":0,"Explanation":"Westeros is home to the Seven Kingdoms and the Iron Throne.","TimeLimitSeconds":15},
-    {"Id":"TV-005","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What animated TV series features Homer, Marge, Bart, Lisa, and Maggie?","Options":["The Simpsons","Family Guy","Futurama","Bob's Burgers"],"CorrectAnswerIndex":0,"Explanation":"The Simpsons is the longest-running American animated series in television history.","TimeLimitSeconds":15},
-    {"Id":"TV-006","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"In 'Seinfeld', what is Kramer's first name, revealed in Season 6?","Options":["Cosmo","Newman","Morty","Artie"],"CorrectAnswerIndex":0,"Explanation":"Cosmo Kramer was played by Michael Richards.","TimeLimitSeconds":15},
-    {"Id":"TV-007","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1990s TV show followed agents Fox Mulder and Dana Scully investigating paranormal cases?","Options":["The X-Files","Twin Peaks","Millennium","Fringe"],"CorrectAnswerIndex":0,"Explanation":"The X-Files coined the tagline 'The Truth Is Out There'.","TimeLimitSeconds":15},
-    {"Id":"TV-008","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who was the host of 'Jeopardy!' from 1984 until his passing in 2020?","Options":["Alex Trebek","Art Fleming","Pat Sajak","Bob Barker"],"CorrectAnswerIndex":0,"Explanation":"Alex Trebek hosted over 8,000 episodes of Jeopardy!.","TimeLimitSeconds":15},
-    {"Id":"TV-009","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What animated show is set in the underwater city of Bikini Bottom?","Options":["SpongeBob SquarePants","Finding Nemo","The Little Mermaid","Fish Hooks"],"CorrectAnswerIndex":0,"Explanation":"SpongeBob SquarePants was created by marine science educator Stephen Hillenburg.","TimeLimitSeconds":15},
-    {"Id":"TV-010","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the name of the bar in Boston 'where everybody knows your name'?","Options":["Cheers","Paddy's Pub","Moe's Tavern","The Regal Beagle"],"CorrectAnswerIndex":0,"Explanation":"Cheers ran for 11 seasons on NBC from 1982 to 1993.","TimeLimitSeconds":15},
-    {"Id":"TV-011","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"In 'Stranger Things', what is the name of the alternate dimension full of monsters?","Options":["The Upside Down","The Underworld","The Nether","The Shadow Realm"],"CorrectAnswerIndex":0,"Explanation":"The Upside Down is a dark mirror reflection of Hawkins, Indiana.","TimeLimitSeconds":15},
-    {"Id":"TV-012","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What popular 1990s teen drama followed Brandon, Brenda, Dylan, and Kelly in California?","Options":["Beverly Hills, 90210","Dawson's Creek","Melrose Place","The O.C."],"CorrectAnswerIndex":0,"Explanation":"Beverly Hills, 90210 was created by Darren Star and produced by Aaron Spelling.","TimeLimitSeconds":15},
-    {"Id":"TV-013","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who is the eccentric billionaire boss in 'The Office' (UK) and regional manager in US?","Options":["Michael Scott","Dwight Schrute","David Brent","Jim Halpert"],"CorrectAnswerIndex":0,"Explanation":"Steve Carell played regional manager Michael Scott in the US adaptation.","TimeLimitSeconds":15},
-    {"Id":"TV-014","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What animated sci-fi sitcom follows eccentric scientist Rick Sanchez and his grandson?","Options":["Rick and Morty","Futurama","Solar Opposites","Final Space"],"CorrectAnswerIndex":0,"Explanation":"Rick and Morty premiered on Adult Swim in December 2013.","TimeLimitSeconds":15},
-    {"Id":"TV-015","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What long-running sketch comedy show has broadcast live from Studio 8H in Rockefeller Center since 1975?","Options":["Saturday Night Live","MADtv","In Living Color","SCTV"],"CorrectAnswerIndex":0,"Explanation":"SNL was created by Lorne Michaels and premiered in October 1975.","TimeLimitSeconds":15},
-    {"Id":"TV-016","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1990s medical drama made George Clooney a household name as Dr. Doug Ross?","Options":["ER","Grey's Anatomy","Chicago Hope","House M.D."],"CorrectAnswerIndex":0,"Explanation":"ER was created by Michael Crichton and ran for 15 seasons on NBC.","TimeLimitSeconds":15},
-    {"Id":"TV-017","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which TV series features Tony Soprano balancing mob life with family therapy?","Options":["The Sopranos","The Wire","Boardwalk Empire","Oz"],"CorrectAnswerIndex":0,"Explanation":"The Sopranos starred James Gandolfini and won 21 Primetime Emmy Awards.","TimeLimitSeconds":15},
-    {"Id":"TV-018","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"In 'Parks and Recreation', who plays the bacon-and-whiskey-loving Ron Swanson?","Options":["Nick Offerman","Chris Pratt","Adam Scott","Rob Lowe"],"CorrectAnswerIndex":0,"Explanation":"Nick Offerman played the libertarian director of the Pawnee Parks Department.","TimeLimitSeconds":15},
-    {"Id":"TV-019","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What reality competition series features the famous catchphrase 'The tribe has spoken'?","Options":["Survivor","Big Brother","The Amazing Race","The Challenge"],"CorrectAnswerIndex":0,"Explanation":"Jeff Probst snuffs torches on Survivor since its US debut in May 2000.","TimeLimitSeconds":15},
-    {"Id":"TV-020","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 90s sitcom featured the Banks family and Will Smith moving from West Philadelphia to Bel-Air?","Options":["The Fresh Prince of Bel-Air","Family Matters","Martin","A Different World"],"CorrectAnswerIndex":0,"Explanation":"The Fresh Prince of Bel-Air ran for six seasons on NBC.","TimeLimitSeconds":15},
-    {"Id":"TV-021","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the name of the coffee shop in 'Gilmore Girls' run by Luke Danes?","Options":["Luke's Diner","The Dragonfly Inn","Al's Pancake World","Black, White and Read"],"CorrectAnswerIndex":0,"Explanation":"Luke Danes' diner in Stars Hollow is Lorelai and Rory's primary coffee spot.","TimeLimitSeconds":15},
-    {"Id":"TV-022","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In 'Breaking Bad', what is the street name of the blue methamphetamine cooked by Walt and Jesse?","Options":["Blue Sky","Blue Magic","Crystal Blue","Azure Pure"],"CorrectAnswerIndex":0,"Explanation":"Walter White's signature chemically pure product is known as Blue Sky.","TimeLimitSeconds":15},
-    {"Id":"TV-023","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What was the name of the island where Oceanic Flight 815 crashed in 'Lost'?","Options":["The Island","Monster Island","Hydra Island","Gilligan's Island"],"CorrectAnswerIndex":0,"Explanation":"The mysterious electromagnetic island in Lost was the central setting for six seasons.","TimeLimitSeconds":15},
-    {"Id":"TV-024","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What British sci-fi series features a Time Lord who travels in a blue police box called the TARDIS?","Options":["Doctor Who","Red Dwarf","Torchwood","The Prisoner"],"CorrectAnswerIndex":0,"Explanation":"Doctor Who first aired on BBC Television in November 1963.","TimeLimitSeconds":15},
-    {"Id":"TV-025","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In 'The Big Bang Theory', what is Sheldon Cooper's trademark catchphrase when pulling a prank?","Options":["Bazinga!","Gotcha!","Eureka!","Score!"],"CorrectAnswerIndex":0,"Explanation":"Jim Parsons played Dr. Sheldon Cooper, winning four Emmy Awards.","TimeLimitSeconds":15},
-    {"Id":"TV-026","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What fictional small Indiana town is the setting for 'Parks and Recreation'?","Options":["Pawnee","Eagleton","Hawkins","Dillon"],"CorrectAnswerIndex":0,"Explanation":"Pawnee, Indiana was famously in a bitter rivalry with wealthy neighbor Eagleton.","TimeLimitSeconds":15},
-    {"Id":"TV-027","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which acclaimed HBO series depicted the Baltimore drug trade and school system across five seasons?","Options":["The Wire","The Corner","Treme","We Own This City"],"CorrectAnswerIndex":0,"Explanation":"The Wire was created by former police reporter David Simon.","TimeLimitSeconds":15},
-    {"Id":"TV-028","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the name of the bar in 'It's Always Sunny in Philadelphia'?","Options":["Paddy's Pub","Sudz","The Green Man","O'Callahan's"],"CorrectAnswerIndex":0,"Explanation":"Paddy's Pub is an unsuccessful South Philadelphia Irish bar run by 'The Gang'.","TimeLimitSeconds":15},
-    {"Id":"TV-029","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who created and starred in the multi-Emmy-winning sitcom '30 Rock'?","Options":["Tina Fey","Amy Poehler","Julia Louis-Dreyfus","Maya Rudolph"],"CorrectAnswerIndex":0,"Explanation":"Tina Fey based 30 Rock on her experiences as head writer for Saturday Night Live.","TimeLimitSeconds":15},
-    {"Id":"TV-030","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In 'Mad Men', what Madison Avenue advertising agency does Don Draper work for in early seasons?","Options":["Sterling Cooper","Cutler Gleason Chaough","McCann Erickson","DDB Needham"],"CorrectAnswerIndex":0,"Explanation":"Sterling Cooper was the prestigious 1960s New York advertising agency.","TimeLimitSeconds":15},
-    {"Id":"TV-031","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the name of the dog in 'Family Guy' who talks and drinks martinis?","Options":["Brian Griffin","Stewie","Peter","Jasper"],"CorrectAnswerIndex":0,"Explanation":"Brian Griffin is voiced by series creator Seth MacFarlane.","TimeLimitSeconds":15},
-    {"Id":"TV-032","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which 1980s sitcom starred Ted Danson as former Red Sox pitcher Sam Malone?","Options":["Cheers","Taxi","Night Court","Coach"],"CorrectAnswerIndex":0,"Explanation":"Sam 'Mayday' Malone was the bartender and owner of Cheers.","TimeLimitSeconds":15},
-    {"Id":"TV-033","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the title of the spinoff series featuring attorney Saul Goodman from 'Breaking Bad'?","Options":["Better Call Saul","Slippin' Jimmy","The Albuquerque Files","Goodman & Associates"],"CorrectAnswerIndex":0,"Explanation":"Better Call Saul ran for six critically acclaimed seasons on AMC.","TimeLimitSeconds":15},
-    {"Id":"TV-034","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the name of the fictional kingdom ruled by the Roy family in 'Succession'?","Options":["Waystar RoyCo","Pierce Media","Vaulter","GoJo"],"CorrectAnswerIndex":0,"Explanation":"Waystar RoyCo is a massive global media and entertainment conglomerate.","TimeLimitSeconds":15},
-    {"Id":"TV-035","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In 'Modern Family', what is the name of the real estate agent dad who considers himself a 'cool dad'?","Options":["Phil Dunphy","Jay Pritchett","Mitchell Pritchett","Cam Tucker"],"CorrectAnswerIndex":0,"Explanation":"Ty Burrell won two Emmy Awards playing the lovable Phil Dunphy.","TimeLimitSeconds":15},
-    {"Id":"TV-036","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What sci-fi franchise created by Gene Roddenberry debuted on television in September 1966?","Options":["Star Trek","Battlestar Galactica","Doctor Who","Babylon 5"],"CorrectAnswerIndex":0,"Explanation":"Star Trek: The Original Series starred William Shatner and Leonard Nimoy.","TimeLimitSeconds":15},
-    {"Id":"TV-037","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What was the name of the high school in the 1990s teen comedy 'Saved by the Bell'?","Options":["Bayside High School","Valley High","West Beverly High","Degrassi High"],"CorrectAnswerIndex":0,"Explanation":"Zack Morris, Kelly Kapowski, and A.C. Slater attended Bayside High.","TimeLimitSeconds":15},
-    {"Id":"TV-038","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who hosted 'The Tonight Show' for 30 years from 1962 until his retirement in 1992?","Options":["Johnny Carson","Jack Paar","Jay Leno","Steve Allen"],"CorrectAnswerIndex":0,"Explanation":"Johnny Carson was heralded as the 'King of Late Night'.","TimeLimitSeconds":15},
-    {"Id":"TV-039","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the name of the paper supplier regional manager played by Steve Carell in 'The Office'?","Options":["Michael Scott","Jim Halpert","Dwight Schrute","Andy Bernard"],"CorrectAnswerIndex":0,"Explanation":"Michael Gary Scott served as Regional Manager of Dunder Mifflin Scranton.","TimeLimitSeconds":15},
-    {"Id":"TV-040","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In 'The Twilight Zone', who was the creator, host, and narrator of the original 1959 series?","Options":["Rod Serling","Alfred Hitchcock","Ray Bradbury","Richard Matheson"],"CorrectAnswerIndex":0,"Explanation":"Rod Serling wrote 92 of the 156 original episodes.","TimeLimitSeconds":15},
-    {"Id":"TV-041","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the bar where Frasier Crane and his brother Niles met in 'Frasier'?","Options":["Café Nervosa","Central Perk","Monk's","The Blue Parrot"],"CorrectAnswerIndex":0,"Explanation":"Café Nervosa in Seattle was the upscale coffeehouse frequented by Frasier and Niles.","TimeLimitSeconds":15},
-    {"Id":"TV-042","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"In 'M*A*S*H', what did the acronym MASH stand for?","Options":["Mobile Army Surgical Hospital","Military Auxiliary Service Hospital","Medical Army Support Hospital","Mobile Allied Surgeon Headquarters"],"CorrectAnswerIndex":0,"Explanation":"The 4077th Mobile Army Surgical Hospital was stationed in South Korea.","TimeLimitSeconds":15},
-    {"Id":"TV-043","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the spaceship in the cult classic sci-fi series 'Firefly'?","Options":["Serenity","Enterprise","Galactica","Millennium"],"CorrectAnswerIndex":0,"Explanation":"Serenity was a Firefly-class transport vessel captained by Malcolm Reynolds.","TimeLimitSeconds":15},
-    {"Id":"TV-044","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What 1983 series finale holds the record as the most-watched scripted television episode in US history with 106 million viewers?","Options":["M*A*S*H ('Goodbye, Farewell and Amen')","Cheers","Seinfeld","Friends"],"CorrectAnswerIndex":0,"Explanation":"The finale of M*A*S*H drew a 60.2 rating and over 105.9 million viewers.","TimeLimitSeconds":15},
-    {"Id":"TV-045","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the hotel where Basil and Sybil Fawlty worked in the BBC comedy 'Fawlty Towers'?","Options":["Fawlty Towers","Gleneagles Hotel","Torquay Grand","Bawdy Towers"],"CorrectAnswerIndex":0,"Explanation":"John Cleese and Connie Booth created and wrote the classic Torquay seaside hotel sitcom.","TimeLimitSeconds":15},
-    {"Id":"TV-046","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the full name of the mob boss played by James Gandolfini in 'The Sopranos'?","Options":["Anthony John Soprano","Antonio Luigi Soprano","Anthony Peter Soprano","Anthony Paulie Soprano"],"CorrectAnswerIndex":0,"Explanation":"Tony Soprano was head of the DiMeo crime family in North Jersey.","TimeLimitSeconds":15},
-    {"Id":"TV-047","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"In 'Twin Peaks', who was murdered, prompting FBI Special Agent Dale Cooper's investigation?","Options":["Laura Palmer","Donna Hayward","Audrey Horne","Shelly Johnson"],"CorrectAnswerIndex":0,"Explanation":"'Who killed Laura Palmer?' was the central mystery of the David Lynch series.","TimeLimitSeconds":15},
-    {"Id":"TV-048","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the fictional president played by Martin Sheen in 'The West Wing'?","Options":["Josiah Bartlet","David Palmer","Tom Kirkman","Frank Underwood"],"CorrectAnswerIndex":0,"Explanation":"President Josiah 'Jed' Bartlet was a Nobel laureate in economics from New Hampshire.","TimeLimitSeconds":15},
-    {"Id":"TV-049","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"In 'The Simpsons', what is the name of Homer Simpson's boss and owner of the Springfield Nuclear Power Plant?","Options":["Charles Montgomery Burns","Waylon Smithers","Artie Ziff","Hank Scorpio"],"CorrectAnswerIndex":0,"Explanation":"Mr. Burns is known for his catchphrase 'Excellent' and tapping his fingers together.","TimeLimitSeconds":15},
-    {"Id":"TV-050","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which animated character was voiced by Hank Azaria, including Moe Szyslak, Chief Wiggum, and Apu?","Options":["The Simpsons characters","Family Guy","King of the Hill","Futurama"],"CorrectAnswerIndex":0,"Explanation":"Hank Azaria won six Emmy Awards for his voice work on The Simpsons.","TimeLimitSeconds":15},
-    {"Id":"TV-051","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the name of the animated baby genius in 'Family Guy'?","Options":["Stewie Griffin","Chris Griffin","Meg Griffin","Peter Griffin"],"CorrectAnswerIndex":0,"Explanation":"Stewie Griffin possesses sophisticated speaking skills with an upper-class English accent.","TimeLimitSeconds":15},
-    {"Id":"TV-052","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"In 'Friends', which character famously works as a paleontologist?","Options":["Ross Geller","Chandler Bing","Joey Tribbiani","Gunther"],"CorrectAnswerIndex":0,"Explanation":"Dr. Ross Geller worked at the Museum of Prehistoric History and NYU.","TimeLimitSeconds":15},
-    {"Id":"TV-053","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What animated mystery cartoon featured Scooby-Doo and the Mystery Inc. gang in the Mystery Machine?","Options":["Scooby-Doo, Where Are You!","The Flintstones","The Jetsons","Yogi Bear"],"CorrectAnswerIndex":0,"Explanation":"Hanna-Barbera debuted Scooby-Doo on CBS in September 1969.","TimeLimitSeconds":15},
-    {"Id":"TV-054","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which reality television judge is famous for his blunt critiques on 'American Idol' and 'America's Got Talent'?","Options":["Simon Cowell","Randy Jackson","Gordon Ramsay","Howie Mandel"],"CorrectAnswerIndex":0,"Explanation":"Simon Cowell became a global TV personality through American Idol and the X Factor.","TimeLimitSeconds":15},
-    {"Id":"TV-055","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What sitcom followed four older women living together in Miami: Blanche, Dorothy, Rose, and Sophia?","Options":["The Golden Girls","Designing Women","Kate & Allie","Empty Nest"],"CorrectAnswerIndex":0,"Explanation":"The Golden Girls won Primetime Emmy Awards for all four lead actresses.","TimeLimitSeconds":15},
-    {"Id":"TV-056","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who hosted 'The Price Is Right' for 35 years from 1972 until 2007?","Options":["Bob Barker","Drew Carey","Monty Hall","Bill Cullen"],"CorrectAnswerIndex":0,"Explanation":"Bob Barker reminded viewers to 'help control the pet population, have your pets spayed or neutered.'","TimeLimitSeconds":15},
-    {"Id":"TV-057","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What 1980s detective series featured Tom Selleck driving a red Ferrari 308 in Hawaii?","Options":["Magnum, P.I.","Miami Vice","Knight Rider","The A-Team"],"CorrectAnswerIndex":0,"Explanation":"Thomas Magnum lived on Robin Masters' estate in Oahu.","TimeLimitSeconds":15},
-    {"Id":"TV-058","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What Netflix series follows Queen Elizabeth II's reign across multiple decades?","Options":["The Crown","Downton Abbey","Victoria","Bridgerton"],"CorrectAnswerIndex":0,"Explanation":"The Crown starred Claire Foy, Olivia Colman, and Imelda Staunton as the Queen.","TimeLimitSeconds":15},
-    {"Id":"TV-059","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"In 'Parks and Recreation', who plays the hyper-optimistic deputy director Leslie Knope?","Options":["Amy Poehler","Rashida Jones","Aubrey Plaza","Retta"],"CorrectAnswerIndex":0,"Explanation":"Amy Poehler earned six Emmy nominations and a Golden Globe for the role.","TimeLimitSeconds":15},
-    {"Id":"TV-060","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What TV game show asks contestants to spin a giant wheel and buy vowels?","Options":["Wheel of Fortune","Jeopardy!","The Price Is Right","Card Sharks"],"CorrectAnswerIndex":0,"Explanation":"Wheel of Fortune was created by Merv Griffin in 1975.","TimeLimitSeconds":15},
-    {"Id":"TV-061","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1990s TV sitcom featured the nerdy neighbor Steve Urkel?","Options":["Family Matters","Step by Step","Full House","Hangin' with Mr. Cooper"],"CorrectAnswerIndex":0,"Explanation":"Jaleel White played the suspender-wearing Steve Urkel.","TimeLimitSeconds":15},
-    {"Id":"TV-062","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In 'Seinfeld', what holiday did Frank Costanza invent as an alternative to Christmas?","Options":["Festivus","Chrismukkah","Robanukah","Kwanzo"],"CorrectAnswerIndex":0,"Explanation":"Festivus featured 'The Airing of Grievances' and 'Feats of Strength'.","TimeLimitSeconds":15},
-    {"Id":"TV-063","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which TV drama starred Bryan Cranston and Aaron Paul in Albuquerque, New Mexico?","Options":["Breaking Bad","Better Call Saul","Ozark","Justified"],"CorrectAnswerIndex":0,"Explanation":"Breaking Bad is widely recognized as one of the greatest television series ever produced.","TimeLimitSeconds":15},
-    {"Id":"TV-064","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the name of the talking Pontiac Firebird Trans Am in 'Knight Rider'?","Options":["KITT","KARR","HAL","Jarvis"],"CorrectAnswerIndex":0,"Explanation":"KITT (Knight Industries Two Thousand) was voiced by William Daniels.","TimeLimitSeconds":15},
-    {"Id":"TV-065","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the name of the fictional town in Maine where Stephen King's series 'Castle Rock' is set?","Options":["Castle Rock","Derry","Chester's Mill","Haven"],"CorrectAnswerIndex":0,"Explanation":"Castle Rock is Stephen King's fictional recurring Maine town.","TimeLimitSeconds":15},
-    {"Id":"TV-066","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who played Chandler Bing on the hit NBC sitcom 'Friends'?","Options":["Matthew Perry","Matt LeBlanc","David Schwimmer","Paul Rudd"],"CorrectAnswerIndex":0,"Explanation":"Matthew Perry played the sarcastic, quick-witted Chandler Bing.","TimeLimitSeconds":15},
-    {"Id":"TV-067","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1980s TV series followed a team of ex-special forces mercenaries on the run: Hannibal, Face, Murdock, and B.A. Baracus?","Options":["The A-Team","Miami Vice","MacGyver","Airwolf"],"CorrectAnswerIndex":0,"Explanation":"The A-Team was famous for Mr. T's phrase 'I pity the fool' and driving a black GMC van.","TimeLimitSeconds":15},
-    {"Id":"TV-068","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In 'Arrested Development', what business does the Bluth family operate on the boardwalk?","Options":["A Frozen Banana Stand","A Taco Truck","A Donut Shack","A Surfboard Shop"],"CorrectAnswerIndex":0,"Explanation":"'There's always money in the banana stand!'","TimeLimitSeconds":15},
-    {"Id":"TV-069","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who was the host of the popular 1990s PBS painting show 'The Joy of Painting'?","Options":["Bob Ross","Bill Alexander","Fred Rogers","LeVar Burton"],"CorrectAnswerIndex":0,"Explanation":"Bob Ross painted 'happy little trees' across 403 episodes.","TimeLimitSeconds":15},
-    {"Id":"TV-070","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What British costume drama chronicled the aristocratic Crawley family and their domestic servants in Yorkshire?","Options":["Downton Abbey","The Crown","Poldark","Call the Midwife"],"CorrectAnswerIndex":0,"Explanation":"Downton Abbey was created by Julian Fellowes and broadcast on ITV and PBS Masterpiece.","TimeLimitSeconds":15},
-    {"Id":"TV-071","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the title of the theme song for the sitcom 'The Golden Girls'?","Options":["Thank You for Being a Friend","Where Everybody Knows Your Name","Those Were the Days","As Long as We Got Each Other"],"CorrectAnswerIndex":0,"Explanation":"Andrew Gold originally wrote and recorded the song in 1978; Cynthia Fee sang the TV version.","TimeLimitSeconds":15},
-    {"Id":"TV-072","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the spaceship commanded by Captain Jean-Luc Picard in 'Star Trek: The Next Generation'?","Options":["USS Enterprise (NCC-1701-D)","USS Voyager","USS Defiant","USS Excelsior"],"CorrectAnswerIndex":0,"Explanation":"The Enterprise-D was a Galaxy-class starship launched in 2363.","TimeLimitSeconds":15},
-    {"Id":"TV-073","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"In 'Lost', what was the mysterious six-number sequence that Hurley used to win the lottery?","Options":["4, 8, 15, 16, 23, 42","1, 2, 3, 5, 8, 13","7, 11, 21, 33, 44, 52","3, 9, 17, 25, 36, 49"],"CorrectAnswerIndex":0,"Explanation":"The Numbers recurringly appeared on the hatch and across the island.","TimeLimitSeconds":15},
-    {"Id":"TV-074","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the nuclear submarine in the 1960s sci-fi series 'Voyage to the Bottom of the Sea'?","Options":["USOS Seaview","USS Nautilus","USS Triton","USS Seaquest"],"CorrectAnswerIndex":0,"Explanation":"The SSRN Seaview was designed by Admiral Harriman Nelson.","TimeLimitSeconds":15},
-    {"Id":"TV-075","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who played the title role of Lieutenant Columbo in the long-running mystery series 'Columbo'?","Options":["Peter Falk","Telly Savalas","Karl Malden","Jack Klugman"],"CorrectAnswerIndex":0,"Explanation":"Peter Falk won four Emmy Awards for his portrayal of the rumpled LAPD homicide detective.","TimeLimitSeconds":15},
-    {"Id":"TV-076","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"In 'The Wire', what was the nickname of the stick-up man who robbed drug dealers with a shotgun?","Options":["Omar Little","Stringer Bell","Avon Barksdale","Bunk Moreland"],"CorrectAnswerIndex":0,"Explanation":"Michael K. Williams played the iconic, whistle-blowing Omar Little.","TimeLimitSeconds":15},
-    {"Id":"TV-077","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the first television show to feature a flush toilet heard flushing off-screen in 1971?","Options":["All in the Family","The Brady Bunch","I Love Lucy","Sanford and Son"],"CorrectAnswerIndex":0,"Explanation":"All in the Family broke numerous television taboos in the early 1970s.","TimeLimitSeconds":15},
-    {"Id":"TV-078","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"In 'Dexter', what department of the Miami Metro Police Department does Dexter Morgan work for?","Options":["Blood Spatter Analyst in Forensics","Homicide Detective","Crime Scene Photographer","Ballistics Expert"],"CorrectAnswerIndex":0,"Explanation":"Dexter analyzed blood spatter patterns by day and operated as a vigilante killer by night.","TimeLimitSeconds":15},
-    {"Id":"TV-079","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the butler in 'The Fresh Prince of Bel-Air'?","Options":["Geoffrey Butler","Niles","Alfred","Giles"],"CorrectAnswerIndex":0,"Explanation":"Joseph Marcell played Geoffrey Barbara Butler.","TimeLimitSeconds":15},
-    {"Id":"TV-080","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the fictional law firm in 'L.A. Law'?","Options":["McKenzie, Brackman, Chaney and Kuzak","Crane, Poole & Schmidt","Lockhart/Gardner","Pearson Hardman"],"CorrectAnswerIndex":0,"Explanation":"L.A. Law was created by Steven Bochco and Terry Louise Fisher, winning four Outstanding Drama Series Emmys.","TimeLimitSeconds":15},
-    {"Id":"TV-081","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the name of the high school in the musical TV series 'Glee'?","Options":["William McKinley High School","East High School","Bayside High School","West Beverly High"],"CorrectAnswerIndex":0,"Explanation":"Glee was set in Lima, Ohio at McKinley High.","TimeLimitSeconds":15},
-    {"Id":"TV-082","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which TV comedy follows the misadventures of the Belcher family running a hamburger restaurant?","Options":["Bob's Burgers","King of the Hill","Family Guy","The Cleveland Show"],"CorrectAnswerIndex":0,"Explanation":"Bob's Burgers premiered on Fox in 2011.","TimeLimitSeconds":15},
-    {"Id":"TV-083","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who plays the lead character Ted Lasso in the Apple TV+ comedy series?","Options":["Jason Sudeikis","Bill Lawrence","Brendan Hunt","Brett Goldstein"],"CorrectAnswerIndex":0,"Explanation":"Jason Sudeikis won consecutive Emmy Awards playing the optimistic American coach in London.","TimeLimitSeconds":15},
-    {"Id":"TV-084","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What animated 1960s series followed a prehistoric family living in Bedrock?","Options":["The Flintstones","The Jetsons","Yogi Bear","Scooby-Doo"],"CorrectAnswerIndex":0,"Explanation":"The Flintstones was the first animated series to hold a prime time television network slot.","TimeLimitSeconds":15},
-    {"Id":"TV-085","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What British chef stars in 'Hell's Kitchen' and 'Kitchen Nightmares'?","Options":["Gordon Ramsay","Jamie Oliver","Marco Pierre White","Wolfgang Puck"],"CorrectAnswerIndex":0,"Explanation":"Gordon Ramsay is celebrated for his fiery kitchen critiques and Michelin-starred restaurants.","TimeLimitSeconds":15},
-    {"Id":"TV-086","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the name of the hospital in 'Grey's Anatomy' (originally Seattle Grace)?","Options":["Grey Sloan Memorial Hospital","Seattle General Hospital","Cook County Hospital","Sacred Heart Hospital"],"CorrectAnswerIndex":0,"Explanation":"Seattle Grace was renamed Grey Sloan Memorial in Season 9.","TimeLimitSeconds":15},
-    {"Id":"TV-087","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In 'Schitt's Creek', what was the family's original source of fortune before losing it?","Options":["Rose Video (video store chain)","Real Estate Empire","Department Store Chain","Car Dealerships"],"CorrectAnswerIndex":0,"Explanation":"Johnny Rose founded the second-largest video store rental chain in North America.","TimeLimitSeconds":15},
-    {"Id":"TV-088","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1980s TV series starred Richard Dean Anderson as an agent who could escape any situation using everyday items?","Options":["MacGyver","The A-Team","Magnum, P.I.","Knight Rider"],"CorrectAnswerIndex":0,"Explanation":"Angus MacGyver was renowned for his Swiss Army knife and non-lethal problem solving.","TimeLimitSeconds":15},
-    {"Id":"TV-089","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which TV comedy features a family comprising Jay Pritchett, Gloria, Phil, Claire, Cam, and Mitchell?","Options":["Modern Family","Parenthood","Black-ish","Life in Pieces"],"CorrectAnswerIndex":0,"Explanation":"Modern Family won five consecutive Emmy Awards for Outstanding Comedy Series.","TimeLimitSeconds":15},
-    {"Id":"TV-090","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What is the name of the detective played by Andy Samberg in 'Brooklyn Nine-Nine'?","Options":["Jake Peralta","Charles Boyle","Terry Jeffords","Raymond Holt"],"CorrectAnswerIndex":0,"Explanation":"Jake Peralta is the goofy yet brilliant lead detective of the 99th Precinct.","TimeLimitSeconds":15},
-    {"Id":"TV-091","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the fictional town in Massachusetts where 'Cheers' was set?","Options":["Boston","Salem","Cambridge","Worcester"],"CorrectAnswerIndex":0,"Explanation":"Cheers was set in the Beacon Hill neighborhood of Boston, Massachusetts.","TimeLimitSeconds":15},
-    {"Id":"TV-092","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the captain of the Battlestar Galactica in the 2004 reimagined sci-fi series?","Options":["William Adama","Saul Tigh","Lee Adama","Karl Agathon"],"CorrectAnswerIndex":0,"Explanation":"Edward James Olmos played Commander/Admiral William Adama.","TimeLimitSeconds":15},
-    {"Id":"TV-093","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the title of the fictional soap opera within the soap opera in 'Soap' (1977)?","Options":["Soap","The Secret Storm","Passions","Days of Our Lives"],"CorrectAnswerIndex":0,"Explanation":"Soap was a parody of daytime dramas created by Susan Harris.","TimeLimitSeconds":15},
-    {"Id":"TV-094","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the creator and lead writer of the political drama 'The West Wing' and 'The Newsroom'?","Options":["Aaron Sorkin","David Chase","David Simon","Matthew Weiner"],"CorrectAnswerIndex":0,"Explanation":"Aaron Sorkin is famed for his rapid-fire 'walk-and-talk' dialogue.","TimeLimitSeconds":15},
-    {"Id":"TV-095","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What 1960s British secret agent series starred Patrick McGoohan as 'Number Six' trapped in 'The Village'?","Options":["The Prisoner","Danger Man","The Avengers","The Saint"],"CorrectAnswerIndex":0,"Explanation":"'I am not a number, I am a free man!' was the iconic quote from The Prisoner.","TimeLimitSeconds":15},
-    {"Id":"TV-096","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the name of the animated space family created by Hanna-Barbera in 1962: George, Jane, Judy, and Elroy?","Options":["The Jetsons","The Flintstones","The Space Family","Futurama"],"CorrectAnswerIndex":0,"Explanation":"The Jetsons lived in Orbit City with their dog Astro and maid Rosie.","TimeLimitSeconds":15},
-    {"Id":"TV-097","Category":"TV Shows","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What Netflix dystopian drama series features deadly children's playground games in South Korea?","Options":["Squid Game","Alice in Borderland","All of Us Are Dead","Sweet Home"],"CorrectAnswerIndex":0,"Explanation":"Squid Game became Netflix's most-watched series worldwide in 2021.","TimeLimitSeconds":15},
-    {"Id":"TV-098","Category":"TV Shows","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"In 'Parks and Recreation', what holiday is celebrated on February 13th for female friends?","Options":["Galentine's Day","Treat Yo Self","Pawnee Day","Sisterhood Day"],"CorrectAnswerIndex":0,"Explanation":"Leslie Knope created Galentine's Day to celebrate female friendship.","TimeLimitSeconds":15},
-    {"Id":"TV-099","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the fictional advertising agency founded by Don Draper, Roger Sterling, and Bert Cooper in Season 3?","Options":["Sterling Cooper Draper Pryce","Cramer & Co","McCann Worldwide","Draper Daniels"],"CorrectAnswerIndex":0,"Explanation":"SCDP was founded in a suite at the Time-Life Building.","TimeLimitSeconds":15},
-    {"Id":"TV-100","Category":"TV Shows","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the callsign of the medical unit in the TV series 'M*A*S*H'?","Options":["4077th","8063rd","121st","5th Evac"],"CorrectAnswerIndex":0,"Explanation":"The 4077th MASH unit was stationed in Uijeongbu, South Korea.","TimeLimitSeconds":15}
+    {
+      "Id": "TV-001",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the coffee shop where the main characters hang out in 'Friends'?",
+      "Options": [
+        "Monk's Diner",
+        "MacLaren's Pub",
+        "Luke's Diner",
+        "Central Perk"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Central Perk in Greenwich Village was managed by Gunther.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-002",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the fictional paper company in the US version of 'The Office'?",
+      "Options": [
+        "Wernham Hogg",
+        "Dunder Mifflin",
+        "Vandelay Industries",
+        "Initech"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Dunder Mifflin Paper Company, Inc. was based in Scranton, Pennsylvania.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-003",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who plays the chemistry teacher turned drug lord Walter White in 'Breaking Bad'?",
+      "Options": [
+        "Bob Odenkirk",
+        "Aaron Paul",
+        "Dean Norris",
+        "Bryan Cranston"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Bryan Cranston won four Primetime Emmy Awards for Outstanding Lead Actor for the role.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-004",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the fictional continent where most of 'Game of Thrones' takes place?",
+      "Options": [
+        "Middle-earth",
+        "Narnia",
+        "Westeros",
+        "Essos"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Westeros is home to the Seven Kingdoms and the Iron Throne.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-005",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What animated TV series features Homer, Marge, Bart, Lisa, and Maggie?",
+      "Options": [
+        "Futurama",
+        "Family Guy",
+        "Bob's Burgers",
+        "The Simpsons"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Simpsons is the longest-running American animated series in television history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-006",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Seinfeld', what is Kramer's first name, revealed in Season 6?",
+      "Options": [
+        "Morty",
+        "Newman",
+        "Artie",
+        "Cosmo"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Cosmo Kramer was played by Michael Richards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-007",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990s TV show followed agents Fox Mulder and Dana Scully investigating paranormal cases?",
+      "Options": [
+        "Twin Peaks",
+        "Millennium",
+        "Fringe",
+        "The X-Files"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The X-Files coined the tagline 'The Truth Is Out There'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-008",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the host of 'Jeopardy!' from 1984 until his passing in 2020?",
+      "Options": [
+        "Bob Barker",
+        "Pat Sajak",
+        "Alex Trebek",
+        "Art Fleming"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Alex Trebek hosted over 8,000 episodes of Jeopardy!.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-009",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What animated show is set in the underwater city of Bikini Bottom?",
+      "Options": [
+        "The Little Mermaid",
+        "Fish Hooks",
+        "SpongeBob SquarePants",
+        "Finding Nemo"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "SpongeBob SquarePants was created by marine science educator Stephen Hillenburg.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-010",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the bar in Boston 'where everybody knows your name'?",
+      "Options": [
+        "The Regal Beagle",
+        "Paddy's Pub",
+        "Moe's Tavern",
+        "Cheers"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Cheers ran for 11 seasons on NBC from 1982 to 1993.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-011",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Stranger Things', what is the name of the alternate dimension full of monsters?",
+      "Options": [
+        "The Underworld",
+        "The Upside Down",
+        "The Shadow Realm",
+        "The Nether"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Upside Down is a dark mirror reflection of Hawkins, Indiana.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-012",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular 1990s teen drama followed Brandon, Brenda, Dylan, and Kelly in California?",
+      "Options": [
+        "The O.C.",
+        "Melrose Place",
+        "Dawson's Creek",
+        "Beverly Hills, 90210"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Beverly Hills, 90210 was created by Darren Star and produced by Aaron Spelling.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-013",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is the eccentric billionaire boss in 'The Office' (UK) and regional manager in US?",
+      "Options": [
+        "Michael Scott",
+        "Jim Halpert",
+        "Dwight Schrute",
+        "David Brent"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Steve Carell played regional manager Michael Scott in the US adaptation.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-014",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What animated sci-fi sitcom follows eccentric scientist Rick Sanchez and his grandson?",
+      "Options": [
+        "Rick and Morty",
+        "Final Space",
+        "Solar Opposites",
+        "Futurama"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Rick and Morty premiered on Adult Swim in December 2013.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-015",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What long-running sketch comedy show has broadcast live from Studio 8H in Rockefeller Center since 1975?",
+      "Options": [
+        "MADtv",
+        "In Living Color",
+        "SCTV",
+        "Saturday Night Live"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "SNL was created by Lorne Michaels and premiered in October 1975.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-016",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990s medical drama made George Clooney a household name as Dr. Doug Ross?",
+      "Options": [
+        "House M.D.",
+        "Chicago Hope",
+        "Grey's Anatomy",
+        "ER"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "ER was created by Michael Crichton and ran for 15 seasons on NBC.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-017",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which TV series features Tony Soprano balancing mob life with family therapy?",
+      "Options": [
+        "Boardwalk Empire",
+        "The Sopranos",
+        "The Wire",
+        "Oz"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Sopranos starred James Gandolfini and won 21 Primetime Emmy Awards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-018",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Parks and Recreation', who plays the bacon-and-whiskey-loving Ron Swanson?",
+      "Options": [
+        "Nick Offerman",
+        "Adam Scott",
+        "Rob Lowe",
+        "Chris Pratt"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Nick Offerman played the libertarian director of the Pawnee Parks Department.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-019",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What reality competition series features the famous catchphrase 'The tribe has spoken'?",
+      "Options": [
+        "Survivor",
+        "The Challenge",
+        "Big Brother",
+        "The Amazing Race"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Jeff Probst snuffs torches on Survivor since its US debut in May 2000.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-020",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 90s sitcom featured the Banks family and Will Smith moving from West Philadelphia to Bel-Air?",
+      "Options": [
+        "Family Matters",
+        "Martin",
+        "A Different World",
+        "The Fresh Prince of Bel-Air"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Fresh Prince of Bel-Air ran for six seasons on NBC.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-021",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the coffee shop in 'Gilmore Girls' run by Luke Danes?",
+      "Options": [
+        "Luke's Diner",
+        "Black, White and Read",
+        "Al's Pancake World",
+        "The Dragonfly Inn"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Luke Danes' diner in Stars Hollow is Lorelai and Rory's primary coffee spot.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-022",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Breaking Bad', what is the street name of the blue methamphetamine cooked by Walt and Jesse?",
+      "Options": [
+        "Blue Magic",
+        "Azure Pure",
+        "Blue Sky",
+        "Crystal Blue"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Walter White's signature chemically pure product is known as Blue Sky.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-023",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the island where Oceanic Flight 815 crashed in 'Lost'?",
+      "Options": [
+        "Gilligan's Island",
+        "Hydra Island",
+        "The Island",
+        "Monster Island"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The mysterious electromagnetic island in Lost was the central setting for six seasons.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-024",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What British sci-fi series features a Time Lord who travels in a blue police box called the TARDIS?",
+      "Options": [
+        "Red Dwarf",
+        "Doctor Who",
+        "The Prisoner",
+        "Torchwood"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Doctor Who first aired on BBC Television in November 1963.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-025",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'The Big Bang Theory', what is Sheldon Cooper's trademark catchphrase when pulling a prank?",
+      "Options": [
+        "Eureka!",
+        "Bazinga!",
+        "Score!",
+        "Gotcha!"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Jim Parsons played Dr. Sheldon Cooper, winning four Emmy Awards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-026",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What fictional small Indiana town is the setting for 'Parks and Recreation'?",
+      "Options": [
+        "Pawnee",
+        "Dillon",
+        "Hawkins",
+        "Eagleton"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Pawnee, Indiana was famously in a bitter rivalry with wealthy neighbor Eagleton.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-027",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which acclaimed HBO series depicted the Baltimore drug trade and school system across five seasons?",
+      "Options": [
+        "Treme",
+        "The Corner",
+        "The Wire",
+        "We Own This City"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Wire was created by former police reporter David Simon.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-028",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the bar in 'It's Always Sunny in Philadelphia'?",
+      "Options": [
+        "O'Callahan's",
+        "The Green Man",
+        "Sudz",
+        "Paddy's Pub"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Paddy's Pub is an unsuccessful South Philadelphia Irish bar run by 'The Gang'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-029",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who created and starred in the multi-Emmy-winning sitcom '30 Rock'?",
+      "Options": [
+        "Tina Fey",
+        "Amy Poehler",
+        "Julia Louis-Dreyfus",
+        "Maya Rudolph"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tina Fey based 30 Rock on her experiences as head writer for Saturday Night Live.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-030",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Mad Men', what Madison Avenue advertising agency does Don Draper work for in early seasons?",
+      "Options": [
+        "DDB Needham",
+        "McCann Erickson",
+        "Cutler Gleason Chaough",
+        "Sterling Cooper"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Sterling Cooper was the prestigious 1960s New York advertising agency.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-031",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the dog in 'Family Guy' who talks and drinks martinis?",
+      "Options": [
+        "Peter",
+        "Jasper",
+        "Stewie",
+        "Brian Griffin"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Brian Griffin is voiced by series creator Seth MacFarlane.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-032",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which 1980s sitcom starred Ted Danson as former Red Sox pitcher Sam Malone?",
+      "Options": [
+        "Cheers",
+        "Night Court",
+        "Taxi",
+        "Coach"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sam 'Mayday' Malone was the bartender and owner of Cheers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-033",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the title of the spinoff series featuring attorney Saul Goodman from 'Breaking Bad'?",
+      "Options": [
+        "Better Call Saul",
+        "Goodman & Associates",
+        "Slippin' Jimmy",
+        "The Albuquerque Files"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Better Call Saul ran for six critically acclaimed seasons on AMC.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-034",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the fictional kingdom ruled by the Roy family in 'Succession'?",
+      "Options": [
+        "GoJo",
+        "Pierce Media",
+        "Waystar RoyCo",
+        "Vaulter"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Waystar RoyCo is a massive global media and entertainment conglomerate.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-035",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Modern Family', what is the name of the real estate agent dad who considers himself a 'cool dad'?",
+      "Options": [
+        "Mitchell Pritchett",
+        "Cam Tucker",
+        "Jay Pritchett",
+        "Phil Dunphy"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ty Burrell won two Emmy Awards playing the lovable Phil Dunphy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-036",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What sci-fi franchise created by Gene Roddenberry debuted on television in September 1966?",
+      "Options": [
+        "Babylon 5",
+        "Battlestar Galactica",
+        "Doctor Who",
+        "Star Trek"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Star Trek: The Original Series starred William Shatner and Leonard Nimoy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-037",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the high school in the 1990s teen comedy 'Saved by the Bell'?",
+      "Options": [
+        "West Beverly High",
+        "Degrassi High",
+        "Valley High",
+        "Bayside High School"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Zack Morris, Kelly Kapowski, and A.C. Slater attended Bayside High.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-038",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who hosted 'The Tonight Show' for 30 years from 1962 until his retirement in 1992?",
+      "Options": [
+        "Jack Paar",
+        "Steve Allen",
+        "Jay Leno",
+        "Johnny Carson"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Johnny Carson was heralded as the 'King of Late Night'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-039",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the paper supplier regional manager played by Steve Carell in 'The Office'?",
+      "Options": [
+        "Jim Halpert",
+        "Dwight Schrute",
+        "Michael Scott",
+        "Andy Bernard"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Michael Gary Scott served as Regional Manager of Dunder Mifflin Scranton.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-040",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'The Twilight Zone', who was the creator, host, and narrator of the original 1959 series?",
+      "Options": [
+        "Ray Bradbury",
+        "Rod Serling",
+        "Alfred Hitchcock",
+        "Richard Matheson"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Rod Serling wrote 92 of the 156 original episodes.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-041",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the bar where Frasier Crane and his brother Niles met in 'Frasier'?",
+      "Options": [
+        "Central Perk",
+        "Café Nervosa",
+        "Monk's",
+        "The Blue Parrot"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Café Nervosa in Seattle was the upscale coffeehouse frequented by Frasier and Niles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-042",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'M*A*S*H', what did the acronym MASH stand for?",
+      "Options": [
+        "Mobile Allied Surgeon Headquarters",
+        "Military Auxiliary Service Hospital",
+        "Medical Army Support Hospital",
+        "Mobile Army Surgical Hospital"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The 4077th Mobile Army Surgical Hospital was stationed in South Korea.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-043",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the spaceship in the cult classic sci-fi series 'Firefly'?",
+      "Options": [
+        "Galactica",
+        "Enterprise",
+        "Serenity",
+        "Millennium"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Serenity was a Firefly-class transport vessel captained by Malcolm Reynolds.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-044",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1983 series finale holds the record as the most-watched scripted television episode in US history with 106 million viewers?",
+      "Options": [
+        "Cheers",
+        "Friends",
+        "Seinfeld",
+        "M*A*S*H ('Goodbye, Farewell and Amen')"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The finale of M*A*S*H drew a 60.2 rating and over 105.9 million viewers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-045",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the hotel where Basil and Sybil Fawlty worked in the BBC comedy 'Fawlty Towers'?",
+      "Options": [
+        "Fawlty Towers",
+        "Bawdy Towers",
+        "Torquay Grand",
+        "Gleneagles Hotel"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "John Cleese and Connie Booth created and wrote the classic Torquay seaside hotel sitcom.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-046",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the full name of the mob boss played by James Gandolfini in 'The Sopranos'?",
+      "Options": [
+        "Anthony John Soprano",
+        "Antonio Luigi Soprano",
+        "Anthony Paulie Soprano",
+        "Anthony Peter Soprano"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tony Soprano was head of the DiMeo crime family in North Jersey.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-047",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Twin Peaks', who was murdered, prompting FBI Special Agent Dale Cooper's investigation?",
+      "Options": [
+        "Donna Hayward",
+        "Laura Palmer",
+        "Audrey Horne",
+        "Shelly Johnson"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Who killed Laura Palmer?' was the central mystery of the David Lynch series.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-048",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the fictional president played by Martin Sheen in 'The West Wing'?",
+      "Options": [
+        "Tom Kirkman",
+        "Josiah Bartlet",
+        "Frank Underwood",
+        "David Palmer"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "President Josiah 'Jed' Bartlet was a Nobel laureate in economics from New Hampshire.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-049",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'The Simpsons', what is the name of Homer Simpson's boss and owner of the Springfield Nuclear Power Plant?",
+      "Options": [
+        "Artie Ziff",
+        "Waylon Smithers",
+        "Charles Montgomery Burns",
+        "Hank Scorpio"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Mr. Burns is known for his catchphrase 'Excellent' and tapping his fingers together.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-050",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which animated character was voiced by Hank Azaria, including Moe Szyslak, Chief Wiggum, and Apu?",
+      "Options": [
+        "Futurama",
+        "The Simpsons characters",
+        "King of the Hill",
+        "Family Guy"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Hank Azaria won six Emmy Awards for his voice work on The Simpsons.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-051",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the animated baby genius in 'Family Guy'?",
+      "Options": [
+        "Stewie Griffin",
+        "Peter Griffin",
+        "Meg Griffin",
+        "Chris Griffin"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Stewie Griffin possesses sophisticated speaking skills with an upper-class English accent.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-052",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Friends', which character famously works as a paleontologist?",
+      "Options": [
+        "Ross Geller",
+        "Gunther",
+        "Joey Tribbiani",
+        "Chandler Bing"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Dr. Ross Geller worked at the Museum of Prehistoric History and NYU.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-053",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What animated mystery cartoon featured Scooby-Doo and the Mystery Inc. gang in the Mystery Machine?",
+      "Options": [
+        "Scooby-Doo, Where Are You!",
+        "The Jetsons",
+        "The Flintstones",
+        "Yogi Bear"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Hanna-Barbera debuted Scooby-Doo on CBS in September 1969.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-054",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which reality television judge is famous for his blunt critiques on 'American Idol' and 'America's Got Talent'?",
+      "Options": [
+        "Randy Jackson",
+        "Gordon Ramsay",
+        "Simon Cowell",
+        "Howie Mandel"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Simon Cowell became a global TV personality through American Idol and the X Factor.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-055",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What sitcom followed four older women living together in Miami: Blanche, Dorothy, Rose, and Sophia?",
+      "Options": [
+        "Kate & Allie",
+        "The Golden Girls",
+        "Designing Women",
+        "Empty Nest"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Golden Girls won Primetime Emmy Awards for all four lead actresses.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-056",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who hosted 'The Price Is Right' for 35 years from 1972 until 2007?",
+      "Options": [
+        "Bill Cullen",
+        "Drew Carey",
+        "Bob Barker",
+        "Monty Hall"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Bob Barker reminded viewers to 'help control the pet population, have your pets spayed or neutered.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-057",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s detective series featured Tom Selleck driving a red Ferrari 308 in Hawaii?",
+      "Options": [
+        "Magnum, P.I.",
+        "Miami Vice",
+        "The A-Team",
+        "Knight Rider"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Thomas Magnum lived on Robin Masters' estate in Oahu.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-058",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Netflix series follows Queen Elizabeth II's reign across multiple decades?",
+      "Options": [
+        "The Crown",
+        "Victoria",
+        "Downton Abbey",
+        "Bridgerton"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Crown starred Claire Foy, Olivia Colman, and Imelda Staunton as the Queen.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-059",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Parks and Recreation', who plays the hyper-optimistic deputy director Leslie Knope?",
+      "Options": [
+        "Aubrey Plaza",
+        "Retta",
+        "Rashida Jones",
+        "Amy Poehler"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Amy Poehler earned six Emmy nominations and a Golden Globe for the role.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-060",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What TV game show asks contestants to spin a giant wheel and buy vowels?",
+      "Options": [
+        "The Price Is Right",
+        "Jeopardy!",
+        "Wheel of Fortune",
+        "Card Sharks"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Wheel of Fortune was created by Merv Griffin in 1975.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-061",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1990s TV sitcom featured the nerdy neighbor Steve Urkel?",
+      "Options": [
+        "Family Matters",
+        "Full House",
+        "Step by Step",
+        "Hangin' with Mr. Cooper"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Jaleel White played the suspender-wearing Steve Urkel.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-062",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Seinfeld', what holiday did Frank Costanza invent as an alternative to Christmas?",
+      "Options": [
+        "Chrismukkah",
+        "Robanukah",
+        "Festivus",
+        "Kwanzo"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Festivus featured 'The Airing of Grievances' and 'Feats of Strength'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-063",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which TV drama starred Bryan Cranston and Aaron Paul in Albuquerque, New Mexico?",
+      "Options": [
+        "Better Call Saul",
+        "Ozark",
+        "Breaking Bad",
+        "Justified"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Breaking Bad is widely recognized as one of the greatest television series ever produced.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-064",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the talking Pontiac Firebird Trans Am in 'Knight Rider'?",
+      "Options": [
+        "Jarvis",
+        "KITT",
+        "KARR",
+        "HAL"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "KITT (Knight Industries Two Thousand) was voiced by William Daniels.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-065",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the fictional town in Maine where Stephen King's series 'Castle Rock' is set?",
+      "Options": [
+        "Haven",
+        "Castle Rock",
+        "Derry",
+        "Chester's Mill"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Castle Rock is Stephen King's fictional recurring Maine town.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-066",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who played Chandler Bing on the hit NBC sitcom 'Friends'?",
+      "Options": [
+        "Matt LeBlanc",
+        "Matthew Perry",
+        "David Schwimmer",
+        "Paul Rudd"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Matthew Perry played the sarcastic, quick-witted Chandler Bing.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-067",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s TV series followed a team of ex-special forces mercenaries on the run: Hannibal, Face, Murdock, and B.A. Baracus?",
+      "Options": [
+        "Miami Vice",
+        "The A-Team",
+        "MacGyver",
+        "Airwolf"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The A-Team was famous for Mr. T's phrase 'I pity the fool' and driving a black GMC van.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-068",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Arrested Development', what business does the Bluth family operate on the boardwalk?",
+      "Options": [
+        "A Taco Truck",
+        "A Surfboard Shop",
+        "A Frozen Banana Stand",
+        "A Donut Shack"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'There's always money in the banana stand!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-069",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the host of the popular 1990s PBS painting show 'The Joy of Painting'?",
+      "Options": [
+        "Fred Rogers",
+        "Bob Ross",
+        "LeVar Burton",
+        "Bill Alexander"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Bob Ross painted 'happy little trees' across 403 episodes.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-070",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What British costume drama chronicled the aristocratic Crawley family and their domestic servants in Yorkshire?",
+      "Options": [
+        "The Crown",
+        "Call the Midwife",
+        "Poldark",
+        "Downton Abbey"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Downton Abbey was created by Julian Fellowes and broadcast on ITV and PBS Masterpiece.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-071",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the title of the theme song for the sitcom 'The Golden Girls'?",
+      "Options": [
+        "Thank You for Being a Friend",
+        "Those Were the Days",
+        "Where Everybody Knows Your Name",
+        "As Long as We Got Each Other"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Andrew Gold originally wrote and recorded the song in 1978; Cynthia Fee sang the TV version.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-072",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the spaceship commanded by Captain Jean-Luc Picard in 'Star Trek: The Next Generation'?",
+      "Options": [
+        "USS Voyager",
+        "USS Excelsior",
+        "USS Enterprise (NCC-1701-D)",
+        "USS Defiant"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Enterprise-D was a Galaxy-class starship launched in 2363.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-073",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Lost', what was the mysterious six-number sequence that Hurley used to win the lottery?",
+      "Options": [
+        "4, 8, 15, 16, 23, 42",
+        "3, 9, 17, 25, 36, 49",
+        "7, 11, 21, 33, 44, 52",
+        "1, 2, 3, 5, 8, 13"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Numbers recurringly appeared on the hatch and across the island.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-074",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the nuclear submarine in the 1960s sci-fi series 'Voyage to the Bottom of the Sea'?",
+      "Options": [
+        "USS Triton",
+        "USS Nautilus",
+        "USS Seaquest",
+        "USOS Seaview"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The SSRN Seaview was designed by Admiral Harriman Nelson.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-075",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who played the title role of Lieutenant Columbo in the long-running mystery series 'Columbo'?",
+      "Options": [
+        "Telly Savalas",
+        "Peter Falk",
+        "Jack Klugman",
+        "Karl Malden"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Peter Falk won four Emmy Awards for his portrayal of the rumpled LAPD homicide detective.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-076",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'The Wire', what was the nickname of the stick-up man who robbed drug dealers with a shotgun?",
+      "Options": [
+        "Stringer Bell",
+        "Avon Barksdale",
+        "Omar Little",
+        "Bunk Moreland"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Michael K. Williams played the iconic, whistle-blowing Omar Little.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-077",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the first television show to feature a flush toilet heard flushing off-screen in 1971?",
+      "Options": [
+        "I Love Lucy",
+        "The Brady Bunch",
+        "All in the Family",
+        "Sanford and Son"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "All in the Family broke numerous television taboos in the early 1970s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-078",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Dexter', what department of the Miami Metro Police Department does Dexter Morgan work for?",
+      "Options": [
+        "Ballistics Expert",
+        "Blood Spatter Analyst in Forensics",
+        "Crime Scene Photographer",
+        "Homicide Detective"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Dexter analyzed blood spatter patterns by day and operated as a vigilante killer by night.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-079",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the butler in 'The Fresh Prince of Bel-Air'?",
+      "Options": [
+        "Alfred",
+        "Niles",
+        "Geoffrey Butler",
+        "Giles"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Joseph Marcell played Geoffrey Barbara Butler.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-080",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the fictional law firm in 'L.A. Law'?",
+      "Options": [
+        "Crane, Poole & Schmidt",
+        "Pearson Hardman",
+        "McKenzie, Brackman, Chaney and Kuzak",
+        "Lockhart/Gardner"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "L.A. Law was created by Steven Bochco and Terry Louise Fisher, winning four Outstanding Drama Series Emmys.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-081",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the high school in the musical TV series 'Glee'?",
+      "Options": [
+        "West Beverly High",
+        "William McKinley High School",
+        "Bayside High School",
+        "East High School"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Glee was set in Lima, Ohio at McKinley High.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-082",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which TV comedy follows the misadventures of the Belcher family running a hamburger restaurant?",
+      "Options": [
+        "Bob's Burgers",
+        "The Cleveland Show",
+        "Family Guy",
+        "King of the Hill"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Bob's Burgers premiered on Fox in 2011.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-083",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who plays the lead character Ted Lasso in the Apple TV+ comedy series?",
+      "Options": [
+        "Brendan Hunt",
+        "Brett Goldstein",
+        "Bill Lawrence",
+        "Jason Sudeikis"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Jason Sudeikis won consecutive Emmy Awards playing the optimistic American coach in London.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-084",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What animated 1960s series followed a prehistoric family living in Bedrock?",
+      "Options": [
+        "Yogi Bear",
+        "Scooby-Doo",
+        "The Jetsons",
+        "The Flintstones"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Flintstones was the first animated series to hold a prime time television network slot.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-085",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What British chef stars in 'Hell's Kitchen' and 'Kitchen Nightmares'?",
+      "Options": [
+        "Gordon Ramsay",
+        "Wolfgang Puck",
+        "Marco Pierre White",
+        "Jamie Oliver"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Gordon Ramsay is celebrated for his fiery kitchen critiques and Michelin-starred restaurants.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-086",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the hospital in 'Grey's Anatomy' (originally Seattle Grace)?",
+      "Options": [
+        "Cook County Hospital",
+        "Grey Sloan Memorial Hospital",
+        "Sacred Heart Hospital",
+        "Seattle General Hospital"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Seattle Grace was renamed Grey Sloan Memorial in Season 9.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-087",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Schitt's Creek', what was the family's original source of fortune before losing it?",
+      "Options": [
+        "Car Dealerships",
+        "Rose Video (video store chain)",
+        "Real Estate Empire",
+        "Department Store Chain"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Johnny Rose founded the second-largest video store rental chain in North America.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-088",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1980s TV series starred Richard Dean Anderson as an agent who could escape any situation using everyday items?",
+      "Options": [
+        "The A-Team",
+        "Knight Rider",
+        "Magnum, P.I.",
+        "MacGyver"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Angus MacGyver was renowned for his Swiss Army knife and non-lethal problem solving.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-089",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which TV comedy features a family comprising Jay Pritchett, Gloria, Phil, Claire, Cam, and Mitchell?",
+      "Options": [
+        "Black-ish",
+        "Parenthood",
+        "Modern Family",
+        "Life in Pieces"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Modern Family won five consecutive Emmy Awards for Outstanding Comedy Series.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-090",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the detective played by Andy Samberg in 'Brooklyn Nine-Nine'?",
+      "Options": [
+        "Terry Jeffords",
+        "Jake Peralta",
+        "Raymond Holt",
+        "Charles Boyle"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Jake Peralta is the goofy yet brilliant lead detective of the 99th Precinct.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-091",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the fictional town in Massachusetts where 'Cheers' was set?",
+      "Options": [
+        "Worcester",
+        "Salem",
+        "Boston",
+        "Cambridge"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Cheers was set in the Beacon Hill neighborhood of Boston, Massachusetts.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-092",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the captain of the Battlestar Galactica in the 2004 reimagined sci-fi series?",
+      "Options": [
+        "William Adama",
+        "Lee Adama",
+        "Karl Agathon",
+        "Saul Tigh"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Edward James Olmos played Commander/Admiral William Adama.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-093",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the title of the fictional soap opera within the soap opera in 'Soap' (1977)?",
+      "Options": [
+        "Soap",
+        "Passions",
+        "The Secret Storm",
+        "Days of Our Lives"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Soap was a parody of daytime dramas created by Susan Harris.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-094",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the creator and lead writer of the political drama 'The West Wing' and 'The Newsroom'?",
+      "Options": [
+        "David Simon",
+        "David Chase",
+        "Aaron Sorkin",
+        "Matthew Weiner"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Aaron Sorkin is famed for his rapid-fire 'walk-and-talk' dialogue.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-095",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1960s British secret agent series starred Patrick McGoohan as 'Number Six' trapped in 'The Village'?",
+      "Options": [
+        "Danger Man",
+        "The Prisoner",
+        "The Avengers",
+        "The Saint"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'I am not a number, I am a free man!' was the iconic quote from The Prisoner.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-096",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the animated space family created by Hanna-Barbera in 1962: George, Jane, Judy, and Elroy?",
+      "Options": [
+        "The Jetsons",
+        "The Space Family",
+        "Futurama",
+        "The Flintstones"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Jetsons lived in Orbit City with their dog Astro and maid Rosie.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-097",
+      "Category": "TV Shows",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Netflix dystopian drama series features deadly children's playground games in South Korea?",
+      "Options": [
+        "Sweet Home",
+        "Squid Game",
+        "Alice in Borderland",
+        "All of Us Are Dead"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Squid Game became Netflix's most-watched series worldwide in 2021.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-098",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'Parks and Recreation', what holiday is celebrated on February 13th for female friends?",
+      "Options": [
+        "Sisterhood Day",
+        "Pawnee Day",
+        "Treat Yo Self",
+        "Galentine's Day"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Leslie Knope created Galentine's Day to celebrate female friendship.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-099",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the fictional advertising agency founded by Don Draper, Roger Sterling, and Bert Cooper in Season 3?",
+      "Options": [
+        "McCann Worldwide",
+        "Draper Daniels",
+        "Cramer & Co",
+        "Sterling Cooper Draper Pryce"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "SCDP was founded in a suite at the Time-Life Building.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "TV-100",
+      "Category": "TV Shows",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the callsign of the medical unit in the TV series 'M*A*S*H'?",
+      "Options": [
+        "4077th",
+        "121st",
+        "8063rd",
+        "5th Evac"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The 4077th MASH unit was stationed in Uijeongbu, South Korea.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'Breaking Bad', what is Walter White's criminal alter ego name inspired by a quantum physicist?",
+      "Options": [
+        "Heisenberg",
+        "Schrödinger",
+        "Fermi",
+        "Oppenheimer"
+      ],
+      "Explanation": "Walter White named his drug kingpin persona after physicist Werner Heisenberg.",
+      "Id": "TVS-101",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On the sitcom 'Cheers', what did all the patrons shout whenever George Wendt's character walked into the bar?",
+      "Options": [
+        "'Norm!'",
+        "'Cliff!'",
+        "'Frasier!'",
+        "'Sammy!'"
+      ],
+      "Explanation": "Norm Peterson's daily entrance was greeted in unison by the entire bar.",
+      "Id": "TVS-102",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which classic sitcom took place at the 4077th Mobile Army Surgical Hospital during the Korean War?",
+      "Options": [
+        "Hogan's Heroes",
+        "Gomer Pyle, U.S.M.C.",
+        "M*A*S*H",
+        "McHale's Navy"
+      ],
+      "Explanation": "M*A*S*H ran for 11 seasons, and its 1983 series finale remains the most-watched scripted TV episode in history.",
+      "Id": "TVS-103",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'The Office' (US), what is the name of the paper company where the characters work?",
+      "Options": [
+        "Sabre",
+        "Dunder Mifflin",
+        "Vance Refrigeration",
+        "Wernham Hogg"
+      ],
+      "Explanation": "The Scranton branch of Dunder Mifflin is managed by Michael Scott.",
+      "Id": "TVS-104",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which sci-fi series featured FBI special agents Fox Mulder and Dana Scully investigating paranormal cases?",
+      "Options": [
+        "The X-Files",
+        "Supernatural",
+        "Twin Peaks",
+        "Fringe"
+      ],
+      "Explanation": "The series slogan was 'The Truth Is Out There'.",
+      "Id": "TVS-105",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'Seinfeld', what fictional winter holiday did Frank Costanza invent as an alternative to commercial Christmas?",
+      "Options": [
+        "Kramer-mas",
+        "Festivus ('for the rest of us')",
+        "Spite-mas",
+        "Serenity Day"
+      ],
+      "Explanation": "Festivus featured an unadorned aluminum pole and the 'Airing of Grievances'.",
+      "Id": "TVS-106",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'Game of Thrones', what is the ancestral castle and seat of House Stark in the North?",
+      "Options": [
+        "King's Landing",
+        "Casterly Rock",
+        "Winterfell",
+        "Dragonstone"
+      ],
+      "Explanation": "Winterfell was ruled by Lord Eddard 'Ned' Stark.",
+      "Id": "TVS-107",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s TV show followed four older women sharing a house in Miami, Florida?",
+      "Options": [
+        "The Golden Girls",
+        "Designing Women",
+        "Alice",
+        "Maude"
+      ],
+      "Explanation": "Dorothy, Rose, Blanche, and Sophia loved eating cheesecake around the kitchen table.",
+      "Id": "TVS-108",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the name of the high school chemistry teacher turned meth kingpin in 'Breaking Bad'?",
+      "Options": [
+        "Walter White",
+        "Hank Schrader",
+        "Jesse Pinkman",
+        "Saul Goodman"
+      ],
+      "Explanation": "Bryan Cranston won four Primetime Emmy Awards for playing Walter White.",
+      "Id": "TVS-109",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'Friends', what is the name of the Central Perk coffee shop manager with bleached blonde hair who secretly loves Rachel?",
+      "Options": [
+        "Tag",
+        "Paul",
+        "Gunther",
+        "Mike"
+      ],
+      "Explanation": "James Michael Tyler played the deadpan barista Gunther in 148 episodes.",
+      "Id": "TVS-110",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which long-running animated comedy series is set in the fictional town of Quahog, Rhode Island?",
+      "Options": [
+        "American Dad!",
+        "Family Guy",
+        "The Simpsons",
+        "Bob's Burgers"
+      ],
+      "Explanation": "Seth MacFarlane created Family Guy focusing on the Griffin family.",
+      "Id": "TVS-111",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'Stranger Things', what is the alternate shadowy dimension that mirrors the real world called?",
+      "Options": [
+        "The Upside Down",
+        "The Underworld",
+        "The Nether",
+        "The Void"
+      ],
+      "Explanation": "The Upside Down is inhabited by the Demogorgon, the Mind Flayer, and Vecna.",
+      "Id": "TVS-112",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'The Big Bang Theory', what is Sheldon Cooper's trademark catchphrase whenever he plays a practical joke?",
+      "Options": [
+        "'Eureka!'",
+        "'Boom!'",
+        "'Bazinga!'",
+        "'Gotcha!'"
+      ],
+      "Explanation": "Jim Parsons played theoretical physicist Sheldon Cooper.",
+      "Id": "TVS-113",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1990s TV drama followed a group of lifeguards patrolling the beaches of Los Angeles County?",
+      "Options": [
+        "Melrose Place",
+        "Beverly Hills, 90210",
+        "Baywatch",
+        "Pacific Blue"
+      ],
+      "Explanation": "Baywatch starred David Hasselhoff and Pamela Anderson and was syndicated in 140+ countries.",
+      "Id": "TVS-114",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'Parks and Recreation', what fictional Indiana city does Leslie Knope serve with endless enthusiasm?",
+      "Options": [
+        "Pawnee",
+        "Muncie",
+        "Springfield",
+        "Eagleton"
+      ],
+      "Explanation": "Pawnee is Leslie Knope's beloved town, known for waffles from JJ's Diner.",
+      "Id": "TVS-115",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which post-apocalyptic drama series starring Andrew Lincoln followed survivors during a zombie apocalypse?",
+      "Options": [
+        "Z Nation",
+        "Fear the Walking Dead",
+        "The Walking Dead",
+        "The Last of Us"
+      ],
+      "Explanation": "Andrew Lincoln played former sheriff's deputy Rick Grimes on AMC.",
+      "Id": "TVS-116",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'Seinfeld', what is the occupation of George Costanza's fictional alter-ego 'Art Vandelay'?",
+      "Options": [
+        "Hand Model",
+        "Marine Biologist",
+        "Latex Salesman",
+        "Architect / Importer-Exporter"
+      ],
+      "Explanation": "George frequently claimed Art Vandelay was an architect or importer-exporter.",
+      "Id": "TVS-117",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1970s and 80s sitcom followed three single roommates living in Santa Monica pretending Jack was gay to satisfy Mr. Roper?",
+      "Options": [
+        "Three's Company",
+        "All in the Family",
+        "Good Times",
+        "The Jeffersons"
+      ],
+      "Explanation": "Three's Company starred John Ritter, Joyce DeWitt, and Suzanne Somers.",
+      "Id": "TVS-118",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'The Sopranos', what is the name of Tony Soprano's psychiatrist played by Lorraine Bracco?",
+      "Options": [
+        "Dr. Wendy Kobler",
+        "Dr. Elliot Kupferberg",
+        "Dr. Jennifer Melfi",
+        "Dr. Carmela Soprano"
+      ],
+      "Explanation": "Tony Soprano sought therapy from Dr. Melfi following his panic attacks.",
+      "Id": "TVS-119",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which medical comedy-drama set at Sacred Heart Hospital was narrated by intern J.D. (John Dorian)?",
+      "Options": [
+        "House M.D.",
+        "Scrubs",
+        "Grey's Anatomy",
+        "ER"
+      ],
+      "Explanation": "Zach Braff starred as J.D. alongside Donald Faison (Turk) and John C. McGinley (Dr. Cox).",
+      "Id": "TVS-120",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'The Simpsons', what is the name of Homer Simpson's favorite tavern owner?",
+      "Options": [
+        "Carl Carlson",
+        "Moe Szyslak",
+        "Lenny Leonard",
+        "Barney Gumble"
+      ],
+      "Explanation": "Homer and his drinking buddies hang out at Moe's Tavern.",
+      "Id": "TVS-121",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1990s sitcom featured the Tanners: Bob Saget, John Stamos, Dave Coulier, and the Olsen twins?",
+      "Options": [
+        "Growing Pains",
+        "Step by Step",
+        "Family Ties",
+        "Full House"
+      ],
+      "Explanation": "Danny, Uncle Jesse, and Joey raised DJ, Stephanie, and Michelle in San Francisco.",
+      "Id": "TVS-122",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'Sherlock' (BBC), who plays the modern-day detective Sherlock Holmes alongside Martin Freeman's Dr. Watson?",
+      "Options": [
+        "Benedict Cumberbatch",
+        "Tom Hiddleston",
+        "Matt Smith",
+        "David Tennant"
+      ],
+      "Explanation": "Benedict Cumberbatch earned worldwide acclaim as the consulting detective.",
+      "Id": "TVS-123",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'Friends', how many times did Ross Geller get legally divorced during the series?",
+      "Options": [
+        "3 times (Carol, Emily, Rachel)",
+        "2 times",
+        "1 time",
+        "4 times"
+      ],
+      "Explanation": "Ross's divorces were a recurring joke, dubbed the 'Divorce Force'.",
+      "Id": "TVS-124",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which hit HBO fantasy drama was adapted from George R.R. Martin's 'A Song of Ice and Fire' novels?",
+      "Options": [
+        "The Witcher",
+        "Game of Thrones",
+        "The Wheel of Time",
+        "House of the Dragon"
+      ],
+      "Explanation": "Game of Thrones won 59 Primetime Emmy Awards across its eight seasons.",
+      "Id": "TVS-125",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'Modern Family', what is Phil Dunphy's profession?",
+      "Options": [
+        "Lawyer",
+        "Contractor",
+        "Realtor",
+        "Dentist"
+      ],
+      "Explanation": "Phil Dunphy (Ty Burrell) is a proud, cheerleading real estate agent.",
+      "Id": "TVS-126",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which police procedural and crime comedy stars Andy Samberg as Jake Peralta in Brooklyn's 99th precinct?",
+      "Options": [
+        "Brooklyn Nine-Nine",
+        "Southland",
+        "The Shield",
+        "Reno 911!"
+      ],
+      "Explanation": "Captain Raymond Holt (Andre Braugher) commanded the precinct.",
+      "Id": "TVS-127",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'The Fresh Prince of Bel-Air', what was the name of the wealthy uncle who took in Will Smith from West Philadelphia?",
+      "Options": [
+        "Uncle Jesse",
+        "Uncle Phil (Philip Banks)",
+        "Uncle Carl",
+        "Uncle Ray"
+      ],
+      "Explanation": "James Avery portrayed the commanding and loving Judge Philip Banks.",
+      "Id": "TVS-128",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which western drama series created by Taylor Sheridan stars Kevin Costner as ranch owner John Dutton?",
+      "Options": [
+        "1883",
+        "1923",
+        "Longmire",
+        "Yellowstone"
+      ],
+      "Explanation": "Yellowstone follows the Dutton family's control of the largest contiguous ranch in the US.",
+      "Id": "TVS-129",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'Mad Men', what is the name of the enigmatic creative director at Sterling Cooper played by Jon Hamm?",
+      "Options": [
+        "Roger Sterling",
+        "Bert Cooper",
+        "Pete Campbell",
+        "Don Draper"
+      ],
+      "Explanation": "Don Draper was born Dick Whitman before assuming a stolen identity.",
+      "Id": "TVS-130",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which hit 1980s sitcom centered on the Keaton family, featuring Michael J. Fox as conservative son Alex P. Keaton?",
+      "Options": [
+        "Growing Pains",
+        "ALF",
+        "Family Ties",
+        "The Wonder Years"
+      ],
+      "Explanation": "Family Ties explored the dynamic between ex-hippie parents and their conservative son.",
+      "Id": "TVS-131",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'Gilligan's Island', how long was the S.S. Minnow's scheduled cruise before shipwrecking on an uncharted island?",
+      "Options": [
+        "A 1-day trip",
+        "A 3-hour tour",
+        "A 12-hour sail",
+        "A weekend cruise"
+      ],
+      "Explanation": "'A three hour tour, a three hour tour' is sung in the memorable theme song.",
+      "Id": "TVS-132",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which animated series features Rick Sanchez, an eccentric alcoholic scientist, and his grandson Morty on multiverse adventures?",
+      "Options": [
+        "Bojack Horseman",
+        "Rick and Morty",
+        "Futurama",
+        "Solar Opposites"
+      ],
+      "Explanation": "Created by Justin Roiland and Dan Harmon for Adult Swim.",
+      "Id": "TVS-133",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'Lost', what was the airline and flight number of the doomed plane that crashed on the mysterious island?",
+      "Options": [
+        "Global 42",
+        "Trans-Pacific 714",
+        "Oceanic Flight 815",
+        "Pacific Air 108"
+      ],
+      "Explanation": "Oceanic 815 was flying from Sydney to Los Angeles.",
+      "Id": "TVS-134",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which TV legal drama starred Bob Odenkirk as Jimmy McGill transforming into a shady strip-mall defense attorney?",
+      "Options": [
+        "Better Call Saul",
+        "The Good Wife",
+        "Suits",
+        "Breaking Bad"
+      ],
+      "Explanation": "Better Call Saul was the critically acclaimed prequel and sequel to Breaking Bad.",
+      "Id": "TVS-135",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'That '70s Show', in what state is the fictional town of Point Place located?",
+      "Options": [
+        "Michigan",
+        "Wisconsin",
+        "Illinois",
+        "Ohio"
+      ],
+      "Explanation": "Eric Forman and his friends hung out in his parents' basement in Point Place, Wisconsin.",
+      "Id": "TVS-136",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which medical drama series starred Hugh Laurie as a cynical, Vicodin-addicted diagnostic medical genius?",
+      "Options": [
+        "House M.D.",
+        "The Good Doctor",
+        "ER",
+        "Grey's Anatomy"
+      ],
+      "Explanation": "Dr. Gregory House's diagnostic motto was 'Everybody lies'.",
+      "Id": "TVS-137",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'Star Trek: The Next Generation', who served as Captain of the USS Enterprise-D?",
+      "Options": [
+        "Kathryn Janeway",
+        "Benjamin Sisko",
+        "James T. Kirk",
+        "Jean-Luc Picard"
+      ],
+      "Explanation": "Patrick Stewart portrayed Captain Jean-Luc Picard with his catchphrase 'Make it so'.",
+      "Id": "TVS-138",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which mystery crime drama series created by David Lynch was set in a small Washington town investigating the murder of Laura Palmer?",
+      "Options": [
+        "Wayward Pines",
+        "The X-Files",
+        "Broadchurch",
+        "Twin Peaks"
+      ],
+      "Explanation": "'Who killed Laura Palmer?' was television's defining mystery in 1990.",
+      "Id": "TVS-139",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'How I Met Your Mother', what is Barney Stinson's (Neil Patrick Harris) favorite phrase describing anything awesome?",
+      "Options": [
+        "'Dyn-o-mite!'",
+        "'Bazinga!'",
+        "'Giddy up!'",
+        "'Legen—wait for it—dary!'"
+      ],
+      "Explanation": "Barney Stinson was famous for suits, high-fives, and the Playbook.",
+      "Id": "TVS-140",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1960s sitcom featured the Addams Family with patriarch Gomez, wife Morticia, and butler Lurch?",
+      "Options": [
+        "I Dream of Jeannie",
+        "The Addams Family",
+        "The Munsters",
+        "Bewitched"
+      ],
+      "Explanation": "The theme song famously prompted audiences to snap their fingers twice.",
+      "Id": "TVS-141",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'The Crown' (Netflix), which British monarch's life and reign is chronicled across multiple decades and casts?",
+      "Options": [
+        "King George VI",
+        "Queen Mary",
+        "Queen Victoria",
+        "Queen Elizabeth II"
+      ],
+      "Explanation": "Claire Foy, Olivia Colman, and Imelda Staunton portrayed Queen Elizabeth II across different eras.",
+      "Id": "TVS-142",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'South Park', which character is routinely killed off in almost every episode of the early seasons?",
+      "Options": [
+        "Eric Cartman",
+        "Stan Marsh",
+        "Kenny McCormick",
+        "Kyle Broflovski"
+      ],
+      "Explanation": "Stan and Kyle would shout 'Oh my God, they killed Kenny! You bastards!'",
+      "Id": "TVS-143",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which British spy thriller series starred Jodie Comer as assassin Villanelle and Sandra Oh as MI6 agent Eve Polastri?",
+      "Options": [
+        "Slow Horses",
+        "The Night Manager",
+        "Killing Eve",
+        "Bodyguard"
+      ],
+      "Explanation": "Killing Eve was adapted from Luke Jennings' Codename Villanelle novels.",
+      "Id": "TVS-144",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'The Office' (US), what weapon did Dwight Schrute keep hidden under his desk, in the ceiling, and throughout the office?",
+      "Options": [
+        "Handguns",
+        "A taser",
+        "Pepper spray, swords, nunchucks, and throwing stars",
+        "Crossbows"
+      ],
+      "Explanation": "Dwight Schrute possessed an extensive cache of martial arts and survival weapons.",
+      "Id": "TVS-145",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1980s sitcom centered on an alien from planet Melmac who lived with the Tanner family and wanted to eat cats?",
+      "Options": [
+        "3rd Rock from the Sun",
+        "ALF (Alien Life Form)",
+        "Small Wonder",
+        "Mork & Mindy"
+      ],
+      "Explanation": "Gordon Shumway was nicknamed ALF by the Tanner family.",
+      "Id": "TVS-146",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'The Simpsons', what instrument does Lisa Simpson play in the school band and during the opening credits?",
+      "Options": [
+        "Flute",
+        "Clarinet",
+        "Trumpet",
+        "Baritone Saxophone"
+      ],
+      "Explanation": "Lisa Simpson plays blues and jazz saxophone, mentored by Bleeding Gums Murphy.",
+      "Id": "TVS-147",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which superhero drama on Amazon Prime Video features corrupt corporate superheroes managed by Vought International?",
+      "Options": [
+        "Invincible",
+        "The Boys",
+        "Peacemaker",
+        "The Umbrella Academy"
+      ],
+      "Explanation": "Antony Starr stars as the terrifying Homelander alongside Karl Urban's Billy Butcher.",
+      "Id": "TVS-148",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In 'Buffy the Vampire Slayer', what town is situated directly on top of the mystical 'Hellmouth'?",
+      "Options": [
+        "Woodsboro",
+        "Beacon Hills",
+        "Mystic Falls",
+        "Sunnydale, California"
+      ],
+      "Explanation": "Sarah Michelle Gellar played the Slayer Buffy Summers defending Sunnydale High.",
+      "Id": "TVS-149",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "On 'Cheers', what was Woody Boyd's hometown in Indiana before moving to Boston?",
+      "Options": [
+        "French Lick, Indiana",
+        "Hanover, Indiana",
+        "Gary, Indiana",
+        "Kokomo, Indiana"
+      ],
+      "Explanation": "Woody Harrelson played innocent and sweet farm-boy bartender Woody Boyd.",
+      "Id": "TVS-150",
+      "Category": "TV Shows",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    }
   ]
 }

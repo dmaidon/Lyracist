@@ -2,107 +2,2407 @@
   "PackId": "rock-and-roll",
   "Title": "Rock & Roll Legends",
   "Category": "Rock & Roll",
-  "Description": "100 legendary questions covering classic rock, hard rock, grunge, 80s hair metal, and guitar heroes.",
+  "Description": "150 curated questions covering Rock & Roll.",
   "Questions": [
-    {"Id":"RR-001","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who was known as 'The King of Rock and Roll'?","Options":["Chuck Berry","Elvis Presley","Buddy Holly","Little Richard"],"CorrectAnswerIndex":1,"Explanation":"Elvis Presley is globally recognized as the King of Rock and Roll.","TimeLimitSeconds":15},
-    {"Id":"RR-002","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which British band released the hit album 'Abbey Road'?","Options":["The Rolling Stones","The Who","The Beatles","The Kinks"],"CorrectAnswerIndex":2,"Explanation":"The Beatles released Abbey Road in 1969 with its famous zebra-crossing cover.","TimeLimitSeconds":15},
-    {"Id":"RR-003","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What is the name of Queen's lead singer who passed away in 1991?","Options":["Freddie Mercury","Brian May","Roger Taylor","John Deacon"],"CorrectAnswerIndex":0,"Explanation":"Freddie Mercury was Queen's charismatic frontman.","TimeLimitSeconds":15},
-    {"Id":"RR-004","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which Australian band recorded 'Highway to Hell' and 'Back in Black'?","Options":["INXS","AC/DC","Midnight Oil","Silverchair"],"CorrectAnswerIndex":1,"Explanation":"AC/DC released Highway to Hell in 1979 and Back in Black in 1980.","TimeLimitSeconds":15},
-    {"Id":"RR-005","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who was the lead singer of Nirvana?","Options":["Dave Grohl","Krist Novoselic","Kurt Cobain","Eddie Vedder"],"CorrectAnswerIndex":2,"Explanation":"Kurt Cobain fronted Nirvana until his death in 1994.","TimeLimitSeconds":15},
-    {"Id":"RR-006","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band is famous for the anthemic ballad 'Stairway to Heaven'?","Options":["Deep Purple","Led Zeppelin","Black Sabbath","Pink Floyd"],"CorrectAnswerIndex":1,"Explanation":"Led Zeppelin released Stairway to Heaven on their fourth studio album.","TimeLimitSeconds":15},
-    {"Id":"RR-007","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What instrument did Jimi Hendrix famously play left-handed?","Options":["Bass","Drums","Electric Guitar","Keyboard"],"CorrectAnswerIndex":2,"Explanation":"Jimi Hendrix played a right-handed Fender Stratocaster flipped upside down.","TimeLimitSeconds":15},
-    {"Id":"RR-008","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which American rock band was fronted by Steven Tyler?","Options":["Aerosmith","Bon Jovi","Guns N' Roses","Kiss"],"CorrectAnswerIndex":0,"Explanation":"Steven Tyler is the lead singer of Aerosmith.","TimeLimitSeconds":15},
-    {"Id":"RR-009","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who recorded 'Born in the U.S.A.' in 1984?","Options":["Bob Dylan","Bruce Springsteen","Tom Petty","John Mellencamp"],"CorrectAnswerIndex":1,"Explanation":"Bruce Springsteen, known as 'The Boss', released Born in the U.S.A.","TimeLimitSeconds":15},
-    {"Id":"RR-010","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which rock group consists of Gene Simmons, Paul Stanley, Ace Frehley, and Peter Criss?","Options":["Alice Cooper","Kiss","Twisted Sister","Mötley Crüe"],"CorrectAnswerIndex":1,"Explanation":"Kiss is renowned for their face paint and theatrical stage shows.","TimeLimitSeconds":15},
-    {"Id":"RR-011","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What song by The Rolling Stones begins with the line 'I can't get no...'?","Options":["Satisfaction","Paint It Black","Jumpin' Jack Flash","Angie"],"CorrectAnswerIndex":0,"Explanation":"'(I Can't Get No) Satisfaction' was a #1 hit in 1965.","TimeLimitSeconds":15},
-    {"Id":"RR-012","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band released 'Sweet Child o' Mine' in 1987?","Options":["Def Leppard","Poison","Guns N' Roses","Van Halen"],"CorrectAnswerIndex":2,"Explanation":"Guns N' Roses featured Slash's iconic guitar riff on Sweet Child o' Mine.","TimeLimitSeconds":15},
-    {"Id":"RR-013","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who was the legendary drummer for The Beatles?","Options":["Keith Moon","Ringo Starr","Charlie Watts","Ginger Baker"],"CorrectAnswerIndex":1,"Explanation":"Ringo Starr joined The Beatles in 1962.","TimeLimitSeconds":15},
-    {"Id":"RR-014","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which rock band recorded 'Smoke on the Water'?","Options":["Deep Purple","Uriah Heep","Blue Öyster Cult","Rainbow"],"CorrectAnswerIndex":0,"Explanation":"Deep Purple wrote the song after a casino fire in Montreux, Switzerland.","TimeLimitSeconds":15},
-    {"Id":"RR-015","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who was the lead singer of The Doors?","Options":["Jim Morrison","Ray Manzarek","Robbie Krieger","John Densmore"],"CorrectAnswerIndex":0,"Explanation":"Jim Morrison was the charismatic lead vocalist and poet for The Doors.","TimeLimitSeconds":15},
-    {"Id":"RR-016","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band had a massive 1977 hit with 'Hotel California'?","Options":["The Eagles","Fleetwood Mac","America","Doobie Brothers"],"CorrectAnswerIndex":0,"Explanation":"The Eagles recorded Hotel California with guitarists Don Felder and Joe Walsh.","TimeLimitSeconds":15},
-    {"Id":"RR-017","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What famous guitarist popularized two-handed finger tapping on 'Eruption'?","Options":["Eddie Van Halen","Slash","Randy Rhoads","Joe Satriani"],"CorrectAnswerIndex":0,"Explanation":"Eddie Van Halen revolutionized rock guitar with Eruption in 1978.","TimeLimitSeconds":15},
-    {"Id":"RR-018","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band released 'Another Brick in the Wall'?","Options":["Pink Floyd","Genesis","Yes","Rush"],"CorrectAnswerIndex":0,"Explanation":"Pink Floyd featured the track on their 1979 concept album The Wall.","TimeLimitSeconds":15},
-    {"Id":"RR-019","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who is the lead singer of U2?","Options":["The Edge","Bono","Adam Clayton","Larry Mullen Jr."],"CorrectAnswerIndex":1,"Explanation":"Bono (Paul David Hewson) has fronted U2 since 1976.","TimeLimitSeconds":15},
-    {"Id":"RR-020","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band sang 'Don't Stop Believin''?","Options":["Journey","Foreigner","REO Speedwagon","Styx"],"CorrectAnswerIndex":0,"Explanation":"Journey released Don't Stop Believin' on their 1981 album Escape.","TimeLimitSeconds":15},
-    {"Id":"RR-021","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What was the name of Led Zeppelin's legendary drummer who died in 1980?","Options":["John Bonham","Keith Moon","Mitch Mitchell","Ian Paice"],"CorrectAnswerIndex":0,"Explanation":"John Bonham, nicknamed 'Bonzo', was renowned for his powerhouse drumming.","TimeLimitSeconds":15},
-    {"Id":"RR-022","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which album is the bestselling studio album of all time by an American band?","Options":["Eagles - Greatest Hits (1971–1975)","Fleetwood Mac - Rumours","Michael Jackson - Thriller","Meat Loaf - Bat Out of Hell"],"CorrectAnswerIndex":0,"Explanation":"Their Greatest Hits (1971–1975) has sold over 38 million copies in the US.","TimeLimitSeconds":15},
-    {"Id":"RR-023","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who played lead guitar for Black Sabbath?","Options":["Tony Iommi","Geezer Butler","Ozzy Osbourne","Bill Ward"],"CorrectAnswerIndex":0,"Explanation":"Tony Iommi played with prosthetic fingertips after an industrial accident.","TimeLimitSeconds":15},
-    {"Id":"RR-024","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which band was formed by Dave Grohl following Kurt Cobain's death?","Options":["Foo Fighters","Queens of the Stone Age","Audioslave","Velvet Revolver"],"CorrectAnswerIndex":0,"Explanation":"Dave Grohl recorded the first Foo Fighters album entirely by himself in 1994.","TimeLimitSeconds":15},
-    {"Id":"RR-025","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which Canadian rock power trio consisted of Geddy Lee, Alex Lifeson, and Neil Peart?","Options":["Rush","Triumph","The Guess Who","April Wine"],"CorrectAnswerIndex":0,"Explanation":"Rush is celebrated for their intricate progressive rock and virtuoso musicianship.","TimeLimitSeconds":15},
-    {"Id":"RR-026","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What 1969 music festival in upstate New York was billed as '3 Days of Peace & Music'?","Options":["Altamont","Woodstock","Monterey Pop","Isle of Wight"],"CorrectAnswerIndex":1,"Explanation":"Woodstock took place on Max Yasgur's dairy farm in Bethel, NY.","TimeLimitSeconds":15},
-    {"Id":"RR-027","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which rock star bit the head off a bat on stage in Des Moines in 1982?","Options":["Ozzy Osbourne","Alice Cooper","Marilyn Manson","Rob Halford"],"CorrectAnswerIndex":0,"Explanation":"Ozzy Osbourne thought the bat was a rubber toy until he bit into it.","TimeLimitSeconds":15},
-    {"Id":"RR-028","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who was the original lead singer of AC/DC before Brian Johnson?","Options":["Bon Scott","Dave Evans","Mark Evans","Angus Young"],"CorrectAnswerIndex":0,"Explanation":"Bon Scott sang on Highway to Hell and died in February 1980.","TimeLimitSeconds":15},
-    {"Id":"RR-029","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which Fleetwood Mac album was written during widespread internal romantic breakups?","Options":["Rumours","Tusk","Mirage","Tango in the Night"],"CorrectAnswerIndex":0,"Explanation":"Rumours was released in 1977 and sold over 40 million copies worldwide.","TimeLimitSeconds":15},
-    {"Id":"RR-030","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which guitar virtuoso was nicknamed 'Slowhand'?","Options":["Eric Clapton","Jeff Beck","Jimmy Page","Mark Knopfler"],"CorrectAnswerIndex":0,"Explanation":"Eric Clapton was given the moniker 'Slowhand' during his time in the Yardbirds.","TimeLimitSeconds":15},
-    {"Id":"RR-031","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which band featured brothers Liam and Noel Gallagher?","Options":["Oasis","Blur","The Stone Roses","Pulp"],"CorrectAnswerIndex":0,"Explanation":"Oasis spearheaded the 1990s Britpop explosion with hits like Wonderwall.","TimeLimitSeconds":15},
-    {"Id":"RR-032","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which 80s rock band sang 'Pour Some Sugar on Me'?","Options":["Def Leppard","Whitesnake","Motley Crue","Ratt"],"CorrectAnswerIndex":0,"Explanation":"Def Leppard released the smash hit on their 1987 blockbuster Hysteria.","TimeLimitSeconds":15},
-    {"Id":"RR-033","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who is the bass guitarist and co-lead singer of Blink-182?","Options":["Mark Hoppus","Tom DeLonge","Travis Barker","Scott Raynor"],"CorrectAnswerIndex":0,"Explanation":"Mark Hoppus founded Blink-182 alongside Tom DeLonge in 1992.","TimeLimitSeconds":15},
-    {"Id":"RR-034","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What famous Seattle band released the grunge masterpiece 'Ten' in 1991?","Options":["Pearl Jam","Soundgarden","Alice in Chains","Screaming Trees"],"CorrectAnswerIndex":0,"Explanation":"Pearl Jam's debut album Ten featured Alive, Even Flow, and Jeremy.","TimeLimitSeconds":15},
-    {"Id":"RR-035","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who was the legendary lead singer of Queen of the Stone Age and Kyuss?","Options":["Josh Homme","Nick Oliveri","Mark Lanegan","Chris Goss"],"CorrectAnswerIndex":0,"Explanation":"Josh Homme formed Queens of the Stone Age in Palm Desert, California.","TimeLimitSeconds":15},
-    {"Id":"RR-036","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which band recorded 'Free Bird' with its famous four-minute twin guitar solo?","Options":["Lynyrd Skynyrd","The Allman Brothers Band","ZZ Top","Molly Hatchet"],"CorrectAnswerIndex":0,"Explanation":"Lynyrd Skynyrd closed their concerts with the southern rock epic Free Bird.","TimeLimitSeconds":15},
-    {"Id":"RR-037","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What was the title of Green Day's breakthrough 1994 punk rock album?","Options":["Dookie","Insomniac","Nimrod","American Idiot"],"CorrectAnswerIndex":0,"Explanation":"Dookie featured Basket Case and When I Come Around, winning a Grammy.","TimeLimitSeconds":15},
-    {"Id":"RR-038","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who wrote and recorded 'Purple Haze' in 1967?","Options":["The Jimi Hendrix Experience","Cream","The Yardbirds","Traffic"],"CorrectAnswerIndex":0,"Explanation":"Jimi Hendrix wrote the psychedelic anthem showcasing his signature chord.","TimeLimitSeconds":15},
-    {"Id":"RR-039","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which heavy metal band is known for their mascot 'Eddie the Head'?","Options":["Iron Maiden","Judas Priest","Megadeth","Slayer"],"CorrectAnswerIndex":0,"Explanation":"Iron Maiden has featured Eddie on nearly all studio album covers and stage sets.","TimeLimitSeconds":15},
-    {"Id":"RR-040","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which Texas trio consists of Billy Gibbons, Dusty Hill, and Frank Beard?","Options":["ZZ Top","Stevie Ray Vaughan and Double Trouble","The Fabulous Thunderbirds","Los Lonely Boys"],"CorrectAnswerIndex":0,"Explanation":"ZZ Top performed together with the same lineup for over 50 years.","TimeLimitSeconds":15},
-    {"Id":"RR-041","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the original name of Black Sabbath before changing it in 1969?","Options":["Earth","Polka Tulk Blues Band","The Spectres","Mythology"],"CorrectAnswerIndex":0,"Explanation":"They performed as Earth before changing to Black Sabbath after a Boris Karloff horror film.","TimeLimitSeconds":15},
-    {"Id":"RR-042","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which session musician played the iconic saxophone solo on Pink Floyd's 'Money'?","Options":["Dick Parry","Clarence Clemons","Wayne Shorter","Bobby Keys"],"CorrectAnswerIndex":0,"Explanation":"Dick Parry played the sax solos on Dark Side of the Moon and Wish You Were Here.","TimeLimitSeconds":15},
-    {"Id":"RR-043","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What famous drummer lost his left arm in a 1984 car crash and continued drumming?","Options":["Rick Allen","Phil Rudd","Tommy Lee","Alex Van Halen"],"CorrectAnswerIndex":0,"Explanation":"Rick Allen of Def Leppard returned using a custom electronic pedal kit.","TimeLimitSeconds":15},
-    {"Id":"RR-044","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which guitar was named 'Blackie' and sold at auction for $959,500 in 2004?","Options":["Eric Clapton's Fender Stratocaster","David Gilmour's Strat","Stevie Ray Vaughan's Strat","Rory Gallagher's Strat"],"CorrectAnswerIndex":0,"Explanation":"Eric Clapton assembled Blackie from three vintage 1950s Strats.","TimeLimitSeconds":15},
-    {"Id":"RR-045","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the keyboardist for The Doors who provided the bass lines with his left hand?","Options":["Ray Manzarek","Robbie Krieger","John Densmore","Jerry Scheff"],"CorrectAnswerIndex":0,"Explanation":"Ray Manzarek played a Fender Rhodes Piano Bass with his left hand.","TimeLimitSeconds":15},
-    {"Id":"RR-046","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"In which year did the plane crash known as 'The Day the Music Died' occur?","Options":["1957","1959","1961","1963"],"CorrectAnswerIndex":1,"Explanation":"On February 3, 1959, Buddy Holly, Ritchie Valens, and The Big Bopper died in Iowa.","TimeLimitSeconds":15},
-    {"Id":"RR-047","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is Angus Young's signature schoolboy stage costume inspired by?","Options":["His sister's suggestion from Ashfield Boys High","A school dare","A movie costume","AC/DC's first manager"],"CorrectAnswerIndex":0,"Explanation":"His sister Margaret suggested he wear his Ashfield Boys High School uniform on stage.","TimeLimitSeconds":15},
-    {"Id":"RR-048","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which bassist played with Ozzy Osbourne, Metallica, and Suicidal Tendencies?","Options":["Robert Trujillo","Jason Newsted","Cliff Burton","Bob Daisley"],"CorrectAnswerIndex":0,"Explanation":"Robert Trujillo joined Metallica in 2003 after touring with Ozzy and Suicidal Tendencies.","TimeLimitSeconds":15},
-    {"Id":"RR-049","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which song holds the record for the longest guitar solo to reach #1 on the Billboard Hot 100?","Options":["Free Bird","November Rain","Hotel California","Stairway to Heaven"],"CorrectAnswerIndex":1,"Explanation":"November Rain by Guns N' Roses featured Slash's solo in a 9-minute track reaching #3.","TimeLimitSeconds":15},
-    {"Id":"RR-050","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the lead singer of Soundgarden who passed away in 2017?","Options":["Chris Cornell","Layne Staley","Scott Weiland","Mark Lanegan"],"CorrectAnswerIndex":0,"Explanation":"Chris Cornell possessed a four-octave vocal range and fronted Soundgarden and Audioslave.","TimeLimitSeconds":15},
-    {"Id":"RR-051","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band is famous for 'Roxanne' and was fronted by Sting?","Options":["The Police","Genesis","The Clash","Duran Duran"],"CorrectAnswerIndex":0,"Explanation":"The Police released Roxanne in 1978.","TimeLimitSeconds":15},
-    {"Id":"RR-052","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which rock band released 'Enter Sandman' in 1991?","Options":["Metallica","Megadeth","Pantera","Anthrax"],"CorrectAnswerIndex":0,"Explanation":"Enter Sandman was the lead single from Metallica's self-titled 'Black Album'.","TimeLimitSeconds":15},
-    {"Id":"RR-053","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What city did The Beatles originate from?","Options":["London","Liverpool","Manchester","Birmingham"],"CorrectAnswerIndex":1,"Explanation":"The Beatles formed in Liverpool, England in 1960.","TimeLimitSeconds":15},
-    {"Id":"RR-054","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who sang 'Rebel Yell' and 'White Wedding'?","Options":["Billy Idol","David Bowie","Alice Cooper","Iggy Pop"],"CorrectAnswerIndex":0,"Explanation":"Billy Idol became an MTV superstar with Rebel Yell and White Wedding.","TimeLimitSeconds":15},
-    {"Id":"RR-055","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band released 'Crazy Train'?","Options":["Ozzy Osbourne","Judas Priest","Dio","Scorpions"],"CorrectAnswerIndex":0,"Explanation":"Crazy Train was the debut solo single by Ozzy Osbourne featuring Randy Rhoads.","TimeLimitSeconds":15},
-    {"Id":"RR-056","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"What famous band was Stevie Nicks a lead singer for?","Options":["Fleetwood Mac","Heart","The Pretenders","Blondie"],"CorrectAnswerIndex":0,"Explanation":"Stevie Nicks joined Fleetwood Mac with Lindsey Buckingham in 1975.","TimeLimitSeconds":15},
-    {"Id":"RR-057","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which song begins with the acoustic line 'There's a lady who's sure all that glitters is gold'?","Options":["Stairway to Heaven","Dust in the Wind","More Than a Feeling","Landslide"],"CorrectAnswerIndex":0,"Explanation":"Robert Plant wrote the opening lyrics for Led Zeppelin's Stairway to Heaven.","TimeLimitSeconds":15},
-    {"Id":"RR-058","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who is the drummer for Metallica?","Options":["Lars Ulrich","James Hetfield","Kirk Hammett","Dave Mustaine"],"CorrectAnswerIndex":0,"Explanation":"Lars Ulrich co-founded Metallica with James Hetfield in 1981.","TimeLimitSeconds":15},
-    {"Id":"RR-059","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which rock band recorded 'Jump' featuring a famous synthesizer hook?","Options":["Van Halen","Bon Jovi","Foreigner","Europe"],"CorrectAnswerIndex":0,"Explanation":"Eddie Van Halen played the Oberheim OB-Xa synthesizer on Jump in 1984.","TimeLimitSeconds":15},
-    {"Id":"RR-060","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which British rock band sang 'You Really Got Me'?","Options":["The Kinks","The Who","The Animals","The Troggs"],"CorrectAnswerIndex":0,"Explanation":"The Kinks released You Really Got Me in 1964, pioneered distorted power chords.","TimeLimitSeconds":15},
-    {"Id":"RR-061","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What was the name of the recording studio built by Jimi Hendrix in New York?","Options":["Electric Lady Studios","Abbey Road","Sound City","Muscle Shoals"],"CorrectAnswerIndex":0,"Explanation":"Electric Lady Studios was opened by Jimi Hendrix shortly before his death in 1970.","TimeLimitSeconds":15},
-    {"Id":"RR-062","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which band released the album 'Synchronicity' in 1983 featuring 'Every Breath You Take'?","Options":["The Police","The Cars","Tears for Fears","Dire Straits"],"CorrectAnswerIndex":0,"Explanation":"Synchronicity was the final studio album released by The Police.","TimeLimitSeconds":15},
-    {"Id":"RR-063","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who was the lead singer of INXS until his passing in 1997?","Options":["Michael Hutchence","Andrew Farriss","Kirk Pengilly","Jon Farriss"],"CorrectAnswerIndex":0,"Explanation":"Michael Hutchence was the magnetic frontman of Australian rock band INXS.","TimeLimitSeconds":15},
-    {"Id":"RR-064","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which rock band had hits with 'Tom Sawyer' and 'Limelight'?","Options":["Rush","Yes","Kansas","Boston"],"CorrectAnswerIndex":0,"Explanation":"Rush released both hits on their landmark 1981 album Moving Pictures.","TimeLimitSeconds":15},
-    {"Id":"RR-065","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who sang lead vocals on Boston's debut album including 'More Than a Feeling'?","Options":["Brad Delp","Tom Scholz","Barry Goudreau","Sib Hashian"],"CorrectAnswerIndex":0,"Explanation":"Brad Delp was famous for his soaring multi-octave tenor vocals.","TimeLimitSeconds":15},
-    {"Id":"RR-066","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which band featured guitarist Carlos Santana and played 'Black Magic Woman'?","Options":["Santana","War","Chicago","Earth, Wind & Fire"],"CorrectAnswerIndex":0,"Explanation":"Santana's Latin rock rendition of Peter Green's Black Magic Woman was a smash hit.","TimeLimitSeconds":15},
-    {"Id":"RR-067","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which band released 'Sultans of Swing' in 1978?","Options":["Dire Straits","The Knack","The Police","Talking Heads"],"CorrectAnswerIndex":0,"Explanation":"Dire Straits was led by finger-picking guitarist and songwriter Mark Knopfler.","TimeLimitSeconds":15},
-    {"Id":"RR-068","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who was the lead singer of Creedence Clearwater Revival?","Options":["John Fogerty","Tom Fogerty","Stu Cook","Doug Clifford"],"CorrectAnswerIndex":0,"Explanation":"John Fogerty wrote and sang CCR classics like Proud Mary and Fortunate Son.","TimeLimitSeconds":15},
-    {"Id":"RR-069","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which 90s rock band released the hit 'Black Hole Sun'?","Options":["Soundgarden","Alice in Chains","Stone Temple Pilots","Bush"],"CorrectAnswerIndex":0,"Explanation":"Soundgarden released Black Hole Sun on their 1994 album Superunknown.","TimeLimitSeconds":15},
-    {"Id":"RR-070","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who was the female rock singer who fronted The Runaways and wrote 'I Love Rock 'n Roll'?","Options":["Joan Jett","Lita Ford","Cherie Currie","Pat Benatar"],"CorrectAnswerIndex":0,"Explanation":"Joan Jett & the Blackhearts topped the Billboard charts with I Love Rock 'n Roll.","TimeLimitSeconds":15},
-    {"Id":"RR-071","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What famous guitarist played the blistering guitar solo on Michael Jackson's 'Beat It'?","Options":["Eddie Van Halen","Steve Lukather","Slash","Jeff Beck"],"CorrectAnswerIndex":0,"Explanation":"Eddie Van Halen recorded the iconic solo in two takes without taking any payment.","TimeLimitSeconds":15},
-    {"Id":"RR-072","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which bassist for Metallica died tragically in a tour bus crash in Sweden in 1986?","Options":["Cliff Burton","Jason Newsted","Robert Trujillo","Ron McGovney"],"CorrectAnswerIndex":0,"Explanation":"Cliff Burton played on Kill 'Em All, Ride the Lightning, and Master of Puppets.","TimeLimitSeconds":15},
-    {"Id":"RR-073","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of the nightclub on the Sunset Strip where The Doors were the house band?","Options":["Whisky a Go Go","The Roxy","The Viper Room","Troubadour"],"CorrectAnswerIndex":0,"Explanation":"The Doors were the house band at the Whisky a Go Go in 1966.","TimeLimitSeconds":15},
-    {"Id":"RR-074","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which British rock band's original lineup consisted of Roger Daltrey, Pete Townshend, John Entwistle, and Keith Moon?","Options":["The Who","The Yardbirds","The Kinks","Small Faces"],"CorrectAnswerIndex":0,"Explanation":"The Who were known as one of the loudest and most explosive live acts in history.","TimeLimitSeconds":15},
-    {"Id":"RR-075","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the producer known as the 'Fifth Beatle' who produced almost all Beatles albums?","Options":["George Martin","Brian Epstein","Phil Spector","Glyn Johns"],"CorrectAnswerIndex":0,"Explanation":"Sir George Martin signed The Beatles to Parlophone and produced their records.","TimeLimitSeconds":15},
-    {"Id":"RR-076","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the first music video ever broadcast on MTV when it launched in August 1981?","Options":["Video Killed the Radio Star","You Better Run","Brass in Pocket","Take on Me"],"CorrectAnswerIndex":0,"Explanation":"The Buggles' 'Video Killed the Radio Star' was the first video shown on MTV.","TimeLimitSeconds":15},
-    {"Id":"RR-077","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the nickname of Keith Moon, legendary drummer for The Who?","Options":["Moon the Loon","Mad Keith","The Animal","Dynamite"],"CorrectAnswerIndex":0,"Explanation":"Keith Moon was called 'Moon the Loon' for his eccentric lifestyle and wild stunts.","TimeLimitSeconds":15},
-    {"Id":"RR-078","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which guitar icon played a double-neck Gibson EDS-1275 live on 'Stairway to Heaven'?","Options":["Jimmy Page","Alex Lifeson","Slash","Don Felder"],"CorrectAnswerIndex":0,"Explanation":"Jimmy Page switched between 6-string and 12-string necks without switching guitars.","TimeLimitSeconds":15},
-    {"Id":"RR-079","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who founded the grunge label Sub Pop Records in Seattle in 1986?","Options":["Bruce Pavitt and Jonathan Poneman","David Geffen","Rick Rubin","Jack Endino"],"CorrectAnswerIndex":0,"Explanation":"Sub Pop signed Nirvana, Soundgarden, and Mudhoney during the grunge explosion.","TimeLimitSeconds":15},
-    {"Id":"RR-080","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What tuning did Keith Richards famously use with five strings on his Fender Telecaster?","Options":["Open G Tuning","Drop D Tuning","DADGAD","Open D Tuning"],"CorrectAnswerIndex":0,"Explanation":"Keith Richards removed the low 6th string and tuned to Open G (G-D-G-B-D).","TimeLimitSeconds":15},
-    {"Id":"RR-081","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band sang 'Dream On' in 1973?","Options":["Aerosmith","Kiss","Deep Purple","Queen"],"CorrectAnswerIndex":0,"Explanation":"Dream On was written by Steven Tyler at the piano and became Aerosmith's signature song.","TimeLimitSeconds":15},
-    {"Id":"RR-082","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who is the lead singer of The Rolling Stones?","Options":["Mick Jagger","Keith Richards","Ronnie Wood","Charlie Watts"],"CorrectAnswerIndex":0,"Explanation":"Mick Jagger has fronted The Rolling Stones since 1962.","TimeLimitSeconds":15},
-    {"Id":"RR-083","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band sang 'Carry On Wayward Son' and 'Dust in the Wind'?","Options":["Kansas","Boston","Styx","Chicago"],"CorrectAnswerIndex":0,"Explanation":"Kansas achieved multi-platinum success with both hits in the late 1970s.","TimeLimitSeconds":15},
-    {"Id":"RR-084","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band released 'Paranoid' and 'Iron Man' in 1970?","Options":["Black Sabbath","Judas Priest","Deep Purple","Motorhead"],"CorrectAnswerIndex":0,"Explanation":"Black Sabbath's Paranoid album is considered a founding pillar of heavy metal.","TimeLimitSeconds":15},
-    {"Id":"RR-085","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who was the frontman of Tom Petty and the Heartbreakers?","Options":["Tom Petty","Mike Campbell","Benmont Tench","Stan Lynch"],"CorrectAnswerIndex":0,"Explanation":"Tom Petty led the Heartbreakers and also was a member of the Traveling Wilburys.","TimeLimitSeconds":15},
-    {"Id":"RR-086","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which supergroup featured George Harrison, Bob Dylan, Tom Petty, Roy Orbison, and Jeff Lynne?","Options":["The Traveling Wilburys","The Highwaymen","Cream","Derek and the Dominos"],"CorrectAnswerIndex":0,"Explanation":"The Traveling Wilburys recorded two Grammy-winning albums under pseudonym names.","TimeLimitSeconds":15},
-    {"Id":"RR-087","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which punk band featured Joey, Johnny, Dee Dee, and Tommy?","Options":["The Ramones","Sex Pistols","The Clash","Buzzcocks"],"CorrectAnswerIndex":0,"Explanation":"The Ramones formed in Queens, NY, adopting the shared stage surname Ramone.","TimeLimitSeconds":15},
-    {"Id":"RR-088","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"What famous song by Derek and the Dominos was written by Eric Clapton about Pattie Boyd?","Options":["Layla","Bell Bottom Blues","Wonderful Tonight","Tears in Heaven"],"CorrectAnswerIndex":0,"Explanation":"Layla was inspired by Clapton's unrequited love for George Harrison's wife Pattie Boyd.","TimeLimitSeconds":15},
-    {"Id":"RR-089","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which band had a massive 1981 hit with 'Don't You Want Me'?","Options":["The Human League","Depeche Mode","Soft Cell","New Order"],"CorrectAnswerIndex":0,"Explanation":"The Human League topped the US and UK charts with Don't You Want Me.","TimeLimitSeconds":15},
-    {"Id":"RR-090","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Who sang lead vocals on Alice in Chains classics like 'Man in the Box' and 'Rooster'?","Options":["Layne Staley","Jerry Cantrell","Mike Starr","Sean Kinney"],"CorrectAnswerIndex":0,"Explanation":"Layne Staley was celebrated for his powerful, haunting vocal harmonizations.","TimeLimitSeconds":15},
-    {"Id":"RR-091","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the real first name of U2's guitarist 'The Edge'?","Options":["David Evans","Paul Hewson","Adam Clayton","Larry Mullen"],"CorrectAnswerIndex":0,"Explanation":"The Edge's birth name is David Howell Evans.","TimeLimitSeconds":15},
-    {"Id":"RR-092","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which famous British band recorded at Olympic Studios and featured bassist John Paul Jones?","Options":["Led Zeppelin","The Yardbirds","Cream","Traffic"],"CorrectAnswerIndex":0,"Explanation":"John Paul Jones was a premier London session arranger before forming Led Zeppelin.","TimeLimitSeconds":15},
-    {"Id":"RR-093","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Who was the original lead guitarist of Guns N' Roses before Slash re-joined?","Options":["Tracii Guns","Izzy Stradlin","Buckethead","Ron 'Bumblefoot' Thal"],"CorrectAnswerIndex":0,"Explanation":"Tracii Guns was in the original lineup of L.A. Guns that merged into Guns N' Roses.","TimeLimitSeconds":15},
-    {"Id":"RR-094","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the title of David Bowie's final studio album released two days before his death in 2016?","Options":["Blackstar","The Next Day","Reality","Heathen"],"CorrectAnswerIndex":0,"Explanation":"Blackstar was released on Bowie's 69th birthday in January 2016.","TimeLimitSeconds":15},
-    {"Id":"RR-095","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"Which classic rock drummer was famous for having a 360-degree rotating drum kit?","Options":["Tommy Lee","Neil Peart","Nicko McBrain","Peter Criss"],"CorrectAnswerIndex":0,"Explanation":"Tommy Lee of Mötley Crüe performed spinning and roller coaster drum solos.","TimeLimitSeconds":15},
-    {"Id":"RR-096","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Which band released 'We Will Rock You' and 'We Are the Champions'?","Options":["Queen","Def Leppard","Kiss","The Sweet"],"CorrectAnswerIndex":0,"Explanation":"Queen released both stadium anthems back-to-back on News of the World in 1977.","TimeLimitSeconds":15},
-    {"Id":"RR-097","Category":"Rock & Roll","Difficulty":"Easy","QuestionType":"MultipleChoice","Prompt":"Who sang 'Fortunate Son' during the Vietnam War era?","Options":["Creedence Clearwater Revival","The Doors","The Rolling Stones","Buffalo Springfield"],"CorrectAnswerIndex":0,"Explanation":"CCR released Fortunate Son in 1969, criticizing class privilege in military drafts.","TimeLimitSeconds":15},
-    {"Id":"RR-098","Category":"Rock & Roll","Difficulty":"Medium","QuestionType":"MultipleChoice","Prompt":"Which rock band released 'Under the Bridge' and 'Give It Away' in 1991?","Options":["Red Hot Chili Peppers","Jane's Addiction","Faith No More","Rage Against the Machine"],"CorrectAnswerIndex":0,"Explanation":"RHCP broke into global superstardom with their album Blood Sugar Sex Magik.","TimeLimitSeconds":15},
-    {"Id":"RR-099","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What was the name of Pink Floyd's original frontman and songwriter who left in 1968?","Options":["Syd Barrett","David Gilmour","Richard Wright","Bob Klose"],"CorrectAnswerIndex":0,"Explanation":"Syd Barrett led Pink Floyd through their debut album The Piper at the Gates of Dawn.","TimeLimitSeconds":15},
-    {"Id":"RR-100","Category":"Rock & Roll","Difficulty":"Hard","QuestionType":"MultipleChoice","Prompt":"What is the famous chord that opens The Beatles' 'A Hard Day's Night'?","Options":["G7sus4 / Fadd9 compound chord","E Major","C Major 7","D Suspended 4"],"CorrectAnswerIndex":0,"Explanation":"The iconic ringing chord was a combination of George's 12-string, John's 6-string, and Paul's bass.","TimeLimitSeconds":15}
+    {
+      "Id": "RR-001",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was known as 'The King of Rock and Roll'?",
+      "Options": [
+        "Little Richard",
+        "Chuck Berry",
+        "Buddy Holly",
+        "Elvis Presley"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Elvis Presley is globally recognized as the King of Rock and Roll.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-002",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which British band released the hit album 'Abbey Road'?",
+      "Options": [
+        "The Rolling Stones",
+        "The Kinks",
+        "The Beatles",
+        "The Who"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Beatles released Abbey Road in 1969 with its famous zebra-crossing cover.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-003",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of Queen's lead singer who passed away in 1991?",
+      "Options": [
+        "Freddie Mercury",
+        "John Deacon",
+        "Brian May",
+        "Roger Taylor"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Freddie Mercury was Queen's charismatic frontman.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-004",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Australian band recorded 'Highway to Hell' and 'Back in Black'?",
+      "Options": [
+        "AC/DC",
+        "Silverchair",
+        "Midnight Oil",
+        "INXS"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "AC/DC released Highway to Hell in 1979 and Back in Black in 1980.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-005",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of Nirvana?",
+      "Options": [
+        "Krist Novoselic",
+        "Dave Grohl",
+        "Eddie Vedder",
+        "Kurt Cobain"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Kurt Cobain fronted Nirvana until his death in 1994.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-006",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band is famous for the anthemic ballad 'Stairway to Heaven'?",
+      "Options": [
+        "Pink Floyd",
+        "Deep Purple",
+        "Led Zeppelin",
+        "Black Sabbath"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Led Zeppelin released Stairway to Heaven on their fourth studio album.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-007",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What instrument did Jimi Hendrix famously play left-handed?",
+      "Options": [
+        "Electric Guitar",
+        "Drums",
+        "Keyboard",
+        "Bass"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Jimi Hendrix played a right-handed Fender Stratocaster flipped upside down.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-008",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which American rock band was fronted by Steven Tyler?",
+      "Options": [
+        "Bon Jovi",
+        "Aerosmith",
+        "Kiss",
+        "Guns N' Roses"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Steven Tyler is the lead singer of Aerosmith.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-009",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who recorded 'Born in the U.S.A.' in 1984?",
+      "Options": [
+        "Bob Dylan",
+        "John Mellencamp",
+        "Bruce Springsteen",
+        "Tom Petty"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Bruce Springsteen, known as 'The Boss', released Born in the U.S.A.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-010",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which rock group consists of Gene Simmons, Paul Stanley, Ace Frehley, and Peter Criss?",
+      "Options": [
+        "Alice Cooper",
+        "Twisted Sister",
+        "Mötley Crüe",
+        "Kiss"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Kiss is renowned for their face paint and theatrical stage shows.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-011",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What song by The Rolling Stones begins with the line 'I can't get no...'?",
+      "Options": [
+        "Jumpin' Jack Flash",
+        "Satisfaction",
+        "Paint It Black",
+        "Angie"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'(I Can't Get No) Satisfaction' was a #1 hit in 1965.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-012",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band released 'Sweet Child o' Mine' in 1987?",
+      "Options": [
+        "Def Leppard",
+        "Van Halen",
+        "Guns N' Roses",
+        "Poison"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Guns N' Roses featured Slash's iconic guitar riff on Sweet Child o' Mine.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-013",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the legendary drummer for The Beatles?",
+      "Options": [
+        "Ginger Baker",
+        "Keith Moon",
+        "Charlie Watts",
+        "Ringo Starr"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ringo Starr joined The Beatles in 1962.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-014",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which rock band recorded 'Smoke on the Water'?",
+      "Options": [
+        "Uriah Heep",
+        "Rainbow",
+        "Deep Purple",
+        "Blue Öyster Cult"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Deep Purple wrote the song after a casino fire in Montreux, Switzerland.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-015",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of The Doors?",
+      "Options": [
+        "John Densmore",
+        "Ray Manzarek",
+        "Jim Morrison",
+        "Robbie Krieger"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Jim Morrison was the charismatic lead vocalist and poet for The Doors.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-016",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band had a massive 1977 hit with 'Hotel California'?",
+      "Options": [
+        "America",
+        "Fleetwood Mac",
+        "The Eagles",
+        "Doobie Brothers"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Eagles recorded Hotel California with guitarists Don Felder and Joe Walsh.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-017",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous guitarist popularized two-handed finger tapping on 'Eruption'?",
+      "Options": [
+        "Joe Satriani",
+        "Eddie Van Halen",
+        "Randy Rhoads",
+        "Slash"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Eddie Van Halen revolutionized rock guitar with Eruption in 1978.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-018",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band released 'Another Brick in the Wall'?",
+      "Options": [
+        "Genesis",
+        "Pink Floyd",
+        "Rush",
+        "Yes"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Pink Floyd featured the track on their 1979 concept album The Wall.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-019",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is the lead singer of U2?",
+      "Options": [
+        "The Edge",
+        "Adam Clayton",
+        "Bono",
+        "Larry Mullen Jr."
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Bono (Paul David Hewson) has fronted U2 since 1976.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-020",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band sang 'Don't Stop Believin''?",
+      "Options": [
+        "Journey",
+        "Foreigner",
+        "Styx",
+        "REO Speedwagon"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Journey released Don't Stop Believin' on their 1981 album Escape.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-021",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of Led Zeppelin's legendary drummer who died in 1980?",
+      "Options": [
+        "Ian Paice",
+        "Keith Moon",
+        "John Bonham",
+        "Mitch Mitchell"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "John Bonham, nicknamed 'Bonzo', was renowned for his powerhouse drumming.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-022",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which album is the bestselling studio album of all time by an American band?",
+      "Options": [
+        "Fleetwood Mac - Rumours",
+        "Eagles - Greatest Hits (1971–1975)",
+        "Michael Jackson - Thriller",
+        "Meat Loaf - Bat Out of Hell"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Their Greatest Hits (1971–1975) has sold over 38 million copies in the US.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-023",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who played lead guitar for Black Sabbath?",
+      "Options": [
+        "Geezer Butler",
+        "Bill Ward",
+        "Ozzy Osbourne",
+        "Tony Iommi"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Tony Iommi played with prosthetic fingertips after an industrial accident.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-024",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band was formed by Dave Grohl following Kurt Cobain's death?",
+      "Options": [
+        "Queens of the Stone Age",
+        "Foo Fighters",
+        "Velvet Revolver",
+        "Audioslave"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Dave Grohl recorded the first Foo Fighters album entirely by himself in 1994.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-025",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Canadian rock power trio consisted of Geddy Lee, Alex Lifeson, and Neil Peart?",
+      "Options": [
+        "The Guess Who",
+        "Triumph",
+        "Rush",
+        "April Wine"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Rush is celebrated for their intricate progressive rock and virtuoso musicianship.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-026",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1969 music festival in upstate New York was billed as '3 Days of Peace & Music'?",
+      "Options": [
+        "Monterey Pop",
+        "Woodstock",
+        "Isle of Wight",
+        "Altamont"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Woodstock took place on Max Yasgur's dairy farm in Bethel, NY.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-027",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which rock star bit the head off a bat on stage in Des Moines in 1982?",
+      "Options": [
+        "Alice Cooper",
+        "Rob Halford",
+        "Marilyn Manson",
+        "Ozzy Osbourne"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ozzy Osbourne thought the bat was a rubber toy until he bit into it.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-028",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the original lead singer of AC/DC before Brian Johnson?",
+      "Options": [
+        "Mark Evans",
+        "Dave Evans",
+        "Angus Young",
+        "Bon Scott"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Bon Scott sang on Highway to Hell and died in February 1980.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-029",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Fleetwood Mac album was written during widespread internal romantic breakups?",
+      "Options": [
+        "Tango in the Night",
+        "Mirage",
+        "Rumours",
+        "Tusk"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Rumours was released in 1977 and sold over 40 million copies worldwide.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-030",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which guitar virtuoso was nicknamed 'Slowhand'?",
+      "Options": [
+        "Mark Knopfler",
+        "Eric Clapton",
+        "Jeff Beck",
+        "Jimmy Page"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Eric Clapton was given the moniker 'Slowhand' during his time in the Yardbirds.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-031",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band featured brothers Liam and Noel Gallagher?",
+      "Options": [
+        "Oasis",
+        "Pulp",
+        "The Stone Roses",
+        "Blur"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Oasis spearheaded the 1990s Britpop explosion with hits like Wonderwall.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-032",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which 80s rock band sang 'Pour Some Sugar on Me'?",
+      "Options": [
+        "Ratt",
+        "Motley Crue",
+        "Whitesnake",
+        "Def Leppard"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Def Leppard released the smash hit on their 1987 blockbuster Hysteria.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-033",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is the bass guitarist and co-lead singer of Blink-182?",
+      "Options": [
+        "Scott Raynor",
+        "Tom DeLonge",
+        "Travis Barker",
+        "Mark Hoppus"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Mark Hoppus founded Blink-182 alongside Tom DeLonge in 1992.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-034",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous Seattle band released the grunge masterpiece 'Ten' in 1991?",
+      "Options": [
+        "Screaming Trees",
+        "Soundgarden",
+        "Pearl Jam",
+        "Alice in Chains"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Pearl Jam's debut album Ten featured Alive, Even Flow, and Jeremy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-035",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the legendary lead singer of Queen of the Stone Age and Kyuss?",
+      "Options": [
+        "Josh Homme",
+        "Nick Oliveri",
+        "Chris Goss",
+        "Mark Lanegan"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Josh Homme formed Queens of the Stone Age in Palm Desert, California.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-036",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band recorded 'Free Bird' with its famous four-minute twin guitar solo?",
+      "Options": [
+        "The Allman Brothers Band",
+        "Lynyrd Skynyrd",
+        "ZZ Top",
+        "Molly Hatchet"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Lynyrd Skynyrd closed their concerts with the southern rock epic Free Bird.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-037",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the title of Green Day's breakthrough 1994 punk rock album?",
+      "Options": [
+        "American Idiot",
+        "Insomniac",
+        "Dookie",
+        "Nimrod"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Dookie featured Basket Case and When I Come Around, winning a Grammy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-038",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who wrote and recorded 'Purple Haze' in 1967?",
+      "Options": [
+        "Traffic",
+        "Cream",
+        "The Yardbirds",
+        "The Jimi Hendrix Experience"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Jimi Hendrix wrote the psychedelic anthem showcasing his signature chord.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-039",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which heavy metal band is known for their mascot 'Eddie the Head'?",
+      "Options": [
+        "Slayer",
+        "Iron Maiden",
+        "Megadeth",
+        "Judas Priest"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Iron Maiden has featured Eddie on nearly all studio album covers and stage sets.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-040",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Texas trio consists of Billy Gibbons, Dusty Hill, and Frank Beard?",
+      "Options": [
+        "Los Lonely Boys",
+        "The Fabulous Thunderbirds",
+        "ZZ Top",
+        "Stevie Ray Vaughan and Double Trouble"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "ZZ Top performed together with the same lineup for over 50 years.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-041",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the original name of Black Sabbath before changing it in 1969?",
+      "Options": [
+        "The Spectres",
+        "Mythology",
+        "Polka Tulk Blues Band",
+        "Earth"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "They performed as Earth before changing to Black Sabbath after a Boris Karloff horror film.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-042",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which session musician played the iconic saxophone solo on Pink Floyd's 'Money'?",
+      "Options": [
+        "Bobby Keys",
+        "Wayne Shorter",
+        "Clarence Clemons",
+        "Dick Parry"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Dick Parry played the sax solos on Dark Side of the Moon and Wish You Were Here.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-043",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous drummer lost his left arm in a 1984 car crash and continued drumming?",
+      "Options": [
+        "Tommy Lee",
+        "Rick Allen",
+        "Alex Van Halen",
+        "Phil Rudd"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Rick Allen of Def Leppard returned using a custom electronic pedal kit.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-044",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which guitar was named 'Blackie' and sold at auction for $959,500 in 2004?",
+      "Options": [
+        "Rory Gallagher's Strat",
+        "Stevie Ray Vaughan's Strat",
+        "David Gilmour's Strat",
+        "Eric Clapton's Fender Stratocaster"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Eric Clapton assembled Blackie from three vintage 1950s Strats.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-045",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the keyboardist for The Doors who provided the bass lines with his left hand?",
+      "Options": [
+        "Jerry Scheff",
+        "Ray Manzarek",
+        "John Densmore",
+        "Robbie Krieger"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Ray Manzarek played a Fender Rhodes Piano Bass with his left hand.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-046",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In which year did the plane crash known as 'The Day the Music Died' occur?",
+      "Options": [
+        "1957",
+        "1959",
+        "1961",
+        "1963"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "On February 3, 1959, Buddy Holly, Ritchie Valens, and The Big Bopper died in Iowa.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-047",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is Angus Young's signature schoolboy stage costume inspired by?",
+      "Options": [
+        "His sister's suggestion from Ashfield Boys High",
+        "A school dare",
+        "AC/DC's first manager",
+        "A movie costume"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "His sister Margaret suggested he wear his Ashfield Boys High School uniform on stage.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-048",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which bassist played with Ozzy Osbourne, Metallica, and Suicidal Tendencies?",
+      "Options": [
+        "Jason Newsted",
+        "Robert Trujillo",
+        "Bob Daisley",
+        "Cliff Burton"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Robert Trujillo joined Metallica in 2003 after touring with Ozzy and Suicidal Tendencies.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-049",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which song holds the record for the longest guitar solo to reach #1 on the Billboard Hot 100?",
+      "Options": [
+        "November Rain",
+        "Stairway to Heaven",
+        "Hotel California",
+        "Free Bird"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "November Rain by Guns N' Roses featured Slash's solo in a 9-minute track reaching #3.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-050",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of Soundgarden who passed away in 2017?",
+      "Options": [
+        "Chris Cornell",
+        "Mark Lanegan",
+        "Scott Weiland",
+        "Layne Staley"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Chris Cornell possessed a four-octave vocal range and fronted Soundgarden and Audioslave.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-051",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band is famous for 'Roxanne' and was fronted by Sting?",
+      "Options": [
+        "Genesis",
+        "The Clash",
+        "The Police",
+        "Duran Duran"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Police released Roxanne in 1978.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-052",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which rock band released 'Enter Sandman' in 1991?",
+      "Options": [
+        "Pantera",
+        "Metallica",
+        "Megadeth",
+        "Anthrax"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Enter Sandman was the lead single from Metallica's self-titled 'Black Album'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-053",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What city did The Beatles originate from?",
+      "Options": [
+        "Liverpool",
+        "Manchester",
+        "Birmingham",
+        "London"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Beatles formed in Liverpool, England in 1960.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-054",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'Rebel Yell' and 'White Wedding'?",
+      "Options": [
+        "David Bowie",
+        "Iggy Pop",
+        "Alice Cooper",
+        "Billy Idol"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Billy Idol became an MTV superstar with Rebel Yell and White Wedding.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-055",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band released 'Crazy Train'?",
+      "Options": [
+        "Scorpions",
+        "Dio",
+        "Ozzy Osbourne",
+        "Judas Priest"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Crazy Train was the debut solo single by Ozzy Osbourne featuring Randy Rhoads.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-056",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous band was Stevie Nicks a lead singer for?",
+      "Options": [
+        "Fleetwood Mac",
+        "The Pretenders",
+        "Blondie",
+        "Heart"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Stevie Nicks joined Fleetwood Mac with Lindsey Buckingham in 1975.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-057",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which song begins with the acoustic line 'There's a lady who's sure all that glitters is gold'?",
+      "Options": [
+        "Dust in the Wind",
+        "Landslide",
+        "Stairway to Heaven",
+        "More Than a Feeling"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Robert Plant wrote the opening lyrics for Led Zeppelin's Stairway to Heaven.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-058",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is the drummer for Metallica?",
+      "Options": [
+        "Dave Mustaine",
+        "James Hetfield",
+        "Kirk Hammett",
+        "Lars Ulrich"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Lars Ulrich co-founded Metallica with James Hetfield in 1981.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-059",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which rock band recorded 'Jump' featuring a famous synthesizer hook?",
+      "Options": [
+        "Van Halen",
+        "Bon Jovi",
+        "Europe",
+        "Foreigner"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Eddie Van Halen played the Oberheim OB-Xa synthesizer on Jump in 1984.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-060",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which British rock band sang 'You Really Got Me'?",
+      "Options": [
+        "The Kinks",
+        "The Animals",
+        "The Who",
+        "The Troggs"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Kinks released You Really Got Me in 1964, pioneered distorted power chords.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-061",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the recording studio built by Jimi Hendrix in New York?",
+      "Options": [
+        "Electric Lady Studios",
+        "Abbey Road",
+        "Sound City",
+        "Muscle Shoals"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Electric Lady Studios was opened by Jimi Hendrix shortly before his death in 1970.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-062",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band released the album 'Synchronicity' in 1983 featuring 'Every Breath You Take'?",
+      "Options": [
+        "Tears for Fears",
+        "The Cars",
+        "Dire Straits",
+        "The Police"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Synchronicity was the final studio album released by The Police.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-063",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of INXS until his passing in 1997?",
+      "Options": [
+        "Kirk Pengilly",
+        "Andrew Farriss",
+        "Michael Hutchence",
+        "Jon Farriss"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Michael Hutchence was the magnetic frontman of Australian rock band INXS.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-064",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which rock band had hits with 'Tom Sawyer' and 'Limelight'?",
+      "Options": [
+        "Boston",
+        "Rush",
+        "Kansas",
+        "Yes"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Rush released both hits on their landmark 1981 album Moving Pictures.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-065",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang lead vocals on Boston's debut album including 'More Than a Feeling'?",
+      "Options": [
+        "Tom Scholz",
+        "Brad Delp",
+        "Barry Goudreau",
+        "Sib Hashian"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Brad Delp was famous for his soaring multi-octave tenor vocals.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-066",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band featured guitarist Carlos Santana and played 'Black Magic Woman'?",
+      "Options": [
+        "Santana",
+        "War",
+        "Earth, Wind & Fire",
+        "Chicago"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Santana's Latin rock rendition of Peter Green's Black Magic Woman was a smash hit.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-067",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band released 'Sultans of Swing' in 1978?",
+      "Options": [
+        "Talking Heads",
+        "Dire Straits",
+        "The Knack",
+        "The Police"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Dire Straits was led by finger-picking guitarist and songwriter Mark Knopfler.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-068",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of Creedence Clearwater Revival?",
+      "Options": [
+        "Doug Clifford",
+        "Stu Cook",
+        "John Fogerty",
+        "Tom Fogerty"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "John Fogerty wrote and sang CCR classics like Proud Mary and Fortunate Son.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-069",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which 90s rock band released the hit 'Black Hole Sun'?",
+      "Options": [
+        "Alice in Chains",
+        "Stone Temple Pilots",
+        "Soundgarden",
+        "Bush"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Soundgarden released Black Hole Sun on their 1994 album Superunknown.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-070",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the female rock singer who fronted The Runaways and wrote 'I Love Rock 'n Roll'?",
+      "Options": [
+        "Lita Ford",
+        "Cherie Currie",
+        "Pat Benatar",
+        "Joan Jett"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Joan Jett & the Blackhearts topped the Billboard charts with I Love Rock 'n Roll.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-071",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous guitarist played the blistering guitar solo on Michael Jackson's 'Beat It'?",
+      "Options": [
+        "Eddie Van Halen",
+        "Slash",
+        "Jeff Beck",
+        "Steve Lukather"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Eddie Van Halen recorded the iconic solo in two takes without taking any payment.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-072",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which bassist for Metallica died tragically in a tour bus crash in Sweden in 1986?",
+      "Options": [
+        "Jason Newsted",
+        "Robert Trujillo",
+        "Cliff Burton",
+        "Ron McGovney"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Cliff Burton played on Kill 'Em All, Ride the Lightning, and Master of Puppets.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-073",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the nightclub on the Sunset Strip where The Doors were the house band?",
+      "Options": [
+        "The Viper Room",
+        "Troubadour",
+        "Whisky a Go Go",
+        "The Roxy"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Doors were the house band at the Whisky a Go Go in 1966.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-074",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which British rock band's original lineup consisted of Roger Daltrey, Pete Townshend, John Entwistle, and Keith Moon?",
+      "Options": [
+        "The Who",
+        "Small Faces",
+        "The Kinks",
+        "The Yardbirds"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Who were known as one of the loudest and most explosive live acts in history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-075",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the producer known as the 'Fifth Beatle' who produced almost all Beatles albums?",
+      "Options": [
+        "George Martin",
+        "Glyn Johns",
+        "Phil Spector",
+        "Brian Epstein"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sir George Martin signed The Beatles to Parlophone and produced their records.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-076",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the first music video ever broadcast on MTV when it launched in August 1981?",
+      "Options": [
+        "You Better Run",
+        "Take on Me",
+        "Brass in Pocket",
+        "Video Killed the Radio Star"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Buggles' 'Video Killed the Radio Star' was the first video shown on MTV.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-077",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the nickname of Keith Moon, legendary drummer for The Who?",
+      "Options": [
+        "Moon the Loon",
+        "The Animal",
+        "Mad Keith",
+        "Dynamite"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Keith Moon was called 'Moon the Loon' for his eccentric lifestyle and wild stunts.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-078",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which guitar icon played a double-neck Gibson EDS-1275 live on 'Stairway to Heaven'?",
+      "Options": [
+        "Slash",
+        "Jimmy Page",
+        "Don Felder",
+        "Alex Lifeson"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Jimmy Page switched between 6-string and 12-string necks without switching guitars.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-079",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who founded the grunge label Sub Pop Records in Seattle in 1986?",
+      "Options": [
+        "Bruce Pavitt and Jonathan Poneman",
+        "Jack Endino",
+        "David Geffen",
+        "Rick Rubin"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sub Pop signed Nirvana, Soundgarden, and Mudhoney during the grunge explosion.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-080",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What tuning did Keith Richards famously use with five strings on his Fender Telecaster?",
+      "Options": [
+        "DADGAD",
+        "Drop D Tuning",
+        "Open D Tuning",
+        "Open G Tuning"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Keith Richards removed the low 6th string and tuned to Open G (G-D-G-B-D).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-081",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band sang 'Dream On' in 1973?",
+      "Options": [
+        "Aerosmith",
+        "Queen",
+        "Kiss",
+        "Deep Purple"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Dream On was written by Steven Tyler at the piano and became Aerosmith's signature song.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-082",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is the lead singer of The Rolling Stones?",
+      "Options": [
+        "Keith Richards",
+        "Charlie Watts",
+        "Ronnie Wood",
+        "Mick Jagger"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Mick Jagger has fronted The Rolling Stones since 1962.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-083",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band sang 'Carry On Wayward Son' and 'Dust in the Wind'?",
+      "Options": [
+        "Kansas",
+        "Styx",
+        "Boston",
+        "Chicago"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Kansas achieved multi-platinum success with both hits in the late 1970s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-084",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band released 'Paranoid' and 'Iron Man' in 1970?",
+      "Options": [
+        "Black Sabbath",
+        "Deep Purple",
+        "Judas Priest",
+        "Motorhead"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Black Sabbath's Paranoid album is considered a founding pillar of heavy metal.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-085",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the frontman of Tom Petty and the Heartbreakers?",
+      "Options": [
+        "Stan Lynch",
+        "Mike Campbell",
+        "Tom Petty",
+        "Benmont Tench"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Tom Petty led the Heartbreakers and also was a member of the Traveling Wilburys.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-086",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which supergroup featured George Harrison, Bob Dylan, Tom Petty, Roy Orbison, and Jeff Lynne?",
+      "Options": [
+        "Cream",
+        "The Traveling Wilburys",
+        "Derek and the Dominos",
+        "The Highwaymen"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Traveling Wilburys recorded two Grammy-winning albums under pseudonym names.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-087",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which punk band featured Joey, Johnny, Dee Dee, and Tommy?",
+      "Options": [
+        "Sex Pistols",
+        "Buzzcocks",
+        "The Clash",
+        "The Ramones"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Ramones formed in Queens, NY, adopting the shared stage surname Ramone.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-088",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous song by Derek and the Dominos was written by Eric Clapton about Pattie Boyd?",
+      "Options": [
+        "Layla",
+        "Tears in Heaven",
+        "Bell Bottom Blues",
+        "Wonderful Tonight"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Layla was inspired by Clapton's unrequited love for George Harrison's wife Pattie Boyd.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-089",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band had a massive 1981 hit with 'Don't You Want Me'?",
+      "Options": [
+        "Depeche Mode",
+        "Soft Cell",
+        "The Human League",
+        "New Order"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Human League topped the US and UK charts with Don't You Want Me.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-090",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang lead vocals on Alice in Chains classics like 'Man in the Box' and 'Rooster'?",
+      "Options": [
+        "Jerry Cantrell",
+        "Mike Starr",
+        "Layne Staley",
+        "Sean Kinney"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Layne Staley was celebrated for his powerful, haunting vocal harmonizations.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-091",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the real first name of U2's guitarist 'The Edge'?",
+      "Options": [
+        "David Evans",
+        "Larry Mullen",
+        "Adam Clayton",
+        "Paul Hewson"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Edge's birth name is David Howell Evans.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-092",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which famous British band recorded at Olympic Studios and featured bassist John Paul Jones?",
+      "Options": [
+        "Led Zeppelin",
+        "Cream",
+        "Traffic",
+        "The Yardbirds"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "John Paul Jones was a premier London session arranger before forming Led Zeppelin.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-093",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the original lead guitarist of Guns N' Roses before Slash re-joined?",
+      "Options": [
+        "Tracii Guns",
+        "Izzy Stradlin",
+        "Buckethead",
+        "Ron 'Bumblefoot' Thal"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tracii Guns was in the original lineup of L.A. Guns that merged into Guns N' Roses.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-094",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the title of David Bowie's final studio album released two days before his death in 2016?",
+      "Options": [
+        "Blackstar",
+        "Heathen",
+        "The Next Day",
+        "Reality"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Blackstar was released on Bowie's 69th birthday in January 2016.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-095",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which classic rock drummer was famous for having a 360-degree rotating drum kit?",
+      "Options": [
+        "Nicko McBrain",
+        "Tommy Lee",
+        "Neil Peart",
+        "Peter Criss"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Tommy Lee of Mötley Crüe performed spinning and roller coaster drum solos.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-096",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band released 'We Will Rock You' and 'We Are the Champions'?",
+      "Options": [
+        "Kiss",
+        "Queen",
+        "Def Leppard",
+        "The Sweet"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Queen released both stadium anthems back-to-back on News of the World in 1977.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-097",
+      "Category": "Rock & Roll",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'Fortunate Son' during the Vietnam War era?",
+      "Options": [
+        "Creedence Clearwater Revival",
+        "The Doors",
+        "The Rolling Stones",
+        "Buffalo Springfield"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "CCR released Fortunate Son in 1969, criticizing class privilege in military drafts.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-098",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which rock band released 'Under the Bridge' and 'Give It Away' in 1991?",
+      "Options": [
+        "Faith No More",
+        "Rage Against the Machine",
+        "Jane's Addiction",
+        "Red Hot Chili Peppers"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "RHCP broke into global superstardom with their album Blood Sugar Sex Magik.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-099",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of Pink Floyd's original frontman and songwriter who left in 1968?",
+      "Options": [
+        "David Gilmour",
+        "Richard Wright",
+        "Bob Klose",
+        "Syd Barrett"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Syd Barrett led Pink Floyd through their debut album The Piper at the Gates of Dawn.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "RR-100",
+      "Category": "Rock & Roll",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the famous chord that opens The Beatles' 'A Hard Day's Night'?",
+      "Options": [
+        "E Major",
+        "C Major 7",
+        "G7sus4 / Fadd9 compound chord",
+        "D Suspended 4"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The iconic ringing chord was a combination of George's 12-string, John's 6-string, and Paul's bass.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band recorded the legendary concept album 'The Wall' in 1979?",
+      "Options": [
+        "Genesis",
+        "Yes",
+        "The Who",
+        "Pink Floyd"
+      ],
+      "Explanation": "Pink Floyd released 'The Wall', written largely by Roger Waters.",
+      "Id": "RK-101",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who is the lead singer and primary songwriter of The Cure?",
+      "Options": [
+        "Peter Murphy",
+        "Ian Curtis",
+        "Robert Smith",
+        "Morrissey"
+      ],
+      "Explanation": "Robert Smith has fronted The Cure since their founding in 1978.",
+      "Id": "RK-102",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What famous guitar solo was played by Eddie Van Halen on Michael Jackson's 'Beat It'?",
+      "Options": [
+        "A talkbox solo",
+        "A keyboard synth solo",
+        "A bass guitar intro",
+        "A 2-take uncredited guest solo"
+      ],
+      "Explanation": "Eddie Van Halen recorded his famous solo for free in two takes as a favor to Quincy Jones.",
+      "Id": "RK-103",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band is known for the hit single 'La Grange' and their iconic long beards?",
+      "Options": [
+        "ZZ Top",
+        "The Allman Brothers",
+        "Foghat",
+        "Lynyrd Skynyrd"
+      ],
+      "Explanation": "ZZ Top (Billy Gibbons, Dusty Hill, Frank Beard) released 'La Grange' in 1973.",
+      "Id": "RK-104",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who played bass for The Jimi Hendrix Experience?",
+      "Options": [
+        "Noel Redding",
+        "Jack Bruce",
+        "John Paul Jones",
+        "Geezer Butler"
+      ],
+      "Explanation": "Noel Redding played bass alongside drummer Mitch Mitchell and Hendrix.",
+      "Id": "RK-105",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1971 Led Zeppelin song begins with the acoustic guitar intro in A minor?",
+      "Options": [
+        "Black Dog",
+        "Rock and Roll",
+        "Going to California",
+        "Stairway to Heaven"
+      ],
+      "Explanation": "Jimmy Page's fingerpicked acoustic intro kicks off 'Stairway to Heaven'.",
+      "Id": "RK-106",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What was the name of Nirvana's debut studio album released on Sub Pop in 1989?",
+      "Options": [
+        "In Utero",
+        "Nevermind",
+        "Bleach",
+        "Incesticide"
+      ],
+      "Explanation": "Bleach was recorded for just $600 by producer Jack Endino.",
+      "Id": "RK-107",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which rock band features Angus Young performing in a schoolboy uniform?",
+      "Options": [
+        "Scorpions",
+        "Judas Priest",
+        "Iron Maiden",
+        "AC/DC"
+      ],
+      "Explanation": "Angus Young has famously worn his Australian schoolboy uniform on stage since 1974.",
+      "Id": "RK-108",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who wrote and performed the classic rock anthem 'Cat Scratch Fever' in 1977?",
+      "Options": [
+        "Gene Simmons",
+        "Alice Cooper",
+        "Ted Nugent",
+        "Joe Perry"
+      ],
+      "Explanation": "Ted Nugent released 'Cat Scratch Fever' as the title track of his 1977 album.",
+      "Id": "RK-109",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band recorded the 1976 hit 'More Than a Feeling' featuring Tom Scholz's production?",
+      "Options": [
+        "Boston",
+        "Foreigner",
+        "Kansas",
+        "Styx"
+      ],
+      "Explanation": "Boston's self-titled debut was largely created in Tom Scholz's basement studio.",
+      "Id": "RK-110",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What was the name of the supergroup formed by Chris Cornell and members of Rage Against the Machine?",
+      "Options": [
+        "Soundgarden",
+        "Audioslave",
+        "Velvet Revolver",
+        "Temple of the Dog"
+      ],
+      "Explanation": "Audioslave formed in 2001 and released three multi-platinum albums.",
+      "Id": "RK-111",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who is the legendary drummer for Rush renowned for his complex time signatures and lyrics?",
+      "Options": [
+        "John Bonham",
+        "Ginger Baker",
+        "Neil Peart",
+        "Keith Moon"
+      ],
+      "Explanation": "Neil Peart ('The Professor') served as Rush's drummer and primary lyricist.",
+      "Id": "RK-112",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band released the heavy metal anthem 'Breaking the Law' in 1980?",
+      "Options": [
+        "Iron Maiden",
+        "Judas Priest",
+        "Motorhead",
+        "Saxon"
+      ],
+      "Explanation": "Judas Priest featured 'Breaking the Law' on their British Steel album.",
+      "Id": "RK-113",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What instrument did Ian Anderson play in the progressive rock band Jethro Tull?",
+      "Options": [
+        "Harmonica",
+        "Flute",
+        "Saxophone",
+        "Violin"
+      ],
+      "Explanation": "Ian Anderson is famous for standing on one leg while playing rock flute.",
+      "Id": "RK-114",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band wrote the classic 1973 hard rock track 'Smoke on the Water' after the Montreux Casino fire?",
+      "Options": [
+        "Black Sabbath",
+        "Uriah Heep",
+        "Rainbow",
+        "Deep Purple"
+      ],
+      "Explanation": "Deep Purple recorded 'Smoke on the Water' after Frank Zappa's Montreux concert caught fire.",
+      "Id": "RK-115",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who is the lead guitarist of Guns N' Roses famous for his top hat and Gibson Les Paul?",
+      "Options": [
+        "Izzy Stradlin",
+        "Duff McKagan",
+        "Buckethead",
+        "Slash"
+      ],
+      "Explanation": "Saul Hudson (Slash) created the iconic riffs of 'Sweet Child o' Mine' and 'Paradise City'.",
+      "Id": "RK-116",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band recorded the 1983 heavy metal anthem 'Holy Diver'?",
+      "Options": [
+        "Rainbow",
+        "Black Sabbath",
+        "Dio",
+        "Accept"
+      ],
+      "Explanation": "Ronnie James Dio formed his eponymous band Dio and released 'Holy Diver' in 1983.",
+      "Id": "RK-117",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who founded and fronted the industrial rock band Nine Inch Nails?",
+      "Options": [
+        "Rob Zombie",
+        "Al Jourgensen",
+        "Marilyn Manson",
+        "Trent Reznor"
+      ],
+      "Explanation": "Trent Reznor is the mastermind, multi-instrumentalist, and producer behind Nine Inch Nails.",
+      "Id": "RK-118",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band's logo is the 'Tongue and Lips' design created by John Pasche in 1970?",
+      "Options": [
+        "The Who",
+        "KISS",
+        "The Rolling Stones",
+        "Aerosmith"
+      ],
+      "Explanation": "The iconic red lips and tongue first appeared on the Rolling Stones' Sticky Fingers album.",
+      "Id": "RK-119",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band recorded 'Fortunate Son' protesting the Vietnam War in 1969?",
+      "Options": [
+        "The Doors",
+        "Buffalo Springfield",
+        "Creedence Clearwater Revival",
+        "Jefferson Airplane"
+      ],
+      "Explanation": "John Fogerty wrote 'Fortunate Son' for Creedence Clearwater Revival.",
+      "Id": "RK-120",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What was the name of Black Sabbath's debut album released on Friday the 13th in February 1970?",
+      "Options": [
+        "Vol. 4",
+        "Black Sabbath",
+        "Master of Reality",
+        "Paranoid"
+      ],
+      "Explanation": "The self-titled debut defined the doom and heavy metal genre.",
+      "Id": "RK-121",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band released 'Barracuda' in 1977 featuring Ann and Nancy Wilson?",
+      "Options": [
+        "Heart",
+        "Fleetwood Mac",
+        "The Runaways",
+        "Blondie"
+      ],
+      "Explanation": "Sisters Ann and Nancy Wilson led Heart to multi-platinum rock success.",
+      "Id": "RK-122",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who played the famous bassline on Queen and David Bowie's 1981 collaboration 'Under Pressure'?",
+      "Options": [
+        "Roger Taylor",
+        "John Deacon",
+        "David Bowie",
+        "Brian May"
+      ],
+      "Explanation": "John Deacon came up with the legendary two-note riff later sampled by Vanilla Ice.",
+      "Id": "RK-123",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which punk rock band was fronted by Joey Ramone and played rapid 3-chord songs?",
+      "Options": [
+        "The Clash",
+        "Sex Pistols",
+        "The Damned",
+        "The Ramones"
+      ],
+      "Explanation": "The Ramones pioneered punk rock in NYC's CBGB club in 1974.",
+      "Id": "RK-124",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who sang lead vocals on Black Sabbath's 'Heaven and Hell' album after Ozzy Osbourne left?",
+      "Options": [
+        "Tony Martin",
+        "Glenn Hughes",
+        "Ian Gillan",
+        "Ronnie James Dio"
+      ],
+      "Explanation": "Ronnie James Dio revitalized Black Sabbath with the 1980 album 'Heaven and Hell'.",
+      "Id": "RK-125",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band wrote 'Don't Fear the Reaper' featuring the famous cowbell percussion?",
+      "Options": [
+        "Kansas",
+        "Foghat",
+        "Uriah Heep",
+        "Blue Öyster Cult"
+      ],
+      "Explanation": "Blue Öyster Cult released 'Don't Fear the Reaper' on their 1976 album Agents of Fortune.",
+      "Id": "RK-126",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What famous venue in West Hollywood hosted the debut performances of The Doors, Van Halen, and Motley Crue?",
+      "Options": [
+        "CBGB",
+        "Whisky a Go Go",
+        "The Fillmore",
+        "The Troubadour"
+      ],
+      "Explanation": "Whisky a Go Go on the Sunset Strip is rock music's most historic West Coast club.",
+      "Id": "RK-127",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which 1977 Meat Loaf album, composed by Jim Steinman, became one of the best-selling records in history?",
+      "Options": [
+        "Midnight at the Lost and Found",
+        "Bat Out of Hell",
+        "Bad Attitude",
+        "Dead Ringer"
+      ],
+      "Explanation": "'Bat Out of Hell' has sold over 43 million copies worldwide.",
+      "Id": "RK-128",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who played drums in the power trio Motörhead alongside Lemmy Kilmister?",
+      "Options": [
+        "Phil 'Philthy Animal' Taylor",
+        "Bill Ward",
+        "Tommy Aldridge",
+        "Mikkey Dee"
+      ],
+      "Explanation": "Philthy Animal Taylor was the classic-era drummer behind 'Ace of Spades'.",
+      "Id": "RK-129",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band recorded the 1990 alternative metal classic 'Epic' ('What is it?')?",
+      "Options": [
+        "Jane's Addiction",
+        "Soundgarden",
+        "Faith No More",
+        "Living Colour"
+      ],
+      "Explanation": "Faith No More featured Mike Patton on vocals for their breakthrough hit 'Epic'.",
+      "Id": "RK-130",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What guitar did Eric Clapton famously nickname 'Blackie'?",
+      "Options": [
+        "A Gibson SG Fool guitar",
+        "A Fender Stratocaster assembled from 1950s parts",
+        "A 1959 Gibson Les Paul",
+        "A Martin D-28 Acoustic"
+      ],
+      "Explanation": "Clapton built Blackie using parts from three 1950s Fender Stratocasters.",
+      "Id": "RK-131",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which classic rock band had hits with 'Renegade', 'Come Sail Away', and 'Mr. Roboto'?",
+      "Options": [
+        "Journey",
+        "Kansas",
+        "Styx",
+        "REO Speedwagon"
+      ],
+      "Explanation": "Styx was fronted by Dennis DeYoung, Tommy Shaw, and James Young.",
+      "Id": "RK-132",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the original lead guitarist of Ozzy Osbourne's solo band that co-wrote 'Crazy Train'?",
+      "Options": [
+        "Jake E. Lee",
+        "Zakk Wylde",
+        "Brad Gillis",
+        "Randy Rhoads"
+      ],
+      "Explanation": "Classical-metal virtuoso Randy Rhoads tragically died in a 1982 plane accident.",
+      "Id": "RK-133",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which southern rock band featured three lead guitarists nicknamed the 'Three Guitar Army'?",
+      "Options": [
+        "Lynyrd Skynyrd",
+        "The Outlaws",
+        "Molly Hatchet",
+        "Blackfoot"
+      ],
+      "Explanation": "The Outlaws were renowned for their high-speed triple guitar interplay in 'Green Grass and High Tides'.",
+      "Id": "RK-134",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What was the name of Metallica's 1986 landmark thrash metal masterpiece?",
+      "Options": [
+        "Ride the Lightning",
+        "Master of Puppets",
+        "Kill 'Em All",
+        "...And Justice for All"
+      ],
+      "Explanation": "Master of Puppets was the band's last album with bassist Cliff Burton.",
+      "Id": "RK-135",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which British rock group featured Roger Daltrey swinging his microphone by its cable?",
+      "Options": [
+        "Cream",
+        "The Kinks",
+        "The Who",
+        "The Yardbirds"
+      ],
+      "Explanation": "Roger Daltrey's mic-twirling was a staple of The Who's explosive live shows.",
+      "Id": "RK-136",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who is the lead guitarist and principal songwriter for The Who?",
+      "Options": [
+        "Ray Davies",
+        "Pete Townshend",
+        "Keith Moon",
+        "John Entwistle"
+      ],
+      "Explanation": "Pete Townshend wrote the rock operas 'Tommy' and 'Quadrophenia'.",
+      "Id": "RK-137",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which grunge band released the acclaimed 1994 album 'Superunknown'?",
+      "Options": [
+        "Stone Temple Pilots",
+        "Soundgarden",
+        "Pearl Jam",
+        "Alice in Chains"
+      ],
+      "Explanation": "Soundgarden featured 'Black Hole Sun' and 'Spoonman' on Superunknown.",
+      "Id": "RK-138",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What band recorded the 1973 glam rock anthem '20th Century Boy'?",
+      "Options": [
+        "Sweet",
+        "Slade",
+        "Mott the Hoople",
+        "T. Rex"
+      ],
+      "Explanation": "Marc Bolan led T. Rex as the leading pioneer of British glam rock.",
+      "Id": "RK-139",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band recorded the rock anthem 'Slow Ride' on their 1975 album Fool for the City?",
+      "Options": [
+        "Bad Company",
+        "Free",
+        "Grand Funk Railroad",
+        "Foghat"
+      ],
+      "Explanation": "British blues-rockers Foghat had a massive American hit with 'Slow Ride'.",
+      "Id": "RK-140",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the frontman of Stone Temple Pilots and later Velvet Revolver?",
+      "Options": [
+        "Chris Cornell",
+        "Scott Weiland",
+        "Shannon Hoon",
+        "Layne Staley"
+      ],
+      "Explanation": "Scott Weiland was the charismatic and distinctive voice behind STP.",
+      "Id": "RK-141",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band had hits with 'Zombie' and 'Linger' fronted by Dolores O'Riordan?",
+      "Options": [
+        "The Cranberries",
+        "The Sundays",
+        "Cocteau Twins",
+        "Garbage"
+      ],
+      "Explanation": "The Cranberries were an Irish alternative rock band formed in Limerick.",
+      "Id": "RK-142",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which hard rock band recorded 'Fly to the Angels' and 'Up All Night' in 1990?",
+      "Options": [
+        "Winger",
+        "Warrant",
+        "Slaughter",
+        "Firehouse"
+      ],
+      "Explanation": "Slaughter's debut album 'Stick It to Ya' went double platinum.",
+      "Id": "RK-143",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who played lead guitar in The Yardbirds before forming Led Zeppelin?",
+      "Options": [
+        "Mick Taylor",
+        "Eric Clapton",
+        "Jeff Beck",
+        "Jimmy Page"
+      ],
+      "Explanation": "Jimmy Page assembled Led Zeppelin (originally the 'New Yardbirds') in 1968.",
+      "Id": "RK-144",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which album by The Dark Side of the Moon stayed on the Billboard 200 chart for over 900 weeks?",
+      "Options": [
+        "Michael Jackson - Thriller",
+        "Pink Floyd - The Dark Side of the Moon",
+        "Fleetwood Mac - Rumours",
+        "Eagles - Hotel California"
+      ],
+      "Explanation": "The Dark Side of the Moon spent a record 950+ weeks on the charts.",
+      "Id": "RK-145",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What instrument did John Entwistle play with virtuoso speed in The Who?",
+      "Options": [
+        "Bass guitar",
+        "Lead guitar",
+        "Drums",
+        "Keyboards"
+      ],
+      "Explanation": "Nicknamed 'The Ox' and 'Thunderfingers', Entwistle redefined rock bass playing.",
+      "Id": "RK-146",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band recorded the alternative hit 'Shine' in 1993 featuring Ed Roland on vocals?",
+      "Options": [
+        "Collective Soul",
+        "Silverchair",
+        "Live",
+        "Candlebox"
+      ],
+      "Explanation": "Collective Soul broke out from Georgia with their massive single 'Shine'.",
+      "Id": "RK-147",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who played keyboards and composed the synthesizer intro to Van Halen's 'Jump'?",
+      "Options": [
+        "Eddie Van Halen",
+        "Alex Van Halen",
+        "David Lee Roth",
+        "Michael Anthony"
+      ],
+      "Explanation": "Eddie Van Halen played the iconic Oberheim OB-Xa synthesizer riff on 'Jump'.",
+      "Id": "RK-148",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band had a breakthrough hit with 'Cumbersome' in 1995?",
+      "Options": [
+        "Toadies",
+        "Seven Mary Three",
+        "Better Than Ezra",
+        "Spacehog"
+      ],
+      "Explanation": "Seven Mary Three released 'Cumbersome' on their major-label debut American Standard.",
+      "Id": "RK-149",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which band featured the guitar duo of Glenn Tipton and K.K. Downing?",
+      "Options": [
+        "Scorpions",
+        "Judas Priest",
+        "Accept",
+        "Iron Maiden"
+      ],
+      "Explanation": "Judas Priest's twin-guitar attack pioneered the New Wave of British Heavy Metal.",
+      "Id": "RK-150",
+      "Category": "Rock & Roll",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    }
   ]
 }
