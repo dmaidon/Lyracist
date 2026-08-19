@@ -1,11 +1,11 @@
-<!-- Edited on Aug 18, 2026 @ 18:05:00 -> Constrain numeric input boxes to concise compact widths -->
+<!-- Edited on Aug 19, 2026 @ 09:47:00 -> Added unified Launch Pre-Game Lobby & Countdown single button to Game Master controls -->
 <Window x:Class="Lyracist.Trivia.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:viewmodels="clr-namespace:Lyracist.Trivia.ViewModels"
         Title="Lyracist Trivia Pro - Game Master Console"
-        Height="936" Width="1200"
+        Height="936" Width="1698"
         MinHeight="650" MinWidth="950"
         WindowStartupLocation="CenterScreen"
         Background="#0F172A"
@@ -95,8 +95,8 @@
                 </Style>
             </TabControl.Resources>
 
-            <!-- TAB 1: Live Game Master -->
-            <TabItem Header="🎯 Live Game Master">
+            <!-- TAB 1: Live Game Host & Projection Deck -->
+            <TabItem Header="🎯 Trivia Game Control" FontWeight="Bold" FontSize="14">
                 <Grid Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="320" />
@@ -133,7 +133,9 @@
                                     </Grid>
                                 </Border>
 
-                                <Button Content="🚀 Start New Game" Command="{Binding StartGameWithSelectedPackCommand}" Background="#10B981" Foreground="#FFFFFF" FontWeight="Bold" Height="40" Margin="0,0,0,14" />
+                                <!-- Primary Unified 1-Click Launch Action -->
+                                <Button Content="🎯 Launch Pre-Game Lobby &amp; Countdown" Command="{Binding LaunchPreGameLobbyCommand}" Background="#6366F1" Foreground="#FFFFFF" FontWeight="Black" Height="42" Margin="0,0,0,8" ToolTip="Opens big screen with category banner, countdown timer, and scan-to-join instructions." />
+                                <Button Content="▶ Start Game Now (Skip Countdown)" Command="{Binding StartGameWithSelectedPackCommand}" Background="#10B981" Foreground="#FFFFFF" FontWeight="Bold" Height="36" Margin="0,0,0,14" />
 
                                 <!-- Pre-Game Countdown & Connect Instructions Screen Controller -->
                                 <Border Background="#1E1B4B" CornerRadius="10" Padding="12,10" Margin="0,0,0,12" BorderBrush="#818CF8" BorderThickness="1.5">
@@ -399,187 +401,211 @@
 
             <!-- TAB 2: Settings & Display -->
             <TabItem Header="⚙️ Settings &amp; Display">
-                <Border Background="#1E293B" CornerRadius="12" Padding="24" Margin="0,12,0,0" BorderBrush="#14FFFFFF" BorderThickness="1">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel MaxWidth="800" HorizontalAlignment="Left">
-                            <TextBlock Text="VENUE &amp; GAMEPLAY CONFIGURATION" FontWeight="Black" FontSize="16" Foreground="#38BDF8" Margin="0,0,0,16" />
+                <Border Background="#1E293B" CornerRadius="12" Padding="20,16" Margin="0,12,0,0" BorderBrush="#14FFFFFF" BorderThickness="1">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
 
-                            <!-- Venue & Game Master Branding -->
-                            <Border Background="#0F172A" CornerRadius="10" Padding="16" Margin="0,0,0,14" BorderBrush="#38BDF8" BorderThickness="1.5">
-                                <StackPanel>
-                                    <TextBlock Text="🏢 Venue &amp; Game Master Branding" FontWeight="Bold" FontSize="14" Foreground="#38BDF8" Margin="0,0,0,12" />
+                            <!-- Top Header & Save Button Bar -->
+                            <Grid Grid.Row="0" Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="220" />
-                                            <ColumnDefinition Width="300" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Venue Name:" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding VenueName, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" />
-                                        <TextBlock Grid.Column="2" Text="(Displayed on projection &amp; mobile buzzer)" FontSize="12" Foreground="#64748B" VerticalAlignment="Center" Margin="12,0,0,0" />
-                                    </Grid>
-
-                                    <Grid Margin="0,0,0,4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="220" />
-                                            <ColumnDefinition Width="300" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Game Master / Host Name:" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding HostName, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" />
-                                        <TextBlock Grid.Column="2" Text="(Host identity on scoreboard &amp; intro screens)" FontSize="12" Foreground="#64748B" VerticalAlignment="Center" Margin="12,0,0,0" />
-                                    </Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="VENUE &amp; GAMEPLAY CONFIGURATION" FontWeight="Black" FontSize="16" Foreground="#38BDF8" />
+                                    <TextBlock Text="Configure venue branding, game flow, question timers, scoring rules, and player Wi-Fi credentials." FontSize="12" Foreground="#94A3B8" Margin="0,2,0,0" />
                                 </StackPanel>
-                            </Border>
 
-                            <!-- Intermission Auto-Start Countdown -->
-                            <Border Background="#0F172A" CornerRadius="10" Padding="16" Margin="0,0,0,14" BorderBrush="#14FFFFFF" BorderThickness="1">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="Auto-Start Next Game After Intermission" FontWeight="Bold" FontSize="14" Foreground="#FFFFFF" />
-                                            <TextBlock Text="When game completes, starts a countdown and automatically launches the next pack" FontSize="12" Foreground="#94A3B8" />
+                                <Button Grid.Column="1" Content="💾 Save All Settings" Command="{Binding SaveAllSettingsCommand}" Background="#10B981" Foreground="#FFFFFF" FontWeight="Bold" Height="36" Padding="20,0" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <!-- 3-Column Equal Grid -->
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="14" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="14" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- COLUMN 1: Venue & Host Branding, Intermission Flow -->
+                                <StackPanel Grid.Column="0">
+                                    <!-- Venue & Game Master Branding -->
+                                    <Border Background="#0F172A" CornerRadius="10" Padding="14" Margin="0,0,0,14" BorderBrush="#38BDF8" BorderThickness="1.5">
+                                        <StackPanel>
+                                            <TextBlock Text="🏢 Venue &amp; Host Branding" FontWeight="Bold" FontSize="13" Foreground="#38BDF8" Margin="0,0,0,10" />
+
+                                            <TextBlock Text="Venue Name:" FontSize="12" Foreground="#CBD5E1" Margin="0,0,0,4" />
+                                            <TextBox Text="{Binding VenueName, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,5" Margin="0,0,0,4" />
+                                            <TextBlock Text="Displayed on TV projection &amp; mobile buzzer" FontSize="11" Foreground="#64748B" Margin="0,0,0,10" />
+
+                                            <TextBlock Text="Game Master / Host Name:" FontSize="12" Foreground="#CBD5E1" Margin="0,0,0,4" />
+                                            <TextBox Text="{Binding HostName, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,5" Margin="0,0,0,4" />
+                                            <TextBlock Text="Host identity on scoreboard &amp; intro screens" FontSize="11" Foreground="#64748B" />
                                         </StackPanel>
-                                        <CheckBox Grid.Column="1" IsChecked="{Binding AutoStartNextGameEnabled}" VerticalAlignment="Center" />
-                                    </Grid>
+                                    </Border>
 
-                                    <Grid Margin="0,8,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="220" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Intermission Delay (Minutes):" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding NextGameDelayMinutes, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="2" Text="(1 to 30 minutes)" FontSize="12" Foreground="#64748B" VerticalAlignment="Center" Margin="12,0,0,0" />
-                                    </Grid>
+                                    <!-- Intermission & Game Flow -->
+                                    <Border Background="#0F172A" CornerRadius="10" Padding="14" BorderBrush="#14FFFFFF" BorderThickness="1">
+                                        <StackPanel>
+                                            <TextBlock Text="🔄 Intermission &amp; Auto-Flow" FontWeight="Bold" FontSize="13" Foreground="#FFFFFF" Margin="0,0,0,10" />
+
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="Auto-Start Next Game" FontWeight="SemiBold" FontSize="12" Foreground="#FFFFFF" />
+                                                    <TextBlock Text="Launches countdown upon game completion" FontSize="11" Foreground="#94A3B8" />
+                                                </StackPanel>
+                                                <CheckBox Grid.Column="1" IsChecked="{Binding AutoStartNextGameEnabled}" VerticalAlignment="Center" />
+                                            </Grid>
+
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="Intermission Delay (Minutes):" FontSize="12" Foreground="#CBD5E1" />
+                                                    <TextBlock Text="1 to 30 minutes duration" FontSize="11" Foreground="#64748B" />
+                                                </StackPanel>
+                                                <TextBox Grid.Column="1" Text="{Binding NextGameDelayMinutes, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="6,4" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
-                            </Border>
 
-                            <!-- Question Timers -->
-                            <Border Background="#0F172A" CornerRadius="10" Padding="16" Margin="0,0,0,14" BorderBrush="#14FFFFFF" BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock Text="Timer &amp; Elimination Speeds" FontWeight="Bold" FontSize="14" Foreground="#FFFFFF" Margin="0,0,0,10" />
+                                <!-- COLUMN 2: Timers & Elimination, Scoring & Multipliers -->
+                                <StackPanel Grid.Column="2">
+                                    <!-- Question Timers -->
+                                    <Border Background="#0F172A" CornerRadius="10" Padding="14" Margin="0,0,0,14" BorderBrush="#14FFFFFF" BorderThickness="1">
+                                        <StackPanel>
+                                            <TextBlock Text="⏱️ Timer &amp; Elimination Speeds" FontWeight="Bold" FontSize="13" Foreground="#FFFFFF" Margin="0,0,0,10" />
 
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="260" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Default Question Time (Seconds):" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding DefaultQuestionSeconds, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" />
-                                    </Grid>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Default Question Time (Sec):" FontSize="12" Foreground="#CBD5E1" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding DefaultQuestionSeconds, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="6,4" />
+                                            </Grid>
 
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="260" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Wrong Answer Fade Speed (Seconds):" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding AnswerEliminationIntervalSeconds, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" />
-                                    </Grid>
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Wrong Answer Fade Speed (Sec):" FontSize="12" Foreground="#CBD5E1" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding AnswerEliminationIntervalSeconds, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="6,4" />
+                                            </Grid>
 
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="260" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Post-Reveal Pause Delay (Seconds):" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding PostRevealDelaySeconds, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" />
-                                    </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Post-Reveal Pause Delay (Sec):" FontSize="12" Foreground="#CBD5E1" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding PostRevealDelaySeconds, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="6,4" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Scoring Rules -->
+                                    <Border Background="#0F172A" CornerRadius="10" Padding="14" BorderBrush="#14FFFFFF" BorderThickness="1">
+                                        <StackPanel>
+                                            <TextBlock Text="🏆 Scoring &amp; Multipliers" FontWeight="Bold" FontSize="13" Foreground="#FFFFFF" Margin="0,0,0,10" />
+
+                                            <Grid Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Base Points per Question:" FontSize="12" Foreground="#CBD5E1" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding BasePointsPerQuestion, UpdateSourceTrigger=PropertyChanged}" Width="75" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="6,4" />
+                                            </Grid>
+
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Wrong Answer Deduction Points:" FontSize="12" Foreground="#CBD5E1" VerticalAlignment="Center" ToolTip="Points deducted for an incorrect answer (Default: 0)" />
+                                                <TextBox Grid.Column="1" Text="{Binding WrongAnswerDeductionPoints, UpdateSourceTrigger=PropertyChanged}" Width="75" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="6,4" />
+                                            </Grid>
+
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="Fast Buzzer Speed Bonus" FontSize="12" Foreground="#CBD5E1" />
+                                                    <TextBlock Text="Awards extra points for faster response times" FontSize="11" Foreground="#64748B" />
+                                                </StackPanel>
+                                                <CheckBox Grid.Column="1" IsChecked="{Binding SpeedBonusEnabled}" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
-                            </Border>
 
-                            <!-- Scoring Rules -->
-                            <Border Background="#0F172A" CornerRadius="10" Padding="16" Margin="0,0,0,14" BorderBrush="#14FFFFFF" BorderThickness="1">
-                                <StackPanel>
-                                    <TextBlock Text="Scoring &amp; Multipliers" FontWeight="Bold" FontSize="14" Foreground="#FFFFFF" Margin="0,0,0,10" />
+                                <!-- COLUMN 3: Wi-Fi Credentials & Pre-Game Countdown -->
+                                <StackPanel Grid.Column="4">
+                                    <!-- Wi-Fi & Connect Instructions Configuration -->
+                                    <Border Background="#0F172A" CornerRadius="10" Padding="14" BorderBrush="#818CF8" BorderThickness="1.5">
+                                        <StackPanel>
+                                            <TextBlock Text="📶 Wi-Fi &amp; Connect Instructions" FontWeight="Bold" FontSize="13" Foreground="#FBBF24" Margin="0,0,0,10" />
 
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="260" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Base Points per Question:" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding BasePointsPerQuestion, UpdateSourceTrigger=PropertyChanged}" Width="75" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" />
-                                    </Grid>
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Wi-Fi SSID / Network Name:" FontSize="12" Foreground="#CBD5E1" VerticalAlignment="Center" />
+                                                <Button Grid.Column="1" Content="🔍 Auto-Detect" Command="{Binding AutoDetectWifiSsidCommand}" Background="#334155" Foreground="#FFFFFF" FontSize="10" FontWeight="Bold" Height="24" Padding="8,0" />
+                                            </Grid>
+                                            <TextBox Text="{Binding WifiSsid, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,5" Margin="0,0,0,8" />
 
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="260" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Points to Deduct for Wrong Answer:" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" ToolTip="Points deducted for an incorrect answer (Default: 0)" />
-                                        <TextBox Grid.Column="1" Text="{Binding WrongAnswerDeductionPoints, UpdateSourceTrigger=PropertyChanged}" Width="75" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" />
-                                    </Grid>
+                                            <TextBlock Text="Wi-Fi Password:" FontSize="12" Foreground="#CBD5E1" Margin="0,0,0,4" />
+                                            <TextBox Text="{Binding WifiPassword, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,5" Margin="0,0,0,4" />
+                                            <TextBlock Text="Leave blank if open or passwordless Wi-Fi" FontSize="11" Foreground="#64748B" Margin="0,0,0,10" />
 
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Enable Fast Buzzer Speed Bonus" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <CheckBox Grid.Column="1" IsChecked="{Binding SpeedBonusEnabled}" VerticalAlignment="Center" />
-                                    </Grid>
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="Pre-Game Countdown (Min):" FontSize="12" Foreground="#CBD5E1" />
+                                                    <TextBlock Text="Duration before first round begins" FontSize="11" Foreground="#64748B" />
+                                                </StackPanel>
+                                                <TextBox Grid.Column="1" Text="{Binding PreGameCountdownMinutes, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="6,4" VerticalAlignment="Center" />
+                                            </Grid>
+
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="Auto-Start at 00:00" FontSize="12" Foreground="#CBD5E1" />
+                                                    <TextBlock Text="Starts game when countdown reaches 00:00" FontSize="11" Foreground="#64748B" />
+                                                </StackPanel>
+                                                <CheckBox Grid.Column="1" IsChecked="{Binding AutoStartAfterCountdown}" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
-                            </Border>
-
-                            <!-- Wi-Fi & Connect Instructions Configuration -->
-                            <Border Background="#0F172A" CornerRadius="10" Padding="16" Margin="0,0,0,16" BorderBrush="#818CF8" BorderThickness="1.5">
-                                <StackPanel>
-                                    <TextBlock Text="Wi-Fi Credentials &amp; Connect Instructions Screen" FontWeight="Bold" FontSize="14" Foreground="#FBBF24" Margin="0,0,0,10" />
-
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="200" />
-                                            <ColumnDefinition Width="250" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Wi-Fi SSID / Network Name:" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding WifiSsid, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" />
-                                        <Button Grid.Column="2" Content="🔍 Auto-Detect Active Wi-Fi" Command="{Binding AutoDetectWifiSsidCommand}" Background="#334155" Foreground="#FFFFFF" FontSize="11" FontWeight="Bold" Height="28" Padding="10,0" Margin="10,0,0,0" HorizontalAlignment="Left" />
-                                    </Grid>
-
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="200" />
-                                            <ColumnDefinition Width="250" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Wi-Fi Password:" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding WifiPassword, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" />
-                                        <TextBlock Grid.Column="2" Text="(Leave blank if open Wi-Fi)" FontSize="12" Foreground="#64748B" VerticalAlignment="Center" Margin="10,0,0,0" />
-                                    </Grid>
-
-                                    <Grid Margin="0,0,0,10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="200" />
-                                            <ColumnDefinition Width="100" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Pre-Game Countdown (Minutes):" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding PreGameCountdownMinutes, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,4" />
-                                        <TextBlock Grid.Column="2" Text="(e.g., 5 min before game time)" FontSize="12" Foreground="#64748B" VerticalAlignment="Center" Margin="10,0,0,0" />
-                                    </Grid>
-
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Auto-Start Game When Countdown Reaches 00:00" FontSize="13" Foreground="#CBD5E1" VerticalAlignment="Center" />
-                                        <CheckBox Grid.Column="1" IsChecked="{Binding AutoStartAfterCountdown}" VerticalAlignment="Center" />
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-
-                            <Button Content="💾 Save All Settings" Command="{Binding SaveAllSettingsCommand}" Background="#10B981" Foreground="#FFFFFF" FontWeight="Bold" Height="44" Width="200" HorizontalAlignment="Left" />
-                        </StackPanel>
+                            </Grid>
+                        </Grid>
                     </ScrollViewer>
                 </Border>
             </TabItem>

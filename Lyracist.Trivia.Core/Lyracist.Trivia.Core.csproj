@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 13:04:00 -> Update SQLite packages and suppress warnings -->
+<!-- Edited on Aug 19, 2026 @ 09:16:30 -> Include TriviaData folder and contents with CopyToOutputDirectory=PreserveNewest -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -9,8 +9,8 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
-    <AssemblyVersion>26.8.18.5</AssemblyVersion>
-    <FileVersion>26.8.18.5</FileVersion>
+    <AssemblyVersion>26.8.19.6</AssemblyVersion>
+    <FileVersion>26.8.19.6</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +22,13 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\trivia.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\TriviaData\**\*">
+      <Link>TriviaData\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

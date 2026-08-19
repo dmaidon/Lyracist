@@ -1,4 +1,4 @@
-// Created on Aug 17, 2026 @ 13:06:00 -> SQLite TriviaDatabaseService unit tests
+// Edited on Aug 19, 2026 @ 09:11:30 -> Update tests to verify 14 packs including 150-question biker-trivia pack
 using System;
 using System.IO;
 using Lyracist.Trivia.Core.Models;
@@ -57,16 +57,16 @@ public class DatabaseTests : IDisposable
     }
 
     [Fact]
-    public void LoadAllPacks_ContainsAll13FleshedOut100QuestionPacks()
+    public void LoadAllPacks_ContainsAll14FleshedOutCategoryPacks()
     {
         string dir = TriviaStorageHelper.GetPacksDirectory();
         Assert.True(Directory.Exists(dir), $"Packs directory does not exist: {dir}");
 
         var files = Directory.GetFiles(dir, "*.json");
-        Assert.Equal(13, files.Length);
+        Assert.Equal(14, files.Length);
 
         var packs = TriviaPackManager.LoadAllPacks();
-        Assert.Equal(13, packs.Count);
+        Assert.Equal(14, packs.Count);
 
         string[] requiredPackIds =
         [
@@ -82,7 +82,8 @@ public class DatabaseTests : IDisposable
             "music-legends",
             "pop-culture-80s-90s",
             "movie-soundtracks",
-            "pub-trivia-all-stars"
+            "pub-trivia-all-stars",
+            "biker-trivia"
         ];
 
         foreach (string reqId in requiredPackIds)
@@ -90,6 +91,10 @@ public class DatabaseTests : IDisposable
             var pack = packs.Find(p => p.PackId.Equals(reqId, StringComparison.OrdinalIgnoreCase));
             Assert.NotNull(pack);
             Assert.True(pack.Questions.Count >= 100, $"Pack {reqId} should have at least 100 questions but had {pack.Questions.Count}");
+            if (reqId == "biker-trivia")
+            {
+                Assert.Equal(150, pack.Questions.Count);
+            }
         }
     }
 

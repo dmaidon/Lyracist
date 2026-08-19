@@ -1,8 +1,9 @@
-<!-- Edited on Aug 17, 2026 @ 13:05:00 -> Created Lyracist.Trivia.Tests project file -->
+<!-- Edited on Aug 19, 2026 @ 09:27:30 -> Add WPF support and reference Lyracist.Trivia for banner generator tests -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
@@ -27,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lyracist.Trivia.Core\Lyracist.Trivia.Core.csproj" />
+    <ProjectReference Include="..\Lyracist.Trivia\Lyracist.Trivia.csproj" />
   </ItemGroup>
 
 </Project>

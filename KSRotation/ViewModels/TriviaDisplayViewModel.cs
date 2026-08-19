@@ -1,7 +1,8 @@
-// Created on Aug 18, 2026 @ 19:30:00 -> ViewModel for KSRotation 16:9 Trivia multi-monitor display window
+// Edited on Aug 19, 2026 @ 10:03:00 -> Added Copyright property from Shared.Globals
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -17,6 +18,8 @@ namespace KSRotation.ViewModels
     {
         private readonly TriviaGameEngine _engine;
 
+        public string Copyright => Lyracist.Shared.Globals.Copyright;
+
         [ObservableProperty]
         private string _venueName = "The Main Stage Lounge";
 
@@ -31,6 +34,17 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         private string _categoryTitle = "Music & Pop Culture";
+
+        [ObservableProperty]
+        private string? _categoryBannerPath;
+
+        [ObservableProperty]
+        private string _categorySubtitle = string.Empty;
+
+        public bool HasCategoryBanner => !string.IsNullOrEmpty(CategoryBannerPath) && File.Exists(CategoryBannerPath);
+
+        [ObservableProperty]
+        private int _connectedPlayersCount;
 
         [ObservableProperty]
         private string _questionPrompt = "Question will appear here...";
@@ -218,6 +232,17 @@ namespace KSRotation.ViewModels
             }
         }
 
+        public void UpdateCategory(string category, string? subtitle = null)
+        {
+            CategoryTitle = category;
+            if (!string.IsNullOrEmpty(subtitle))
+            {
+                CategorySubtitle = subtitle;
+            }
+            CategoryBannerPath = TriviaStorageHelper.GetBannerPathForPack(category);
+            OnPropertyChanged(nameof(HasCategoryBanner));
+        }
+
         public void UpdatePreGameCountdown(int secondsRemaining)
         {
             PreGameSecondsRemaining = secondsRemaining;
@@ -307,6 +332,7 @@ namespace KSRotation.ViewModels
 
         private void RefreshTopPlayers(List<TriviaPlayer> list)
         {
+            ConnectedPlayersCount = list.Count;
             TopPlayers.Clear();
             MarqueeScores.Clear();
             var ranked = list.OrderByDescending(p => p.TotalScore).ToList();

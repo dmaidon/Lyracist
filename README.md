@@ -1,5 +1,5 @@
-<!-- Edited on Aug 18, 2026 @ 19:35:00 -> Document Open Big Screen and auto-casting feature in KSRotation in README.md -->
-Last Edit: Aug 18, 2026 - Multi-Monitor Big Screen Projection & Auto-Casting in KSRotation Trivia
+<!-- Edited on Aug 19, 2026 @ 10:07:00 -> Update README.md with 70:30 Pre-Game Lobby, Category Banners, and Biker Trivia -->
+Last Edit: Aug 19, 2026 - 70:30 Pre-Game Lobby, Category Banners & Biker Trivia
 # Lyracist Pro
 
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, and integrated interactive pub/bar trivia with dedicated separate settings, multi-monitor auto-casting, and automated projection pause synchronization.
@@ -18,19 +18,22 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Any singer can be designated as the 1st singer anchor via the `"Set as 1st Singer (Round Start)"` context action or `🚩` button.
 
 ### 🎯 Lyracist Live Trivia (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`)
-- **Multi-Monitor Projection & Auto-Casting in `KSRotation`**:
-  - Direct **"📡 Open Big Screen"** button on the `🎯 Trivia Game Control` tab to open and focus the 16:9 full-screen venue display (`TriviaDisplayWindow`) on the selected target monitor.
-  - Automatically opens and positions the trivia projection window on the secondary display when `"▶ Start Game"` is clicked.
-- **Integrated Host Console & Dedicated 3-Column Settings in `Lyracist` & `KSRotation`**:
-  - **`Lyracist`**: Direct top navigation tabs for **Trivia** (live Game Master controls) and **Trivia Settings** (3-column no-scroll dashboard for rules, timers, scoring bonuses, and Wi-Fi credentials).
-  - **`KSRotation`**: Dedicated top-level tabs for **Trivia** and **Trivia Settings**.
-  - **Deduplicated Venue & DJ Settings**: Pulls Venue and Host / DJ names directly from existing application settings with live synchronized badges, avoiding redundant configuration fields.
-  - **Automated Game Pause & Resume**: Automatically pauses the running trivia round whenever DJ Banners, Special Events, or Rotation screens take over the projection display, and resumes instantly upon closing or dismissing them.
-- **Scoring Rules, Bonus Multipliers & Wrong Answer Deduction**:
-  - **Base Points**: Configurable base reward per question (default: 1000 pts).
-  - **Wrong Answer Deduction**: Configurable points to deduct when a player submits an incorrect answer (default: 0 pts).
-  - **Speed Bonuses & Streak Multipliers**: Optional fast-buzzer scoring curve and progressive correct answer streak bonuses.
-- **Hybrid Standalone & Intermission Trivia**: Complete pub and bar trivia hosting system runnable as a dedicated standalone app (`Lyracist.Trivia`) or during karaoke session fill-ins.
+- **Unified 70:30 Pre-Game Lobby & Category Showcase (`TriviaDisplayWindow`)**:
+  - **70% Left Hero Column**: High-resolution 16:9 Category Announcement Banner (`TriviaData/Banners/{pack}.png`) with ambient illuminated border, tonight's category theme title, and topic subtitle. Dynamic cross-pack syncing automatically updates the big screen whenever the Game Master selects a category from the dropdown.
+  - **30% Right Onboarding Stack**:
+    1. **⏱️ Game Start Countdown Clock**: Large digital timer with pulsing amber badge that ticks down to game launch.
+    2. **📶 1. Connect to Wi-Fi Card**: Dedicated scan-to-connect Wi-Fi QR code with venue SSID and WPA password.
+    3. **📱 2. Join Trivia Game Card**: Dedicated scan-to-join mobile buzzer QR code pointing to `http://<LAN-IP>:8085/trivia` with direct URL.
+  - **Bottom Connection & Copyright Bar**: Displays mobile buzzer play address, company copyright information (`© 2026 PAROLE Software - All rights reserved.`), and app branding.
+  - **Full-Width Ticker Bar**: Continuous horizontal marquee scrolling venue announcements, host branding, game rules, and buzzer tips.
+- **Single-Click Pre-Game Launch (`🎯 Launch Pre-Game Lobby & Countdown`)**:
+  - A single primary action button in the Game Master console that opens/focuses the big screen, locks the category banner, starts the pre-game countdown, and activates the lobby with one click. Accompanied by `"▶ Start Game Now (Skip Countdown)"` for instant kickoff.
+- **16:9 Category Announcement Banners (`TriviaData/Banners/`)**:
+  - Clean 1920x1080 (16:9) graphic banners generated for all 14 categories, focusing on category branding and theme callouts without hardcoded question counts or timers so banners stay accurate regardless of host configuration.
+- **150-Question Bikers & Motorcycles Trivia Database (`biker_trivia.json`)**:
+  - Comprehensive, curated 150-question category covering Harley-Davidson engines and heritage, Indian Motorcycle history, British/European/Japanese classics, and legendary rallies (Sturgis, Daytona, Laconia, Tail of the Dragon).
+- **Automated `TriviaData` Build Output Copying**:
+  - Configured `TriviaData\**\*` with `CopyToOutputDirectory=PreserveNewest` across all projects, ensuring category packs, announcement banners, databases, and configuration automatically copy to build outputs.
 - **Accurate Multi-Monitor Projection**: Select any connected monitor (TV, secondary HDMI, projector) from the host console and cast seamlessly with physical resolution DPI awareness without forcing to Monitor 0.
 - **Venue & Game Master Customization**: Customize Venue Name and Game Master / Host Name directly in the **⚙️ Settings & Display** tab with instant two-way live update across projection monitors and mobile buzzer devices.
 - **Projection Screen Escape & Close Controls**: Press Escape (`Esc`) to immediately close/exit the venue display window, click the floating `✕` close button in the top-right corner, or right-click anywhere for context menu options.
@@ -43,7 +46,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Top Scrolling Player & Score Marquee**: Continuous horizontal ticker across the top of the venue display window displaying registered players, teams, and live scores, with a special gold crown badge highlighting the top scorer.
 - **3-Tab Game Master Console & Settings Page**:
   - **🎯 Live Game Master**: Streamlined live command deck with pack picker, auto-run switch, live question visualizer, QR connection code, scoreboard, and round flow controls.
-  - **⚙️ Settings & Display**: Dedicated settings tab for Intermission delay (minutes), auto-start toggle, display monitor selector, question timers (15s), wrong answer elimination speed (5s), post-reveal buffer (5s), scoring rules, sound effects, port, and venue branding.
+  - **⚙️ Settings & Display**: Dedicated 3-column no-scroll settings tab for Intermission delay (minutes), auto-start toggle, display monitor selector, question timers (15s), wrong answer elimination speed (5s), post-reveal buffer (5s), scoring rules, sound effects, port, and venue branding.
   - **👥 Players & Teams**: Full roster grid with player names, team names, total points, streaks, answer statistics, and player kick/removal tools.
 - **Post-Game Intermission Countdown & Automatic Next Game Start**:
   - When a game finishes, if auto-start is enabled, an intermission countdown runs for the configured duration (e.g. 3 minutes).
@@ -65,21 +68,22 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Automatically progresses through questions with a live 15-second countdown timer on big screen and mobile buzzers.
   - After 15 seconds, incorrect answers sequentially fade out one every 5 seconds until only the correct answer remains illuminated.
   - After showing the correct answer with full explanation, pauses for 5 seconds before automatically advancing to the next question.
-- **Dedicated Data Folder (`TriviaData/`)**: Centralized repository containing SQLite database `trivia.db`, game settings `trivia_settings.json`, and customizable JSON question packs in `TriviaData/packs/`.
-- **13 Curated Category Question Databases (100 Questions Each, 1,300 Questions Total, No Duplicates)**:
-  - 🎸 **Rock & Roll**: Classic rock, 70s/80s arena bands, iconic albums, guitar legends, and rock history.
-  - 🤠 **Country Music**: Outlaw country, 90s anthems, Grand Ole Opry legends, and honky-tonk history.
-  - 🌍 **Geography**: World continents, oceans, mountain peaks, rivers, borders, islands, and landmarks.
-  - 🏛️ **State Capitals**: All 50 U.S. state capitals, territorial capitals, and major world capitals.
-  - 📜 **History**: Ancient civilizations, American revolutions, world wars, space race, and historic moments.
-  - 🎤 **Complete the Lyric**: Karaoke singalong lyrics across rock, pop, 80s/90s classics, and country anthems.
-  - 📺 **TV Shows**: Classic sitcoms, drama series, sci-fi cult classics, and Emmy-winning television.
-  - 🏆 **Sports**: NFL football, MLB baseball, NBA basketball, NHL hockey, soccer, and Olympics.
-  - 🏷️ **Logos & Brand Slogans**: Famous advertising taglines, company mascots, brand history, and logos.
-  - 🌟 **Music & Karaoke Legends**: Chart-topping superstars, iconic frontmen/frontwomen, and music history.
-  - 🕹️ **80s & 90s Pop Culture**: Retro toys, video game classics, 80s/90s movies, fashion fads, and trends.
-  - 🎬 **Blockbuster Movie Soundtracks**: Iconic film scores, Oscar-winning theme songs, and needle-drops.
-  - 🍻 **Pub Trivia All-Stars**: Science, literature, food & drink, myths, idioms, and pub favorites.
+- **Dedicated Data Folder (`TriviaData/`)**: Centralized repository containing SQLite database `trivia.db`, game settings `trivia_settings.json`, customizable JSON question packs in `TriviaData/packs/`, and 16:9 high-resolution category announcement banners in `TriviaData/Banners/`.
+- **14 Curated Category Question Databases (1,450 Questions Total, No Duplicates)**:
+  - 🏍️ **Bikers & Motorcycle Culture**: 150 high-octane questions covering Harley-Davidson, Indian, classic choppers, engine mechanics, famous biker movies, historic rallies, MC culture, and legendary rides.
+  - 🎸 **Rock & Roll**: 100 questions on classic rock, 70s/80s arena bands, iconic albums, guitar legends, and rock history.
+  - 🤠 **Country Music**: 100 questions on outlaw country, 90s anthems, Grand Ole Opry legends, and honky-tonk history.
+  - 🌍 **Geography**: 100 questions on world continents, oceans, mountain peaks, rivers, borders, islands, and landmarks.
+  - 🏛️ **State Capitals**: 100 questions on all 50 U.S. state capitals, territorial capitals, and major world capitals.
+  - 📜 **History**: 100 questions on ancient civilizations, American revolutions, world wars, space race, and historic moments.
+  - 🎤 **Complete the Lyric**: 100 questions on karaoke singalong lyrics across rock, pop, 80s/90s classics, and country anthems.
+  - 📺 **TV Shows**: 100 questions on classic sitcoms, drama series, sci-fi cult classics, and Emmy-winning television.
+  - 🏆 **Sports**: 100 questions on NFL football, MLB baseball, NBA basketball, NHL hockey, soccer, and Olympics.
+  - 🏷️ **Logos & Brand Slogans**: 100 questions on famous advertising taglines, company mascots, brand history, and logos.
+  - 🌟 **Music & Karaoke Legends**: 100 questions on chart-topping superstars, iconic frontmen/frontwomen, and music history.
+  - 🕹️ **80s & 90s Pop Culture**: 100 questions on retro toys, video game classics, 80s/90s movies, fashion fads, and trends.
+  - 🎬 **Blockbuster Movie Soundtracks**: 100 questions on iconic film scores, Oscar-winning theme songs, and needle-drops.
+  - 🍻 **Pub Trivia All-Stars**: 100 questions on science, literature, food & drink, myths, idioms, and pub favorites.
 - **Zero-Install Mobile Player Buzzers (`/trivia`)**: Audience members scan an on-screen QR code on their smartphones to join with their team name and buzz in with 4 large responsive touch buttons with real-time feedback and haptics.
 - **16:9 Multi-Monitor Projection Screen (`TriviaDisplayWindow.xaml`)**: TV and projector output featuring category banners, live animated countdown timer with configurable 3-second warnings, 4-color answer options with progressive opacity elimination fading, room distribution stats, and live team leaderboard podium.
 - **Game Master Host Console**: Complete control deck with monitor picker, auto-progression switch, question pack selector, manual/auto question triggers, timer controls, live answer graphs, and team score management.

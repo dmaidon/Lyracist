@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 19:35:00 -> Added TriviaDisplayWindow management, toggle command, and auto-casting to secondary monitor
+// Edited on Aug 19, 2026 @ 09:48:00 -> Guarded TriviaDisplayWindow and TriviaDisplayViewModel with #if !MAUI for MAUI cross-platform build
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,8 +17,10 @@ namespace KSRotation.ViewModels
         private TriviaGameEngine? _triviaEngine;
         private TriviaWebServer? _triviaWebServer;
         private DispatcherTimer? _triviaSettingsStatusTimer;
+#if !MAUI
         private KSRotation.Windows.TriviaDisplayWindow? _triviaDisplayWindow;
         private TriviaDisplayViewModel? _triviaDisplayVm;
+#endif
 
         [ObservableProperty]
         public partial bool IsTriviaDisplayOpen { get; set; }
@@ -28,6 +30,13 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial string SelectedTriviaPack { get; set; } = "";
+
+        partial void OnSelectedTriviaPackChanged(string value)
+        {
+#if !MAUI
+            _triviaDisplayVm?.UpdateCategory(value);
+#endif
+        }
 
         [ObservableProperty]
         public partial string TriviaGameStateText { get; set; } = "Lobby";
@@ -375,6 +384,7 @@ namespace KSRotation.ViewModels
             }
         }
 
+#if !MAUI
         [RelayCommand]
         public void ToggleTriviaDisplay()
         {
@@ -403,6 +413,8 @@ namespace KSRotation.ViewModels
                     TriviaWifiSsid,
                     TriviaWifiPassword,
                     TriviaPreGameCountdownMinutes * 60);
+
+                _triviaDisplayVm.UpdateCategory(SelectedTriviaPack);
 
                 _triviaDisplayWindow = new KSRotation.Windows.TriviaDisplayWindow
                 {
@@ -453,6 +465,18 @@ namespace KSRotation.ViewModels
                 WindowPositioner.FillArea(_triviaDisplayWindow, targetScreen.Bounds);
             }
         }
+#else
+        [RelayCommand]
+        public void ToggleTriviaDisplay() { }
+
+        [RelayCommand]
+        public void OpenTriviaDisplay() { }
+
+        [RelayCommand]
+        public void CloseTriviaDisplay() { }
+
+        public void PositionTriviaDisplayWindow(string? deviceName) { }
+#endif
 
         [RelayCommand]
         public void ToggleTriviaPause()

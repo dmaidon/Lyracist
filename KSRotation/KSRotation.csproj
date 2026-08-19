@@ -1,4 +1,4 @@
-<!-- Edited on Aug 18, 2026 @ 15:30:00 -> Bump AssemblyVersion and FileVersion to 26.8.18.497 -->
+<!-- Edited on Aug 19, 2026 @ 09:16:30 -> Include TriviaData folder and contents with CopyToOutputDirectory=PreserveNewest -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -138,6 +138,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\EventBanners\*" Link="EventBanners\%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\TriviaData\**\*">
+      <Link>TriviaData\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

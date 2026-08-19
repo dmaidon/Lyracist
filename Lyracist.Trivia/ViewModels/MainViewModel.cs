@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 17:48:00 -> Added WrongAnswerDeductionPoints setting for wrong answer penalty configuration
+// Edited on Aug 19, 2026 @ 09:45:00 -> Added LaunchPreGameLobbyCommand and automatic Category Banner sync to projection display
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -173,6 +173,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public TriviaGameEngine Engine => _engine;
 
     public event EventHandler<string>? TargetMonitorChanged;
+    public event EventHandler? RequestOpenProjectionWindow;
 
     private readonly System.Timers.Timer _preGameTimer = new(1000);
     private DisplayViewModel? _activeDisplayVm;
@@ -382,7 +383,29 @@ public partial class MainViewModel : ObservableObject, IDisposable
             int qCount = Math.Clamp(QuestionsPerGame, 1, shuffled.Count);
             TotalQuestionsInRound = qCount;
             CurrentRoundTitle = value.Title;
+            _activeDisplayVm?.UpdateCategory(value.Category, value.Description);
         }
+    }
+
+    [RelayCommand]
+    private void LaunchPreGameLobby()
+    {
+        IsShowingConnectScreen = true;
+        if (!IsPreGameCountdownRunning)
+        {
+            if (PreGameSecondsRemaining <= 0)
+            {
+                PreGameSecondsRemaining = PreGameCountdownMinutes * 60;
+                int mins = PreGameSecondsRemaining / 60;
+                int secs = PreGameSecondsRemaining % 60;
+                PreGameCountdownText = $"{mins:D2}:{secs:D2}";
+            }
+            IsPreGameCountdownRunning = true;
+            _preGameTimer.Start();
+        }
+        _activeDisplayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
+        _activeDisplayVm?.UpdateCategory(SelectedPack?.Category ?? SelectedPack?.Title ?? string.Empty, SelectedPack?.Description);
+        RequestOpenProjectionWindow?.Invoke(this, EventArgs.Empty);
     }
 
     [RelayCommand]
@@ -468,6 +491,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         dvm.VenueName = VenueName;
         dvm.UpdateWifiCredentials(WifiSsid, WifiPassword);
         dvm.UpdatePreGameCountdown(PreGameSecondsRemaining);
+        dvm.UpdateCategory(SelectedPack?.Category ?? SelectedPack?.Title ?? string.Empty, SelectedPack?.Description);
         dvm.IsConnectInstructionsActive = IsShowingConnectScreen;
     }
 

@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 15:06:30 -> Accurate monitor positioning using bounds and trigger OnProjectionOpened on cast
+// Edited on Aug 19, 2026 @ 09:46:00 -> Handled RequestOpenProjectionWindow to open pre-game lobby on target monitor
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -25,6 +25,10 @@ public partial class MainWindow : Window
             vm.TargetMonitorChanged += (s, deviceName) =>
             {
                 Dispatcher.Invoke(() => PositionDisplayWindow(deviceName));
+            };
+            vm.RequestOpenProjectionWindow += (s, e) =>
+            {
+                Dispatcher.Invoke(() => OpenProjectionWindow_Click(this, new RoutedEventArgs()));
             };
         }
     }

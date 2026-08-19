@@ -1,8 +1,62 @@
-<!-- Edited on Aug 18, 2026 @ 19:35:00 -> Document Multi-Monitor Big Screen Projection in KSRotation in CHANGELOG.md -->
-Last Edit: Aug 18, 2026 - Multi-Monitor Big Screen Projection & Auto-Casting in KSRotation Trivia
+<!-- Edited on Aug 19, 2026 @ 10:04:30 -> Added Copyright notice to bottom of Trivia Display screen -->
+Last Edit: Aug 19, 2026 - Bottom Bar Copyright Notice & 70:30 Pre-Game Lobby
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.19.0] - 2026-08-19
+
+### Added
+- **Unified 16:9 Pre-Game Lobby & Category Showcase Screen (`TriviaDisplayWindow`)**:
+  - Re-architected the pre-game big screen into a unified, high-impact lobby layout combining all pre-game elements onto one screen:
+    - **Left Hero Column (70% width)**: Displays the high-resolution 16:9 Category Announcement Banner (`TriviaData/Banners/{pack}.png`) at maximum size with ambient border glow, theme tagline, and dynamic cross-pack syncing whenever the host selects a new category dropdown.
+    - **Right Onboarding Stack (30% width)**:
+      1. **Game Start Countdown Clock**: Large digital timer with pulsing amber badge showing time until game launch.
+      2. **📶 1. Connect to Wi-Fi QR Card**: Scan-to-connect Wi-Fi QR code with venue SSID and WPA password.
+      3. **📱 2. Join Trivia Game QR Card**: Scan-to-join mobile buzzer QR code pointing to `http://<LAN-IP>:8085/trivia` with clean direct URL.
+    - **Bottom Connection & Copyright Bar**: Displays mobile buzzer URL (`📱 PLAY ON YOUR PHONE: ...`), company copyright information (`© 2026 PAROLE Software - All rights reserved.`), and app branding across all projection screens.
+    - **Full-Width Ticker Bar**: Continuous horizontal marquee scrolling venue announcements, host branding, game rules, and buzzer tips.
+- **Single-Click Pre-Game Launch (`LaunchPreGameLobbyCommand`)**:
+  - Added a primary **"🎯 Launch Pre-Game Lobby & Countdown"** action button in `Lyracist.Trivia` that automatically opens/focuses the big screen on the target monitor, syncs the selected category banner, starts the pre-game countdown, and activates the lobby with one single click.
+  - Accompanied by **"▶ Start Game Now (Skip Countdown)"** for instant gameplay kickoff.
+- **16:9 Aspect Ratio Category Announcement Banners (`TriviaData/Banners/`)**:
+  - Created high-resolution 1920x1080 (16:9) announcement banners for all 14 trivia categories, saved directly into `TriviaData/Banners/` and automatically copied to the build folder with `PreserveNewest`:
+    1. `biker_trivia.png`: *Bikers & Motorcycles* (Dark Carbon & Flame Gold theme, 🏍️ emblem).
+    2. `rock_and_roll.png`: *Rock & Roll Legends* (Electric Indigo & Neon Pink theme, 🎸 emblem).
+    3. `country_music.png`: *Country Music Hits* (Saddle Brown & Gold theme, 🤠 emblem).
+    4. `geography.png`: *World Geography* (Deep Emerald & Ocean Teal theme, 🌍 emblem).
+    5. `state_capitals.png`: *State & World Capitals* (Navy Blue & Gold theme, 🏛️ emblem).
+    6. `history.png`: *World History* (Antique Bronze & Crimson theme, 📜 emblem).
+    7. `complete_the_lyric.png`: *Complete the Lyric* (Neon Magenta & Cyan Singalong theme, 🎤 emblem).
+    8. `tv_shows.png`: *TV Shows & Sitcoms* (Retro Indigo & Cyber Blue theme, 📺 emblem).
+    9. `sports.png`: *Sports & Athletes* (Stadium Green & Gold theme, 🏆 emblem).
+    10. `logos_and_slogans.png`: *Logos & Slogans* (Electric Blue & Amber theme, 🏷️ emblem).
+    11. `music_legends.png`: *Music & Karaoke Legends* (Royal Purple & Platinum Gold theme, 🌟 emblem).
+    12. `pop_culture_80s_90s.png`: *80s & 90s Pop Culture* (Synthwave Neon Pink & Turquoise theme, 🕹️ emblem).
+    13. `movie_soundtracks.png`: *Movie Soundtracks* (Midnight Cinema & Gold theme, 🎬 emblem).
+    14. `pub_general_knowledge.png`: *Pub Trivia All-Stars* (Pub Tavern Amber & Forest Green theme, 🍻 emblem).
+  - Streamlined banner graphics to focus purely on category branding, topic highlights, and player join callouts, omitting hardcoded question counts, timers, and scoring rules so banners remain accurate regardless of host settings.
+  - Added `TriviaStorageHelper.GetBannersDirectory()` and automated banner generator utility (`TriviaBannerGenerator.cs`).
+- **Automated `TriviaData` Build Output Copying**:
+  - Configured `TriviaData\**\*` with `<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>` across `Lyracist.Trivia.Core.csproj`, `Lyracist.Trivia.csproj`, `Lyracist.csproj`, and `KSRotation.csproj`.
+  - Automatically copies and updates `TriviaData/packs/` (all 14 category JSON packs), `TriviaData/Banners/` (all 14 category banners), `trivia.db`, and `trivia_settings.json` into the target build output directory (`C:\VB26\Release\Lyracist\Debug\net10.0-windows\TriviaData\`) whenever files or settings are added or modified.
+- **150-Question Bikers & Motorcycles Trivia Database (`biker_trivia.json`)**:
+  - Added a comprehensive, curated 150-question category pack covering:
+    1. **Harley-Davidson Heritage & Engines**: Founding in 1903 Milwaukee, Knucklehead, Panhead, Shovelhead, Evolution, Twin Cam, Milwaukee-Eight, Revolution/Porsche V-Rod, Sportster, Fat Boy, and H.O.G. history.
+    2. **Indian Motorcycle & Early American Iron**: 1901 Springfield heritage, Scout, Chief, Indian Four, Burt Munro's Bonneville record, Crocker, Henderson, and Excelsior.
+    3. **British, European & Japanese Icons**: Triumph Bonneville & Steve McQueen, Norton Commando & Featherbed frame, Vincent Black Shadow & Rollie Free, Ducati Desmodromic, BMW Boxers, Honda CB750 & Gold Wing, Kawasaki H2 Mach IV Widowmaker & GPZ900R Ninja, Suzuki Hayabusa.
+    4. **Legendary Rallies & Road Pilgrimages**: Sturgis (Pappy Hoel & Jackpine Gypsies), Daytona Bike Week, Laconia, Tail of the Dragon (318 curves in 11 miles), Route 66, Blue Ridge Parkway, and Iron Butt Association (SaddleSore 1000).
+    5. **Choppers & Custom Mechanical Engineering**: Origin of chopping, ape hangers, sissy bars, suicide clutch & jockey shifters, Springer front ends, hardtail vs. softail, rake & trail geometry, dry sump oiling, and masters (Arlen Ness, Indian Larry, Jesse James, Von Dutch, Ed Roth).
+    6. **Biker Culture, Traditions & Etiquette**: Guardian / Gremlin bell lore, 1%er history (Hollister 1947), two-finger downward wave, cut / three-piece rocker patches, road captain & sweep duties, staggered formation, and lane splitting.
+    7. **Movies, TV Shows & Pop Culture Icons**: *Easy Rider* (Captain America & Billy Bike), *The Wild One* (Marlon Brando), *Sons of Anarchy* (SAMCRO & Jax Teller), *Terminator 2* (Fat Boy), Evel Knievel, *Long Way Round*, and *On Any Sunday*.
+
+### Changed
+- **`Lyracist.Trivia` 3-Column No-Scroll Settings Dashboard**:
+  - Converted the **⚙️ Settings & Display** tab into an equal 3-column dashboard layout so Game Masters and hosts can view and edit all configuration fields without vertical scrolling.
+  - **Column 1**: Venue & Host Branding (Venue Name, Game Master / Host Name) and Intermission & Auto-Flow controls.
+  - **Column 2**: Timer & Elimination Speeds (Default Question Time, Wrong Answer Fade Speed, Post-Reveal Delay) and Scoring & Multipliers (Base Points, Wrong Answer Deduction, Fast Buzzer Speed Bonus).
+  - **Column 3**: Wi-Fi Credentials & Connect Instructions (Wi-Fi SSID, Password, Auto-Detect button, Pre-Game Countdown duration, and Auto-Start toggle).
+  - Added a dedicated top header bar with quick-access **"💾 Save All Settings"** action button.
 
 ## [26.8.18.0] - 2026-08-18
 

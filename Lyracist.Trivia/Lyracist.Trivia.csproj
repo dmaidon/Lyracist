@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 14:48:30 -> Link Shared WifiHelper.cs for Wi-Fi QR Code generation -->
+<!-- Edited on Aug 19, 2026 @ 10:02:00 -> Include Shared\Globals.cs link -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -14,8 +14,8 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
-    <AssemblyVersion>26.8.17.12</AssemblyVersion>
-    <FileVersion>26.8.17.12</FileVersion>
+    <AssemblyVersion>26.8.19.18</AssemblyVersion>
+    <FileVersion>26.8.19.18</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
   </PropertyGroup>
 
@@ -30,11 +30,25 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\Globals.cs" Link="Shared\Globals.cs" />
     <Compile Include="..\Shared\MonitorInfo.cs" Link="Shared\MonitorInfo.cs" />
     <Compile Include="..\Shared\MonitorDpiHelper.cs" Link="Shared\MonitorDpiHelper.cs" />
     <Compile Include="..\Shared\WindowPositioner.cs" Link="Shared\WindowPositioner.cs" />
     <Compile Include="..\Shared\LocalNetworkHelper.cs" Link="Shared\LocalNetworkHelper.cs" />
     <Compile Include="..\Shared\WifiHelper.cs" Link="Shared\WifiHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\TriviaData\**\*">
+      <Link>TriviaData\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="..\TriviaData\trivia_settings.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

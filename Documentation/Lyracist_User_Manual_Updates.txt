@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 19:35:00 -> Document Multi-Monitor Big Screen Projection in KSRotation
+// Edited on Aug 19, 2026 @ 10:04:30 -> Added Copyright notice to bottom of Trivia Display screen in Lyracist_User_Manual_Updates.txt
 Rotation Management & Round Cycle Tracking (`Lyracist`, `KSRotation`, & `KSRotation.Maui`) - (August 2026)
 
 Section: Performance & Rotation Operations / Singer Queue Management
@@ -71,12 +71,18 @@ Section: Entertainment Modules / Lyracist.Trivia & Pub Trivia Game Master
      * **Floating Close Button (`✕`)**: Sleek translucent circular close button in the top-right corner, illuminating red on hover for instant 1-click closure.
      * **Right-Click Context Menu**: Right-clicking anywhere on the screen displays quick options to close (`✕ Close Projection (Esc)`) or toggle fullscreen (`🗖 Toggle Fullscreen (F11)`).
      * **Double-Click & Drag**: Double-clicking the display toggles between windowed and fullscreen maximized modes, with click-and-drag window repositioning.
-   - **Dedicated Venue Connect Instructions Screen (`TriviaDisplayWindow`)**:
-     * **Dual QR Code Presentation (Enlarged 380×380 px)**: Displays an extra-large, full-screen high-contrast join screen before game start or on demand:
-       1. **1. Connect to Wi-Fi**: High-resolution scan-to-connect Wi-Fi QR code (`WIFI:S:...;T:WPA;P:...;;` or `nopass`), auto-detected/configured SSID name, and password.
-       2. **2. Join Trivia Game**: High-resolution mobile buzzer QR code (`http://<ip>:<port>/`), direct web address, and clear 3-step joining instructions.
-     * **Pre-Game Countdown Clock**: Displays a large digital countdown clock (`"⏱ TRIVIA GAME STARTS IN: mm:ss"`) that starts ticking when the screen is cast to the monitor and automatically launches the game when the countdown completes.
-     * **Game Master Host Controls**: Host can easily toggle the connect screen, set the pre-game countdown (e.g. 5 minutes), add minutes on the fly (`+1m`, `+5m`, `Reset`), pause/resume the countdown, and auto-detect Wi-Fi credentials.
+    - **Unified 16:9 Pre-Game Lobby & Category Showcase Screen (`TriviaDisplayWindow`)**:
+      * Combines all pre-game elements into a clean, modern split layout:
+        1. **Left Hero Column (70% width)**: Full-featured 16:9 Category Announcement Banner (`TriviaData/Banners/{pack}.png`) with ambient glow, tonight's category theme title, and topic subtitle. Cross-fades dynamically when the host selects a different pack in the console dropdown.
+        2. **Right Onboarding Stack (30% width)**:
+           - **⏱️ Game Start Countdown Clock**: Large digital timer with pulsing badge (`"⏱ GAME STARTS IN: mm:ss"`) that counts down to launch.
+           - **📶 1. Connect to Wi-Fi Card**: Dedicated scan-to-connect Wi-Fi QR code (`WifiQrCodeImage`), SSID name, and password.
+           - **📱 2. Join Trivia Game Card**: Dedicated scan-to-join mobile buzzer QR code (`QrCodeImage`), direct URL, and buzzer onboarding instructions.
+        3. **Bottom Connection & Copyright Bar**: Displays mobile buzzer URL (`📱 PLAY ON YOUR PHONE: ...`), company copyright information (`© 2026 PAROLE Software - All rights reserved.`), and app branding across all projection screens.
+        4. **Continuous Scrolling Marquee**: Bottom/top ticker bar displaying venue branding, Game Master name, game rules, and buzzer tips.
+      * **Single-Click Game Master Setup (`🎯 Launch Pre-Game Lobby & Countdown`)**:
+        - A single primary action button in the Game Master console that opens/focuses the big screen, locks the category banner, starts the pre-game countdown, and activates the lobby.
+        - Accompanied by `"▶ Start Game Now (Skip Countdown)"` for immediate question launch.
    - **Top Scrolling Player & Score Marquee**:
      * Continuous horizontal marquee ticker running along the top of the venue display screen (`TriviaDisplayWindow`).
      * Shows all registered players and teams with their live point totals.

@@ -1,0 +1,2408 @@
+{
+  "PackId": "biker-trivia",
+  "Title": "Bikers & Motorcycles",
+  "Category": "Bikers & Motorcycles",
+  "Description": "150 high-octane questions covering Harley-Davidson, Indian, classic choppers, engine mechanics, famous biker movies, historic rallies, MC culture, and legendary rides.",
+  "Questions": [
+    {
+      "Id": "BK-001",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what American city was the Harley-Davidson Motor Company founded in 1903?",
+      "Options": [
+        "Detroit, Michigan",
+        "Milwaukee, Wisconsin",
+        "Chicago, Illinois",
+        "Cleveland, Ohio"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "William S. Harley and the Davidson brothers built their first motorcycle in a small wooden shed in Milwaukee, Wisconsin.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-002",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the official acronym and mascot name for the official factory-sponsored Harley Owners Group?",
+      "Options": [
+        "DOG",
+        "EAGLE",
+        "HOG",
+        "WOLF"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "H.O.G. stands for Harley Owners Group, originating from the 1920s racing team mascot pig that rode victory laps.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-003",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which famous Harley-Davidson model line was introduced in 1957 and remained in production for over 65 years?",
+      "Options": [
+        "Sportster",
+        "Road King",
+        "Fat Boy",
+        "Electra Glide"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Sportster (XL series) debuted in 1957 to compete with fast British roadsters like Triumph and BSA.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-004",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What iconic Harley-Davidson motorcycle featured solid aluminum disc wheels and became famous in 'Terminator 2'?",
+      "Options": [
+        "Heritage Softail",
+        "Fat Boy",
+        "Low Rider",
+        "Street Glide"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The FLSTF Fat Boy debuted in 1990 featuring distinctive solid disc wheels and shotgun exhaust.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-005",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the classic V-angle between cylinders in a traditional Harley-Davidson V-Twin engine?",
+      "Options": [
+        "90 degrees",
+        "60 degrees",
+        "45 degrees",
+        "180 degrees"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Harley's traditional V-Twins use a 45-degree angle with a single crankpin, creating its distinct 'potato-potato' cadence.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-006",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Harley-Davidson touring model is famously equipped with a fork-mounted 'Batwing' fairing?",
+      "Options": [
+        "Road Glide",
+        "Street Glide",
+        "Heritage Classic",
+        "Fat Bob"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Street Glide and Electra Glide use fork-mounted Batwing fairings, while the Road Glide uses a frame-mounted Sharknose fairing.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-007",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What corporate conglomerate owned and operated Harley-Davidson between 1969 and 1981?",
+      "Options": [
+        "AMF (American Machine and Foundry)",
+        "General Motors",
+        "Brunswick Corporation",
+        "Textron"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "AMF owned Harley-Davidson from 1969 until 13 senior executives bought the company back in 1981.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-008",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Harley-Davidson overhead valve engine era ran from 1936 to 1947, named after its valve cover shape?",
+      "Options": [
+        "Flathead",
+        "Knucklehead",
+        "Panhead",
+        "Shovelhead"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The EL 61ci Knucklehead was introduced in 1936, nicknamed for its rocker boxes resembling clenched fist knuckles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-009",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the aluminum cylinder engine introduced in 1984 that is credited with saving Harley-Davidson?",
+      "Options": [
+        "Evolution (Evo)",
+        "Twin Cam 88",
+        "Milwaukee-Eight",
+        "Revolution"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The 1340cc Evolution engine cured earlier oil leak and reliability issues, ushering in Harley's modern golden era.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-010",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which German sports car manufacturer co-developed the liquid-cooled 'Revolution' engine for the Harley-Davidson V-Rod?",
+      "Options": [
+        "BMW",
+        "Porsche",
+        "Audi",
+        "Mercedes-AMG"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Porsche Engineering partnered with Harley-Davidson in Stuttgart to develop the VRSC V-Rod's DOHC 60-degree V-twin engine.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-011",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Harley-Davidson engine family succeeded the Evolution engine in big twin touring and Dyna models starting in 1999?",
+      "Options": [
+        "Twin Cam 88",
+        "Milwaukee-Eight",
+        "Shovelhead",
+        "Ironhead"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Twin Cam 88 (1450cc) featured dual camshafts driven by silent internal chains.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-012",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What frame design features hidden rear shock absorbers to give the vintage visual appearance of a rigid hardtail?",
+      "Options": [
+        "Softail",
+        "Dyna",
+        "Touring",
+        "Featherbed"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The FXST Softail was introduced in 1984, placing gas shocks horizontally underneath the transmission.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-013",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What engine era followed the Knucklehead in 1948, featuring chrome rocker covers resembling cooking pans?",
+      "Options": [
+        "Panhead",
+        "Shovelhead",
+        "Flathead",
+        "Blockhead"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Panhead engine featured aluminum heads, hydraulic lifters, and pan-shaped rocker covers from 1948 to 1965.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-014",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which legendary VP of Styling at Harley-Davidson designed the FX Super Glide, Low Rider, and Fat Boy?",
+      "Options": [
+        "Willie G. Davidson",
+        "Arthur Davidson",
+        "Erik Buell",
+        "Bill Harley"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Willie G. Davidson led styling for four decades, creating factory custom icons and the modern Harley aesthetic.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-015",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What nickname was given to early 1907–1912 Harley-Davidson motorcycles due to their smooth grey paint and quiet mufflers?",
+      "Options": [
+        "The Iron Ghost",
+        "The Silent Gray Fellow",
+        "The Milwaukee Phantom",
+        "The Steel Whisperer"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Harleys were painted Renault Gray with red pinstriping and boasted exceptional quietness, earning the title 'Silent Gray Fellow'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-016",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year did the Electra Glide debut, bringing push-button 12-volt electric starting to Harley-Davidson Big Twins?",
+      "Options": [
+        "1955",
+        "1965",
+        "1972",
+        "1980"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "1965 was the final year of the Panhead engine and the first year of the electric starter, hence 'Electra' Glide.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-017",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What four-valve-per-cylinder engine architecture was introduced by Harley-Davidson in 2016 for its touring line?",
+      "Options": [
+        "Milwaukee-Eight (M8)",
+        "Revolution Max",
+        "Twin Cam 103",
+        "Evolution II"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Milwaukee-Eight was Harley's ninth Big Twin design, featuring dual spark plugs and four valves per cylinder.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-018",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the model designation of the military motorcycle Harley-Davidson built in massive numbers during World War II?",
+      "Options": [
+        "WLA",
+        "XA-750",
+        "UL-1200",
+        "J-Series"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The WLA ('Liberator') was powered by a 45ci flathead engine; over 90,000 units were produced for Allied forces.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-019",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which famous factory flat-track racing motorcycle won 29 AMA Grand National Championships for Harley-Davidson?",
+      "Options": [
+        "XR-750",
+        "WR-45",
+        "KR-750",
+        "CR-1000"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Introduced in 1970, the alloy XR-750 became the most winning race bike in AMA history and Evel Knievel's jump bike.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-020",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What distinctive frame characteristic differentiates a traditional Dyna model from a Softail model?",
+      "Options": [
+        "Dual exposed rear coil-over shock absorbers",
+        "Rigid hardtail triangular swingarm",
+        "Single monoshock under the seat",
+        "Inverted front girder"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Dyna chassis featured rubber engine mounts and two visible external coil-over shock absorbers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-021",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of Harley-Davidson's factory performance and custom parts division?",
+      "Options": [
+        "Screamin' Eagle",
+        "Thunder Road",
+        "Iron Stallion",
+        "Night Rod"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Screamin' Eagle is Harley-Davidson's official high-performance racing parts and engine upgrade brand.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-022",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What year did Harley-Davidson celebrate its massive 100th Anniversary milestone in Milwaukee?",
+      "Options": [
+        "1999",
+        "2001",
+        "2003",
+        "2005"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Harley celebrated its centennial in 2003, drawing hundreds of thousands of riders home to Milwaukee.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-023",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which model line features a distinctive frame-mounted dual headlight 'Sharknose' fairing?",
+      "Options": [
+        "Road Glide",
+        "Street Glide",
+        "Electra Glide",
+        "Ultra Limited"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Road Glide features a frame-mounted Sharknose fairing, reducing wind buffet forces on the handlebars.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-024",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the experimental shaft-drive opposed-twin motorcycle Harley built for desert warfare in 1942 based on the BMW R71?",
+      "Options": [
+        "Harley-Davidson XA",
+        "Harley-Davidson WLC",
+        "Harley-Davidson Peashooter",
+        "Harley-Davidson Servi-Car"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Harley XA used a 750cc flat-twin engine and shaft drive to run cooler in harsh North African desert sands.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-025",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What three-wheeled vehicle did Harley-Davidson manufacture from 1932 to 1973 for utility, delivery, and police patrol?",
+      "Options": [
+        "Tri Glide",
+        "Servi-Car",
+        "Sidecar Utility",
+        "Cargo-Glide"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Servi-Car was built for 42 years, popular with auto dealerships, meter maids, and delivery couriers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-026",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year was Indian Motocycle founded, making it America's first motorcycle company (predating Harley by 2 years)?",
+      "Options": [
+        "1898",
+        "1901",
+        "1903",
+        "1910"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "George M. Hendee and Oscar Hedstrom founded the Hendee Manufacturing Company in Springfield, Massachusetts in 1901.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-027",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What New Zealander famously set world land speed records at Bonneville on a heavily modified 1920 Indian Scout?",
+      "Options": [
+        "Burt Munro",
+        "John Britten",
+        "Guy Martin",
+        "Joey Dunlop"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Burt Munro set the under-1000cc world record at Bonneville in 1967, dramatized in 'The World's Fastest Indian'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-028",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What visual design feature introduced in 1940 became an unmistakable trademark of vintage Indian Chief motorcycles?",
+      "Options": [
+        "Deep skirted fenders",
+        "Square chrome exhaust",
+        "Spoke-less wheels",
+        "Wooden floorboards"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Full valanced / skirted fenders sweeping around the wheels became the defining aesthetic of classic Indian motorcycles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-029",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What powersports corporation purchased and successfully revived the Indian Motorcycle brand in 2011?",
+      "Options": [
+        "Polaris Industries",
+        "Arctic Cat",
+        "Bombardier (BRP)",
+        "Textron"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Polaris acquired Indian in 2011 and engineered the acclaimed Thunder Stroke 111 engine and modern lineup in Spirit Lake, Iowa.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-030",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the illuminated warbonnet ornament mounted on the front fender of classic Indian motorcycles?",
+      "Options": [
+        "The War Chief",
+        "The Headdress / War Bonnet",
+        "The Eagle Feather",
+        "The Spirit Scout"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The lighted Indian Headdress (War Bonnet) fender lamp is an iconic styling signature dating back to the 1940s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-031",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What iconic middleweight model introduced by Indian in 1920 is renowned for its handling and hillclimbing pedigree?",
+      "Options": [
+        "Scout",
+        "Chief",
+        "Warrior",
+        "Arrow"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The 37ci (606cc) Indian Scout debuted in 1920, celebrated for its indestructible geardrive primary and agile handling.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-032",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What luxury 4-cylinder motorcycle was produced by Indian from 1928 to 1942, based on the Ace motorcycle design?",
+      "Options": [
+        "Indian Four",
+        "Indian Quad",
+        "Indian Straight-4",
+        "Indian Imperial"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Indian Four featured an inline longitudinal 4-cylinder engine and was revered as the 'Duesenberg of motorcycles'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-033",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what city was Indian Motocycle originally manufactured from 1901 until the original factory closed in 1953?",
+      "Options": [
+        "Springfield, Massachusetts",
+        "Providence, Rhode Island",
+        "Hartford, Connecticut",
+        "Worcester, Massachusetts"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The massive historic Indian factory in Springfield was famously nicknamed 'The Wigwam'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-034",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the air-cooled, 49-degree V-twin engine engineered by Polaris for the 2014 Indian revival?",
+      "Options": [
+        "Thunder Stroke 111",
+        "PowerPlus 108",
+        "Evolution 110",
+        "Big Twin 114"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Thunder Stroke 111 was styled with downward-pointing exhaust headers mimicking vintage 1940s Indian Chiefs.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-035",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which American builder and racer won the inaugural 1937 Daytona 200 beach race on an Indian Sport Scout?",
+      "Options": [
+        "Ed Kretz",
+        "Joe Petrali",
+        "Cannonball Baker",
+        "Smokey Yunick"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Ed 'Iron Man' Kretz dominated the inaugural 200-mile beach road race at Daytona aboard an Indian.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-036",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What flat-track race-inspired production motorcycle did Indian release in 2019 following back-to-back AFT championships?",
+      "Options": [
+        "FTR 1200",
+        "Challenger RR",
+        "Scout Bobber",
+        "Super Chief"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The FTR 1200 was modeled after the championship-winning Scout FTR750 purpose-built dirt tracker.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-037",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the long-distance pioneer who crossed America on an Indian in 1914 in a record 11 days?",
+      "Options": [
+        "Erwin 'Cannonball' Baker",
+        "Carl Stearns Clancy",
+        "Bessie Stringfield",
+        "Malcolm Forbes"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Erwin 'Cannonball' Baker's cross-country records inspired the famous Cannonball Sea-to-Shining-Sea road races.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-038",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What historic American motorcycle company from Cleveland (1915–1929) produced a popular inline-4 and 2-stroke lightweight?",
+      "Options": [
+        "Cleveland Motorcycle",
+        "Henderson",
+        "Excelsior",
+        "Pierce-Arrow"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Cleveland Motorcycle Manufacturing Company produced innovative inline fours with worm-gear drives.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-039",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Along with Harley-Davidson and Indian, which company made up the 'Big Three' American motorcycle builders in the 1920s?",
+      "Options": [
+        "Excelsior-Henderson (Schwinn)",
+        "Crocker",
+        "Flying Merkel",
+        "Thor"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Ignaz Schwinn's Excelsior Motor Mfg. produced powerhouse Excelsior and Henderson four-cylinder motorcycles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-040",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What legendary Los Angeles boutique motorcycle built by Al Crocker in the 1930s outperformed contemporary Harleys and Indians?",
+      "Options": [
+        "Crocker V-Twin",
+        "Merkel Lightning",
+        "Cyclone OHC",
+        "Simplex Raider"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Al Crocker built handcrafted overhead-valve V-Twins with engines up to 100ci; fewer than 100 were produced, making them multi-million-dollar collector gems.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-041",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What African-American woman, known as the 'Motorcycle Queen of Miami', solo rode a Harley across the Jim Crow South in the 1930s and 40s?",
+      "Options": [
+        "Bessie Stringfield",
+        "Madam C.J. Walker",
+        "Ruby Bridges",
+        "Dorothy Levitt"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Bessie Stringfield completed eight solo cross-country tours and served as a WWII US Army civilian dispatch courier.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-042",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What liquid-cooled bagger introduced by Indian in 2020 features a frame-mounted fairing and inverted front forks?",
+      "Options": [
+        "Challenger",
+        "Roadmaster",
+        "Springfield Dark Horse",
+        "Chief Bobber"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Indian Challenger introduced the 122hp PowerPlus 108 overhead-cam engine to challenge the Harley Road Glide.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-043",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was unique about the spelling of Indian's company name from 1923 until 1953?",
+      "Options": [
+        "It was spelled 'Motocycle' without an 'r'",
+        "It was spelled with an umlaut",
+        "It was hyphenated as Motor-Cycle",
+        "It was all capitalized in Latin script"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "In 1923, the firm officially renamed itself 'The Indian Motocycle Company', dropping the 'r'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-044",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What prominent suspension style did Indian use in the 1940s on the rear of the Indian Chief before full swingarms?",
+      "Options": [
+        "Plunger rear suspension",
+        "Cantilever monoshock",
+        "Leaf spring rear axle",
+        "Air bladder struts"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Indian equipped the Chief with spring-loaded plunger frame rear suspension in 1940, years before Harley adopted rear shocks.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-045",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the bright orange and black British single-cylinder bike produced in 1910s Milwaukee known as 'The Flying...'?",
+      "Options": [
+        "Flying Merkel",
+        "Flying Arrow",
+        "Flying Yankee",
+        "Flying Falcon"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Flying Merkel was famous for its bright 'Merkel Orange' paint, innovative monoshock rear suspension, and cam-action front fork.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-046",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What British motorcycle manufacturer produces the iconic 'Bonneville', named after the Utah salt flats?",
+      "Options": [
+        "Triumph",
+        "Norton",
+        "BSA",
+        "Royal Enfield"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Triumph Bonneville T120 was launched in 1959 to honor Johnny Allen's 214 mph record on the Bonneville Salt Flats.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-047",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Japanese motorcycle released in 1969 is widely heralded as the world's very first modern 'Superbike'?",
+      "Options": [
+        "Honda CB750 Four",
+        "Kawasaki Z1",
+        "Suzuki GT750",
+        "Yamaha XS650"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The 1969 Honda CB750 featured an inline four-cylinder engine, front disc brake, and electric starter at an affordable price.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-048",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What distinctive engine cylinder layout has BMW used on its 'R-Series' boxer motorcycles since 1923?",
+      "Options": [
+        "Horizontally opposed flat-twin",
+        "Transverse 90-degree V-twin",
+        "Inline three-cylinder",
+        "Single overhead thumper"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "BMW's boxer engines have two cylinders protruding outward into the airstream on opposite sides with shaft final drive.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-049",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What motorcycle holds the record as the most-produced motorized vehicle in human history, surpassing 100 million units?",
+      "Options": [
+        "Honda Super Cub",
+        "Yamaha DT-1",
+        "Vespa PX150",
+        "Harley Sportster"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Honda Super Cub step-through was launched in 1958 with the slogan 'You meet the nicest people on a Honda'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-050",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Italian manufacturer is world-famous for its Desmodromic valve control and trellis-frame sportbikes?",
+      "Options": [
+        "Ducati",
+        "Moto Guzzi",
+        "Aprilia",
+        "MV Agusta"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Ducati, headquartered in Bologna, utilizes mechanical desmodromic valve actuation to prevent high-RPM valve float.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-051",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1999 Suzuki hypersport motorcycle was named after the Japanese peregrine falcon and exceeded 194 mph?",
+      "Options": [
+        "Hayabusa (GSX1300R)",
+        "Katana",
+        "Bandit 1200",
+        "B-King"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Suzuki Hayabusa became the world's fastest production motorcycle, prompting the 186 mph (300 km/h) 'Gentlemen's Agreement'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-052",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Italian manufacturer located on Lake Como is famous for its 90-degree transverse V-Twins with cylinders protruding sideways?",
+      "Options": [
+        "Moto Guzzi",
+        "Ducati",
+        "Benelli",
+        "Laverda"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Moto Guzzi has manufactured motorcycles in Mandello del Lario since 1921, famous for its transverse V-twin configuration.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-053",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which British twin, ridden by Rollie Free in a bathing suit in 1948, was the fastest production motorcycle of its era at 125+ mph?",
+      "Options": [
+        "Vincent Black Shadow",
+        "Brough Superior SS100",
+        "Norton Manx",
+        "Triumph Thunderbird"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The 998cc Vincent Black Shadow and Black Lightning were the undisputed top-speed kings of the late 1940s and 50s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-054",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What motorcycle brand was favored by T.E. Lawrence ('Lawrence of Arabia'), who owned seven and was called the 'Rolls-Royce of Motorcycles'?",
+      "Options": [
+        "Brough Superior",
+        "Vincent HRD",
+        "Ariel Square Four",
+        "Velocette"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "George Brough guaranteed that every SS100 had been tested to 100 mph before customer delivery.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-055",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What flagship Honda luxury touring motorcycle introduced in 1975 evolved from a 1000cc flat-four into an 1833cc flat-six?",
+      "Options": [
+        "Gold Wing (GL series)",
+        "Valkyrie",
+        "Silver Wing",
+        "Pan European"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Honda Gold Wing set the global gold standard for long-distance two-up luxury motorcycle touring.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-056",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What revolutionary double-cradle frame developed by the McCandless brothers gave Norton road racers unmatched handling in 1950?",
+      "Options": [
+        "Featherbed Frame",
+        "Isolastic Frame",
+        "Deltabox Frame",
+        "Trellis Frame"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Norton racer Harold Daniell remarked the new frame rode 'like a featherbed', giving the iconic chassis its legendary name.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-057",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What motorcycle model holds the record for the longest continuous production run in history, built continuously since 1932?",
+      "Options": [
+        "Royal Enfield Bullet",
+        "Harley-Davidson Sportster",
+        "BMW R25",
+        "Triumph Bonneville"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Royal Enfield Bullet single-cylinder thumper has been produced continuously in the UK and Chennai, India since 1932.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-058",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1970s two-stroke triple from Kawasaki earned the fearsome street nickname 'The Widowmaker' due to explosive acceleration and flexible chassis?",
+      "Options": [
+        "Kawasaki H2 Mach IV 750",
+        "Kawasaki Z1 900",
+        "Kawasaki KZ1000",
+        "Kawasaki GPZ750 Turbo"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The 748cc 3-cylinder 2-stroke H2 Mach IV delivered blistering 12-second quarter-mile times that overwhelmed its braking and frame.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-059",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What muscle bike did Yamaha introduce in 1985 featuring a 1198cc V4 engine and the patented 'V-Boost' induction system?",
+      "Options": [
+        "V-Max",
+        "Virago",
+        "Warrior",
+        "Raider"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Yamaha V-Max used servo-operated butterfly valves to unleash 145 horsepower above 6,000 RPM.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-060",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What did the acronym 'BSA' stand for regarding the historic British motorcycle and arms manufacturing conglomerate?",
+      "Options": [
+        "Birmingham Small Arms",
+        "British Standard Automotive",
+        "Bristol Speedworks Association",
+        "Balfour Steel Armor"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "BSA started as a consortium of gunsmiths in Birmingham, England before becoming the world's largest motorcycle maker in the 1950s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-061",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which German brand pioneered production motorcycle Anti-lock Braking Systems (ABS) on its K100 in 1988?",
+      "Options": [
+        "BMW",
+        "KTM",
+        "Horex",
+        "MZ"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "BMW Motorrad was the first manufacturer to introduce electronic ABS on production street motorcycles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-062",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What classic British 1000cc motorcycle featured four cylinders arranged in a square with two geared crankshafts?",
+      "Options": [
+        "Ariel Square Four",
+        "Brough Superior Golden Dream",
+        "Sunbeam S7",
+        "Matchless Silver Hawk"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Designed by Edward Turner, the Ariel 'Squariel' ran from 1931 to 1959 with four cylinders in a square block.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-063",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Austrian motorcycle company with orange branding is dominant in off-road, Dakar Rally, and naked Duke street bikes?",
+      "Options": [
+        "KTM",
+        "Husqvarna",
+        "GasGas",
+        "Beta"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "KTM (Kronreif & Trunkenpolz Mattighofen) won 18 consecutive Dakar Rally motorcycle titles from 2001 to 2019.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-064",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 900cc Kawasaki sportbike did Tom Cruise famously ride in the 1986 blockbuster movie 'Top Gun'?",
+      "Options": [
+        "Ninja 900 (GPZ900R)",
+        "Z1R 1000",
+        "Ninja ZX-10",
+        "KZ900 LTD"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tom Cruise's character 'Maverick' raced a jet down the runway on a 1985 red and black Kawasaki GPZ900R Ninja.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-065",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What system did Norton invent for the 1968 Commando to isolate the rider from parallel-twin engine vibration?",
+      "Options": [
+        "Isolastic rubber mounting system",
+        "Counter-rotating balance shafts",
+        "Hydraulic swingarm dampers",
+        "Pneumatic engine cradles"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Isolastic system connected the engine, gearbox, and swingarm as a unit, separated from the frame via rubber bushings.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-066",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In which South Dakota town is the world-famous annual Sturgis Motorcycle Rally held each August?",
+      "Options": [
+        "Sturgis",
+        "Deadwood",
+        "Rapid City",
+        "Spearfish"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The rally takes place in Sturgis, SD, drawing over 500,000 riders to ride through the Black Hills, Mount Rushmore, and Needles Highway.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-067",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous Florida motorcycle rally takes place each March, featuring events on Main Street and Daytona International Speedway?",
+      "Options": [
+        "Daytona Bike Week",
+        "Biketoberfest",
+        "Key West Poker Run",
+        "Panama City Thunder"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Daytona Bike Week began in 1937 with the Daytona 200 beach race and is one of America's premier motorcycle gatherings.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-068",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the famous nickname for US Highway 129 on the NC/TN border, known for having 318 curves in 11 miles?",
+      "Options": [
+        "Tail of the Dragon (Deals Gap)",
+        "The Snake",
+        "The Devil's Triangle",
+        "The Twisted Sisters"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tail of the Dragon at Deals Gap is a world-renowned destination with 318 curves, no intersections, and famous 'Tree of Shame'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-069",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What historic 2,448-mile American highway running from Chicago to Santa Monica is celebrated as 'The Mother Road'?",
+      "Options": [
+        "Route 66",
+        "Highway 1",
+        "Route 50",
+        "Lincoln Highway"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "US Route 66 was established in 1926 and remains the ultimate American cross-country pilgrimage for motorcyclists.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-070",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which New Hampshire gathering, founded in 1916/1923 at Weirs Beach, is recognized as the oldest national motorcycle rally in the US?",
+      "Options": [
+        "Laconia Motorcycle Week",
+        "Americade",
+        "Sturgis",
+        "Oyster Run"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Laconia Motorcycle Week in the Lakes Region of New Hampshire is the oldest continuous motorcycle rally in the nation.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-071",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who founded the Sturgis Motorcycle Rally in 1938 with the Jackpine Gypsies motorcycle club?",
+      "Options": [
+        "J.C. 'Pappy' Hoel",
+        "Willie G. Davidson",
+        "Sonny Barger",
+        "E.C. Smith"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Pappy Hoel and his Indian motorcycle dealership organized the first 'Black Hills Classic' race on August 14, 1938.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-072",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the qualifying ride requirement for the Iron Butt Association's entry-level 'SaddleSore 1000' certification?",
+      "Options": [
+        "1,000 miles within 24 hours",
+        "500 miles within 12 hours",
+        "1,500 miles within 36 hours",
+        "Coast-to-coast in 50 hours"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Iron Butt Association ('World's Toughest Riders') certifies riders who document completing 1,000 miles in 24 hours or less.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-073",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What scenic 469-mile national parkway connects Shenandoah National Park in Virginia to the Great Smoky Mountains in North Carolina?",
+      "Options": [
+        "Blue Ridge Parkway",
+        "Natchez Trace Parkway",
+        "Skyline Drive",
+        "Cherohala Skyway"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Blue Ridge Parkway is famous for sweeping low-speed curves, zero commercial trucks, and panoramic mountain vistas.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-074",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the oldest, most prestigious and perilous motorcycle road racing event in the world, held on public island roads since 1907?",
+      "Options": [
+        "Isle of Man TT (Tourist Trophy)",
+        "Macau Grand Prix",
+        "North West 200",
+        "Ulster Grand Prix"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Isle of Man TT races on the 37.73-mile Snaefell Mountain Course, where superbikes hit speeds exceeding 200 mph between stone walls.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-075",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous destination campground outside Sturgis is renowned as the 'World's Largest Biker Bar' and concert venue?",
+      "Options": [
+        "The Buffalo Chip",
+        "Full Throttle Saloon",
+        "Glencoe CampResort",
+        "Iron Horse Saloon"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Legendary Buffalo Chip campground founded by Rod Woodruff has hosted massive rock concerts and rallies since 1981.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-076",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What legendary high-altitude scenic highway crosses the Continental Divide through Glacier National Park in Montana?",
+      "Options": [
+        "Going-to-the-Sun Road",
+        "Beartooth Highway",
+        "Million Dollar Highway",
+        "Trail Ridge Road"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Going-to-the-Sun Road spans 50 miles across Logan Pass with dramatic cliffside vistas and glacial peaks.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-077",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What perilous stretch of US 550 between Ouray and Silverton in Colorado is carved into mountain cliffs with no guardrails?",
+      "Options": [
+        "The Million Dollar Highway",
+        "Independence Pass",
+        "Pikes Peak Climb",
+        "Monarch Pass"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Million Dollar Highway delivers breathtaking San Juan mountain riding along narrow, steep drop-offs.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-078",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous biker bar on Route 66 in Oatman, Arizona is famous for wild burros wandering the street and dollar bills on walls?",
+      "Options": [
+        "Oatman Hotel & Saloon",
+        "Hackberry General Store",
+        "Delgadillo's Snow Cap",
+        "Roadrunners Bar"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The 1902 Oatman Hotel on old Route 66 is wallpapered in signed dollar bills where wild burros greet visiting bikers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-079",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Texas Hill Country trio of winding farm-to-market roads (FM 335, 336, 337) is known as a top motorcycle ride?",
+      "Options": [
+        "The Twisted Sisters (The Three Sisters)",
+        "The Hill Country Loop",
+        "The Devil's Backbone",
+        "The Guadalupe Triangle"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Twisted Sisters span 100 miles of roller-coaster canyon twisties through the Texas Hill Country.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-080",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the legendary scenic highway running along the Pacific coast of California through Big Sur?",
+      "Options": [
+        "Pacific Coast Highway (PCH / Highway 1)",
+        "Route 101",
+        "Avenue of the Giants",
+        "Cabot Trail"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "PCH (California State Route 1) offers world-class coastal curves crossing the dramatic Bixby Creek Bridge.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-081",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What mountain road in southwest Montana and Wyoming leading into Yellowstone was called 'the most beautiful drive in America' by Charles Kuralt?",
+      "Options": [
+        "Beartooth Highway (US 212)",
+        "Chief Joseph Scenic Byway",
+        "Wind River Canyon",
+        "Lolo Pass"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Beartooth Highway climbs to 10,947 feet above sea level with dramatic switchbacks and alpine tundra.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-082",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What northern New York state touring rally held in Lake George is the largest touring motorcycle rally in North America?",
+      "Options": [
+        "Americade",
+        "Rally in the Valley",
+        "Rendezvous in the Adirondacks",
+        "Catskill Thunder"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Americade, founded in 1983 by Bill Dutcher, welcomes touring, sport-touring, and cruiser riders to the Adirondacks.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-083",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What monument overlooking the Tail of the Dragon is decorated with broken fairings and parts from crashed motorcycles?",
+      "Options": [
+        "The Tree of Shame",
+        "The Dragon's Tomb",
+        "The Deals Gap Wall",
+        "The Slayers Post"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Tree of Shame at the Deals Gap Motorcycle Resort holds hundreds of motorcycle pieces left behind by riders who pushed too hard.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-084",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which famous charity ride, founded in 1984 by Arthur Kane, brings thousands of bikers to Washington D.C. on Memorial Day weekend?",
+      "Options": [
+        "Rolling Thunder (now Rolling to Remember)",
+        "Patriot Guard Mission",
+        "Ride for the Fallen",
+        "Run for the Wall"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Rolling Thunder roared through the Pentagon and National Mall to raise awareness for POW/MIA military personnel.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-085",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the scenic motorcycle road along the Columbia River Gorge in Oregon celebrated as America's first scenic highway?",
+      "Options": [
+        "Historic Columbia River Highway",
+        "Cascade Lakes Scenic Byway",
+        "McKenzie Pass",
+        "Rim Drive"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Built between 1913 and 1922, it passes Multnomah Falls and Crown Point with historic stone guard walls.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-086",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the term 'chopper' originally derive from in post-WWII motorcycle culture?",
+      "Options": [
+        "'Chopping' or removing unnecessary parts and cutting the frame",
+        "Helicopter blades inspiration",
+        "A famous butcher in California",
+        "The loud chopping sound of the exhaust"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Returning WWII veterans stripped ('chopped') heavy stock fenders and cut frames to make bikes lighter, faster, and customized.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-087",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What style of extra-tall handlebars requires the rider to reach upward above their shoulders?",
+      "Options": [
+        "Ape Hangers",
+        "Drag Bars",
+        "Clip-Ons",
+        "Beach Bars"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Ape hangers place the hand grips high in the air, forcing riders to hang onto them like primates.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-088",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the tall passenger backrest bar extending vertically up from the rear fender of a chopper called?",
+      "Options": [
+        "Sissy Bar",
+        "Tombstone Bar",
+        "Highway Post",
+        "Grab Spar"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Originally called a 'sissy bar' because tough solo bikers joked that only pampered passengers needed a backrest.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-089",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is a 'suicide clutch' setup on a vintage or custom chopper?",
+      "Options": [
+        "A non-locking foot-operated clutch paired with a hand jockey shifter",
+        "A front brake with no lever",
+        "A throttle that locks wide open",
+        "A clutch lever mounted to the footpeg"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "A rocker foot-clutch without a return spring means taking your left foot off the ground at a stop light can stall or lurch the bike into traffic.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-090",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is a 'hardtail' motorcycle frame?",
+      "Options": [
+        "A rigid frame with no rear suspension or rear shocks",
+        "A seat made of molded plastic",
+        "A reinforced steel fender",
+        "A solid rear disc wheel"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "A hardtail has a solid triangular frame where the rear axle is bolted directly to the chassis without springs or shocks.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-091",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What front suspension design uses dual external chrome springs and pivot arms rather than hydraulic telescopic tubes?",
+      "Options": [
+        "Springer front end",
+        "Girder fork",
+        "Inverted fork",
+        "Leading-link fork"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Springer fork was standard on early Harleys and remains a beloved staple of vintage chopper builds.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-092",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In motorcycle geometry, what does 'rake' refer to?",
+      "Options": [
+        "The angle (in degrees) of the steering head relative to vertical",
+        "The distance between the front and rear axles",
+        "The width of the handlebars",
+        "The height of the seat above the pavement"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Increasing the rake angle kicks the front fork further outward, a hallmark of long custom choppers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-093",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is a 'bobber' motorcycle style?",
+      "Options": [
+        "A bike with 'bobbed' (shortened) fenders and stripped accessories, retaining stock frame geometry",
+        "A bike with an extended 12-inch stretched fork",
+        "A full-dress touring bike with hard luggage",
+        "A mini-bike with fat balloon tires"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Bobbers preceded choppers in the 1930s-40s by shortening (bobbing) the rear fender without cutting or altering the main frame.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-094",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is 'trail' in motorcycle steering geometry?",
+      "Options": [
+        "The horizontal distance between the steering axis contact point and the tire contact patch on the ground",
+        "The turning radius at full handlebar lock",
+        "The height difference between front and rear axles",
+        "The length of the swingarm pivot"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Trail acts like the caster wheel on a shopping cart, providing directional high-speed stability.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-095",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What teardrop-shaped fuel tank from a 125cc two-stroke Harley became a quintessential custom chopper component?",
+      "Options": [
+        "Sportster Peanut Tank (Hummer / Wassell style)",
+        "Fat Bob split tanks",
+        "Coffin Tank",
+        "Prism Tank"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The tiny high-tunnel 'Peanut' tank from the Harley Hummer and Sportster became the standard tank for sleek custom choppers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-096",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What style of vintage hand shifter is mounted right behind the rider's thigh or directly to the top of the transmission?",
+      "Options": [
+        "Jockey Shifter",
+        "Slap Shifter",
+        "Quick Shifter",
+        "Tank Gate Shifter"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "A jockey shifter has a short arm mounted under the seat or transmission, operated like a horse jockey using a whip.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-097",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What exhaust tip design flares out into a flattened vertical fan shape resembling a fish tail?",
+      "Options": [
+        "Fishtail exhaust",
+        "Turn-down pipes",
+        "Slash-cut pipes",
+        "Megaphone mufflers"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Fishtail exhausts are a classic 1940s-50s retro styling feature especially popular on custom Chicano / Vicla-style lowriders.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-098",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What custom bike builder from San Leandro, California was hailed as the 'King of Custom Motorcycles' with his Diggers and Ness-Styler bikes?",
+      "Options": [
+        "Arlen Ness",
+        "Indian Larry",
+        "Ron Finch",
+        "Billy Lane"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Arlen Ness pioneered low-slung, stretched custom aluminum and billet motorcycles and custom parts empires starting in the 1970s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-099",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which NYC chopper builder was renowned for grease-monkey aesthetics, twisted steel chain frames, and question mark tattoos?",
+      "Options": [
+        "Indian Larry",
+        "Jesse James",
+        "Roland Sands",
+        "Cyril Huze"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Indian Larry (Larry Desmedt) was a legendary purist custom builder who built raw old-school choppers in Brooklyn, NY.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-100",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Long Beach custom shop founded by Jesse James in 1992 built high-profile choppers for celebrities like Shaq and Kid Rock?",
+      "Options": [
+        "West Coast Choppers",
+        "Orange County Choppers",
+        "Chop Shop Custom",
+        "Exile Cycles"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Jesse James founded West Coast Choppers, famous for the iconic Iron Cross logo and CFL (Cheap .450) rigid frames.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-101",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular custom motorcycle style is characterized by wide beach bars, long fishtail pipes, lowered suspension, and 21-inch spoke front wheels?",
+      "Options": [
+        "Vicla / Chicano Style",
+        "Cafe Racer",
+        "Tracker",
+        "Brat Style"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Vicla (Chicano style) custom Softails feature brilliant candy paint, engraving, long fishtails, and high ape-hangers or beach bars.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-102",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is a 'Cafe Racer' motorcycle style?",
+      "Options": [
+        "A lightweight bike with clip-on handlebars, rear-set footpegs, and solo hump seat designed for quick rides between coffee shops in 1960s London",
+        "A custom chopper built for long highway hauls",
+        "An off-road motorcycle with high knobby tires",
+        "A high-seat adventure tourer with aluminum panniers"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "British 'Ton-Up Boys' modified standard bikes to race from cafe to cafe, aiming to hit the magic 100 mph mark ('the ton').",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-103",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the mechanical term for an engine lubrication system that stores its oil in a separate external tank rather than in the bottom of the crankcase?",
+      "Options": [
+        "Dry Sump",
+        "Wet Sump",
+        "Splash Oiler",
+        "Total Loss"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Most Harley-Davidson Big Twins and classic British twins utilize a dry-sump system with scavenge pumps and an external horseshoe oil tank.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-104",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is a 'spreader' or 'triple tree' on a motorcycle?",
+      "Options": [
+        "The clamp assembly that holds the fork tubes to the steering stem neck",
+        "A 3-into-1 exhaust header collector",
+        "A three-way fuel petcock valve",
+        "The rear luggage rack support bracket"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The upper and lower triple trees (triple clamps) secure the front fork legs and pivot inside the steering head of the frame.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-105",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What type of primary drive system replaces the sealed chain case with a wide, exposed toothed rubber belt?",
+      "Options": [
+        "Open Belt Primary",
+        "Shaft Drive Link",
+        "Direct Gear Primary",
+        "Hydraulic Sump Drive"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Open 2-inch to 3.5-inch belt primaries give custom choppers a menacing industrial look and eliminate primary oil cases.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-106",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What small brass or pewter accessory is hung low on a motorcycle frame to ward off bad road luck and road gremlins?",
+      "Options": [
+        "Guardian Bell / Gremlin Bell",
+        "Lucky Horseshoe",
+        "Highway Coin",
+        "Spirit Token"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Biker tradition holds that a Guardian Bell traps evil road gremlins in its hollow cavity; its protective power is doubled if given as a gift by a friend.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-107",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the '1%' (One-Percenter) badge or patch signify in traditional motorcycle club culture?",
+      "Options": [
+        "Outlaw motorcycle clubs operating outside the rules of the American Motorcyclist Association (AMA)",
+        "Riders who have ridden over 100,000 miles",
+        "The top 1% fastest drag racing riders",
+        "Bikers who own custom-built show bikes"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Following the 1947 Hollister rally, an alleged AMA statement claimed '99% of riders are law-abiding citizens', leading outlaw clubs to adopt the '1%' patch.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-108",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the traditional 'Biker Wave' exchanged between riders passing each other on the highway?",
+      "Options": [
+        "A low left-hand wave pointing two fingers down toward the asphalt",
+        "A high wave with both hands off the bars",
+        "Flashing high beams three times",
+        "A friendly honk of the horn"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The two-finger downward point represents 'keep two wheels on the ground' and mutual respect between riders.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-109",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the leather or denim sleeveless vest worn by motorcyclists to display club patches called?",
+      "Options": [
+        "Kutte / Cut / Cutoff",
+        "Duster",
+        "Jerkin",
+        "Waistcoat"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Originating from cutting the sleeves and collars off leather jackets or denim coats, it is known as a 'cut' or 'kutte'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-110",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What are the three parts of a traditional traditional 'Three-Piece Patch' on the back of an MC cut?",
+      "Options": [
+        "Top Rocker (Club Name), Center Logo (Club Crest), Bottom Rocker (Territory/Location)",
+        "Country, State, Zip Code",
+        "Club Name, Member Nickname, Bike Model",
+        "President, Vice President, Enforcer"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Top Rocker identifies the club, the Center patch is the club insignia, and the Bottom Rocker declares the territorial charter.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-111",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the standard, safest formation used by organized groups riding on multi-lane highways?",
+      "Options": [
+        "Staggered formation (zig-zag spacing)",
+        "Single-file tight line",
+        "Side-by-side shoulder to shoulder",
+        "Random loose cluster"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "A staggered formation provides each rider with a full lane buffer, clear forward visibility, and room to swerve around hazards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-112",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In a group ride or motorcycle club run, who is the 'Road Captain'?",
+      "Options": [
+        "The experienced rider who maps the route, sets the pace, and leads the pack",
+        "The club mechanic who fixes broken bikes",
+        "The rider carrying emergency medical supplies",
+        "The owner of the largest motorcycle in the group"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Road Captain plans fuel stops, oversees rider safety, manages pace, and commands the formation on the road.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-113",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In club riding, what is the role of the 'Tail Gunner' or 'Sweep' rider?",
+      "Options": [
+        "Rides at the rear of the pack to assist distressed riders and secure lane changes",
+        "Operates the rear camera on the ride",
+        "Cleans bikes at the campsite",
+        "Counts fuel consumption for the group"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Sweep/Tail Gunner secures the lane during group lane changes, provides first aid or tools if a bike breaks down, and ensures no rider is left behind.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-114",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is derogatory biker slang for a rider who trailer-hauls their motorcycle to within 5 miles of a rally just to pose?",
+      "Options": [
+        "Trailer Queen / Rub (Rich Urban Biker)",
+        "Iron Butter",
+        "Hard Core Nomad",
+        "Caging Rider"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Trailer Queen' or 'Credit Card Biker' describes someone who avoids actual highway riding in favor of trailering and posing.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-115",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the biker acronym 'ATGATT' stand for?",
+      "Options": [
+        "All The Gear, All The Time",
+        "Always Take Gas At The Tank",
+        "All Twin-Cams Go All The Time",
+        "Avoid Trucks, Give All Trucks Time"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "ATGATT promotes wearing full protective riding gear (helmet, jacket, gloves, pants, boots) on every single ride.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-116",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is a 'cage' in biker slang terminology?",
+      "Options": [
+        "An automobile, car, truck, or van",
+        "A motorcycle storage shed",
+        "A full-face helmet with a heavy chin bar",
+        "A crowded parking lot"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Bikers call cars 'cages' and drivers 'cagers' because they are enclosed in metal and glass boxes disconnected from the road.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-117",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What motorcycle club rank is designated for a trusted member who has no local territorial charter and answers directly to national leadership?",
+      "Options": [
+        "Nomad",
+        "Prospect",
+        "Enforcer",
+        "First Mate"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Nomads wear a 'NOMAD' bottom rocker, indicating they are not tied to a specific geographic city or clubhouse.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-118",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What event in July 1947 in a small California town sparked the sensational media image of the 'outlaw biker' and inspired the film 'The Wild One'?",
+      "Options": [
+        "The Hollister Independence Day Gypsy Tour Rally",
+        "The Altamont Speedway Concert",
+        "The Riverside Run",
+        "The Bakersfield Brawl"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "San Francisco Chronicle and Life Magazine sensationalized street racing in Hollister, cementing the public outlaw biker myth.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-119",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the common slang term for the passenger seat or the passenger riding on the back of a motorcycle?",
+      "Options": [
+        "Pillion (or riding bitch)",
+        "Sidecar seat",
+        "Trailer deck",
+        "Bob tail"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The 'pillion' is the secondary pad behind the driver's seat designed for a passenger.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-120",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is slang for a reckless, inexperienced rider on a high-speed sportbike wearing no protective gear (t-shirt, shorts, flip-flops)?",
+      "Options": [
+        "Squid",
+        "Monkey",
+        "Poser",
+        "Skater"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Squid' commonly stands for 'Stupid, Quick, Underdressed, and Imminently Dead'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-121",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What are 'chicken strips' on a motorcycle tire?",
+      "Options": [
+        "The unworn, shiny tread on the outermost edges of the tire indicating the rider does not lean deeply in turns",
+        "Reflective safety tape on the rim",
+        "Rubber wear indicators in the center grooves",
+        "Plugs used to patch a flat tire"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Wide chicken strips mean the rider was 'too chicken' to lean the motorcycle aggressively through corners.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-122",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the 'Church' or 'Colours Meeting' signify in traditional motorcycle club governance?",
+      "Options": [
+        "A mandatory closed-door weekly club business meeting for patched members only",
+        "A Sunday morning charity ride",
+        "A motorcycle blessing ceremony at church",
+        "A bike repair seminar"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "In traditional MCs, 'Church' is the sacred, mandatory business meeting where only full-patch members are allowed.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-123",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular biker slogan expresses the camaraderie and life ethos of the open road?",
+      "Options": [
+        "Live to Ride, Ride to Live",
+        "Keep calm and cruise on",
+        "Two wheels, one world",
+        "Speed is our destiny"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Live to Ride, Ride to Live' has been stamped on medallions, leather, and chrome accessories for decades.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-124",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is 'lane splitting' (also known as lane filtering or white-lining)?",
+      "Options": [
+        "Riding a motorcycle between lanes of slow-moving or stopped traffic moving in the same direction",
+        "Cutting across lanes without a turn signal",
+        "Riding on the highway shoulder",
+        "Swerving back and forth to warm up tires"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Lane splitting allows motorcyclists to navigate between lanes, legal in California, many US states, and most European countries.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-125",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does 'dropping the hammer' or 'giving it the beans' mean in rider slang?",
+      "Options": [
+        "Wrenching the throttle wide open for maximum acceleration",
+        "Applying the rear brake abruptly",
+        "Downshifting into neutral",
+        "Setting down the kickstand"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Dropping the hammer means rolling hard into wide-open throttle to accelerate at full power.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-126",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1969 counterculture road movie starred Peter Fonda, Dennis Hopper, and Jack Nicholson riding custom choppers to New Orleans?",
+      "Options": [
+        "Easy Rider",
+        "The Wild Angels",
+        "Electra Glide in Blue",
+        "Hells Angels on Wheels"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Easy Rider defined a generation, featuring the iconic 'Captain America' chopper with its stars-and-stripes teardrop tank.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-127",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What popular FX television series (2008–2014) followed Jax Teller and the fictional outlaw club SAMCRO in Charming, California?",
+      "Options": [
+        "Sons of Anarchy",
+        "Mayans M.C.",
+        "Gangland",
+        "Biker Boyz"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Created by Kurt Sutter, Sons of Anarchy chronicled the brotherhood, crime, and drama of the Redwood Original charter.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-128",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1953 film featured Marlon Brando as rebel leader Johnny Strabler, who answered 'Whaddya got?' when asked what he was rebelling against?",
+      "Options": [
+        "The Wild One",
+        "Rebel Without a Cause",
+        "The Loveless",
+        "Motorcycle Diaries"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Marlon Brando rode his own 1950 Triumph Thunderbird 6T in The Wild One, establishing the leather-jacket biker archetype.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-129",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What legendary daredevil became famous in the 1970s for soaring his Harley-Davidson XR-750 over buses and fountains?",
+      "Options": [
+        "Evel Knievel",
+        "Robbie Maddison",
+        "Travis Pastrana",
+        "Super Dave Osborne"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Robert Craig 'Evel' Knievel was an American icon who performed 75 ramp-to-ramp motorcycle jumps in his stars-and-stripes jumpsuit.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-130",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Discovery Channel reality TV show featured the father-son custom chopper building duo Paul Teutul Sr. and Paul Teutul Jr.?",
+      "Options": [
+        "American Chopper (Orange County Choppers)",
+        "Biker Build-Off",
+        "Monster Garage",
+        "Counting Cars"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "American Chopper followed the heated arguments and intricate themed custom chopper builds at Orange County Choppers (OCC).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-131",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In 'The Great Escape' (1963), what actor (along with stunt double Bud Ekins) famously jumped a barbed-wire fence on a Triumph motorcycle?",
+      "Options": [
+        "Steve McQueen",
+        "James Garner",
+        "Charles Bronson",
+        "Paul Newman"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Steve McQueen loved motorcycles; Bud Ekins performed the famous 65-foot jump over the border fence on a 1961 Triumph TR6 Trophy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-132",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous line does Bruce Willis's character Butch say in 'Pulp Fiction' after picking up Fabienne on Zed's chopper?",
+      "Options": [
+        "'It's not a motorcycle, baby, it's a chopper.'",
+        "'Get on the bike and don't look back.'",
+        "'This is our ticket out of town.'",
+        "'Hop on, we're going to Mexico.'"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Fabienne asks 'Whose motorcycle is this?' Butch replies 'It's a chopper, baby.' 'Whose chopper is this?' 'It's Zed's.' 'Who's Zed?' 'Zed's dead, baby. Zed's dead.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-133",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What television documentary travel series followed Ewan McGregor and Charley Boorman riding BMW adventure bikes around the world?",
+      "Options": [
+        "Long Way Round",
+        "Riding Solo",
+        "Motorcycle Diaries",
+        "Across the Globe on Two Wheels"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "In 2004, Ewan and Charley rode BMW R1150GS Adventure bikes from London to New York via Siberia on the 'Road of Bones'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-134",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who built the famous 'Captain America' and 'Billy Bike' choppers used in the movie 'Easy Rider'?",
+      "Options": [
+        "Ben Hardy and Cliff Vaughs",
+        "Arlen Ness",
+        "Von Dutch",
+        "Ed Roth"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "African-American custom builders Ben Hardy and Cliff Vaughs created the iconic panhead choppers in Los Angeles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-135",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What long-running club leader of the Hells Angels Oakland chapter appeared in movies and wrote the autobiography 'Hell's Angel'?",
+      "Options": [
+        "Ralph 'Sonny' Barger",
+        "George Christie",
+        "Skip Workman",
+        "Otto Friedli"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sonny Barger was the most famous spokesperson and figurehead of the club, authoring several bestselling books before passing in 2022.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-136",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What actor played Jax Teller, the conflicted vice president of SAMCRO, in the TV drama 'Sons of Anarchy'?",
+      "Options": [
+        "Charlie Hunnam",
+        "Ryan Hurst",
+        "Tommy Flanagan",
+        "Theo Rossi"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "British actor Charlie Hunnam played Jackson 'Jax' Teller throughout all seven seasons of Sons of Anarchy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-137",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What pinstriping artist and customizer (born Kenny Howard) created the iconic 'Flying Eyeball' logo and transformed Kustom Kulture?",
+      "Options": [
+        "Von Dutch",
+        "Ed 'Big Daddy' Roth",
+        "Dean Jeffries",
+        "Larry Watson"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Von Dutch was a legendary master pinstriper and gunsmith whose work pioneered California custom motorcycle and car culture.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-138",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1971 motorcycle documentary directed by Bruce Brown and featuring Steve McQueen is considered the definitive film on motorcycle racing?",
+      "Options": [
+        "On Any Sunday",
+        "Faster",
+        "TT3D: Closer to the Edge",
+        "Why We Ride"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "On Any Sunday received an Academy Award nomination for Best Documentary Feature, capturing the joy of motorcycling.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-139",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What character played by Henry Winkler on the classic TV show 'Happy Days' was known for his black leather jacket and Triumph motorcycle?",
+      "Options": [
+        "Arthur 'Fonzie' Fonzarelli",
+        "Richie Cunningham",
+        "Potsie Weber",
+        "Ralph Malph"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Fonz was the epitome of cool, giving his signature two thumbs up alongside his 1949 Triumph Trophy 500.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-140",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1974 cult movie featured a police motorcycle officer riding a Moto Guzzi and Harley Electra Glide through Arizona?",
+      "Options": [
+        "Electra Glide in Blue",
+        "Vanishing Point",
+        "Mad Max",
+        "Dirty Mary, Crazy Larry"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Robert Blake starred as highway patrolman John Wintergreen in the acclaimed drama Electra Glide in Blue.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-141",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What custom builder created rat-rod 'Rat Fink' cartoon monsters with bulging eyes and flies buzzing around gear shifters?",
+      "Options": [
+        "Ed 'Big Daddy' Roth",
+        "George Barris",
+        "Gene Winfield",
+        "Boyd Coddington"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Ed 'Big Daddy' Roth created Rat Fink as the anti-Mickey Mouse, revolutionizing custom car and motorcycle t-shirt art.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-142",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Hollywood star co-founded ARCH Motorcycle Company with master builder Gard Hollinger to produce bespoke performance cruisers?",
+      "Options": [
+        "Keanu Reeves",
+        "Brad Pitt",
+        "Tom Cruise",
+        "Ryan Reynolds"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Keanu Reeves is an avid motorcycle enthusiast who co-founded ARCH Motorcycle in 2011 to build the KRGT-1.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-143",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the steam-powered skycycle rocket Evel Knievel used to attempt to jump Idaho's Snake River Canyon in 1974?",
+      "Options": [
+        "Skycycle X-2",
+        "Canyon Eagle 1",
+        "Thunderbolt 7",
+        "Snake Rocket X"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The parachute deployed prematurely on the Skycycle X-2, causing Knievel to float into the canyon floor with minor injuries.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-144",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What post-apocalyptic 1979 Australian movie featured the Toecutter's gang riding classic Kawasaki KZ1000s and Honda CB750s?",
+      "Options": [
+        "Mad Max",
+        "Stone",
+        "The Road Warrior",
+        "Dead End Drive-In"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "George Miller's original Mad Max featured thrilling, high-speed stunt motorcycle chases across Australian outback highways.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-145",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What American motorcycle road racer, known as 'King Kenny', was the first American to win a 500cc Grand Prix World Championship (1978)?",
+      "Options": [
+        "Kenny Roberts",
+        "Freddie Spencer",
+        "Eddie Lawson",
+        "Wayne Rainey"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Kenny Roberts revolutionized world championship motorcycle racing by introducing dirt-track knee-down sliding techniques to pavement.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-146",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What physical steering technique must a rider use to initiate a turn at speeds above 10-15 mph?",
+      "Options": [
+        "Countersteering (push forward on the right grip to lean and turn right)",
+        "Direct steering like a tricycle",
+        "Leaning with body weight only without touching the handlebars",
+        "Pulling back on both handlebars"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Pushing forward on the right handlebar momentary steers the front wheel left, causing the bike to lean and turn right smoothly.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-147",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is a violent, rapid oscillation of the front wheel and handlebars commonly known as?",
+      "Options": [
+        "Tank slapper / Speed wobble",
+        "Death drift",
+        "Fork flutter",
+        "Rake chatter"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "A tank slapper occurs when the front wheel loses alignment upon landing or hitting a bump, slamming handlebars side-to-side.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-148",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What dangerous motorcycle crash occurs when a sliding rear tire suddenly regains traction, violently violently flipping the bike and rider over?",
+      "Options": [
+        "Highside",
+        "Lowside",
+        "Endo",
+        "Ground loop"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "A highside catapults the rider over the top of the motorcycle when a sideways sliding tire abruptly hooks up with asphalt.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-149",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Northern Irish racing legend holds the all-time record of 26 victories at the Isle of Man TT?",
+      "Options": [
+        "Joey Dunlop",
+        "John McGuinness",
+        "Michael Dunlop",
+        "Ian Lougher"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Joey Dunlop ('King of the Roads') won 26 TT races between 1977 and 2000, revered as one of motorsport's greatest road racers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "BK-150",
+      "Category": "Bikers & Motorcycles",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the classic biker farewell wish for a safe, trouble-free journey on two wheels?",
+      "Options": [
+        "Keep the shiny side up and the rubber side down",
+        "May the wind always follow you",
+        "Ride hard or go home",
+        "Straight roads and fast times"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Keep the shiny side up and the rubber side down' is the timeless universal blessing shared between motorcyclists everywhere.",
+      "TimeLimitSeconds": 15
+    }
+  ]
+}

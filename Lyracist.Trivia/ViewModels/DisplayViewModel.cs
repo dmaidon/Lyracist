@@ -1,7 +1,8 @@
-// Edited on Aug 17, 2026 @ 15:05:00 -> Ensured Connect Instructions Screen and QR codes initialize on projection load
+// Edited on Aug 19, 2026 @ 10:02:30 -> Added Copyright property from Shared.Globals
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -18,6 +19,8 @@ public partial class DisplayViewModel : ObservableObject
 {
     private readonly TriviaGameEngine _engine;
 
+    public string Copyright => Lyracist.Shared.Globals.Copyright;
+
     [ObservableProperty]
     private string _venueName = "The Main Stage Lounge";
 
@@ -32,6 +35,17 @@ public partial class DisplayViewModel : ObservableObject
 
     [ObservableProperty]
     private string _categoryTitle = "Music & Pop Culture";
+
+    [ObservableProperty]
+    private string? _categoryBannerPath;
+
+    [ObservableProperty]
+    private string _categorySubtitle = string.Empty;
+
+    public bool HasCategoryBanner => !string.IsNullOrEmpty(CategoryBannerPath) && File.Exists(CategoryBannerPath);
+
+    [ObservableProperty]
+    private int _connectedPlayersCount;
 
     [ObservableProperty]
     private string _questionPrompt = "Question will appear here...";
@@ -219,6 +233,17 @@ public partial class DisplayViewModel : ObservableObject
         }
     }
 
+    public void UpdateCategory(string category, string? subtitle = null)
+    {
+        CategoryTitle = category;
+        if (!string.IsNullOrEmpty(subtitle))
+        {
+            CategorySubtitle = subtitle;
+        }
+        CategoryBannerPath = TriviaStorageHelper.GetBannerPathForPack(category);
+        OnPropertyChanged(nameof(HasCategoryBanner));
+    }
+
     public void UpdatePreGameCountdown(int secondsRemaining)
     {
         PreGameSecondsRemaining = secondsRemaining;
@@ -309,6 +334,7 @@ public partial class DisplayViewModel : ObservableObject
 
     private void RefreshTopPlayers(List<TriviaPlayer> list)
     {
+        ConnectedPlayersCount = list.Count;
         TopPlayers.Clear();
         MarqueeScores.Clear();
         var ranked = list.OrderByDescending(p => p.TotalScore).ToList();
