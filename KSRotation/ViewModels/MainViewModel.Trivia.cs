@@ -244,6 +244,28 @@ namespace KSRotation.ViewModels
                     TriviaPauseButtonText = "⏸ Pause";
                 });
             };
+
+            _triviaEngine.IntermissionCompleted += (s, e) =>
+            {
+                // The engine only reaches here when AutoStartNextGameEnabled was on, so it is safe
+                // to unconditionally start the next round - without this, "Auto-Start Next Game"
+                // silently does nothing and the show stops after one game.
+                System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
+                {
+                    AdvanceToNextTriviaPack();
+                    StartTrivia();
+                });
+            };
+        }
+
+        private void AdvanceToNextTriviaPack()
+        {
+            if (TriviaAvailablePacks.Count > 1 && !string.IsNullOrWhiteSpace(SelectedTriviaPack))
+            {
+                int currentIndex = TriviaAvailablePacks.IndexOf(SelectedTriviaPack);
+                int nextIndex = currentIndex >= 0 ? (currentIndex + 1) % TriviaAvailablePacks.Count : 0;
+                SelectedTriviaPack = TriviaAvailablePacks[nextIndex];
+            }
         }
 
         private void LoadTriviaPacks()
@@ -258,6 +280,15 @@ namespace KSRotation.ViewModels
             if (TriviaAvailablePacks.Count > 0)
             {
                 SelectedTriviaPack = TriviaAvailablePacks[0];
+            }
+            else
+            {
+                // On a machine where the resolved TriviaData directory doesn't hold the expected
+                // packs (e.g. a fresh install away from the dev box), the host would otherwise
+                // just see an empty category list with no clue why. Leave a breadcrumb in the log.
+                Lyracist.Shared.Globals.LogError("KSRotation",
+                    $"No trivia question packs found in '{TriviaPackManager.GetDefaultPacksDirectory()}'. Category list will be empty until a .json pack is placed there.",
+                    "LoadTriviaPacks");
             }
         }
 
@@ -350,11 +381,16 @@ namespace KSRotation.ViewModels
                 var matchedPack = allPacks.FirstOrDefault(p => p.Title.Equals(SelectedTriviaPack, StringComparison.OrdinalIgnoreCase));
                 if (matchedPack != null && matchedPack.Questions.Count > 0)
                 {
+                    // Shuffle and cap to QuestionsPerGame so every session is a fresh randomized
+                    // order of a bounded length, matching the standalone Lyracist.Trivia app -
+                    // without this, every game replayed all ~150 questions in the same fixed order.
+                    var shuffled = matchedPack.Questions.OrderBy(_ => Random.Shared.Next()).ToList();
+                    int qCount = Math.Clamp(TriviaSettings.QuestionsPerGame > 0 ? TriviaSettings.QuestionsPerGame : 10, 1, shuffled.Count);
                     rounds = [new TriviaRound
                     {
                         RoundNumber = 1,
                         Title = matchedPack.Title,
-                        Questions = matchedPack.Questions
+                        Questions = shuffled.Take(qCount).ToList()
                     }];
                 }
 
@@ -500,9 +536,14 @@ namespace KSRotation.ViewModels
         public void ResetTrivia()
         {
             if (_triviaEngine == null) return;
+            // The web server holds a fixed reference to the engine passed at construction, so it
+            // must be recreated too - otherwise phones keep talking to the disposed old engine
+            // while the screen shows the new one, and the buzzers silently stop working.
+            _triviaWebServer?.Dispose();
             _triviaEngine.Dispose();
             _triviaEngine = new TriviaGameEngine(TriviaSettings);
             WireTriviaEngineEvents();
+            StartTriviaWebServer();
             TriviaGameStateText = "Lobby";
             IsTriviaGameRunning = false;
             TriviaCurrentQuestionPrompt = "Game reset. Click 'Start Game' to begin.";

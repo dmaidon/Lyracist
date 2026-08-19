@@ -463,6 +463,10 @@
                     <span id="opt-text-3" class="opt-text">Option D</span>
                 </button>
             </div>
+
+            <div id="submit-error-banner" style="display:none; background:rgba(239,68,68,0.2); border:1px solid #EF4444; border-radius:12px; padding:10px 16px; text-align:center; color:#FCA5A5; font-weight:700; font-size:0.85rem; margin-top:10px;">
+                ⚠️ Connection issue — your answer didn't go through. Tap an option to try again.
+            </div>
         </div>
 
         <!-- 4. Answer Reveal / Result Screen -->
@@ -582,6 +586,9 @@
 
             if (navigator.vibrate) navigator.vibrate(40);
 
+            const errorBanner = document.getElementById('submit-error-banner');
+            errorBanner.style.display = 'none';
+
             // Highlight selected button
             document.querySelectorAll('.btn-buzzer').forEach((btn, idx) => {
                 if (idx === optionIndex) {
@@ -591,19 +598,39 @@
                 }
             });
 
-            try {
-                await fetch('/api/trivia/submit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        playerName: playerName,
-                        selectedOptionIndex: optionIndex,
-                        responseTimeMs: responseTimeMs
-                    })
-                });
-            } catch (err) {
-                console.error('Submit error:', err);
+            const payload = JSON.stringify({
+                playerName: playerName,
+                selectedOptionIndex: optionIndex,
+                responseTimeMs: responseTimeMs
+            });
+
+            // A transient network blip used to be swallowed silently here, leaving the button
+            // showing "locked in" while the server never actually received the answer. Retry a
+            // few times, and if it still fails, tell the player and let them tap again.
+            const maxAttempts = 3;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    const res = await fetch('/api/trivia/submit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: payload
+                    });
+                    if (res.ok) return;
+                } catch (err) {
+                    console.error(`Submit attempt ${attempt} error:`, err);
+                }
+
+                if (attempt < maxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+                }
             }
+
+            hasSubmitted = false;
+            errorBanner.style.display = 'block';
+            document.querySelectorAll('.btn-buzzer').forEach((btn, idx) => {
+                btn.disabled = false;
+                if (idx === optionIndex) btn.classList.remove('selected');
+            });
         }
 
         function startPolling() {

@@ -15,54 +15,19 @@ public static class TriviaStorageHelper
             return _cachedTriviaDataPath;
         }
 
-        // 1. Direct standard solution path
-        const string standardPath = @"C:\VB26\Lyracist\TriviaData";
-        if (Directory.Exists(standardPath))
+        // KSRotation, Lyracist and Lyracist.Trivia all build to the same BaseOutputPath, so the
+        // application startup folder is the same physical directory for every one of them - a
+        // single TriviaData folder next to the running EXE is automatically the one shared
+        // location for packs, banners, settings and the database across all three apps.
+        // (The Android/MAUI build is a separate case: it has no shared startup folder with the
+        // Windows apps, so its copy of TriviaData is synced onto the device separately.)
+        string dataDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TriviaData");
+        if (!Directory.Exists(dataDir))
         {
-            _cachedTriviaDataPath = standardPath;
-            return standardPath;
+            Directory.CreateDirectory(dataDir);
         }
 
-        // 2. Search upwards for Lyracist solution root or TriviaData folder
-        string? current = AppDomain.CurrentDomain.BaseDirectory;
-        for (int i = 0; i < 7 && current != null; i++)
-        {
-            string candidateTrivia = Path.Combine(current, "TriviaData");
-            if (Directory.Exists(candidateTrivia))
-            {
-                _cachedTriviaDataPath = Path.GetFullPath(candidateTrivia);
-                return _cachedTriviaDataPath;
-            }
-
-            string lyracistTrivia = Path.Combine(current, "Lyracist", "TriviaData");
-            if (Directory.Exists(lyracistTrivia))
-            {
-                _cachedTriviaDataPath = Path.GetFullPath(lyracistTrivia);
-                return _cachedTriviaDataPath;
-            }
-
-            // Check if solution file is in current directory
-            if (File.Exists(Path.Combine(current, "Lyracist.slnx")) || File.Exists(Path.Combine(current, "Lyracist.sln")))
-            {
-                string slnData = Path.Combine(current, "TriviaData");
-                if (!Directory.Exists(slnData))
-                {
-                    Directory.CreateDirectory(slnData);
-                }
-                _cachedTriviaDataPath = Path.GetFullPath(slnData);
-                return _cachedTriviaDataPath;
-            }
-
-            current = Directory.GetParent(current)?.FullName;
-        }
-
-        // 3. Fallback to app directory TriviaData
-        string localFallback = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TriviaData");
-        if (!Directory.Exists(localFallback))
-        {
-            Directory.CreateDirectory(localFallback);
-        }
-        _cachedTriviaDataPath = Path.GetFullPath(localFallback);
+        _cachedTriviaDataPath = Path.GetFullPath(dataDir);
         return _cachedTriviaDataPath;
     }
 

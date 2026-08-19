@@ -10,6 +10,13 @@ public partial class App : System.Windows.Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+
+        Lyracist.Shared.Globals.LogAppStart("Lyracist.Trivia");
+        Lyracist.Shared.Globals.PurgeOldLogs(14);
+
         base.OnStartup(e);
         try
         {
@@ -21,7 +28,30 @@ public partial class App : System.Windows.Application
         }
         catch (System.Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error generating category banners: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist.Trivia", "App.OnStartup", ex);
         }
+    }
+
+    private static void OnDispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    {
+        // Log and swallow so a single UI-thread fault (e.g. a bad tick handler) never takes down
+        // an unattended show. Do not show a blocking MessageBox here - there may be no one at the
+        // keyboard to dismiss it, and a modal dialog would freeze the game/projection indefinitely.
+        Lyracist.Shared.Globals.LogError("Lyracist.Trivia", "DispatcherUnhandledException", e.Exception);
+        e.Handled = true;
+    }
+
+    private static void OnAppDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        if (e.ExceptionObject is Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist.Trivia", "AppDomainUnhandledException", ex);
+        }
+    }
+
+    private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        Lyracist.Shared.Globals.LogError("Lyracist.Trivia", "UnobservedTaskException", e.Exception);
+        e.SetObserved();
     }
 }

@@ -382,6 +382,15 @@ public partial class MainViewModel : ObservableObject, IDisposable
         {
             SelectedPack = AvailablePacks[0];
         }
+        else
+        {
+            // On a machine where the resolved TriviaData directory doesn't hold the expected
+            // packs (e.g. a fresh install away from the dev box), the host would otherwise just
+            // see an empty category list with no clue why. Leave a breadcrumb in the log folder.
+            Lyracist.Shared.Globals.LogError("Lyracist.Trivia",
+                $"No trivia question packs found in '{TriviaPackManager.GetDefaultPacksDirectory()}'. Category list will be empty until a .json pack is placed there.",
+                "LoadQuestionPacks");
+        }
     }
 
     partial void OnSelectedPackChanged(TriviaQuestionPack? value)
@@ -509,24 +518,32 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     private void OnPreGameTimerTick(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        if (IsPreGameCountdownRunning && PreGameSecondsRemaining > 0)
+        // This handler fires on the Timer's threadpool thread. Every property touched below is
+        // bound to WPF UI (the game master panel and/or the projection window), so it must be
+        // marshaled onto the UI thread like every other engine/timer callback in this class -
+        // otherwise a cross-thread binding exception can crash the whole app during the
+        // unattended pre-game wait, before anyone is at the keyboard to notice.
+        Application.Current?.Dispatcher.Invoke(() =>
         {
-            PreGameSecondsRemaining--;
-            int mins = PreGameSecondsRemaining / 60;
-            int secs = PreGameSecondsRemaining % 60;
-            PreGameCountdownText = $"{mins:D2}:{secs:D2}";
-            _activeDisplayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
-
-            if (PreGameSecondsRemaining == 0)
+            if (IsPreGameCountdownRunning && PreGameSecondsRemaining > 0)
             {
-                _preGameTimer.Stop();
-                IsPreGameCountdownRunning = false;
-                if (AutoStartAfterCountdown)
+                PreGameSecondsRemaining--;
+                int mins = PreGameSecondsRemaining / 60;
+                int secs = PreGameSecondsRemaining % 60;
+                PreGameCountdownText = $"{mins:D2}:{secs:D2}";
+                _activeDisplayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
+
+                if (PreGameSecondsRemaining == 0)
                 {
-                    Application.Current?.Dispatcher.Invoke(() => StartGameWithSelectedPack());
+                    _preGameTimer.Stop();
+                    IsPreGameCountdownRunning = false;
+                    if (AutoStartAfterCountdown)
+                    {
+                        StartGameWithSelectedPack();
+                    }
                 }
             }
-        }
+        });
     }
 
     [RelayCommand]

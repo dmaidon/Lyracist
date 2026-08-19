@@ -190,9 +190,64 @@ public class TriviaDatabaseService : IDisposable
 
     public void SeedPackIntoDatabase(TriviaQuestionPack pack)
     {
-        foreach (var q in pack.Questions)
+        // Seeding runs on every app startup for every pack (~150 questions each). Calling
+        // SaveQuestion() per row used to open/close a fresh SqliteConnection per question, which
+        // measurably slowed every launch. Reuse one connection, one prepared command, and one
+        // transaction for the whole pack instead.
+        if (pack.Questions.Count == 0) return;
+
+        lock (_lock)
         {
-            SaveQuestion(q);
+            using var conn = new SqliteConnection(_connectionString);
+            conn.Open();
+            using var transaction = conn.BeginTransaction();
+
+            using var cmd = conn.CreateCommand();
+            cmd.Transaction = transaction;
+            cmd.CommandText = @"
+                INSERT INTO Questions (Id, Category, Difficulty, QuestionType, Prompt, OptionsJson, CorrectAnswerIndex, Explanation, AudioSnippetPath, TimeLimitSeconds)
+                VALUES ($id, $category, $diff, $qtype, $prompt, $options, $correct, $expl, $audio, $time)
+                ON CONFLICT(Id) DO UPDATE SET
+                    Category = excluded.Category,
+                    Difficulty = excluded.Difficulty,
+                    QuestionType = excluded.QuestionType,
+                    Prompt = excluded.Prompt,
+                    OptionsJson = excluded.OptionsJson,
+                    CorrectAnswerIndex = excluded.CorrectAnswerIndex,
+                    Explanation = excluded.Explanation,
+                    AudioSnippetPath = excluded.AudioSnippetPath,
+                    TimeLimitSeconds = excluded.TimeLimitSeconds;
+            ";
+
+            var pId = cmd.Parameters.Add("$id", SqliteType.Text);
+            var pCategory = cmd.Parameters.Add("$category", SqliteType.Text);
+            var pDiff = cmd.Parameters.Add("$diff", SqliteType.Integer);
+            var pQtype = cmd.Parameters.Add("$qtype", SqliteType.Integer);
+            var pPrompt = cmd.Parameters.Add("$prompt", SqliteType.Text);
+            var pOptions = cmd.Parameters.Add("$options", SqliteType.Text);
+            var pCorrect = cmd.Parameters.Add("$correct", SqliteType.Integer);
+            var pExpl = cmd.Parameters.Add("$expl", SqliteType.Text);
+            var pAudio = cmd.Parameters.Add("$audio", SqliteType.Text);
+            var pTime = cmd.Parameters.Add("$time", SqliteType.Integer);
+            cmd.Prepare();
+
+            foreach (var q in pack.Questions)
+            {
+                pId.Value = q.Id;
+                pCategory.Value = q.Category;
+                pDiff.Value = (int)q.Difficulty;
+                pQtype.Value = (int)q.QuestionType;
+                pPrompt.Value = q.Prompt;
+                pOptions.Value = JsonSerializer.Serialize(q.Options);
+                pCorrect.Value = q.CorrectAnswerIndex;
+                pExpl.Value = (object?)q.Explanation ?? DBNull.Value;
+                pAudio.Value = (object?)q.AudioSnippetPath ?? DBNull.Value;
+                pTime.Value = q.TimeLimitSeconds;
+
+                cmd.ExecuteNonQuery();
+            }
+
+            transaction.Commit();
         }
     }
 
