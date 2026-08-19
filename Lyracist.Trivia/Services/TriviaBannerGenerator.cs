@@ -369,4 +369,199 @@ public static class TriviaBannerGenerator
         using var fs = File.OpenWrite(destinationPath);
         encoder.Save(fs);
     }
+
+    private record ChipStyle(string Icon, MediaColor AccentPrimary, MediaColor AccentSecondary);
+
+    /// <summary>
+    /// Renders a 1920x1080 lobby banner listing every category in a mixed multi-pack game, styled
+    /// to match the single-category banners (gradient background, glow, corner brackets, pill
+    /// badges) instead of the plain "🎯 Mixed Trivia" text fallback. Returns a frozen in-memory
+    /// bitmap - no disk file is written, so there's no stale-file caching to worry about when the
+    /// game master changes which packs are checked.
+    /// </summary>
+    public static BitmapSource RenderMixedBanner(IReadOnlyList<TriviaQuestionPack> packs)
+    {
+        const int width = 1920;
+        const int height = 1080;
+
+        var accentPrimary = MediaColor.FromRgb(0x8B, 0x5C, 0xF6);
+        var accentSecondary = MediaColor.FromRgb(0xFB, 0xBF, 0x24);
+        var bgTop = MediaColor.FromRgb(0x1E, 0x1B, 0x4B);
+        var bgBottom = MediaColor.FromRgb(0x0F, 0x0A, 0x1F);
+
+        var visual = new DrawingVisual();
+        using (var dc = visual.RenderOpen())
+        {
+            // 1. Background gradient + ambient glow (same look as the single-category banners)
+            var bgBrush = new LinearGradientBrush(bgTop, bgBottom, new WpfPoint(0, 0), new WpfPoint(1, 1));
+            dc.DrawRectangle(bgBrush, null, new Rect(0, 0, width, height));
+
+            var glowBrush = new RadialGradientBrush { Center = new WpfPoint(0.5, 0.42), GradientOrigin = new WpfPoint(0.5, 0.42), RadiusX = 0.65, RadiusY = 0.6 };
+            glowBrush.GradientStops.Add(new GradientStop(MediaColor.FromArgb(0x40, accentPrimary.R, accentPrimary.G, accentPrimary.B), 0.0));
+            glowBrush.GradientStops.Add(new GradientStop(MediaColor.FromArgb(0x12, accentSecondary.R, accentSecondary.G, accentSecondary.B), 0.6));
+            glowBrush.GradientStops.Add(new GradientStop(Colors.Transparent, 1.0));
+            dc.DrawRectangle(glowBrush, null, new Rect(0, 0, width, height));
+
+            // 2. Decorative border + corner brackets
+            var outerBorderPen = new MediaPen(new SolidColorBrush(MediaColor.FromArgb(0x30, 0xFF, 0xFF, 0xFF)), 2.0);
+            dc.DrawRoundedRectangle(null, outerBorderPen, new Rect(40, 40, width - 80, height - 80), 24, 24);
+            var innerBorderPen = new MediaPen(new SolidColorBrush(MediaColor.FromArgb(0x60, accentPrimary.R, accentPrimary.G, accentPrimary.B)), 1.5);
+            dc.DrawRoundedRectangle(null, innerBorderPen, new Rect(55, 55, width - 110, height - 110), 18, 18);
+
+            var bracketPen = new MediaPen(new SolidColorBrush(accentPrimary), 4.0);
+            dc.DrawLine(bracketPen, new WpfPoint(70, 70), new WpfPoint(140, 70));
+            dc.DrawLine(bracketPen, new WpfPoint(70, 70), new WpfPoint(70, 140));
+            dc.DrawLine(bracketPen, new WpfPoint(width - 140, 70), new WpfPoint(width - 70, 70));
+            dc.DrawLine(bracketPen, new WpfPoint(width - 70, 70), new WpfPoint(width - 70, 140));
+            dc.DrawLine(bracketPen, new WpfPoint(70, height - 70), new WpfPoint(140, height - 70));
+            dc.DrawLine(bracketPen, new WpfPoint(70, height - 70), new WpfPoint(70, height - 140));
+            dc.DrawLine(bracketPen, new WpfPoint(width - 140, height - 70), new WpfPoint(width - 70, height - 70));
+            dc.DrawLine(bracketPen, new WpfPoint(width - 70, height - 70), new WpfPoint(width - 70, height - 140));
+
+            // 3. Header pill
+            DrawPill(dc, width, "⚡  MIXED CATEGORY SHUFFLE  •  LYRACIST TRIVIA NIGHT  ⚡", 120, accentPrimary, accentSecondary);
+
+            // 4. Big title + subtitle
+            const string title = "MIXED TRIVIA NIGHT";
+            var titleBrush = new LinearGradientBrush(Colors.White, accentSecondary, new WpfPoint(0, 0), new WpfPoint(0, 1));
+            var titleFace = new Typeface(new MediaFontFamily("Segoe UI"), FontStyles.Normal, FontWeights.ExtraBold, FontStretches.Normal);
+            var titleText = new FormattedText(title, CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight, titleFace, 64, titleBrush, 1.0);
+            var titleShadow = new FormattedText(title, CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight, titleFace, 64, new SolidColorBrush(MediaColor.FromArgb(0xAA, 0, 0, 0)), 1.0);
+            const double titleY = 210;
+            dc.DrawText(titleShadow, new WpfPoint(((width - titleText.Width) / 2.0) + 4, titleY + 4));
+            dc.DrawText(titleText, new WpfPoint((width - titleText.Width) / 2.0, titleY));
+
+            var subText = new FormattedText(
+                $"{packs.Count} Categories Shuffled Together Into One Game",
+                CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight,
+                new Typeface(new MediaFontFamily("Segoe UI"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal),
+                26, new SolidColorBrush(MediaColor.FromRgb(0xCB, 0xD5, 0xE1)), 1.0);
+            dc.DrawText(subText, new WpfPoint((width - subText.Width) / 2.0, titleY + 92));
+
+            // 5. One color-coded chip per category, in a centered grid (cap the grid at 6 - if more
+            // packs than that are checked, the overflow is summarized below the grid instead of
+            // shrinking every chip into illegibility).
+            int chipCount = Math.Min(packs.Count, 6);
+            int columns = chipCount <= 3 ? Math.Max(chipCount, 1) : (int)Math.Ceiling(chipCount / 2.0);
+            int rows = chipCount == 0 ? 0 : (int)Math.Ceiling(chipCount / (double)columns);
+            const double chipWidth = 460;
+            const double chipHeight = 150;
+            const double chipGapX = 30;
+            const double chipGapY = 26;
+            double gridWidth = columns * chipWidth + (columns - 1) * chipGapX;
+            double gridHeight = rows * chipHeight + Math.Max(0, rows - 1) * chipGapY;
+            double gridX = (width - gridWidth) / 2.0;
+            const double gridY = 470;
+
+            for (int i = 0; i < chipCount; i++)
+            {
+                int col = i % columns;
+                int row = i / columns;
+                double x = gridX + col * (chipWidth + chipGapX);
+                double y = gridY + row * (chipHeight + chipGapY);
+                DrawChip(dc, packs[i].Title, ResolveChipStyle(packs[i]), x, y, chipWidth, chipHeight);
+            }
+
+            if (packs.Count > chipCount)
+            {
+                var moreText = new FormattedText(
+                    $"+ {packs.Count - chipCount} more categories in the mix",
+                    CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight,
+                    new Typeface(new MediaFontFamily("Segoe UI"), FontStyles.Italic, FontWeights.SemiBold, FontStretches.Normal),
+                    22, new SolidColorBrush(MediaColor.FromRgb(0x94, 0xA3, 0xB8)), 1.0);
+                dc.DrawText(moreText, new WpfPoint((width - moreText.Width) / 2.0, gridY + gridHeight + 16));
+            }
+
+            // 6. Bottom callout + footer
+            DrawCallout(dc, width, "📱  SCAN QR CODE ON SCREEN TO JOIN  •  GET READY TO BUZZ IN!", 720, accentPrimary);
+
+            var footerText = new FormattedText(
+                "LYRACIST PUB TRIVIA NIGHT  •  LIVE VENUE MULTI-PLAYER GAME",
+                CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight,
+                new Typeface(new MediaFontFamily("Segoe UI"), FontStyles.Normal, FontWeights.Bold, FontStretches.Normal),
+                16, new SolidColorBrush(MediaColor.FromRgb(0x64, 0x74, 0x8B)), 1.0);
+            dc.DrawText(footerText, new WpfPoint((width - footerText.Width) / 2.0, height - 100));
+        }
+
+        var rtb = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+        rtb.Render(visual);
+        rtb.Freeze();
+        return rtb;
+    }
+
+    /// <summary>
+    /// Maps a pack to the icon/accent colors of its matching built-in category banner (by looking
+    /// up the same file TriviaStorageHelper.GetBannerPathForPack would resolve), so a mixed-game
+    /// chip for "Rock & Roll Legends" reuses that category's real icon and colors instead of a
+    /// generic placeholder. Falls back to a neutral violet/target style for custom user packs that
+    /// don't match any built-in category.
+    /// </summary>
+    private static ChipStyle ResolveChipStyle(TriviaQuestionPack pack)
+    {
+        string? bannerPath = TriviaStorageHelper.GetBannerPathForPack(pack.Category);
+        if (bannerPath != null)
+        {
+            string fileName = Path.GetFileName(bannerPath);
+            var match = Array.Find(AllBanners, b => string.Equals(b.FileName, fileName, StringComparison.OrdinalIgnoreCase));
+            if (match != null) return new ChipStyle(match.Icon, match.AccentPrimary, match.AccentSecondary);
+        }
+
+        return new ChipStyle("🎯", MediaColor.FromRgb(0x8B, 0x5C, 0xF6), MediaColor.FromRgb(0xA7, 0x8B, 0xFA));
+    }
+
+    private static void DrawPill(DrawingContext dc, int width, string text, double y, MediaColor accentPrimary, MediaColor accentSecondary)
+    {
+        var pillText = new FormattedText(
+            text, CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight,
+            new Typeface(new MediaFontFamily("Segoe UI"), FontStyles.Normal, FontWeights.Black, FontStretches.Normal),
+            16, new SolidColorBrush(accentSecondary), 1.0);
+
+        double pillWidth = pillText.Width + 64;
+        const double pillHeight = 46;
+        double pillX = (width - pillWidth) / 2.0;
+        var pillBg = new SolidColorBrush(MediaColor.FromArgb(0xDD, 0x0F, 0x17, 0x2A));
+        var pillBorder = new MediaPen(new SolidColorBrush(MediaColor.FromArgb(0xAA, accentPrimary.R, accentPrimary.G, accentPrimary.B)), 1.5);
+        dc.DrawRoundedRectangle(pillBg, pillBorder, new Rect(pillX, y, pillWidth, pillHeight), 23, 23);
+        dc.DrawText(pillText, new WpfPoint((width - pillText.Width) / 2.0, y + 12));
+    }
+
+    private static void DrawCallout(DrawingContext dc, int width, string text, double y, MediaColor accentPrimary)
+    {
+        var calloutText = new FormattedText(
+            text, CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight,
+            new Typeface(new MediaFontFamily("Segoe UI"), FontStyles.Normal, FontWeights.Bold, FontStretches.Normal),
+            22, MediaBrushes.White, 1.0);
+
+        double calloutWidth = calloutText.Width + 100;
+        const double calloutHeight = 64;
+        double calloutX = (width - calloutWidth) / 2.0;
+        var calloutBg = new SolidColorBrush(MediaColor.FromArgb(0xDD, 0x0F, 0x17, 0x2A));
+        var calloutBorder = new MediaPen(new SolidColorBrush(MediaColor.FromArgb(0x99, accentPrimary.R, accentPrimary.G, accentPrimary.B)), 2.0);
+        dc.DrawRoundedRectangle(calloutBg, calloutBorder, new Rect(calloutX, y, calloutWidth, calloutHeight), 16, 16);
+        dc.DrawText(calloutText, new WpfPoint((width - calloutText.Width) / 2.0, y + 17));
+    }
+
+    private static void DrawChip(DrawingContext dc, string label, ChipStyle style, double x, double y, double w, double h)
+    {
+        var chipBg = new SolidColorBrush(MediaColor.FromArgb(0xCC, 0x0F, 0x17, 0x2A));
+        var chipBorder = new MediaPen(new SolidColorBrush(MediaColor.FromArgb(0xAA, style.AccentPrimary.R, style.AccentPrimary.G, style.AccentPrimary.B)), 2.0);
+        dc.DrawRoundedRectangle(chipBg, chipBorder, new Rect(x, y, w, h), 16, 16);
+
+        var iconText = new FormattedText(
+            style.Icon, CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight,
+            new Typeface(new MediaFontFamily("Segoe UI Emoji"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
+            52, MediaBrushes.White, 1.0);
+        dc.DrawText(iconText, new WpfPoint(x + 20, y + (h - iconText.Height) / 2.0));
+
+        var labelText = new FormattedText(
+            label.ToUpperInvariant(), CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight,
+            new Typeface(new MediaFontFamily("Segoe UI"), FontStyles.Normal, FontWeights.Bold, FontStretches.Normal),
+            24, new SolidColorBrush(style.AccentSecondary), 1.0)
+        {
+            MaxTextWidth = Math.Max(w - 110, 10),
+            MaxTextHeight = h - 20,
+            Trimming = TextTrimming.CharacterEllipsis
+        };
+        dc.DrawText(labelText, new WpfPoint(x + 95, y + (h - Math.Min(labelText.Height, h - 20)) / 2.0));
+    }
 }

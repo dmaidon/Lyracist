@@ -1952,14 +1952,28 @@
                         <StackPanel>
                             <TextBlock Text="🎯 Trivia Game Control" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" Margin="0,0,0,12" />
 
-                            <TextBlock Text="Question Pack" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                            <TextBlock Text="Question Pack(s) — check 2+ to mix categories" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource MaterialDesignBody}" TextWrapping="Wrap" />
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <ComboBox Grid.Column="0" ItemsSource="{Binding TriviaAvailablePacks}" SelectedItem="{Binding SelectedTriviaPack}" Style="{StaticResource ModernComboBoxStyle}" />
-                                <Button Grid.Column="1" Content="🔄" Command="{Binding RefreshTriviaPacksCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Margin="4,0,0,0" ToolTip="Refresh Packs" Height="28" Width="32" Padding="0" />
+                                <Border Grid.Column="0" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="4">
+                                    <ListBox ItemsSource="{Binding TriviaSelectablePacks}" MaxHeight="150" ScrollViewer.VerticalScrollBarVisibility="Auto" BorderThickness="0">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Focusable" Value="False" />
+                                                <Setter Property="Padding" Value="6,3" />
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" Content="{Binding Title}" Foreground="{DynamicResource MaterialDesignBody}" FontSize="12" />
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Border>
+                                <Button Grid.Column="1" Content="🔄" Command="{Binding RefreshTriviaPacksCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Margin="4,0,0,0" ToolTip="Refresh Packs" Height="28" Width="32" Padding="0" VerticalAlignment="Top" />
                             </Grid>
 
                             <!-- Game State Pill -->
@@ -2259,6 +2273,11 @@
                                             </Grid>
                                         </Border>
                                         <TextBlock Text="ℹ️ Automatically synchronized from primary Venue and DJ settings in KSRotation."
+                                                   FontSize="10" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" Margin="0,0,0,8" />
+
+                                        <TextBlock Text="Pre-Game Welcome Banner" FontWeight="SemiBold" FontSize="11" Margin="0,0,0,2" Foreground="{DynamicResource MaterialDesignBody}" />
+                                        <TextBox Text="{Binding TriviaInstructionBannerText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernCompactTextBoxStyle}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50" Margin="0,0,0,2" />
+                                        <TextBlock Text="Shown on the lobby screen before the game starts. Use {venue} and {dj} to insert the venue/host name."
                                                    FontSize="10" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </GroupBox>

@@ -29,16 +29,6 @@ namespace KSRotation.ViewModels
         public partial TriviaSettings TriviaSettings { get; set; } = new();
 
         [ObservableProperty]
-        public partial string SelectedTriviaPack { get; set; } = "";
-
-        partial void OnSelectedTriviaPackChanged(string value)
-        {
-#if !MAUI
-            _triviaDisplayVm?.UpdateCategory(value);
-#endif
-        }
-
-        [ObservableProperty]
         public partial string TriviaGameStateText { get; set; } = "Lobby";
 
         [ObservableProperty]
@@ -90,6 +80,16 @@ namespace KSRotation.ViewModels
         public string TriviaVenueName => !string.IsNullOrWhiteSpace(VenueName) ? VenueName : "Main Venue";
 
         public string TriviaHostName => !string.IsNullOrWhiteSpace(DjName) ? DjName : "DJ / Host";
+
+        [ObservableProperty]
+        public partial string TriviaInstructionBannerText { get; set; } = TriviaSettings.DefaultInstructionBannerText;
+
+        partial void OnTriviaInstructionBannerTextChanged(string value)
+        {
+#if !MAUI
+            _triviaDisplayVm?.UpdateInstructionBannerTemplate(value);
+#endif
+        }
 
         [ObservableProperty]
         public partial int TriviaDefaultQuestionSeconds { get; set; } = 15;
@@ -148,7 +148,7 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool IsTriviaSettingsStatusVisible { get; set; }
 
-        public ObservableCollection<string> TriviaAvailablePacks { get; } = [];
+        public ObservableCollection<SelectableTriviaPack> TriviaSelectablePacks { get; } = [];
         public ObservableCollection<TriviaPlayer> TriviaPlayers { get; } = [];
 
         public void InitializeTrivia()
@@ -249,39 +249,49 @@ namespace KSRotation.ViewModels
             {
                 // The engine only reaches here when AutoStartNextGameEnabled was on, so it is safe
                 // to unconditionally start the next round - without this, "Auto-Start Next Game"
-                // silently does nothing and the show stops after one game.
+                // silently does nothing and the show stops after one game. Whatever packs are
+                // checked stays checked between games - StartTrivia draws a fresh random question
+                // set every time it runs, so this alone gives a different game each time.
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
-                    AdvanceToNextTriviaPack();
                     StartTrivia();
                 });
             };
         }
 
-        private void AdvanceToNextTriviaPack()
+        /// <summary>
+        /// Returns every checked pack, or the first available pack if none are checked (so
+        /// "Start Game" always has something to play instead of silently doing nothing).
+        /// </summary>
+        private List<TriviaQuestionPack> GetCheckedTriviaPacks()
         {
-            if (TriviaAvailablePacks.Count > 1 && !string.IsNullOrWhiteSpace(SelectedTriviaPack))
-            {
-                int currentIndex = TriviaAvailablePacks.IndexOf(SelectedTriviaPack);
-                int nextIndex = currentIndex >= 0 ? (currentIndex + 1) % TriviaAvailablePacks.Count : 0;
-                SelectedTriviaPack = TriviaAvailablePacks[nextIndex];
-            }
+            var checkedPacks = TriviaSelectablePacks.Where(sp => sp.IsChecked).Select(sp => sp.Pack).ToList();
+            if (checkedPacks.Count > 0) return checkedPacks;
+            return TriviaSelectablePacks.Count > 0 ? [TriviaSelectablePacks[0].Pack] : [];
         }
 
         private void LoadTriviaPacks()
         {
-            TriviaAvailablePacks.Clear();
+            TriviaSelectablePacks.Clear();
             var packs = TriviaPackManager.LoadAllPacks();
+            bool isFirst = true;
             foreach (var p in packs)
             {
-                TriviaAvailablePacks.Add(p.Title);
+                var selectable = new SelectableTriviaPack(p, isChecked: isFirst);
+                selectable.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(SelectableTriviaPack.IsChecked))
+                    {
+#if !MAUI
+                        UpdateTriviaCategoryPreview();
+#endif
+                    }
+                };
+                TriviaSelectablePacks.Add(selectable);
+                isFirst = false;
             }
 
-            if (TriviaAvailablePacks.Count > 0)
-            {
-                SelectedTriviaPack = TriviaAvailablePacks[0];
-            }
-            else
+            if (TriviaSelectablePacks.Count == 0)
             {
                 // On a machine where the resolved TriviaData directory doesn't hold the expected
                 // packs (e.g. a fresh install away from the dev box), the host would otherwise
@@ -291,6 +301,23 @@ namespace KSRotation.ViewModels
                     "LoadTriviaPacks");
             }
         }
+
+#if !MAUI
+        private void UpdateTriviaCategoryPreview()
+        {
+            var checkedPacks = GetCheckedTriviaPacks();
+            if (checkedPacks.Count == 0) return;
+
+            if (checkedPacks.Count == 1)
+            {
+                _triviaDisplayVm?.UpdateCategory(checkedPacks[0].Title);
+            }
+            else
+            {
+                _triviaDisplayVm?.UpdateMixedCategory(checkedPacks);
+            }
+        }
+#endif
 
         private void StartTriviaWebServer()
         {
@@ -329,6 +356,7 @@ namespace KSRotation.ViewModels
         {
             OnPropertyChanged(nameof(TriviaVenueName));
             OnPropertyChanged(nameof(TriviaHostName));
+            TriviaInstructionBannerText = string.IsNullOrWhiteSpace(TriviaSettings.InstructionBannerText) ? TriviaSettings.DefaultInstructionBannerText : TriviaSettings.InstructionBannerText;
             TriviaDefaultQuestionSeconds = TriviaSettings.DefaultQuestionSeconds;
             TriviaWarningCountdownSeconds = TriviaSettings.WarningCountdownSeconds;
             TriviaAnswerEliminationIntervalSeconds = TriviaSettings.AnswerEliminationIntervalSeconds;
@@ -352,6 +380,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.VenueName = TriviaVenueName;
             TriviaSettings.HostName = TriviaHostName;
+            TriviaSettings.InstructionBannerText = TriviaInstructionBannerText;
             TriviaSettings.DefaultQuestionSeconds = TriviaDefaultQuestionSeconds;
             TriviaSettings.WarningCountdownSeconds = TriviaWarningCountdownSeconds;
             TriviaSettings.AnswerEliminationIntervalSeconds = TriviaAnswerEliminationIntervalSeconds;
@@ -377,21 +406,25 @@ namespace KSRotation.ViewModels
             try
             {
                 List<TriviaRound> rounds = [];
-                var allPacks = TriviaPackManager.LoadAllPacks();
-                var matchedPack = allPacks.FirstOrDefault(p => p.Title.Equals(SelectedTriviaPack, StringComparison.OrdinalIgnoreCase));
-                if (matchedPack != null && matchedPack.Questions.Count > 0)
+                var checkedPacks = GetCheckedTriviaPacks();
+                if (checkedPacks.Count > 0)
                 {
-                    // Shuffle and cap to QuestionsPerGame so every session is a fresh randomized
-                    // order of a bounded length, matching the standalone Lyracist.Trivia app -
-                    // without this, every game replayed all ~150 questions in the same fixed order.
-                    var shuffled = matchedPack.Questions.OrderBy(_ => Random.Shared.Next()).ToList();
-                    int qCount = Math.Clamp(TriviaSettings.QuestionsPerGame > 0 ? TriviaSettings.QuestionsPerGame : 10, 1, shuffled.Count);
-                    rounds = [new TriviaRound
+                    // Pool every checked pack's questions together and draw this game's set fresh -
+                    // see TriviaPackManager.BuildMixedQuestionSet for the double-draw-then-rescramble
+                    // algorithm. Called again on every unattended auto-restart too, so the question
+                    // set is different every game even with the exact same packs checked.
+                    var gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, TriviaSettings.QuestionsPerGame);
+                    if (gameQuestions.Count > 0)
                     {
-                        RoundNumber = 1,
-                        Title = matchedPack.Title,
-                        Questions = shuffled.Take(qCount).ToList()
-                    }];
+                        string title = checkedPacks.Count == 1 ? checkedPacks[0].Title : string.Join(" + ", checkedPacks.Select(p => p.Title));
+                        rounds = [new TriviaRound
+                        {
+                            RoundNumber = 1,
+                            Title = title,
+                            Category = checkedPacks.Count == 1 ? checkedPacks[0].Category : "Mixed Trivia",
+                            Questions = gameQuestions
+                        }];
+                    }
                 }
 
                 if (rounds.Count == 0)
@@ -407,7 +440,7 @@ namespace KSRotation.ViewModels
                     }];
                 }
 
-                _triviaEngine.StartGame(rounds, SelectedTriviaPack);
+                _triviaEngine.StartGame(rounds, rounds[0].Title);
                 TriviaActiveRoundTitle = rounds[0].Title;
                 _triviaEngine.StartCurrentQuestion();
 
@@ -450,7 +483,18 @@ namespace KSRotation.ViewModels
                     TriviaWifiPassword,
                     TriviaPreGameCountdownMinutes * 60);
 
-                _triviaDisplayVm.UpdateCategory(SelectedTriviaPack);
+                _triviaDisplayVm.HostName = TriviaHostName;
+                _triviaDisplayVm.UpdateInstructionBannerTemplate(TriviaInstructionBannerText);
+
+                var checkedPacksForDisplay = GetCheckedTriviaPacks();
+                if (checkedPacksForDisplay.Count == 1)
+                {
+                    _triviaDisplayVm.UpdateCategory(checkedPacksForDisplay[0].Title);
+                }
+                else if (checkedPacksForDisplay.Count > 1)
+                {
+                    _triviaDisplayVm.UpdateMixedCategory(checkedPacksForDisplay);
+                }
 
                 _triviaDisplayWindow = new KSRotation.Windows.TriviaDisplayWindow
                 {

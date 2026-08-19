@@ -31,4 +31,27 @@ public class TriviaSettings
     public double MarqueeSpeed { get; set; } = 50.0;
     public int DisplayMonitorIndex { get; set; } = 1;
     public string SelectedMonitorDevice { get; set; } = string.Empty;
+
+    public const string DefaultInstructionBannerText = "Welcome to Live Pub Trivia Night at {venue}! Your GameMaster is {dj}.";
+
+    public string InstructionBannerText { get; set; } = DefaultInstructionBannerText;
+
+    /// <summary>
+    /// Resolves {venue} and {dj} tokens in InstructionBannerText (case-insensitive) against the
+    /// current venue/host names, for display on the pre-game lobby screen.
+    /// </summary>
+    public string GetResolvedInstructionBanner(string venueName, string hostName) =>
+        ResolveInstructionBanner(InstructionBannerText, venueName, hostName);
+
+    /// <summary>
+    /// Resolves {venue} and {dj} tokens (case-insensitive) in a raw instruction banner template.
+    /// Shared by every display ViewModel so the substitution logic isn't duplicated per app.
+    /// </summary>
+    public static string ResolveInstructionBanner(string? template, string? venueName, string? hostName)
+    {
+        string raw = string.IsNullOrWhiteSpace(template) ? DefaultInstructionBannerText : template.Trim();
+        return raw
+            .Replace("{venue}", venueName ?? string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("{dj}", hostName ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+    }
 }

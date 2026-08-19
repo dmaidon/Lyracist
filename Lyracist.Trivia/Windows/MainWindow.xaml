@@ -111,9 +111,25 @@
                             <StackPanel>
                                 <TextBlock Text="GAME MASTER CONTROLS" FontWeight="Bold" FontSize="13" Foreground="#94A3B8" Margin="0,0,0,8" />
 
-                                <!-- Pack Selector -->
-                                <TextBlock Text="Select Question Pack:" FontSize="12" Foreground="#CBD5E1" Margin="0,0,0,4" />
-                                <ComboBox ItemsSource="{Binding AvailablePacks}" SelectedItem="{Binding SelectedPack}" DisplayMemberPath="Title" Margin="0,0,0,10" Background="#0F172A" Foreground="#FFFFFF" Padding="8,6" />
+                                <!-- Pack Selector: check 2+ packs to shuffle them together into one mixed game -->
+                                <TextBlock Text="Select Question Pack(s) — check 2+ to mix categories:" FontSize="12" Foreground="#CBD5E1" Margin="0,0,0,4" TextWrapping="Wrap" />
+                                <Border Background="#0F172A" CornerRadius="6" Margin="0,0,0,10" BorderBrush="#1AFFFFFF" BorderThickness="1">
+                                    <ListBox ItemsSource="{Binding SelectablePacks}" Background="Transparent" BorderThickness="0" MaxHeight="160" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Focusable" Value="False" />
+                                                <Setter Property="Padding" Value="6,3" />
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" Foreground="#FFFFFF">
+                                                    <TextBlock Text="{Binding Title}" FontSize="12" />
+                                                </CheckBox>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Border>
 
                                 <!-- Number of Questions per Game -->
                                 <TextBlock Text="Questions Per Game:" FontSize="12" Foreground="#CBD5E1" Margin="0,0,0,4" />
@@ -448,7 +464,11 @@
 
                                             <TextBlock Text="Game Master / Host Name:" FontSize="12" Foreground="#CBD5E1" Margin="0,0,0,4" />
                                             <TextBox Text="{Binding HostName, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,5" Margin="0,0,0,4" />
-                                            <TextBlock Text="Host identity on scoreboard &amp; intro screens" FontSize="11" Foreground="#64748B" />
+                                            <TextBlock Text="Host identity on scoreboard &amp; intro screens" FontSize="11" Foreground="#64748B" Margin="0,0,0,10" />
+
+                                            <TextBlock Text="Pre-Game Welcome Banner:" FontSize="12" Foreground="#CBD5E1" Margin="0,0,0,4" />
+                                            <TextBox Text="{Binding InstructionBannerText, UpdateSourceTrigger=PropertyChanged}" Background="#1E293B" Foreground="#FFFFFF" Padding="8,5" Margin="0,0,0,4" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="50" />
+                                            <TextBlock Text="Shown on the lobby screen before the game starts. Use {venue} and {dj} to insert the venue/host name." FontSize="11" Foreground="#64748B" TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Border>
 

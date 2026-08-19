@@ -79,4 +79,23 @@ public static class TriviaPackManager
         string json = JsonSerializer.Serialize(pack, JsonOptions);
         File.WriteAllText(filePath, json);
     }
+
+    /// <summary>
+    /// Combines the questions from one or more selected packs into a single game's question set.
+    /// Draws a random candidate pool of up to double the configured game length from across every
+    /// selected pack, then rescrambles that candidate pool and takes the configured count. This
+    /// runs fresh on every call (including unattended auto-restart between games), so the question
+    /// set - and its order - is different every time even when the same packs are selected again.
+    /// </summary>
+    public static List<TriviaQuestion> BuildMixedQuestionSet(IEnumerable<TriviaQuestionPack> selectedPacks, int questionsPerGame)
+    {
+        var pool = selectedPacks.SelectMany(p => p.Questions).ToList();
+        if (pool.Count == 0) return [];
+
+        int gameSize = questionsPerGame > 0 ? questionsPerGame : 10;
+        int candidateSize = Math.Min(pool.Count, gameSize * 2);
+
+        var candidatePool = pool.OrderBy(_ => Random.Shared.Next()).Take(candidateSize).ToList();
+        return candidatePool.OrderBy(_ => Random.Shared.Next()).Take(Math.Min(gameSize, candidatePool.Count)).ToList();
+    }
 }

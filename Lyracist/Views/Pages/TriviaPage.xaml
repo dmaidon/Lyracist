@@ -35,15 +35,29 @@
             <StackPanel>
                 <TextBlock Text="🎮 Game Master Deck" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,12" />
 
-                <!-- Pack Selection -->
-                <TextBlock Text="Question Pack" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,4" />
+                <!-- Pack Selection: check 2+ packs to shuffle them together into one mixed game -->
+                <TextBlock Text="Question Pack(s) — check 2+ to mix categories" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,4" TextWrapping="Wrap" />
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ComboBox Grid.Column="0" ItemsSource="{Binding AvailablePacks}" SelectedItem="{Binding SelectedPack}" />
-                    <ui:Button Grid.Column="1" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding RefreshPacksCommand}" Margin="4,0,0,0" ToolTip="Refresh Packs" />
+                    <Border Grid.Column="0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                        <ListBox ItemsSource="{Binding SelectablePacks}" MaxHeight="150" ScrollViewer.VerticalScrollBarVisibility="Auto" BorderThickness="0">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Focusable" Value="False" />
+                                    <Setter Property="Padding" Value="6,3" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" Content="{Binding Title}" FontSize="12" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+                    <ui:Button Grid.Column="1" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding RefreshPacksCommand}" Margin="4,0,0,0" ToolTip="Refresh Packs" VerticalAlignment="Top" />
                 </Grid>
 
                 <!-- Game State Pill -->

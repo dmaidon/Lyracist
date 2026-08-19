@@ -36,6 +36,9 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private string _hostName = "Trivia Master";
 
     [ObservableProperty]
+    private string _instructionBannerText = TriviaSettings.DefaultInstructionBannerText;
+
+    [ObservableProperty]
     private string _connectUrl = "http://localhost:8085";
 
     [ObservableProperty]
@@ -67,9 +70,6 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     private int _totalQuestionsInRound = 5;
-
-    [ObservableProperty]
-    private TriviaQuestionPack? _selectedPack;
 
     [ObservableProperty]
     private int _connectedPlayerCount;
@@ -167,6 +167,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public int[] QuestionsPerGamePresets { get; } = [5, 10, 15, 20, 25, 50, 100];
     public ObservableCollection<MonitorInfo> AvailableMonitors { get; } = [];
     public ObservableCollection<TriviaQuestionPack> AvailablePacks { get; } = [];
+    public ObservableCollection<SelectableTriviaPack> SelectablePacks { get; } = [];
     public ObservableCollection<TriviaPlayer> Players { get; } = [];
     public ObservableCollection<AnswerDistributionItem> AnswerDistribution { get; } = [];
     public ObservableCollection<TriviaHelpTopic> HelpTopics { get; } = [];
@@ -207,6 +208,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _settings = loadedSettings ?? new TriviaSettings();
         _venueName = _settings.VenueName;
         _hostName = _settings.HostName;
+        _instructionBannerText = string.IsNullOrWhiteSpace(_settings.InstructionBannerText) ? TriviaSettings.DefaultInstructionBannerText : _settings.InstructionBannerText;
         _autoAdvanceQuestions = _settings.AutoAdvanceQuestions;
         _questionsPerGame = _settings.QuestionsPerGame > 0 ? _settings.QuestionsPerGame : 10;
         _autoStartNextGameEnabled = _settings.AutoStartNextGameEnabled;
@@ -322,6 +324,13 @@ public partial class MainViewModel : ObservableObject, IDisposable
         SaveSettings();
     }
 
+    partial void OnInstructionBannerTextChanged(string value)
+    {
+        Settings.InstructionBannerText = value;
+        _activeDisplayVm?.UpdateInstructionBannerTemplate(value);
+        SaveSettings();
+    }
+
     partial void OnQuestionsPerGameChanged(int value)
     {
         Settings.QuestionsPerGame = value;
@@ -371,18 +380,27 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public void LoadQuestionPacks()
     {
         AvailablePacks.Clear();
+        SelectablePacks.Clear();
         var packs = TriviaPackManager.LoadAllPacks();
+        bool isFirst = true;
         foreach (var p in packs)
         {
             AvailablePacks.Add(p);
             _dbService.SeedPackIntoDatabase(p);
+
+            var selectable = new SelectableTriviaPack(p, isChecked: isFirst);
+            selectable.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(SelectableTriviaPack.IsChecked))
+                {
+                    UpdateSelectedPacksPreview();
+                }
+            };
+            SelectablePacks.Add(selectable);
+            isFirst = false;
         }
 
-        if (AvailablePacks.Count > 0)
-        {
-            SelectedPack = AvailablePacks[0];
-        }
-        else
+        if (AvailablePacks.Count == 0)
         {
             // On a machine where the resolved TriviaData directory doesn't hold the expected
             // packs (e.g. a fresh install away from the dev box), the host would otherwise just
@@ -391,20 +409,40 @@ public partial class MainViewModel : ObservableObject, IDisposable
                 $"No trivia question packs found in '{TriviaPackManager.GetDefaultPacksDirectory()}'. Category list will be empty until a .json pack is placed there.",
                 "LoadQuestionPacks");
         }
+
+        UpdateSelectedPacksPreview();
     }
 
-    partial void OnSelectedPackChanged(TriviaQuestionPack? value)
+    /// <summary>
+    /// Returns every checked pack, or the first available pack if none are checked (so "Start
+    /// Game" always has something to play instead of silently doing nothing).
+    /// </summary>
+    private List<TriviaQuestionPack> GetCheckedPacks()
     {
-        if (value != null && value.Questions.Count > 0)
+        var checkedPacks = SelectablePacks.Where(sp => sp.IsChecked).Select(sp => sp.Pack).ToList();
+        if (checkedPacks.Count > 0) return checkedPacks;
+        return AvailablePacks.Count > 0 ? [AvailablePacks[0]] : [];
+    }
+
+    private void UpdateSelectedPacksPreview()
+    {
+        var checkedPacks = GetCheckedPacks();
+        if (checkedPacks.Count == 0) return;
+
+        CurrentQuestionNumber = 1;
+        TotalQuestionsInRound = Math.Clamp(QuestionsPerGame, 1, checkedPacks.Sum(p => p.Questions.Count));
+
+        if (checkedPacks.Count == 1)
         {
-            // Shuffle questions when category is selected so questions are in randomized order
-            var shuffled = value.Questions.OrderBy(_ => Random.Shared.Next()).ToList();
-            ActiveQuestion = shuffled.FirstOrDefault();
-            CurrentQuestionNumber = 1;
-            int qCount = Math.Clamp(QuestionsPerGame, 1, shuffled.Count);
-            TotalQuestionsInRound = qCount;
-            CurrentRoundTitle = value.Title;
-            _activeDisplayVm?.UpdateCategory(value.Category, value.Description);
+            CurrentRoundTitle = checkedPacks[0].Title;
+            ActiveQuestion = checkedPacks[0].Questions.FirstOrDefault();
+            _activeDisplayVm?.UpdateCategory(checkedPacks[0].Category, checkedPacks[0].Description);
+        }
+        else
+        {
+            CurrentRoundTitle = string.Join(" + ", checkedPacks.Select(p => p.Title));
+            ActiveQuestion = checkedPacks[0].Questions.FirstOrDefault();
+            _activeDisplayVm?.UpdateMixedCategory(checkedPacks);
         }
     }
 
@@ -425,34 +463,40 @@ public partial class MainViewModel : ObservableObject, IDisposable
             _preGameTimer.Start();
         }
         _activeDisplayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
-        _activeDisplayVm?.UpdateCategory(SelectedPack?.Category ?? SelectedPack?.Title ?? string.Empty, SelectedPack?.Description);
+        UpdateSelectedPacksPreview();
         RequestOpenProjectionWindow?.Invoke(this, EventArgs.Empty);
     }
 
     [RelayCommand]
     private void StartGameWithSelectedPack()
     {
-        if (SelectedPack == null || SelectedPack.Questions.Count == 0) return;
+        var checkedPacks = GetCheckedPacks();
+        if (checkedPacks.Count == 0) return;
 
         // Reset game completion state
         IsGameComplete = false;
         WinnerAnnouncement = string.Empty;
         WinningTeamRoster = string.Empty;
 
-        // Shuffle questions so each time a category is played, a fresh randomized order is used
-        var shuffledQuestions = SelectedPack.Questions.OrderBy(_ => Random.Shared.Next()).ToList();
-        int qCount = Math.Clamp(QuestionsPerGame, 1, shuffledQuestions.Count);
-        var gameQuestions = shuffledQuestions.Take(qCount).ToList();
+        // Pool every checked pack's questions together and draw this game's set fresh - see
+        // TriviaPackManager.BuildMixedQuestionSet for the double-draw-then-rescramble algorithm.
+        // Called again on every unattended auto-restart too, so the question set is different
+        // every game even with the exact same packs checked.
+        var gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, QuestionsPerGame);
+        if (gameQuestions.Count == 0) return;
+
+        string title = checkedPacks.Count == 1 ? checkedPacks[0].Title : string.Join(" + ", checkedPacks.Select(p => p.Title));
+        string category = checkedPacks.Count == 1 ? checkedPacks[0].Category : "Mixed Trivia";
 
         var round = new TriviaRound
         {
             RoundNumber = 1,
-            Title = SelectedPack.Title,
-            Category = SelectedPack.Category,
+            Title = title,
+            Category = category,
             Questions = gameQuestions
         };
 
-        _engine.StartGame([round], SelectedPack.Title);
+        _engine.StartGame([round], title);
         CurrentRoundTitle = round.Title;
         TotalQuestionsInRound = round.Questions.Count;
         CurrentQuestionNumber = 1;
@@ -485,13 +529,9 @@ public partial class MainViewModel : ObservableObject, IDisposable
         IsIntermissionActive = false;
         IntermissionSecondsRemaining = 0;
 
-        // Auto-advance to next pack or reshuffle current
-        if (AvailablePacks.Count > 1 && SelectedPack != null)
-        {
-            int currentIndex = AvailablePacks.IndexOf(SelectedPack);
-            int nextIndex = (currentIndex + 1) % AvailablePacks.Count;
-            SelectedPack = AvailablePacks[nextIndex];
-        }
+        // Whatever packs are checked stays checked between games - BuildMixedQuestionSet draws a
+        // fresh random question set every time it's called, so this alone gives a different game
+        // each time without needing to cycle to a different pack.
         StartGameWithSelectedPack();
     }
 
@@ -510,10 +550,11 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _activeDisplayVm = dvm;
         dvm.HostName = HostName;
         dvm.VenueName = VenueName;
+        dvm.UpdateInstructionBannerTemplate(InstructionBannerText);
         dvm.UpdateWifiCredentials(WifiSsid, WifiPassword);
         dvm.UpdatePreGameCountdown(PreGameSecondsRemaining);
-        dvm.UpdateCategory(SelectedPack?.Category ?? SelectedPack?.Title ?? string.Empty, SelectedPack?.Description);
         dvm.IsConnectInstructionsActive = IsShowingConnectScreen;
+        UpdateSelectedPacksPreview();
     }
 
     private void OnPreGameTimerTick(object? sender, System.Timers.ElapsedEventArgs e)
@@ -638,6 +679,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         Settings.VenueName = VenueName;
         Settings.HostName = HostName;
+        Settings.InstructionBannerText = InstructionBannerText;
         Settings.WifiSsid = WifiSsid;
         Settings.WifiPassword = WifiPassword;
         Settings.PreGameCountdownMinutes = PreGameCountdownMinutes;

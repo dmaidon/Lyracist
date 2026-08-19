@@ -69,9 +69,6 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     private string _pauseButtonText = "⏸ Pause";
 
     [ObservableProperty]
-    private string _selectedPack = "";
-
-    [ObservableProperty]
     private int _selectedScreenIndex = 0;
 
     [ObservableProperty]
@@ -80,7 +77,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     [ObservableProperty]
     private string _patronUrl = "http://localhost:8085/trivia";
 
-    public ObservableCollection<string> AvailablePacks { get; } = [];
+    public ObservableCollection<SelectableTriviaPack> SelectablePacks { get; } = [];
     public ObservableCollection<TriviaPlayer> Players { get; } = [];
     public ObservableCollection<string> ScreenOptions { get; } = [];
 
@@ -179,23 +176,25 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         {
             // The engine only reaches here when AutoStartNextGameEnabled was on, so it is safe to
             // unconditionally start the next round - without this, "Auto-Start Next Game" silently
-            // does nothing and the show stops after one game.
+            // does nothing and the show stops after one game. Whatever packs are checked stays
+            // checked between games - StartGame draws a fresh random question set every time it
+            // runs, so this alone gives a different game each time.
             System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
             {
-                AdvanceToNextPack();
                 StartGame();
             });
         };
     }
 
-    private void AdvanceToNextPack()
+    /// <summary>
+    /// Returns every checked pack, or the first available pack if none are checked (so "Start
+    /// Game" always has something to play instead of silently doing nothing).
+    /// </summary>
+    private List<TriviaQuestionPack> GetCheckedPacks()
     {
-        if (AvailablePacks.Count > 1 && !string.IsNullOrWhiteSpace(SelectedPack))
-        {
-            int currentIndex = AvailablePacks.IndexOf(SelectedPack);
-            int nextIndex = currentIndex >= 0 ? (currentIndex + 1) % AvailablePacks.Count : 0;
-            SelectedPack = AvailablePacks[nextIndex];
-        }
+        var checkedPacks = SelectablePacks.Where(sp => sp.IsChecked).Select(sp => sp.Pack).ToList();
+        if (checkedPacks.Count > 0) return checkedPacks;
+        return SelectablePacks.Count > 0 ? [SelectablePacks[0].Pack] : [];
     }
 
     public void ApplySettings(TriviaSettings newSettings)
@@ -206,18 +205,16 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
     private void LoadPacks()
     {
-        AvailablePacks.Clear();
+        SelectablePacks.Clear();
         var packs = TriviaPackManager.LoadAllPacks();
+        bool isFirst = true;
         foreach (var p in packs)
         {
-            AvailablePacks.Add(p.Title);
+            SelectablePacks.Add(new SelectableTriviaPack(p, isChecked: isFirst));
+            isFirst = false;
         }
 
-        if (AvailablePacks.Count > 0)
-        {
-            SelectedPack = AvailablePacks[0];
-        }
-        else
+        if (SelectablePacks.Count == 0)
         {
             // On a machine where the resolved TriviaData directory doesn't hold the expected
             // packs (e.g. a fresh install away from the dev box), the host would otherwise just
@@ -261,21 +258,25 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         try
         {
             List<TriviaRound> rounds = [];
-            var allPacks = TriviaPackManager.LoadAllPacks();
-            var matchedPack = allPacks.FirstOrDefault(p => p.Title.Equals(SelectedPack, StringComparison.OrdinalIgnoreCase));
-            if (matchedPack != null && matchedPack.Questions.Count > 0)
+            var checkedPacks = GetCheckedPacks();
+            if (checkedPacks.Count > 0)
             {
-                // Shuffle and cap to QuestionsPerGame so every session is a fresh randomized order
-                // of a bounded length, matching the standalone Lyracist.Trivia app - without this,
-                // every game replayed all ~150 questions in the same fixed order.
-                var shuffled = matchedPack.Questions.OrderBy(_ => Random.Shared.Next()).ToList();
-                int qCount = Math.Clamp(Settings.QuestionsPerGame > 0 ? Settings.QuestionsPerGame : 10, 1, shuffled.Count);
-                rounds = [new TriviaRound
+                // Pool every checked pack's questions together and draw this game's set fresh -
+                // see TriviaPackManager.BuildMixedQuestionSet for the double-draw-then-rescramble
+                // algorithm. Called again on every unattended auto-restart too, so the question
+                // set is different every game even with the exact same packs checked.
+                var gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, Settings.QuestionsPerGame);
+                if (gameQuestions.Count > 0)
                 {
-                    RoundNumber = 1,
-                    Title = matchedPack.Title,
-                    Questions = shuffled.Take(qCount).ToList()
-                }];
+                    string title = checkedPacks.Count == 1 ? checkedPacks[0].Title : string.Join(" + ", checkedPacks.Select(p => p.Title));
+                    rounds = [new TriviaRound
+                    {
+                        RoundNumber = 1,
+                        Title = title,
+                        Category = checkedPacks.Count == 1 ? checkedPacks[0].Category : "Mixed Trivia",
+                        Questions = gameQuestions
+                    }];
+                }
             }
 
             if (rounds.Count == 0)
@@ -292,7 +293,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
                 }];
             }
 
-            _engine.StartGame(rounds, SelectedPack);
+            _engine.StartGame(rounds, rounds[0].Title);
             ActiveRoundTitle = rounds[0].Title;
             _engine.StartCurrentQuestion();
         }

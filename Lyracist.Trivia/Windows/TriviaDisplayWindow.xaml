@@ -153,14 +153,23 @@
                             </Style.Triggers>
                         </Style>
                     </Grid.Style>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="7*" />
                         <ColumnDefinition Width="24" />
                         <ColumnDefinition Width="3*" />
                     </Grid.ColumnDefinitions>
 
+                    <!-- Game Master's Instruction/Welcome Banner (customizable in Settings) -->
+                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Background="#1E1B4B" CornerRadius="14" Padding="20,12" Margin="0,0,0,14" BorderBrush="#FBBF24" BorderThickness="2">
+                        <TextBlock Text="{Binding WelcomeBannerText}" FontSize="22" FontWeight="Black" Foreground="#FBBF24" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
+                    </Border>
+
                     <!-- Left Column: Featured 16:9 Category Announcement Banner -->
-                    <Border Grid.Column="0" Background="#140E2A" CornerRadius="24" Padding="24" BorderBrush="#8B5CF6" BorderThickness="3">
+                    <Border Grid.Row="1" Grid.Column="0" Background="#140E2A" CornerRadius="24" Padding="24" BorderBrush="#8B5CF6" BorderThickness="3">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -178,10 +187,35 @@
                             <!-- 16:9 Banner Display Container -->
                             <Border Grid.Row="1" CornerRadius="18" Background="#090514" BorderBrush="#A78BFA" BorderThickness="2" ClipToBounds="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                 <Grid>
-                                    <!-- Banner Image -->
-                                    <Image Source="{Binding CategoryBannerPath}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <!-- Single-Category Banner Image -->
+                                    <Image Source="{Binding CategoryBannerPath}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMixedCategoryGame}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
 
-                                    <!-- Fallback when banner path is loading or unavailable -->
+                                    <!-- Mixed-Category Banner Image: generated fresh, listing every checked category -->
+                                    <Image Source="{Binding MixedCategoryBannerImage}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMixedCategoryGame}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+
+                                    <!-- Fallback when no banner (path or generated image) is available -->
                                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <StackPanel.Style>
                                             <Style TargetType="StackPanel">
@@ -208,7 +242,7 @@
                     </Border>
 
                     <!-- Right Column: Countdown + Stacked Dual QR Cards (Wi-Fi & Trivia Join) -->
-                    <Grid Grid.Column="2">
+                    <Grid Grid.Row="1" Grid.Column="2">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />

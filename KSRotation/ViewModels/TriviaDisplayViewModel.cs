@@ -41,7 +41,20 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         private string _categorySubtitle = string.Empty;
 
-        public bool HasCategoryBanner => !string.IsNullOrEmpty(CategoryBannerPath) && File.Exists(CategoryBannerPath);
+        [ObservableProperty]
+        private string _welcomeBannerText = TriviaSettings.DefaultInstructionBannerText;
+
+        private string _instructionBannerTemplate = TriviaSettings.DefaultInstructionBannerText;
+
+        [ObservableProperty]
+        private bool _isMixedCategoryGame;
+
+        [ObservableProperty]
+        private BitmapSource? _mixedCategoryBannerImage;
+
+        public bool HasCategoryBanner => IsMixedCategoryGame
+            ? MixedCategoryBannerImage != null
+            : (!string.IsNullOrEmpty(CategoryBannerPath) && File.Exists(CategoryBannerPath));
 
         [ObservableProperty]
         private int _connectedPlayersCount;
@@ -163,6 +176,7 @@ namespace KSRotation.ViewModels
 
             UpdateWifiCredentials(wifiSsid ?? string.Empty, wifiPassword ?? string.Empty);
             UpdatePreGameCountdown(preGameSecondsRemaining);
+            RefreshWelcomeBannerText();
 
             _engine.StateChanged += (s, e) => Application.Current?.Dispatcher.Invoke(() => HandleStateChanged(e));
             _engine.TimerTick += (s, e) => Application.Current?.Dispatcher.Invoke(() => HandleTimerTick(e));
@@ -200,6 +214,25 @@ namespace KSRotation.ViewModels
             }
         }
 
+        /// <summary>
+        /// Sets the game master's raw instruction banner template (may contain {venue}/{dj} tokens)
+        /// and re-resolves it immediately against the current venue/host names.
+        /// </summary>
+        public void UpdateInstructionBannerTemplate(string template)
+        {
+            _instructionBannerTemplate = template;
+            RefreshWelcomeBannerText();
+        }
+
+        private void RefreshWelcomeBannerText()
+        {
+            WelcomeBannerText = TriviaSettings.ResolveInstructionBanner(_instructionBannerTemplate, VenueName, HostName);
+        }
+
+        partial void OnVenueNameChanged(string value) => RefreshWelcomeBannerText();
+
+        partial void OnHostNameChanged(string value) => RefreshWelcomeBannerText();
+
         public void UpdateWifiCredentials(string ssid, string password)
         {
             WifiSsid = string.IsNullOrWhiteSpace(ssid) ? (Lyracist.Shared.WifiHelper.GetConnectedSsid() ?? "Ask Host for Wi-Fi") : ssid;
@@ -234,12 +267,39 @@ namespace KSRotation.ViewModels
 
         public void UpdateCategory(string category, string? subtitle = null)
         {
+            IsMixedCategoryGame = false;
+            MixedCategoryBannerImage = null;
+
             CategoryTitle = category;
             if (!string.IsNullOrEmpty(subtitle))
             {
                 CategorySubtitle = subtitle;
             }
             CategoryBannerPath = TriviaStorageHelper.GetBannerPathForPack(category);
+            OnPropertyChanged(nameof(HasCategoryBanner));
+        }
+
+        /// <summary>
+        /// Renders a fresh lobby banner listing every checked pack's category instead of the
+        /// plain "Mixed Trivia" text fallback. Called every time the game master's pack checklist
+        /// changes, so the banner always reflects the current mix.
+        /// </summary>
+        public void UpdateMixedCategory(List<TriviaQuestionPack> packs)
+        {
+            IsMixedCategoryGame = true;
+            CategoryBannerPath = null;
+            CategoryTitle = "Mixed Trivia";
+            CategorySubtitle = $"A randomized mix of {packs.Count} categories: {string.Join(", ", packs.Select(p => p.Title))}";
+
+            try
+            {
+                MixedCategoryBannerImage = Lyracist.Trivia.Services.TriviaBannerGenerator.RenderMixedBanner(packs);
+            }
+            catch
+            {
+                MixedCategoryBannerImage = null;
+            }
+
             OnPropertyChanged(nameof(HasCategoryBanner));
         }
 
