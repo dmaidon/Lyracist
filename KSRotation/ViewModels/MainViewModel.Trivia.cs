@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 06:33:00 -> Added Tiered Option Value scoring (100% / 70% / 40%) properties and settings sync to KSRotation MainViewModel.Trivia
+// Edited on Aug 20, 2026 @ 12:10:30 -> Dismiss pre-game countdown and sync TV projection in StartTrivia
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -120,6 +120,16 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial int TriviaPostRevealDelaySeconds { get; set; } = 5;
+
+        /// Live summary of the auto-run timing (shown under the "Auto-Run Game" toggle) so the
+        /// header always reflects the game master's actual configured timings instead of a
+        /// hardcoded "15s answer • 5s fade • 5s reveal" that goes stale the moment they're changed.
+        public string TriviaAutoRunTimingSummary =>
+            $"{TriviaDefaultQuestionSeconds}s answer • {TriviaAnswerEliminationIntervalSeconds}s fade • {TriviaPostRevealDelaySeconds}s reveal";
+
+        partial void OnTriviaDefaultQuestionSecondsChanged(int value) => OnPropertyChanged(nameof(TriviaAutoRunTimingSummary));
+        partial void OnTriviaAnswerEliminationIntervalSecondsChanged(int value) => OnPropertyChanged(nameof(TriviaAutoRunTimingSummary));
+        partial void OnTriviaPostRevealDelaySecondsChanged(int value) => OnPropertyChanged(nameof(TriviaAutoRunTimingSummary));
 
         [ObservableProperty]
         public partial int TriviaBasePoints { get; set; } = 1000;
@@ -526,6 +536,16 @@ namespace KSRotation.ViewModels
             if (_triviaEngine == null) return;
             try
             {
+                // Cancel pre-game countdown and dismiss lobby screen
+                _triviaPreGameTimer.Stop();
+                TriviaIsPreGameCountdownRunning = false;
+                TriviaIsShowingConnectScreen = false;
+                if (_triviaDisplayVm != null)
+                {
+                    _triviaDisplayVm.IsConnectInstructionsActive = false;
+                    _triviaDisplayVm.IsPreGameCountdownRunning = false;
+                }
+
                 List<TriviaRound> rounds = [];
                 var checkedPacks = GetCheckedTriviaPacks();
                 if (checkedPacks.Count > 0)
@@ -602,7 +622,7 @@ namespace KSRotation.ViewModels
 
                 _triviaDisplayVm.HostName = TriviaHostName;
                 _triviaDisplayVm.UpdateInstructionBannerTemplate(TriviaInstructionBannerText);
-                _triviaDisplayVm.IsConnectInstructionsActive = TriviaIsShowingConnectScreen;
+                _triviaDisplayVm.IsConnectInstructionsActive = (_triviaEngine.State == TriviaGameState.Lobby) && TriviaIsShowingConnectScreen;
 
                 var checkedPacksForDisplay = GetCheckedTriviaPacks();
                 if (checkedPacksForDisplay.Count > 0)
@@ -619,6 +639,8 @@ namespace KSRotation.ViewModels
                 {
                     _triviaDisplayVm.UpdateMixedCategory(checkedPacksForDisplay);
                 }
+
+                _triviaDisplayVm.SyncWithEngine();
 
                 _triviaDisplayWindow = new KSRotation.Windows.TriviaDisplayWindow
                 {
@@ -639,6 +661,7 @@ namespace KSRotation.ViewModels
             }
             else
             {
+                _triviaDisplayVm?.SyncWithEngine();
                 PositionTriviaDisplayWindow(SelectedMonitorDevice);
                 _triviaDisplayWindow.Activate();
             }

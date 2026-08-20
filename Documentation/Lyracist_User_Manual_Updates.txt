@@ -1,4 +1,25 @@
-// Edited on Aug 19, 2026 @ 11:24:00 -> Added Help & About tabs in LyracistTrivia and timer override documentation
+// Edited on Aug 20, 2026 @ 10:04:00 -> Added Auto-Advance System documentation with grace period timer, fill-in music, and BigDJButton controls
+Auto-Advance System for Karaoke Hosting (`Lyracist`) - (August 2026)
+
+Section: Performance Operations / Auto-Advance & DJ Control Panel
+
+[System Details]
+1. Safe, DJ-Friendly Auto-Advance Lifecycle:
+   - **Post-Performance Grace Period**:
+     * When a karaoke track finishes naturally, the playback engine triggers a configurable grace period countdown (default 15 seconds, adjustable from 5s to 30s in Settings).
+     * During the countdown, the fill-in background music player spins up automatically at a pleasant ducked volume level.
+     * The stage billboard displays the upcoming performer notice: `"Next singer: {name} — please come to the stage"`.
+   - **Large High-Contrast DJ Control Buttons**:
+     * **`▶ START SONG`** (`StartSongButton`): Allows the DJ to immediately start the next performer without waiting for the grace timer to run down. It stops the grace timer, halts/fades out fill-in music, loads the singer's song, synchronizes the lyrics projection window, mobile tablet lyrics server, and rotation billboard, and begins track playback.
+     * **`⏭ SKIP SINGER`** (`SkipSingerButton`): Skips the current performer if they stepped away or are not ready, advancing the rotation without counting the song as completed or saving to history, while keeping fill-in music playing and restarting the grace period countdown for the next performer in line.
+   - **State Machine Safeguards (`AutoAdvanceState`)**:
+     * `StartingSong` transition lock prevents accidental double-clicks from double-starting tracks.
+     * Auto-advance automatically inhibits itself during active Trivia and Scaryoke games to prevent song interruption.
+     * If the queue is empty, the system returns safely to `Idle`.
+     * If the next performer has not selected a song, the system transitions to `WaitingForSongSelection` with a stage prompt and keeps fill-in music playing.
+
+--------------------------------------------------------------------------------
+
 Rotation Management & Round Cycle Tracking (`Lyracist`, `KSRotation`, & `KSRotation.Maui`) - (August 2026)
 
 Section: Performance & Rotation Operations / Singer Queue Management
@@ -82,7 +103,7 @@ Section: Entertainment Modules / Lyracist.Trivia & Pub Trivia Game Master
         4. **Continuous Scrolling Marquee**: Bottom/top ticker bar displaying venue branding, Game Master name, game rules, and buzzer tips.
       * **Single-Click Game Master Setup (`🎯 Launch Pre-Game Lobby & Countdown`)**:
         - A single primary action button in the Game Master console that opens/focuses the big screen, locks the category banner, starts the pre-game countdown, and activates the lobby.
-        - Accompanied by `"▶ Start Game Now (Skip Countdown)"` for immediate question launch.
+        - Accompanied by `"▶ Start Game Now (Skip Countdown)"` which immediately cancels the pre-game countdown lobby, starts Question #1, and opens/synchronizes the live question display on the TV projection screen.
    - **Top Scrolling Player & Score Marquee**:
      * Continuous horizontal marquee ticker running along the top of the venue display screen (`TriviaDisplayWindow`).
      * Shows all registered players and teams with their live point totals.

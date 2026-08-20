@@ -2035,7 +2035,7 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel VerticalAlignment="Center">
                                                 <TextBlock Text="⚡ Auto-Run Game" FontWeight="Bold" FontSize="11" Foreground="#FFFFFF" />
-                                                <TextBlock Text="15s answer • 5s fade • 5s reveal" FontSize="9" Foreground="#94A3B8" />
+                                                <TextBlock Text="{Binding TriviaAutoRunTimingSummary}" FontSize="9" Foreground="#94A3B8" />
                                             </StackPanel>
                                             <CheckBox Grid.Column="1" IsChecked="{Binding TriviaAutoAdvance}" VerticalAlignment="Center" />
                                         </Grid>
@@ -2043,26 +2043,30 @@
 
                                     <!-- Primary 1-Click Launch Action -->
                                     <Button Content="🎯 Launch Pre-Game Countdown" Command="{Binding LaunchTriviaPreGameLobbyCommand}"
-                                            Background="#6366F1" Foreground="White" FontWeight="Bold" Height="36" Margin="0,0,0,8"
+                                            Style="{StaticResource StandardGameButton}"
+                                            Background="#6366F1" Foreground="White"  Margin="0,0,0,8"
                                             ToolTip="Opens big screen with category banner, countdown timer, and scan-to-join instructions." />
 
                                     <Button Content="▶ Start Game Now (Skip Countdown)" Command="{Binding StartTriviaCommand}"
-                                            Background="#10B981" Foreground="White" FontWeight="Bold" Height="34" Margin="0,0,0,12" />
+                                            Style="{StaticResource StandardGameButton}"
+                                            Background="#10B981" Foreground="White"  Margin="0,0,0,12" />
 
                                     <!-- Live Question Controls -->
                                     <TextBlock Text="LIVE QUESTION CONTROLS" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,6" />
 
                                     <Button Content="{Binding TriviaPauseButtonText}" Command="{Binding ToggleTriviaPauseCommand}"
-                                            Background="#F59E0B" Foreground="White" FontWeight="Bold" Height="32" Margin="0,0,0,6" />
+                                            Style="{StaticResource StandardGameButton}"
+                                            Background="#F59E0B" Foreground="White"  Margin="0,0,0,6" />
 
                                     <Button Content="🔓 Lock &amp; Reveal Answer" Command="{Binding LockAndRevealTriviaCommand}"
-                                            Background="#8B5CF6" Foreground="White" FontWeight="Bold" Height="32" Margin="0,0,0,6" />
+                                            Style="{StaticResource StandardGameButton}"
+                                            Background="#8B5CF6" Foreground="White"  Margin="0,0,0,6" />
 
                                     <Button Content="⏭ Next Question" Command="{Binding NextTriviaQuestionCommand}"
-                                            Style="{StaticResource ModernSecondaryButtonStyle}" Height="32" Margin="0,0,0,6" />
+                                            Style="{StaticResource StandardGameButton}" Height="32" Margin="0,0,0,6" />
 
                                     <Button Content="🔄 Reset Game Session" Command="{Binding ResetTriviaCommand}"
-                                            Style="{StaticResource ModernSecondaryButtonStyle}" Height="30" Margin="0,0,0,12" />
+                                            Style="{StaticResource StandardGameButton}" Height="30" Margin="0,0,0,12" />
 
                                     <!-- Server & Join URL Card -->
                                     <Border Background="{DynamicResource MaterialDesignDivider}" CornerRadius="6" Padding="8">

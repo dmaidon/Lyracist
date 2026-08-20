@@ -1,4 +1,4 @@
-// Edited on Jul 19, 2026 @ 09:40:00 -> Add AudioDeviceId property
+// Edited on Aug 20, 2026 @ 09:52:00 -> Add EndReached event to IVideoBackend
 using System;
 using System.Threading.Tasks;
 
@@ -7,6 +7,7 @@ namespace Lyracist.Media.Video;
 public interface IVideoBackend
 {
     event EventHandler<VideoFrame>? FrameReady;
+    event EventHandler? EndReached;
 
     Task LoadAsync(string path);
     Task PlayAsync();

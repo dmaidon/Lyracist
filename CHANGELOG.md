@@ -1,12 +1,39 @@
-<!-- Edited on Aug 20, 2026 @ 06:45:00 -> Added Tiered Option Value Scoring (100% / 70% / 40%) with live mobile buzzer badge and configurable settings across all solution apps -->
-Last Edit: Aug 20, 2026 - Tiered Option Value Scoring (100% / 70% / 40%) Across All Solution Apps
+<!-- Edited on Aug 20, 2026 @ 12:18:00 -> Added Clean Exit & Application Termination fixes in Lyracist.Trivia -->
+Last Edit: Aug 20, 2026 - Clean Exit & Application Termination Fixes
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [26.8.20.0] - 2026-08-20
+## [26.8.20.1] - 2026-08-20
 
 ### Added & Enhanced
+- **Clean Application Termination & Explicit Exit Controls in `Lyracist.Trivia`**:
+  - Resolved an issue where closing `Lyracist.Trivia` could leave background network listeners or timers running, preventing the process from terminating without Task Manager.
+  - Added explicit `Application.Current.Shutdown()` and `App.OnExit` `Environment.Exit(0)` termination handlers.
+  - Updated `MainViewModel.Dispose()` to safely stop and dispose `_preGameTimer` alongside `TriviaWebServer`, `TriviaGameEngine`, and `TriviaDatabaseService`.
+  - Added a dedicated **"✕ Exit"** button in the main Game Master header bar for immediate 1-click application exit.
+
+- **TV Projection Screen Synchronization & Countdown Termination Fix**:
+  - Resolved an issue in `Lyracist.Trivia`, `Lyracist`, and `KSRotation` where clicking `"▶ Start Game Now (Skip Countdown)"` started active gameplay on the host console, but opening or focusing the TV Projection window (`TriviaDisplayWindow`) caused the pre-game countdown clock to start/display rather than Question #1.
+  - Corrected `StartGameWithSelectedPack()` / `StartGame()` / `StartTrivia()` to immediately cancel and stop any running pre-game lobby timer, dismiss `IsShowingConnectScreen`, and trigger/focus the TV projection screen.
+  - Added `SyncWithEngine()` to `DisplayViewModel` and `TriviaDisplayViewModel` to immediately hydrate the active question prompt, options, timer countdown, elimination opacities, answer stats, and scores whenever the display window is initialized or opened during an in-progress game.
+
+- **Safe, DJ-Friendly Auto-Advance System for Karaoke Hosting**:
+  - **Grace Period Lifecycle & Timer**:
+    * Configurable post-performance grace period countdown (default 15 seconds, adjustable in Settings).
+    * Natural playback completion via LibVLC & FFME `EndReached` events triggers the grace period transition automatically.
+    * Smooth fill-in background music starts ducked during the grace period while stage billboard displays announcement banner: `"Next singer: {name} — please come to the stage"`.
+  - **Large High-Contrast DJ Control Panel Buttons**:
+    * Added `BigDJButton` style with high contrast, large bold text, rounded glow styling, and touch/click accessibility.
+    * **`▶ START SONG`** (`StartSongButton`): Instantly cancels grace timer, halts/ducks fill-in music, loads the current singer's song, synchronizes projection window and mobile lyrics server, and begins audio/video playback.
+    * **`⏭ SKIP SINGER`** (`SkipSingerButton`): Advances singer queue without completing or scoring skipped song, keeps fill-in music playing, and restarts a fresh grace period for the next performer.
+  - **Multi-Subsystem Synchronization & State Machine**:
+    * Created `AutoAdvanceManager` coordinating `IMediaEngine`, `IShowFlowService`, `IDisplayService`, `RotationViewModel`, `ITabletLyricsServer`, `LyricsWindowViewModel`, and `KaraokeViewModel`.
+    * Implemented `AutoAdvanceState` enum (`Idle`, `GracePeriod`, `WaitingForSongSelection`, `ReadyToStart`, `StartingSong`) preventing accidental double-starts.
+    * Safe mode interlocks: Auto-advance automatically suppresses execution during active Trivia and Scaryoke modes.
+    * Empty queue / missing singer protection: Auto-advance safely returns to `Idle` if no active singers exist.
+    * Missing song detection: Transitions to `WaitingForSongSelection` with billboard prompt if singer has no song selected yet.
+
 - **Tiered Option Value Scoring (100% / 70% / 40%) Across `Lyracist`, `KSRotation`, and `Lyracist.Trivia`**:
   - **Dynamic Multiplier Tiers**: Base points scale according to the number of visible options remaining at the exact moment of player answer submission:
     * **4 Options Visible (0 Eliminated)**: 100% of Base Points (1,000 pts default). Rewarding early, confident buzz-ins before any wrong options fade.

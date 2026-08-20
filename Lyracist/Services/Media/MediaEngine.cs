@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Fix pitch hot-reload race with LoadSong/Stop by snapshotting the path and checking cancellation after every await
+// Edited on Aug 20, 2026 @ 09:53:00 -> Add SongEnded event and wire IVideoBackend.EndReached for AutoAdvanceManager integration
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -39,6 +39,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     public event Action<ImageSource>? FrameReady;
     public event Action? Started;
     public event Action? Stopped;
+    public event Action? SongEnded;
 
     public double Volume
     {
@@ -195,6 +196,25 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         _libraryService = libraryService;
 
         _video.FrameReady += OnVideoFrameReady;
+        _video.EndReached += (s, e) =>
+        {
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                bool wasPlaying = _isPlaying;
+                _isPlaying = false;
+                _loadedAudioPath = null;
+                if (!_isMp4Mode)
+                {
+                    _timer?.Stop();
+                    _scheduler.Reset();
+                }
+                SongEnded?.Invoke();
+                if (wasPlaying)
+                {
+                    Stopped?.Invoke();
+                }
+            }));
+        };
         InitializePlaybackTimer();
     }
 

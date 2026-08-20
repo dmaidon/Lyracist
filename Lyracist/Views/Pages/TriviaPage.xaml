@@ -1,4 +1,4 @@
-<!-- Edited on Aug 20, 2026 @ 05:59:00 -> Upgraded TriviaPage to 3-column Game Master console with 1-click launch, answer visualizer, and display controls -->
+<!-- Edited on Aug 20, 2026 @ 13:58:00 -> Bound Auto-Run timing summary to AutoRunTimingSummary -->
 <Page x:Class="Lyracist.Views.Pages.TriviaPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -140,7 +140,7 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="⚡ Auto-Run Game" FontWeight="Bold" FontSize="11" Foreground="#FFFFFF" />
-                                    <TextBlock Text="15s answer • 5s fade • 5s reveal" FontSize="9" Foreground="#94A3B8" />
+                                    <TextBlock Text="{Binding AutoRunTimingSummary}" FontSize="9" Foreground="#94A3B8" />
                                 </StackPanel>
                                 <CheckBox Grid.Column="1" IsChecked="{Binding AutoAdvanceQuestions}" VerticalAlignment="Center" />
                             </Grid>

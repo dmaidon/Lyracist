@@ -1,4 +1,4 @@
-{
+﻿{
   "PackId": "baseball-trivia",
   "Title": "Baseball Trivia",
   "Category": "Baseball Trivia",
@@ -11,12 +11,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "How many players from each team are on the field defensively during a standard baseball inning?",
       "Options": [
-        "Eight",
         "Nine",
-        "Ten",
-        "Eleven"
+        "Eleven",
+        "Eight",
+        "Ten"
       ],
-      "CorrectAnswerIndex": 1,
+      "CorrectAnswerIndex": 0,
       "Explanation": "A defensive team fields nine players: pitcher, catcher, four infielders, and three outfielders.",
       "TimeLimitSeconds": 15
     },
@@ -27,12 +27,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "How many balls does a batter need to be awarded before taking first base on a walk?",
       "Options": [
-        "Three",
         "Four",
-        "Five",
-        "Six"
+        "Six",
+        "Three",
+        "Five"
       ],
-      "CorrectAnswerIndex": 1,
+      "CorrectAnswerIndex": 0,
       "Explanation": "Four pitches called balls result in a base on balls, sending the batter to first.",
       "TimeLimitSeconds": 15
     },
@@ -43,12 +43,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "How many strikes result in a batter being called out?",
       "Options": [
+        "Five",
         "Two",
         "Three",
-        "Four",
-        "Five"
+        "Four"
       ],
-      "CorrectAnswerIndex": 1,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Three strikes and the batter is out, whether the strikes are swinging, called, or foul (with limits on foul bunts).",
       "TimeLimitSeconds": 15
     },
@@ -59,12 +59,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is it called when a batter hits a fly ball out of the park in fair territory, scoring at least one run?",
       "Options": [
-        "A home run",
         "A grand slam",
         "A triple",
+        "A home run",
         "A ground-rule double"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "A home run allows the batter (and any runners on base) to round all bases and score.",
       "TimeLimitSeconds": 15
     },
@@ -75,12 +75,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What term describes a home run hit with the bases loaded, scoring four runs at once?",
       "Options": [
-        "Grand slam",
         "Walk-off",
-        "Cycle",
-        "Sacrifice fly"
+        "Sacrifice fly",
+        "Grand slam",
+        "Cycle"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "A grand slam is the maximum possible runs on a single home run - one for each runner plus the batter.",
       "TimeLimitSeconds": 15
     },
@@ -91,12 +91,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is it called when a player hits a single, double, triple, and home run all in the same game?",
       "Options": [
-        "A cycle",
-        "A slam",
         "A sweep",
-        "A quad"
+        "A cycle",
+        "A quad",
+        "A slam"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Hitting for the cycle is a rare offensive feat requiring all four types of hits in one game.",
       "TimeLimitSeconds": 15
     },
@@ -107,12 +107,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the term for a play where the batting team's runner scores the winning run in the bottom of the final inning, immediately ending the game?",
       "Options": [
+        "Sayonara hit",
         "Walk-off",
         "Sudden death",
-        "Sayonara hit",
         "Game-ender"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "A walk-off ends the game instantly because the home team, batting last, has already won - no more outs are needed.",
       "TimeLimitSeconds": 15
     },
@@ -123,12 +123,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is a 'balk' in baseball?",
       "Options": [
-        "An illegal motion by the pitcher with runners on base, awarding them the next base",
-        "A batter stepping out of the box mid-pitch",
         "A foul ball caught for an out",
-        "An intentional walk"
+        "A batter stepping out of the box mid-pitch",
+        "An intentional walk",
+        "An illegal motion by the pitcher with runners on base, awarding them the next base"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "A balk penalizes a pitcher for a deceptive or illegal motion meant to unfairly hold or trick baserunners.",
       "TimeLimitSeconds": 15
     },
@@ -139,12 +139,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the 'infield fly rule' designed to prevent?",
       "Options": [
+        "Pitchers throwing too many pickoff attempts",
         "Infielders intentionally dropping an easy pop fly to turn a cheap double play",
         "Outfielders trapping a line drive",
-        "Pitchers throwing too many pickoff attempts",
         "Catchers blocking home plate illegally"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "With runners on first and second (or bases loaded) and fewer than two outs, an infield fly is automatically ruled out to stop a cheap double-play trick.",
       "TimeLimitSeconds": 15
     },
@@ -155,12 +155,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is a 'sacrifice fly'?",
       "Options": [
-        "A fly ball caught for an out that allows a runner to tag up and score",
+        "An intentional strikeout",
         "A bunt that advances a runner",
-        "A fly ball that lands foul",
-        "An intentional strikeout"
+        "A fly ball caught for an out that allows a runner to tag up and score",
+        "A fly ball that lands foul"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "A sacrifice fly doesn't count as an official at-bat against the batter's average, even though it's an out, because it drove in a run.",
       "TimeLimitSeconds": 15
     },
@@ -171,12 +171,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What defensive statistic credits a pitcher with ending a game while protecting a lead under specific conditions?",
       "Options": [
+        "A blown lead",
         "A save",
         "A hold",
-        "A shutout",
-        "A blown lead"
+        "A shutout"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "A save is awarded to a relief pitcher who finishes a close game his team wins without giving up the lead.",
       "TimeLimitSeconds": 15
     },
@@ -187,12 +187,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What batting statistic combines on-base percentage and slugging percentage into a single number widely used in modern analysis?",
       "Options": [
-        "OPS (On-base Plus Slugging)",
-        "WAR (Wins Above Replacement)",
         "WHIP (Walks and Hits per Inning Pitched)",
-        "BABIP"
+        "WAR (Wins Above Replacement)",
+        "BABIP",
+        "OPS (On-base Plus Slugging)"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "OPS adds a hitter's on-base percentage to their slugging percentage as a quick overall offensive measure.",
       "TimeLimitSeconds": 15
     },
@@ -203,12 +203,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What pitching statistic measures the average number of baserunners (via walks and hits) allowed per inning?",
       "Options": [
-        "WHIP",
-        "ERA",
         "OPS",
+        "ERA",
+        "WHIP",
         "FIP"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "WHIP (Walks plus Hits per Inning Pitched) shows how many baserunners a pitcher typically allows each inning.",
       "TimeLimitSeconds": 15
     },
@@ -219,12 +219,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What sabermetric statistic attempts to estimate how many more wins a player is worth compared to a readily available replacement-level player?",
       "Options": [
-        "WAR (Wins Above Replacement)",
         "OPS",
+        "WAR (Wins Above Replacement)",
         "ERA+",
         "SLG"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "WAR compresses a player's total offensive, defensive, and pitching value into one comprehensive number.",
       "TimeLimitSeconds": 15
     },
@@ -235,12 +235,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What term describes a play where a defensive team records three outs on a single continuous play?",
       "Options": [
-        "A triple play",
         "A double play",
         "A perfect inning",
-        "A shutdown sequence"
+        "A shutdown sequence",
+        "A triple play"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Triple plays are among the rarest defensive feats in baseball, often occurring on a sharp line drive with runners moving.",
       "TimeLimitSeconds": 15
     },
@@ -251,12 +251,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is an 'unassisted triple play,' one of the rarest plays in baseball?",
       "Options": [
+        "Three consecutive strikeouts by one pitcher",
         "A single fielder recording all three outs of a triple play alone",
         "A triple play completed without any errors",
-        "Three consecutive strikeouts by one pitcher",
         "A triple play ending an inning and a game simultaneously"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "An unassisted triple play typically happens when a middle infielder catches a liner, steps on second, and tags a runner - all without help.",
       "TimeLimitSeconds": 15
     },
@@ -267,12 +267,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is a 'ground-rule double'?",
       "Options": [
-        "A fair ball that bounces over the outfield fence or gets stuck in a defined obstruction, automatically awarding the batter second base",
         "A double hit directly down the foul line",
+        "A ball that hits the foul pole",
         "A double where the batter is thrown out trying for third",
-        "A ball that hits the foul pole"
+        "A fair ball that bounces over the outfield fence or gets stuck in a defined obstruction, automatically awarding the batter second base"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Ground-rule doubles are governed by each park's specific field rules for balls that leave play in unusual ways.",
       "TimeLimitSeconds": 15
     },
@@ -283,12 +283,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What term describes a batter leading their league in batting average, home runs, and RBIs in the same season?",
       "Options": [
-        "The Triple Crown",
         "The Grand Slam Season",
-        "The Batting Trifecta",
-        "The Golden Season"
+        "The Golden Season",
+        "The Triple Crown",
+        "The Batting Trifecta"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Winning the Triple Crown is one of the rarest offensive achievements; Miguel Cabrera won the last MLB Triple Crown in 2012.",
       "TimeLimitSeconds": 15
     },
@@ -299,12 +299,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What milestone is reached by a pitcher who records 300 career wins, a benchmark achieved by only a handful of pitchers in modern history?",
       "Options": [
+        "The Iron Arm Club",
         "The 300-win club",
         "The Cy Young Circle",
-        "The Century Club",
-        "The Iron Arm Club"
+        "The Century Club"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Randy Johnson was the most recent pitcher to reach 300 career wins, in 2009 - a feat increasingly rare in the modern bullpen era.",
       "TimeLimitSeconds": 15
     },
@@ -316,9 +316,9 @@
       "Prompt": "What exclusive career hitting milestone has been reached by legends like Pete Rose, Ty Cobb, and Derek Jeter?",
       "Options": [
         "3,000 career hits",
-        "500 career home runs",
+        "2,000 career walks",
         "1,000 career RBIs",
-        "2,000 career walks"
+        "500 career home runs"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "Membership in the 3,000-hit club is one of the surest tickets to the Hall of Fame in baseball history.",
@@ -331,12 +331,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "Who holds the all-time MLB record for career stolen bases, nicknamed 'The Man of Steal'?",
       "Options": [
-        "Rickey Henderson",
         "Lou Brock",
         "Ty Cobb",
-        "Vince Coleman"
+        "Vince Coleman",
+        "Rickey Henderson"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Rickey Henderson stole 1,406 career bases, a record widely considered unbreakable in the modern game.",
       "TimeLimitSeconds": 15
     },
@@ -347,12 +347,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "Who holds the MLB all-time career saves record among relief pitchers?",
       "Options": [
-        "Mariano Rivera",
-        "Trevor Hoffman",
         "Lee Smith",
-        "Dennis Eckersley"
+        "Dennis Eckersley",
+        "Mariano Rivera",
+        "Trevor Hoffman"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Mariano Rivera finished his career with 652 saves, largely built on his legendary cut fastball for the Yankees.",
       "TimeLimitSeconds": 15
     },
@@ -363,12 +363,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What award is given annually to the best pitcher in each league, named after a legendary early-1900s hurler?",
       "Options": [
-        "The Cy Young Award",
-        "The Gold Glove Award",
         "The Comeback Player Award",
-        "The Silver Slugger Award"
+        "The Silver Slugger Award",
+        "The Gold Glove Award",
+        "The Cy Young Award"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Cy Young won 511 career games, and MLB has honored the sport's top pitchers with his namesake award since 1956.",
       "TimeLimitSeconds": 15
     },
@@ -380,8 +380,8 @@
       "Prompt": "How many career National League and American League MVP awards did Barry Bonds win, the most of any player in history?",
       "Options": [
         "Seven",
-        "Four",
         "Five",
+        "Four",
         "Nine"
       ],
       "CorrectAnswerIndex": 0,
@@ -395,12 +395,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What underdog 1969 team, previously a perennial last-place club, stunned baseball by winning the World Series?",
       "Options": [
-        "The New York Mets ('Miracle Mets')",
-        "The Kansas City Royals",
         "The San Diego Padres",
-        "The Seattle Pilots"
+        "The Seattle Pilots",
+        "The New York Mets ('Miracle Mets')",
+        "The Kansas City Royals"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "The 1969 'Miracle Mets' went from lovable losers to World Series champions in just their eighth season of existence.",
       "TimeLimitSeconds": 15
     },
@@ -411,12 +411,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What error by first baseman Bill Buckner in Game 6 of the 1986 World Series became one of the most infamous plays in baseball history?",
       "Options": [
-        "A ground ball rolled through his legs, allowing the winning run to score",
         "He dropped a routine pop fly",
         "He threw the ball into the stands",
-        "He missed the base on a force out"
+        "He missed the base on a force out",
+        "A ground ball rolled through his legs, allowing the winning run to score"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Mookie Wilson's slow roller got past Buckner, letting the Mets complete a comeback and eventually win the Series against the Red Sox.",
       "TimeLimitSeconds": 15
     },
@@ -427,12 +427,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "Whose dramatic pinch-hit walk-off home run, despite two bad knees, won Game 1 of the 1988 World Series for the Dodgers?",
       "Options": [
-        "Kirk Gibson",
+        "Steve Sax",
         "Orel Hershiser",
-        "Mickey Hatcher",
-        "Steve Sax"
+        "Kirk Gibson",
+        "Mickey Hatcher"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Kirk Gibson could barely walk but limped around the bases after his iconic home run off Dennis Eckersley.",
       "TimeLimitSeconds": 15
     },
@@ -443,12 +443,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What Boston catcher famously waved his fly ball fair with his arms in Game 6 of the 1975 World Series before it hit the foul pole for a home run?",
       "Options": [
+        "Carl Yastrzemski",
         "Carlton Fisk",
         "Rico Petrocelli",
-        "Carl Yastrzemski",
         "Fred Lynn"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Carlton Fisk's body-language 'wave it fair' gesture became one of the most replayed moments in World Series history.",
       "TimeLimitSeconds": 15
     },
@@ -459,12 +459,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "Which slugger earned the nickname 'Mr. October' after hitting three home runs on three consecutive pitches in Game 6 of the 1977 World Series?",
       "Options": [
-        "Reggie Jackson",
         "Thurman Munson",
-        "Chris Chambliss",
-        "Graig Nettles"
+        "Graig Nettles",
+        "Reggie Jackson",
+        "Chris Chambliss"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Reggie Jackson's three-homer game for the Yankees against the Dodgers cemented his clutch postseason legacy.",
       "TimeLimitSeconds": 15
     },
@@ -475,12 +475,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What injury did Curt Schilling famously pitch through during the 2004 postseason, visible as blood soaking through his sock?",
       "Options": [
-        "A torn tendon sheath in his ankle",
-        "A broken finger",
+        "A torn hamstring",
         "A dislocated shoulder",
-        "A torn hamstring"
+        "A broken finger",
+        "A torn tendon sheath in his ankle"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Schilling's 'Bloody Sock' start became legendary as the Red Sox completed their historic comeback against the Yankees en route to the title.",
       "TimeLimitSeconds": 15
     },
@@ -491,12 +491,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the record for most games played in a single World Series before the format was standardized to a best-of-seven?",
       "Options": [
+        "Ten games",
         "Eight games (best-of-nine format, used in 1903 and 1919-1921)",
         "Nine games",
-        "Six games",
-        "Ten games"
+        "Six games"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "MLB briefly experimented with a best-of-nine World Series format in the early 1900s before settling on best-of-seven.",
       "TimeLimitSeconds": 15
     },
@@ -508,8 +508,8 @@
       "Prompt": "What was the first MLB team to win a World Series after entering the playoffs as a Wild Card, doing so in 2002?",
       "Options": [
         "The Anaheim Angels",
-        "The Florida Marlins",
         "The Colorado Rockies",
+        "The Florida Marlins",
         "The St. Louis Cardinals"
       ],
       "CorrectAnswerIndex": 0,
@@ -523,12 +523,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What over-the-shoulder, back-to-home-plate catch by Willie Mays in the 1954 World Series is simply known as 'The Catch'?",
       "Options": [
-        "A running grab of a deep fly ball at the Polo Grounds",
+        "A bare-handed catch at first base",
         "A diving catch at the warning track",
         "A leaping catch over the outfield wall",
-        "A bare-handed catch at first base"
+        "A running grab of a deep fly ball at the Polo Grounds"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Willie Mays' basket catch running away from home plate is considered one of the greatest defensive plays ever filmed.",
       "TimeLimitSeconds": 15
     },
@@ -539,12 +539,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What poignant phrase did Lou Gehrig use to describe himself in his 1939 farewell speech at Yankee Stadium after his ALS diagnosis?",
       "Options": [
+        "'Baseball has been my whole life'",
         "'The luckiest man on the face of the earth'",
-        "'The Iron Horse rides on'",
         "'I gave everything I had'",
-        "'Baseball has been my whole life'"
+        "'The Iron Horse rides on'"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Gehrig's Farewell Speech, delivered as his career ended tragically early due to illness, remains one of sports' most emotional moments.",
       "TimeLimitSeconds": 15
     },
@@ -555,12 +555,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What was the highest single-season batting average recorded in the modern era, set by Ted Williams in 1941 and never matched since?",
       "Options": [
-        ".406",
-        ".390",
         ".420",
-        ".378"
+        ".378",
+        ".390",
+        ".406"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Ted Williams hit .406 in 1941 - no MLB player has batted .400 or better in a full season since.",
       "TimeLimitSeconds": 15
     },
@@ -571,12 +571,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "Which Hall of Fame pitcher famously chose not to pitch Game 1 of the 1965 World Series because it fell on Yom Kippur?",
       "Options": [
-        "Sandy Koufax",
         "Don Drysdale",
         "Warren Spahn",
+        "Sandy Koufax",
         "Bob Gibson"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Sandy Koufax's decision to observe the Jewish holy day rather than pitch became a landmark moment beyond baseball.",
       "TimeLimitSeconds": 15
     },
@@ -587,12 +587,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "Who became the second player in MLB history to reach 3,000 hits while also becoming a symbol of humanitarian service, dying in a 1972 plane crash delivering aid?",
       "Options": [
-        "Roberto Clemente",
-        "Al Kaline",
+        "Carl Yastrzemski",
         "Lou Brock",
-        "Carl Yastrzemski"
+        "Al Kaline",
+        "Roberto Clemente"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Roberto Clemente reached exactly 3,000 hits in his final regular-season at-bat before his tragic death delivering earthquake relief supplies.",
       "TimeLimitSeconds": 15
     },
@@ -619,12 +619,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What single-season MLB hits record, set in 2004, is held by Ichiro Suzuki?",
       "Options": [
-        "262 hits",
+        "270 hits",
         "248 hits",
-        "257 hits",
-        "270 hits"
+        "262 hits",
+        "257 hits"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Ichiro Suzuki's 262 hits in 2004 broke George Sisler's 84-year-old single-season record.",
       "TimeLimitSeconds": 15
     },
@@ -635,12 +635,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What Yankees shortstop, nicknamed 'The Captain,' retired in 2014 with over 3,400 career hits, all with one franchise?",
       "Options": [
+        "Bernie Williams",
         "Derek Jeter",
         "Alex Rodriguez",
-        "Bernie Williams",
         "Don Mattingly"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Derek Jeter spent his entire 20-year Hall of Fame career with the New York Yankees, winning five World Series titles.",
       "TimeLimitSeconds": 15
     },
@@ -651,12 +651,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the name of the annual award given to the best rookie in each league, honoring the man who broke baseball's color barrier?",
       "Options": [
+        "The Hank Aaron Award",
         "The Jackie Robinson Rookie of the Year Award",
-        "The Comeback Player of the Year Award",
         "The Roberto Clemente Award",
-        "The Hank Aaron Award"
+        "The Comeback Player of the Year Award"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "MLB officially renamed the Rookie of the Year Award after Jackie Robinson in 1987, forty years after his historic debut.",
       "TimeLimitSeconds": 15
     },
@@ -667,12 +667,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What Chicago ballpark, home of the Cubs, is famous for its ivy-covered outfield walls and didn't install lights for night games until 1988?",
       "Options": [
-        "Wrigley Field",
         "Comiskey Park",
         "Guaranteed Rate Field",
-        "Miller Park"
+        "Miller Park",
+        "Wrigley Field"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Wrigley Field, opened in 1914, was the last MLB ballpark to add lights, hosting its first official night game on August 8, 1988.",
       "TimeLimitSeconds": 15
     },
@@ -683,12 +683,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What nickname is given to the original Yankee Stadium, built in 1923 to house the growing legend of Babe Ruth?",
       "Options": [
-        "The House That Ruth Built",
-        "The Bronx Cathedral",
         "Murderers' Stadium",
-        "The Pinstripe Palace"
+        "The Pinstripe Palace",
+        "The Bronx Cathedral",
+        "The House That Ruth Built"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Yankee Stadium earned its nickname because Ruth's popularity directly funded its construction.",
       "TimeLimitSeconds": 15
     },
@@ -699,12 +699,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What Baltimore ballpark, opened in 1992, is widely credited with sparking the modern trend of retro, downtown-style baseball stadiums?",
       "Options": [
-        "Oriole Park at Camden Yards",
         "Progressive Field",
+        "Coors Field",
         "PNC Park",
-        "Coors Field"
+        "Oriole Park at Camden Yards"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Camden Yards blended old-fashioned brick architecture with modern amenities, inspiring nearly every ballpark built since.",
       "TimeLimitSeconds": 15
     },
@@ -715,12 +715,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What Colorado ballpark's high altitude is famous for causing baseballs to travel farther, contributing to unusually high-scoring games?",
       "Options": [
-        "Coors Field",
         "Chase Field",
         "Kauffman Stadium",
-        "Truist Park"
+        "Truist Park",
+        "Coors Field"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Coors Field sits roughly a mile above sea level in Denver, where thinner air famously helps fly balls carry further.",
       "TimeLimitSeconds": 15
     },
@@ -731,12 +731,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the name of the domed, permanently roofed stadium home to the Tampa Bay Rays?",
       "Options": [
-        "Tropicana Field",
         "Marlins Park",
+        "Tropicana Field",
         "Rogers Centre",
         "Minute Maid Park"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Tropicana Field's cable-supported dome and famously quirky catwalks have made it one of MLB's most distinctive ballparks.",
       "TimeLimitSeconds": 15
     },
@@ -747,12 +747,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What material are official MLB bats required to be made of, unlike aluminum bats commonly used in amateur baseball?",
       "Options": [
-        "Solid wood",
+        "Carbon fiber",
         "Composite fiberglass",
         "Reinforced aluminum",
-        "Carbon fiber"
+        "Solid wood"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "MLB requires solid wood bats, typically ash, maple, or birch, unlike the metal bats used at lower levels of the sport.",
       "TimeLimitSeconds": 15
     },
@@ -763,12 +763,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What informal nickname do catchers give their bulky protective gear (mask, chest protector, shin guards)?",
       "Options": [
-        "The tools of ignorance",
+        "The iron suit",
         "The battle armor",
         "The backstop kit",
-        "The iron suit"
+        "The tools of ignorance"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "The self-deprecating nickname pokes fun at how tough (or foolish) you'd have to be to willingly crouch behind home plate all game.",
       "TimeLimitSeconds": 15
     },
@@ -780,9 +780,9 @@
       "Prompt": "What controversial 1983 incident involved Kansas City's George Brett having a home run controversially disallowed for excess pine tar on his bat?",
       "Options": [
         "The Pine Tar Incident",
-        "The Sticky Bat Scandal",
         "The Tar Wars Game",
-        "The Sap Controversy"
+        "The Sap Controversy",
+        "The Sticky Bat Scandal"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "Brett's furious dugout charge after umpires nullified his go-ahead homer became one of baseball's most memorable meltdowns - later overturned by the league.",
@@ -795,12 +795,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What pitch, once common but banned by MLB in 1920 due to safety and fairness concerns, involved doctoring the ball with saliva or other substances?",
       "Options": [
-        "The spitball",
         "The screwball",
-        "The knuckleball",
-        "The forkball"
+        "The forkball",
+        "The spitball",
+        "The knuckleball"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "The spitball was outlawed largely for safety reasons after a batter was killed by a doctored pitch he couldn't see clearly.",
       "TimeLimitSeconds": 15
     },
@@ -811,12 +811,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "In what year did the American League first adopt the designated hitter (DH) rule, allowing a substitute for the pitcher's spot in the batting order?",
       "Options": [
-        "1973",
         "1965",
         "1980",
-        "1990"
+        "1990",
+        "1973"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "The AL introduced the DH in 1973 as an experiment to boost offense; the National League didn't adopt it full-time until 2022.",
       "TimeLimitSeconds": 15
     },
@@ -843,12 +843,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "How many total bases are there on a standard baseball diamond, including home plate?",
       "Options": [
-        "Four",
         "Three",
+        "Six",
         "Five",
-        "Six"
+        "Four"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "A diamond has first, second, third base, and home plate, forming the four corners a runner must touch to score.",
       "TimeLimitSeconds": 15
     },
@@ -860,9 +860,9 @@
       "Prompt": "What is the standard distance between each base on a Major League Baseball diamond?",
       "Options": [
         "90 feet",
-        "60 feet",
         "75 feet",
-        "100 feet"
+        "100 feet",
+        "60 feet"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "The 90-foot base paths have remained unchanged since the 19th century, a distance considered nearly perfectly balanced between offense and defense.",
@@ -875,12 +875,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What longtime New York Yankees and Mets manager was famous for his colorful, rambling quotes known as 'Stengelese'?",
       "Options": [
-        "Casey Stengel",
+        "Yogi Berra",
         "Joe McCarthy",
-        "Billy Martin",
-        "Yogi Berra"
+        "Casey Stengel",
+        "Billy Martin"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Casey Stengel managed the Yankees to seven World Series titles in the 1950s while entertaining reporters with his unique verbal style.",
       "TimeLimitSeconds": 15
     },
@@ -891,12 +891,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "Who holds the record for most seasons managing a single MLB franchise, leading the Philadelphia Athletics for 50 years?",
       "Options": [
+        "Walter Alston",
         "Connie Mack",
-        "John McGraw",
         "Sparky Anderson",
-        "Walter Alston"
+        "John McGraw"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Connie Mack managed (and largely owned) the Athletics from 1901 to 1950, an unmatched tenure in professional sports history.",
       "TimeLimitSeconds": 15
     },
@@ -907,12 +907,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What Brooklyn Dodgers general manager is credited with signing Jackie Robinson and breaking baseball's color barrier?",
       "Options": [
+        "Walter O'Malley",
         "Branch Rickey",
-        "Larry MacPhail",
         "Buzzie Bavasi",
-        "Walter O'Malley"
+        "Larry MacPhail"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Branch Rickey scouted and signed Robinson specifically to integrate the major leagues, a decision that reshaped the sport forever.",
       "TimeLimitSeconds": 15
     },
@@ -925,8 +925,8 @@
       "Options": [
         "Billy Martin",
         "Lou Piniella",
-        "Buck Showalter",
-        "Joe Torre"
+        "Joe Torre",
+        "Buck Showalter"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "Billy Martin's tumultuous, on-again-off-again tenure managing the Yankees became a defining storyline of the franchise's late 1970s and 80s.",
@@ -939,12 +939,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What Japanese slugger holds the world professional baseball career home run record with 868, more than any MLB player?",
       "Options": [
-        "Sadaharu Oh",
         "Ichiro Suzuki",
         "Shohei Ohtani",
-        "Hideki Matsui"
+        "Hideki Matsui",
+        "Sadaharu Oh"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Sadaharu Oh hit 868 home runs playing for the Yomiuri Giants in Japan's Nippon Professional Baseball league.",
       "TimeLimitSeconds": 15
     },
@@ -955,12 +955,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What international tournament, first held in 2006, features national teams from around the world competing in a baseball championship?",
       "Options": [
-        "The World Baseball Classic",
+        "The International League Championship",
         "The Baseball World Cup",
         "The Global Series",
-        "The International League Championship"
+        "The World Baseball Classic"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "The World Baseball Classic showcases MLB stars representing their home countries, distinct from the amateur Baseball World Cup.",
       "TimeLimitSeconds": 15
     },
@@ -971,12 +971,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "In 2020, MLB officially recognized the statistics and records of which historic set of leagues, elevating them to 'major league' status?",
       "Options": [
-        "The Negro Leagues",
-        "The Federal League",
         "The Pacific Coast League",
-        "The American Association"
+        "The Negro Leagues",
+        "The American Association",
+        "The Federal League"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "MLB's 2020 decision recognized seven Negro Leagues (1920-1948) as major leagues, incorporating their statistics into official records.",
       "TimeLimitSeconds": 15
     },
@@ -987,12 +987,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What legendary Negro Leagues pitcher, known for his showmanship and blazing fastball, later became the oldest rookie in MLB history at age 42?",
       "Options": [
-        "Satchel Paige",
+        "Buck O'Neil",
         "Josh Gibson",
         "Cool Papa Bell",
-        "Buck O'Neil"
+        "Satchel Paige"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Satchel Paige finally reached the majors with the Cleveland Indians in 1948 after a legendary career in the Negro Leagues.",
       "TimeLimitSeconds": 15
     },
@@ -1003,12 +1003,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "Which country has produced more MLB players per capita than any other outside the United States, especially from towns like San Pedro de Macoris?",
       "Options": [
-        "The Dominican Republic",
         "Venezuela",
         "Puerto Rico",
+        "The Dominican Republic",
         "Cuba"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "The Dominican Republic has become one of baseball's richest talent pipelines, producing stars from Sammy Sosa to Pedro Martinez.",
       "TimeLimitSeconds": 15
     },
@@ -1020,9 +1020,9 @@
       "Prompt": "What Pennsylvania town has hosted the Little League World Series every summer since 1947?",
       "Options": [
         "Williamsport",
+        "Scranton",
         "Harrisburg",
-        "Allentown",
-        "Scranton"
+        "Allentown"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "Williamsport, Pennsylvania is the birthplace of Little League Baseball and remains the permanent host of its world series.",
@@ -1035,12 +1035,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What Nebraska city has hosted the NCAA College World Series for decades, first at Rosenblatt Stadium and now at Charles Schwab Field?",
       "Options": [
-        "Omaha",
         "Lincoln",
+        "Omaha",
         "Des Moines",
         "Wichita"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Omaha has been synonymous with the College World Series since it began hosting the tournament in 1950.",
       "TimeLimitSeconds": 15
     },
@@ -1052,9 +1052,9 @@
       "Prompt": "What traditional song is sung by fans during the seventh-inning stretch at nearly every MLB game?",
       "Options": [
         "'Take Me Out to the Ball Game'",
-        "'The Star-Spangled Banner'",
         "'Sweet Caroline'",
-        "'God Bless America'"
+        "'God Bless America'",
+        "'The Star-Spangled Banner'"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "Written in 1908, 'Take Me Out to the Ball Game' has become baseball's unofficial anthem, sung during the stretch since the mid-1970s.",
@@ -1067,12 +1067,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What legendary broadcaster called Los Angeles Dodgers games for 67 seasons, famous for his warm, storytelling style?",
       "Options": [
-        "Vin Scully",
+        "Bob Uecker",
         "Harry Caray",
         "Jack Buck",
-        "Bob Uecker"
+        "Vin Scully"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Vin Scully's tenure with the Dodgers, from Brooklyn to LA, ran from 1950 to 2016, making him one of broadcasting's most beloved voices.",
       "TimeLimitSeconds": 15
     },
@@ -1083,12 +1083,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What 1989 film starring Kevin Costner featured the famous line 'If you build it, he will come' about a mysterious Iowa cornfield baseball diamond?",
       "Options": [
-        "Field of Dreams",
         "The Natural",
         "Bull Durham",
-        "For Love of the Game"
+        "For Love of the Game",
+        "Field of Dreams"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Field of Dreams turned an Iowa farm into a real-life tourist destination, still hosting MLB games decades later.",
       "TimeLimitSeconds": 15
     },
@@ -1099,12 +1099,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What 2011 film, based on a Michael Lewis book, dramatized the Oakland Athletics' use of sabermetrics to build a competitive roster on a tight budget?",
       "Options": [
+        "Trouble with the Curve",
         "Moneyball",
         "42",
-        "Trouble with the Curve",
         "The Rookie"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Moneyball starred Brad Pitt as GM Billy Beane, chronicling the A's data-driven approach that reshaped how front offices evaluate players.",
       "TimeLimitSeconds": 15
     },
@@ -1116,9 +1116,9 @@
       "Prompt": "What technology, expanded across MLB starting in 2014, allows managers to challenge close calls for video review by umpires?",
       "Options": [
         "Instant replay review",
-        "The electronic strike zone",
+        "Robo-umpiring",
         "Statcast tracking",
-        "Robo-umpiring"
+        "The electronic strike zone"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "Managers can challenge certain calls, triggering a video review by umpires in a centralized replay center to confirm or overturn the ruling.",
@@ -1148,9 +1148,9 @@
       "Prompt": "In what year did the National League adopt the designated hitter rule on a permanent, universal basis?",
       "Options": [
         "2022",
-        "2018",
+        "2015",
         "2020",
-        "2015"
+        "2018"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "After decades of AL-only use, the NL adopted the universal DH starting with the 2022 season.",
@@ -1163,12 +1163,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What extra-innings rule, adopted by MLB starting in 2020, places a runner on second base to begin each half-inning past the ninth?",
       "Options": [
-        "The extra-innings ghost runner rule",
-        "The sudden death rule",
         "The mercy rule",
-        "The tiebreaker rule"
+        "The tiebreaker rule",
+        "The sudden death rule",
+        "The extra-innings ghost runner rule"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Originally introduced to shorten games during the pandemic-shortened season, the runner-on-second rule became a permanent fixture for extra innings.",
       "TimeLimitSeconds": 15
     },
@@ -1180,9 +1180,9 @@
       "Prompt": "What term describes a pitcher throwing at least one complete game without allowing any opposing batter to reach base by any means?",
       "Options": [
         "A perfect game",
+        "A quality start",
         "A no-hitter",
-        "A shutout",
-        "A quality start"
+        "A shutout"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "A perfect game is even rarer than a no-hitter, requiring 27 consecutive batters retired with zero walks, hits, or errors.",
@@ -1195,12 +1195,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the term for a batter deliberately tapping the ball a short distance to advance a runner or reach base via a soft, controlled hit?",
       "Options": [
-        "A bunt",
         "A chop",
+        "A slap hit",
         "A dribbler",
-        "A slap hit"
+        "A bunt"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Bunts are often used strategically as sacrifice plays to advance runners, or as a surprise attempt to reach base on a fast infield roller.",
       "TimeLimitSeconds": 15
     },
@@ -1211,12 +1211,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What defensive strategy involves shifting infielders heavily to one side of the field based on a hitter's known tendencies?",
       "Options": [
-        "The defensive shift",
         "The pull play",
-        "The pinch formation",
-        "The overload"
+        "The defensive shift",
+        "The overload",
+        "The pinch formation"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Defensive shifts became a major strategic trend in the 2010s before MLB limited them with new positioning rules in 2023.",
       "TimeLimitSeconds": 15
     },
@@ -1229,8 +1229,8 @@
       "Options": [
         "A LOOGY (Lefty One-Out GuY) / situational reliever",
         "A closer",
-        "A long reliever",
-        "A swingman"
+        "A swingman",
+        "A long reliever"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "LOOGY is baseball slang for a left-handed specialist brought in for a very short, matchup-specific appearance.",
@@ -1243,12 +1243,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What position is primarily responsible for covering the area between second and third base, often considered the most demanding defensive infield spot?",
       "Options": [
-        "Shortstop",
         "Second baseman",
+        "Center fielder",
         "Third baseman",
-        "Center fielder"
+        "Shortstop"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Shortstop requires a strong arm, quick reflexes, and excellent range, making it one of the most valuable defensive positions.",
       "TimeLimitSeconds": 15
     },
@@ -1259,12 +1259,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What term describes an out recorded when a fielder throws the ball to a base ahead of a runner attempting to advance, forcing them out without a tag?",
       "Options": [
-        "A force out",
         "A tag out",
         "A fielder's choice",
-        "An appeal play"
+        "An appeal play",
+        "A force out"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Force outs happen when a runner has no choice but to advance because a following batter-runner is occupying their previous base.",
       "TimeLimitSeconds": 15
     },
@@ -1275,12 +1275,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What defensive statistic tracks the number of times a fielder successfully participates in recording an out without directly making the tag or catch?",
       "Options": [
-        "An assist",
         "A putout",
         "A range factor",
-        "A chance"
+        "A chance",
+        "An assist"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Assists are credited to fielders whose throw helps another player record an out, most commonly on a groundball to an infielder.",
       "TimeLimitSeconds": 15
     },
@@ -1291,12 +1291,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What term describes an inning in which a pitcher retires all three batters without allowing a hit, walk, or error?",
       "Options": [
+        "A perfect frame",
         "A 1-2-3 inning",
         "A clean sweep",
-        "A perfect frame",
         "A shutdown inning"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "A 1-2-3 inning is the most efficient possible outcome for a pitcher, facing the minimum three batters.",
       "TimeLimitSeconds": 15
     },
@@ -1308,9 +1308,9 @@
       "Prompt": "What is the term for the area behind home plate, first base, and third base where foul balls and pop-ups often occur?",
       "Options": [
         "Foul territory",
-        "The dead zone",
+        "The sideline",
         "The out-of-play area",
-        "The sideline"
+        "The dead zone"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "Foul territory varies significantly in size between ballparks, affecting how many foul pop-ups turn into outs.",
@@ -1324,8 +1324,8 @@
       "Prompt": "What is a 'pickle,' the informal term for a common baserunning situation?",
       "Options": [
         "A rundown between two bases where a runner is trapped by fielders",
-        "A close play at home plate",
         "A disputed foul ball call",
+        "A close play at home plate",
         "A mound conference"
       ],
       "CorrectAnswerIndex": 0,
@@ -1339,12 +1339,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the term for a batter who hits from both the left and right sides of the plate depending on the pitcher?",
       "Options": [
-        "A switch hitter",
-        "A dual batter",
         "An ambidextrous hitter",
-        "A flex hitter"
+        "A flex hitter",
+        "A switch hitter",
+        "A dual batter"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Switch hitters gain a platoon advantage by always batting from the side opposite the pitcher's throwing hand.",
       "TimeLimitSeconds": 15
     },
@@ -1355,12 +1355,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What midseason exhibition, first played in 1933, brings together the best players from the American and National Leagues each summer?",
       "Options": [
+        "The Commissioner's Trophy Game",
         "The MLB All-Star Game",
         "The Midsummer Classic Cup",
-        "The League Championship Exhibition",
-        "The Commissioner's Trophy Game"
+        "The League Championship Exhibition"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "The All-Star Game, nicknamed the 'Midsummer Classic,' has been a summer tradition since 1933, aside from a brief pandemic pause.",
       "TimeLimitSeconds": 15
     },
@@ -1371,12 +1371,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What award, given annually since 1957, honors the best defensive player at each position in each league?",
       "Options": [
-        "The Gold Glove Award",
         "The Platinum Glove Award",
         "The Fielding Excellence Award",
+        "The Gold Glove Award",
         "The Diamond Defender Award"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "The Gold Glove Award recognizes standout fielding performances, voted on by managers and coaches.",
       "TimeLimitSeconds": 15
     },
@@ -1387,12 +1387,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What award, first given in 1980, recognizes the best offensive player at each defensive position in each league?",
       "Options": [
-        "The Silver Slugger Award",
-        "The Golden Bat Award",
         "The Offensive Player Award",
+        "The Golden Bat Award",
+        "The Silver Slugger Award",
         "The Home Run Derby Trophy"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "The Silver Slugger Award complements the Gold Glove by honoring hitting excellence rather than fielding.",
       "TimeLimitSeconds": 15
     },
@@ -1403,12 +1403,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What annual exhibition event, held the night before the All-Star Game, features sluggers competing to hit the most home runs?",
       "Options": [
-        "The Home Run Derby",
         "The Slugfest Showcase",
+        "The Home Run Derby",
         "The Power Hitter Classic",
         "The Long Ball Contest"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "The Home Run Derby has become one of MLB's most popular standalone events, often drawing bigger TV audiences than the All-Star Game itself.",
       "TimeLimitSeconds": 15
     },
@@ -1419,12 +1419,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What trophy is awarded annually to the winner of the World Series?",
       "Options": [
-        "The Commissioner's Trophy",
-        "The Pennant Cup",
         "The World Series Shield",
-        "The Baseball Cup"
+        "The Commissioner's Trophy",
+        "The Baseball Cup",
+        "The Pennant Cup"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "The Commissioner's Trophy, featuring flags representing every MLB team, has been presented to World Series champions since 1967.",
       "TimeLimitSeconds": 15
     },
@@ -1436,8 +1436,8 @@
       "Prompt": "What two leagues merged in 1903 to form the modern structure of Major League Baseball, culminating in the first World Series that same year?",
       "Options": [
         "The American League and National League",
-        "The National League and Federal League",
         "The Union Association and American League",
+        "The National League and Federal League",
         "The Players' League and National League"
       ],
       "CorrectAnswerIndex": 0,
@@ -1451,12 +1451,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What was the outcome of the very first modern World Series, played in 1903 between Boston and Pittsburgh?",
       "Options": [
-        "Boston (AL) defeated Pittsburgh (NL)",
         "Pittsburgh defeated Boston",
-        "The series ended in a tie",
-        "It was canceled before completion"
+        "Boston (AL) defeated Pittsburgh (NL)",
+        "It was canceled before completion",
+        "The series ended in a tie"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "The Boston Americans (later the Red Sox) won the first World Series five games to three over the Pittsburgh Pirates.",
       "TimeLimitSeconds": 15
     },
@@ -1467,12 +1467,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the collective name given to the added round of playoff teams, introduced in 2012, that don't win their division but still qualify for the postseason?",
       "Options": [
-        "Wild Card teams",
         "At-large qualifiers",
+        "Wild Card teams",
         "Bonus contenders",
         "Second-chance teams"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "The Wild Card format has expanded several times since its 1994 introduction, now including multiple teams per league.",
       "TimeLimitSeconds": 15
     },
@@ -1483,12 +1483,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What year did Major League Baseball cancel its postseason entirely due to a players' strike, the only time this has happened since 1904?",
       "Options": [
-        "1994",
-        "1981",
         "1990",
-        "2002"
+        "1994",
+        "2002",
+        "1981"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "The 1994 players' strike wiped out the World Series entirely, a rare and painful chapter in the sport's labor history.",
       "TimeLimitSeconds": 15
     },
@@ -1499,12 +1499,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "How many teams currently make up Major League Baseball, split evenly between the American and National Leagues?",
       "Options": [
+        "26",
         "30",
         "28",
-        "32",
-        "26"
+        "32"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "MLB has featured 30 teams (15 per league) since the Arizona Diamondbacks and Tampa Bay Devil Rays joined in 1998.",
       "TimeLimitSeconds": 15
     },
@@ -1515,12 +1515,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the term for a pitcher who specializes in coming into the game at the very end to close it out and secure the win?",
       "Options": [
-        "A closer",
-        "A starter",
         "A middle reliever",
-        "A long man"
+        "A long man",
+        "A closer",
+        "A starter"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Closers are typically a team's best relief pitcher, brought in for high-leverage save situations in the final inning.",
       "TimeLimitSeconds": 15
     },
@@ -1531,12 +1531,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What term describes a pitch that appears to be a strike but drops or moves out of the zone just before reaching the batter, inducing a swing and miss?",
       "Options": [
+        "A cutter",
         "A breaking ball",
         "A fastball",
-        "A meatball",
-        "A cutter"
+        "A meatball"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Breaking balls like curveballs and sliders use spin to change direction late, deceiving hitters who commit to a swing.",
       "TimeLimitSeconds": 15
     },
@@ -1547,12 +1547,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What unique pitch, thrown with almost no spin, is known for its unpredictable, fluttering movement that baffles both hitters and catchers?",
       "Options": [
-        "The knuckleball",
         "The screwball",
-        "The splitter",
-        "The changeup"
+        "The changeup",
+        "The knuckleball",
+        "The splitter"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Knuckleball specialists like Tim Wakefield and R.A. Dickey built entire careers around the pitch's erratic, hard-to-predict flight path.",
       "TimeLimitSeconds": 15
     },
@@ -1563,12 +1563,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is a 'changeup' pitch designed to do?",
       "Options": [
-        "Look like a fastball out of the hand but arrive much slower, disrupting a batter's timing",
-        "Curve sharply downward at the last second",
         "Rise unexpectedly through the strike zone",
+        "Curve sharply downward at the last second",
+        "Look like a fastball out of the hand but arrive much slower, disrupting a batter's timing",
         "Move dramatically side to side"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "A changeup relies on deceptive arm speed rather than velocity, throwing off a hitter's timing after seeing faster pitches.",
       "TimeLimitSeconds": 15
     },
@@ -1579,12 +1579,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the term for a batter's turn at the plate that results in an official statistical outcome, excluding walks, sacrifices, and hit-by-pitches?",
       "Options": [
-        "An at-bat",
-        "A plate appearance",
         "A turn",
-        "An inning stint"
+        "An inning stint",
+        "An at-bat",
+        "A plate appearance"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "At-bats are a subset of plate appearances used specifically to calculate batting average, excluding non-AB outcomes like walks.",
       "TimeLimitSeconds": 15
     },
@@ -1595,12 +1595,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What Babe Ruth moment in the 1932 World Series became legendary, with some claiming he pointed to the outfield before hitting a home run there?",
       "Options": [
-        "The Called Shot",
-        "The Pointed Bomb",
+        "The Prophecy Pitch",
         "The Guaranteed Swing",
-        "The Prophecy Pitch"
+        "The Called Shot",
+        "The Pointed Bomb"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Whether Ruth truly 'called' his home run against the Cubs remains debated, but the legend has endured for nearly a century.",
       "TimeLimitSeconds": 15
     },
@@ -1611,12 +1611,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the traditional first pitch tradition where a dignitary, celebrity, or honored guest throws a ceremonial pitch before an MLB game begins?",
       "Options": [
-        "The ceremonial first pitch",
+        "The pregame pitch",
         "The opening toss",
-        "The honorary delivery",
-        "The pregame pitch"
+        "The ceremonial first pitch",
+        "The honorary delivery"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "US Presidents have thrown ceremonial first pitches dating back to William Howard Taft in 1910, a tradition that continues today.",
       "TimeLimitSeconds": 15
     },
@@ -1627,12 +1627,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What nickname is given to Major League Baseball's opening day, traditionally marking the unofficial start of spring?",
       "Options": [
-        "Opening Day",
-        "First Pitch Day",
         "Season Kickoff",
-        "Diamond Day"
+        "Diamond Day",
+        "First Pitch Day",
+        "Opening Day"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Opening Day carries near-holiday status among baseball fans, with the Cincinnati Reds traditionally hosting the very first game of the season.",
       "TimeLimitSeconds": 15
     },
@@ -1644,9 +1644,9 @@
       "Prompt": "What warm-weather period each spring do MLB teams spend in Florida and Arizona preparing for the regular season?",
       "Options": [
         "Spring training",
+        "Rookie orientation",
         "Preseason camp",
-        "Winter ball",
-        "Rookie orientation"
+        "Winter ball"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "Spring training takes place across the Grapefruit League (Florida) and Cactus League (Arizona) each March.",
@@ -1659,12 +1659,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What term describes the informal winter leagues in countries like the Dominican Republic and Venezuela where MLB players often compete in the offseason?",
       "Options": [
-        "Winter ball",
-        "Off-season league",
         "Caribbean circuit",
-        "Development league"
+        "Winter ball",
+        "Development league",
+        "Off-season league"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "Winter ball leagues let players stay sharp and develop skills during the MLB offseason, often in front of passionate home crowds.",
       "TimeLimitSeconds": 15
     },
@@ -1675,12 +1675,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the term for a rookie player's very first official MLB game appearance?",
       "Options": [
-        "A debut",
-        "A call-up",
         "An initiation",
-        "A christening"
+        "A christening",
+        "A debut",
+        "A call-up"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "A player's MLB debut is often a highly anticipated milestone after years working through the minor league system.",
       "TimeLimitSeconds": 15
     },
@@ -1692,9 +1692,9 @@
       "Prompt": "What minor league classification sits directly below Major League Baseball, typically the last stop before a player's MLB call-up?",
       "Options": [
         "Triple-A (AAA)",
+        "Rookie ball",
         "Double-A (AA)",
-        "Single-A",
-        "Rookie ball"
+        "Single-A"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "Triple-A is the highest level of minor league baseball, feeding talent directly into MLB rosters.",
@@ -1708,9 +1708,9 @@
       "Prompt": "What is the collective term for a team's group of minor league affiliates across different classification levels?",
       "Options": [
         "A farm system",
-        "A pipeline",
         "A development chain",
-        "A prospect ladder"
+        "A prospect ladder",
+        "A pipeline"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "Teams build out their own 'farm system' of affiliated minor league clubs to develop young talent before the majors.",
@@ -1723,12 +1723,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the standard number of innings in a regulation MLB game, barring a tie requiring extra innings?",
       "Options": [
-        "Nine",
         "Seven",
-        "Ten",
-        "Eight"
+        "Eight",
+        "Nine",
+        "Ten"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "A standard MLB game runs nine innings, with extra innings played only if the score remains tied.",
       "TimeLimitSeconds": 15
     },
@@ -1741,8 +1741,8 @@
       "Options": [
         "Both arms spread out horizontally, palms down",
         "One arm raised straight up with a closed fist",
-        "Both arms crossed over the chest",
-        "One arm pointed toward the runner"
+        "One arm pointed toward the runner",
+        "Both arms crossed over the chest"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "The 'safe' signal - arms spread wide, palms down - is one of the most recognizable gestures in the sport.",
@@ -1756,9 +1756,9 @@
       "Prompt": "What umpire signal indicates a batter or runner has been called out?",
       "Options": [
         "A closed fist punched upward or outward",
-        "Arms spread wide with palms down",
         "Pointing directly at the base",
-        "Both hands raised above the head"
+        "Both hands raised above the head",
+        "Arms spread wide with palms down"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "The emphatic upward or outward fist punch signals an out, often delivered with dramatic flair by veteran umpires.",
@@ -1772,9 +1772,9 @@
       "Prompt": "What is the term for the area on the field where relief pitchers warm up before entering the game?",
       "Options": [
         "The bullpen",
-        "The warm-up zone",
+        "The staging area",
         "The relief station",
-        "The staging area"
+        "The warm-up zone"
       ],
       "CorrectAnswerIndex": 0,
       "Explanation": "The bullpen, typically located down the foul lines or beyond the outfield fence, is where relievers throw practice pitches before entering.",
@@ -1787,12 +1787,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What piece of equipment does a batter wear to protect their hand and improve bat grip, particularly in cold or wet weather?",
       "Options": [
-        "A batting glove",
         "A wrist guard",
         "A hand shield",
+        "A batting glove",
         "A palm brace"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Batting gloves improve grip and reduce the sting of contact, though some players famously choose to bat bare-handed.",
       "TimeLimitSeconds": 15
     },
@@ -1803,12 +1803,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is the term for a pitcher's warm-up mound located in the bullpen, separate from the game mound on the infield?",
       "Options": [
-        "The bullpen mound",
-        "The practice hill",
         "The warm-up slab",
-        "The relief rubber"
+        "The relief rubber",
+        "The bullpen mound",
+        "The practice hill"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Bullpen mounds mirror the exact height and slope of the game mound so pitchers can warm up under realistic conditions.",
       "TimeLimitSeconds": 15
     },
@@ -1819,12 +1819,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What informal name is given to a batter who bats immediately after the best hitter in a lineup, protecting them from intentional walks?",
       "Options": [
-        "The protection/cleanup hitter",
-        "The setup man",
         "The anchor",
-        "The bridge hitter"
+        "The bridge hitter",
+        "The protection/cleanup hitter",
+        "The setup man"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "Lineup 'protection' theory suggests a dangerous hitter batting behind a star reduces the likelihood of intentional walks.",
       "TimeLimitSeconds": 15
     },
@@ -1835,12 +1835,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What term is used when a batter is intentionally walked by the pitching team to avoid a dangerous confrontation, often signaled by four wide pitches or an automatic award?",
       "Options": [
-        "An intentional walk",
-        "A pass",
+        "A deliberate base",
         "A free pass on request",
-        "A deliberate base"
+        "An intentional walk",
+        "A pass"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 2,
       "Explanation": "MLB simplified intentional walks in 2017, allowing managers to signal one without requiring four actual pitches to be thrown.",
       "TimeLimitSeconds": 15
     },
@@ -1851,12 +1851,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What is a 'quality start,' a common modern benchmark for evaluating a starting pitcher's outing?",
       "Options": [
+        "Pitching without allowing a walk",
         "At least six innings pitched while allowing three or fewer earned runs",
         "A complete game shutout",
-        "Seven strikeouts in five innings",
-        "Pitching without allowing a walk"
+        "Seven strikeouts in five innings"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 1,
       "Explanation": "The quality start statistic became popular in the 1980s as a simple way to measure consistently solid (if not dominant) starts.",
       "TimeLimitSeconds": 15
     },
@@ -1867,12 +1867,12 @@
       "QuestionType": "MultipleChoice",
       "Prompt": "What term describes the situation where a batter reaches base safely because of a fielder's mistake rather than a clean hit?",
       "Options": [
-        "Reached on an error",
         "A charity hit",
+        "A misplay credit",
         "A gifted at-bat",
-        "A misplay credit"
+        "Reached on an error"
       ],
-      "CorrectAnswerIndex": 0,
+      "CorrectAnswerIndex": 3,
       "Explanation": "Reaching 'on an error' does not count as a hit for batting average purposes, since the batter didn't earn it with a clean ball in play.",
       "TimeLimitSeconds": 15
     },

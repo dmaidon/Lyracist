@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Copy frame bytes into a rented buffer before dispatching (fixes use-after-free on format change) and dispose outgoing Media on reload (fixes native handle leak)
+// Edited on Aug 20, 2026 @ 09:52:15 -> Add EndReached event implementation for LibVLC playback completion
 using System;
 using System.Buffers;
 using System.IO;
@@ -47,6 +47,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
     private bool _enableKillVocal = false;
 
     public event EventHandler<VideoFrame>? FrameReady;
+    public event EventHandler? EndReached;
 
     private string? _audioDeviceId;
     public string? AudioDeviceId
@@ -194,6 +195,11 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         // Apply default volume and equalizer
         _mediaPlayer.Volume = (int)_volume;
         UpdateEqualizer();
+
+        _mediaPlayer.EndReached += (s, e) =>
+        {
+            EndReached?.Invoke(this, EventArgs.Empty);
+        };
     }
 
     public Task LoadAsync(string path)

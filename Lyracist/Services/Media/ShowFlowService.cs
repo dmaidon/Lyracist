@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 08:42:15 -> Remove PartyTyme occasion stream loader
+// Edited on Aug 20, 2026 @ 09:56:30 -> Coordinate fill-in music and playback lifecycle with AutoAdvanceManager
 using System;
 using System.Linq;
 using System.Threading;
@@ -76,11 +76,10 @@ public class ShowFlowService : IShowFlowService
         // to duck out.
         mediaEngine.Started += OnKaraokeTrackStarted;
 
-        // The singer's song ending re-opens the gap for fill-in music and starts countdown.
+        // The singer's song ending re-opens the gap for fill-in music.
         mediaEngine.Stopped += () =>
         {
             ScheduleFillInMusic();
-            StartAutoAdvanceCountdown();
         };
 
         // The rotation queue running dry means the night's singers are done:

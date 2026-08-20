@@ -1,3 +1,4 @@
+// Edited on Aug 20, 2026 @ 09:52:45 -> Add SongEnded event to IMediaEngine for natural song finish notification
 using System;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -18,6 +19,9 @@ public interface IMediaEngine
 
     /// <summary>Fires whenever Stop() is called (song finished or was cut short).</summary>
     event Action? Stopped;
+
+    /// <summary>Fires when a song finishes naturally (EndReached from media backend).</summary>
+    event Action? SongEnded;
 
     double Volume { get; set; }
     double Speed { get; set; }

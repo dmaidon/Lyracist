@@ -1,10 +1,4 @@
-// Consolidated from Lyracist/ViewModels/TriviaDisplayViewModel.cs and
-// KSRotation/ViewModels/TriviaDisplayViewModel.cs (previously two hand-duplicated
-// ~470-line copies) into a single Shared/-linked file, per this project's shared-code
-// convention. Standardized on the non-blocking Dispatcher.InvokeAsync engine-event
-// wiring (Lyracist's original behavior) - KSRotation's copy previously used the
-// blocking Dispatcher.Invoke, which could stall/deadlock the engine's timer thread
-// if the UI thread was busy.
+// Edited on Aug 20, 2026 @ 12:10:30 -> Added SyncWithEngine and active state hydration to TriviaDisplayViewModel
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -182,7 +176,7 @@ public partial class TriviaDisplayViewModel : ObservableObject
         _venueName = venueName;
         _connectUrl = connectUrl;
         _qrCodeImage = qrCode ?? GenerateQrBitmap(connectUrl);
-        _isConnectInstructionsActive = true;
+        _isConnectInstructionsActive = (_engine.State == TriviaGameState.Lobby);
         _marqueeSummaryText = $"🎯 {_brandName} LIVE TRIVIA • Scan the QR code on your phone to join now!";
 
         UpdateWifiCredentials(wifiSsid ?? string.Empty, wifiPassword ?? string.Empty);
@@ -198,6 +192,8 @@ public partial class TriviaDisplayViewModel : ObservableObject
         _engine.GameCompleted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleGameCompleted(e));
         _engine.IntermissionTick += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionTick(e));
         _engine.IntermissionCompleted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionCompleted());
+
+        SyncWithEngine();
     }
 
     public static BitmapSource? GenerateQrBitmap(string payload)
@@ -331,6 +327,75 @@ public partial class TriviaDisplayViewModel : ObservableObject
         int mins = secondsRemaining / 60;
         int secs = secondsRemaining % 60;
         PreGameCountdownText = $"{mins:D2}:{secs:D2}";
+    }
+
+    public void SyncWithEngine()
+    {
+        GameState = _engine.State;
+        if (_engine.State == TriviaGameState.Lobby)
+        {
+            IsConnectInstructionsActive = true;
+            IsGameComplete = false;
+        }
+        else
+        {
+            IsConnectInstructionsActive = false;
+            IsPreGameCountdownRunning = false;
+            IsGameComplete = (_engine.State == TriviaGameState.GameComplete);
+
+            var currentQ = _engine.CurrentSession?.CurrentQuestion;
+            if (currentQ != null)
+            {
+                CategoryTitle = currentQ.Category;
+                QuestionPrompt = currentQ.Prompt;
+                OptionA = currentQ.Options.Count > 0 ? currentQ.Options[0] : "";
+                OptionB = currentQ.Options.Count > 1 ? currentQ.Options[1] : "";
+                OptionC = currentQ.Options.Count > 2 ? currentQ.Options[2] : "";
+                OptionD = currentQ.Options.Count > 3 ? currentQ.Options[3] : "";
+
+                OptionAOpacity = _engine.EliminatedAnswerIndices.Contains(0) ? 0.12 : 1.0;
+                OptionBOpacity = _engine.EliminatedAnswerIndices.Contains(1) ? 0.12 : 1.0;
+                OptionCOpacity = _engine.EliminatedAnswerIndices.Contains(2) ? 0.12 : 1.0;
+                OptionDOpacity = _engine.EliminatedAnswerIndices.Contains(3) ? 0.12 : 1.0;
+
+                RemainingSeconds = _engine.RemainingSeconds;
+                TotalCountdownSeconds = _engine.TotalCountdownSeconds;
+                CountdownProgress = TotalCountdownSeconds > 0 ? Math.Clamp((double)RemainingSeconds / TotalCountdownSeconds, 0.0, 1.0) : 0;
+                IsWarningActive = _engine.IsInWarningCountdown;
+
+                if (_engine.State == TriviaGameState.RevealAnswer)
+                {
+                    CorrectAnswerIndex = currentQ.CorrectAnswerIndex;
+                    ExplanationText = currentQ.Explanation;
+                    OptionAOpacity = (currentQ.CorrectAnswerIndex == 0) ? 1.0 : 0.12;
+                    OptionBOpacity = (currentQ.CorrectAnswerIndex == 1) ? 1.0 : 0.12;
+                    OptionCOpacity = (currentQ.CorrectAnswerIndex == 2) ? 1.0 : 0.12;
+                    OptionDOpacity = (currentQ.CorrectAnswerIndex == 3) ? 1.0 : 0.12;
+
+                    AnswerStats.Clear();
+                    var dist = _engine.GetAnswerDistribution();
+                    string[] labels = ["A", "B", "C", "D"];
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int count = dist.GetValueOrDefault(i, 0);
+                        string text = (currentQ.Options.Count > i) ? currentQ.Options[i] : $"Option {labels[i]}";
+                        bool isCorrect = (i == currentQ.CorrectAnswerIndex);
+                        AnswerStats.Add(new AnswerDistributionItem(labels[i], text, count, isCorrect));
+                    }
+                }
+            }
+
+            if (_engine.State == TriviaGameState.GameComplete)
+            {
+                IsIntermissionActive = _engine.IsInIntermission;
+                IntermissionSecondsRemaining = _engine.IntermissionSecondsRemaining;
+                int mins = IntermissionSecondsRemaining / 60;
+                int secs = IntermissionSecondsRemaining % 60;
+                IntermissionCountdownText = $"{mins:D2}:{secs:D2}";
+            }
+        }
+
+        RefreshTopPlayers(_engine.GetPlayers());
     }
 
     private void HandleStateChanged(TriviaGameState state)

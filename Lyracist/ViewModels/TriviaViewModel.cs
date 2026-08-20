@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 05:58:00 -> Upgraded TriviaViewModel to full feature parity with Lyracist.Trivia, 1-click launch, pre-game countdown, answer distribution visualizer, and 16:9 display window
+// Edited on Aug 20, 2026 @ 12:10:30 -> Dismiss pre-game countdown and sync TV projection in StartGame
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,6 +32,15 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
     [ObservableProperty]
     private TriviaSettings _settings;
+
+    /// Live summary of the auto-run timing (shown under the "Auto-Run Game" toggle) so the
+    /// header always reflects the game master's actual configured timings instead of a
+    /// hardcoded "15s answer • 5s fade • 5s reveal" that goes stale the moment they're changed
+    /// (e.g. from the Lyracist.Trivia app, since all three apps share the same settings file).
+    public string AutoRunTimingSummary =>
+        $"{Settings.DefaultQuestionSeconds}s answer • {Settings.AnswerEliminationIntervalSeconds}s fade • {Settings.PostRevealDelaySeconds}s reveal";
+
+    partial void OnSettingsChanged(TriviaSettings value) => OnPropertyChanged(nameof(AutoRunTimingSummary));
 
     [ObservableProperty]
     private string _venueName = "Main Venue";
@@ -494,6 +503,16 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
             var checkedPacks = GetCheckedPacks();
             if (checkedPacks.Count == 0) return;
 
+            // Cancel pre-game countdown and dismiss lobby screen
+            _preGameTimer.Stop();
+            IsPreGameCountdownRunning = false;
+            IsShowingConnectScreen = false;
+            if (_displayVm != null)
+            {
+                _displayVm.IsConnectInstructionsActive = false;
+                _displayVm.IsPreGameCountdownRunning = false;
+            }
+
             var gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, QuestionsPerGame);
             if (gameQuestions.Count == 0) return;
 
@@ -549,9 +568,10 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
             _displayVm.HostName = HostName;
             _displayVm.UpdateInstructionBannerTemplate(InstructionBannerText);
-            _displayVm.IsConnectInstructionsActive = IsShowingConnectScreen;
+            _displayVm.IsConnectInstructionsActive = (_engine.State == TriviaGameState.Lobby) && IsShowingConnectScreen;
 
             UpdateSelectedPacksPreview();
+            _displayVm.SyncWithEngine();
 
             _displayWindow = new TriviaDisplayWindow
             {
@@ -572,6 +592,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         }
         else
         {
+            _displayVm?.SyncWithEngine();
             PositionDisplayWindow(SelectedMonitor?.DeviceName);
             _displayWindow.Activate();
         }

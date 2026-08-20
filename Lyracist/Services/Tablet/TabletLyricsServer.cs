@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Split StartAsync's route mapping into focused methods, dedupe the queue payload projection, drop the redundant DI-injected RotationViewModel parameter on /api/queue, and replace magic status strings with RequestStatuses constants
+// Edited on Aug 20, 2026 @ 09:54:40 -> Add LoadSong methods to TabletLyricsServer for mobile client synchronization
 using System;
 using System.IO;
 using System.Linq;
@@ -865,6 +865,16 @@ public class TabletLyricsServer(
         {
             System.Diagnostics.Debug.WriteLine($"Error broadcasting next singer: {ex.Message}");
         }
+    }
+
+    public void LoadSong(string songTitle, string artist)
+    {
+        _ = BroadcastActiveSingerAsync();
+    }
+
+    public void LoadSong(Singer singer)
+    {
+        _ = BroadcastActiveSingerAsync();
     }
 
     public async Task BroadcastLyricsAsync(LyricsMessage message)

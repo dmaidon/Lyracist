@@ -1,12 +1,25 @@
-<!-- Edited on Aug 20, 2026 @ 06:47:00 -> Added Tiered Option Value Scoring (100% / 70% / 40%) details to README.md -->
-Last Edit: Aug 20, 2026 - Tiered Option Value Scoring (100% / 70% / 40%) Across All Solution Apps
+<!-- Edited on Aug 20, 2026 @ 12:18:00 -> Updated README.md with clean exit and process termination details -->
+Last Edit: Aug 20, 2026 - Clean Application Exit & Process Termination
 # Lyracist Pro
 
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, integrated interactive pub/bar trivia with dedicated separate settings, multi-monitor auto-casting, automated projection pause synchronization, full feature parity across standalone and embedded Trivia engines, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, integrated interactive pub/bar trivia with dedicated separate settings, multi-monitor auto-casting, automated projection pause synchronization, full feature parity across standalone and embedded Trivia engines, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
 
 ---
 
 ## Key Features
+
+### ⚡ Safe, DJ-Friendly Auto-Advance System
+- **Grace Period Timer & Fill-In Music**:
+  - Automatically initiates a configurable grace period countdown (default 15s) when a song finishes.
+  - Automatically spins up ducked fill-in background music between performances.
+  - Broadcasts stage announcement: `"Next singer: {name} — please come to the stage"` on the rotation billboard.
+- **Large High-Contrast DJ Control Buttons**:
+  - **`▶ START SONG`** (`StartSongButton`): Stops grace timer and fill-in music, loads the song, updates projection and tablet lyric displays, and immediately begins playback.
+  - **`⏭ SKIP SINGER`** (`SkipSingerButton`): Advances singer queue without scoring the skipped song, keeps fill-in music running, and restarts the grace period for the next performer.
+- **State Machine Protection (`AutoAdvanceState`)**:
+  - Guards against accidental double-starts via `StartingSong` transition lock.
+  - Interlocks with Trivia and Scaryoke modes so auto-advance never triggers during mini-games.
+  - Safely falls back to `WaitingForSongSelection` if the upcoming singer has not chosen a track yet.
 
 ### 🛠️ Trivia Database Creator & Pack Studio (`TriviaDbCreator.exe`)
 - **Visual Category & Question Authoring**: Standalone WPF MVVM desktop app using Fluent UI (`WPF-UI`) for creating, editing, and expanding trivia question databases.
@@ -60,14 +73,14 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - **Bottom Connection & Copyright Bar**: Displays mobile buzzer play address, company copyright information (`© 2026 PAROLE Software - All rights reserved.`), and app branding.
   - **Full-Width Ticker Bar**: Continuous horizontal marquee scrolling venue announcements, host branding, game rules, and buzzer tips.
 - **Single-Click Pre-Game Launch (`🎯 Launch Pre-Game Lobby & Countdown`)**:
-  - A single primary action button in the Game Master console that opens/focuses the big screen, locks the category banner, starts the pre-game countdown, and activates the lobby with one click. Accompanied by `"▶ Start Game Now (Skip Countdown)"` for instant kickoff.
+  - A single primary action button in the Game Master console that opens/focuses the big screen, locks the category banner, starts the pre-game countdown, and activates the lobby with one click. Accompanied by `"▶ Start Game Now (Skip Countdown)"` for instant kickoff which immediately opens and hydrates the live question projection screen and halts background lobby timers.
 - **16:9 Category Announcement Banners (`TriviaData/Banners/`)**:
   - Clean 1920x1080 (16:9) graphic banners generated for all 14 categories, focusing on category branding and theme callouts without hardcoded question counts or timers so banners stay accurate regardless of host configuration.
 - **Automated `TriviaData` Build Output Copying**:
   - Configured `TriviaData\**\*` with `CopyToOutputDirectory=PreserveNewest` across all projects, ensuring category packs, announcement banners, databases, and configuration automatically copy to build outputs.
 - **Accurate Multi-Monitor Projection**: Select any connected monitor (TV, secondary HDMI, projector) from the host console and cast seamlessly with physical resolution DPI awareness without forcing to Monitor 0.
 - **Venue & Game Master Customization**: Customize Venue Name and Game Master / Host Name directly in the **⚙️ Settings & Display** tab with instant two-way live update across projection monitors and mobile buzzer devices.
-- **Projection Screen Escape & Close Controls**: Press Escape (`Esc`) to immediately close/exit the venue display window, click the floating `✕` close button in the top-right corner, or right-click anywhere for context menu options.
+- **Application Exit & Projection Screen Controls**: 1-click **✕ Exit** button in the main Game Master header bar immediately and cleanly terminates all background socket servers and timers. Press Escape (`Esc`) to close/exit the venue projection window, click the floating `✕` close button in the top-right corner, or right-click anywhere for context menu options.
 - **Dedicated Venue Connect Instructions Screen**:
   - **Dual QR Code Architecture**: Projects two enlarged high-contrast QR cards (380×380 px) on venue screens:
     1. **1. Connect to Wi-Fi**: High-resolution scan-to-connect QR code with SSID and password for 1-tap phone connection.

@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 08:41:40 -> Remove IPartyTymeService from mocked dependencies
+// Edited on Aug 20, 2026 @ 14:02:00 -> Explicitly initialize FloatCurrentSingerToTop to false in test helper
 using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
@@ -25,6 +25,7 @@ public class KaraokeRotationRegressionTests
         var display = new Mock<IDisplayService>();
         var mediaEngine = new Mock<IMediaEngine>();
         var vm = new RotationViewModel(display.Object, mediaEngine.Object);
+        SetFloatCurrentSingerToTop(vm, false);
         vm.Rotation.Clear();
         vm.InactiveSingers.Clear();
         return vm;

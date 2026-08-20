@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 15:48:00 -> Registered TriviaViewModel, TriviaSettingsViewModel, TriviaPage, and TriviaSettingsPage in DI
+// Edited on Aug 20, 2026 @ 09:59:00 -> Register AutoAdvanceManager, PlaybackEngine, and RotationEngine in DI
 using System;
 using System.Linq;
 using System.Windows;
@@ -40,7 +40,7 @@ public partial class App : System.Windows.Application
         }
         catch (Exception ex)
         {
-            AppLogger.LogError(ex, "Failed to open SQLite keep-alive connection");
+            AppLogger.LogError(ex, "Failed to initialize SQLite keep-alive connection");
         }
     }
 
@@ -106,6 +106,19 @@ public partial class App : System.Windows.Application
                 services.AddKeyedSingleton("Occasion", (_, _) => new BackgroundMusicPlayer { Loop = false });
                 services.AddSingleton<IShowFlowService, ShowFlowService>();
                 services.AddSingleton<IKSRotationSyncService, KSRotationSyncService>();
+                services.AddSingleton<PlaybackEngine>();
+                services.AddSingleton<RotationEngine>();
+                services.AddSingleton<AutoAdvanceManager>(sp => new AutoAdvanceManager(
+                    sp.GetRequiredService<IMediaEngine>(),
+                    sp.GetRequiredService<IShowFlowService>(),
+                    sp.GetRequiredService<IDisplayService>(),
+                    sp.GetRequiredService<RotationViewModel>(),
+                    sp.GetRequiredService<ITabletLyricsServer>(),
+                    sp.GetRequiredService<ILibraryService>(),
+                    sp.GetRequiredService<LyricsWindowViewModel>(),
+                    () => sp.GetRequiredService<KaraokeViewModel>(),
+                    () => sp.GetRequiredService<TriviaViewModel>()
+                ));
 
                 // ViewModels
                 services.AddSingleton<SplashViewModel>();
@@ -233,6 +246,11 @@ public partial class App : System.Windows.Application
         // Start the KSRotation sync service in the background
         var syncService = Host.Services.GetRequiredService<IKSRotationSyncService>();
         syncService.Start();
+
+        // Initialize AutoAdvanceManager
+        var autoAdvance = Host.Services.GetRequiredService<AutoAdvanceManager>();
+        var karaokeVm = Host.Services.GetRequiredService<KaraokeViewModel>();
+        karaokeVm.AutoAdvance = autoAdvance;
 
         // Resolve and show the MainWindow via dependency injection
         var mainWindow = Host.Services.GetRequiredService<MainWindow>();

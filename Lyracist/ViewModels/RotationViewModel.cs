@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:48:00 -> Ensure FloatCurrentSingerToTop promotes and floats singer on checkbox toggle and SetRotationStartSinger
+// Edited on Aug 20, 2026 @ 09:53:20 -> Add GetCurrentSinger, GetNextSinger, and SkipCurrentSinger methods for AutoAdvanceManager
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -723,6 +723,50 @@ public partial class RotationViewModel : BaseViewModel
     {
         Rotation.Clear();
         SelectedSinger = null;
+
+        RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
+    }
+
+    public Singer? GetCurrentSinger()
+    {
+        return Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation) 
+               ?? Rotation.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused) 
+               ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+    }
+
+    public Singer? GetNextSinger()
+    {
+        var next = Rotation.FirstOrDefault(s => s.IsNext && !s.IsInactive && !s.IsPaused);
+        if (next != null) return next;
+
+        var current = GetCurrentSinger();
+        if (current == null) return null;
+
+        int currentIndex = Rotation.IndexOf(current);
+        int count = Rotation.Count;
+        if (currentIndex >= 0 && count > 1)
+        {
+            for (int i = 1; i < count; i++)
+            {
+                var candidate = Rotation[(currentIndex + i) % count];
+                if (candidate != current && !candidate.IsInactive && !candidate.IsPaused)
+                {
+                    return candidate;
+                }
+            }
+        }
+        return null;
+    }
+
+    [RelayCommand]
+    public void SkipCurrentSinger()
+    {
+        var current = GetCurrentSinger();
+        if (current == null) return;
+
+        RunRotationOrderChange(() =>
+            Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, current, FloatCurrentSingerToTop));
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);

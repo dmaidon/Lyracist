@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 12:10:30 -> Dismiss pregame lobby and sync TV projection window immediately on StartGameWithSelectedPack
+// Edited on Aug 20, 2026 @ 13:58:00 -> Added pregame timer cleanup to Dispose and updated Help Topic 7 with Exit button
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -973,7 +973,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
             Icon = "🖥️",
             AccentColor = "#14B8A6",
             DescriptionHeader = "Projection Controls, Display Management & Deconfliction",
-            DescriptionContent = "• Target Monitor Selection: Select the projection screen from the monitor dropdown (supports primary, secondary, and projector screens with per-monitor DPI scaling).\n\n• Quick Window Controls:\n  - Esc Key: Closes the TV projection window immediately.\n  - Floating ✕ Button: Discreet close button in the upper-right corner of the projection screen.\n  - F11 Key: Toggles borderless fullscreen mode.\n\n• Karaoke Integration: If run alongside Lyracist or KsRotation, trivia games automatically pause with a 'DJ Banner Active' notice whenever full-screen DJ banners are projected."
+            DescriptionContent = "• Target Monitor Selection: Select the projection screen from the monitor dropdown (supports primary, secondary, and projector screens with per-monitor DPI scaling).\n\n• Quick Window & Exit Controls:\n  - ✕ Exit Button: 1-click exit button in the Game Master header bar cleanly terminates all web servers, timers, and background tasks.\n  - Esc Key: Closes the TV projection window immediately.\n  - Floating ✕ Button: Discreet close button in the upper-right corner of the projection screen.\n  - F11 Key: Toggles borderless fullscreen mode.\n\n• Karaoke Integration: If run alongside Lyracist or KsRotation, trivia games automatically pause with a 'DJ Banner Active' notice whenever full-screen DJ banners are projected."
         });
 
         HelpTopics.Add(new TriviaHelpTopic

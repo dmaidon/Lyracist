@@ -1,4 +1,4 @@
-// Edited on Jul 19, 2026 @ 09:40:00 -> Add AudioDeviceId stub and Hardware Mixer Mode EQ bypass
+// Edited on Aug 20, 2026 @ 09:52:30 -> Add EndReached event implementation for FFME media ended
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -20,6 +20,7 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
     private int _pitchShift = 0;
 
     public event EventHandler<VideoFrame>? FrameReady;
+    public event EventHandler? EndReached;
     public string? AudioDeviceId { get; set; }
 
     public TimeSpan Position => _mediaElement != null ? _mediaElement.Position : TimeSpan.Zero;
@@ -74,6 +75,10 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
                 LoadedBehavior = MediaPlaybackState.Manual,
                 UnloadedBehavior = MediaPlaybackState.Manual,
                 Volume = _volume / 100.0
+            };
+            _mediaElement.MediaEnded += (s, e) =>
+            {
+                EndReached?.Invoke(this, EventArgs.Empty);
             };
             _mediaElement.MediaOpening += (s, e) =>
             {

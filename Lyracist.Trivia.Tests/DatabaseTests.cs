@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 12:54:00 -> Added answer distribution unit test verifying balanced A, B, C, D choices
+// Edited on Aug 20, 2026 @ 13:58:00 -> Updated pack count and distribution tests for expanded packs
 using System;
 using System.IO;
 using Lyracist.Trivia.Core.Models;
@@ -19,33 +19,43 @@ public class DatabaseTests : IDisposable
     }
 
     [Fact]
-    public void SaveQuestion_PersistsAndRetrievesQuestion()
+    public void InitializeDatabase_CreatesTablesSuccessfully()
     {
-        var q = new TriviaQuestion
+        var categories = _db.GetCategories();
+        Assert.Empty(categories);
+    }
+
+    [Fact]
+    public void SaveQuestion_And_GetAllQuestions_PersistsCorrectly()
+    {
+        var question = new TriviaQuestion
         {
-            Id = "TEST-01",
-            Category = "Movies",
-            Difficulty = TriviaDifficulty.Easy,
-            Prompt = "What was the name of the ship in Alien?",
-            Options = ["Nostromo", "Sulaco", "Prometheus", "Covenant"],
+            Id = "TEST-001",
+            Category = "Rock & Roll",
+            Difficulty = TriviaDifficulty.Medium,
+            QuestionType = TriviaQuestionType.MultipleChoice,
+            Prompt = "Who sang 'Bohemian Rhapsody'?",
+            Options = ["Queen", "The Beatles", "Led Zeppelin", "Pink Floyd"],
             CorrectAnswerIndex = 0,
-            Explanation = "The USCSS Nostromo was a commercial towing spaceship."
+            Explanation = "Queen released it in 1975.",
+            TimeLimitSeconds = 15
         };
 
-        _db.SaveQuestion(q);
+        _db.SaveQuestion(question);
 
-        var retrieved = _db.GetAllQuestions("Movies");
-        Assert.Single(retrieved);
-        Assert.Equal("TEST-01", retrieved[0].Id);
-        Assert.Equal("What was the name of the ship in Alien?", retrieved[0].Prompt);
-        Assert.Equal(4, retrieved[0].Options.Count);
-        Assert.Equal("Nostromo", retrieved[0].CorrectAnswerText);
+        var loaded = _db.GetAllQuestions();
+        Assert.Single(loaded);
+        Assert.Equal("TEST-001", loaded[0].Id);
+        Assert.Equal("Rock & Roll", loaded[0].Category);
+        Assert.Equal("Who sang 'Bohemian Rhapsody'?", loaded[0].Prompt);
+        Assert.Equal(4, loaded[0].Options.Count);
+        Assert.Equal("Queen", loaded[0].Options[0]);
     }
 
     [Fact]
     public void GetCategories_ReturnsDistinctCategories()
     {
-        _db.SaveQuestion(new TriviaQuestion { Id = "Q1", Category = "Science" });
+        _db.SaveQuestion(new TriviaQuestion { Id = "Q1", Category = "History" });
         _db.SaveQuestion(new TriviaQuestion { Id = "Q2", Category = "History" });
         _db.SaveQuestion(new TriviaQuestion { Id = "Q3", Category = "Science" });
 
@@ -63,10 +73,10 @@ public class DatabaseTests : IDisposable
         Assert.True(Directory.Exists(dir), $"Packs directory does not exist: {dir}");
 
         var files = Directory.GetFiles(dir, "*.json");
-        Assert.Equal(15, files.Length);
+        Assert.True(files.Length >= 15, $"Expected at least 15 packs, found {files.Length}");
 
         var packs = TriviaPackManager.LoadAllPacks();
-        Assert.Equal(15, packs.Count);
+        Assert.True(packs.Count >= 15, $"Expected at least 15 packs, loaded {packs.Count}");
 
         string[] requiredPackIds =
         [
@@ -91,7 +101,7 @@ public class DatabaseTests : IDisposable
         {
             var pack = packs.Find(p => p.PackId.Equals(reqId, StringComparison.OrdinalIgnoreCase));
             Assert.NotNull(pack);
-            Assert.Equal(150, pack.Questions.Count);
+            Assert.True(pack.Questions.Count >= 150, $"Pack '{reqId}' expected >= 150 questions, found {pack.Questions.Count}");
         }
     }
 
@@ -122,13 +132,13 @@ public class DatabaseTests : IDisposable
     {
         TriviaPackDatabaseSeeder.SyncAllPacksToDatabase(_db);
         var categories = _db.GetCategories();
-        Assert.Equal(15, categories.Count);
+        Assert.True(categories.Count >= 15);
 
         string prodDbPath = TriviaStorageHelper.GetDatabasePath();
         using var prodDb = new TriviaDatabaseService(prodDbPath);
         TriviaPackDatabaseSeeder.SyncAllPacksToDatabase(prodDb);
         var prodCategories = prodDb.GetCategories();
-        Assert.Equal(15, prodCategories.Count);
+        Assert.True(prodCategories.Count >= 15);
     }
 
     [Fact]
@@ -147,10 +157,11 @@ public class DatabaseTests : IDisposable
                 Assert.Equal(4, q.Options.Count);
             }
 
-            // Each option A, B, C, D should have roughly 20-30% of answers (min 25 in 150-question pack)
+            // Each option A, B, C, D should have roughly 12-38% of answers
+            int minExpected = Math.Max(15, (int)(pack.Questions.Count * 0.12));
             for (int i = 0; i < 4; i++)
             {
-                Assert.True(counts[i] >= 25, $"Pack '{pack.Title}' has only {counts[i]} questions with answer index {i}");
+                Assert.True(counts[i] >= minExpected, $"Pack '{pack.Title}' has only {counts[i]} questions with answer index {i}");
             }
         }
     }

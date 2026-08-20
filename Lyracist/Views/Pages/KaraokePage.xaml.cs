@@ -1,3 +1,5 @@
+// Edited on Aug 20, 2026 @ 09:58:30 -> Add StartSongButton_Click and SkipSingerButton_Click event handlers for DJ Control Panel
+using System.Windows;
 using System.Windows.Controls;
 using Lyracist.ViewModels;
 
@@ -13,6 +15,16 @@ public partial class KaraokePage : Page
         DataContext = viewModel;
         InitializeComponent();
         Loaded += (s, e) => ViewModel.OnNavigatedTo();
+    }
+
+    private async void StartSongButton_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.StartSongNow();
+    }
+
+    private void SkipSingerButton_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SkipSinger();
     }
 
     private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 08:16:00 -> Add VenueTitleText and DjTitleText properties to KaraokeViewModel
+// Edited on Aug 20, 2026 @ 09:57:30 -> Add AutoAdvanceManager integration and StartSongNow/SkipSinger commands
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -13,6 +13,7 @@ using Lyracist.Core.Interfaces;
 using Lyracist.Services.Display;
 using Lyracist.Services.Integration;
 using Lyracist.Services.Database;
+using Lyracist.Services.Media;
 using Lyracist.Models;
 using Microsoft.EntityFrameworkCore;
 using Wpf.Ui;
@@ -33,6 +34,7 @@ public partial class KaraokeViewModel : BaseViewModel
     private int _searchRequestToken;
 
     public RotationViewModel Rotation { get; }
+    public AutoAdvanceManager? AutoAdvance { get; set; }
 
     [ObservableProperty]
     private bool _isScaryokeMode;
@@ -955,16 +957,59 @@ public partial class KaraokeViewModel : BaseViewModel
         LoadSingerNames();
     }
 
+    [ObservableProperty]
+    private AutoAdvanceState _autoAdvanceState = AutoAdvanceState.Idle;
+
+    [RelayCommand]
+    public async Task StartSongNow()
+    {
+        if (AutoAdvance != null)
+        {
+            await AutoAdvance.StartSongNow();
+        }
+        else
+        {
+            await Play();
+        }
+    }
+
+    [RelayCommand]
+    public void SkipSinger()
+    {
+        if (AutoAdvance != null)
+        {
+            AutoAdvance.SkipSinger();
+        }
+        else
+        {
+            Rotation.SkipCurrentSinger();
+        }
+    }
+
     [RelayCommand]
     private void CancelAutoAdvance()
     {
-        _showFlow.CancelAutoAdvance();
+        if (AutoAdvance != null)
+        {
+            AutoAdvance.CancelGracePeriod();
+        }
+        else
+        {
+            _showFlow.CancelAutoAdvance();
+        }
     }
 
     [RelayCommand]
     private void TriggerAutoAdvanceNow()
     {
-        _showFlow.TriggerAutoAdvanceNow();
+        if (AutoAdvance != null)
+        {
+            AutoAdvance.AutoAdvanceToNextSinger();
+        }
+        else
+        {
+            _showFlow.TriggerAutoAdvanceNow();
+        }
     }
 
     [RelayCommand]

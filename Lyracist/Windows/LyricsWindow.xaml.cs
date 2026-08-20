@@ -1,8 +1,9 @@
-// Edited on Aug 8, 2026 @ 17:05:00 -> Optimize visualizer layout thrashing and allocations to resolve cursor flicker
+// Edited on Aug 20, 2026 @ 09:54:00 -> Add LoadSong methods to LyricsWindow for ProjectionWindow synchronization
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Lyracist.Models;
 using Lyracist.Services.Display;
 using Lyracist.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,16 @@ public partial class LyricsWindow : Window
 
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived += OnReactionReceived;
         System.Windows.Media.CompositionTarget.Rendering += OnCompositionTargetRendering;
+    }
+
+    public void LoadSong(string songTitle, string artist)
+    {
+        _vm.LoadSong(songTitle, artist);
+    }
+
+    public void LoadSong(Singer singer)
+    {
+        _vm.LoadSong(singer);
     }
 
     protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)

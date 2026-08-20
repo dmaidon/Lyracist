@@ -1,9 +1,11 @@
+// Edited on Aug 20, 2026 @ 09:53:40 -> Add LoadSong methods to LyricsWindowViewModel for projection screen updates
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lyracist.Models;
 using Lyracist.Services.Display;
 
 namespace Lyracist.ViewModels;
@@ -177,6 +179,25 @@ public partial class LyricsWindowViewModel : ObservableObject
         FallbackText = text;
         StartSlideshow();
         IsFallbackVisible = !IsSlideshowVisible;
+    }
+
+    /// <summary>
+    /// Prepares the projection display for a newly loaded song.
+    /// </summary>
+    public void LoadSong(string songTitle, string artist)
+    {
+        string label = !string.IsNullOrWhiteSpace(songTitle)
+            ? $"{artist} - {songTitle}"
+            : "Lyracist — Ready";
+        ShowFallback(label);
+    }
+
+    public void LoadSong(Singer singer)
+    {
+        if (singer != null)
+        {
+            LoadSong(singer.SongTitle, singer.Artist);
+        }
     }
 
     /// <summary>
