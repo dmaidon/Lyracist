@@ -540,11 +540,13 @@ namespace KSRotation.ViewModels
                 _triviaPreGameTimer.Stop();
                 TriviaIsPreGameCountdownRunning = false;
                 TriviaIsShowingConnectScreen = false;
+#if !MAUI
                 if (_triviaDisplayVm != null)
                 {
                     _triviaDisplayVm.IsConnectInstructionsActive = false;
                     _triviaDisplayVm.IsPreGameCountdownRunning = false;
                 }
+#endif
 
                 List<TriviaRound> rounds = [];
                 var checkedPacks = GetCheckedTriviaPacks();
