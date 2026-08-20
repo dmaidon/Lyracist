@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 17:48:00 -> Added WrongAnswerDeductionPoints setting defaulting to 0
+// Edited on Aug 20, 2026 @ 06:18:00 -> Added TieredScoringEnabled, Points4OptionsPercent, Points3OptionsPercent, and Points2OptionsPercent settings
 using System;
 
 namespace Lyracist.Trivia.Core.Models;
@@ -23,6 +23,13 @@ public class TriviaSettings
     public bool SpeedBonusEnabled { get; set; } = true;
     public int MaxSpeedBonus { get; set; } = 500;
     public double StreakBonusMultiplier { get; set; } = 0.1;
+
+    // Tiered Option Value Scoring (100% / 70% / 40%)
+    public bool TieredScoringEnabled { get; set; } = true;
+    public int Points4OptionsPercent { get; set; } = 100;
+    public int Points3OptionsPercent { get; set; } = 70;
+    public int Points2OptionsPercent { get; set; } = 40;
+
     public bool SoundEffectsEnabled { get; set; } = true;
     public bool AutoAdvanceQuestions { get; set; } = true;
     public bool AutoStartNextGameEnabled { get; set; } = true;

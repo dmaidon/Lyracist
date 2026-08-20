@@ -1,15 +1,22 @@
-// Edited on Aug 19, 2026 @ 11:15:30 -> Respect GameMaster DefaultQuestionSeconds over question JSON default
+// Edited on Aug 20, 2026 @ 05:58:00 -> Upgraded TriviaViewModel to full feature parity with Lyracist.Trivia, 1-click launch, pre-game countdown, answer distribution visualizer, and 16:9 display window
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Windows;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lyracist.Core.Helpers;
 using Lyracist.Services.Display;
 using Lyracist.Shared;
 using Lyracist.Trivia.Core.Models;
 using Lyracist.Trivia.Core.Services;
+using Lyracist.Windows;
+using QRCoder;
+using Application = System.Windows.Application;
 
 namespace Lyracist.ViewModels;
 
@@ -19,9 +26,21 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     private readonly TriviaDatabaseService _dbService;
     private TriviaGameEngine _engine;
     private TriviaWebServer? _webServer;
+    private TriviaDisplayWindow? _displayWindow;
+    private TriviaDisplayViewModel? _displayVm;
+    private readonly DispatcherTimer _preGameTimer = new();
 
     [ObservableProperty]
     private TriviaSettings _settings;
+
+    [ObservableProperty]
+    private string _venueName = "Main Venue";
+
+    [ObservableProperty]
+    private string _hostName = "Trivia Master";
+
+    [ObservableProperty]
+    private string _instructionBannerText = TriviaSettings.DefaultInstructionBannerText;
 
     [ObservableProperty]
     private string _gameTitle = "Trivia Night Pro";
@@ -48,10 +67,10 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     private int _correctAnswerIndex = -1;
 
     [ObservableProperty]
-    private int _remainingSeconds;
+    private int _remainingSeconds = 15;
 
     [ObservableProperty]
-    private int _totalSeconds = 15;
+    private int _totalCountdownSeconds = 15;
 
     [ObservableProperty]
     private string _gameStateText = "Lobby";
@@ -69,7 +88,13 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     private string _pauseButtonText = "⏸ Pause";
 
     [ObservableProperty]
-    private int _selectedScreenIndex = 0;
+    private bool _autoAdvanceQuestions = true;
+
+    [ObservableProperty]
+    private int _questionsPerGame = 10;
+
+    [ObservableProperty]
+    private int _connectedPlayerCount;
 
     [ObservableProperty]
     private string _serverStatusText = "Server Offline";
@@ -77,9 +102,47 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     [ObservableProperty]
     private string _patronUrl = "http://localhost:8085/trivia";
 
+    [ObservableProperty]
+    private BitmapSource? _qrCodeImage;
+
+    [ObservableProperty]
+    private int _preGameCountdownMinutes = 5;
+
+    [ObservableProperty]
+    private int _preGameSecondsRemaining = 300;
+
+    [ObservableProperty]
+    private bool _isPreGameCountdownRunning;
+
+    [ObservableProperty]
+    private string _preGameCountdownText = "05:00";
+
+    [ObservableProperty]
+    private bool _isShowingConnectScreen = true;
+
+    [ObservableProperty]
+    private bool _autoStartAfterCountdown = true;
+
+    [ObservableProperty]
+    private bool _isIntermissionActive;
+
+    [ObservableProperty]
+    private int _intermissionSecondsRemaining;
+
+    [ObservableProperty]
+    private string _intermissionCountdownText = "03:00";
+
+    [ObservableProperty]
+    private MonitorInfo? _selectedMonitor;
+
+    [ObservableProperty]
+    private bool _isDisplayOpen;
+
+    public int[] QuestionsPerGamePresets { get; } = [5, 10, 15, 20, 25, 50, 100];
+    public ObservableCollection<MonitorInfo> AvailableMonitors { get; } = [];
     public ObservableCollection<SelectableTriviaPack> SelectablePacks { get; } = [];
     public ObservableCollection<TriviaPlayer> Players { get; } = [];
-    public ObservableCollection<string> ScreenOptions { get; } = [];
+    public ObservableCollection<AnswerDistributionItem> AnswerDistribution { get; } = [];
 
     public TriviaGameEngine Engine => _engine;
 
@@ -90,19 +153,73 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         _engine = new TriviaGameEngine(_settings);
         _dbService = new TriviaDatabaseService();
 
+        _venueName = !string.IsNullOrWhiteSpace(AppSettings.SelectedVenue) ? AppSettings.SelectedVenue : _settings.VenueName;
+        _hostName = !string.IsNullOrWhiteSpace(AppSettings.DjName) ? AppSettings.DjName : _settings.HostName;
+        _instructionBannerText = string.IsNullOrWhiteSpace(_settings.InstructionBannerText) ? TriviaSettings.DefaultInstructionBannerText : _settings.InstructionBannerText;
+        _autoAdvanceQuestions = _settings.AutoAdvanceQuestions;
+        _questionsPerGame = _settings.QuestionsPerGame > 0 ? _settings.QuestionsPerGame : 10;
+        _preGameCountdownMinutes = _settings.PreGameCountdownMinutes > 0 ? _settings.PreGameCountdownMinutes : 5;
+        _autoStartAfterCountdown = _settings.AutoStartAfterCountdown;
+        _preGameSecondsRemaining = _preGameCountdownMinutes * 60;
+        _preGameCountdownText = $"{_preGameCountdownMinutes:D2}:00";
+
         _displayService.SetTriviaGameEngine(_engine);
+
+        _preGameTimer.Interval = TimeSpan.FromSeconds(1);
+        _preGameTimer.Tick += OnPreGameTimerTick;
 
         WireEngineEvents();
         LoadPacks();
-        LoadScreens();
+        RefreshMonitors();
         StartWebServer();
+    }
+
+    public void RefreshMonitors()
+    {
+        AvailableMonitors.Clear();
+        var monitors = MonitorEnumerator.GetMonitors();
+        foreach (var m in monitors)
+        {
+            AvailableMonitors.Add(m);
+        }
+
+        if (AvailableMonitors.Count > 0)
+        {
+            var match = AvailableMonitors.FirstOrDefault(m => string.Equals(m.DeviceName, Settings.SelectedMonitorDevice, StringComparison.OrdinalIgnoreCase));
+            SelectedMonitor = match ?? (AvailableMonitors.Count > 1 ? AvailableMonitors[1] : AvailableMonitors[0]);
+        }
+    }
+
+    partial void OnSelectedMonitorChanged(MonitorInfo? value)
+    {
+        if (value != null)
+        {
+            Settings.SelectedMonitorDevice = value.DeviceName;
+            TriviaStorageHelper.SaveSettings(Settings);
+            PositionDisplayWindow(value.DeviceName);
+        }
+    }
+
+    partial void OnAutoAdvanceQuestionsChanged(bool value)
+    {
+        Settings.AutoAdvanceQuestions = value;
+        _engine.Settings.AutoAdvanceQuestions = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+    }
+
+    partial void OnQuestionsPerGameChanged(int value)
+    {
+        Settings.QuestionsPerGame = value;
+        _engine.Settings.QuestionsPerGame = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        UpdateSelectedPacksPreview();
     }
 
     private void WireEngineEvents()
     {
         _engine.StateChanged += (s, state) =>
         {
-            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            Application.Current?.Dispatcher.InvokeAsync(() =>
             {
                 GameStateText = state.ToString();
                 IsGameRunning = state != TriviaGameState.Lobby && state != TriviaGameState.GameComplete;
@@ -111,50 +228,64 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
         _engine.TimerTick += (s, remaining) =>
         {
-            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            Application.Current?.Dispatcher.InvokeAsync(() =>
             {
                 RemainingSeconds = remaining;
+                TotalCountdownSeconds = _engine.TotalCountdownSeconds;
             });
         };
 
         _engine.QuestionStarted += (s, q) =>
         {
-            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            Application.Current?.Dispatcher.InvokeAsync(() =>
             {
                 CurrentQuestionPrompt = q.Prompt;
                 OptionA = q.Options.Count > 0 ? q.Options[0] : "";
                 OptionB = q.Options.Count > 1 ? q.Options[1] : "";
                 OptionC = q.Options.Count > 2 ? q.Options[2] : "";
                 OptionD = q.Options.Count > 3 ? q.Options[3] : "";
-                CorrectAnswerIndex = -1; // Hidden until reveal
-                TotalSeconds = Settings.DefaultQuestionSeconds > 0 ? Settings.DefaultQuestionSeconds : (q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : 15);
-                RemainingSeconds = TotalSeconds;
+                CorrectAnswerIndex = -1;
+                TotalCountdownSeconds = _engine.TotalCountdownSeconds;
+                RemainingSeconds = TotalCountdownSeconds;
+                AnswerDistribution.Clear();
             });
         };
 
         _engine.AnswerRevealed += (s, q) =>
         {
-            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            Application.Current?.Dispatcher.InvokeAsync(() =>
             {
                 CorrectAnswerIndex = q.CorrectAnswerIndex;
+
+                AnswerDistribution.Clear();
+                var dist = _engine.GetAnswerDistribution();
+                string[] labels = ["A", "B", "C", "D"];
+                for (int i = 0; i < 4; i++)
+                {
+                    int count = dist.GetValueOrDefault(i, 0);
+                    string text = (q.Options.Count > i) ? q.Options[i] : $"Option {labels[i]}";
+                    bool isCorrect = (i == q.CorrectAnswerIndex);
+                    AnswerDistribution.Add(new AnswerDistributionItem(labels[i], text, count, isCorrect));
+                }
             });
         };
 
         _engine.LeaderboardUpdated += (s, playersList) =>
         {
-            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            Application.Current?.Dispatcher.InvokeAsync(() =>
             {
                 Players.Clear();
                 foreach (var p in playersList)
                 {
                     Players.Add(p);
                 }
+                ConnectedPlayerCount = Players.Count(p => p.IsConnected);
             });
         };
 
         _engine.GamePaused += (s, reason) =>
         {
-            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            Application.Current?.Dispatcher.InvokeAsync(() =>
             {
                 IsPaused = true;
                 PauseReason = reason ?? "Paused";
@@ -164,7 +295,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
         _engine.GameResumed += (s, e) =>
         {
-            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            Application.Current?.Dispatcher.InvokeAsync(() =>
             {
                 IsPaused = false;
                 PauseReason = "";
@@ -172,35 +303,70 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
             });
         };
 
+        _engine.IntermissionTick += (s, remaining) =>
+        {
+            Application.Current?.Dispatcher.InvokeAsync(() =>
+            {
+                IsIntermissionActive = remaining > 0;
+                IntermissionSecondsRemaining = remaining;
+                int mins = remaining / 60;
+                int secs = remaining % 60;
+                IntermissionCountdownText = $"{mins:D2}:{secs:D2}";
+            });
+        };
+
         _engine.IntermissionCompleted += (s, e) =>
         {
-            // The engine only reaches here when AutoStartNextGameEnabled was on, so it is safe to
-            // unconditionally start the next round - without this, "Auto-Start Next Game" silently
-            // does nothing and the show stops after one game. Whatever packs are checked stays
-            // checked between games - StartGame draws a fresh random question set every time it
-            // runs, so this alone gives a different game each time.
-            System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+            Application.Current?.Dispatcher.InvokeAsync(() =>
             {
+                IsIntermissionActive = false;
+                IntermissionSecondsRemaining = 0;
                 StartGame();
             });
         };
     }
 
-    /// <summary>
-    /// Returns every checked pack, or the first available pack if none are checked (so "Start
-    /// Game" always has something to play instead of silently doing nothing).
-    /// </summary>
-    private List<TriviaQuestionPack> GetCheckedPacks()
+    public List<TriviaQuestionPack> GetCheckedPacks()
     {
         var checkedPacks = SelectablePacks.Where(sp => sp.IsChecked).Select(sp => sp.Pack).ToList();
         if (checkedPacks.Count > 0) return checkedPacks;
         return SelectablePacks.Count > 0 ? [SelectablePacks[0].Pack] : [];
     }
 
+    private void UpdateSelectedPacksPreview()
+    {
+        var checkedPacks = GetCheckedPacks();
+        if (checkedPacks.Count == 0) return;
+
+        int questionCount = Math.Clamp(QuestionsPerGame > 0 ? QuestionsPerGame : 10, 1, checkedPacks.Sum(p => p.Questions.Count));
+        _displayVm?.UpdateFeaturedCategoryHeader(questionCount, checkedPacks.Count);
+
+        if (checkedPacks.Count == 1)
+        {
+            ActiveRoundTitle = checkedPacks[0].Title;
+            _displayVm?.UpdateCategory(checkedPacks[0].Category, checkedPacks[0].Description);
+        }
+        else
+        {
+            ActiveRoundTitle = string.Join(" + ", checkedPacks.Select(p => p.Title));
+            _displayVm?.UpdateMixedCategory(checkedPacks);
+        }
+    }
+
     public void ApplySettings(TriviaSettings newSettings)
     {
         Settings = newSettings;
         _engine.Settings = newSettings;
+        AutoAdvanceQuestions = newSettings.AutoAdvanceQuestions;
+        QuestionsPerGame = newSettings.QuestionsPerGame > 0 ? newSettings.QuestionsPerGame : 10;
+        PreGameCountdownMinutes = newSettings.PreGameCountdownMinutes > 0 ? newSettings.PreGameCountdownMinutes : 5;
+        AutoStartAfterCountdown = newSettings.AutoStartAfterCountdown;
+
+        if (_displayVm != null)
+        {
+            _displayVm.UpdateInstructionBannerTemplate(newSettings.InstructionBannerText);
+            _displayVm.UpdateWifiCredentials(newSettings.WifiSsid, newSettings.WifiPassword);
+        }
     }
 
     private void LoadPacks()
@@ -210,30 +376,27 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         bool isFirst = true;
         foreach (var p in packs)
         {
-            SelectablePacks.Add(new SelectableTriviaPack(p, isChecked: isFirst));
+            _dbService.SeedPackIntoDatabase(p);
+            var selectable = new SelectableTriviaPack(p, isChecked: isFirst);
+            selectable.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(SelectableTriviaPack.IsChecked))
+                {
+                    UpdateSelectedPacksPreview();
+                }
+            };
+            SelectablePacks.Add(selectable);
             isFirst = false;
         }
 
         if (SelectablePacks.Count == 0)
         {
-            // On a machine where the resolved TriviaData directory doesn't hold the expected
-            // packs (e.g. a fresh install away from the dev box), the host would otherwise just
-            // see an empty category list with no clue why. Leave a breadcrumb in the log folder.
-            Lyracist.Shared.Globals.LogError("Lyracist",
-                $"No trivia question packs found in '{TriviaPackManager.GetDefaultPacksDirectory()}'. Category list will be empty until a .json pack is placed there.",
+            Globals.LogError("Lyracist",
+                $"No trivia question packs found in '{TriviaPackManager.GetDefaultPacksDirectory()}'.",
                 "LoadPacks");
         }
-    }
 
-    private void LoadScreens()
-    {
-        ScreenOptions.Clear();
-        var screens = _displayService.GetScreens();
-        for (int i = 0; i < screens.Count; i++)
-        {
-            ScreenOptions.Add($"Monitor {screens[i].Index}: {screens[i].DeviceName} ({(screens[i].IsPrimary ? "Primary" : "Secondary")})");
-        }
-        SelectedScreenIndex = screens.Count > 1 ? 1 : 0;
+        UpdateSelectedPacksPreview();
     }
 
     private void StartWebServer()
@@ -245,6 +408,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
             _webServer.Start();
             PatronUrl = $"http://{ip}:{Settings.Port}/trivia";
             ServerStatusText = $"Online: {PatronUrl}";
+            GenerateQrCode(PatronUrl);
         }
         catch (Exception ex)
         {
@@ -252,55 +416,271 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         }
     }
 
-    [RelayCommand]
-    private void StartGame()
+    private void GenerateQrCode(string url)
     {
         try
         {
-            List<TriviaRound> rounds = [];
-            var checkedPacks = GetCheckedPacks();
-            if (checkedPacks.Count > 0)
+            using var generator = new QRCodeGenerator();
+            using var data = generator.CreateQrCode(url, QRCodeGenerator.ECCLevel.M);
+            using var qrCode = new PngByteQRCode(data);
+            byte[] bytes = qrCode.GetGraphic(20, [0, 0, 0, 255], [255, 255, 255, 255]);
+
+            var image = new BitmapImage();
+            using var ms = new MemoryStream(bytes);
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.StreamSource = ms;
+            image.EndInit();
+            image.Freeze();
+            QrCodeImage = image;
+        }
+        catch { }
+    }
+
+    private void OnPreGameTimerTick(object? sender, EventArgs e)
+    {
+        if (IsPreGameCountdownRunning && PreGameSecondsRemaining > 0)
+        {
+            PreGameSecondsRemaining--;
+            int mins = PreGameSecondsRemaining / 60;
+            int secs = PreGameSecondsRemaining % 60;
+            PreGameCountdownText = $"{mins:D2}:{secs:D2}";
+            _displayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
+
+            if (PreGameSecondsRemaining == 0)
             {
-                // Pool every checked pack's questions together and draw this game's set fresh -
-                // see TriviaPackManager.BuildMixedQuestionSet for the double-draw-then-rescramble
-                // algorithm. Called again on every unattended auto-restart too, so the question
-                // set is different every game even with the exact same packs checked.
-                var gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, Settings.QuestionsPerGame);
-                if (gameQuestions.Count > 0)
+                _preGameTimer.Stop();
+                IsPreGameCountdownRunning = false;
+                if (AutoStartAfterCountdown)
                 {
-                    string title = checkedPacks.Count == 1 ? checkedPacks[0].Title : string.Join(" + ", checkedPacks.Select(p => p.Title));
-                    rounds = [new TriviaRound
-                    {
-                        RoundNumber = 1,
-                        Title = title,
-                        Category = checkedPacks.Count == 1 ? checkedPacks[0].Category : "Mixed Trivia",
-                        Questions = gameQuestions
-                    }];
+                    StartGame();
                 }
             }
+        }
+    }
 
-            if (rounds.Count == 0)
+    [RelayCommand]
+    public void LaunchPreGameLobby()
+    {
+        IsShowingConnectScreen = true;
+        if (!IsPreGameCountdownRunning)
+        {
+            if (PreGameSecondsRemaining <= 0)
             {
-                // Fallback default round
-                rounds = [new TriviaRound
-                {
-                    RoundNumber = 1,
-                    Title = "General Knowledge",
-                    Questions = [
-                        new TriviaQuestion { Id = "Q1", Prompt = "What is the capital of France?", Options = ["London", "Paris", "Rome", "Berlin"], CorrectAnswerIndex = 1, TimeLimitSeconds = 15 },
-                        new TriviaQuestion { Id = "Q2", Prompt = "Which planet is known as the Red Planet?", Options = ["Venus", "Mars", "Jupiter", "Saturn"], CorrectAnswerIndex = 1, TimeLimitSeconds = 15 }
-                    ]
-                }];
+                PreGameSecondsRemaining = PreGameCountdownMinutes * 60;
+                int mins = PreGameSecondsRemaining / 60;
+                int secs = PreGameSecondsRemaining % 60;
+                PreGameCountdownText = $"{mins:D2}:{secs:D2}";
             }
+            IsPreGameCountdownRunning = true;
+            _preGameTimer.Start();
+        }
 
-            _engine.StartGame(rounds, rounds[0].Title);
-            ActiveRoundTitle = rounds[0].Title;
+        OpenTriviaDisplay();
+        _displayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
+        UpdateSelectedPacksPreview();
+    }
+
+    [RelayCommand]
+    public void StartGame()
+    {
+        try
+        {
+            var checkedPacks = GetCheckedPacks();
+            if (checkedPacks.Count == 0) return;
+
+            var gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, QuestionsPerGame);
+            if (gameQuestions.Count == 0) return;
+
+            string title = checkedPacks.Count == 1 ? checkedPacks[0].Title : string.Join(" + ", checkedPacks.Select(p => p.Title));
+            string category = checkedPacks.Count == 1 ? checkedPacks[0].Category : "Mixed Trivia";
+
+            var round = new TriviaRound
+            {
+                RoundNumber = 1,
+                Title = title,
+                Category = category,
+                Questions = gameQuestions
+            };
+
+            _engine.StartGame([round], title);
+            ActiveRoundTitle = round.Title;
             _engine.StartCurrentQuestion();
+
+            OpenTriviaDisplay();
         }
         catch (Exception ex)
         {
             System.Windows.MessageBox.Show($"Error starting game: {ex.Message}", "Lyracist Trivia", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
         }
+    }
+
+    [RelayCommand]
+    public void ToggleTriviaDisplay()
+    {
+        if (_displayWindow != null && _displayWindow.IsLoaded)
+        {
+            CloseTriviaDisplay();
+        }
+        else
+        {
+            OpenTriviaDisplay();
+        }
+    }
+
+    [RelayCommand]
+    public void OpenTriviaDisplay()
+    {
+        if (_displayWindow == null || !_displayWindow.IsLoaded)
+        {
+            _displayVm = new TriviaDisplayViewModel(
+                _engine,
+                VenueName,
+                PatronUrl,
+                QrCodeImage,
+                Settings.WifiSsid,
+                Settings.WifiPassword,
+                PreGameSecondsRemaining);
+
+            _displayVm.HostName = HostName;
+            _displayVm.UpdateInstructionBannerTemplate(InstructionBannerText);
+            _displayVm.IsConnectInstructionsActive = IsShowingConnectScreen;
+
+            UpdateSelectedPacksPreview();
+
+            _displayWindow = new TriviaDisplayWindow
+            {
+                DataContext = _displayVm
+            };
+
+            _displayWindow.Closed += (s, e) =>
+            {
+                _displayWindow = null;
+                _displayVm = null;
+                IsDisplayOpen = false;
+            };
+
+            PositionDisplayWindow(SelectedMonitor?.DeviceName);
+            _displayWindow.Show();
+            PositionDisplayWindow(SelectedMonitor?.DeviceName);
+            IsDisplayOpen = true;
+        }
+        else
+        {
+            PositionDisplayWindow(SelectedMonitor?.DeviceName);
+            _displayWindow.Activate();
+        }
+    }
+
+    [RelayCommand]
+    public void CloseTriviaDisplay()
+    {
+        if (_displayWindow != null && _displayWindow.IsLoaded)
+        {
+            _displayWindow.Close();
+            _displayWindow = null;
+            _displayVm = null;
+            IsDisplayOpen = false;
+        }
+    }
+
+    public void PositionDisplayWindow(string? deviceName)
+    {
+        if (_displayWindow == null || !_displayWindow.IsLoaded) return;
+
+        var screens = System.Windows.Forms.Screen.AllScreens;
+        var targetScreen = WindowPositioner.ResolveByDeviceName(screens, deviceName);
+        if (targetScreen != null)
+        {
+            _displayWindow.WindowState = WindowState.Normal;
+            _displayWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+            WindowPositioner.FillArea(_displayWindow, targetScreen.Bounds);
+        }
+    }
+
+    [RelayCommand]
+    private void StartPreGameCountdown(object? parameter)
+    {
+        int minutes = 5;
+        if (parameter is int i) minutes = i;
+        else if (parameter is string s && int.TryParse(s, out int parsed)) minutes = parsed;
+
+        PreGameCountdownMinutes = minutes > 0 ? minutes : 5;
+        PreGameSecondsRemaining = PreGameCountdownMinutes * 60;
+        int mins = PreGameSecondsRemaining / 60;
+        int secs = PreGameSecondsRemaining % 60;
+        PreGameCountdownText = $"{mins:D2}:{secs:D2}";
+        IsPreGameCountdownRunning = true;
+        _preGameTimer.Stop();
+        _preGameTimer.Start();
+        _displayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
+    }
+
+    [RelayCommand]
+    private void AddPreGameMinutes(object? parameter)
+    {
+        int deltaMinutes = 1;
+        if (parameter is int i) deltaMinutes = i;
+        else if (parameter is string s && int.TryParse(s, out int parsed)) deltaMinutes = parsed;
+
+        PreGameSecondsRemaining = Math.Max(0, PreGameSecondsRemaining + (deltaMinutes * 60));
+        int mins = PreGameSecondsRemaining / 60;
+        int secs = PreGameSecondsRemaining % 60;
+        PreGameCountdownText = $"{mins:D2}:{secs:D2}";
+        _displayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
+        if (!IsPreGameCountdownRunning && PreGameSecondsRemaining > 0)
+        {
+            IsPreGameCountdownRunning = true;
+            _preGameTimer.Start();
+        }
+    }
+
+    [RelayCommand]
+    private void Add1Minute() => AddPreGameMinutes(1);
+
+    [RelayCommand]
+    private void Add5Minutes() => AddPreGameMinutes(5);
+
+    [RelayCommand]
+    private void Reset5Minutes() => StartPreGameCountdown(5);
+
+    [RelayCommand]
+    private void TogglePreGameTimer()
+    {
+        IsPreGameCountdownRunning = !IsPreGameCountdownRunning;
+        if (IsPreGameCountdownRunning)
+        {
+            _preGameTimer.Start();
+        }
+        else
+        {
+            _preGameTimer.Stop();
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleConnectInstructions()
+    {
+        IsShowingConnectScreen = !IsShowingConnectScreen;
+        if (_displayVm != null)
+        {
+            _displayVm.IsConnectInstructionsActive = IsShowingConnectScreen;
+        }
+    }
+
+    [RelayCommand]
+    private void RemovePlayer(TriviaPlayer? player)
+    {
+        if (player != null)
+        {
+            Players.Remove(player);
+        }
+    }
+
+    [RelayCommand]
+    private void StartQuestion()
+    {
+        _engine.StartCurrentQuestion();
     }
 
     [RelayCommand]
@@ -324,9 +704,6 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     [RelayCommand]
     private void ResetGame()
     {
-        // The web server holds a fixed reference to the engine passed at construction, so it must
-        // be recreated too - otherwise phones keep talking to the disposed old engine while the
-        // screen shows the new one, and the buzzers silently stop working.
         _webServer?.Dispose();
         _engine.Dispose();
         _engine = new TriviaGameEngine(Settings);
@@ -338,6 +715,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         CurrentQuestionPrompt = "Game reset. Click 'Start Game' to begin.";
         OptionA = OptionB = OptionC = OptionD = "";
         CorrectAnswerIndex = -1;
+        AnswerDistribution.Clear();
     }
 
     [RelayCommand]
@@ -348,8 +726,11 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
     public void Dispose()
     {
+        _preGameTimer.Stop();
+        CloseTriviaDisplay();
         _webServer?.Dispose();
         _engine.Dispose();
+        _dbService.Dispose();
         GC.SuppressFinalize(this);
     }
 }

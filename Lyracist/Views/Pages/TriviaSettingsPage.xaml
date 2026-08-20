@@ -1,4 +1,4 @@
-<!-- Edited on Aug 18, 2026 @ 19:40:00 -> Added CompactTextBoxStyle for crisp 28px vertically centered inputs -->
+<!-- Edited on Aug 20, 2026 @ 06:30:00 -> Added Tiered Option Value Scoring controls (100% / 70% / 40%) to TriviaSettingsPage -->
 <Page x:Class="Lyracist.Views.Pages.TriviaSettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -136,7 +136,7 @@
 
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="🎯 Trivia Night Pro Settings" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}" />
-                    <TextBlock Text="Configure gameplay timers, scoring rules, speed multipliers, and local Wi-Fi patron access."
+                    <TextBlock Text="Configure gameplay timers, scoring rules, speed multipliers, projection displays, and Wi-Fi access."
                                FontSize="12" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,2,0,0" />
                 </StackPanel>
 
@@ -165,22 +165,28 @@
                             <Grid Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="6" />
+                                    <ColumnDefinition Width="4" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="6" />
+                                    <ColumnDefinition Width="4" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="4" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Time Limit (Sec)" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
-                                    <TextBox Text="{Binding DefaultQuestionSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="55" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
+                                    <TextBlock Text="Time (s)" FontWeight="SemiBold" FontSize="10" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                    <TextBox Text="{Binding DefaultQuestionSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="45" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Warning (Sec)" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
-                                    <TextBox Text="{Binding WarningCountdownSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="55" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
+                                    <TextBlock Text="Warn (s)" FontWeight="SemiBold" FontSize="10" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                    <TextBox Text="{Binding WarningCountdownSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="45" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="4">
-                                    <TextBlock Text="Wrong Fade (Sec)" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" ToolTip="Wrong option elimination fade speed (seconds)" />
-                                    <TextBox Text="{Binding AnswerEliminationIntervalSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="55" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
+                                    <TextBlock Text="Fade (s)" FontWeight="SemiBold" FontSize="10" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" ToolTip="Wrong option elimination fade speed (seconds)" />
+                                    <TextBox Text="{Binding AnswerEliminationIntervalSeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="45" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="6">
+                                    <TextBlock Text="Reveal (s)" FontWeight="SemiBold" FontSize="10" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" ToolTip="Post-reveal answer display delay (seconds)" />
+                                    <TextBox Text="{Binding PostRevealDelaySeconds, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="45" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
                                 </StackPanel>
                             </Grid>
                             <CheckBox Content="Auto-advance questions"
@@ -208,6 +214,39 @@
                                     <TextBox Text="{Binding WrongAnswerDeductionPoints, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="75" HorizontalAlignment="Left" TextAlignment="Center" Height="28" />
                                 </StackPanel>
                             </Grid>
+
+                            <!-- Tiered Option Value Scoring (100% / 70% / 40%) -->
+                            <Border Background="{DynamicResource AppBackgroundBrush}" BorderBrush="{DynamicResource PurpleBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <CheckBox Content="Tiered Option Value (4=100%, 3=70%, 2=40%)"
+                                              IsChecked="{Binding TieredScoringEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                              Foreground="{DynamicResource AppTextPrimaryBrush}"
+                                              FontWeight="SemiBold" FontSize="11" Margin="0,0,0,6"
+                                              ToolTip="Awards full points if answered with all 4 options, 70% with 3 options, and 40% with 2 options." />
+                                    <Grid IsEnabled="{Binding TieredScoringEnabled}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="6" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="6" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="4 Opt (%)" FontWeight="SemiBold" FontSize="10" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                            <TextBox Text="{Binding Points4OptionsPercent, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="45" HorizontalAlignment="Left" TextAlignment="Center" Height="26" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="3 Opt (%)" FontWeight="SemiBold" FontSize="10" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                            <TextBox Text="{Binding Points3OptionsPercent, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="45" HorizontalAlignment="Left" TextAlignment="Center" Height="26" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="4">
+                                            <TextBlock Text="2 Opt (%)" FontWeight="SemiBold" FontSize="10" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                                            <TextBox Text="{Binding Points2OptionsPercent, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" Width="45" HorizontalAlignment="Left" TextAlignment="Center" Height="26" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
                             <Grid Margin="0,0,0,4">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -227,10 +266,10 @@
                     </GroupBox>
                 </StackPanel>
 
-                <!-- COLUMN 1: Active Venue/Host & Intermission -->
+                <!-- COLUMN 1: Venue/Host, Banner & Intermission -->
                 <StackPanel Grid.Column="2">
-                    <!-- 🏢 Active Venue & Game Master (Inherited from App Settings) -->
-                    <GroupBox Header="🏢 Active Venue &amp; Host" Style="{StaticResource PurpleCardStyle}">
+                    <!-- 🏢 Active Venue, Host & Welcome Banner -->
+                    <GroupBox Header="🏢 Venue, Host &amp; Welcome Banner" Style="{StaticResource PurpleCardStyle}">
                         <StackPanel>
                             <Border Background="{DynamicResource AppBackgroundBrush}" BorderBrush="{DynamicResource PurpleBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
                                 <Grid>
@@ -252,8 +291,9 @@
                                     <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding GameMasterName}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AppTextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
                                 </Grid>
                             </Border>
-                            <TextBlock Text="ℹ️ Automatically synchronized from primary Venue and DJ settings in application Settings."
-                                       FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" />
+
+                            <TextBlock Text="Welcome Banner Template ({venue}, {dj} tokens):" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,2" />
+                            <TextBox Text="{Binding InstructionBannerText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactTextBoxStyle}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="46" Margin="0,0,0,4" />
                         </StackPanel>
                     </GroupBox>
 
@@ -279,8 +319,27 @@
                     </GroupBox>
                 </StackPanel>
 
-                <!-- COLUMN 2: Network, Wi-Fi & Save Actions -->
+                <!-- COLUMN 2: Network, Monitor & Save Actions -->
                 <StackPanel Grid.Column="4">
+                    <!-- 🖥️ Target Projection Monitor Card -->
+                    <GroupBox Header="🖥️ Target Projection Monitor" Style="{StaticResource BlueCardStyle}">
+                        <StackPanel>
+                            <ComboBox ItemsSource="{Binding AvailableMonitors}"
+                                      SelectedItem="{Binding SelectedMonitor}"
+                                      HorizontalAlignment="Stretch" Height="30" Padding="6,2" VerticalContentAlignment="Center" Margin="0,0,0,4">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Index, StringFormat='{}Monitor {0}: '}" FontWeight="Bold" Foreground="#8B5CF6" />
+                                            <TextBlock Text="{Binding Width, StringFormat='{}{0}x'}" />
+                                            <TextBlock Text="{Binding Height}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                    </GroupBox>
+
                     <!-- 📶 Wi-Fi & Network Card -->
                     <GroupBox Header="📶 Local Network &amp; Wi-Fi Access" Style="{StaticResource PurpleCardStyle}">
                         <StackPanel>

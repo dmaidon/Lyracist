@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 11:15:30 -> Respect GameMaster DefaultQuestionSeconds over question JSON default
+// Edited on Aug 20, 2026 @ 06:21:00 -> Added Tiered Option Value Scoring (100% / 70% / 40%) and progressive elimination during countdown in TriviaGameEngine
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -109,6 +109,8 @@ public class TriviaGameEngine : IDisposable
                 p.TotalAnswered = 0;
                 p.LastAnswerIndex = -1;
                 p.HasAnsweredCurrentQuestion = false;
+                p.VisibleOptionsAtSubmission = 4;
+                p.RemainingSecondsAtSubmission = 0;
             }
 
             EliminatedAnswerIndices.Clear();
@@ -131,10 +133,13 @@ public class TriviaGameEngine : IDisposable
                 p.LastAnswerIndex = -1;
                 p.HasAnsweredCurrentQuestion = false;
                 p.LastPointsEarned = 0;
+                p.VisibleOptionsAtSubmission = 4;
+                p.RemainingSecondsAtSubmission = 0;
             }
 
             EliminatedAnswerIndices.Clear();
             _pendingWrongIndices.Clear();
+            _pendingWrongIndices.AddRange(Enumerable.Range(0, q.Options.Count).Where(i => i != q.CorrectAnswerIndex));
 
             TotalCountdownSeconds = Settings.DefaultQuestionSeconds > 0 ? Settings.DefaultQuestionSeconds : (q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : 15);
             RemainingSeconds = TotalCountdownSeconds;
@@ -169,13 +174,15 @@ public class TriviaGameEngine : IDisposable
             player.LastAnswerIndex = optionIndex;
             player.LastResponseTimeMs = responseTimeMs;
             player.HasAnsweredCurrentQuestion = true;
+            player.VisibleOptionsAtSubmission = Math.Max(1, 4 - EliminatedAnswerIndices.Count);
+            player.RemainingSecondsAtSubmission = RemainingSeconds;
             player.LastSeenAt = DateTime.Now;
 
             // Check if all connected players have answered
             var activePlayers = _players.Values.Where(p => p.IsConnected).ToList();
             if (activePlayers.Count > 0 && activePlayers.All(p => p.HasAnsweredCurrentQuestion))
             {
-                // All players answered early! Lock and begin elimination
+                // All players answered early! Lock and reveal
                 StartAnswerElimination();
             }
 
@@ -201,8 +208,8 @@ public class TriviaGameEngine : IDisposable
             var q = CurrentSession.CurrentQuestion;
             if (q == null) return;
 
-            // Calculate scores right away so they are locked in
-            double multiplier = CurrentSession.CurrentRound?.PointMultiplier ?? 1.0;
+            // Calculate scores right away factoring in Tiered Scoring (100% / 70% / 40%)
+            double roundMultiplier = CurrentSession.CurrentRound?.PointMultiplier ?? 1.0;
             foreach (var p in _players.Values)
             {
                 if (p.HasAnsweredCurrentQuestion)
@@ -214,15 +221,34 @@ public class TriviaGameEngine : IDisposable
                         p.CurrentStreak++;
                         if (p.CurrentStreak > p.MaxStreak) p.MaxStreak = p.CurrentStreak;
 
+                        double tierMultiplier = 1.0;
+                        if (Settings.TieredScoringEnabled)
+                        {
+                            if (p.VisibleOptionsAtSubmission >= 4)
+                            {
+                                tierMultiplier = Math.Clamp(Settings.Points4OptionsPercent / 100.0, 0.0, 5.0);
+                            }
+                            else if (p.VisibleOptionsAtSubmission == 3)
+                            {
+                                tierMultiplier = Math.Clamp(Settings.Points3OptionsPercent / 100.0, 0.0, 5.0);
+                            }
+                            else
+                            {
+                                tierMultiplier = Math.Clamp(Settings.Points2OptionsPercent / 100.0, 0.0, 5.0);
+                            }
+                        }
+
+                        int basePoints = (int)(Settings.BasePointsPerQuestion * tierMultiplier);
+
                         int speedBonus = 0;
                         if (Settings.SpeedBonusEnabled && TotalCountdownSeconds > 0)
                         {
-                            double remainingRatio = Math.Clamp((double)RemainingSeconds / TotalCountdownSeconds, 0.0, 1.0);
-                            speedBonus = (int)(Settings.MaxSpeedBonus * remainingRatio);
+                            double remainingRatio = Math.Clamp((double)p.RemainingSecondsAtSubmission / TotalCountdownSeconds, 0.0, 1.0);
+                            speedBonus = (int)(Settings.MaxSpeedBonus * remainingRatio * tierMultiplier);
                         }
 
                         double streakMultiplier = 1.0 + Math.Min(p.CurrentStreak * Settings.StreakBonusMultiplier, 0.5);
-                        int points = (int)((Settings.BasePointsPerQuestion + speedBonus) * multiplier * streakMultiplier);
+                        int points = (int)((basePoints + speedBonus) * roundMultiplier * streakMultiplier);
                         p.LastPointsEarned = points;
                         p.TotalScore += points;
                     }
@@ -241,16 +267,17 @@ public class TriviaGameEngine : IDisposable
                 }
             }
 
-            // Identify wrong answer indices
-            var wrongIndices = Enumerable.Range(0, q.Options.Count).Where(i => i != q.CorrectAnswerIndex).ToList();
-            if (wrongIndices.Count > 0)
-            {
-                // Eliminate the first wrong answer immediately
-                EliminatedAnswerIndices.Clear();
-                EliminatedAnswerIndices.Add(wrongIndices[0]);
+            // Identify wrong answer indices that have not yet been eliminated
+            var uneliminatedWrong = Enumerable.Range(0, q.Options.Count)
+                .Where(i => i != q.CorrectAnswerIndex && !EliminatedAnswerIndices.Contains(i))
+                .ToList();
 
+            if (uneliminatedWrong.Count > 0)
+            {
+                // Eliminate the next wrong answer immediately and enter EliminatingAnswers state
+                EliminatedAnswerIndices.Add(uneliminatedWrong[0]);
                 _pendingWrongIndices.Clear();
-                _pendingWrongIndices.AddRange(wrongIndices.Skip(1));
+                _pendingWrongIndices.AddRange(uneliminatedWrong.Skip(1));
 
                 _eliminationCountdownSeconds = Settings.AnswerEliminationIntervalSeconds > 0 ? Settings.AnswerEliminationIntervalSeconds : 5;
                 SetState(TriviaGameState.EliminatingAnswers);
@@ -304,54 +331,69 @@ public class TriviaGameEngine : IDisposable
                 StartCurrentQuestion();
                 return true;
             }
-            else if (CurrentSession.CurrentRoundIndex + 1 < CurrentSession.Rounds.Count)
+
+            // End of round
+            if (CurrentSession.CurrentRoundIndex + 1 < CurrentSession.Rounds.Count)
             {
                 CurrentSession.CurrentRoundIndex++;
                 CurrentSession.CurrentQuestionIndex = 0;
-                ShowLeaderboard();
+                StartCurrentQuestion();
                 return true;
             }
-            else
-            {
-                // Game Complete
-                SetState(TriviaGameState.GameComplete);
-                var result = GetGameResult();
-                LeaderboardUpdated?.Invoke(this, GetPlayers());
-                GameCompleted?.Invoke(this, result);
 
-                if (Settings.AutoStartNextGameEnabled && Settings.NextGameDelayMinutes > 0)
-                {
-                    IntermissionSecondsRemaining = Settings.NextGameDelayMinutes * 60;
-                    _tickTimer.Start();
-                    IntermissionTick?.Invoke(this, IntermissionSecondsRemaining);
-                }
-                else
-                {
-                    IntermissionSecondsRemaining = 0;
-                    _tickTimer.Stop();
-                }
-                return false;
-            }
+            // End of game!
+            CompleteGame();
+            return false;
+        }
+    }
+
+    private void CompleteGame()
+    {
+        _tickTimer.Stop();
+        SetState(TriviaGameState.GameComplete);
+
+        var result = GetGameResult();
+        GameCompleted?.Invoke(this, result);
+
+        if (Settings.AutoStartNextGameEnabled && Settings.NextGameDelayMinutes > 0)
+        {
+            IntermissionSecondsRemaining = Settings.NextGameDelayMinutes * 60;
+            IntermissionTick?.Invoke(this, IntermissionSecondsRemaining);
+            _tickTimer.Start();
+        }
+        else
+        {
+            IntermissionSecondsRemaining = 0;
+        }
+    }
+
+    public void SkipIntermission()
+    {
+        lock (_stateLock)
+        {
+            _tickTimer.Stop();
+            IntermissionSecondsRemaining = 0;
+            IntermissionCompleted?.Invoke(this, EventArgs.Empty);
         }
     }
 
     public TriviaGameResult GetGameResult()
     {
-        var rankedPlayers = GetPlayers();
+        var ranked = GetPlayers();
         var result = new TriviaGameResult
         {
-            RankedPlayers = rankedPlayers
+            RankedPlayers = ranked
         };
 
-        // Group players who provided a team name
-        var teamGroups = rankedPlayers
-            .Where(p => !string.IsNullOrWhiteSpace(p.TeamName))
-            .GroupBy(p => p.TeamName.Trim(), StringComparer.OrdinalIgnoreCase)
+        // Group players by TeamName (excluding individual / blank team names)
+        var teamGroups = ranked
+            .Where(p => !string.IsNullOrWhiteSpace(p.TeamName) && !p.TeamName.Equals(p.Name, StringComparison.OrdinalIgnoreCase))
+            .GroupBy(p => p.TeamName, StringComparer.OrdinalIgnoreCase)
             .Select(g => new TriviaTeamSummary
             {
                 TeamName = g.Key,
                 TotalScore = g.Sum(p => p.TotalScore),
-                Players = g.Select(p => p.Name).Distinct().ToList()
+                Players = g.Select(p => p.Name).ToList()
             })
             .OrderByDescending(t => t.TotalScore)
             .ToList();
@@ -360,21 +402,21 @@ public class TriviaGameEngine : IDisposable
 
         if (teamGroups.Count > 0)
         {
-            var winningTeam = teamGroups[0];
+            var topTeam = teamGroups[0];
             result.HasTeamWinner = true;
-            result.WinningName = winningTeam.TeamName;
-            result.WinningScore = winningTeam.TotalScore;
-            result.WinningTeamMembers = winningTeam.Players;
-            result.WinnerTitle = $"🏆 TEAM CHAMPIONS: {winningTeam.TeamName}";
+            result.WinnerTitle = $"🏆 WINNING TEAM: {topTeam.TeamName}";
+            result.WinningName = topTeam.TeamName;
+            result.WinningScore = topTeam.TotalScore;
+            result.WinningTeamMembers = topTeam.Players;
         }
-        else if (rankedPlayers.Count > 0)
+        else if (ranked.Count > 0)
         {
-            var winningPlayer = rankedPlayers[0];
+            var topPlayer = ranked[0];
             result.HasTeamWinner = false;
-            result.WinningName = winningPlayer.Name;
-            result.WinningScore = winningPlayer.TotalScore;
-            result.WinningTeamMembers = [winningPlayer.Name];
-            result.WinnerTitle = $"🏆 TRIVIA CHAMPION: {winningPlayer.Name}";
+            result.WinnerTitle = $"👑 CHAMPION: {topPlayer.Name}";
+            result.WinningName = topPlayer.Name;
+            result.WinningScore = topPlayer.TotalScore;
+            result.WinningTeamMembers = [topPlayer.Name];
         }
         else
         {
@@ -393,7 +435,7 @@ public class TriviaGameEngine : IDisposable
 
     public void ResumeTimer()
     {
-        if ((State == TriviaGameState.QuestionActive || State == TriviaGameState.EliminatingAnswers || State == TriviaGameState.RevealAnswer || State == TriviaGameState.RoundLeaderboard))
+        if ((State == TriviaGameState.QuestionActive || State == TriviaGameState.EliminatingAnswers || State == TriviaGameState.RevealAnswer || State == TriviaGameState.RoundLeaderboard || State == TriviaGameState.GameComplete))
         {
             _tickTimer.Start();
         }
@@ -408,6 +450,25 @@ public class TriviaGameEngine : IDisposable
                 case TriviaGameState.QuestionActive:
                     RemainingSeconds--;
                     TimerTick?.Invoke(this, RemainingSeconds);
+
+                    // Progressive option elimination during question countdown
+                    if (TotalCountdownSeconds > 0 && _pendingWrongIndices.Count > 0)
+                    {
+                        // If at or past 2/3 countdown mark and 0 eliminated so far -> eliminate 1st wrong option (3 options remain = 70%)
+                        if (RemainingSeconds <= (TotalCountdownSeconds * 2 / 3) && EliminatedAnswerIndices.Count == 0)
+                        {
+                            EliminatedAnswerIndices.Add(_pendingWrongIndices[0]);
+                            _pendingWrongIndices.RemoveAt(0);
+                            AnswersEliminated?.Invoke(this, [.. EliminatedAnswerIndices]);
+                        }
+                        // If at or past 1/3 countdown mark and only 1 eliminated so far -> eliminate 2nd wrong option (2 options remain = 40%)
+                        else if (RemainingSeconds <= (TotalCountdownSeconds * 1 / 3) && EliminatedAnswerIndices.Count == 1 && _pendingWrongIndices.Count > 0)
+                        {
+                            EliminatedAnswerIndices.Add(_pendingWrongIndices[0]);
+                            _pendingWrongIndices.RemoveAt(0);
+                            AnswersEliminated?.Invoke(this, [.. EliminatedAnswerIndices]);
+                        }
+                    }
 
                     if (RemainingSeconds <= 0)
                     {
@@ -433,7 +494,6 @@ public class TriviaGameEngine : IDisposable
                             }
                             else
                             {
-                                // All wrong answers have faded out! Only correct answer remains!
                                 CompleteRevealAnswer();
                             }
                         }
@@ -478,6 +538,7 @@ public class TriviaGameEngine : IDisposable
                     {
                         IntermissionSecondsRemaining--;
                         IntermissionTick?.Invoke(this, IntermissionSecondsRemaining);
+
                         if (IntermissionSecondsRemaining <= 0)
                         {
                             _tickTimer.Stop();
@@ -489,56 +550,14 @@ public class TriviaGameEngine : IDisposable
         }
     }
 
-    public void StartIntermissionCountdown(int seconds)
-    {
-        lock (_stateLock)
-        {
-            IntermissionSecondsRemaining = seconds;
-            if (IntermissionSecondsRemaining > 0)
-            {
-                _tickTimer.Start();
-                IntermissionTick?.Invoke(this, IntermissionSecondsRemaining);
-            }
-        }
-    }
-
-    public void SkipIntermission()
-    {
-        lock (_stateLock)
-        {
-            IntermissionSecondsRemaining = 0;
-            _tickTimer.Stop();
-            IntermissionCompleted?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    private void SetState(TriviaGameState newState)
-    {
-        CurrentSession.State = newState;
-        StateChanged?.Invoke(this, newState);
-    }
-
-    public Dictionary<int, int> GetAnswerDistribution()
-    {
-        var dist = new Dictionary<int, int> { [0] = 0, [1] = 0, [2] = 0, [3] = 0 };
-        foreach (var p in _players.Values)
-        {
-            if (p.HasAnsweredCurrentQuestion && p.LastAnswerIndex >= 0 && p.LastAnswerIndex < 4)
-            {
-                dist[p.LastAnswerIndex]++;
-            }
-        }
-        return dist;
-    }
-
     public void PauseGame(string? reason = null)
     {
         lock (_stateLock)
         {
             if (IsPaused) return;
             IsPaused = true;
-            PauseReason = string.IsNullOrWhiteSpace(reason) ? "Event In Progress" : reason;
-            _tickTimer.Stop();
+            PauseReason = reason ?? "Paused by Host";
+            PauseTimer();
             GamePaused?.Invoke(this, PauseReason);
         }
     }
@@ -550,24 +569,37 @@ public class TriviaGameEngine : IDisposable
             if (!IsPaused) return;
             IsPaused = false;
             PauseReason = null;
-            if (State == TriviaGameState.QuestionActive || State == TriviaGameState.EliminatingAnswers || State == TriviaGameState.RevealAnswer || State == TriviaGameState.RoundLeaderboard || (State == TriviaGameState.GameComplete && IntermissionSecondsRemaining > 0))
-            {
-                _tickTimer.Start();
-            }
+            ResumeTimer();
             GameResumed?.Invoke(this, EventArgs.Empty);
         }
     }
 
     public void TogglePause(string? reason = null)
     {
-        if (IsPaused)
+        if (IsPaused) ResumeGame();
+        else PauseGame(reason);
+    }
+
+    public Dictionary<int, int> GetAnswerDistribution()
+    {
+        lock (_stateLock)
         {
-            ResumeGame();
+            var dist = new Dictionary<int, int> { [0] = 0, [1] = 0, [2] = 0, [3] = 0 };
+            foreach (var p in _players.Values)
+            {
+                if (p.HasAnsweredCurrentQuestion && p.LastAnswerIndex >= 0 && p.LastAnswerIndex <= 3)
+                {
+                    dist[p.LastAnswerIndex]++;
+                }
+            }
+            return dist;
         }
-        else
-        {
-            PauseGame(reason);
-        }
+    }
+
+    private void SetState(TriviaGameState newState)
+    {
+        CurrentSession.State = newState;
+        StateChanged?.Invoke(this, newState);
     }
 
     public void Dispose()

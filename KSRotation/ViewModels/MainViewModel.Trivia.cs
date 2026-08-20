@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 11:15:30 -> Respect GameMaster TriviaSettings.DefaultQuestionSeconds over question JSON default
+// Edited on Aug 20, 2026 @ 06:33:00 -> Added Tiered Option Value scoring (100% / 70% / 40%) properties and settings sync to KSRotation MainViewModel.Trivia
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,6 +17,7 @@ namespace KSRotation.ViewModels
         private TriviaGameEngine? _triviaEngine;
         private TriviaWebServer? _triviaWebServer;
         private DispatcherTimer? _triviaSettingsStatusTimer;
+        private readonly DispatcherTimer _triviaPreGameTimer = new();
 #if !MAUI
         private KSRotation.Windows.TriviaDisplayWindow? _triviaDisplayWindow;
         private TriviaDisplayViewModel? _triviaDisplayVm;
@@ -76,6 +77,11 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial string TriviaPatronUrl { get; set; } = "http://localhost:8085/trivia";
 
+        [ObservableProperty]
+        public partial int TriviaConnectedPlayerCount { get; set; }
+
+        public int[] TriviaQuestionsPerGamePresets { get; } = [5, 10, 15, 20, 25, 50, 100];
+
         // Separate Trivia Settings Properties (Venue and Host pulled directly from active app settings)
         public string TriviaVenueName => !string.IsNullOrWhiteSpace(VenueName) ? VenueName : "Main Venue";
 
@@ -92,6 +98,18 @@ namespace KSRotation.ViewModels
         }
 
         [ObservableProperty]
+        public partial int TriviaQuestionsPerGame { get; set; } = 10;
+
+        partial void OnTriviaQuestionsPerGameChanged(int value)
+        {
+            TriviaSettings.QuestionsPerGame = value;
+            if (_triviaEngine != null) _triviaEngine.Settings.QuestionsPerGame = value;
+#if !MAUI
+            UpdateTriviaCategoryPreview();
+#endif
+        }
+
+        [ObservableProperty]
         public partial int TriviaDefaultQuestionSeconds { get; set; } = 15;
 
         [ObservableProperty]
@@ -101,10 +119,25 @@ namespace KSRotation.ViewModels
         public partial int TriviaAnswerEliminationIntervalSeconds { get; set; } = 5;
 
         [ObservableProperty]
+        public partial int TriviaPostRevealDelaySeconds { get; set; } = 5;
+
+        [ObservableProperty]
         public partial int TriviaBasePoints { get; set; } = 1000;
 
         [ObservableProperty]
         public partial int TriviaWrongAnswerDeduction { get; set; } = 0;
+
+        [ObservableProperty]
+        public partial bool TriviaTieredScoringEnabled { get; set; } = true;
+
+        [ObservableProperty]
+        public partial int TriviaPoints4OptionsPercent { get; set; } = 100;
+
+        [ObservableProperty]
+        public partial int TriviaPoints3OptionsPercent { get; set; } = 70;
+
+        [ObservableProperty]
+        public partial int TriviaPoints2OptionsPercent { get; set; } = 40;
 
         [ObservableProperty]
         public partial bool TriviaSpeedBonusEnabled { get; set; } = true;
@@ -131,6 +164,18 @@ namespace KSRotation.ViewModels
         public partial int TriviaPreGameCountdownMinutes { get; set; } = 5;
 
         [ObservableProperty]
+        public partial int TriviaPreGameSecondsRemaining { get; set; } = 300;
+
+        [ObservableProperty]
+        public partial bool TriviaIsPreGameCountdownRunning { get; set; }
+
+        [ObservableProperty]
+        public partial string TriviaPreGameCountdownText { get; set; } = "05:00";
+
+        [ObservableProperty]
+        public partial bool TriviaIsShowingConnectScreen { get; set; } = true;
+
+        [ObservableProperty]
         public partial bool TriviaAutoStartAfterCountdown { get; set; } = true;
 
         [ObservableProperty]
@@ -150,6 +195,7 @@ namespace KSRotation.ViewModels
 
         public ObservableCollection<SelectableTriviaPack> TriviaSelectablePacks { get; } = [];
         public ObservableCollection<TriviaPlayer> TriviaPlayers { get; } = [];
+        public ObservableCollection<AnswerDistributionItem> TriviaAnswerDistribution { get; } = [];
 
         public void InitializeTrivia()
         {
@@ -162,6 +208,9 @@ namespace KSRotation.ViewModels
                 WireTriviaEngineEvents();
                 LoadTriviaPacks();
                 StartTriviaWebServer();
+
+                _triviaPreGameTimer.Interval = TimeSpan.FromSeconds(1);
+                _triviaPreGameTimer.Tick += OnTriviaPreGameTimerTick;
             }
             catch (Exception ex)
             {
@@ -202,6 +251,7 @@ namespace KSRotation.ViewModels
                     TriviaCorrectAnswerIndex = -1;
                     TriviaTotalSeconds = TriviaSettings.DefaultQuestionSeconds > 0 ? TriviaSettings.DefaultQuestionSeconds : (q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : 15);
                     TriviaRemainingSeconds = TriviaTotalSeconds;
+                    TriviaAnswerDistribution.Clear();
                 });
             };
 
@@ -210,6 +260,17 @@ namespace KSRotation.ViewModels
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
                     TriviaCorrectAnswerIndex = q.CorrectAnswerIndex;
+
+                    TriviaAnswerDistribution.Clear();
+                    var dist = _triviaEngine.GetAnswerDistribution();
+                    string[] labels = ["A", "B", "C", "D"];
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int count = dist.GetValueOrDefault(i, 0);
+                        string text = (q.Options.Count > i) ? q.Options[i] : $"Option {labels[i]}";
+                        bool isCorrect = (i == q.CorrectAnswerIndex);
+                        TriviaAnswerDistribution.Add(new AnswerDistributionItem(labels[i], text, count, isCorrect));
+                    }
                 });
             };
 
@@ -222,6 +283,7 @@ namespace KSRotation.ViewModels
                     {
                         TriviaPlayers.Add(p);
                     }
+                    TriviaConnectedPlayerCount = TriviaPlayers.Count(p => p.IsConnected);
                 });
             };
 
@@ -247,11 +309,6 @@ namespace KSRotation.ViewModels
 
             _triviaEngine.IntermissionCompleted += (s, e) =>
             {
-                // The engine only reaches here when AutoStartNextGameEnabled was on, so it is safe
-                // to unconditionally start the next round - without this, "Auto-Start Next Game"
-                // silently does nothing and the show stops after one game. Whatever packs are
-                // checked stays checked between games - StartTrivia draws a fresh random question
-                // set every time it runs, so this alone gives a different game each time.
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
                     StartTrivia();
@@ -259,10 +316,29 @@ namespace KSRotation.ViewModels
             };
         }
 
-        /// <summary>
-        /// Returns every checked pack, or the first available pack if none are checked (so
-        /// "Start Game" always has something to play instead of silently doing nothing).
-        /// </summary>
+        private void OnTriviaPreGameTimerTick(object? sender, EventArgs e)
+        {
+            if (TriviaIsPreGameCountdownRunning && TriviaPreGameSecondsRemaining > 0)
+            {
+                TriviaPreGameSecondsRemaining--;
+                int mins = TriviaPreGameSecondsRemaining / 60;
+                int secs = TriviaPreGameSecondsRemaining % 60;
+                TriviaPreGameCountdownText = $"{mins:D2}:{secs:D2}";
+#if !MAUI
+                _triviaDisplayVm?.UpdatePreGameCountdown(TriviaPreGameSecondsRemaining);
+#endif
+                if (TriviaPreGameSecondsRemaining == 0)
+                {
+                    _triviaPreGameTimer.Stop();
+                    TriviaIsPreGameCountdownRunning = false;
+                    if (TriviaAutoStartAfterCountdown)
+                    {
+                        StartTrivia();
+                    }
+                }
+            }
+        }
+
         private List<TriviaQuestionPack> GetCheckedTriviaPacks()
         {
             var checkedPacks = TriviaSelectablePacks.Where(sp => sp.IsChecked).Select(sp => sp.Pack).ToList();
@@ -293,9 +369,6 @@ namespace KSRotation.ViewModels
 
             if (TriviaSelectablePacks.Count == 0)
             {
-                // On a machine where the resolved TriviaData directory doesn't hold the expected
-                // packs (e.g. a fresh install away from the dev box), the host would otherwise
-                // just see an empty category list with no clue why. Leave a breadcrumb in the log.
                 Lyracist.Shared.Globals.LogError("KSRotation",
                     $"No trivia question packs found in '{TriviaPackManager.GetDefaultPacksDirectory()}'. Category list will be empty until a .json pack is placed there.",
                     "LoadTriviaPacks");
@@ -308,12 +381,12 @@ namespace KSRotation.ViewModels
             var checkedPacks = GetCheckedTriviaPacks();
             if (checkedPacks.Count == 0) return;
 
-            int questionCount = Math.Clamp(TriviaSettings.QuestionsPerGame > 0 ? TriviaSettings.QuestionsPerGame : 10, 1, checkedPacks.Sum(p => p.Questions.Count));
+            int questionCount = Math.Clamp(TriviaQuestionsPerGame > 0 ? TriviaQuestionsPerGame : 10, 1, checkedPacks.Sum(p => p.Questions.Count));
             _triviaDisplayVm?.UpdateFeaturedCategoryHeader(questionCount, checkedPacks.Count);
 
             if (checkedPacks.Count == 1)
             {
-                _triviaDisplayVm?.UpdateCategory(checkedPacks[0].Title);
+                _triviaDisplayVm?.UpdateCategory(checkedPacks[0].Category, checkedPacks[0].Description);
             }
             else
             {
@@ -360,11 +433,17 @@ namespace KSRotation.ViewModels
             OnPropertyChanged(nameof(TriviaVenueName));
             OnPropertyChanged(nameof(TriviaHostName));
             TriviaInstructionBannerText = string.IsNullOrWhiteSpace(TriviaSettings.InstructionBannerText) ? TriviaSettings.DefaultInstructionBannerText : TriviaSettings.InstructionBannerText;
+            TriviaQuestionsPerGame = TriviaSettings.QuestionsPerGame > 0 ? TriviaSettings.QuestionsPerGame : 10;
             TriviaDefaultQuestionSeconds = TriviaSettings.DefaultQuestionSeconds;
             TriviaWarningCountdownSeconds = TriviaSettings.WarningCountdownSeconds;
             TriviaAnswerEliminationIntervalSeconds = TriviaSettings.AnswerEliminationIntervalSeconds;
+            TriviaPostRevealDelaySeconds = TriviaSettings.PostRevealDelaySeconds > 0 ? TriviaSettings.PostRevealDelaySeconds : 5;
             TriviaBasePoints = TriviaSettings.BasePointsPerQuestion;
             TriviaWrongAnswerDeduction = TriviaSettings.WrongAnswerDeductionPoints;
+            TriviaTieredScoringEnabled = TriviaSettings.TieredScoringEnabled;
+            TriviaPoints4OptionsPercent = TriviaSettings.Points4OptionsPercent;
+            TriviaPoints3OptionsPercent = TriviaSettings.Points3OptionsPercent;
+            TriviaPoints2OptionsPercent = TriviaSettings.Points2OptionsPercent;
             TriviaSpeedBonusEnabled = TriviaSettings.SpeedBonusEnabled;
             TriviaMaxSpeedBonus = TriviaSettings.MaxSpeedBonus;
             TriviaStreakBonusEnabled = TriviaSettings.StreakBonusMultiplier > 0;
@@ -372,7 +451,9 @@ namespace KSRotation.ViewModels
             TriviaAutoAdvance = TriviaSettings.AutoAdvanceQuestions;
             TriviaAutoStartNextGame = TriviaSettings.AutoStartNextGameEnabled;
             TriviaNextGameDelayMinutes = TriviaSettings.NextGameDelayMinutes;
-            TriviaPreGameCountdownMinutes = TriviaSettings.PreGameCountdownMinutes;
+            TriviaPreGameCountdownMinutes = TriviaSettings.PreGameCountdownMinutes > 0 ? TriviaSettings.PreGameCountdownMinutes : 5;
+            TriviaPreGameSecondsRemaining = TriviaPreGameCountdownMinutes * 60;
+            TriviaPreGameCountdownText = $"{TriviaPreGameCountdownMinutes:D2}:00";
             TriviaAutoStartAfterCountdown = TriviaSettings.AutoStartAfterCountdown;
             TriviaPort = TriviaSettings.Port;
             TriviaWifiSsid = TriviaSettings.WifiSsid;
@@ -384,11 +465,17 @@ namespace KSRotation.ViewModels
             TriviaSettings.VenueName = TriviaVenueName;
             TriviaSettings.HostName = TriviaHostName;
             TriviaSettings.InstructionBannerText = TriviaInstructionBannerText;
+            TriviaSettings.QuestionsPerGame = TriviaQuestionsPerGame;
             TriviaSettings.DefaultQuestionSeconds = TriviaDefaultQuestionSeconds;
             TriviaSettings.WarningCountdownSeconds = TriviaWarningCountdownSeconds;
             TriviaSettings.AnswerEliminationIntervalSeconds = TriviaAnswerEliminationIntervalSeconds;
+            TriviaSettings.PostRevealDelaySeconds = TriviaPostRevealDelaySeconds;
             TriviaSettings.BasePointsPerQuestion = TriviaBasePoints;
             TriviaSettings.WrongAnswerDeductionPoints = TriviaWrongAnswerDeduction;
+            TriviaSettings.TieredScoringEnabled = TriviaTieredScoringEnabled;
+            TriviaSettings.Points4OptionsPercent = TriviaPoints4OptionsPercent;
+            TriviaSettings.Points3OptionsPercent = TriviaPoints3OptionsPercent;
+            TriviaSettings.Points2OptionsPercent = TriviaPoints2OptionsPercent;
             TriviaSettings.SpeedBonusEnabled = TriviaSpeedBonusEnabled;
             TriviaSettings.MaxSpeedBonus = TriviaMaxSpeedBonus;
             TriviaSettings.StreakBonusMultiplier = TriviaStreakBonusEnabled ? TriviaStreakMultiplier : 0;
@@ -403,6 +490,30 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
+        public void LaunchTriviaPreGameLobby()
+        {
+            TriviaIsShowingConnectScreen = true;
+            if (!TriviaIsPreGameCountdownRunning)
+            {
+                if (TriviaPreGameSecondsRemaining <= 0)
+                {
+                    TriviaPreGameSecondsRemaining = TriviaPreGameCountdownMinutes * 60;
+                    int mins = TriviaPreGameSecondsRemaining / 60;
+                    int secs = TriviaPreGameSecondsRemaining % 60;
+                    TriviaPreGameCountdownText = $"{mins:D2}:{secs:D2}";
+                }
+                TriviaIsPreGameCountdownRunning = true;
+                _triviaPreGameTimer.Start();
+            }
+
+            OpenTriviaDisplay();
+#if !MAUI
+            _triviaDisplayVm?.UpdatePreGameCountdown(TriviaPreGameSecondsRemaining);
+            UpdateTriviaCategoryPreview();
+#endif
+        }
+
+        [RelayCommand]
         public void StartTrivia()
         {
             if (_triviaEngine == null) return;
@@ -412,11 +523,7 @@ namespace KSRotation.ViewModels
                 var checkedPacks = GetCheckedTriviaPacks();
                 if (checkedPacks.Count > 0)
                 {
-                    // Pool every checked pack's questions together and draw this game's set fresh -
-                    // see TriviaPackManager.BuildMixedQuestionSet for the double-draw-then-rescramble
-                    // algorithm. Called again on every unattended auto-restart too, so the question
-                    // set is different every game even with the exact same packs checked.
-                    var gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, TriviaSettings.QuestionsPerGame);
+                    var gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, TriviaQuestionsPerGame);
                     if (gameQuestions.Count > 0)
                     {
                         string title = checkedPacks.Count == 1 ? checkedPacks[0].Title : string.Join(" + ", checkedPacks.Select(p => p.Title));
@@ -447,7 +554,6 @@ namespace KSRotation.ViewModels
                 TriviaActiveRoundTitle = rounds[0].Title;
                 _triviaEngine.StartCurrentQuestion();
 
-                // Automatically launch or focus the 16:9 big-screen display window on the selected monitor
                 OpenTriviaDisplay();
             }
             catch (Exception ex)
@@ -484,21 +590,22 @@ namespace KSRotation.ViewModels
                     null,
                     TriviaWifiSsid,
                     TriviaWifiPassword,
-                    TriviaPreGameCountdownMinutes * 60);
+                    TriviaPreGameSecondsRemaining);
 
                 _triviaDisplayVm.HostName = TriviaHostName;
                 _triviaDisplayVm.UpdateInstructionBannerTemplate(TriviaInstructionBannerText);
+                _triviaDisplayVm.IsConnectInstructionsActive = TriviaIsShowingConnectScreen;
 
                 var checkedPacksForDisplay = GetCheckedTriviaPacks();
                 if (checkedPacksForDisplay.Count > 0)
                 {
-                    int questionCountForDisplay = Math.Clamp(TriviaSettings.QuestionsPerGame > 0 ? TriviaSettings.QuestionsPerGame : 10, 1, checkedPacksForDisplay.Sum(p => p.Questions.Count));
+                    int questionCountForDisplay = Math.Clamp(TriviaQuestionsPerGame > 0 ? TriviaQuestionsPerGame : 10, 1, checkedPacksForDisplay.Sum(p => p.Questions.Count));
                     _triviaDisplayVm.UpdateFeaturedCategoryHeader(questionCountForDisplay, checkedPacksForDisplay.Count);
                 }
 
                 if (checkedPacksForDisplay.Count == 1)
                 {
-                    _triviaDisplayVm.UpdateCategory(checkedPacksForDisplay[0].Title);
+                    _triviaDisplayVm.UpdateCategory(checkedPacksForDisplay[0].Category, checkedPacksForDisplay[0].Description);
                 }
                 else if (checkedPacksForDisplay.Count > 1)
                 {
@@ -568,6 +675,92 @@ namespace KSRotation.ViewModels
 #endif
 
         [RelayCommand]
+        public void StartTriviaPreGameCountdown(object? parameter)
+        {
+            int minutes = 5;
+            if (parameter is int i) minutes = i;
+            else if (parameter is string s && int.TryParse(s, out int parsed)) minutes = parsed;
+
+            TriviaPreGameCountdownMinutes = minutes > 0 ? minutes : 5;
+            TriviaPreGameSecondsRemaining = TriviaPreGameCountdownMinutes * 60;
+            int mins = TriviaPreGameSecondsRemaining / 60;
+            int secs = TriviaPreGameSecondsRemaining % 60;
+            TriviaPreGameCountdownText = $"{mins:D2}:{secs:D2}";
+            TriviaIsPreGameCountdownRunning = true;
+            _triviaPreGameTimer.Stop();
+            _triviaPreGameTimer.Start();
+#if !MAUI
+            _triviaDisplayVm?.UpdatePreGameCountdown(TriviaPreGameSecondsRemaining);
+#endif
+        }
+
+        [RelayCommand]
+        public void AddTriviaPreGameMinutes(object? parameter)
+        {
+            int deltaMinutes = 1;
+            if (parameter is int i) deltaMinutes = i;
+            else if (parameter is string s && int.TryParse(s, out int parsed)) deltaMinutes = parsed;
+
+            TriviaPreGameSecondsRemaining = Math.Max(0, TriviaPreGameSecondsRemaining + (deltaMinutes * 60));
+            int mins = TriviaPreGameSecondsRemaining / 60;
+            int secs = TriviaPreGameSecondsRemaining % 60;
+            TriviaPreGameCountdownText = $"{mins:D2}:{secs:D2}";
+#if !MAUI
+            _triviaDisplayVm?.UpdatePreGameCountdown(TriviaPreGameSecondsRemaining);
+#endif
+            if (!TriviaIsPreGameCountdownRunning && TriviaPreGameSecondsRemaining > 0)
+            {
+                TriviaIsPreGameCountdownRunning = true;
+                _triviaPreGameTimer.Start();
+            }
+        }
+
+        [RelayCommand]
+        public void Add1TriviaPreGameMinute() => AddTriviaPreGameMinutes(1);
+
+        [RelayCommand]
+        public void Add5TriviaPreGameMinutes() => AddTriviaPreGameMinutes(5);
+
+        [RelayCommand]
+        public void Reset5TriviaPreGameMinutes() => StartTriviaPreGameCountdown(5);
+
+        [RelayCommand]
+        public void ToggleTriviaPreGameTimer()
+        {
+            TriviaIsPreGameCountdownRunning = !TriviaIsPreGameCountdownRunning;
+            if (TriviaIsPreGameCountdownRunning)
+            {
+                _triviaPreGameTimer.Start();
+            }
+            else
+            {
+                _triviaPreGameTimer.Stop();
+            }
+        }
+
+        [RelayCommand]
+        public void ToggleTriviaConnectInstructions()
+        {
+            TriviaIsShowingConnectScreen = !TriviaIsShowingConnectScreen;
+#if !MAUI
+            if (_triviaDisplayVm != null)
+            {
+                _triviaDisplayVm.IsConnectInstructionsActive = TriviaIsShowingConnectScreen;
+            }
+#endif
+        }
+
+        [RelayCommand]
+        public void RemoveTriviaPlayer(TriviaPlayer? player)
+        {
+            if (player != null)
+            {
+                TriviaPlayers.Remove(player);
+                TriviaConnectedPlayerCount = TriviaPlayers.Count(p => p.IsConnected);
+            }
+        }
+
+        [RelayCommand]
         public void ToggleTriviaPause()
         {
             _triviaEngine?.TogglePause("Host Manual Pause");
@@ -589,9 +782,6 @@ namespace KSRotation.ViewModels
         public void ResetTrivia()
         {
             if (_triviaEngine == null) return;
-            // The web server holds a fixed reference to the engine passed at construction, so it
-            // must be recreated too - otherwise phones keep talking to the disposed old engine
-            // while the screen shows the new one, and the buzzers silently stop working.
             _triviaWebServer?.Dispose();
             _triviaEngine.Dispose();
             _triviaEngine = new TriviaGameEngine(TriviaSettings);
@@ -602,6 +792,7 @@ namespace KSRotation.ViewModels
             TriviaCurrentQuestionPrompt = "Game reset. Click 'Start Game' to begin.";
             TriviaOptionA = TriviaOptionB = TriviaOptionC = TriviaOptionD = "";
             TriviaCorrectAnswerIndex = -1;
+            TriviaAnswerDistribution.Clear();
         }
 
         [RelayCommand]

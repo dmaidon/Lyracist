@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 11:16:30 -> Added unit test verifying Game Master custom question time limit override
+// Edited on Aug 20, 2026 @ 06:40:00 -> Added unit tests for Tiered Option Value Scoring (100% / 70% / 40%)
 using System;
 using System.Collections.Generic;
 using Lyracist.Trivia.Core.Models;
@@ -392,5 +392,131 @@ public class GameEngineTests
 
         Assert.Equal(30, engine.TotalCountdownSeconds);
         Assert.Equal(30, engine.RemainingSeconds);
+    }
+
+    [Fact]
+    public void TieredScoring_Awards100PercentWhenAll4OptionsVisible()
+    {
+        var settings = new TriviaSettings
+        {
+            BasePointsPerQuestion = 1000,
+            SpeedBonusEnabled = false,
+            StreakBonusMultiplier = 0.0,
+            TieredScoringEnabled = true,
+            Points4OptionsPercent = 100,
+            Points3OptionsPercent = 70,
+            Points2OptionsPercent = 40
+        };
+
+        using var engine = new TriviaGameEngine(settings);
+        var alice = engine.RegisterPlayer("Alice");
+        var bob = engine.RegisterPlayer("Bob");
+
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        // 0 eliminated -> 4 options visible
+        Assert.Empty(engine.EliminatedAnswerIndices);
+        engine.SubmitAnswer("Alice", 1); // Correct
+
+        engine.LockAndRevealAnswer();
+
+        Assert.Equal(1000, alice.TotalScore);
+        Assert.Equal(1000, alice.LastPointsEarned);
+    }
+
+    [Fact]
+    public void TieredScoring_Awards70PercentWhen1OptionEliminated()
+    {
+        var settings = new TriviaSettings
+        {
+            BasePointsPerQuestion = 1000,
+            SpeedBonusEnabled = false,
+            StreakBonusMultiplier = 0.0,
+            TieredScoringEnabled = true,
+            Points4OptionsPercent = 100,
+            Points3OptionsPercent = 70,
+            Points2OptionsPercent = 40
+        };
+
+        using var engine = new TriviaGameEngine(settings);
+        var alice = engine.RegisterPlayer("Alice");
+        var bob = engine.RegisterPlayer("Bob");
+
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        // Simulate 1 option eliminated (e.g. index 0) -> 3 options visible
+        engine.EliminatedAnswerIndices.Add(0);
+        engine.SubmitAnswer("Alice", 1); // Correct
+
+        engine.LockAndRevealAnswer();
+
+        Assert.Equal(700, alice.TotalScore);
+        Assert.Equal(700, alice.LastPointsEarned);
+    }
+
+    [Fact]
+    public void TieredScoring_Awards40PercentWhen2OptionsEliminated()
+    {
+        var settings = new TriviaSettings
+        {
+            BasePointsPerQuestion = 1000,
+            SpeedBonusEnabled = false,
+            StreakBonusMultiplier = 0.0,
+            TieredScoringEnabled = true,
+            Points4OptionsPercent = 100,
+            Points3OptionsPercent = 70,
+            Points2OptionsPercent = 40
+        };
+
+        using var engine = new TriviaGameEngine(settings);
+        var alice = engine.RegisterPlayer("Alice");
+        var bob = engine.RegisterPlayer("Bob");
+
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        // Simulate 2 options eliminated (e.g. index 0 and 2) -> 2 options visible (50/50)
+        engine.EliminatedAnswerIndices.Add(0);
+        engine.EliminatedAnswerIndices.Add(2);
+        engine.SubmitAnswer("Alice", 1); // Correct
+
+        engine.LockAndRevealAnswer();
+
+        Assert.Equal(400, alice.TotalScore);
+        Assert.Equal(400, alice.LastPointsEarned);
+    }
+
+    [Fact]
+    public void TieredScoring_WhenDisabled_Awards100PercentRegardlessOfEliminations()
+    {
+        var settings = new TriviaSettings
+        {
+            BasePointsPerQuestion = 1000,
+            SpeedBonusEnabled = false,
+            StreakBonusMultiplier = 0.0,
+            TieredScoringEnabled = false,
+            Points4OptionsPercent = 100,
+            Points3OptionsPercent = 70,
+            Points2OptionsPercent = 40
+        };
+
+        using var engine = new TriviaGameEngine(settings);
+        var alice = engine.RegisterPlayer("Alice");
+        var bob = engine.RegisterPlayer("Bob");
+
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        // 2 options eliminated, but TieredScoringEnabled is false
+        engine.EliminatedAnswerIndices.Add(0);
+        engine.EliminatedAnswerIndices.Add(2);
+        engine.SubmitAnswer("Alice", 1); // Correct
+
+        engine.LockAndRevealAnswer();
+
+        Assert.Equal(1000, alice.TotalScore);
+        Assert.Equal(1000, alice.LastPointsEarned);
     }
 }

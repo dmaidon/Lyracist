@@ -1,4 +1,4 @@
-<!-- Edited on Aug 18, 2026 @ 17:48:00 -> Display deducted points on incorrect answers when pointsEarned is negative -->
+<!-- Edited on Aug 20, 2026 @ 06:26:00 -> Added real-time Tiered Point Multiplier badge (100% / 70% / 40%) and elimination handling to mobile buzzer screen -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -255,6 +255,49 @@
             justify-content: center;
         }
 
+        .multiplier-pill {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .multiplier-pill.tier-100 {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #10B981;
+            color: #34D399;
+        }
+
+        .multiplier-pill.tier-70 {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: #06B6D4;
+            color: #38BDF8;
+        }
+
+        .multiplier-pill.tier-40 {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: #F59E0B;
+            color: #FBBF24;
+        }
+
+        .badge-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-points {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
         .buzzer-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -443,6 +486,12 @@
 
             <div id="question-text" class="question-box">
                 Loading question...
+            </div>
+
+            <!-- Tiered Point Value Pill -->
+            <div id="value-multiplier-pill" class="multiplier-pill tier-100">
+                <span id="multiplier-badge" class="badge-value">⚡ 100% VALUE</span>
+                <span id="multiplier-points" class="badge-points">1,000 pts base</span>
             </div>
 
             <div class="buzzer-grid">
@@ -694,6 +743,31 @@
                 }
 
                 showScreen('screen-question');
+
+                // Update real-time point value multiplier badge
+                const multPill = document.getElementById('value-multiplier-pill');
+                const multBadge = document.getElementById('multiplier-badge');
+                const multPoints = document.getElementById('multiplier-points');
+                if (multPill && multBadge && multPoints) {
+                    const pct = data.currentValuePercent || 100;
+                    const pts = data.currentPotentialPoints || (data.basePoints || 1000);
+                    multBadge.textContent = `⚡ ${pct}% VALUE`;
+                    multPoints.textContent = `${pts.toLocaleString()} pts base`;
+                    multPill.className = `multiplier-pill tier-${pct}`;
+                }
+
+                // Update eliminated choices in real time during countdown
+                if (data.eliminatedIndices && Array.isArray(data.eliminatedIndices)) {
+                    data.eliminatedIndices.forEach(idx => {
+                        const btn = document.querySelector(`.btn-buzzer.opt-${idx}`);
+                        if (btn) {
+                            btn.classList.add('eliminated');
+                            if (!hasSubmitted) {
+                                btn.disabled = true;
+                            }
+                        }
+                    });
+                }
 
                 // Update countdown bar
                 const bar = document.getElementById('timer-bar');

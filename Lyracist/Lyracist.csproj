@@ -1,4 +1,4 @@
-<!-- Edited on Aug 19, 2026 @ 09:16:30 -> Include TriviaData folder and contents with CopyToOutputDirectory=PreserveNewest -->
+<!-- Edited on Aug 20, 2026 @ 05:56:00 -> Added TriviaBannerGenerator linked compile reference -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -116,6 +116,7 @@
     <Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
     <Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
     <Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
+    <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />
   </ItemGroup>
 
   <ItemGroup>

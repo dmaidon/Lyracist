@@ -1,4 +1,4 @@
-<!-- Edited on Aug 19, 2026 @ 11:51:30 -> Use official LyracistTrivia_logo.png on About page -->
+<!-- Edited on Aug 20, 2026 @ 06:37:00 -> Added Tiered Option Value Scoring controls (100% / 70% / 40%) in Lyracist.Trivia MainWindow.xaml -->
 <Window x:Class="Lyracist.Trivia.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -536,6 +536,44 @@
                                                 <TextBlock Text="Wrong Answer Deduction Points:" FontSize="12" Foreground="#CBD5E1" VerticalAlignment="Center" ToolTip="Points deducted for an incorrect answer (Default: 0)" />
                                                 <TextBox Grid.Column="1" Text="{Binding WrongAnswerDeductionPoints, UpdateSourceTrigger=PropertyChanged}" Width="75" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="6,4" />
                                             </Grid>
+
+                                            <!-- Tiered Option Value Scoring (100% / 70% / 40%) -->
+                                            <Border Background="#188B5CF6" BorderBrush="#338B5CF6" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
+                                                <StackPanel>
+                                                    <Grid Margin="0,0,0,6">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel VerticalAlignment="Center">
+                                                            <TextBlock Text="Tiered Option Value (4=100%, 3=70%, 2=40%)" FontSize="12" FontWeight="SemiBold" Foreground="#CBD5E1" />
+                                                            <TextBlock Text="Reduces points awarded as wrong options fade out" FontSize="10" Foreground="#64748B" />
+                                                        </StackPanel>
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding TieredScoringEnabled}" VerticalAlignment="Center" />
+                                                    </Grid>
+                                                    <Grid IsEnabled="{Binding TieredScoringEnabled}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="6" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="6" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="4 Opt (%)" FontSize="10" Foreground="#94A3B8" Margin="0,0,0,2" />
+                                                            <TextBox Text="{Binding Points4OptionsPercent, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="4,2" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2">
+                                                            <TextBlock Text="3 Opt (%)" FontSize="10" Foreground="#94A3B8" Margin="0,0,0,2" />
+                                                            <TextBox Text="{Binding Points3OptionsPercent, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="4,2" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="4">
+                                                            <TextBlock Text="2 Opt (%)" FontSize="10" Foreground="#94A3B8" Margin="0,0,0,2" />
+                                                            <TextBox Text="{Binding Points2OptionsPercent, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="4,2" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
 
                                             <Grid>
                                                 <Grid.ColumnDefinitions>

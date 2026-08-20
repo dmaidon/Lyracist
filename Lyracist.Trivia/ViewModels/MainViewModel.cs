@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 11:47:00 -> Added Topic 8 JSON Database Format & Schema Guide to help system
+// Edited on Aug 20, 2026 @ 06:35:00 -> Added Tiered Option Value Scoring (100% / 70% / 40%) properties and settings to Lyracist.Trivia MainViewModel
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -114,6 +114,18 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private int _wrongAnswerDeductionPoints = 0;
 
     [ObservableProperty]
+    private bool _tieredScoringEnabled = true;
+
+    [ObservableProperty]
+    private int _points4OptionsPercent = 100;
+
+    [ObservableProperty]
+    private int _points3OptionsPercent = 70;
+
+    [ObservableProperty]
+    private int _points2OptionsPercent = 40;
+
+    [ObservableProperty]
     private bool _speedBonusEnabled = true;
 
     [ObservableProperty]
@@ -218,6 +230,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _postRevealDelaySeconds = _settings.PostRevealDelaySeconds > 0 ? _settings.PostRevealDelaySeconds : 5;
         _basePointsPerQuestion = _settings.BasePointsPerQuestion > 0 ? _settings.BasePointsPerQuestion : 1000;
         _wrongAnswerDeductionPoints = _settings.WrongAnswerDeductionPoints;
+        _tieredScoringEnabled = _settings.TieredScoringEnabled;
+        _points4OptionsPercent = _settings.Points4OptionsPercent;
+        _points3OptionsPercent = _settings.Points3OptionsPercent;
+        _points2OptionsPercent = _settings.Points2OptionsPercent;
         _speedBonusEnabled = _settings.SpeedBonusEnabled;
         _maxSpeedBonus = _settings.MaxSpeedBonus;
         _streakBonusMultiplier = _settings.StreakBonusMultiplier;
@@ -695,6 +711,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Settings.PostRevealDelaySeconds = PostRevealDelaySeconds;
         Settings.BasePointsPerQuestion = BasePointsPerQuestion;
         Settings.WrongAnswerDeductionPoints = WrongAnswerDeductionPoints;
+        Settings.TieredScoringEnabled = TieredScoringEnabled;
+        Settings.Points4OptionsPercent = Points4OptionsPercent;
+        Settings.Points3OptionsPercent = Points3OptionsPercent;
+        Settings.Points2OptionsPercent = Points2OptionsPercent;
         Settings.SpeedBonusEnabled = SpeedBonusEnabled;
         Settings.MaxSpeedBonus = MaxSpeedBonus;
         Settings.StreakBonusMultiplier = StreakBonusMultiplier;
@@ -842,8 +862,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
             Title = "⚙️ 3. Settings & Timer Override Rules",
             Icon = "⚙️",
             AccentColor = "#F59E0B",
-            DescriptionHeader = "Authoritative Timer Control, Scoring Options & Game Customization",
-            DescriptionContent = "• ⏱️ Question Answer Window (Game Master Override):\n  - The 'Question Answer Window' setting in the Settings tab (default: 15s) is authoritative for the live game.\n  - If the Game Master changes this setting to 10s, 20s, 25s, 30s, etc., all questions will count down using the Game Master's configured duration, overriding the 15s factory default in the question JSON files.\n\n• ❌ 5-Second Wrong Answer Elimination: Automatically eliminates incorrect answer choices at 5-second intervals during the countdown, narrowing choices for remaining players.\n\n• ⏳ 5-Second Reveal Buffer: Displays the correct answer, points breakdown, and explanation for 5 seconds before advancing.\n\n• 🎯 Scoring & Speed Bonuses: Base score of 1,000 pts per correct answer, with up to +500 speed bonus for fast buzzers, and a +10% streak multiplier for consecutive correct answers.\n\n• ⚠️ Wrong Answer Deductions: Optional point deduction (0 to -500 pts) for incorrect submissions to discourage blind guessing.\n\n• 🔄 Auto-Start Next Game: Configurable intermission timer (e.g. 3 minutes) that automatically launches the next game when the current session concludes."
+            DescriptionHeader = "Authoritative Timer Control, Tiered Option Value Scoring & Game Customization",
+            DescriptionContent = "• ⚡ Tiered Option Value Scoring (100% / 70% / 40%):\n  - 4 Options Visible (0 Eliminated): 100% Base Points (1,000 pts default). Awards early, confident buzz-ins before options fade.\n  - 3 Options Visible (1 Eliminated): 70% Base Points (700 pts default). Fades 1st wrong option at 2/3 countdown.\n  - 2 Options Visible (50/50): 40% Base Points (400 pts default). Fades 2nd wrong option at 1/3 countdown.\n  - Early knowledge enjoys a decisive 2.5× advantage while casual patrons can still score on 50/50 guesses.\n\n• ⏱️ Question Answer Window (Game Master Override):\n  - The 'Question Answer Window' setting in the Settings tab (default: 15s) is authoritative for the live game.\n  - If the Game Master changes this setting to 10s, 20s, 25s, 30s, etc., all questions will count down using the Game Master's configured duration, overriding the 15s factory default in the question JSON files.\n\n• ❌ Wrong Answer Elimination: Automatically eliminates incorrect answer choices at configured intervals during the countdown, narrowing choices for remaining players.\n\n• ⏳ 5-Second Reveal Buffer: Displays the correct answer, points breakdown, and explanation for 5 seconds before advancing.\n\n• 🎯 Scoring & Speed Bonuses: Base score of 1,000 pts per correct answer, with up to +500 speed bonus for fast buzzers, and a +10% streak multiplier for consecutive correct answers.\n\n• ⚠️ Wrong Answer Deductions: Optional point deduction (0 to -500 pts) for incorrect submissions to discourage blind guessing.\n\n• 🔄 Auto-Start Next Game: Configurable intermission timer (e.g. 3 minutes) that automatically launches the next game when the current session concludes."
         });
 
         HelpTopics.Add(new TriviaHelpTopic
@@ -870,7 +890,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
             Icon = "🗄️",
             AccentColor = "#6366F1",
             DescriptionHeader = "Starter Categories, Auto-Discovery & Adding Custom Databases",
-            DescriptionContent = "• Dynamic Auto-Discovery: The game engine dynamically scans the TriviaData/packs/ folder on startup and loads all available JSON question packs into the category selector.\n\n• Adding Custom Databases:\n  - Users can add their own custom category databases at any time. Simply place a new JSON file (e.g. disney_trivia.json) into the TriviaData/packs/ directory.\n  - Each question requires a Prompt, 4 Options, CorrectAnswerIndex (0-3), and an optional Explanation.\n  - To display a custom 16:9 pre-game banner, place a matching PNG or JPG image (e.g. disney_trivia.png) in TriviaData/Banners/. If no image is provided, the lobby automatically generates a sleek category card.\n\n• Pre-Loaded Starter Library:\n  - Includes 14 starter categories with 150 questions each (2,100 total curated questions) spanning Bikers, Rock & Roll, Country, Pop Culture, Movies, TV, Geography, Capitals, History, Sports, Slogans, and Pub Trivia.\n\n• Automatic SQLite Database Seeding: Discovered questions are synchronized into TriviaData/trivia.db with full offline capability."
+            DescriptionContent = "• Dynamic Auto-Discovery: The game engine dynamically scans the TriviaData/packs/ folder on startup and loads all available JSON question packs into the category selector.\n\n• Adding Custom Databases:\n  - Users can add their own custom category databases at any time. Simply place a new JSON file (e.g. disney_trivia.json) into the TriviaData/packs/ directory.\n  - Each question requires a Prompt, 4 Options, CorrectAnswerIndex (0-3), and an optional Explanation.\n  - To display a custom 16:9 pre-game banner, place a matching PNG or JPG image (e.g. disney_trivia.png) in TriviaData/Banners/. If no image is provided, the lobby automatically generates a sleek category card.\n\n• Pre-Loaded Starter Library:\n  - Includes 15 starter categories with 150 questions each (2,250 total curated questions) spanning Bikers, Rock & Roll, Country, Pop Culture, Movies, TV, Geography, Capitals, History, Sports, Slogans, and Pub Trivia.\n\n• Automatic SQLite Database Seeding: Discovered questions are synchronized into TriviaData/trivia.db with full offline capability."
         });
 
         HelpTopics.Add(new TriviaHelpTopic

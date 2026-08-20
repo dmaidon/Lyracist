@@ -1,10 +1,47 @@
-<!-- Edited on Aug 19, 2026 @ 15:53:00 -> Added Famous Movie Lines & Sayings 15th pack with 150 questions (2,250 total questions) -->
-Last Edit: Aug 19, 2026 - Famous Movie Lines & Sayings 15th Category Added (2,250 Total Questions)
+<!-- Edited on Aug 20, 2026 @ 06:45:00 -> Added Tiered Option Value Scoring (100% / 70% / 40%) with live mobile buzzer badge and configurable settings across all solution apps -->
+Last Edit: Aug 20, 2026 - Tiered Option Value Scoring (100% / 70% / 40%) Across All Solution Apps
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [26.8.19.0] - 2026-08-19
+## [26.8.20.0] - 2026-08-20
+
+### Added & Enhanced
+- **Tiered Option Value Scoring (100% / 70% / 40%) Across `Lyracist`, `KSRotation`, and `Lyracist.Trivia`**:
+  - **Dynamic Multiplier Tiers**: Base points scale according to the number of visible options remaining at the exact moment of player answer submission:
+    * **4 Options Visible (0 Eliminated)**: 100% of Base Points (1,000 pts default). Rewarding early, confident buzz-ins before any wrong options fade.
+    * **3 Options Visible (1 Eliminated)**: 70% of Base Points (700 pts default). Triggered when the first wrong option fades at the 2/3 question countdown mark.
+    * **2 Options Visible (2 Eliminated / 50-50)**: 40% of Base Points (400 pts default). Triggered when the second wrong option fades at the 1/3 question countdown mark.
+    * **Mathematical Balance**: Gives early knowledgeable players a decisive 2.5× scoring advantage (1,000 pts vs 400 pts) while casual patrons can still score meaningful points on 50/50 guesses.
+  - **Mobile Buzzer Web App (`trivia.html`) Real-Time Multiplier Pill**:
+    * Added dynamic `#value-multiplier-pill` right above the 4 buzzer buttons updating in real time as options fade: `⚡ 100% VALUE (1,000 pts)`, `⚡ 70% VALUE (700 pts)`, `⚡ 40% VALUE (400 pts)`.
+    * Synchronized buzzer button elimination and disable state during question active countdown.
+  - **Configuration Controls in Trivia Settings**:
+    * Added `Tiered Option Value (4=100%, 3=70%, 2=40%)` toggle and customizable percentage fields across `Lyracist` (`TriviaSettingsPage.xaml`), `KSRotation` (`MainWindow.xaml`), and `Lyracist.Trivia` (`MainWindow.xaml`).
+- **Unified Trivia Parity & Feature Alignment Across `Lyracist`, `KSRotation`, and `Lyracist.Trivia`**:
+  - Brought complete visual, behavioral, and architectural feature parity between standalone `Lyracist.Trivia` and the embedded trivia engines in `Lyracist` and `KSRotation`.
+  - **16:9 Big Screen Projection Window (`TriviaDisplayWindow`) in `Lyracist` and `KSRotation`**:
+    - High-impact 70:30 pre-game lobby featuring single-category 16:9 announcement banners and real-time generated collage banners for multi-pack category games (`TriviaBannerGenerator`).
+    - Right-column onboarding stack featuring large digital pre-game countdown clock, Wi-Fi scan-to-connect QR card with SSID and password credentials, and Trivia scan-to-join mobile buzzer QR card.
+    - Continuous top marquee ticker bar for venue announcements and player rankings.
+    - Dynamic 2x2 question cards (▲ Purple, ◆ Cyan, ● Amber, ■ Rose) with real-time answer elimination fading and post-reveal explanations.
+    - Intermission countdown card and celebration view for round winners and team rosters.
+  - **3-Column Game Master Deck in `Lyracist` (`TriviaPage.xaml`) and `KSRotation` (`MainWindow.xaml`)**:
+    - **Header Bar**: Active venue label, connected player count badge, target monitor projection dropdown, and 1-click "📺 Open Big Screen" button.
+    - **Left Column**: Category pack checklist (check 2+ to mix categories), Questions Per Game preset selector (5, 10, 15, 20, 25, 50, 100), Auto-Run Game switch (15s answer, 5s fade, 5s reveal), 1-click `"🎯 Launch Pre-Game Countdown"` and `"▶ Start Game Now"`, live question controls (Start, Pause, Lock & Reveal, Next, Reset), and patron mobile portal info.
+    - **Center Column**: Active round title, countdown timer, question prompt card, real-time **Patron Answer Distribution Visualizer** (A, B, C, D vote counts and progress bars), and 2x2 stylized answer option preview.
+    - **Right Column**: Live Player Leaderboard with real-time score updates, team associations, and individual player kick/moderation action (`✕`).
+  - **Dedicated Trivia Settings Tab in `Lyracist` (`TriviaSettingsPage.xaml`) and `KSRotation`**:
+    - Question Timers (Time limit, warning countdown, wrong option elimination fade, post-reveal delay).
+    - Scoring & Multipliers (Base points, wrong answer penalty deduction, speed bonus, streak multiplier).
+    - Venue & Host configuration with customizable pre-game welcome banner template supporting `{venue}` and `{dj}` tokens.
+    - Intermission & Pre-game countdown controls (auto-start next game, pre-game delay in minutes, auto-start after countdown).
+    - Local network and Wi-Fi credentials with auto-detect Wi-Fi network and password.
+    - Target monitor selection and Save / Reset Defaults with animated status toasts.
+  - **Karaoke & Rotation Screen Priority & Auto-Pause Deconfliction**:
+    - In `Lyracist` (`DisplayService.cs`) and `KSRotation` (`MainViewModel.Trivia.cs`), Trivia is secondary to Karaoke performance and Singer Rotation.
+    - When a karaoke song is playing or singer rotation is projected on the screen, Trivia automatically pauses with an informative status reason (`"Karaoke Performance"` or `"Rotation Screen Active"`) and yields the display.
+    - When song performance finishes and rotation yields, Trivia automatically resumes seamlessly.
 
 ### Added
 - **New Category Pack: "Famous Lines & Sayings From Movies" (150 Questions)**:

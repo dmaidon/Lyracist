@@ -1,4 +1,4 @@
-// Created on Aug 17, 2026 @ 13:00:15 -> TriviaPlayer and team ranking model
+// Edited on Aug 20, 2026 @ 06:19:00 -> Added VisibleOptionsAtSubmission and RemainingSecondsAtSubmission for tiered scoring calculation
 using System;
 
 namespace Lyracist.Trivia.Core.Models;
@@ -17,6 +17,8 @@ public class TriviaPlayer
     public double LastResponseTimeMs { get; set; } = 0;
     public bool HasAnsweredCurrentQuestion { get; set; } = false;
     public int LastPointsEarned { get; set; } = 0;
+    public int VisibleOptionsAtSubmission { get; set; } = 4;
+    public int RemainingSecondsAtSubmission { get; set; } = 0;
     public bool IsConnected { get; set; } = true;
     public DateTime ConnectedAt { get; set; } = DateTime.Now;
     public DateTime LastSeenAt { get; set; } = DateTime.Now;

@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 15:42:30 -> Added isPaused and pauseReason to web status payload
+// Edited on Aug 20, 2026 @ 06:23:00 -> Added tiered scoring properties and potential points to /api/trivia/state payload
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -263,6 +263,16 @@ public class TriviaWebServer : IDisposable
             bool isCorrect = player != null && q != null && player.LastAnswerIndex == q.CorrectAnswerIndex;
             var gameResult = _engine.GetGameResult();
 
+            int visibleCount = Math.Max(1, 4 - _engine.EliminatedAnswerIndices.Count);
+            int currentPercent = 100;
+            if (_engine.Settings.TieredScoringEnabled)
+            {
+                if (visibleCount >= 4) currentPercent = _engine.Settings.Points4OptionsPercent;
+                else if (visibleCount == 3) currentPercent = _engine.Settings.Points3OptionsPercent;
+                else currentPercent = _engine.Settings.Points2OptionsPercent;
+            }
+            int potentialPoints = (int)(_engine.Settings.BasePointsPerQuestion * (currentPercent / 100.0));
+
             var statePayload = new
             {
                 state = _engine.State.ToString(),
@@ -275,6 +285,11 @@ public class TriviaWebServer : IDisposable
                 prompt = q?.Prompt ?? "",
                 options = q?.Options ?? [],
                 eliminatedIndices = _engine.EliminatedAnswerIndices,
+                tieredScoringEnabled = _engine.Settings.TieredScoringEnabled,
+                currentValuePercent = currentPercent,
+                currentPotentialPoints = potentialPoints,
+                basePoints = _engine.Settings.BasePointsPerQuestion,
+                visibleOptionsCount = visibleCount,
                 correctIndex = (_engine.State == TriviaGameState.RevealAnswer || _engine.State == TriviaGameState.RoundLeaderboard) ? q?.CorrectAnswerIndex : -1,
                 explanation = (_engine.State == TriviaGameState.RevealAnswer) ? q?.Explanation : "",
                 isCorrect = isCorrect,

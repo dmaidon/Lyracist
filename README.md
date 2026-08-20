@@ -1,8 +1,8 @@
-<!-- Edited on Aug 19, 2026 @ 15:16:00 -> Added TriviaDbCreator application details -->
-Last Edit: Aug 19, 2026 - TriviaDbCreator Project Added
+<!-- Edited on Aug 20, 2026 @ 06:47:00 -> Added Tiered Option Value Scoring (100% / 70% / 40%) details to README.md -->
+Last Edit: Aug 20, 2026 - Tiered Option Value Scoring (100% / 70% / 40%) Across All Solution Apps
 # Lyracist Pro
 
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, integrated interactive pub/bar trivia with dedicated separate settings, multi-monitor auto-casting, automated projection pause synchronization, and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, integrated interactive pub/bar trivia with dedicated separate settings, multi-monitor auto-casting, automated projection pause synchronization, full feature parity across standalone and embedded Trivia engines, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
 
 ---
 
@@ -26,6 +26,13 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Any singer can be designated as the 1st singer anchor via the `"Set as 1st Singer (Round Start)"` context action or `🚩` button.
 
 ### 🎯 Lyracist Live Trivia (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`)
+- **Tiered Option Value Scoring (100% / 70% / 40%)**:
+  - **Dynamic Multiplier Tiers**: Base points awarded scale dynamically based on how many options remain visible when a player buzzes in:
+    * **4 Options Visible**: **100% Points** (1,000 pts default). Awards full points to players with instant knowledge before any wrong options fade.
+    * **3 Options Visible**: **70% Points** (700 pts default). Automatically drops as the 1st wrong option fades at the 2/3 countdown mark.
+    * **2 Options Visible (50/50)**: **40% Points** (400 pts default). Automatically drops as the 2nd wrong option fades at the 1/3 countdown mark.
+  - **Live Mobile Multiplier Pill (`trivia.html`)**: Mobile devices display a real-time point multiplier badge (`⚡ 100% VALUE`, `⚡ 70% VALUE`, `⚡ 40% VALUE`) above the buzzer buttons, visually syncing with fading options on the big screen.
+  - **Configurable in Trivia Settings**: Enable/disable tiered scoring and customize option percentages across all applications.
 - **15 Category Starter Databases (2,250 Questions) with Balanced Option Distribution**:
   - Every single category database contains 150 curated, accurate questions with explanations, and multiple-choice answers evenly distributed across all 4 options (**~25% A, ~25% B, ~25% C, ~25% D**).
   - Dynamic Auto-Discovery: Users can create and drop unlimited custom JSON question packs into `TriviaData/packs/` with automatic database seeding on startup:
