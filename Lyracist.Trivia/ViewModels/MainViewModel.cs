@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 06:35:00 -> Added Tiered Option Value Scoring (100% / 70% / 40%) properties and settings to Lyracist.Trivia MainViewModel
+// Edited on Aug 20, 2026 @ 12:10:30 -> Dismiss pregame lobby and sync TV projection window immediately on StartGameWithSelectedPack
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -98,6 +98,29 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private int _nextGameDelayMinutes = 3;
 
+    /// 0 (or blank) means unlimited - auto-start just keeps looping forever like before. A
+    /// positive value preloads that many games' worth of questions up front (see
+    /// StartGameWithSelectedPack/_preloadedGameQuestionSets) and stops auto-restarting once
+    /// TriviaGameEngine.HasReachedGamesCap trips.
+    [ObservableProperty]
+    private int _totalGamesToPlay = 0;
+
+    private List<List<TriviaQuestion>>? _preloadedGameQuestionSets;
+    private int _preloadedGameIndex;
+
+    public string GameProgressText => TotalGamesToPlay > 0
+        ? $"Game {Math.Min(_engine.GamesPlayedCount, TotalGamesToPlay)} of {TotalGamesToPlay}"
+        : string.Empty;
+
+    partial void OnTotalGamesToPlayChanged(int value)
+    {
+        // Invalidate any in-progress preload so the next Start Game click rebuilds against the
+        // new count instead of continuing to hand out games sized/counted for the old value.
+        _preloadedGameQuestionSets = null;
+        _preloadedGameIndex = 0;
+        OnPropertyChanged(nameof(GameProgressText));
+    }
+
     [ObservableProperty]
     private int _defaultQuestionSeconds = 15;
 
@@ -106,6 +129,16 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     private int _postRevealDelaySeconds = 5;
+
+    /// Live summary of the auto-run timing (shown under the "Auto-Run Game" toggle) so the
+    /// header always reflects the game master's actual configured timings instead of a
+    /// hardcoded "15s answer • 5s fade • 5s reveal" that goes stale the moment they're changed.
+    public string AutoRunTimingSummary =>
+        $"{DefaultQuestionSeconds}s answer • {AnswerEliminationIntervalSeconds}s fade • {PostRevealDelaySeconds}s reveal";
+
+    partial void OnDefaultQuestionSecondsChanged(int value) => OnPropertyChanged(nameof(AutoRunTimingSummary));
+    partial void OnAnswerEliminationIntervalSecondsChanged(int value) => OnPropertyChanged(nameof(AutoRunTimingSummary));
+    partial void OnPostRevealDelaySecondsChanged(int value) => OnPropertyChanged(nameof(AutoRunTimingSummary));
 
     [ObservableProperty]
     private int _basePointsPerQuestion = 1000;
@@ -225,6 +258,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _questionsPerGame = _settings.QuestionsPerGame > 0 ? _settings.QuestionsPerGame : 10;
         _autoStartNextGameEnabled = _settings.AutoStartNextGameEnabled;
         _nextGameDelayMinutes = _settings.NextGameDelayMinutes > 0 ? _settings.NextGameDelayMinutes : 3;
+        _totalGamesToPlay = Math.Max(0, _settings.TotalGamesToPlay);
         _defaultQuestionSeconds = _settings.DefaultQuestionSeconds > 0 ? _settings.DefaultQuestionSeconds : 15;
         _answerEliminationIntervalSeconds = _settings.AnswerEliminationIntervalSeconds > 0 ? _settings.AnswerEliminationIntervalSeconds : 5;
         _postRevealDelaySeconds = _settings.PostRevealDelaySeconds > 0 ? _settings.PostRevealDelaySeconds : 5;
@@ -251,14 +285,14 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _webServer = new TriviaWebServer(_engine, _settings.Port);
 
         // Wire engine events
-        _engine.StateChanged += (s, e) => Application.Current?.Dispatcher.Invoke(() => HandleStateChanged(e));
-        _engine.TimerTick += (s, e) => Application.Current?.Dispatcher.Invoke(() => HandleTimerTick(e));
-        _engine.QuestionStarted += (s, e) => Application.Current?.Dispatcher.Invoke(() => HandleQuestionStarted(e));
-        _engine.AnswerRevealed += (s, e) => Application.Current?.Dispatcher.Invoke(() => HandleAnswerRevealed(e));
-        _engine.LeaderboardUpdated += (s, e) => Application.Current?.Dispatcher.Invoke(() => RefreshPlayers(e));
-        _engine.GameCompleted += (s, e) => Application.Current?.Dispatcher.Invoke(() => HandleGameCompleted(e));
-        _engine.IntermissionTick += (s, e) => Application.Current?.Dispatcher.Invoke(() => HandleIntermissionTick(e));
-        _engine.IntermissionCompleted += (s, e) => Application.Current?.Dispatcher.Invoke(() => HandleIntermissionCompleted());
+        _engine.StateChanged += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleStateChanged(e));
+        _engine.TimerTick += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleTimerTick(e));
+        _engine.QuestionStarted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleQuestionStarted(e));
+        _engine.AnswerRevealed += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswerRevealed(e));
+        _engine.LeaderboardUpdated += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => RefreshPlayers(e));
+        _engine.GameCompleted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleGameCompleted(e));
+        _engine.IntermissionTick += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionTick(e));
+        _engine.IntermissionCompleted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionCompleted());
 
         // Setup Pre-Game ticker (started when screen is cast or manually started)
         _isPreGameCountdownRunning = false;
@@ -491,16 +525,50 @@ public partial class MainViewModel : ObservableObject, IDisposable
         var checkedPacks = GetCheckedPacks();
         if (checkedPacks.Count == 0) return;
 
+        // Cancel any running pre-game countdown and dismiss the lobby/connect screen
+        _preGameTimer.Stop();
+        IsPreGameCountdownRunning = false;
+        IsShowingConnectScreen = false;
+        if (_activeDisplayVm != null)
+        {
+            _activeDisplayVm.IsConnectInstructionsActive = false;
+            _activeDisplayVm.IsPreGameCountdownRunning = false;
+        }
+
         // Reset game completion state
         IsGameComplete = false;
         WinnerAnnouncement = string.Empty;
         WinningTeamRoster = string.Empty;
 
-        // Pool every checked pack's questions together and draw this game's set fresh - see
-        // TriviaPackManager.BuildMixedQuestionSet for the double-draw-then-rescramble algorithm.
-        // Called again on every unattended auto-restart too, so the question set is different
-        // every game even with the exact same packs checked.
-        var gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, QuestionsPerGame);
+        List<TriviaQuestion> gameQuestions;
+        if (TotalGamesToPlay > 1)
+        {
+            // Preload every game in this run up front so no question repeats across the whole
+            // session (e.g. 3 games of 20), instead of drawing each game's set independently
+            // right before it starts. Rebuilds whenever the cache is missing, stale (Total
+            // Games changed), or exhausted - naturally covering both "starting a brand new
+            // session" and "starting another one manually after the last capped run finished".
+            if (_preloadedGameQuestionSets == null || _preloadedGameQuestionSets.Count != TotalGamesToPlay || _preloadedGameIndex >= _preloadedGameQuestionSets.Count)
+            {
+                _preloadedGameQuestionSets = TriviaPackManager.BuildMultiGameQuestionSets(checkedPacks, QuestionsPerGame, TotalGamesToPlay);
+                _preloadedGameIndex = 0;
+            }
+
+            if (_preloadedGameQuestionSets.Count == 0) return;
+            gameQuestions = _preloadedGameQuestionSets[_preloadedGameIndex];
+            _preloadedGameIndex++;
+        }
+        else
+        {
+            _preloadedGameQuestionSets = null;
+            _preloadedGameIndex = 0;
+
+            // Pool every checked pack's questions together and draw this game's set fresh - see
+            // TriviaPackManager.BuildMixedQuestionSet for the double-draw-then-rescramble
+            // algorithm. Called again on every unattended auto-restart too, so the question set
+            // is different every game even with the exact same packs checked.
+            gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, QuestionsPerGame);
+        }
         if (gameQuestions.Count == 0) return;
 
         string title = checkedPacks.Count == 1 ? checkedPacks[0].Title : string.Join(" + ", checkedPacks.Select(p => p.Title));
@@ -515,6 +583,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         };
 
         _engine.StartGame([round], title);
+        OnPropertyChanged(nameof(GameProgressText));
         CurrentRoundTitle = round.Title;
         TotalQuestionsInRound = round.Questions.Count;
         CurrentQuestionNumber = 1;
@@ -522,6 +591,9 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
         // Start 1st question automatically
         _engine.StartCurrentQuestion();
+
+        // Ensure big screen opens / focuses directly to active gameplay
+        RequestOpenProjectionWindow?.Invoke(this, EventArgs.Empty);
     }
 
     private void HandleGameCompleted(TriviaGameResult result)
@@ -555,7 +627,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     public void OnProjectionOpened()
     {
-        if (_engine.State == TriviaGameState.Lobby && !IsPreGameCountdownRunning)
+        if (_engine.State == TriviaGameState.Lobby && IsShowingConnectScreen && !IsPreGameCountdownRunning)
         {
             IsPreGameCountdownRunning = true;
             _preGameTimer.Start();
@@ -571,8 +643,9 @@ public partial class MainViewModel : ObservableObject, IDisposable
         dvm.UpdateInstructionBannerTemplate(InstructionBannerText);
         dvm.UpdateWifiCredentials(WifiSsid, WifiPassword);
         dvm.UpdatePreGameCountdown(PreGameSecondsRemaining);
-        dvm.IsConnectInstructionsActive = IsShowingConnectScreen;
+        dvm.IsConnectInstructionsActive = (_engine.State == TriviaGameState.Lobby) && IsShowingConnectScreen;
         UpdateSelectedPacksPreview();
+        dvm.SyncWithEngine();
     }
 
     private void OnPreGameTimerTick(object? sender, System.Timers.ElapsedEventArgs e)
@@ -706,6 +779,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         Settings.QuestionsPerGame = QuestionsPerGame;
         Settings.AutoStartNextGameEnabled = AutoStartNextGameEnabled;
         Settings.NextGameDelayMinutes = NextGameDelayMinutes;
+        Settings.TotalGamesToPlay = TotalGamesToPlay;
         Settings.DefaultQuestionSeconds = DefaultQuestionSeconds;
         Settings.AnswerEliminationIntervalSeconds = AnswerEliminationIntervalSeconds;
         Settings.PostRevealDelaySeconds = PostRevealDelaySeconds;
@@ -916,6 +990,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        try { _preGameTimer.Stop(); } catch { }
+        try { _preGameTimer.Dispose(); } catch { }
         _webServer.Dispose();
         _engine.Dispose();
         _dbService.Dispose();

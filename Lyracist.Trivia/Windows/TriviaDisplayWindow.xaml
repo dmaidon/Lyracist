@@ -59,12 +59,18 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
+            <!-- Prominent Venue Name Banner -->
+            <Border Grid.Row="0" Background="#221942" CornerRadius="14" Padding="24,10" Margin="0,0,0,14" HorizontalAlignment="Center" BorderBrush="#FBBF24" BorderThickness="2.5">
+                <TextBlock Text="{Binding VenueName}" FontSize="30" FontWeight="Black" Foreground="#FBBF24" TextAlignment="Center" />
+            </Border>
+
             <!-- Top Scrolling Marquee Bar (Scores & Leader Ticker) -->
-            <Border Grid.Row="0" Background="#26103A" CornerRadius="10" Padding="0,6" Margin="0,0,0,16" BorderBrush="#581C87" BorderThickness="1.5" ClipToBounds="True">
+            <Border Grid.Row="1" Background="#26103A" CornerRadius="10" Padding="0,6" Margin="0,0,0,16" BorderBrush="#581C87" BorderThickness="1.5" ClipToBounds="True">
                 <Canvas Height="24" ClipToBounds="True">
                     <TextBlock Text="{Binding MarqueeSummaryText}" FontSize="14" FontWeight="Bold" Foreground="#FBBF24" VerticalAlignment="Center">
                         <TextBlock.Triggers>
@@ -81,13 +87,13 @@
             </Border>
 
             <!-- Top Header & Timer Bar -->
-            <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid Grid.Row="2" Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Category & Venue Title -->
+                <!-- Category Title -->
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock FontSize="24" FontWeight="Black" TextTrimming="CharacterEllipsis">
                         <TextBlock.Style>
@@ -103,7 +109,6 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-                    <TextBlock Text="{Binding VenueName}" FontSize="14" FontWeight="SemiBold" Foreground="#64748B" />
                 </StackPanel>
 
                 <!-- Circular/Pill Countdown Timer -->
@@ -140,7 +145,7 @@
             </Grid>
 
             <!-- Middle Screen State Switcher -->
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="3">
                 <!-- 1. Unified Pre-Game Lobby Screen (Category Banner Left + Countdown/QR Right) -->
                 <Grid Margin="0,0,0,16">
                     <Grid.Style>
@@ -544,23 +549,40 @@
             </Grid>
 
             <!-- Bottom Connection & Copyright Bar -->
-            <Border Grid.Row="3" Background="#D90F172A" CornerRadius="14" Padding="20,10" BorderBrush="#14FFFFFF" BorderThickness="1">
+            <Border Grid.Row="4" Background="#D90F172A" CornerRadius="14" Padding="20,10" BorderBrush="#14FFFFFF" BorderThickness="1">
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Small persistent join QR code so latecomers can still scan in once the
+                         game is underway, not just during the initial lobby screen. -->
+                    <Border Grid.Column="0" Background="#FFFFFF" CornerRadius="8" Padding="4" Margin="0,0,12,0" VerticalAlignment="Center">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsConnectInstructionsActive}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <Image Source="{Binding QrCodeImage}" Width="56" Height="56" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="📱 PLAY ON YOUR PHONE:" FontWeight="ExtraBold" FontSize="13" Foreground="#94A3B8" Margin="0,0,8,0" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding ConnectUrl}" FontWeight="ExtraBold" FontSize="15" Foreground="#38BDF8" VerticalAlignment="Center" />
                     </StackPanel>
 
                     <!-- Center Copyright Notice -->
-                    <TextBlock Grid.Column="1" Text="{Binding Copyright}" FontSize="12" Foreground="#64748B" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{Binding Copyright}" FontSize="12" Foreground="#64748B" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
-                    <TextBlock Grid.Column="2" Text="Powered by Lyracist" FontSize="12" Foreground="#475569" VerticalAlignment="Center" FontWeight="Bold" />
+                    <TextBlock Grid.Column="3" Text="Powered by Lyracist" FontSize="12" Foreground="#475569" VerticalAlignment="Center" FontWeight="Bold" />
                 </Grid>
             </Border>
         </Grid>

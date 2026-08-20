@@ -100,6 +100,38 @@ public static class TriviaPackManager
     }
 
     /// <summary>
+    /// Preloads question sets for a whole run of back-to-back games at once (e.g. 3 games of 20
+    /// questions), instead of drawing each game's set fresh via BuildMixedQuestionSet right
+    /// before it starts. Shuffles the full eligible pool once and deals it out in consecutive
+    /// chunks so no question repeats across the run - only wrapping around (reshuffling and
+    /// continuing) if the pool is too small to cover every game without repeats.
+    /// </summary>
+    public static List<List<TriviaQuestion>> BuildMultiGameQuestionSets(IEnumerable<TriviaQuestionPack> selectedPacks, int questionsPerGame, int gameCount)
+    {
+        var result = new List<List<TriviaQuestion>>();
+        if (gameCount <= 0) return result;
+
+        var pool = selectedPacks.SelectMany(p => p.Questions).ToList();
+        if (pool.Count == 0) return result;
+
+        int gameSize = questionsPerGame > 0 ? questionsPerGame : 10;
+        int totalNeeded = gameSize * gameCount;
+
+        var drawn = new List<TriviaQuestion>();
+        while (drawn.Count < totalNeeded)
+        {
+            drawn.AddRange(pool.OrderBy(_ => Random.Shared.Next()));
+        }
+
+        for (int i = 0; i < gameCount; i++)
+        {
+            result.Add(drawn.Skip(i * gameSize).Take(gameSize).ToList());
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// Builds the pre-game lobby's featured-category header, e.g. "TONIGHT'S GAME FEATURES 10
     /// QUESTIONS FROM THE FOLLOWING CATEGORY:" (singular pack) or "...CATEGORIES:" (2+ packs
     /// mixed together). Shared by every display ViewModel so the wording can't drift between apps.

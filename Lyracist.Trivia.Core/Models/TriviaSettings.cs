@@ -34,6 +34,11 @@ public class TriviaSettings
     public bool AutoAdvanceQuestions { get; set; } = true;
     public bool AutoStartNextGameEnabled { get; set; } = true;
     public int NextGameDelayMinutes { get; set; } = 3;
+
+    /// Caps how many games auto-start plays before stopping instead of looping forever.
+    /// 0 (or less) means unlimited - the pre-existing behavior. Only meaningful when
+    /// AutoStartNextGameEnabled is true; see TriviaGameEngine.GamesPlayedCount/CompleteGame.
+    public int TotalGamesToPlay { get; set; } = 0;
     public bool MarqueeEnabled { get; set; } = true;
     public double MarqueeSpeed { get; set; } = 50.0;
     public int DisplayMonitorIndex { get; set; } = 1;

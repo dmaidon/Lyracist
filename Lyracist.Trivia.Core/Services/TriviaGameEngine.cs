@@ -32,6 +32,10 @@ public class TriviaGameEngine : IDisposable
     public int IntermissionSecondsRemaining { get; private set; }
     public bool IsInIntermission => State == TriviaGameState.GameComplete && IntermissionSecondsRemaining > 0;
 
+    /// Counts every StartGame() call this session (each auto-restart calls it again), so
+    /// CompleteGame can stop auto-restarting once Settings.TotalGamesToPlay is reached.
+    public int GamesPlayedCount { get; private set; }
+
     public bool IsPaused { get; private set; }
     public string? PauseReason { get; private set; }
 
@@ -111,6 +115,7 @@ public class TriviaGameEngine : IDisposable
         lock (_stateLock)
         {
             _tickTimer.Stop();
+            GamesPlayedCount++;
             CurrentSession = new TriviaGameSession
             {
                 Title = title ?? "Pub Trivia Night",
@@ -177,10 +182,19 @@ public class TriviaGameEngine : IDisposable
     {
         lock (_stateLock)
         {
-            if (IsPaused || State != TriviaGameState.QuestionActive)
+            // Answers are open for the full question countdown AND the post-countdown fade
+            // (EliminatingAnswers) - a late answer submitted once options have started fading
+            // is scored against however many options are still visible at that moment, via
+            // ScoreAnswer/GetTierPercent below. This is what makes the 70%/40% tiers reachable
+            // at all, since fading no longer happens until the game master's full question time
+            // has elapsed.
+            if (IsPaused || (State != TriviaGameState.QuestionActive && State != TriviaGameState.EliminatingAnswers))
             {
-                return false; // Answers locked while paused or inactive
+                return false;
             }
+
+            var q = CurrentSession.CurrentQuestion;
+            if (q == null) return false;
 
             if (!_players.TryGetValue(playerName, out var player))
             {
@@ -199,15 +213,64 @@ public class TriviaGameEngine : IDisposable
             player.RemainingSecondsAtSubmission = RemainingSeconds;
             player.LastSeenAt = DateTime.Now;
 
-            // Check if all connected players have answered
+            ScoreAnswer(player, q);
+
+            // If everyone connected has now answered, skip straight ahead instead of waiting
+            // out the remaining clock/fade.
             var activePlayers = _players.Values.Where(p => p.IsConnected).ToList();
             if (activePlayers.Count > 0 && activePlayers.All(p => p.HasAnsweredCurrentQuestion))
             {
-                // All players answered early! Lock and reveal
-                StartAnswerElimination();
+                if (State == TriviaGameState.QuestionActive)
+                {
+                    StartAnswerElimination();
+                }
+                else
+                {
+                    CompleteRevealAnswer();
+                }
             }
 
             return true;
+        }
+    }
+
+    /// Scores one player's answer immediately at submission time, using however many options
+    /// were visible for them right then (see VisibleOptionsAtSubmission/GetTierPercent). Called
+    /// from SubmitAnswer only - unanswered players are scored (zeroed) later, once the answer
+    /// window fully closes in CompleteRevealAnswer.
+    private void ScoreAnswer(TriviaPlayer p, TriviaQuestion q)
+    {
+        double roundMultiplier = CurrentSession.CurrentRound?.PointMultiplier ?? 1.0;
+        p.TotalAnswered++;
+
+        if (p.LastAnswerIndex == q.CorrectAnswerIndex)
+        {
+            p.TotalCorrect++;
+            p.CurrentStreak++;
+            if (p.CurrentStreak > p.MaxStreak) p.MaxStreak = p.CurrentStreak;
+
+            double tierMultiplier = Math.Clamp(GetTierPercent(p.VisibleOptionsAtSubmission) / 100.0, 0.0, 5.0);
+
+            int basePoints = (int)(Settings.BasePointsPerQuestion * tierMultiplier);
+
+            int speedBonus = 0;
+            if (Settings.SpeedBonusEnabled && TotalCountdownSeconds > 0)
+            {
+                double remainingRatio = Math.Clamp((double)p.RemainingSecondsAtSubmission / TotalCountdownSeconds, 0.0, 1.0);
+                speedBonus = (int)(Settings.MaxSpeedBonus * remainingRatio * tierMultiplier);
+            }
+
+            double streakMultiplier = 1.0 + Math.Min(p.CurrentStreak * Settings.StreakBonusMultiplier, 0.5);
+            int points = (int)((basePoints + speedBonus) * roundMultiplier * streakMultiplier);
+            p.LastPointsEarned = points;
+            p.TotalScore += points;
+        }
+        else
+        {
+            p.CurrentStreak = 0;
+            int deduction = Math.Max(0, Settings.WrongAnswerDeductionPoints);
+            p.LastPointsEarned = -deduction;
+            p.TotalScore -= deduction;
         }
     }
 
@@ -231,49 +294,10 @@ public class TriviaGameEngine : IDisposable
             var q = CurrentSession.CurrentQuestion;
             if (q == null) return;
 
-            // Calculate scores right away factoring in Tiered Scoring (100% / 70% / 40%)
-            double roundMultiplier = CurrentSession.CurrentRound?.PointMultiplier ?? 1.0;
-            foreach (var p in _players.Values)
-            {
-                if (p.HasAnsweredCurrentQuestion)
-                {
-                    p.TotalAnswered++;
-                    if (p.LastAnswerIndex == q.CorrectAnswerIndex)
-                    {
-                        p.TotalCorrect++;
-                        p.CurrentStreak++;
-                        if (p.CurrentStreak > p.MaxStreak) p.MaxStreak = p.CurrentStreak;
-
-                        double tierMultiplier = Math.Clamp(GetTierPercent(p.VisibleOptionsAtSubmission) / 100.0, 0.0, 5.0);
-
-                        int basePoints = (int)(Settings.BasePointsPerQuestion * tierMultiplier);
-
-                        int speedBonus = 0;
-                        if (Settings.SpeedBonusEnabled && TotalCountdownSeconds > 0)
-                        {
-                            double remainingRatio = Math.Clamp((double)p.RemainingSecondsAtSubmission / TotalCountdownSeconds, 0.0, 1.0);
-                            speedBonus = (int)(Settings.MaxSpeedBonus * remainingRatio * tierMultiplier);
-                        }
-
-                        double streakMultiplier = 1.0 + Math.Min(p.CurrentStreak * Settings.StreakBonusMultiplier, 0.5);
-                        int points = (int)((basePoints + speedBonus) * roundMultiplier * streakMultiplier);
-                        p.LastPointsEarned = points;
-                        p.TotalScore += points;
-                    }
-                    else
-                    {
-                        p.CurrentStreak = 0;
-                        int deduction = Math.Max(0, Settings.WrongAnswerDeductionPoints);
-                        p.LastPointsEarned = -deduction;
-                        p.TotalScore -= deduction;
-                    }
-                }
-                else
-                {
-                    p.CurrentStreak = 0;
-                    p.LastPointsEarned = 0;
-                }
-            }
+            // Scoring for players who already answered happened immediately in ScoreAnswer at
+            // submission time. Players who haven't answered yet still can - the window stays
+            // open through the fade below - so they're only finalized (zeroed) once the answer
+            // window fully closes in CompleteRevealAnswer.
 
             // Identify wrong answer indices that have not yet been eliminated
             var uneliminatedWrong = Enumerable.Range(0, q.Options.Count)
@@ -304,6 +328,17 @@ public class TriviaGameEngine : IDisposable
     {
         var q = CurrentSession.CurrentQuestion;
         if (q == null) return;
+
+        // The answer window is fully closed now - anyone who never answered forfeits their
+        // streak and scores nothing for this question.
+        foreach (var p in _players.Values)
+        {
+            if (!p.HasAnsweredCurrentQuestion)
+            {
+                p.CurrentStreak = 0;
+                p.LastPointsEarned = 0;
+            }
+        }
 
         SetState(TriviaGameState.RevealAnswer);
         _postRevealCountdownSeconds = Settings.PostRevealDelaySeconds > 0 ? Settings.PostRevealDelaySeconds : 5;
@@ -355,6 +390,10 @@ public class TriviaGameEngine : IDisposable
         }
     }
 
+    /// True once Settings.TotalGamesToPlay (if set) has been reached - CompleteGame stops
+    /// auto-restarting at that point instead of looping forever.
+    public bool HasReachedGamesCap => Settings.TotalGamesToPlay > 0 && GamesPlayedCount >= Settings.TotalGamesToPlay;
+
     private void CompleteGame()
     {
         _tickTimer.Stop();
@@ -363,7 +402,7 @@ public class TriviaGameEngine : IDisposable
         var result = GetGameResult();
         GameCompleted?.Invoke(this, result);
 
-        if (Settings.AutoStartNextGameEnabled && Settings.NextGameDelayMinutes > 0)
+        if (Settings.AutoStartNextGameEnabled && Settings.NextGameDelayMinutes > 0 && !HasReachedGamesCap)
         {
             IntermissionSecondsRemaining = Settings.NextGameDelayMinutes * 60;
             IntermissionTick?.Invoke(this, IntermissionSecondsRemaining);
@@ -456,27 +495,12 @@ public class TriviaGameEngine : IDisposable
             switch (State)
             {
                 case TriviaGameState.QuestionActive:
+                    // All 4 options stay visible for the full question time - no fading until
+                    // the game master's configured time is fully up. Progressive elimination
+                    // (and the tiered 70%/40% scoring that comes with it) only starts once we
+                    // move into EliminatingAnswers below.
                     RemainingSeconds--;
                     TimerTick?.Invoke(this, RemainingSeconds);
-
-                    // Progressive option elimination during question countdown
-                    if (TotalCountdownSeconds > 0 && _pendingWrongIndices.Count > 0)
-                    {
-                        // If at or past 2/3 countdown mark and 0 eliminated so far -> eliminate 1st wrong option (3 options remain = 70%)
-                        if (RemainingSeconds <= (TotalCountdownSeconds * 2 / 3) && EliminatedAnswerIndices.Count == 0)
-                        {
-                            EliminatedAnswerIndices.Add(_pendingWrongIndices[0]);
-                            _pendingWrongIndices.RemoveAt(0);
-                            AnswersEliminated?.Invoke(this, [.. EliminatedAnswerIndices]);
-                        }
-                        // If at or past 1/3 countdown mark and only 1 eliminated so far -> eliminate 2nd wrong option (2 options remain = 40%)
-                        else if (RemainingSeconds <= (TotalCountdownSeconds * 1 / 3) && EliminatedAnswerIndices.Count == 1 && _pendingWrongIndices.Count > 0)
-                        {
-                            EliminatedAnswerIndices.Add(_pendingWrongIndices[0]);
-                            _pendingWrongIndices.RemoveAt(0);
-                            AnswersEliminated?.Invoke(this, [.. EliminatedAnswerIndices]);
-                        }
-                    }
 
                     if (RemainingSeconds <= 0)
                     {

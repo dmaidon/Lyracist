@@ -1,8 +1,9 @@
-// Edited on Aug 20, 2026 @ 06:40:00 -> Added unit tests for Tiered Option Value Scoring (100% / 70% / 40%)
+// Edited on Aug 20, 2026 @ 12:10:30 -> Added DisplayViewModel active state hydration unit test
 using System;
 using System.Collections.Generic;
 using Lyracist.Trivia.Core.Models;
 using Lyracist.Trivia.Core.Services;
+using Lyracist.Trivia.ViewModels;
 using Xunit;
 
 namespace Lyracist.Trivia.Tests;
@@ -289,6 +290,52 @@ public class GameEngineTests
     }
 
     [Fact]
+    public void GameComplete_SkipsIntermission_WhenGamesCapReached()
+    {
+        var settings = new TriviaSettings
+        {
+            AutoStartNextGameEnabled = true,
+            NextGameDelayMinutes = 2,
+            TotalGamesToPlay = 1
+        };
+        using var engine = new TriviaGameEngine(settings);
+        engine.RegisterPlayer("Alice");
+        engine.StartGame([CreateSampleRound()]); // Game 1 of 1
+        engine.StartCurrentQuestion();
+        engine.AdvanceToNextQuestion(); // to Q2
+        engine.AdvanceToNextQuestion(); // completes game
+
+        Assert.Equal(1, engine.GamesPlayedCount);
+        Assert.True(engine.HasReachedGamesCap);
+        Assert.Equal(TriviaGameState.GameComplete, engine.State);
+        // Auto-start would normally kick off an intermission here, but the configured game cap
+        // (1) has already been reached, so it must not loop into another game.
+        Assert.False(engine.IsInIntermission);
+        Assert.Equal(0, engine.IntermissionSecondsRemaining);
+    }
+
+    [Fact]
+    public void GameComplete_StartsIntermission_WhenBelowGamesCap()
+    {
+        var settings = new TriviaSettings
+        {
+            AutoStartNextGameEnabled = true,
+            NextGameDelayMinutes = 2,
+            TotalGamesToPlay = 3
+        };
+        using var engine = new TriviaGameEngine(settings);
+        engine.RegisterPlayer("Alice");
+        engine.StartGame([CreateSampleRound()]); // Game 1 of 3
+        engine.StartCurrentQuestion();
+        engine.AdvanceToNextQuestion();
+        engine.AdvanceToNextQuestion(); // completes game 1
+
+        Assert.Equal(1, engine.GamesPlayedCount);
+        Assert.False(engine.HasReachedGamesCap);
+        Assert.True(engine.IsInIntermission);
+    }
+
+    [Fact]
     public void SkipIntermission_ResetsIntermissionAndFiresCompletionEvent()
     {
         var settings = new TriviaSettings
@@ -518,5 +565,106 @@ public class GameEngineTests
 
         Assert.Equal(1000, alice.TotalScore);
         Assert.Equal(1000, alice.LastPointsEarned);
+    }
+
+    [Fact]
+    public void NoFadeDuringQuestionActive_OptionsStayVisibleUntilTimeExpiresOrLocked()
+    {
+        using var engine = new TriviaGameEngine();
+        var alice = engine.RegisterPlayer("Alice");
+        var bob = engine.RegisterPlayer("Bob"); // second player so answering doesn't auto-lock
+
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        // Only Alice answers; Bob leaves the question open. Nothing should fade just because
+        // time is passing - fading only starts once the game master's full question time is up
+        // (or they lock it manually), not progressively during the countdown.
+        engine.SubmitAnswer("Alice", 1);
+
+        Assert.Equal(TriviaGameState.QuestionActive, engine.State);
+        Assert.Empty(engine.EliminatedAnswerIndices);
+    }
+
+    [Fact]
+    public void LateAnswer_DuringPostCountdownFade_IsAcceptedAndScoresReducedTier()
+    {
+        var settings = new TriviaSettings
+        {
+            BasePointsPerQuestion = 1000,
+            SpeedBonusEnabled = false,
+            StreakBonusMultiplier = 0.0,
+            TieredScoringEnabled = true,
+            Points4OptionsPercent = 100,
+            Points3OptionsPercent = 70,
+            Points2OptionsPercent = 40
+        };
+
+        using var engine = new TriviaGameEngine(settings);
+        var alice = engine.RegisterPlayer("Alice");
+        var bob = engine.RegisterPlayer("Bob");
+
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        // Alice answers immediately while all 4 options are still visible.
+        engine.SubmitAnswer("Alice", 1);
+        Assert.Equal(1000, alice.TotalScore);
+
+        // Simulate the countdown reaching 0 (or the game master locking early) - this starts
+        // the post-countdown fade, eliminating the first wrong option.
+        engine.LockAndRevealAnswer();
+        Assert.Equal(TriviaGameState.EliminatingAnswers, engine.State);
+        Assert.Single(engine.EliminatedAnswerIndices);
+
+        // Bob answers late, during the fade, with only 3 options now visible - should still be
+        // accepted (the window stays open through the fade) and scored at the reduced 70% tier.
+        bool accepted = engine.SubmitAnswer("Bob", 1);
+
+        Assert.True(accepted);
+        Assert.Equal(700, bob.TotalScore);
+        Assert.Equal(700, bob.LastPointsEarned);
+    }
+
+    [Fact]
+    public void PlayerWhoNeverAnswers_KeepsStreakUntilAnswerWindowFullyCloses()
+    {
+        using var engine = new TriviaGameEngine();
+        var alice = engine.RegisterPlayer("Alice");
+        var bob = engine.RegisterPlayer("Bob");
+
+        engine.StartGame([CreateSampleRound()]);
+        bob.CurrentStreak = 3;
+        engine.StartCurrentQuestion();
+
+        engine.SubmitAnswer("Alice", 1);
+        engine.LockAndRevealAnswer(); // starts the fade; Bob still hasn't answered
+
+        Assert.Equal(TriviaGameState.EliminatingAnswers, engine.State);
+        // Bob's streak must not be zeroed yet - the answer window is still open during the fade.
+        Assert.Equal(3, bob.CurrentStreak);
+    }
+
+    [Fact]
+    public void DisplayViewModel_WhenConstructedDuringActiveQuestion_SyncsQuestionStateAndDisablesLobbyCountdown()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        Assert.Equal(TriviaGameState.QuestionActive, engine.State);
+
+        var displayVm = new DisplayViewModel(engine, "Test Venue", "http://test:8085", null);
+
+        Assert.False(displayVm.IsConnectInstructionsActive);
+        Assert.False(displayVm.IsPreGameCountdownRunning);
+        Assert.Equal(TriviaGameState.QuestionActive, displayVm.GameState);
+        Assert.Equal("Who sang 'Thriller'?", displayVm.QuestionPrompt);
+        Assert.Equal("Prince", displayVm.OptionA);
+        Assert.Equal("Michael Jackson", displayVm.OptionB);
+        Assert.Equal("Madonna", displayVm.OptionC);
+        Assert.Equal("Stevie Wonder", displayVm.OptionD);
+        Assert.Equal(1.0, displayVm.OptionAOpacity);
+        Assert.Equal(15, displayVm.TotalCountdownSeconds);
     }
 }

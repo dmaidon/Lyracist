@@ -162,7 +162,7 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="⚡ Auto-Run Game" FontWeight="Bold" FontSize="12" Foreground="#FFFFFF" />
-                                            <TextBlock Text="15s answer • 5s fade • 5s reveal" FontSize="10" Foreground="#94A3B8" />
+                                            <TextBlock Text="{Binding AutoRunTimingSummary}" FontSize="10" Foreground="#94A3B8" />
                                         </StackPanel>
                                         <CheckBox Grid.Column="1" IsChecked="{Binding AutoAdvanceQuestions}" VerticalAlignment="Center" />
                                     </Grid>
@@ -219,6 +219,19 @@
                                     </Border>
                                     <Border Background="#475569" CornerRadius="6" Padding="8,4">
                                         <TextBlock Text="{Binding CurrentQuestionNumber, StringFormat='Question #{0}'}" FontWeight="Bold" Foreground="#38BDF8" FontSize="12" />
+                                    </Border>
+                                    <Border Background="#312E81" CornerRadius="6" Padding="8,4" Margin="8,0,0,0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding TotalGamesToPlay}" Value="0">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding GameProgressText}" FontWeight="Bold" Foreground="#A5B4FC" FontSize="12" />
                                     </Border>
                                 </StackPanel>
 
@@ -466,7 +479,7 @@
                                                 <CheckBox Grid.Column="1" IsChecked="{Binding AutoStartNextGameEnabled}" VerticalAlignment="Center" />
                                             </Grid>
 
-                                            <Grid>
+                                            <Grid Margin="0,0,0,10">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
@@ -476,6 +489,18 @@
                                                     <TextBlock Text="1 to 30 minutes duration" FontSize="11" Foreground="#64748B" />
                                                 </StackPanel>
                                                 <TextBox Grid.Column="1" Text="{Binding NextGameDelayMinutes, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="6,4" VerticalAlignment="Center" />
+                                            </Grid>
+
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="Number of Games to Play:" FontSize="12" Foreground="#CBD5E1" />
+                                                    <TextBlock Text="0 = unlimited. Preloads all games' questions up front so nothing repeats." FontSize="11" Foreground="#64748B" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                                <TextBox Grid.Column="1" Text="{Binding TotalGamesToPlay, UpdateSourceTrigger=PropertyChanged}" Width="65" TextAlignment="Center" Background="#1E293B" Foreground="#FFFFFF" Padding="6,4" VerticalAlignment="Center" />
                                             </Grid>
                                         </StackPanel>
                                     </Border>
