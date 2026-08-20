@@ -1,8 +1,8 @@
 <!-- Created on Aug 17, 2026 @ 13:07:30 -> App.xaml for Lyracist.Trivia with MaterialDesign themes -->
 <Application x:Class="Lyracist.Trivia.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="Windows/MainWindow.xaml"
              ShutdownMode="OnMainWindowClose">
     <Application.Resources>
@@ -18,6 +18,11 @@
             <SolidColorBrush x:Key="OptionDBrush" Color="#F43F5E" />
             <SolidColorBrush x:Key="TimerWarningBrush" Color="#EF4444" />
             <SolidColorBrush x:Key="TimerNormalBrush" Color="#10B981" />
+
+            <Style x:Key="StandardGameButton" TargetType="Button">
+                <Setter Property="Height" Value="36" />
+                <Setter Property="FontWeight" Value="Bold" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
