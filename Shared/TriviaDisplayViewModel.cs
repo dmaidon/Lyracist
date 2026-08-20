@@ -1,4 +1,10 @@
-// Edited on Aug 20, 2026 @ 06:10:00 -> Added explicit using alias for System.Windows.Application to resolve Windows Forms ambiguity
+// Consolidated from Lyracist/ViewModels/TriviaDisplayViewModel.cs and
+// KSRotation/ViewModels/TriviaDisplayViewModel.cs (previously two hand-duplicated
+// ~470-line copies) into a single Shared/-linked file, per this project's shared-code
+// convention. Standardized on the non-blocking Dispatcher.InvokeAsync engine-event
+// wiring (Lyracist's original behavior) - KSRotation's copy previously used the
+// blocking Dispatcher.Invoke, which could stall/deadlock the engine's timer thread
+// if the UI thread was busy.
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,11 +17,12 @@ using Lyracist.Trivia.Core.Models;
 using Lyracist.Trivia.Core.Services;
 using Application = System.Windows.Application;
 
-namespace Lyracist.ViewModels;
+namespace Lyracist.Shared;
 
 public partial class TriviaDisplayViewModel : ObservableObject
 {
     private readonly TriviaGameEngine _engine;
+    private readonly string _brandName;
 
     public string Copyright => Lyracist.Shared.Globals.Copyright;
 
@@ -168,13 +175,15 @@ public partial class TriviaDisplayViewModel : ObservableObject
     public ObservableCollection<TriviaMarqueeScoreItem> MarqueeScores { get; } = [];
     public ObservableCollection<AnswerDistributionItem> AnswerStats { get; } = [];
 
-    public TriviaDisplayViewModel(TriviaGameEngine engine, string venueName, string connectUrl, BitmapSource? qrCode, string? wifiSsid = null, string? wifiPassword = null, int preGameSecondsRemaining = 300)
+    public TriviaDisplayViewModel(TriviaGameEngine engine, string venueName, string connectUrl, BitmapSource? qrCode, string? wifiSsid = null, string? wifiPassword = null, int preGameSecondsRemaining = 300, string brandName = "LYRACIST")
     {
         _engine = engine;
+        _brandName = brandName;
         _venueName = venueName;
         _connectUrl = connectUrl;
         _qrCodeImage = qrCode ?? GenerateQrBitmap(connectUrl);
         _isConnectInstructionsActive = true;
+        _marqueeSummaryText = $"🎯 {_brandName} LIVE TRIVIA • Scan the QR code on your phone to join now!";
 
         UpdateWifiCredentials(wifiSsid ?? string.Empty, wifiPassword ?? string.Empty);
         UpdatePreGameCountdown(preGameSecondsRemaining);
@@ -216,6 +225,10 @@ public partial class TriviaDisplayViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Sets the game master's raw instruction banner template (may contain {venue}/{dj} tokens)
+    /// and re-resolves it immediately against the current venue/host names.
+    /// </summary>
     public void UpdateInstructionBannerTemplate(string template)
     {
         _instructionBannerTemplate = template;
@@ -277,6 +290,11 @@ public partial class TriviaDisplayViewModel : ObservableObject
         OnPropertyChanged(nameof(HasCategoryBanner));
     }
 
+    /// <summary>
+    /// Renders a fresh lobby banner listing every checked pack's category instead of the
+    /// plain "Mixed Trivia" text fallback. Called every time the game master's pack checklist
+    /// changes, so the banner always reflects the current mix.
+    /// </summary>
     public void UpdateMixedCategory(List<TriviaQuestionPack> packs)
     {
         IsMixedCategoryGame = true;
@@ -296,6 +314,11 @@ public partial class TriviaDisplayViewModel : ObservableObject
         OnPropertyChanged(nameof(HasCategoryBanner));
     }
 
+    /// <summary>
+    /// Refreshes the lobby's "TONIGHT'S GAME FEATURES N QUESTIONS FROM THE FOLLOWING
+    /// CATEGORY/CATEGORIES:" header. Called alongside UpdateCategory/UpdateMixedCategory
+    /// whenever the game master's pack checklist or question-count setting changes.
+    /// </summary>
     public void UpdateFeaturedCategoryHeader(int questionCount, int categoryCount)
     {
         FeaturedCategoryHeaderText = TriviaPackManager.BuildFeaturedCategoryHeader(questionCount, categoryCount);
@@ -418,7 +441,7 @@ public partial class TriviaDisplayViewModel : ObservableObject
         }
         else
         {
-            MarqueeSummaryText = "🎯 LYRACIST LIVE TRIVIA • Scan the QR code on your phone to join the show!";
+            MarqueeSummaryText = $"🎯 {_brandName} LIVE TRIVIA • Scan the QR code on your phone to join the show!";
         }
     }
 

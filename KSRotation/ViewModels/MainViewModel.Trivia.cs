@@ -403,6 +403,11 @@ namespace KSRotation.ViewModels
                 string ip = LocalNetworkHelper.GetLocalIPv4Address()?.ToString() ?? "127.0.0.1";
                 _triviaWebServer = new TriviaWebServer(_triviaEngine, TriviaSettings.Port);
                 _triviaWebServer.Start();
+                if (!_triviaWebServer.IsRunning)
+                {
+                    TriviaServerStatusText = $"Server Error: could not bind port {TriviaSettings.Port} (already in use?)";
+                    return;
+                }
                 TriviaPatronUrl = $"http://{ip}:{TriviaSettings.Port}/trivia";
                 TriviaServerStatusText = $"Online: {TriviaPatronUrl}";
             }
@@ -416,10 +421,12 @@ namespace KSRotation.ViewModels
         {
             if (_triviaEngine == null) return;
 
-            bool isScreenOccupied = IsDisplayEnabled || IsDjBannerEnabled;
+            bool isSpecialEventActive = !string.IsNullOrEmpty(ActiveSpecialEvent) &&
+                !ActiveSpecialEvent.Equals("None", StringComparison.OrdinalIgnoreCase);
+            bool isScreenOccupied = IsDisplayEnabled || IsDjBannerEnabled || isSpecialEventActive;
             if (isScreenOccupied)
             {
-                string reason = IsDjBannerEnabled ? "DJ Banner Display" : "Rotation Screen Active";
+                string reason = isSpecialEventActive ? "Special Event" : (IsDjBannerEnabled ? "DJ Banner Display" : "Rotation Screen Active");
                 _triviaEngine.PauseGame(reason);
             }
             else
@@ -590,7 +597,8 @@ namespace KSRotation.ViewModels
                     null,
                     TriviaWifiSsid,
                     TriviaWifiPassword,
-                    TriviaPreGameSecondsRemaining);
+                    TriviaPreGameSecondsRemaining,
+                    brandName: "KSRotation");
 
                 _triviaDisplayVm.HostName = TriviaHostName;
                 _triviaDisplayVm.UpdateInstructionBannerTemplate(TriviaInstructionBannerText);
@@ -755,6 +763,7 @@ namespace KSRotation.ViewModels
         {
             if (player != null)
             {
+                _triviaEngine?.RemovePlayer(player.Name);
                 TriviaPlayers.Remove(player);
                 TriviaConnectedPlayerCount = TriviaPlayers.Count(p => p.IsConnected);
             }

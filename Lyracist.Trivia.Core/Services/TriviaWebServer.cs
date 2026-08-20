@@ -104,13 +104,17 @@ public class TriviaWebServer : IDisposable
                     }
                 }, token);
             }
-            catch (Exception ex) when (ex is OperationCanceledException || ex is ObjectDisposedException || ex is SocketException)
+            catch (Exception ex) when (ex is OperationCanceledException || ex is ObjectDisposedException)
             {
-                break; // Server stopping
+                break; // Server stopping intentionally (Stop() was called)
             }
             catch (Exception ex)
             {
+                // A single failed accept (e.g. transient SocketException from a flaky client)
+                // must not take down the whole listener - log and keep accepting. A short
+                // delay avoids a tight retry loop if the underlying socket is persistently faulted.
                 System.Diagnostics.Debug.WriteLine($"TriviaWebServer AcceptConnectionsAsync error: {ex.Message}");
+                try { await Task.Delay(250, token); } catch { break; }
             }
         }
     }
@@ -258,19 +262,18 @@ public class TriviaWebServer : IDisposable
             var player = !string.IsNullOrEmpty(playerName)
                 ? _engine.GetPlayers().FirstOrDefault(p => p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase))
                 : null;
+            if (player != null)
+            {
+                player.IsConnected = true;
+                player.LastSeenAt = DateTime.Now;
+            }
 
             var q = _engine.CurrentSession.CurrentQuestion;
             bool isCorrect = player != null && q != null && player.LastAnswerIndex == q.CorrectAnswerIndex;
             var gameResult = _engine.GetGameResult();
 
             int visibleCount = Math.Max(1, 4 - _engine.EliminatedAnswerIndices.Count);
-            int currentPercent = 100;
-            if (_engine.Settings.TieredScoringEnabled)
-            {
-                if (visibleCount >= 4) currentPercent = _engine.Settings.Points4OptionsPercent;
-                else if (visibleCount == 3) currentPercent = _engine.Settings.Points3OptionsPercent;
-                else currentPercent = _engine.Settings.Points2OptionsPercent;
-            }
+            int currentPercent = _engine.GetTierPercent(visibleCount);
             int potentialPoints = (int)(_engine.Settings.BasePointsPerQuestion * (currentPercent / 100.0));
 
             var statePayload = new

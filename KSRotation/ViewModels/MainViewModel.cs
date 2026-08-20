@@ -292,6 +292,7 @@ namespace KSRotation.ViewModels
                     UpdateLastSongState();
                     QueueSaveSettings();
                     RebuildRotationJsonCacheNow();
+                    CheckAndSyncTriviaPause();
                     break;
 
                 case nameof(SelectedProjectionView):

@@ -57,9 +57,30 @@ public class TriviaGameEngine : IDisposable
         _tickTimer.AutoReset = true;
     }
 
+    private static readonly TimeSpan PlayerDisconnectTimeout = TimeSpan.FromSeconds(20);
+
     public List<TriviaPlayer> GetPlayers()
     {
+        // Phones poll /api/trivia/state roughly once a second while connected, refreshing
+        // LastSeenAt. A player with no fresh poll in PlayerDisconnectTimeout has dropped off
+        // WiFi/closed the tab - mark them disconnected so they no longer block early-reveal.
+        var cutoff = DateTime.Now - PlayerDisconnectTimeout;
+        foreach (var p in _players.Values)
+        {
+            if (p.IsConnected && p.LastSeenAt < cutoff)
+            {
+                p.IsConnected = false;
+            }
+        }
+
         return _players.Values.OrderByDescending(p => p.TotalScore).ToList();
+    }
+
+    public bool RemovePlayer(string name)
+    {
+        if (!_players.TryRemove(name.Trim(), out _)) return false;
+        LeaderboardUpdated?.Invoke(this, GetPlayers());
+        return true;
     }
 
     public TriviaPlayer RegisterPlayer(string name, string teamName = "")
@@ -202,6 +223,8 @@ public class TriviaGameEngine : IDisposable
     {
         lock (_stateLock)
         {
+            if (State != TriviaGameState.QuestionActive) return; // already locked/revealed - ignore re-entrant calls
+
             _tickTimer.Stop();
             SetState(TriviaGameState.AnsweringLocked);
 
@@ -221,22 +244,7 @@ public class TriviaGameEngine : IDisposable
                         p.CurrentStreak++;
                         if (p.CurrentStreak > p.MaxStreak) p.MaxStreak = p.CurrentStreak;
 
-                        double tierMultiplier = 1.0;
-                        if (Settings.TieredScoringEnabled)
-                        {
-                            if (p.VisibleOptionsAtSubmission >= 4)
-                            {
-                                tierMultiplier = Math.Clamp(Settings.Points4OptionsPercent / 100.0, 0.0, 5.0);
-                            }
-                            else if (p.VisibleOptionsAtSubmission == 3)
-                            {
-                                tierMultiplier = Math.Clamp(Settings.Points3OptionsPercent / 100.0, 0.0, 5.0);
-                            }
-                            else
-                            {
-                                tierMultiplier = Math.Clamp(Settings.Points2OptionsPercent / 100.0, 0.0, 5.0);
-                            }
-                        }
+                        double tierMultiplier = Math.Clamp(GetTierPercent(p.VisibleOptionsAtSubmission) / 100.0, 0.0, 5.0);
 
                         int basePoints = (int)(Settings.BasePointsPerQuestion * tierMultiplier);
 
@@ -578,6 +586,18 @@ public class TriviaGameEngine : IDisposable
     {
         if (IsPaused) ResumeGame();
         else PauseGame(reason);
+    }
+
+    /// Percent of base points awarded for a correct answer submitted while
+    /// <paramref name="visibleOptionsCount"/> options are still visible (100/70/40 tiers).
+    /// Single source of truth for the tier lookup - used for actual scoring here and by
+    /// TriviaWebServer for the live "potential points" badge shown to players.
+    public int GetTierPercent(int visibleOptionsCount)
+    {
+        if (!Settings.TieredScoringEnabled) return 100;
+        if (visibleOptionsCount >= 4) return Settings.Points4OptionsPercent;
+        if (visibleOptionsCount == 3) return Settings.Points3OptionsPercent;
+        return Settings.Points2OptionsPercent;
     }
 
     public Dictionary<int, int> GetAnswerDistribution()

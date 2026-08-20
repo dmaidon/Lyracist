@@ -406,6 +406,11 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
             string ip = LocalNetworkHelper.GetLocalIPv4Address()?.ToString() ?? "127.0.0.1";
             _webServer = new TriviaWebServer(_engine, Settings.Port);
             _webServer.Start();
+            if (!_webServer.IsRunning)
+            {
+                ServerStatusText = $"Server Error: could not bind port {Settings.Port} (already in use?)";
+                return;
+            }
             PatronUrl = $"http://{ip}:{Settings.Port}/trivia";
             ServerStatusText = $"Online: {PatronUrl}";
             GenerateQrCode(PatronUrl);
@@ -673,6 +678,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     {
         if (player != null)
         {
+            _engine.RemovePlayer(player.Name);
             Players.Remove(player);
         }
     }

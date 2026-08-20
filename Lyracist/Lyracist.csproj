@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.8.19.430</AssemblyVersion>
-    <FileVersion>26.8.19.430</FileVersion>
+    <AssemblyVersion>26.8.20.431</AssemblyVersion>
+    <FileVersion>26.8.20.431</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -116,6 +116,7 @@
     <Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
     <Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
     <Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
+    <Compile Include="..\Shared\TriviaDisplayViewModel.cs" Link="TriviaDisplayViewModel.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />
   </ItemGroup>
 
