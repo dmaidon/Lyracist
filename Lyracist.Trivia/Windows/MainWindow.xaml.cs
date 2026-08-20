@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 09:46:00 -> Handled RequestOpenProjectionWindow to open pre-game lobby on target monitor
+// Edited on Aug 20, 2026 @ 12:17:00 -> Added ExitButton_Click and explicit Application.Current.Shutdown on close
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -48,6 +48,10 @@ public partial class MainWindow : Window
             {
                 DataContext = displayVm
             };
+            _displayWindow.Closed += (s, e) =>
+            {
+                _displayWindow = null;
+            };
             PositionDisplayWindow(vm.SelectedMonitor?.DeviceName);
             _displayWindow.Show();
             PositionDisplayWindow(vm.SelectedMonitor?.DeviceName);
@@ -61,6 +65,11 @@ public partial class MainWindow : Window
             PositionDisplayWindow(vm.SelectedMonitor?.DeviceName);
             _displayWindow.Activate();
         }
+    }
+
+    private void ExitButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
     }
 
     private void PositionDisplayWindow(string? deviceName)
@@ -79,10 +88,21 @@ public partial class MainWindow : Window
 
     private void Window_Closing(object sender, CancelEventArgs e)
     {
-        _displayWindow?.Close();
+        try
+        {
+            _displayWindow?.Close();
+        }
+        catch { }
+
         if (DataContext is IDisposable disposable)
         {
-            disposable.Dispose();
+            try
+            {
+                disposable.Dispose();
+            }
+            catch { }
         }
+
+        System.Windows.Application.Current?.Shutdown();
     }
 }

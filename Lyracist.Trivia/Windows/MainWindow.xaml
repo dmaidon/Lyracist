@@ -1,4 +1,4 @@
-<!-- Edited on Aug 20, 2026 @ 06:37:00 -> Added Tiered Option Value Scoring controls (100% / 70% / 40%) in Lyracist.Trivia MainWindow.xaml -->
+<!-- Edited on Aug 20, 2026 @ 12:17:00 -> Added Exit button to header bar in Lyracist.Trivia MainWindow.xaml -->
 <Window x:Class="Lyracist.Trivia.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -65,6 +65,9 @@
 
                     <!-- Open/Activate TV Projection Button -->
                     <Button Content="📺 Open TV Projection" Background="#8B5CF6" Foreground="#FFFFFF" Click="OpenProjectionWindow_Click" FontWeight="Bold" Height="36" Padding="14,0" />
+
+                    <!-- Exit Application Button -->
+                    <Button Content="✕ Exit" Background="#EF4444" Foreground="#FFFFFF" Click="ExitButton_Click" FontWeight="Bold" Height="36" Padding="14,0" Margin="10,0,0,0" ToolTip="Exit Lyracist Trivia" />
                 </StackPanel>
             </Grid>
         </Border>

@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 09:27:00 -> Ensure category announcement banners are generated on startup
+// Edited on Aug 20, 2026 @ 12:17:00 -> Added explicit OnExit process termination
 using System.IO;
 using System.Windows;
 using Lyracist.Trivia.Core.Services;
@@ -30,6 +30,12 @@ public partial class App : System.Windows.Application
         {
             Lyracist.Shared.Globals.LogError("Lyracist.Trivia", "App.OnStartup", ex);
         }
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        base.OnExit(e);
+        Environment.Exit(0);
     }
 
     private static void OnDispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
