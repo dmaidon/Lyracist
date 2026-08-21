@@ -1,4 +1,4 @@
-<!-- Edited on Aug 18, 2026 @ 15:30:00 -> Bump AssemblyVersion and FileVersion to 26.8.18.198 -->
+<!-- Edited on Aug 21, 2026 @ 09:03:00 -> Update KSRotation.Maui for responsive vertical and horizontal orientation layouts -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -28,9 +28,9 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 
-		<AssemblyVersion>26.8.20.215</AssemblyVersion>
+		<AssemblyVersion>26.8.21.216</AssemblyVersion>
 
-		<FileVersion>26.8.20.215</FileVersion>
+		<FileVersion>26.8.21.216</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 

@@ -1,10 +1,18 @@
-// Edited on Aug 21, 2026 @ 08:30:00 -> Added documentation for global TextBox select-all on focus, new singer auto-selection, 1st singer tablet sync, singer display box sizing, and rotation singer insertion
+// Edited on Aug 21, 2026 @ 09:03:00 -> Added documentation for KSRotation.Maui responsive vertical/horizontal layout, global TextBox select-all on focus, and singer rotation insertion
 Singer Rotation & Trivia Game Enhancements (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`) - (August 2026)
 
 Section: Performance & Rotation Operations / Singer Queue Management & Trivia Live Control
 
 [System Details]
-1. Global Auto-Highlighting & Select-All on Focus (All Applications):
+1. Responsive Tablet Layout (`KSRotation.Maui`):
+   - **Vertical Mode (Portrait Orientation)**:
+     * When the tablet is held vertically, the layout dynamically reflows to place the Active Rotation Queue at the top across full screen width.
+     * The Patron Request Portal (QR code, connection URL, DJ PIN toggle) and Incoming Requests list reflow side-by-side across the bottom (220px height).
+     * Maximizes vertical screen area for long rotation queues on handheld tablets.
+   - **Horizontal Mode (Landscape Orientation)**:
+     * Retains the traditional two-column master layout with Rotation on the left and the Portal & Requests sidebar on the right (280px).
+
+2. Global Auto-Highlighting & Select-All on Focus (All Applications):
    - **Instant Text Selection Across All Inputs**:
      * Across all desktop applications (`KSRotation`, `Lyracist`, `Lyracist.Trivia`, `TriviaDbCreator`, `LyracistDbEditor`, `LyracistKeyGen`, `ScaryokeWheel`), clicking or tabbing into any `TextBox`, `PasswordBox`, or numeric input box automatically selects and highlights all text.
      * Allows the user to immediately type new values or replacement text without having to manually backspace or select text first.
@@ -12,7 +20,7 @@ Section: Performance & Rotation Operations / Singer Queue Management & Trivia Li
    - **New Singer Addition Auto-Selection**:
      * Adding a new performer in `KSRotation` automatically scrolls the list to the new singer row, focuses the performer name text box, and highlights `"New Singer"` for 1-step editing.
 
-2. 1st Singer (Round Start Anchor) Remote DJ Tablet & Web Portal Synchronization (`KSRotation` & `Lyracist`):
+3. 1st Singer (Round Start Anchor) Remote DJ Tablet & Web Portal Synchronization (`KSRotation` & `Lyracist`):
    - **Remote Visual Highlighting**:
      * The Remote DJ Board (`dj.html`) displays the `🚩 1ST` badge next to the anchor performer's name and applies a distinct red card background (`--row-start-bg`) and border outline.
      * The DJ tablet features a dedicated `🚩` action button on each singer card to allow setting, shifting, or clearing the 1st singer round anchor with one tap.

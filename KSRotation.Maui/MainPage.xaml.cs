@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 12:15:00 -> Add duet partner support to add and edit performer in MAUI MainPage
+// Edited on Aug 21, 2026 @ 09:02:00 -> Add responsive portrait/vertical layout with rotation at top and QR code + requests at bottom
 using System;
 using System.Linq;
 using Microsoft.Maui.Controls;
@@ -422,5 +422,100 @@ public partial class MainPage : ContentPage
     {
         var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
         vm.IsDjQrVisible = !vm.IsDjQrVisible;
+    }
+
+    private bool _isPortrait = false;
+    private bool _hasAllocatedSize = false;
+
+    protected override void OnSizeAllocated(double width, double height)
+    {
+        base.OnSizeAllocated(width, height);
+
+        if (width <= 0 || height <= 0)
+            return;
+
+        bool isPortrait = height > width;
+        if (!_hasAllocatedSize || _isPortrait != isPortrait)
+        {
+            _hasAllocatedSize = true;
+            _isPortrait = isPortrait;
+            UpdateOrientationLayout(isPortrait);
+        }
+    }
+
+    private void UpdateOrientationLayout(bool isPortrait)
+    {
+        if (isPortrait)
+        {
+            // Vertical / Portrait Mode: Rotation Queue at top, QR Code and Requests at bottom
+            RootLayoutGrid.ColumnDefinitions.Clear();
+            RootLayoutGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+
+            RootLayoutGrid.RowDefinitions.Clear();
+            RootLayoutGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star }); // Top: Rotation Queue
+            RootLayoutGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Bottom: Portal & Requests
+
+            Grid.SetRow(RotationSectionGrid, 0);
+            Grid.SetColumn(RotationSectionGrid, 0);
+
+            Grid.SetRow(PortalAndRequestsGrid, 1);
+            Grid.SetColumn(PortalAndRequestsGrid, 0);
+
+            // Inside PortalAndRequestsGrid: Side-by-side bottom layout (QR code card on left, Requests on right)
+            PortalAndRequestsGrid.RowDefinitions.Clear();
+            PortalAndRequestsGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(220) });
+
+            PortalAndRequestsGrid.ColumnDefinitions.Clear();
+            PortalAndRequestsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(170) });
+            PortalAndRequestsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+
+            Grid.SetRow(PortalConnectionCard, 0);
+            Grid.SetColumn(PortalConnectionCard, 0);
+
+            Grid.SetRow(IncomingRequestsGrid, 0);
+            Grid.SetColumn(IncomingRequestsGrid, 1);
+            IncomingRequestsGrid.HeightRequest = 220;
+
+            Grid.SetRowSpan(AboutOverlay, 2);
+            Grid.SetColumnSpan(AboutOverlay, 1);
+            Grid.SetRowSpan(EditSingerOverlay, 2);
+            Grid.SetColumnSpan(EditSingerOverlay, 1);
+        }
+        else
+        {
+            // Horizontal / Landscape Mode: Rotation on left (*), Portal & Requests on right (280px)
+            RootLayoutGrid.RowDefinitions.Clear();
+            RootLayoutGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star });
+
+            RootLayoutGrid.ColumnDefinitions.Clear();
+            RootLayoutGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+            RootLayoutGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(280) });
+
+            Grid.SetRow(RotationSectionGrid, 0);
+            Grid.SetColumn(RotationSectionGrid, 0);
+
+            Grid.SetRow(PortalAndRequestsGrid, 0);
+            Grid.SetColumn(PortalAndRequestsGrid, 1);
+
+            // Inside PortalAndRequestsGrid: Stacked vertical layout (QR code card on top, Requests list below)
+            PortalAndRequestsGrid.ColumnDefinitions.Clear();
+            PortalAndRequestsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+
+            PortalAndRequestsGrid.RowDefinitions.Clear();
+            PortalAndRequestsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            PortalAndRequestsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star });
+
+            Grid.SetRow(PortalConnectionCard, 0);
+            Grid.SetColumn(PortalConnectionCard, 0);
+
+            Grid.SetRow(IncomingRequestsGrid, 1);
+            Grid.SetColumn(IncomingRequestsGrid, 0);
+            IncomingRequestsGrid.ClearValue(VisualElement.HeightRequestProperty);
+
+            Grid.SetRowSpan(AboutOverlay, 1);
+            Grid.SetColumnSpan(AboutOverlay, 2);
+            Grid.SetRowSpan(EditSingerOverlay, 1);
+            Grid.SetColumnSpan(EditSingerOverlay, 2);
+        }
     }
 }

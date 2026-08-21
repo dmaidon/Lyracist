@@ -1,5 +1,5 @@
-<!-- Edited on Aug 21, 2026 @ 08:30:00 -> Added release notes for global TextBox select-all on focus and new singer auto-selection across all apps -->
-Last Edit: Aug 21, 2026 - Global TextBox Select-All On Focus Across All Applications and New Singer Auto-Selection
+<!-- Edited on Aug 21, 2026 @ 09:03:00 -> Added release notes for KSRotation.Maui responsive vertical/horizontal layout -->
+Last Edit: Aug 21, 2026 - KSRotation.Maui Responsive Vertical/Horizontal Layout and Global TextBox Select-All On Focus
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -7,6 +7,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.21.1] - 2026-08-21
 
 ### Fixed & Enhanced
+- **Responsive Vertical & Horizontal Orientation Layouts in `KSRotation.Maui`**:
+  - Implemented dynamic orientation handling in `MainPage.xaml` and `MainPage.xaml.cs` via `OnSizeAllocated` detection.
+  - In **Vertical Mode (Portrait)**: The Active Rotation Queue spans the top across full width, and the Patron Request Portal (QR Code card) and Incoming Requests list reflow side-by-side across the bottom (220px height), maximizing vertical screen real estate for rotation management.
+  - In **Horizontal Mode (Landscape)**: The layout retains the traditional two-column master view with Rotation on the left (`*`) and Portal/Requests sidebar on the right (`280px`).
 - **Global Auto-Highlighting & Select-All on Focus Across All Applications**:
   - Implemented `TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus()` across all WPF applications (`KSRotation`, `Lyracist`, `Lyracist.Trivia`, `TriviaDbCreator`, `LyracistDbEditor`, `LyracistKeyGen`, and `ScaryokeWheel`).
   - Entering or clicking any `TextBox`, `PasswordBox`, or numeric box from an unfocused state automatically highlights and selects all existing text, allowing instant overwrite typing without manual backspacing or double-clicking. Subsequent clicks inside an already focused box preserve normal caret positioning.

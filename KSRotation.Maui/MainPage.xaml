@@ -1,4 +1,4 @@
-<!-- Edited on Aug 18, 2026 @ 13:24:00 -> Add Float to Top toggle, 1st Singer round flag badge, and Set 1st Singer action -->
+<!-- Edited on Aug 21, 2026 @ 09:02:00 -> Add responsive portrait/vertical layout with rotation at top and QR code + requests at bottom -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -8,10 +8,10 @@
              Title="KSRotation Console (Master)"
              BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#12141C}">
 
-    <Grid ColumnDefinitions="*, 280" RowDefinitions="*" Padding="12" ColumnSpacing="12">
+    <Grid x:Name="RootLayoutGrid" ColumnDefinitions="*, 280" RowDefinitions="*" Padding="12" ColumnSpacing="12" RowSpacing="12">
 
-        <!-- LEFT COLUMN: ACTIVE ROTATION QUEUE -->
-        <Grid Grid.Column="0" RowDefinitions="Auto, *" RowSpacing="12">
+        <!-- LEFT (OR TOP) SECTION: ACTIVE ROTATION QUEUE -->
+        <Grid x:Name="RotationSectionGrid" Grid.Column="0" Grid.Row="0" RowDefinitions="Auto, *" RowSpacing="12">
 
             <!-- Top Panel: Add New Singer -->
             <Border Grid.Row="0" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="12">
@@ -278,11 +278,11 @@
             </Grid>
         </Grid>
 
-        <!-- RIGHT COLUMN: WEB PORTAL SERVER & INCOMING REQUESTS -->
-        <Grid Grid.Column="1" RowDefinitions="Auto, *" RowSpacing="12">
+        <!-- RIGHT (OR BOTTOM) SECTION: WEB PORTAL SERVER & INCOMING REQUESTS -->
+        <Grid x:Name="PortalAndRequestsGrid" Grid.Column="1" Grid.Row="0" RowDefinitions="Auto, *" ColumnDefinitions="*" RowSpacing="12" ColumnSpacing="12">
 
             <!-- Portal Connection Card -->
-            <Border Grid.Row="0" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="8">
+            <Border x:Name="PortalConnectionCard" Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="8">
                 <VerticalStackLayout Spacing="6">
                     <!-- Tapping this title toggles DJ mode -->
                     <Label Text="PATRON REQUEST PORTAL" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1.5" HorizontalOptions="Center">
@@ -330,7 +330,7 @@
             </Border>
 
             <!-- Incoming Requests List -->
-            <Grid Grid.Row="1" RowDefinitions="Auto, Auto, *">
+            <Grid x:Name="IncomingRequestsGrid" Grid.Row="1" Grid.Column="0" RowDefinitions="Auto, Auto, *">
                 <Label Text="INCOMING REQUESTS" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1.5" Margin="0,0,0,4" />
 
                 <HorizontalStackLayout Grid.Row="1" Spacing="6" Margin="0,0,0,6">
