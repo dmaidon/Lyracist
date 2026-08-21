@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:34:00 -> Added Global Auto-Selection & Fast Input and 1st Singer Tablet Sync to Help topics
+// Edited on Aug 21, 2026 @ 12:57:00 -> Added Remote DJ Tablet checkmark order and popup modal performer entry documentation to Help topics
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -159,11 +159,11 @@ public partial class HelpViewModel : BaseViewModel
                 DescriptionContent = "• Global Select-All on Focus: Clicking or tabbing into any TextBox, PasswordBox, or numeric input control across any application (Lyracist, KsRotation, Trivia, TriviaDbCreator, LyracistDbEditor, KeyGen, ScaryokeWheel) automatically highlights and selects all existing text.\n\n• Instant Overwrite Typing: Hosts and Game Masters can immediately type new values without manually clearing or double-clicking text boxes first.\n\n• Natural Sub-Selection: Subsequent clicks inside an already focused box preserve normal caret placement for precision editing.\n\n• New Singer Auto-Focus: Adding a new singer automatically scrolls the rotation queue, focuses the performer name field, and highlights 'New Singer' for immediate overwrite."
             },
             new() {
-                Title = "20. 1st Singer (Round Start Anchor) & Tablet Sync",
+                Title = "20. 1st Singer & Remote DJ Tablet Controls",
                 Icon = "Flag24",
                 AccentColor = "#EF4444",
                 DescriptionHeader = "Rotation Cycle Visual Highlighting & Remote DJ Tablet Actions",
-                DescriptionContent = "• Visual Red Badge & Outline: The performer who initiated the rotation cycle is highlighted with a '🚩 1ST' badge, red background outline, and distinct card styling across desktop consoles, Remote DJ Tablet (dj.html), and Patron Portals.\n\n• 1-Click Remote Anchor Control: The DJ Tablet features a dedicated '🚩' action button to assign or clear the 1st singer round anchor with one tap from anywhere in the venue.\n\n• Smart Cycle Rollover: Allows the DJ to instantly see when a full rotation cycle/round has completed once that singer returns to the top of the queue."
+                DescriptionContent = "• Visual Red Badge & Outline: The performer who initiated the rotation cycle is highlighted with a '🚩 1ST' badge, red background outline, and distinct card styling across desktop consoles, Remote DJ Tablet (dj.html), and Patron Portals.\n\n• 1-Click Remote Anchor Control: The DJ Tablet features a dedicated '🚩' action button to assign or clear the 1st singer round anchor with one tap from anywhere in the venue.\n\n• First-Button Checkmark (✓): In the Remote DJ Board (dj.html), the finished song checkmark ('✓') is positioned first in the action buttons bar for fast, immediate 1-tap song completion.\n\n• Popup Modal Performer Entry: Adding a performer from the DJ tablet opens a focused popup modal dialog with auto-focused name input, keyboard shortcuts (Enter to add, Escape to cancel), and instant queue synchronization."
             }
         ];
 

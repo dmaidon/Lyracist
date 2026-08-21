@@ -1,5 +1,5 @@
-<!-- Edited on Aug 21, 2026 @ 12:12:00 -> Update CHANGELOG with Android deployment stability and MAUI layout dispatch safeguarding -->
-Last Edit: Aug 21, 2026 - KSRotation.Maui Responsive Layouts, Android Stability & Global TextBox Select-All On Focus
+<!-- Edited on Aug 21, 2026 @ 12:34:00 -> Update CHANGELOG with Remote DJ app checkmark ordering and popup modal changes -->
+Last Edit: Aug 21, 2026 - Remote DJ Web Board Checkmark First & Add Performer Popup Modal, MAUI Responsive Layouts & Android Stability
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -7,6 +7,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.21.1] - 2026-08-21
 
 ### Fixed & Enhanced
+- **Remote DJ Web Board Checkmark Action & Add Performer Modal Dialog (`dj.html`)**:
+  - Reordered performer card action buttons so the finished song checkmark (`✓`) is positioned as the very first button in the actions bar, matching the ergonomics of desktop and MAUI consoles.
+  - Converted the static inline "Add Performer to Rotation" card into a dedicated action button and top rotation toolbar shortcut that opens a popup modal overlay dialog (`#add-performer-modal`).
+  - Added full keyboard navigation to the Add Performer popup (auto-focusing and selecting performer name on open, `Enter` key submission, and `Escape` key dismissal with backdrop click close), streamlining rapid singer entry without scrolling the main board.
 - **Android Deployment & Layout Dispatch Safeguarding (`KSRotation.Maui`)**:
   - Configured `<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>` and `<AndroidEnableFastDeployment>false</AndroidEnableFastDeployment>` in `KSRotation.Maui.csproj` to eliminate Visual Studio Android launcher errors (`DotNetDebugLaunchProvider.LaunchApplicationAsync` / `AggregateException`), ensuring a 100% self-contained APK package.
   - Added an `OperatingSystem.IsWindows()` guard to `Shared/WifiHelper.cs` to immediately bypass native `wlanapi.dll` P/Invoke and `netsh` process spawning on non-Windows platforms (Android).

@@ -1,10 +1,19 @@
-// Edited on Aug 21, 2026 @ 12:12:00 -> Added documentation for KSRotation.Maui responsive vertical/horizontal layout, Android deployment stability, global TextBox select-all on focus, and singer rotation insertion
+// Edited on Aug 21, 2026 @ 12:34:00 -> Added documentation for Remote DJ Board checkmark first action, popup modal performer entry, KSRotation.Maui responsive layout, and Android stability
 Singer Rotation & Trivia Game Enhancements (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`) - (August 2026)
 
 Section: Performance & Rotation Operations / Singer Queue Management & Trivia Live Control
 
 [System Details]
-1. Responsive Tablet Layout & Android Deployment (`KSRotation.Maui`):
+1. Remote DJ Web Board Checkmark First Action & Add Performer Popup Modal (`dj.html`):
+   - **Checkmark Action Reordering**:
+     * In the Remote DJ Board (`dj.html`), the finished song checkmark (`✓`) is now positioned as the very first button on each singer card.
+     * Aligns remote tablet ergonomics with the desktop console (`✓ Finish`) and MAUI app layout, enabling immediate 1-tap song completion without misclicks.
+   - **Add Performer Modal Dialog**:
+     * Replaced the static inline "Add Performer to Rotation" card with a prominent "+ Add Performer" button in the rotation header and action panel.
+     * Tapping the button launches a focused popup modal dialog (`#add-performer-modal`) containing Performer Name, Duet Partner (Optional), Song Title (Optional), and Artist (Optional) inputs.
+     * The Performer Name field automatically receives focus with text selected upon modal launch, supports `Enter` to submit, and dismisses on `Escape` or backdrop touch.
+
+2. Responsive Tablet Layout & Android Deployment (`KSRotation.Maui`):
    - **Vertical Mode (Portrait Orientation)**:
      * When the tablet is held vertically, the layout dynamically reflows to place the Active Rotation Queue at the top across full screen width.
      * The Patron Request Portal (QR code, connection URL, DJ PIN toggle) and Incoming Requests list reflow side-by-side across the bottom (220px height).
