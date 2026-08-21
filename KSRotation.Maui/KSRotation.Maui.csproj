@@ -31,13 +31,21 @@
 
 	<PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+	</PropertyGroup>
+
+	<!-- Fast Deployment stays on for Debug so F5 only pushes changed assemblies instead of a full
+	     ~100MB reinstall each time; Release keeps the full embed for launch stability. -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Debug'">
+		<AndroidEnableFastDeployment>true</AndroidEnableFastDeployment>
+	</PropertyGroup>
+	<PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' != 'Debug'">
 		<AndroidEnableFastDeployment>false</AndroidEnableFastDeployment>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.8.21.223</AssemblyVersion>
+		<AssemblyVersion>26.8.21.225</AssemblyVersion>
 
-		<FileVersion>26.8.21.223</FileVersion>
+		<FileVersion>26.8.21.225</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 
@@ -179,6 +187,15 @@
 			<AndroidObjDirRelease>obj\Release\net10.0-android</AndroidObjDirRelease>
 		</PropertyGroup>
 		<Exec Command="powershell -Command &quot;foreach ($dir in @('$(IntermediateOutputPath)lp', '$(IntermediateOutputPath)android', '$(IntermediateOutputPath)resizetizer', '$(IntermediateOutputPath)designtime')) { if (Test-Path $dir) { try { Get-ChildItem -Path $dir -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue; if (Test-Path $dir) { Rename-Item -Path $dir -NewName (($dir | Split-Path -Leaf) + '_stale_' + [System.Guid]::NewGuid().ToString('N')) -ErrorAction SilentlyContinue } } catch { } } }; Get-ChildItem -Path '$(IntermediateOutputPath)' -Filter '*_stale_*' -Directory -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue; exit 0&quot;" ContinueOnError="true" Condition="Exists('$(IntermediateOutputPath)')" />
+	</Target>
+
+	<!-- Workaround: VS's Android debug launcher (DotNetDebugLaunchProvider) doesn't reliably tear down
+	     its adb reverse tunnel when a debug session ends/crashes. Stale tunnels pile up across sessions
+	     and can make the next F5 hang or fail with "Failed to launch the app for Android" while the
+	     launcher waits on a dead debugger-proxy socket. Clear all reverse tunnels on every device before
+	     each install/run so a new session always starts clean. -->
+	<Target Name="ClearStaleAdbReverseTunnels" BeforeTargets="_InstallAndroidPackage;Install;_Install;Run;_Run" Condition="$(TargetFramework.Contains('-android')) and Exists('$(AndroidSdkDirectory)\platform-tools\adb.exe')">
+		<Exec Command="powershell -Command &quot;$adb = '$(AndroidSdkDirectory)\platform-tools\adb.exe'; try { $devices = &amp; $adb devices | Select-String '\tdevice$' | ForEach-Object { ($_ -split '\t')[0] }; foreach ($d in $devices) { &amp; $adb -s $d reverse --remove-all 2&gt;$null } } catch { }; exit 0&quot;" ContinueOnError="true" />
 	</Target>
 
 </Project>

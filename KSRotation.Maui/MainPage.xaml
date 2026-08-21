@@ -11,33 +11,24 @@
     <Grid x:Name="RootLayoutGrid" ColumnDefinitions="*, 280" RowDefinitions="*" Padding="12" ColumnSpacing="12" RowSpacing="12">
 
         <!-- LEFT (OR TOP) SECTION: ACTIVE ROTATION QUEUE -->
-        <Grid x:Name="RotationSectionGrid" Grid.Column="0" Grid.Row="0" RowDefinitions="Auto, *" RowSpacing="12">
-
-            <!-- Top Panel: Add New Singer -->
-            <Border Grid.Row="0" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="12">
-                <Grid ColumnDefinitions="*, *, *, *, Auto" ColumnSpacing="8" VerticalOptions="Center">
-                    <Entry x:Name="NameEntry" Placeholder="Performer Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="0" VerticalOptions="Center" />
-                    <Entry x:Name="DuetEntry" Placeholder="Duet Partner (Optional)" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="1" VerticalOptions="Center" />
-                    <Entry x:Name="SongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="2" VerticalOptions="Center" />
-                    <Entry x:Name="ArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Grid.Column="3" VerticalOptions="Center" />
-                    <Button Text="Add Performer" Clicked="OnAddPerformerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" Grid.Column="4" Padding="16,0" HeightRequest="40" VerticalOptions="Center" />
-                </Grid>
-            </Border>
+        <Grid x:Name="RotationSectionGrid" Grid.Column="0" Grid.Row="0" RowDefinitions="*" RowSpacing="12">
 
             <!-- Rotation List View -->
-            <Grid Grid.Row="1" RowDefinitions="Auto, *">
-                <HorizontalStackLayout Spacing="8" Margin="0,0,0,6" VerticalOptions="Center">
-                    <Label Text="ACTIVE ROTATION" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" VerticalOptions="Center" />
-                    <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
-                        <CheckBox IsChecked="{Binding FloatCurrentSingerToTop}" Color="#7C3AED" Scale="0.8" VerticalOptions="Center" />
-                        <Label Text="Float to Top" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
+            <Grid Grid.Row="0" RowDefinitions="Auto, *">
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="0,0,0,6">
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <Label Text="ACTIVE ROTATION" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" VerticalOptions="Center" />
+                        <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                            <CheckBox IsChecked="{Binding FloatCurrentSingerToTop}" Color="#7C3AED" Scale="0.8" VerticalOptions="Center" />
+                            <Label Text="Float to Top" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Button Text="Clear Queue" Clicked="OnClearQueueClicked" BackgroundColor="Transparent" TextColor="#F87171" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#F87171" VerticalOptions="Center" />
+                        <Button x:Name="LoadTestDataBtn" Text="Load Test Data" Clicked="OnLoadTestDataClicked" BackgroundColor="Transparent" TextColor="#3B82F6" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#3B82F6" VerticalOptions="Center" />
+                        <Button x:Name="ThemeBtn" Text="☀️ Light Mode" Clicked="OnThemeToggled" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
+                        <Button Text="🎃 Scaryoke" Clicked="OnScaryokeWheelClicked" BackgroundColor="Transparent" BorderColor="#F97316" TextColor="#F97316" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
+                        <Button Text="ⓘ About" Clicked="OnAboutClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
                     </HorizontalStackLayout>
-                    <Button Text="Clear Queue" Clicked="OnClearQueueClicked" BackgroundColor="Transparent" TextColor="#F87171" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#F87171" VerticalOptions="Center" />
-                    <Button x:Name="LoadTestDataBtn" Text="Load Test Data" Clicked="OnLoadTestDataClicked" BackgroundColor="Transparent" TextColor="#3B82F6" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#3B82F6" VerticalOptions="Center" />
-                    <Button x:Name="ThemeBtn" Text="☀️ Light Mode" Clicked="OnThemeToggled" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
-                    <Button Text="🎃 Scaryoke" Clicked="OnScaryokeWheelClicked" BackgroundColor="Transparent" BorderColor="#F97316" TextColor="#F97316" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
-                    <Button Text="ⓘ About" Clicked="OnAboutClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
-                </HorizontalStackLayout>
+                </ScrollView>
                 <ScrollView Grid.Row="1">
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Singers}">
                         <BindableLayout.ItemTemplate>
@@ -282,51 +273,13 @@
         <!-- RIGHT (OR BOTTOM) SECTION: WEB PORTAL SERVER & INCOMING REQUESTS -->
         <Grid x:Name="PortalAndRequestsGrid" Grid.Column="1" Grid.Row="0" RowDefinitions="Auto, *" ColumnDefinitions="*" RowSpacing="12" ColumnSpacing="12">
 
-            <!-- Portal Connection Card -->
+            <!-- Portal Connection Card: just the two entry points now. The QR code, connection URL,
+                 and full connect info moved into ConnectQrOverlay; the "Add Performer" entry fields
+                 moved into AddSingerOverlay. Both used to scrunch on narrow/portrait tablets. -->
             <Border x:Name="PortalConnectionCard" Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="8">
-                <VerticalStackLayout Spacing="6">
-                    <!-- Tapping this title toggles DJ mode -->
-                    <Label Text="PATRON REQUEST PORTAL" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1.5" HorizontalOptions="Center">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnPortalTitleTapped" />
-                        </Label.GestureRecognizers>
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
-                                <Setter Property="Text" Value="⚠️ DJ CONTROL PORTAL" />
-                                <Setter Property="TextColor" Value="#EF4444" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
-
-                    <Border StrokeShape="RoundRectangle 8" BackgroundColor="White" Padding="4" WidthRequest="96" HeightRequest="96" HorizontalOptions="Center">
-                        <Image Source="{Binding QrCodeImage}" Aspect="AspectFit">
-                            <Image.Triggers>
-                                <DataTrigger TargetType="Image" Binding="{Binding IsDjQrVisible}" Value="True">
-                                    <Setter Property="Source" Value="{Binding DjQrCodeImage}" />
-                                </DataTrigger>
-                            </Image.Triggers>
-                        </Image>
-                    </Border>
-
-                    <Label Text="{Binding ConnectionUrl}" TextColor="#10B981" FontSize="11" FontAttributes="Bold" HorizontalOptions="Center">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
-                                <Setter Property="Text" Value="{Binding DjConnectionUrl}" />
-                                <Setter Property="TextColor" Value="#EF4444" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
-
-                    <Label Text="Singers scan to connect &amp; request songs" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" HorizontalOptions="Center">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
-                                <Setter Property="Text" Value="DJ ONLY: Remote dashboard login URL" />
-                                <Setter Property="TextColor" Value="#EF4444" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
-
-                    <Label Text="{Binding DjPin, StringFormat='PIN: {0}'}" TextColor="#EF4444" FontSize="12" FontAttributes="Bold" HorizontalOptions="Center" IsVisible="{Binding IsDjQrVisible}" />
+                <VerticalStackLayout Spacing="8" VerticalOptions="Center">
+                    <Button Text="+ Add Performer" Clicked="OnAddPerformerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" FontSize="12" Padding="8,0" HeightRequest="40" HorizontalOptions="Fill" />
+                    <Button Text="📱 Connect QR" Clicked="OnShowConnectQrClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" BorderWidth="1" FontAttributes="Bold" FontSize="12" Padding="8,0" HeightRequest="40" HorizontalOptions="Fill" />
                 </VerticalStackLayout>
             </Border>
 
@@ -463,6 +416,84 @@
                         <Button Text="Close" Clicked="OnCloseAboutClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
                     </VerticalStackLayout>
                 </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Connect QR overlay: replaces the always-on QR card (which scrunched down to an
+             unreadable size on narrow/portrait tablets) with a single button + popup. -->
+        <Grid x:Name="ConnectQrOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False">
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="280" HorizontalOptions="Center" VerticalOptions="Center">
+                <VerticalStackLayout Spacing="6">
+                    <!-- Tapping this title toggles DJ mode -->
+                    <Label Text="PATRON REQUEST PORTAL" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" HorizontalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnPortalTitleTapped" />
+                        </Label.GestureRecognizers>
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
+                                <Setter Property="Text" Value="⚠️ DJ CONTROL PORTAL" />
+                                <Setter Property="TextColor" Value="#EF4444" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+
+                    <Border StrokeShape="RoundRectangle 8" BackgroundColor="White" Padding="8" WidthRequest="180" HeightRequest="180" HorizontalOptions="Center" Margin="0,8">
+                        <Image Source="{Binding QrCodeImage}" Aspect="AspectFit">
+                            <Image.Triggers>
+                                <DataTrigger TargetType="Image" Binding="{Binding IsDjQrVisible}" Value="True">
+                                    <Setter Property="Source" Value="{Binding DjQrCodeImage}" />
+                                </DataTrigger>
+                            </Image.Triggers>
+                        </Image>
+                    </Border>
+
+                    <Label Text="{Binding ConnectionUrl}" TextColor="#10B981" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
+                                <Setter Property="Text" Value="{Binding DjConnectionUrl}" />
+                                <Setter Property="TextColor" Value="#EF4444" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+
+                    <Label Text="Singers scan to connect &amp; request songs" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" HorizontalOptions="Center">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
+                                <Setter Property="Text" Value="DJ ONLY: Remote dashboard login URL" />
+                                <Setter Property="TextColor" Value="#EF4444" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+
+                    <Label Text="{Binding DjPin, StringFormat='PIN: {0}'}" TextColor="#EF4444" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center" IsVisible="{Binding IsDjQrVisible}" />
+
+                    <Button Text="Close" Clicked="OnCloseConnectQrClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" HeightRequest="36" Margin="0,14,0,0" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- Add Singer overlay: replaces the old inline row of Entry fields (which scrunched together
+             and clipped their text on narrow/portrait tablets) with a single button + popup form. -->
+        <Grid x:Name="AddSingerOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False">
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="320" HorizontalOptions="Center" VerticalOptions="Center">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Add Performer" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,12" />
+
+                    <Label Text="Name" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                    <Entry x:Name="AddNameEntry" Placeholder="Performer Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
+
+                    <Label Text="Duet Partner (Optional)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                    <Entry x:Name="AddDuetEntry" Placeholder="Partner Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
+
+                    <Label Text="Song" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                    <Entry x:Name="AddSongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
+
+                    <Label Text="Artist" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                    <Entry x:Name="AddArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,14" />
+
+                    <Button Text="Add" Clicked="OnSaveAddPerformerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
+                    <Button Text="Cancel" Clicked="OnCancelAddPerformerClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" HeightRequest="36" />
+                </VerticalStackLayout>
             </Border>
         </Grid>
 

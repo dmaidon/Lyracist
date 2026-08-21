@@ -35,13 +35,22 @@ public partial class MainPage : ContentPage
         LoadTestDataBtn.Opacity = enabled ? 1.0 : 0.35;
     }
 
-    private async void OnAddPerformerClicked(object? sender, EventArgs e)
+    private void OnAddPerformerClicked(object? sender, EventArgs e)
+    {
+        AddNameEntry.Text = string.Empty;
+        AddDuetEntry.Text = string.Empty;
+        AddSongEntry.Text = string.Empty;
+        AddArtistEntry.Text = string.Empty;
+        AddSingerOverlay.IsVisible = true;
+    }
+
+    private async void OnSaveAddPerformerClicked(object? sender, EventArgs e)
     {
         var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
-        string name = NameEntry.Text?.Trim() ?? string.Empty;
-        string duet = DuetEntry.Text?.Trim() ?? string.Empty;
-        string song = SongEntry.Text?.Trim() ?? string.Empty;
-        string artist = ArtistEntry.Text?.Trim() ?? string.Empty;
+        string name = AddNameEntry.Text?.Trim() ?? string.Empty;
+        string duet = AddDuetEntry.Text?.Trim() ?? string.Empty;
+        string song = AddSongEntry.Text?.Trim() ?? string.Empty;
+        string artist = AddArtistEntry.Text?.Trim() ?? string.Empty;
 
         if (!vm.TryAddPerformer(name, song, artist, duet))
         {
@@ -49,11 +58,12 @@ public partial class MainPage : ContentPage
             return;
         }
 
-        // Clear entry fields
-        NameEntry.Text = string.Empty;
-        DuetEntry.Text = string.Empty;
-        SongEntry.Text = string.Empty;
-        ArtistEntry.Text = string.Empty;
+        AddSingerOverlay.IsVisible = false;
+    }
+
+    private void OnCancelAddPerformerClicked(object? sender, EventArgs e)
+    {
+        AddSingerOverlay.IsVisible = false;
     }
 
     private void OnDeleteSingerClicked(object? sender, EventArgs e)
@@ -424,6 +434,16 @@ public partial class MainPage : ContentPage
         vm.IsDjQrVisible = !vm.IsDjQrVisible;
     }
 
+    private void OnShowConnectQrClicked(object? sender, EventArgs e)
+    {
+        ConnectQrOverlay.IsVisible = true;
+    }
+
+    private void OnCloseConnectQrClicked(object? sender, EventArgs e)
+    {
+        ConnectQrOverlay.IsVisible = false;
+    }
+
     private bool _isPortrait = false;
     private bool _hasAllocatedSize = false;
 
@@ -490,6 +510,10 @@ public partial class MainPage : ContentPage
                 Grid.SetColumnSpan(AboutOverlay, 1);
                 Grid.SetRowSpan(EditSingerOverlay, 2);
                 Grid.SetColumnSpan(EditSingerOverlay, 1);
+                Grid.SetRowSpan(AddSingerOverlay, 2);
+                Grid.SetColumnSpan(AddSingerOverlay, 1);
+                Grid.SetRowSpan(ConnectQrOverlay, 2);
+                Grid.SetColumnSpan(ConnectQrOverlay, 1);
             }
             else
             {
@@ -534,6 +558,10 @@ public partial class MainPage : ContentPage
                 Grid.SetColumnSpan(AboutOverlay, 2);
                 Grid.SetRowSpan(EditSingerOverlay, 1);
                 Grid.SetColumnSpan(EditSingerOverlay, 2);
+                Grid.SetRowSpan(AddSingerOverlay, 1);
+                Grid.SetColumnSpan(AddSingerOverlay, 2);
+                Grid.SetRowSpan(ConnectQrOverlay, 1);
+                Grid.SetColumnSpan(ConnectQrOverlay, 2);
             }
         }
         catch (Exception ex)
