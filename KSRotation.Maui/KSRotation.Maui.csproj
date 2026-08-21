@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 09:03:00 -> Update KSRotation.Maui for responsive vertical and horizontal orientation layouts -->
+<!-- Edited on Aug 21, 2026 @ 10:22:00 -> Set EmbedAssembliesIntoApk and disable FastDeployment for Android stability -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -27,10 +27,17 @@
 		<WindowsPackageType>None</WindowsPackageType>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
 
-		<AssemblyVersion>26.8.21.222</AssemblyVersion>
+	<PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
+		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+		<AndroidEnableFastDeployment>false</AndroidEnableFastDeployment>
+	</PropertyGroup>
 
-		<FileVersion>26.8.21.222</FileVersion>
+	<PropertyGroup>
+		<AssemblyVersion>26.8.21.223</AssemblyVersion>
+
+		<FileVersion>26.8.21.223</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 

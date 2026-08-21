@@ -207,7 +207,7 @@
                                         </VerticalStackLayout>
 
                                         <!-- Actions Panel -->
-                                        <HorizontalStackLayout Spacing="4" Margin="0,2,4,0">
+                                        <HorizontalStackLayout Spacing="4" Margin="0,2,8,0">
 
                                             <!-- Complete current round -->
                                             <Button Text="✓" Clicked="OnFinishSingerSongClicked" CommandParameter="{Binding .}"  BackgroundColor="Transparent" BorderColor="#3B82F6" BorderWidth="1" TextColor="#3B82F6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Song Completed" />
