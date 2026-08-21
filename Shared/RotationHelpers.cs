@@ -33,8 +33,10 @@ namespace Lyracist.Shared
         /// cycle before the round rolls over into the next cycle.
         /// Otherwise (if the anchor is at index 0 or not found), the new singer is inserted before any inactive singers
         /// (or appended to the list).
+        /// The anchor-index math above is correct regardless of "float current singer to top" mode - the anchor
+        /// is found by its IsRotationStart flag, not by list position, so it needs no float-mode parameter of its own.
         /// </summary>
-        public static void InsertNewSinger<T>(IList<T> singers, T newSinger, bool floatCurrentSingerToTop = false) where T : class, IRotationSinger
+        public static void InsertNewSinger<T>(IList<T> singers, T newSinger) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(newSinger);

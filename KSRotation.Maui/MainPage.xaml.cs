@@ -566,7 +566,12 @@ public partial class MainPage : ContentPage
         }
         catch (Exception ex)
         {
+            // Debug.WriteLine alone is invisible on a DJ's tablet in the field with no debugger
+            // attached - if this ever throws partway through (several sequential Grid mutations
+            // per branch), the layout is left half-updated with zero diagnostic trail. LoggerService
+            // writes to the same persistent, on-device log file the rest of the app already uses.
             System.Diagnostics.Debug.WriteLine($"UpdateOrientationLayout error: {ex.Message}");
+            KSRotation.Services.LoggerService.LogError("MainPage.UpdateOrientationLayout", ex);
         }
     }
 }

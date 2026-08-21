@@ -1717,22 +1717,6 @@
       "TimeLimitSeconds": 15
     },
     {
-      "Prompt": "Smash Mouth - All Star: 'Somebody once told me the world is gonna roll me, I ain't the sharpest tool in the...'",
-      "Options": [
-        "Yard",
-        "Shed",
-        "Box",
-        "Barn"
-      ],
-      "Explanation": "'...I ain't the sharpest tool in the shed.'",
-      "Id": "CTL-108",
-      "Category": "Complete the Lyric",
-      "Difficulty": "Medium",
-      "QuestionType": "MultipleChoice",
-      "CorrectAnswerIndex": 1,
-      "TimeLimitSeconds": 15
-    },
-    {
       "Prompt": "TLC - Waterfalls: 'Don't go chasing waterfalls, please stick to the rivers and the lakes that you're...'",
       "Options": [
         "Next to",
@@ -1778,22 +1762,6 @@
       "Difficulty": "Medium",
       "QuestionType": "MultipleChoice",
       "CorrectAnswerIndex": 2,
-      "TimeLimitSeconds": 15
-    },
-    {
-      "Prompt": "Dexys Midnight Runners - Come On Eileen: 'Come on Eileen, oh I swear (what he means), at this moment, you mean...'",
-      "Options": [
-        "Everything",
-        "So much to me",
-        "Nothing else",
-        "The world to me"
-      ],
-      "Explanation": "'...at this moment, you mean everything!'",
-      "Id": "CTL-112",
-      "Category": "Complete the Lyric",
-      "Difficulty": "Medium",
-      "QuestionType": "MultipleChoice",
-      "CorrectAnswerIndex": 0,
       "TimeLimitSeconds": 15
     },
     {
@@ -1858,22 +1826,6 @@
       "Difficulty": "Medium",
       "QuestionType": "MultipleChoice",
       "CorrectAnswerIndex": 3,
-      "TimeLimitSeconds": 15
-    },
-    {
-      "Prompt": "Kenny Rogers - The Gambler: 'You've got to know when to hold 'em, know when to fold 'em, know when to walk away, and know when to...'",
-      "Options": [
-        "Play",
-        "Bet",
-        "Run",
-        "Hide"
-      ],
-      "Explanation": "'...and know when to run. You never count your money when you're sittin' at the table...'",
-      "Id": "CTL-117",
-      "Category": "Complete the Lyric",
-      "Difficulty": "Medium",
-      "QuestionType": "MultipleChoice",
-      "CorrectAnswerIndex": 2,
       "TimeLimitSeconds": 15
     },
     {
@@ -2274,22 +2226,6 @@
       "Difficulty": "Medium",
       "QuestionType": "MultipleChoice",
       "CorrectAnswerIndex": 0,
-      "TimeLimitSeconds": 15
-    },
-    {
-      "Prompt": "Men at Work - Down Under: 'Travelling in a fried-out Kombi, on a hippie trail, head full of zombie. I met a strange lady, she made me nervous, she took me in and gave me...'",
-      "Options": [
-        "A cold beer",
-        "Dinner",
-        "Breakfast",
-        "Vegemite"
-      ],
-      "Explanation": "'...she took me in and made me breakfast. And she said: Do you come from a land down under?'",
-      "Id": "CTL-143",
-      "Category": "Complete the Lyric",
-      "Difficulty": "Medium",
-      "QuestionType": "MultipleChoice",
-      "CorrectAnswerIndex": 2,
       "TimeLimitSeconds": 15
     },
     {

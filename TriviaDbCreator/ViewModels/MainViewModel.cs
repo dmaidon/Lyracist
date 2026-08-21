@@ -534,7 +534,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var prng = new Random(42);
+        var prng = new Random();
         var targetIndices = new List<int>();
         for (int i = 0; i < PackQuestions.Count; i++)
         {

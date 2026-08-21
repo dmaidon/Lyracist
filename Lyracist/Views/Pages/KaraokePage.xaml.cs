@@ -17,16 +17,6 @@ public partial class KaraokePage : Page
         Loaded += (s, e) => ViewModel.OnNavigatedTo();
     }
 
-    private async void StartSongButton_Click(object sender, RoutedEventArgs e)
-    {
-        await ViewModel.StartSongNow();
-    }
-
-    private void SkipSingerButton_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel.SkipSinger();
-    }
-
     private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         if (sender is ListBoxItem item)

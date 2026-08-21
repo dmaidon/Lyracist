@@ -568,6 +568,11 @@
     <script>
         let playerName = localStorage.getItem('lyracist_trivia_player') || '';
         let teamName = localStorage.getItem('lyracist_trivia_team') || '';
+        // Identifies THIS device's claim to playerName across requests, so a second device
+        // choosing the same display name can't silently merge into (and submit/score as) the
+        // first device's player. Persisted so reloading the page on the same device still counts
+        // as the same player rather than getting rejected as a name collision with itself.
+        let playerId = localStorage.getItem('lyracist_trivia_playerid') || '';
         let hasSubmitted = false;
         let selectedOption = -1;
         let questionStartTime = 0;
@@ -597,10 +602,21 @@
                 const res = await fetch('/api/trivia/join', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: playerName, teamName: teamName })
+                    body: JSON.stringify({ name: playerName, teamName: teamName, playerId: playerId })
                 });
 
+                if (res.status === 409) {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.error || 'That name is already in use this game. Please choose a different name.');
+                    return;
+                }
+
                 if (res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    if (data.playerId) {
+                        playerId = data.playerId;
+                        localStorage.setItem('lyracist_trivia_playerid', playerId);
+                    }
                     showScreen('screen-lobby');
                     updatePlayerBadge();
                     startPolling();
@@ -649,6 +665,7 @@
 
             const payload = JSON.stringify({
                 playerName: playerName,
+                playerId: playerId,
                 selectedOptionIndex: optionIndex,
                 responseTimeMs: responseTimeMs
             });
@@ -692,7 +709,7 @@
             if (!playerName) return;
 
             try {
-                const res = await fetch(`/api/trivia/state?player=${encodeURIComponent(playerName)}`);
+                const res = await fetch(`/api/trivia/state?player=${encodeURIComponent(playerName)}&playerId=${encodeURIComponent(playerId)}`);
                 if (!res.ok) return;
 
                 const data = await res.json();
@@ -700,6 +717,26 @@
             } catch (err) {
                 // Ignore transient network errors
             }
+        }
+
+        // The host's Points4/3/2OptionsPercent settings are free-text and unvalidated - a value
+        // that doesn't land on exactly 100/70/40 used to leave this badge with no color/border at
+        // all (its class name was built as `tier-${pct}`, which only has CSS rules for those three
+        // exact numbers). Styling by threshold instead means any configured percent still gets a
+        // sensible color.
+        function applyMultiplierPillStyle(pill, pct) {
+            let bg, border, color;
+            if (pct >= 85) {
+                bg = 'rgba(16, 185, 129, 0.15)'; border = '#10B981'; color = '#34D399';
+            } else if (pct >= 55) {
+                bg = 'rgba(6, 182, 212, 0.15)'; border = '#06B6D4'; color = '#38BDF8';
+            } else {
+                bg = 'rgba(245, 158, 11, 0.15)'; border = '#F59E0B'; color = '#FBBF24';
+            }
+            pill.className = 'multiplier-pill';
+            pill.style.background = bg;
+            pill.style.borderColor = border;
+            pill.style.color = color;
         }
 
         function handleStateUpdate(data) {
@@ -753,7 +790,7 @@
                     const pts = data.currentPotentialPoints || (data.basePoints || 1000);
                     multBadge.textContent = `⚡ ${pct}% VALUE`;
                     multPoints.textContent = `${pts.toLocaleString()} pts base`;
-                    multPill.className = `multiplier-pill tier-${pct}`;
+                    applyMultiplierPillStyle(multPill, pct);
                 }
 
                 // Update eliminated choices in real time during countdown
@@ -783,12 +820,31 @@
                 }
             } else if (state === 'EliminatingAnswers') {
                 showScreen('screen-question');
-                document.querySelectorAll('.btn-buzzer').forEach(btn => btn.disabled = true);
+
+                // The engine (TriviaGameEngine.SubmitAnswer) explicitly keeps accepting answers
+                // through this whole phase, scored at whatever tier is still live — that's the
+                // entire mechanism behind the 70%/40% tiers. Only disable options that have
+                // actually faded; a still-visible button must stay clickable, same as QuestionActive.
+                const multPill = document.getElementById('value-multiplier-pill');
+                const multBadge = document.getElementById('multiplier-badge');
+                const multPoints = document.getElementById('multiplier-points');
+                if (multPill && multBadge && multPoints) {
+                    const pct = data.currentValuePercent || 100;
+                    const pts = data.currentPotentialPoints || (data.basePoints || 1000);
+                    multBadge.textContent = `⚡ ${pct}% VALUE`;
+                    multPoints.textContent = `${pts.toLocaleString()} pts base`;
+                    applyMultiplierPillStyle(multPill, pct);
+                }
 
                 if (data.eliminatedIndices && Array.isArray(data.eliminatedIndices)) {
                     data.eliminatedIndices.forEach(idx => {
                         const btn = document.querySelector(`.btn-buzzer.opt-${idx}`);
-                        if (btn) btn.classList.add('eliminated');
+                        if (btn) {
+                            btn.classList.add('eliminated');
+                            if (!hasSubmitted) {
+                                btn.disabled = true;
+                            }
+                        }
                     });
                 }
             } else if (state === 'RevealAnswer') {

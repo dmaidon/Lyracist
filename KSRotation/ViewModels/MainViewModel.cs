@@ -1038,7 +1038,7 @@ namespace KSRotation.ViewModels
         private void AddActiveSinger(SingerEntry newSinger)
         {
             LastInsertedSinger = newSinger;
-            RotationHelpers.InsertNewSinger(Singers, newSinger, FloatCurrentSingerToTop);
+            RotationHelpers.InsertNewSinger(Singers, newSinger);
         }
 
         [RelayCommand]

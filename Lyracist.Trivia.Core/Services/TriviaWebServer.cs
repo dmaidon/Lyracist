@@ -211,7 +211,25 @@ public class TriviaWebServer : IDisposable
                 var joinReq = JsonSerializer.Deserialize<JoinRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 if (joinReq != null && !string.IsNullOrWhiteSpace(joinReq.Name))
                 {
-                    var player = _engine.RegisterPlayer(joinReq.Name.Trim(), joinReq.TeamName?.Trim() ?? "");
+                    string trimmedName = joinReq.Name.Trim();
+
+                    // If someone is already actively connected under this name, only let the join
+                    // through if the request carries that same player's PlayerId (a legitimate
+                    // reconnect - e.g. a page reload on the same device). Otherwise this is a
+                    // second, different device picking the same display name, which used to
+                    // silently merge into (and start acting as) the first device's player.
+                    var existing = _engine.GetPlayers().FirstOrDefault(p => p.Name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase));
+                    bool isSamePlayer = existing != null && !string.IsNullOrEmpty(joinReq.PlayerId) &&
+                        string.Equals(existing.PlayerId, joinReq.PlayerId, StringComparison.OrdinalIgnoreCase);
+
+                    if (existing != null && existing.IsConnected && !isSamePlayer)
+                    {
+                        await SendResponseAsync(stream, 409, "application/json; charset=utf-8",
+                            Encoding.UTF8.GetBytes("{\"error\":\"That name is already in use this game. Please choose a different name.\"}"));
+                        return;
+                    }
+
+                    var player = _engine.RegisterPlayer(trimmedName, joinReq.TeamName?.Trim() ?? "");
                     var resp = new { success = true, playerId = player.PlayerId, name = player.Name };
                     await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)));
                 }
@@ -234,7 +252,27 @@ public class TriviaWebServer : IDisposable
                 var subReq = JsonSerializer.Deserialize<SubmitRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 if (subReq != null && !string.IsNullOrWhiteSpace(subReq.PlayerName))
                 {
-                    bool accepted = _engine.SubmitAnswer(subReq.PlayerName.Trim(), subReq.SelectedOptionIndex, subReq.ResponseTimeMs);
+                    string trimmedName = subReq.PlayerName.Trim();
+
+                    // If this name's PlayerId no longer matches who the caller thinks they are,
+                    // another device has since taken over that name (or the caller's own session
+                    // is stale) - don't let it submit an answer as somebody else.
+                    var existing = _engine.GetPlayers().FirstOrDefault(p => p.Name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase));
+                    if (existing != null && !string.IsNullOrEmpty(subReq.PlayerId) &&
+                        !string.Equals(existing.PlayerId, subReq.PlayerId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        await SendResponseAsync(stream, 409, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Player identity mismatch - please rejoin.\"}"));
+                        return;
+                    }
+
+                    int optionCount = _engine.CurrentSession.CurrentQuestion?.Options.Count ?? 4;
+                    if (subReq.SelectedOptionIndex < 0 || subReq.SelectedOptionIndex >= optionCount)
+                    {
+                        await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Invalid answer option.\"}"));
+                        return;
+                    }
+
+                    bool accepted = _engine.SubmitAnswer(trimmedName, subReq.SelectedOptionIndex, subReq.ResponseTimeMs);
                     var resp = new { success = accepted };
                     await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)));
                 }
@@ -253,15 +291,27 @@ public class TriviaWebServer : IDisposable
         if (path.Equals("/api/trivia/state", StringComparison.OrdinalIgnoreCase) && method == "GET")
         {
             string playerName = "";
+            string requestPlayerId = "";
             if (!string.IsNullOrEmpty(queryString))
             {
                 var qParams = HttpUtility.ParseQueryString(queryString);
                 playerName = qParams["player"] ?? "";
+                requestPlayerId = qParams["playerId"] ?? "";
             }
 
             var player = !string.IsNullOrEmpty(playerName)
                 ? _engine.GetPlayers().FirstOrDefault(p => p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase))
                 : null;
+
+            // A playerId that doesn't match means another device has since taken over this name
+            // (or this caller's own session is stale) - don't hand back that player's live score,
+            // streak, or hasAnswered state to someone who isn't actually them.
+            if (player != null && !string.IsNullOrEmpty(requestPlayerId) &&
+                !string.Equals(player.PlayerId, requestPlayerId, StringComparison.OrdinalIgnoreCase))
+            {
+                player = null;
+            }
+
             if (player != null)
             {
                 player.IsConnected = true;
@@ -272,7 +322,7 @@ public class TriviaWebServer : IDisposable
             bool isCorrect = player != null && q != null && player.LastAnswerIndex == q.CorrectAnswerIndex;
             var gameResult = _engine.GetGameResult();
 
-            int visibleCount = Math.Max(1, 4 - _engine.EliminatedAnswerIndices.Count);
+            int visibleCount = Math.Max(1, (q?.Options.Count ?? 4) - _engine.EliminatedAnswerIndices.Count);
             int currentPercent = _engine.GetTierPercent(visibleCount);
             int potentialPoints = (int)(_engine.Settings.BasePointsPerQuestion * (currentPercent / 100.0));
 
@@ -442,6 +492,6 @@ public class TriviaWebServer : IDisposable
         }
     }
 
-    private record JoinRequest(string Name, string? TeamName);
-    private record SubmitRequest(string PlayerName, int SelectedOptionIndex, double ResponseTimeMs);
+    private record JoinRequest(string Name, string? TeamName, string? PlayerId);
+    private record SubmitRequest(string PlayerName, int SelectedOptionIndex, double ResponseTimeMs, string? PlayerId);
 }

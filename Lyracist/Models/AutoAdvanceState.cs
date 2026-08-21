@@ -29,5 +29,12 @@ public enum AutoAdvanceState
     /// <summary>
     /// Song playback transition is in progress (guards against accidental double-starts).
     /// </summary>
-    StartingSong
+    StartingSong,
+
+    /// <summary>
+    /// A grace-period countdown (or the decision to start one) is being held because Trivia or
+    /// Scaryoke mode is active. Automatically resumes once the mini-game ends, instead of being
+    /// silently dropped back to Idle with nothing left to wake it back up.
+    /// </summary>
+    SuspendedForMiniGame
 }

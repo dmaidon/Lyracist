@@ -230,13 +230,13 @@
                     <Button x:Name="StartSongButton"
                             Content="▶ START SONG"
                             Style="{StaticResource BigDJButton}"
-                            Click="StartSongButton_Click"
+                            Command="{Binding StartSongNowCommand}"
                             Margin="0,0,12,0" />
 
                     <Button x:Name="SkipSingerButton"
                             Content="⏭ SKIP SINGER"
                             Style="{StaticResource BigDJButton}"
-                            Click="SkipSingerButton_Click" />
+                            Command="{Binding SkipSingerCommand}" />
                 </StackPanel>
             </Grid>
         </Border>

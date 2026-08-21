@@ -34,7 +34,48 @@ public partial class KaraokeViewModel : BaseViewModel
     private int _searchRequestToken;
 
     public RotationViewModel Rotation { get; }
-    public AutoAdvanceManager? AutoAdvance { get; set; }
+
+    private AutoAdvanceManager? _autoAdvance;
+    public AutoAdvanceManager? AutoAdvance
+    {
+        get => _autoAdvance;
+        set
+        {
+            if (_autoAdvance != null)
+            {
+                _autoAdvance.StateChanged -= HandleAutoAdvanceManagerStateChanged;
+                _autoAdvance.CountdownTick -= HandleAutoAdvanceManagerCountdownTick;
+            }
+
+            _autoAdvance = value;
+
+            if (_autoAdvance != null)
+            {
+                _autoAdvance.StateChanged += HandleAutoAdvanceManagerStateChanged;
+                _autoAdvance.CountdownTick += HandleAutoAdvanceManagerCountdownTick;
+                AutoAdvanceState = _autoAdvance.CurrentState;
+            }
+        }
+    }
+
+    // Mirrors AutoAdvanceManager.CurrentState so the Skip/Start Song buttons can disable
+    // themselves while a song start is already committing, instead of silently no-op'ing on a
+    // click that arrives during that window (AutoAdvanceManager guards against the race either
+    // way — this just gives the DJ visible feedback instead of a dead click).
+    private void HandleAutoAdvanceManagerStateChanged(AutoAdvanceState state) => AutoAdvanceState = state;
+
+    // Drives the countdown progress bar (IsAutoAdvanceActive/AutoAdvanceRemainingSeconds, bound in
+    // KaraokePage.xaml) from the real, running AutoAdvanceManager grace timer. This replaces a
+    // subscription further down this constructor to IShowFlowService.AutoAdvanceCountdownTick,
+    // whose only source - ShowFlowService.StartAutoAdvanceCountdown() - is never called by
+    // anything: that event can never fire, so the countdown UI never updated even though the real
+    // auto-advance countdown (in AutoAdvanceManager) was actually running the whole time.
+    private void HandleAutoAdvanceManagerCountdownTick(int secondsRemaining, bool active)
+    {
+        AutoAdvanceRemainingSeconds = secondsRemaining;
+        IsAutoAdvanceActive = active;
+        OnPropertyChanged(nameof(AutoAdvanceMaxSeconds));
+    }
 
     [ObservableProperty]
     private bool _isScaryokeMode;
@@ -486,15 +527,9 @@ public partial class KaraokeViewModel : BaseViewModel
         Rotation.Rotation.CollectionChanged += (s, e) => UpdateNowNext();
         Rotation.RotationStateChanged += UpdateNowNext;
 
-        _showFlow.AutoAdvanceCountdownTick += (seconds, active) =>
-        {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
-                AutoAdvanceRemainingSeconds = seconds;
-                IsAutoAdvanceActive = active;
-                OnPropertyChanged(nameof(AutoAdvanceMaxSeconds));
-            });
-        };
+        // The countdown progress bar is driven by AutoAdvance.CountdownTick (wired in the
+        // AutoAdvance property setter above) rather than _showFlow.AutoAdvanceCountdownTick here -
+        // see the comment on HandleAutoAdvanceManagerCountdownTick for why.
 
         AppSettings.ThemeModeChanged += theme =>
         {
@@ -958,9 +993,15 @@ public partial class KaraokeViewModel : BaseViewModel
     }
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartSongNowCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SkipSingerCommand))]
     private AutoAdvanceState _autoAdvanceState = AutoAdvanceState.Idle;
 
-    [RelayCommand]
+    // While a song start is already committing, Start/Skip have nothing safe to do until it
+    // settles — StartingSong is transient (typically well under a second, while the track loads).
+    private bool CanStartOrSkip() => AutoAdvanceState != AutoAdvanceState.StartingSong;
+
+    [RelayCommand(CanExecute = nameof(CanStartOrSkip))]
     public async Task StartSongNow()
     {
         if (AutoAdvance != null)
@@ -973,7 +1014,7 @@ public partial class KaraokeViewModel : BaseViewModel
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanStartOrSkip))]
     public void SkipSinger()
     {
         if (AutoAdvance != null)

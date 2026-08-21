@@ -59,7 +59,11 @@ public static class TextBoxSelectionHelper
 
     private static void OnTextBoxGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        if (sender is WpfTextBox textBox)
+        // Multi-line editors (AcceptsReturn="True" - question/explanation text, notes fields,
+        // etc.) are exempt: select-all-on-focus is right for a short single-line field the user
+        // means to overwrite, but wrong for a paragraph of text the user is clicking into to edit
+        // in place. Tabbing/clicking into one leaves the normal caret-placement behavior alone.
+        if (sender is WpfTextBox textBox && !textBox.AcceptsReturn)
         {
             textBox.Dispatcher.BeginInvoke(
                 DispatcherPriority.Input,
@@ -75,7 +79,9 @@ public static class TextBoxSelectionHelper
 
     private static void OnTextBoxPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (sender is WpfTextBox textBox && !textBox.IsKeyboardFocusWithin)
+        // See OnTextBoxGotKeyboardFocus - multi-line editors are exempt so a click places the
+        // caret at that point instead of selecting the entire contents.
+        if (sender is WpfTextBox textBox && !textBox.IsKeyboardFocusWithin && !textBox.AcceptsReturn)
         {
             e.Handled = true;
             textBox.Focus();

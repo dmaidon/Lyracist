@@ -688,6 +688,8 @@
         let currentPerformerName = "None";
         let selectedCatalogTrack = null;
         let searchTimeout = null;
+        let lastCatalogSongs = [];
+        let lastMusicSongs = [];
 
         function getSessionToken() {
             let token = localStorage.getItem("sessionToken");
@@ -960,7 +962,7 @@
 
             let html = "";
             queue.forEach((item, idx) => {
-                const badgeClass = `badge badge-${(item.source || "local").toLowerCase()}`;
+                const badgeClass = `badge badge-${(item.source || "local").toLowerCase().replace(/[^a-z0-9-]/g, "")}`;
                 const startBadge = item.isRotationStart ? `<span class="badge badge-1st" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>` : "";
                 const itemClass = item.isRotationStart ? "queue-item rotation-start" : "queue-item";
                 html += `
@@ -969,11 +971,11 @@
                                     <span class="queue-index">${idx + 1}</span>
                                     <div class="queue-details">
                                         <div class="queue-singer">
-                                            ${item.name}
+                                            ${escapeHtml(item.name)}
                                             ${startBadge}
-                                            <span class="${badgeClass}">${item.source || "Local"}</span>
+                                            <span class="${badgeClass}">${escapeHtml(item.source || "Local")}</span>
                                         </div>
-                                        <div class="queue-song">${item.artist} - ${item.songTitle}</div>
+                                        <div class="queue-song">${escapeHtml(item.artist)} - ${escapeHtml(item.songTitle)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -1016,20 +1018,29 @@
                 return;
             }
 
+            // Kept in a module-level array and referenced by index (rather than serializing the
+            // song into the onclick attribute) so a title/artist containing a quote can't break
+            // the markup or, worse, be used to inject arbitrary HTML/script.
+            lastCatalogSongs = songs;
             let html = "";
             songs.forEach((song, idx) => {
-                const badgeClass = `badge-source badge-${song.source.toLowerCase()}`;
+                const badgeClass = `badge-source badge-${(song.source || "").toLowerCase().replace(/[^a-z0-9-]/g, "")}`;
                 html += `
-                            <div class="search-item" onclick='openRequestModal(${JSON.stringify(song)}, "Karaoke")'>
+                            <div class="search-item" onclick="openCatalogRequestModal(${idx})">
                                 <div class="search-item-info">
-                                    <span class="search-item-title">${song.title}</span>
-                                    <span class="search-item-artist">${song.artist}</span>
+                                    <span class="search-item-title">${escapeHtml(song.title)}</span>
+                                    <span class="search-item-artist">${escapeHtml(song.artist)}</span>
                                 </div>
-                                <span class="${badgeClass}">${song.source}</span>
+                                <span class="${badgeClass}">${escapeHtml(song.source)}</span>
                             </div>
                         `;
             });
             container.innerHTML = html;
+        }
+
+        function openCatalogRequestModal(idx) {
+            const song = lastCatalogSongs[idx];
+            if (song) openRequestModal(song, "Karaoke");
         }
 
         let musicSearchTimeout = null;
@@ -1068,18 +1079,26 @@
                 return;
             }
 
+            // See renderCatalog's comment: referenced by index rather than serialized into the
+            // onclick attribute, so song data never has to be embedded (and escaped) as markup.
+            lastMusicSongs = songs;
             let html = "";
-            songs.forEach((song) => {
+            songs.forEach((song, idx) => {
                 html += `
-                            <div class="search-item" onclick='openRequestModal(${JSON.stringify(song)}, "Music")'>
+                            <div class="search-item" onclick="openMusicRequestModal(${idx})">
                                 <div class="search-item-info">
-                                    <span class="search-item-title">${song.title}</span>
-                                    <span class="search-item-artist">${song.artist}</span>
+                                    <span class="search-item-title">${escapeHtml(song.title)}</span>
+                                    <span class="search-item-artist">${escapeHtml(song.artist)}</span>
                                 </div>
                             </div>
                         `;
             });
             container.innerHTML = html;
+        }
+
+        function openMusicRequestModal(idx) {
+            const song = lastMusicSongs[idx];
+            if (song) openRequestModal(song, "Music");
         }
 
         function openRequestModal(song, type) {
@@ -1406,6 +1425,16 @@
                 btn.disabled = false;
                 document.getElementById("scaryoke-result").textContent = "Network error.";
             }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
     </script>
 </body>

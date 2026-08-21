@@ -77,10 +77,16 @@ public partial class RotationWindowViewModel : BaseViewModel
         };
         _toggleTimer.Start();
 
-        var showFlow = App.AppHost?.Services?.GetService(typeof(Lyracist.Core.Interfaces.IShowFlowService)) as Lyracist.Core.Interfaces.IShowFlowService;
-        if (showFlow != null)
+        // AutoAdvanceManager.CountdownTick is the real, running countdown - IShowFlowService's own
+        // AutoAdvanceCountdownTick event can never fire (nothing calls
+        // ShowFlowService.StartAutoAdvanceCountdown()), so this window's progress bar never
+        // updated even though the actual auto-advance countdown was genuinely running the whole
+        // time. Prefer AutoAdvanceManager; fall back to the ShowFlowService event only if for some
+        // reason AutoAdvanceManager isn't registered.
+        var autoAdvance = App.AppHost?.Services?.GetService(typeof(Lyracist.Services.Media.AutoAdvanceManager)) as Lyracist.Services.Media.AutoAdvanceManager;
+        if (autoAdvance != null)
         {
-            showFlow.AutoAdvanceCountdownTick += (seconds, active) =>
+            autoAdvance.CountdownTick += (seconds, active) =>
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -89,6 +95,22 @@ public partial class RotationWindowViewModel : BaseViewModel
                     OnPropertyChanged(nameof(AutoAdvanceMaxSeconds));
                 });
             };
+        }
+        else
+        {
+            var showFlow = App.AppHost?.Services?.GetService(typeof(Lyracist.Core.Interfaces.IShowFlowService)) as Lyracist.Core.Interfaces.IShowFlowService;
+            if (showFlow != null)
+            {
+                showFlow.AutoAdvanceCountdownTick += (seconds, active) =>
+                {
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        AutoAdvanceRemainingSeconds = seconds;
+                        IsAutoAdvanceActive = active;
+                        OnPropertyChanged(nameof(AutoAdvanceMaxSeconds));
+                    });
+                };
+            }
         }
     }
 

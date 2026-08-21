@@ -215,7 +215,7 @@ public class TriviaGameEngine : IDisposable
             player.LastAnswerIndex = optionIndex;
             player.LastResponseTimeMs = responseTimeMs;
             player.HasAnsweredCurrentQuestion = true;
-            player.VisibleOptionsAtSubmission = Math.Max(1, 4 - EliminatedAnswerIndices.Count);
+            player.VisibleOptionsAtSubmission = Math.Max(1, q.Options.Count - EliminatedAnswerIndices.Count);
             player.RemainingSecondsAtSubmission = RemainingSeconds;
             player.LastSeenAt = DateTime.Now;
 

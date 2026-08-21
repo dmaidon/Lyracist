@@ -537,7 +537,7 @@ public partial class RotationViewModel : BaseViewModel
             TotalSongsSung = totalSongsSung,
             IsMusic = isMusic
         };
-        RotationHelpers.InsertNewSinger(Rotation, newSinger, FloatCurrentSingerToTop);
+        RotationHelpers.InsertNewSinger(Rotation, newSinger);
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
@@ -556,7 +556,7 @@ public partial class RotationViewModel : BaseViewModel
             Notes = NewSingerNotes,
             Key = NewSingerKey
         };
-        RotationHelpers.InsertNewSinger(Rotation, newSinger, FloatCurrentSingerToTop);
+        RotationHelpers.InsertNewSinger(Rotation, newSinger);
 
         // Reset input properties
         NewSingerName = string.Empty;

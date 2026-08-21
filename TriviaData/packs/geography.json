@@ -1909,22 +1909,6 @@
       "TimeLimitSeconds": 15
     },
     {
-      "Prompt": "Which two countries share the longest international land border in the world?",
-      "Options": [
-        "India and Bangladesh",
-        "Canada and the United States (8,891 km)",
-        "Russia and China",
-        "Chile and Argentina"
-      ],
-      "Explanation": "The US-Canada border stretches 5,525 miles including Alaska.",
-      "Id": "GEO-120",
-      "Category": "Geography",
-      "Difficulty": "Medium",
-      "QuestionType": "MultipleChoice",
-      "CorrectAnswerIndex": 1,
-      "TimeLimitSeconds": 15
-    },
-    {
       "Prompt": "What is the capital of Japan, known as the most populous metropolitan area in the world?",
       "Options": [
         "Tokyo",
@@ -2402,6 +2386,22 @@
       "Difficulty": "Medium",
       "QuestionType": "MultipleChoice",
       "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which line of longitude, passing through Greenwich, England, is designated as 0° and used as the reference point for world time zones?",
+      "Options": [
+        "The Prime Meridian",
+        "The Equator",
+        "The International Date Line",
+        "The Tropic of Cancer"
+      ],
+      "Explanation": "The Prime Meridian at 0° longitude passes through the Royal Observatory in Greenwich and anchors the world's time zone system.",
+      "Id": "GEO-151",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
       "TimeLimitSeconds": 15
     }
   ]

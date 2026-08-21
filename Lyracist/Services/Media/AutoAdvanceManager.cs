@@ -77,6 +77,98 @@ public class AutoAdvanceManager
 
         // Hook media playback completion for automatic transition
         _mediaEngine.SongEnded += OnSongEnded;
+
+        // Both KaraokeViewModel and TriviaViewModel are app-lifetime singletons (see App.xaml.cs),
+        // so resolving them once here and subscribing directly is safe - there's no second
+        // instance to miss. This is what lets SuspendedForMiniGame actually resume: without it,
+        // a grace period suppressed while a mini-game is running had nothing left to wake it back
+        // up once the mini-game ended.
+        if (_getKaraokeVm != null)
+        {
+            try
+            {
+                var karaokeVm = _getKaraokeVm();
+                if (karaokeVm != null)
+                {
+                    karaokeVm.PropertyChanged += OnKaraokeViewModelPropertyChanged;
+                }
+            }
+            catch
+            {
+                // Best effort - if resolution fails this early, IsScaryokeModeActive()'s own
+                // try/catch already makes its absence a safe (if less responsive) no-op.
+            }
+        }
+
+        if (_getTriviaVm != null)
+        {
+            try
+            {
+                var triviaVm = _getTriviaVm();
+                if (triviaVm != null)
+                {
+                    triviaVm.PropertyChanged += OnTriviaViewModelPropertyChanged;
+                }
+            }
+            catch
+            {
+                // See above.
+            }
+        }
+    }
+
+    private void OnKaraokeViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(KaraokeViewModel.IsScaryokeMode) && sender is KaraokeViewModel vm)
+        {
+            HandleMiniGameActiveChanged(vm.IsScaryokeMode);
+        }
+    }
+
+    private void OnTriviaViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TriviaViewModel.IsGameRunning) && sender is TriviaViewModel vm)
+        {
+            HandleMiniGameActiveChanged(vm.IsGameRunning);
+        }
+    }
+
+    /// <summary>
+    /// Fires whenever Trivia or Scaryoke mode starts or stops. Starting suspends an in-progress
+    /// grace-period countdown so it can't keep ticking underneath the mini-game; stopping resumes
+    /// it (or lets BeginGracePeriod re-evaluate from scratch, e.g. if the song had already ended
+    /// while the mini-game was running) - but only once BOTH mini-games are inactive, since one
+    /// ending while the other is still running must stay suspended.
+    /// </summary>
+    private void HandleMiniGameActiveChanged(bool isNowActive)
+    {
+        bool shouldResume = false;
+
+        lock (_stateLock)
+        {
+            if (isNowActive)
+            {
+                if (CurrentState == AutoAdvanceState.GracePeriod)
+                {
+                    StopGraceTimer();
+                    CurrentState = AutoAdvanceState.SuspendedForMiniGame;
+                }
+                return;
+            }
+
+            if (CurrentState != AutoAdvanceState.SuspendedForMiniGame || IsTriviaModeActive() || IsScaryokeModeActive())
+            {
+                return;
+            }
+
+            CurrentState = AutoAdvanceState.Idle;
+            shouldResume = true;
+        }
+
+        if (shouldResume)
+        {
+            BeginGracePeriod();
+        }
     }
 
     private void OnSongEnded()
@@ -94,17 +186,21 @@ public class AutoAdvanceManager
     {
         lock (_stateLock)
         {
-            // Safety: Never start auto-advance during Trivia mode
-            if (IsTriviaModeActive())
+            // Safety: Never clobber an in-flight StartSongNow() — it already committed to loading
+            // and playing a specific singer's song, so re-entering GracePeriod here would desync the
+            // state machine out from under it (see the same guard in SkipSinger for the concrete
+            // race this prevents).
+            if (CurrentState == AutoAdvanceState.StartingSong)
             {
-                CurrentState = AutoAdvanceState.Idle;
                 return;
             }
 
-            // Safety: Never start auto-advance during Scaryoke mode
-            if (IsScaryokeModeActive())
+            // Safety: Never start auto-advance during Trivia or Scaryoke mode. Marked (rather than
+            // dropped straight to Idle) so HandleMiniGameActiveChanged knows to resume this once
+            // the mini-game ends, instead of leaving the rotation silently stuck.
+            if (IsTriviaModeActive() || IsScaryokeModeActive())
             {
-                CurrentState = AutoAdvanceState.Idle;
+                CurrentState = AutoAdvanceState.SuspendedForMiniGame;
                 return;
             }
 
@@ -135,11 +231,14 @@ public class AutoAdvanceManager
         // Display announcement on rotation billboard
         _displayService.SetRotationAnnouncement($"Next singer: {singerName} — please come to the stage", true);
 
-        // Start countdown timer
+        // Start countdown timer. StopGraceTimer() must run BEFORE announcing the fresh countdown,
+        // not after - it unconditionally fires CountdownTick(0, false) itself (to clear any stale
+        // previous timer), which would otherwise immediately clobber the "active" announcement two
+        // lines below right back to inactive.
+        StopGraceTimer();
         _secondsRemaining = MaxSeconds;
         CountdownTick?.Invoke(_secondsRemaining, true);
 
-        StopGraceTimer();
         _graceTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _graceTimer.Tick += GraceTimer_Tick;
         _graceTimer.Start();
@@ -168,7 +267,7 @@ public class AutoAdvanceManager
         {
             if (IsTriviaModeActive() || IsScaryokeModeActive())
             {
-                CurrentState = AutoAdvanceState.Idle;
+                CurrentState = AutoAdvanceState.SuspendedForMiniGame;
                 return;
             }
         }
@@ -265,6 +364,19 @@ public class AutoAdvanceManager
     /// </summary>
     public void SkipSinger()
     {
+        lock (_stateLock)
+        {
+            // Safety: a StartSongNow() call is already committing the current singer's song —
+            // loading the track and updating the projection/tablet/billboard is not cancellable
+            // mid-flight, so racing it here would let that song start playing right after the
+            // singer was "skipped". Ignore this skip; the DJ can skip again once StartSongNow
+            // settles (StartingSong is transient — typically well under a second).
+            if (CurrentState == AutoAdvanceState.StartingSong)
+            {
+                return;
+            }
+        }
+
         StopGraceTimer();
 
         // Ensure fill-in music continues

@@ -807,12 +807,22 @@
         function logout() {
             sessionStorage.removeItem("dj_pin");
             stopPolling();
+            // The Add Performer modal is nested inside #dashboard: hiding the dashboard also
+            // visually hides the modal, but its own display:flex and any typed-but-unsaved text
+            // survive underneath. Without closing it explicitly here, re-entering the PIN pops it
+            // back open over the fresh dashboard with whatever was left in it before the lock.
+            closeAddPerformerModal();
             document.getElementById("pin-input").value = "";
             document.getElementById("lock-screen").style.display = "flex";
             document.getElementById("dashboard").style.display = "none";
         }
 
         function startPolling() {
+            // Guard against a double-invocation (e.g. a rapid double-tap on "Unlock Console")
+            // leaving an earlier interval orphaned - pollInterval would only ever hold the most
+            // recent one, so stopPolling()/logout() could never clear the first, leaving it
+            // polling with a stale/cleared PIN forever.
+            stopPolling();
             loadData();
             pollInterval = setInterval(loadData, 3000);
         }
@@ -1214,6 +1224,10 @@
             const modal = document.getElementById("add-performer-modal");
             if (modal) {
                 modal.style.display = "none";
+            }
+            const form = document.getElementById("add-singer-form");
+            if (form) {
+                form.reset();
             }
         }
 

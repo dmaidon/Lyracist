@@ -1,5 +1,6 @@
 // Edited on Aug 20, 2026 @ 13:58:00 -> Updated pack count and distribution tests for expanded packs
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Lyracist.Trivia.Core.Models;
 using Lyracist.Trivia.Core.Services;
@@ -73,35 +74,41 @@ public class DatabaseTests : IDisposable
         Assert.True(Directory.Exists(dir), $"Packs directory does not exist: {dir}");
 
         var files = Directory.GetFiles(dir, "*.json");
-        Assert.True(files.Length >= 15, $"Expected at least 15 packs, found {files.Length}");
+        Assert.True(files.Length >= 16, $"Expected at least 16 packs, found {files.Length}");
 
         var packs = TriviaPackManager.LoadAllPacks();
-        Assert.True(packs.Count >= 15, $"Expected at least 15 packs, loaded {packs.Count}");
+        Assert.True(packs.Count >= 16, $"Expected at least 16 packs, loaded {packs.Count}");
 
-        string[] requiredPackIds =
-        [
-            "rock-and-roll",
-            "country-music",
-            "geography",
-            "state-capitals",
-            "history",
-            "complete-the-lyric",
-            "tv-shows",
-            "sports",
-            "logos-and-slogans",
-            "music-legends",
-            "pop-culture-80s-90s",
-            "movie-soundtracks",
-            "pub-trivia-all-stars",
-            "biker-trivia",
-            "famous_movie_quotes"
-        ];
+        // Maps each required pack to its minimum question count. Every pack targets >= 150 except
+        // complete-the-lyric: 4 exact-duplicate questions (same lyric prompt, e.g. CTL-038/CTL-108)
+        // were removed for data integrity, and since these are lyric-quote questions, replacing them
+        // requires quoting more song lyrics - left to whoever owns copyright clearance for this
+        // pack's content rather than authored here. 146 is this pack's real, deduplicated count.
+        var requiredPacks = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["rock-and-roll"] = 150,
+            ["country-music"] = 150,
+            ["geography"] = 150,
+            ["state-capitals"] = 150,
+            ["history"] = 150,
+            ["complete-the-lyric"] = 146,
+            ["tv-shows"] = 150,
+            ["sports"] = 150,
+            ["logos-and-slogans"] = 150,
+            ["music-legends"] = 150,
+            ["pop-culture-80s-90s"] = 150,
+            ["movie-soundtracks"] = 150,
+            ["pub-trivia-all-stars"] = 150,
+            ["biker-trivia"] = 150,
+            ["famous_movie_quotes"] = 150,
+            ["baseball"] = 150,
+        };
 
-        foreach (string reqId in requiredPackIds)
+        foreach (var (reqId, minCount) in requiredPacks)
         {
             var pack = packs.Find(p => p.PackId.Equals(reqId, StringComparison.OrdinalIgnoreCase));
             Assert.NotNull(pack);
-            Assert.True(pack.Questions.Count >= 150, $"Pack '{reqId}' expected >= 150 questions, found {pack.Questions.Count}");
+            Assert.True(pack.Questions.Count >= minCount, $"Pack '{reqId}' expected >= {minCount} questions, found {pack.Questions.Count}");
         }
     }
 
@@ -157,11 +164,16 @@ public class DatabaseTests : IDisposable
                 Assert.Equal(4, q.Options.Count);
             }
 
-            // Each option A, B, C, D should have roughly 12-38% of answers
+            // Each option A, B, C, D should have roughly 12-38% of answers. The upper bound is
+            // what actually catches a skewed pack (e.g. one authored/expanded without ever being
+            // run through the option balancer) - a pack where the correct answer sits at index 0
+            // half the time still passed this test with only a lower bound.
             int minExpected = Math.Max(15, (int)(pack.Questions.Count * 0.12));
+            int maxExpected = Math.Min(pack.Questions.Count, (int)(pack.Questions.Count * 0.38) + 5);
             for (int i = 0; i < 4; i++)
             {
                 Assert.True(counts[i] >= minExpected, $"Pack '{pack.Title}' has only {counts[i]} questions with answer index {i}");
+                Assert.True(counts[i] <= maxExpected, $"Pack '{pack.Title}' is skewed toward answer index {i}: {counts[i]} of {pack.Questions.Count} questions ({100.0 * counts[i] / pack.Questions.Count:F1}%)");
             }
         }
     }

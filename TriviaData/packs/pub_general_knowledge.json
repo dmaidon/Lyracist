@@ -2117,22 +2117,6 @@
       "TimeLimitSeconds": 15
     },
     {
-      "Prompt": "What is the national animal of Scotland?",
-      "Options": [
-        "The Highland Cow",
-        "The Golden Eagle",
-        "The Unicorn",
-        "The Red Deer"
-      ],
-      "Explanation": "The mythical unicorn has been a heraldic symbol of Scottish kings since the 12th century.",
-      "Id": "PUB-133",
-      "Category": "Pub Trivia All-Stars",
-      "Difficulty": "Medium",
-      "QuestionType": "MultipleChoice",
-      "CorrectAnswerIndex": 2,
-      "TimeLimitSeconds": 15
-    },
-    {
       "Prompt": "What is the primary constituent of natural gas used for home heating and cooking?",
       "Options": [
         "Ethane",
@@ -2375,9 +2359,9 @@
     {
       "Prompt": "Which precious metal is represented by the chemical symbol 'Au' from the Latin 'aurum'?",
       "Options": [
-        "Platinum (Pt)",
-        "Copper (Cu)",
-        "Silver (Ag)",
+        "Platinum",
+        "Copper",
+        "Silver",
         "Gold"
       ],
       "Explanation": "'Aurum' translates to 'shining dawn' in Latin.",
@@ -2400,6 +2384,22 @@
       "Id": "PUB-150",
       "Category": "Pub Trivia All-Stars",
       "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "How many squares are there on a standard chessboard?",
+      "Options": [
+        "64",
+        "32",
+        "100",
+        "81"
+      ],
+      "Explanation": "A chessboard is an 8x8 grid, giving it 64 squares total, alternating between light and dark.",
+      "Id": "PUB-151",
+      "Category": "Pub Trivia All-Stars",
+      "Difficulty": "Easy",
       "QuestionType": "MultipleChoice",
       "CorrectAnswerIndex": 0,
       "TimeLimitSeconds": 15
