@@ -27,7 +27,7 @@
             <!-- Rotation List View -->
             <Grid Grid.Row="1" RowDefinitions="Auto, *">
                 <HorizontalStackLayout Spacing="8" Margin="0,0,0,6" VerticalOptions="Center">
-                    <Label Text="ACTIVE ROTATION QUEUE" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" VerticalOptions="Center" />
+                    <Label Text="ACTIVE ROTATION" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" VerticalOptions="Center" />
                     <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
                         <CheckBox IsChecked="{Binding FloatCurrentSingerToTop}" Color="#7C3AED" Scale="0.8" VerticalOptions="Center" />
                         <Label Text="Float to Top" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
@@ -207,7 +207,11 @@
                                         </VerticalStackLayout>
 
                                         <!-- Actions Panel -->
-                                        <HorizontalStackLayout Spacing="4" Margin="0,2,0,0">
+                                        <HorizontalStackLayout Spacing="4" Margin="0,2,4,0">
+
+                                            <!-- Complete current round -->
+                                            <Button Text="✓" Clicked="OnFinishSingerSongClicked" CommandParameter="{Binding .}"  BackgroundColor="Transparent" BorderColor="#3B82F6" BorderWidth="1" TextColor="#3B82F6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Song Completed" />
+
                                             <!-- Edit Name/Song/Artist -->
                                             <Button Text="✏" Clicked="OnEditSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#8B5CF6" BorderWidth="1" TextColor="#8B5CF6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Edit Performer" />
 
@@ -224,9 +228,6 @@
                                                     </DataTrigger>
                                                 </Button.Triggers>
                                             </Button>
-
-                                            <!-- Complete current round -->
-                                            <Button Text="✓" Clicked="OnFinishSingerSongClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#3B82F6" BorderWidth="1" TextColor="#3B82F6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Song Completed" />
 
                                             <!-- Set/Clear 1st Singer in rotation -->
                                             <Button Text="🚩" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=SetRotationStartSingerCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#DC2626" BorderWidth="1" TextColor="#DC2626" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Set as 1st Singer (Round Start)">

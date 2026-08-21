@@ -1,4 +1,4 @@
-// Created on Aug 10, 2026 @ 14:35:00 -> Wi-Fi SSID auto-detection helper using Native Windows WLAN API with netsh fallback
+// Edited on Aug 21, 2026 @ 10:05:00 -> Add OperatingSystem.IsWindows check to prevent DllNotFoundException and netsh launch on Android
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -10,6 +10,11 @@ public static class WifiHelper
 {
     public static string? GetConnectedSsid()
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            return null;
+        }
+
         try
         {
             string? ssid = GetConnectedSsidNative();
