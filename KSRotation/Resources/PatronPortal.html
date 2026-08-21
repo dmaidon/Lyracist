@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 12:12:00 -> Add Duet / Backup Partner field to patron request portal -->
+<!-- Edited on Aug 21, 2026 @ 08:06:00 -> Add 1st singer badge and row styling to Patron Portal -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -245,6 +245,11 @@
         }
         .singer-row:last-child {
             border-bottom: none;
+        }
+        .singer-row.rotation-start {
+            background-color: rgba(239, 68, 68, 0.08);
+            border-left: 4px solid var(--red);
+            border-radius: 4px;
         }
         .singer-row.current {
             background-color: rgba(252, 211, 77, 0.08);
@@ -820,14 +825,18 @@
                         }
                     }
 
+                    if (singer.isRotationStart) {
+                        cssClass += ' rotation-start';
+                        badge += '<span class="badge rotation-start" style="background-color: var(--red); color: white; margin-left: 6px;" title="1st Singer in Rotation (Round Start)">🚩 1st</span>';
+                    }
                     if (singer.isCurrent) {
                         cssClass += ' current';
-                        badge = singer.isMusic 
+                        badge += singer.isMusic 
                             ? '<span class="badge current">Playing</span>'
                             : '<span class="badge current">Current</span>';
                     } else if (singer.isNext) {
                         cssClass += ' next';
-                        badge = singer.isMusic 
+                        badge += singer.isMusic 
                             ? '<span class="badge next" style="background-color: var(--green); color: white;">Next Track</span>'
                             : '<span class="badge next">Next</span>';
                     }

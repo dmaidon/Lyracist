@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 11:10:00 -> Add OnQrCodeBorderClicked to open enlarged DjQrCodePopoutWindow when DJ QR code is clicked
+// Edited on Aug 21, 2026 @ 08:26:00 -> Focus and select-all on newly inserted singer row
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -241,7 +241,7 @@ namespace KSRotation
         {
             Dispatcher.BeginInvoke(
                 DispatcherPriority.Loaded,
-                new Action(() => FocusNewestSingerNameTextBox(retryCount: 3)));
+                new Action(() => FocusNewestSingerNameTextBox(retryCount: 5)));
         }
 
         private void FocusNewestSingerNameTextBox(int retryCount)
@@ -251,11 +251,25 @@ namespace KSRotation
                 return;
             }
 
-            object lastItem = SingersListView.Items[^1];
-            SingersListView.ScrollIntoView(lastItem);
+            object? targetItem = null;
+            if (DataContext is ViewModels.MainViewModel vm && vm.LastInsertedSinger != null && vm.Singers.Contains(vm.LastInsertedSinger))
+            {
+                targetItem = vm.LastInsertedSinger;
+            }
+            else
+            {
+                targetItem = SingersListView.Items[^1];
+            }
+
+            if (targetItem == null)
+            {
+                return;
+            }
+
+            SingersListView.ScrollIntoView(targetItem);
             SingersListView.UpdateLayout();
 
-            if (SingersListView.ItemContainerGenerator.ContainerFromItem(lastItem) is not WpfListViewItem listViewItem)
+            if (SingersListView.ItemContainerGenerator.ContainerFromItem(targetItem) is not WpfListViewItem listViewItem)
             {
                 RetryFocusNewestSingerNameTextBox(retryCount);
                 return;

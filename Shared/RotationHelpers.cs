@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:56:00 -> Add HandleSingerRetiredOrRemoved, improve EnsureRotationStartFlag, and optimize MoveSingerInList
+// Edited on Aug 21, 2026 @ 07:49:00 -> Add InsertNewSinger to place new singers at end of current rotation round
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,6 +23,71 @@ namespace Lyracist.Shared
             T item = list[oldIndex];
             list.RemoveAt(oldIndex);
             list.Insert(newIndex, item);
+        }
+
+        /// <summary>
+        /// Inserts a new active singer into <paramref name="singers"/> at the end of the current active rotation round.
+        /// When previous singers have already performed in the current cycle and moved to the bottom
+        /// (anchored by the active singer holding <see cref="IRotationSinger.IsRotationStart"/> at index > 0),
+        /// the new singer is inserted right before that anchor (at that anchor index) so they perform in the current
+        /// cycle before the round rolls over into the next cycle.
+        /// Otherwise (if the anchor is at index 0 or not found), the new singer is inserted before any inactive singers
+        /// (or appended to the list).
+        /// </summary>
+        public static void InsertNewSinger<T>(IList<T> singers, T newSinger, bool floatCurrentSingerToTop = false) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            ArgumentNullException.ThrowIfNull(newSinger);
+
+            int count = singers.Count;
+            if (count == 0)
+            {
+                singers.Add(newSinger);
+                newSinger.IsRotationStart = true;
+                return;
+            }
+
+            int startAnchorIndex = -1;
+            int firstInactiveIndex = -1;
+
+            for (int i = 0; i < count; i++)
+            {
+                T s = singers[i];
+                if (s.IsInactive)
+                {
+                    if (firstInactiveIndex == -1)
+                    {
+                        firstInactiveIndex = i;
+                    }
+                }
+                else if (s.IsRotationStart && !s.IsPaused)
+                {
+                    if (startAnchorIndex == -1)
+                    {
+                        startAnchorIndex = i;
+                    }
+                }
+            }
+
+            if (startAnchorIndex > 0)
+            {
+                // Previous singers in this round have already sung and are at the bottom starting at startAnchorIndex.
+                // Insert the new singer at startAnchorIndex so they sing at the end of the current round.
+                singers.Insert(startAnchorIndex, newSinger);
+            }
+            else if (firstInactiveIndex != -1)
+            {
+                // Insert before inactive singers
+                singers.Insert(firstInactiveIndex, newSinger);
+            }
+            else
+            {
+                // Append to end of list
+                singers.Add(newSinger);
+            }
+
+            EnsureRotationStartFlag(singers);
+            UpdateNextSingerHighlight(singers);
         }
 
         /// <summary>

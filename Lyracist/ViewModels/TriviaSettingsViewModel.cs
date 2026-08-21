@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 06:28:00 -> Added TieredScoringEnabled, Points4OptionsPercent, Points3OptionsPercent, and Points2OptionsPercent to TriviaSettingsViewModel
+// Edited on Aug 21, 2026 @ 08:18:00 -> Add live settings synchronization and persistence for all Trivia settings
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -27,74 +27,249 @@ public partial class TriviaSettingsViewModel : BaseViewModel
     [ObservableProperty]
     private string _instructionBannerText = TriviaSettings.DefaultInstructionBannerText;
 
+    partial void OnInstructionBannerTextChanged(string value)
+    {
+        Settings.InstructionBannerText = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private int _defaultQuestionSeconds = 15;
+
+    partial void OnDefaultQuestionSecondsChanged(int value)
+    {
+        Settings.DefaultQuestionSeconds = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private int _warningCountdownSeconds = 3;
 
+    partial void OnWarningCountdownSecondsChanged(int value)
+    {
+        Settings.WarningCountdownSeconds = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private int _answerEliminationIntervalSeconds = 5;
+
+    partial void OnAnswerEliminationIntervalSecondsChanged(int value)
+    {
+        Settings.AnswerEliminationIntervalSeconds = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private int _postRevealDelaySeconds = 5;
 
+    partial void OnPostRevealDelaySecondsChanged(int value)
+    {
+        Settings.PostRevealDelaySeconds = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private int _baseQuestionPoints = 1000;
+
+    partial void OnBaseQuestionPointsChanged(int value)
+    {
+        Settings.BasePointsPerQuestion = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private int _wrongAnswerDeductionPoints = 0;
 
+    partial void OnWrongAnswerDeductionPointsChanged(int value)
+    {
+        Settings.WrongAnswerDeductionPoints = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private bool _tieredScoringEnabled = true;
+
+    partial void OnTieredScoringEnabledChanged(bool value)
+    {
+        Settings.TieredScoringEnabled = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private int _points4OptionsPercent = 100;
 
+    partial void OnPoints4OptionsPercentChanged(int value)
+    {
+        Settings.Points4OptionsPercent = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private int _points3OptionsPercent = 70;
+
+    partial void OnPoints3OptionsPercentChanged(int value)
+    {
+        Settings.Points3OptionsPercent = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private int _points2OptionsPercent = 40;
 
+    partial void OnPoints2OptionsPercentChanged(int value)
+    {
+        Settings.Points2OptionsPercent = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private bool _speedBonusEnabled = true;
+
+    partial void OnSpeedBonusEnabledChanged(bool value)
+    {
+        Settings.SpeedBonusEnabled = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private int _maxSpeedBonusPoints = 500;
 
+    partial void OnMaxSpeedBonusPointsChanged(int value)
+    {
+        Settings.MaxSpeedBonus = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private bool _streakBonusEnabled = true;
+
+    partial void OnStreakBonusEnabledChanged(bool value)
+    {
+        Settings.StreakBonusMultiplier = value ? StreakMultiplier : 0;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private double _streakMultiplier = 0.1;
 
+    partial void OnStreakMultiplierChanged(double value)
+    {
+        if (StreakBonusEnabled)
+        {
+            Settings.StreakBonusMultiplier = value;
+            TriviaStorageHelper.SaveSettings(Settings);
+            _triviaViewModel.ApplySettings(Settings);
+        }
+    }
+
     [ObservableProperty]
     private bool _autoAdvanceQuestions = true;
+
+    partial void OnAutoAdvanceQuestionsChanged(bool value)
+    {
+        Settings.AutoAdvanceQuestions = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private bool _autoStartNextGameEnabled = true;
 
+    partial void OnAutoStartNextGameEnabledChanged(bool value)
+    {
+        Settings.AutoStartNextGameEnabled = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private int _nextGameDelayMinutes = 3;
+
+    partial void OnNextGameDelayMinutesChanged(int value)
+    {
+        Settings.NextGameDelayMinutes = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private int _preGameCountdownMinutes = 5;
 
+    partial void OnPreGameCountdownMinutesChanged(int value)
+    {
+        Settings.PreGameCountdownMinutes = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private bool _autoStartAfterCountdown = true;
+
+    partial void OnAutoStartAfterCountdownChanged(bool value)
+    {
+        Settings.AutoStartAfterCountdown = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private bool _soundEffectsEnabled = true;
 
+    partial void OnSoundEffectsEnabledChanged(bool value)
+    {
+        Settings.SoundEffectsEnabled = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private int _serverPort = 8085;
+
+    partial void OnServerPortChanged(int value)
+    {
+        Settings.Port = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
 
     [ObservableProperty]
     private string _wifiSsid = "";
 
+    partial void OnWifiSsidChanged(string value)
+    {
+        Settings.WifiSsid = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+    }
+
     [ObservableProperty]
     private string _wifiPassword = "";
+
+    partial void OnWifiPasswordChanged(string value)
+    {
+        Settings.WifiPassword = value;
+        TriviaStorageHelper.SaveSettings(Settings);
+        _triviaViewModel.ApplySettings(Settings);
+        if (!string.IsNullOrWhiteSpace(WifiSsid) && !string.IsNullOrWhiteSpace(value))
+        {
+            WifiPasswordStore.SetPasswordForSsid(WifiSsid, value);
+        }
+    }
 
     [ObservableProperty]
     private MonitorInfo? _selectedMonitor;

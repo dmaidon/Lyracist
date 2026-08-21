@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 09:54:40 -> Add LoadSong methods to TabletLyricsServer for mobile client synchronization
+// Edited on Aug 21, 2026 @ 08:06:00 -> Include isRotationStart, isCurrent, isNext in Tablet Queue payload
 using System;
 using System.IO;
 using System.Linq;
@@ -698,7 +698,12 @@ public class TabletLyricsServer(
             songTitle = s.SongTitle,
             artist = s.Artist,
             key = s.Key,
-            source = s.Source
+            source = s.Source,
+            isCurrent = s.IsCurrent,
+            isNext = s.IsNext,
+            isRotationStart = s.IsRotationStart,
+            isPaused = s.IsPaused,
+            isInactive = s.IsInactive
         }).ToList();
     }
 

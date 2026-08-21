@@ -1,12 +1,49 @@
-<!-- Edited on Aug 20, 2026 @ 12:18:00 -> Added Clean Exit & Application Termination fixes in Lyracist.Trivia -->
-Last Edit: Aug 20, 2026 - Clean Exit & Application Termination Fixes
+<!-- Edited on Aug 21, 2026 @ 08:30:00 -> Added release notes for global TextBox select-all on focus and new singer auto-selection across all apps -->
+Last Edit: Aug 21, 2026 - Global TextBox Select-All On Focus Across All Applications and New Singer Auto-Selection
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [26.8.21.1] - 2026-08-21
+
+### Fixed & Enhanced
+- **Global Auto-Highlighting & Select-All on Focus Across All Applications**:
+  - Implemented `TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus()` across all WPF applications (`KSRotation`, `Lyracist`, `Lyracist.Trivia`, `TriviaDbCreator`, `LyracistDbEditor`, `LyracistKeyGen`, and `ScaryokeWheel`).
+  - Entering or clicking any `TextBox`, `PasswordBox`, or numeric box from an unfocused state automatically highlights and selects all existing text, allowing instant overwrite typing without manual backspacing or double-clicking. Subsequent clicks inside an already focused box preserve normal caret positioning.
+- **Auto-Focus & Text Highlighting on New Singer Addition**:
+  - When adding a singer in `KSRotation`, the rotation queue automatically scrolls to the newly inserted singer card, focuses the name input field, and highlights the default `"New Singer"` text for immediate editing.
+- **1st Singer (Round Start Anchor) Display & Action Sync on DJ Tablet & Web Portals**:
+  - Resolved an issue where the `🚩 1ST` badge and red background for the 1st singer in rotation were not displaying on the Remote DJ Tablet (`dj.html`).
+  - Added `.singer-card.rotation-start` red background (`--row-start-bg`) and border outline to `dj.html`, rendered the `🚩 1ST` badge next to the performer's name, and added a 1-click `🚩` remote action button in the action buttons bar.
+  - Implemented remote `set-rotation-start` handling in `MainViewModel.Requests.cs` to allow designating or clearing the 1st singer anchor directly from the DJ tablet.
+  - Synced `isRotationStart` across `PatronPortal.html` (with `🚩 1st` badge and red row styling), `TabletLyricsServer.cs` `BuildQueuePayload()`, `LyricsHub.cs` queue broadcast, and `mobile.html` performer queue view.
+- **High-DPI Singer Display Box & Action Button Sizing in `KSRotation`**:
+  - Resolved an issue on 1080p laptop displays where the bottom border of the `"✓ Finish"`, `"▲"`, and `"▼"` action buttons was clipped by the singer item container border.
+  - Increased singer display box vertical padding (`Padding="2,6,2,10"`), container `MinHeight="80"`, input box `MinHeight="30"`, button heights to `30px`, and adjusted bottom margins to guarantee crisp button border rendering on all display resolutions and DPI scales.
+- **Smart End-of-Round Singer Insertion Across `KSRotation` and `Lyracist`**:
+  - Resolved an issue where newly added singers were appended to the very bottom of the list after performers who had already sung in the current cycle.
+  - Implemented `RotationHelpers.InsertNewSinger` to automatically insert new singers at the end of the *current active rotation cycle* (immediately before the round-anchor performer holding `IsRotationStart = true` at index > 0). New singers now perform before previous singers repeat in the next round.
+- **Accurate Inactive Singer Accounting in `SingersInRotationCount`**:
+  - Corrected `SingersInRotationCount` in `KSRotation\ViewModels\MainViewModel.cs` to filter out inactive singers (`!s.IsInactive`), accurately showing active rotation size.
+  - Added property change notification wiring for `IsInactive` and `IsMusic` to dynamically keep the singer count badge updated in real time.
+- **Randomized Wrong Answer Elimination Order in `TriviaGameEngine`**:
+  - Implemented Fisher-Yates shuffling for pending incorrect answer choices on every question start in `TriviaGameEngine.cs`.
+  - Wrong answers now fade out in randomized, unpredictable sequences, preventing players from deducing the correct answer based on positional fade order.
+- **Live Synchronization & Instant Persistence for Trivia Settings Across `KSRotation`, `Lyracist`, and `Lyracist.Trivia`**:
+  - Resolved an issue in `KSRotation` and `Lyracist` where custom question timing (e.g. changing 15s to 25s), answer elimination fade intervals, post-reveal delay, point settings, and Wi-Fi credentials set in the Settings tab were not syncing into the active game engine or persisting to storage on change.
+  - Added partial property change handlers across `KSRotation\ViewModels\MainViewModel.Trivia.cs`, `Lyracist\ViewModels\TriviaSettingsViewModel.cs`, and `Lyracist.Trivia\ViewModels\MainViewModel.cs` for all gameplay, timing, scoring, and Wi-Fi settings to immediately update `Settings.<Prop>`, sync into the active `_triviaEngine.Settings.<Prop>`, and save to `trivia_settings.json` / `appsettings.json`.
+- **Game Complete & Intermission Screen Responsive Layout**:
+  - Redesigned the Game Complete view in `Lyracist.Trivia` and `Lyracist` (`TriviaDisplayWindow.xaml`) to use a side-by-side 2-column layout (Leaderboard in Column 0, Intermission Sign-Up QR card in Column 1).
+  - Both Wi-Fi and join QR codes are sized cleanly at 120x120px, preventing any vertical overflow or overlap with the bottom connection and copyright footer.
+
 ## [26.8.20.1] - 2026-08-20
 
 ### Added & Enhanced
+- **Trivia Display Countdown Screen QR Layout & Inline Venue Name Across `Lyracist.Trivia`, `Lyracist`, and `KSRotation`**:
+  - Integrated the venue name directly on the same line as the main title (`"🎮 LIVE PUB TRIVIA NIGHT — {VenueName}"`) on the pre-game countdown lobby screen and inline with categories (`"{CategoryTitle} • {VenueName}"`) during gameplay.
+  - Eliminated the separate bulky venue banner row to recover vertical screen real estate.
+  - Resolved scrunched/clipped QR codes on the countdown lobby screen by reorganizing the right column into a side-by-side dual card layout (`📶 1. CONNECT WI-FI` on the left, `📱 2. JOIN TRIVIA` on the right) and embedding QR images in auto-scaling `Viewbox` containers that preserve 1:1 aspect ratio and crisp rendering on any resolution (1080p, 720p, 1440p, 4K).
+
 - **Clean Application Termination & Explicit Exit Controls in `Lyracist.Trivia`**:
   - Resolved an issue where closing `Lyracist.Trivia` could leave background network listeners or timers running, preventing the process from terminating without Task Manager.
   - Added explicit `Application.Current.Shutdown()` and `App.OnExit` `Environment.Exit(0)` termination handlers.

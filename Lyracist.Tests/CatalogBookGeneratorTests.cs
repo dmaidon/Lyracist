@@ -5,7 +5,8 @@ using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Lyracist.Data.Services;
 
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
+// Test parallelization is disabled via xunit.runner.json (parallelizeAssembly/parallelizeTestCollections)
+// instead of the obsolete CollectionBehaviorAttribute.DisableTestParallelization.
 
 namespace Lyracist.Tests
 {

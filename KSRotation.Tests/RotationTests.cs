@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:56:00 -> Add tests for HandleSingerRetiredOrRemoved and EnsureRotationStartFlag
+// Edited on Aug 21, 2026 @ 07:49:00 -> Add unit tests for InsertNewSinger at end of rotation round
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -1213,6 +1213,66 @@ public class MainViewModelTests
         Assert.True(bob.IsRotationStart);
         Assert.False(carol.IsRotationStart);
     }
+
+    [Fact]
+    public void InsertNewSinger_EmptyList_AddsAndSetsRotationStart()
+    {
+        var list = new ObservableCollection<SingerEntry>();
+        var newSinger = new SingerEntry { Name = "Alice" };
+
+        RotationHelpers.InsertNewSinger(list, newSinger);
+
+        Assert.Single(list);
+        Assert.Same(newSinger, list[0]);
+        Assert.True(newSinger.IsRotationStart);
+    }
+
+    [Fact]
+    public void InsertNewSinger_WhenSingersHaveSungAndAnchoredAtBottom_InsertsBeforeAnchor()
+    {
+        // 10 singers in rotation. Singers 1 and 2 already sang, so they are at indices 8 and 9 (the bottom).
+        // Singer 1 is the anchor (IsRotationStart = true) at index 8.
+        var singers = new List<SingerEntry>();
+        for (int i = 3; i <= 10; i++)
+        {
+            singers.Add(new SingerEntry { Name = $"Singer{i}" });
+        }
+        var s1 = new SingerEntry { Name = "Singer1", IsRotationStart = true };
+        var s2 = new SingerEntry { Name = "Singer2" };
+        singers.Add(s1); // index 8
+        singers.Add(s2); // index 9
+
+        var list = new ObservableCollection<SingerEntry>(singers);
+        var newSinger = new SingerEntry { Name = "NewGuy" };
+
+        RotationHelpers.InsertNewSinger(list, newSinger);
+
+        // NewGuy should be placed at index 8 (before Singer1 and Singer2)
+        Assert.Equal(11, list.Count);
+        Assert.Same(newSinger, list[8]);
+        Assert.Same(s1, list[9]);
+        Assert.Same(s2, list[10]);
+        Assert.True(s1.IsRotationStart);
+    }
+
+    [Fact]
+    public void InsertNewSinger_WhenRotationStartIsAtZero_AppendsBeforeInactiveSingers()
+    {
+        var s1 = new SingerEntry { Name = "Singer1", IsRotationStart = true };
+        var s2 = new SingerEntry { Name = "Singer2" };
+        var s3 = new SingerEntry { Name = "Singer3" };
+        var inactive = new SingerEntry { Name = "Inactive1", IsInactive = true };
+
+        var list = new ObservableCollection<SingerEntry> { s1, s2, s3, inactive };
+        var newSinger = new SingerEntry { Name = "NewGuy" };
+
+        RotationHelpers.InsertNewSinger(list, newSinger);
+
+        Assert.Equal(5, list.Count);
+        Assert.Same(newSinger, list[3]);
+        Assert.Same(inactive, list[4]);
+    }
 }
+
 
 

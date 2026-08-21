@@ -1,4 +1,4 @@
-<!-- Edited on Aug 16, 2026 @ 11:18:00 -> Add Authors, Company, and Copyright metadata properties -->
+<!-- Edited on Aug 21, 2026 @ 08:26:00 -> Include TextBoxSelectionHelper compile link -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.8.19.147</AssemblyVersion>
-    <FileVersion>26.8.19.147</FileVersion>
+    <AssemblyVersion>26.8.20.156</AssemblyVersion>
+    <FileVersion>26.8.20.156</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
@@ -35,6 +35,10 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="WPF-UI" Version="4.3.0" />
     <PackageReference Include="TagLibSharp" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>

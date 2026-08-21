@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 09:59:00 -> Register AutoAdvanceManager, PlaybackEngine, and RotationEngine in DI
+// Edited on Aug 21, 2026 @ 08:26:00 -> Enable global select-all on focus for all TextBoxes and numeric boxes
 using System;
 using System.Linq;
 using System.Windows;
@@ -46,6 +46,8 @@ public partial class App : System.Windows.Application
 
     public App()
     {
+        TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
+
         // Initialise logger (creates Logs dir, purges files older than 30 days)
         _ = typeof(AppLogger);
         AppLogger.LogAppStart();

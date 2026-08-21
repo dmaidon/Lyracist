@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:56:00 -> Update delete/mark_inactive to transfer 1st singer flag and float next current singer to top
+// Edited on Aug 21, 2026 @ 08:06:00 -> Add set-rotation-start action to DJ remote handler
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -485,6 +485,24 @@ namespace KSRotation.ViewModels
                         if (singer.IsPaused || singer.IsInactive) return "Singer is paused or inactive.";
 
                         RotationHelpers.SetCurrentSinger(Singers, singer);
+
+                        RebuildRotationJsonCacheNow();
+                        QueueSaveDatabase();
+                        return "";
+                    }
+                case "set-rotation-start":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        if (singer == null) return "Singer not found.";
+
+                        if (singer.IsRotationStart)
+                        {
+                            singer.IsRotationStart = false;
+                        }
+                        else
+                        {
+                            RotationHelpers.SetRotationStartSinger(Singers, singer);
+                        }
 
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();

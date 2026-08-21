@@ -1,4 +1,4 @@
-<!-- Edited on Aug 20, 2026 @ 05:56:00 -> Added TriviaBannerGenerator linked compile reference -->
+<!-- Edited on Aug 21, 2026 @ 08:26:00 -> Added TextBoxSelectionHelper linked compile reference -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.8.20.432</AssemblyVersion>
-    <FileVersion>26.8.20.432</FileVersion>
+    <AssemblyVersion>26.8.20.442</AssemblyVersion>
+    <FileVersion>26.8.20.442</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -65,7 +65,7 @@
     <PackageReference Include="Dapper" Version="2.1.79" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
     <PackageReference Include="WriteableBitmapEx" Version="1.6.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -117,6 +117,7 @@
     <Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
     <Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
     <Compile Include="..\Shared\TriviaDisplayViewModel.cs" Link="TriviaDisplayViewModel.cs" />
+    <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />
   </ItemGroup>
 

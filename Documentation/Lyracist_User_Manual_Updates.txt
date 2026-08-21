@@ -1,4 +1,56 @@
-// Edited on Aug 20, 2026 @ 10:04:00 -> Added Auto-Advance System documentation with grace period timer, fill-in music, and BigDJButton controls
+// Edited on Aug 21, 2026 @ 08:30:00 -> Added documentation for global TextBox select-all on focus, new singer auto-selection, 1st singer tablet sync, singer display box sizing, and rotation singer insertion
+Singer Rotation & Trivia Game Enhancements (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`) - (August 2026)
+
+Section: Performance & Rotation Operations / Singer Queue Management & Trivia Live Control
+
+[System Details]
+1. Global Auto-Highlighting & Select-All on Focus (All Applications):
+   - **Instant Text Selection Across All Inputs**:
+     * Across all desktop applications (`KSRotation`, `Lyracist`, `Lyracist.Trivia`, `TriviaDbCreator`, `LyracistDbEditor`, `LyracistKeyGen`, `ScaryokeWheel`), clicking or tabbing into any `TextBox`, `PasswordBox`, or numeric input box automatically selects and highlights all text.
+     * Allows the user to immediately type new values or replacement text without having to manually backspace or select text first.
+     * Subsequent mouse clicks within an already focused text box retain normal caret placement for precision editing.
+   - **New Singer Addition Auto-Selection**:
+     * Adding a new performer in `KSRotation` automatically scrolls the list to the new singer row, focuses the performer name text box, and highlights `"New Singer"` for 1-step editing.
+
+2. 1st Singer (Round Start Anchor) Remote DJ Tablet & Web Portal Synchronization (`KSRotation` & `Lyracist`):
+   - **Remote Visual Highlighting**:
+     * The Remote DJ Board (`dj.html`) displays the `🚩 1ST` badge next to the anchor performer's name and applies a distinct red card background (`--row-start-bg`) and border outline.
+     * The DJ tablet features a dedicated `🚩` action button on each singer card to allow setting, shifting, or clearing the 1st singer round anchor with one tap.
+     * Synced across the mobile performer portal (`mobile.html`) and patron request portal (`PatronPortal.html`) with matching `🚩 1st` badges and red accents.
+
+2. High-DPI Singer Display Box & Button Border Rendering (`KSRotation`):
+   - **Full Button Border Visibility**:
+     * Increased singer display box vertical padding (`Padding="2,6,2,10"`), container minimum height (`MinHeight="80"`), input textbox minimum height (`MinHeight="30"`), and row action button dimensions (`Height="30"`, `MinWidth="72"` for Finish, `32px` width for Up/Down).
+     * Eliminates bottom border clipping on 1080p laptop displays across standard and non-standard DPI scaling factors (100%, 125%, 150%).
+
+3. Smart End-of-Round Singer Insertion:
+   - **End of Current Rotation Round Placement**:
+     * When new singers are added to an active rotation queue while other singers have already performed in the current round, the new singer is automatically inserted at the end of the *current active round* (immediately before the round start anchor holding the `🚩 1ST` badge at index > 0).
+     * This guarantees that new singers perform during the current rotation cycle before previous performers repeat in the next round.
+     * If all performers are fresh at the start of a round (anchor at index 0), the new singer is placed at the end of the active queue before any inactive entries.
+
+4. Inactive Performer Accounting:
+   - **Rotation Count Badge**:
+     * The `SingersInRotationCount` property accurately reflects the active performer count by strictly excluding singers marked as inactive (`IsInactive = true`) as well as background music filler tracks (`IsMusic = true`).
+     * Toggling a singer's inactive status dynamically updates the rotation badge in real time.
+
+5. Trivia Live Settings Synchronization & Instant Persistence (`KSRotation`, `Lyracist`, and `Lyracist.Trivia`):
+   - **Real-Time Property Sync**:
+     * Modifying any question timer (e.g. question duration like 25s, answer fade interval, post-reveal delay), point values, bonus multipliers, or auto-run configurations in the Trivia settings panel immediately propagates to the active game engine and persists to `trivia_settings.json` / `appsettings.json`.
+     * Live summary text under auto-run toggles immediately reflects updated timings.
+
+6. Randomized Wrong Answer Elimination Order:
+   - **Unpredictable Option Fading**:
+     * Wrong answer choices are randomized via Fisher-Yates shuffle on every question start.
+     * Fading options disappear in unpredictable order across choices A, B, C, and D, preventing players from guessing the correct answer based on positional sequence patterns.
+
+7. Responsive Game Complete & Intermission Score Screen:
+   - **Side-by-Side Split Layout (`TriviaDisplayWindow`)**:
+     * The Game Complete view displays the Final Leaderboard Table in the left column and the Intermission Sign-Up QR Card in the right column.
+     * QR code images are cleanly sized with 120x120px bounding boxes, completely eliminating vertical overflow and preventing overlap with the bottom copyright and connection footer on any resolution.
+
+--------------------------------------------------------------------------------
+
 Auto-Advance System for Karaoke Hosting (`Lyracist`) - (August 2026)
 
 Section: Performance Operations / Auto-Advance & DJ Control Panel
@@ -94,13 +146,15 @@ Section: Entertainment Modules / Lyracist.Trivia & Pub Trivia Game Master
      * **Double-Click & Drag**: Double-clicking the display toggles between windowed and fullscreen maximized modes, with click-and-drag window repositioning.
     - **Unified 16:9 Pre-Game Lobby & Category Showcase Screen (`TriviaDisplayWindow`)**:
       * Combines all pre-game elements into a clean, modern split layout:
-        1. **Left Hero Column (70% width)**: Full-featured 16:9 Category Announcement Banner (`TriviaData/Banners/{pack}.png`) with ambient glow, tonight's category theme title, and topic subtitle. Cross-fades dynamically when the host selects a different pack in the console dropdown.
-        2. **Right Onboarding Stack (30% width)**:
-           - **⏱️ Game Start Countdown Clock**: Large digital timer with pulsing badge (`"⏱ GAME STARTS IN: mm:ss"`) that counts down to launch.
-           - **📶 1. Connect to Wi-Fi Card**: Dedicated scan-to-connect Wi-Fi QR code (`WifiQrCodeImage`), SSID name, and password.
-           - **📱 2. Join Trivia Game Card**: Dedicated scan-to-join mobile buzzer QR code (`QrCodeImage`), direct URL, and buzzer onboarding instructions.
-        3. **Bottom Connection & Copyright Bar**: Displays mobile buzzer URL (`📱 PLAY ON YOUR PHONE: ...`), company copyright information (`© 2026 PAROLE Software - All rights reserved.`), and app branding across all projection screens.
-        4. **Continuous Scrolling Marquee**: Bottom/top ticker bar displaying venue branding, Game Master name, game rules, and buzzer tips.
+        1. **Top Header & Inline Venue Name**: Displays `"🎮 LIVE PUB TRIVIA NIGHT — {VenueName}"` on a single prominent line alongside the countdown timer.
+        2. **Left Hero Column (52% width)**: Full-featured 16:9 Category Announcement Banner (`TriviaData/Banners/{pack}.png`) with ambient glow, tonight's category theme title, and topic subtitle. Cross-fades dynamically when the host selects a different pack in the console dropdown.
+        3. **Right Onboarding Section (48% width)**:
+           - **⏱️ Game Start Countdown Clock**: Digital timer with pulsing badge (`"⏱ GAME STARTS IN: mm:ss"`) that counts down to launch.
+           - **Side-by-Side Dual Onboarding Cards (Unscrunched Viewbox Scaling)**:
+             * **📶 1. Connect to Wi-Fi Card**: Dedicated scan-to-connect Wi-Fi QR code (`WifiQrCodeImage`), SSID name, and password with responsive Viewbox scaling.
+             * **📱 2. Join Trivia Game Card**: Dedicated scan-to-join mobile buzzer QR code (`QrCodeImage`), direct URL, and buzzer onboarding instructions with responsive Viewbox scaling.
+        4. **Bottom Connection & Copyright Bar**: Displays mobile buzzer URL (`📱 PLAY ON YOUR PHONE: ...`), company copyright information (`© 2026 PAROLE Software - All rights reserved.`), and app branding across all projection screens.
+        5. **Continuous Scrolling Marquee**: Top ticker bar displaying live scores, venue branding, Game Master name, game rules, and buzzer tips.
       * **Single-Click Game Master Setup (`🎯 Launch Pre-Game Lobby & Countdown`)**:
         - A single primary action button in the Game Master console that opens/focuses the big screen, locks the category banner, starts the pre-game countdown, and activates the lobby.
         - Accompanied by `"▶ Start Game Now (Skip Countdown)"` which immediately cancels the pre-game countdown lobby, starts Question #1, and opens/synchronizes the live question display on the TV projection screen.

@@ -133,6 +133,15 @@ public partial class DisplayViewModel : ObservableObject
     private bool _isConnectInstructionsActive = true;
 
     [ObservableProperty]
+    private bool _isAnnouncementActive;
+
+    [ObservableProperty]
+    private BitmapSource? _announcementImage;
+
+    [ObservableProperty]
+    private string _announcementDisplayName = string.Empty;
+
+    [ObservableProperty]
     private BitmapSource? _wifiQrCodeImage;
 
     [ObservableProperty]
@@ -326,6 +335,35 @@ public partial class DisplayViewModel : ObservableObject
         int mins = secondsRemaining / 60;
         int secs = secondsRemaining % 60;
         PreGameCountdownText = $"{mins:D2}:{secs:D2}";
+    }
+
+    /// Shows a pre-game advertisement banner full-screen, ahead of the connect instructions
+    /// screen. Loaded fresh from disk each call rather than cached, since these banners are
+    /// large (1-2 MB) and only shown occasionally.
+    public void ShowAnnouncement(string imagePath, string displayName)
+    {
+        try
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.UriSource = new Uri(imagePath, UriKind.Absolute);
+            image.EndInit();
+            image.Freeze();
+            AnnouncementImage = image;
+            AnnouncementDisplayName = displayName;
+            IsAnnouncementActive = true;
+        }
+        catch
+        {
+            AnnouncementImage = null;
+            IsAnnouncementActive = false;
+        }
+    }
+
+    public void DismissAnnouncement()
+    {
+        IsAnnouncementActive = false;
     }
 
     public void SyncWithEngine()

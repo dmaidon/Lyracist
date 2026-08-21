@@ -1,8 +1,8 @@
-// Edited on Jul 16, 2026 @ 12:00:00 -> App lifecycle events
-// Last Edit: Jun 29, 2026 13:10 - Added global exception handlers: DispatcherUnhandledException, AppDomain.UnhandledException, TaskScheduler.UnobservedTaskException.
+// Edited on Aug 21, 2026 @ 08:26:00 -> Enable global select-all on focus for all TextBoxes and numeric boxes
 using KSRotation.Services;
 using System.Windows;
 using System.Windows.Threading;
+using Lyracist.Shared;
 using WpfApplication = System.Windows.Application;
 
 namespace KSRotation
@@ -15,6 +15,7 @@ namespace KSRotation
         /// <inheritdoc/>
         protected override void OnStartup(StartupEventArgs e)
         {
+            TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             LoggerService.LogAppStart();
             LoggerService.CleanupLogs();

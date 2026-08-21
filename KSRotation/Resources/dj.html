@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 12:13:00 -> Add Duet / Backup Partner support to DJ web console -->
+<!-- Edited on Aug 21, 2026 @ 08:06:00 -> Add 1st singer (round start) red background, badge, and set action to DJ tablet console -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +21,7 @@
             --bg-dark: #0B0F19;
             --card-bg: #151D2A;
             --row-bg: #1A2436;
+            --row-start-bg: #2D1414;
             --row-current-bg: #2D1A10;
             --row-next-bg: #151F32;
             --row-inactive-bg: #111823;
@@ -45,6 +46,7 @@
             --bg-dark: #F1F5F9;
             --card-bg: #FFFFFF;
             --row-bg: #F8FAFC;
+            --row-start-bg: #FEF2F2;
             --row-current-bg: #FFF7ED;
             --row-next-bg: #EFF6FF;
             --row-inactive-bg: #E2E8F0;
@@ -224,6 +226,11 @@
             transition: all 0.2s;
         }
 
+        .singer-card.rotation-start {
+            border-color: var(--red);
+            background-color: var(--row-start-bg);
+        }
+
         .singer-card.current {
             border-color: var(--gold);
             background-color: var(--row-current-bg);
@@ -277,6 +284,10 @@
             padding: 2px 6px;
             border-radius: 4px;
             text-transform: uppercase;
+        }
+        .badge.rotation-start {
+            background-color: var(--red);
+            color: #FFF;
         }
         .badge.current {
             background-color: var(--gold);
@@ -822,6 +833,10 @@
                 // Determine card classes
                 let cardClass = 'singer-card';
                 let badges = '';
+                if (s.isRotationStart) {
+                    cardClass += ' rotation-start';
+                    badges += '<span class="badge rotation-start" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>';
+                }
                 if (s.isCurrent) {
                     cardClass += ' current';
                     badges += s.isMusic 
@@ -886,6 +901,9 @@
                 const setClicked = (s.isInactive || s.isPaused) ? '' : `onclick="sendAction('set-current', '${s.id}')"`;
                 const setStyle = (s.isInactive || s.isPaused) ? 'style="opacity:0.4; cursor:not-allowed;"' : '';
 
+                const setStartClicked = (s.isInactive || s.isPaused) ? '' : `onclick="sendAction('set-rotation-start', '${s.id}')"`;
+                const startTitle = s.isRotationStart ? "1st Singer (Round Start Anchor)" : "Set as 1st Singer (Round Start)";
+
                 const deleteHtml = s.isInactive 
                     ? `<button class="btn-text resume" title="Restore" onclick="sendAction('restore', '${s.id}')">↺ Restore</button>`
                     : `<button class="btn-circle red" title="Delete" onclick="sendAction('delete', '${s.id}')">🗑</button>`;
@@ -909,6 +927,7 @@
                         ${queuedSongsHtml}
                     </div>
                     <div class="actions-container">
+                        <button class="btn-circle red" title="${startTitle}" ${setStartClicked} ${setStyle}>🚩</button>
                         <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
                         <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
                         <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>

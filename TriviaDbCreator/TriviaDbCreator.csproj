@@ -1,4 +1,4 @@
-<!-- Created on Aug 19, 2026 @ 15:10:00 -> TriviaDbCreator project configuration -->
+<!-- Edited on Aug 21, 2026 @ 08:26:00 -> Include TextBoxSelectionHelper compile link -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.8.19.12</AssemblyVersion>
-    <FileVersion>26.8.19.12</FileVersion>
+    <AssemblyVersion>26.8.20.22</AssemblyVersion>
+    <FileVersion>26.8.20.22</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
@@ -37,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="Shared\TextBoxSelectionHelper.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />
   </ItemGroup>
 

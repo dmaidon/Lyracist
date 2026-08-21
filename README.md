@@ -1,8 +1,8 @@
-<!-- Edited on Aug 20, 2026 @ 12:18:00 -> Updated README.md with clean exit and process termination details -->
-Last Edit: Aug 20, 2026 - Clean Application Exit & Process Termination
+<!-- Edited on Aug 21, 2026 @ 08:30:00 -> Update README with global TextBox select-all on focus and new singer auto-selection across all apps -->
+Last Edit: Aug 21, 2026 - Global TextBox Select-All On Focus Across All Applications and New Singer Auto-Selection
 # Lyracist Pro
 
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating and round-cycle indicators, integrated interactive pub/bar trivia with dedicated separate settings, multi-monitor auto-casting, automated projection pause synchronization, full feature parity across standalone and embedded Trivia engines, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, integrated interactive pub/bar trivia with dedicated separate settings and live synchronization, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
 
 ---
 
@@ -21,6 +21,14 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Interlocks with Trivia and Scaryoke modes so auto-advance never triggers during mini-games.
   - Safely falls back to `WaitingForSongSelection` if the upcoming singer has not chosen a track yet.
 
+### 📝 Global Auto-Selection & Fast Input (`All Applications`)
+- **Global Select-All on Focus**:
+  - Across every application in the suite (`KSRotation`, `Lyracist`, `Lyracist.Trivia`, `TriviaDbCreator`, `LyracistDbEditor`, `LyracistKeyGen`, `ScaryokeWheel`), clicking or tabbing into any `TextBox`, `PasswordBox`, or numeric input box automatically highlights and selects all existing text.
+  - Game masters, KJs, and hosts can immediately begin typing new values without having to backspace, clear, or double-click to select existing text.
+  - Subsequent clicks within an already-focused text box allow natural caret placement, character editing, and partial text selection without interference.
+- **New Singer Addition Auto-Focus & Select-All**:
+  - When adding a new performer to the rotation queue, the system automatically scrolls the list directly to the newly inserted row, focuses the singer name field, and highlights the default `"New Singer"` text so the host can instantly type the performer's actual name.
+
 ### 🛠️ Trivia Database Creator & Pack Studio (`TriviaDbCreator.exe`)
 - **Visual Category & Question Authoring**: Standalone WPF MVVM desktop app using Fluent UI (`WPF-UI`) for creating, editing, and expanding trivia question databases.
 - **Left Sidebar Pack Explorer**: Auto-discovers and navigates all JSON question packs in `TriviaData/packs/` with search filtering and question count indicators.
@@ -30,15 +38,28 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Direct SQLite Seeding**: 1-click database synchronization updating `TriviaData/trivia.db`.
 
 ### 🎤 Singer Rotation & Queue Management (`Lyracist`, `KSRotation`, `KSRotation.Maui`)
+- **High-DPI Singer Box & Action Button Sizing**:
+  - Singer display boxes in `KSRotation` feature expanded vertical padding (`Padding="2,6,2,10"`, `MinHeight="80"`), clean 30px outlined buttons, and bottom margins, ensuring the bottom border of the `"✓ Finish"`, `"▲"`, and `"▼"` buttons is crisp and completely visible on 1080p laptop displays under any DPI scaling.
+- **Smart End-of-Round Singer Insertion**:
+  - Newly added singers are placed at the end of the *current active rotation round* (right before the 1st singer round anchor `IsRotationStart`), ensuring they perform in the current cycle before already-sung performers repeat in the next round.
+- **Accurate Inactive Performer Accounting**:
+  - `SingersInRotationCount` strictly excludes inactive singers (`IsInactive = true`) and background music tracks, reflecting the true number of performers waiting in rotation.
 - **Float Current Singer to Top Option**:
   - Toggling `"Float Current to Top"` keeps the currently performing singer at index 0 (top of the rotation list).
   - When songs finish, the performer shifts to the end of the queue and the next active singer automatically floats to the top, eliminating scrolling down long rotation queues during busy live shows.
-- **1st Singer in Rotation (Round Start Anchor Flag)**:
+- **1st Singer in Rotation (Round Start Anchor Flag & DJ Tablet Sync)**:
   - Displays a visual red `🚩 1ST` badge next to the anchor performer who started the rotation round.
+  - Highlights the 1st singer card with a subtle red background (`--row-start-bg`) and border across the desktop app, Remote DJ Board (`dj.html`), Mobile Performer Portal (`mobile.html`), and Patron Request Portal (`PatronPortal.html`).
   - Allows the DJ to instantly see when a full rotation cycle/round has completed once that singer returns to the top.
-  - Any singer can be designated as the 1st singer anchor via the `"Set as 1st Singer (Round Start)"` context action or `🚩` button.
+  - Any singer can be designated as the 1st singer anchor via the `"Set as 1st Singer (Round Start)"` context action, desktop `🚩` button, or DJ tablet `🚩` action button.
 
 ### 🎯 Lyracist Live Trivia (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`)
+- **Live Settings Synchronization & Instant Persistence**:
+  - Modifying question countdown duration, elimination fade intervals, post-reveal delay, point values, or auto-run settings immediately syncs to the active game engine and persists to storage without requiring manual saves or game restarts.
+- **Randomized Wrong Answer Elimination**:
+  - Uses Fisher-Yates randomization so wrong answers fade in unpredictable sequences on every question, eliminating any positional pattern tells.
+- **Responsive Game Complete & Intermission Screen**:
+  - Side-by-side leaderboard table and intermission sign-up QR cards ensure Wi-Fi and join QR codes never overlap the bottom connection or copyright bar on any display resolution.
 - **Tiered Option Value Scoring (100% / 70% / 40%)**:
   - **Dynamic Multiplier Tiers**: Base points awarded scale dynamically based on how many options remain visible when a player buzzes in:
     * **4 Options Visible**: **100% Points** (1,000 pts default). Awards full points to players with instant knowledge before any wrong options fade.

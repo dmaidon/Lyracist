@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 13:58:00 -> Added pregame timer cleanup to Dispose and updated Help Topic 7 with Exit button
+// Edited on Aug 21, 2026 @ 08:35:00 -> Added Help Topic 9 Fast Input & Textbox Auto-Selection and updated Help Topics
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +14,7 @@ using CommunityToolkit.Mvvm.Input;
 using Lyracist.Shared;
 using Lyracist.Trivia.Core.Models;
 using Lyracist.Trivia.Core.Services;
+using Lyracist.Trivia.Services;
 using QRCoder;
 using Application = System.Windows.Application;
 using Screen = System.Windows.Forms.Screen;
@@ -118,7 +119,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
         // new count instead of continuing to hand out games sized/counted for the old value.
         _preloadedGameQuestionSets = null;
         _preloadedGameIndex = 0;
+        Settings.TotalGamesToPlay = value;
+        if (_engine != null) _engine.Settings.TotalGamesToPlay = value;
         OnPropertyChanged(nameof(GameProgressText));
+        SaveSettings();
     }
 
     [ObservableProperty]
@@ -136,9 +140,150 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public string AutoRunTimingSummary =>
         $"{DefaultQuestionSeconds}s answer • {AnswerEliminationIntervalSeconds}s fade • {PostRevealDelaySeconds}s reveal";
 
-    partial void OnDefaultQuestionSecondsChanged(int value) => OnPropertyChanged(nameof(AutoRunTimingSummary));
-    partial void OnAnswerEliminationIntervalSecondsChanged(int value) => OnPropertyChanged(nameof(AutoRunTimingSummary));
-    partial void OnPostRevealDelaySecondsChanged(int value) => OnPropertyChanged(nameof(AutoRunTimingSummary));
+    partial void OnDefaultQuestionSecondsChanged(int value)
+    {
+        Settings.DefaultQuestionSeconds = value;
+        if (_engine != null) _engine.Settings.DefaultQuestionSeconds = value;
+        OnPropertyChanged(nameof(AutoRunTimingSummary));
+        SaveSettings();
+    }
+
+    partial void OnAnswerEliminationIntervalSecondsChanged(int value)
+    {
+        Settings.AnswerEliminationIntervalSeconds = value;
+        if (_engine != null) _engine.Settings.AnswerEliminationIntervalSeconds = value;
+        OnPropertyChanged(nameof(AutoRunTimingSummary));
+        SaveSettings();
+    }
+
+    partial void OnPostRevealDelaySecondsChanged(int value)
+    {
+        Settings.PostRevealDelaySeconds = value;
+        if (_engine != null) _engine.Settings.PostRevealDelaySeconds = value;
+        OnPropertyChanged(nameof(AutoRunTimingSummary));
+        SaveSettings();
+    }
+
+    partial void OnBasePointsPerQuestionChanged(int value)
+    {
+        Settings.BasePointsPerQuestion = value;
+        if (_engine != null) _engine.Settings.BasePointsPerQuestion = value;
+        SaveSettings();
+    }
+
+    partial void OnWrongAnswerDeductionPointsChanged(int value)
+    {
+        Settings.WrongAnswerDeductionPoints = value;
+        if (_engine != null) _engine.Settings.WrongAnswerDeductionPoints = value;
+        SaveSettings();
+    }
+
+    partial void OnTieredScoringEnabledChanged(bool value)
+    {
+        Settings.TieredScoringEnabled = value;
+        if (_engine != null) _engine.Settings.TieredScoringEnabled = value;
+        SaveSettings();
+    }
+
+    partial void OnPoints4OptionsPercentChanged(int value)
+    {
+        Settings.Points4OptionsPercent = value;
+        if (_engine != null) _engine.Settings.Points4OptionsPercent = value;
+        SaveSettings();
+    }
+
+    partial void OnPoints3OptionsPercentChanged(int value)
+    {
+        Settings.Points3OptionsPercent = value;
+        if (_engine != null) _engine.Settings.Points3OptionsPercent = value;
+        SaveSettings();
+    }
+
+    partial void OnPoints2OptionsPercentChanged(int value)
+    {
+        Settings.Points2OptionsPercent = value;
+        if (_engine != null) _engine.Settings.Points2OptionsPercent = value;
+        SaveSettings();
+    }
+
+    partial void OnSpeedBonusEnabledChanged(bool value)
+    {
+        Settings.SpeedBonusEnabled = value;
+        if (_engine != null) _engine.Settings.SpeedBonusEnabled = value;
+        SaveSettings();
+    }
+
+    partial void OnMaxSpeedBonusChanged(int value)
+    {
+        Settings.MaxSpeedBonus = value;
+        if (_engine != null) _engine.Settings.MaxSpeedBonus = value;
+        SaveSettings();
+    }
+
+    partial void OnStreakBonusMultiplierChanged(double value)
+    {
+        Settings.StreakBonusMultiplier = value;
+        if (_engine != null) _engine.Settings.StreakBonusMultiplier = value;
+        SaveSettings();
+    }
+
+    partial void OnSoundEffectsEnabledChanged(bool value)
+    {
+        Settings.SoundEffectsEnabled = value;
+        if (_engine != null) _engine.Settings.SoundEffectsEnabled = value;
+        SaveSettings();
+    }
+
+    partial void OnPortChanged(int value)
+    {
+        Settings.Port = value;
+        if (_engine != null) _engine.Settings.Port = value;
+        SaveSettings();
+    }
+
+    partial void OnWifiSsidChanged(string value)
+    {
+        Settings.WifiSsid = value;
+        if (_engine != null) _engine.Settings.WifiSsid = value;
+        _activeDisplayVm?.UpdateWifiCredentials(WifiSsid, WifiPassword);
+        SaveSettings();
+    }
+
+    partial void OnWifiPasswordChanged(string value)
+    {
+        Settings.WifiPassword = value;
+        if (_engine != null) _engine.Settings.WifiPassword = value;
+        _activeDisplayVm?.UpdateWifiCredentials(WifiSsid, WifiPassword);
+        SaveSettings();
+    }
+
+    partial void OnPreGameCountdownMinutesChanged(int value)
+    {
+        Settings.PreGameCountdownMinutes = value;
+        if (_engine != null) _engine.Settings.PreGameCountdownMinutes = value;
+        SaveSettings();
+    }
+
+    partial void OnAutoStartAfterCountdownChanged(bool value)
+    {
+        Settings.AutoStartAfterCountdown = value;
+        if (_engine != null) _engine.Settings.AutoStartAfterCountdown = value;
+        SaveSettings();
+    }
+
+    partial void OnAutoStartNextGameEnabledChanged(bool value)
+    {
+        Settings.AutoStartNextGameEnabled = value;
+        if (_engine != null) _engine.Settings.AutoStartNextGameEnabled = value;
+        SaveSettings();
+    }
+
+    partial void OnNextGameDelayMinutesChanged(int value)
+    {
+        Settings.NextGameDelayMinutes = value;
+        if (_engine != null) _engine.Settings.NextGameDelayMinutes = value;
+        SaveSettings();
+    }
 
     [ObservableProperty]
     private int _basePointsPerQuestion = 1000;
@@ -216,6 +361,36 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public ObservableCollection<TriviaPlayer> Players { get; } = [];
     public ObservableCollection<AnswerDistributionItem> AnswerDistribution { get; } = [];
     public ObservableCollection<TriviaHelpTopic> HelpTopics { get; } = [];
+    public ObservableCollection<AnnouncementHelper.AnnouncementImage> AvailableAnnouncements { get; } = [];
+
+    [ObservableProperty]
+    private AnnouncementHelper.AnnouncementImage? _selectedAnnouncement;
+
+    partial void OnSelectedAnnouncementChanged(AnnouncementHelper.AnnouncementImage? value)
+    {
+        AnnouncementHelper.SaveSelectedFileName(value?.FileName);
+    }
+
+    [RelayCommand]
+    private void ShowAnnouncement()
+    {
+        if (SelectedAnnouncement == null) return;
+
+        if (_activeDisplayVm == null)
+        {
+            // Synchronously opens the projection window and registers _activeDisplayVm via
+            // MainWindow's RequestOpenProjectionWindow handler before this call returns.
+            RequestOpenProjectionWindow?.Invoke(this, EventArgs.Empty);
+        }
+
+        _activeDisplayVm?.ShowAnnouncement(SelectedAnnouncement.FullPath, SelectedAnnouncement.DisplayName);
+    }
+
+    [RelayCommand]
+    private void HideAnnouncement()
+    {
+        _activeDisplayVm?.DismissAnnouncement();
+    }
 
     [ObservableProperty]
     private TriviaHelpTopic? _selectedHelpTopic;
@@ -303,7 +478,22 @@ public partial class MainViewModel : ObservableObject, IDisposable
         DetermineConnectUrl();
         RefreshMonitors();
         LoadQuestionPacks();
+        LoadAnnouncements();
         InitializeHelpTopics();
+    }
+
+    public void LoadAnnouncements()
+    {
+        AvailableAnnouncements.Clear();
+        foreach (var a in AnnouncementHelper.GetAvailableAnnouncements())
+        {
+            AvailableAnnouncements.Add(a);
+        }
+
+        string? lastSelected = AnnouncementHelper.LoadSelectedFileName();
+        SelectedAnnouncement = lastSelected != null
+            ? AvailableAnnouncements.FirstOrDefault(a => a.FileName == lastSelected)
+            : null;
     }
 
     public void RefreshMonitors()
@@ -501,6 +691,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void LaunchPreGameLobby()
     {
+        _activeDisplayVm?.DismissAnnouncement();
         IsShowingConnectScreen = true;
         if (!IsPreGameCountdownRunning)
         {
@@ -525,12 +716,13 @@ public partial class MainViewModel : ObservableObject, IDisposable
         var checkedPacks = GetCheckedPacks();
         if (checkedPacks.Count == 0) return;
 
-        // Cancel any running pre-game countdown and dismiss the lobby/connect screen
+        // Cancel any running pre-game countdown and dismiss the announcement/lobby/connect screen
         _preGameTimer.Stop();
         IsPreGameCountdownRunning = false;
         IsShowingConnectScreen = false;
         if (_activeDisplayVm != null)
         {
+            _activeDisplayVm.DismissAnnouncement();
             _activeDisplayVm.IsConnectInstructionsActive = false;
             _activeDisplayVm.IsPreGameCountdownRunning = false;
         }
@@ -983,6 +1175,15 @@ public partial class MainViewModel : ObservableObject, IDisposable
             AccentColor = "#10B981",
             DescriptionHeader = "Complete JSON Schema Reference for Custom Question Packs",
             DescriptionContent = "• Custom Question Pack JSON File Structure:\nSave as UTF-8 `.json` file inside `TriviaData/packs/` (e.g. `disney_trivia.json`):\n\n{\n  \"PackId\": \"disney-trivia\",\n  \"Title\": \"Disney Animation Classics\",\n  \"Category\": \"Disney Movies\",\n  \"Description\": \"Family-friendly questions spanning animated classics and Pixar films.\",\n  \"Questions\": [\n    {\n      \"Id\": \"DIS-001\",\n      \"Category\": \"Disney Movies\",\n      \"Difficulty\": \"Easy\",\n      \"QuestionType\": \"MultipleChoice\",\n      \"Prompt\": \"What is the name of Simba's father in The Lion King?\",\n      \"Options\": [\n        \"Scar\",\n        \"Mufasa\",\n        \"Rafiki\",\n        \"Pumbaa\"\n      ],\n      \"CorrectAnswerIndex\": 1,\n      \"Explanation\": \"Mufasa was voiced by James Earl Jones in the 1994 classic.\",\n      \"TimeLimitSeconds\": 15\n    }\n  ]\n}\n\n• Key Field Definitions:\n  - PackId: Unique identifier slug (e.g. 'rock-and-roll', 'movie-soundtracks').\n  - Title: Display name shown in Game Master category dropdowns.\n  - Difficulty: 'Easy', 'Medium', or 'Hard'.\n  - QuestionType: 'MultipleChoice' (standard 4-choice buzzer).\n  - Prompt: The question text displayed on TVs and mobile phones.\n  - Options: Array of exactly 4 strings for choices A, B, C, D.\n  - CorrectAnswerIndex: Zero-based integer (0=A, 1=B, 2=C, 3=D).\n  - Explanation: Brief educational snippet shown during answer reveal.\n  - TimeLimitSeconds: Factory fallback timer (15s); Game Master Settings take precedence during live games."
+        });
+
+        HelpTopics.Add(new TriviaHelpTopic
+        {
+            Title = "⚡ 9. Textbox Auto-Selection & Fast Input",
+            Icon = "⚡",
+            AccentColor = "#38BDF8",
+            DescriptionHeader = "Instant Highlighting on Focus Across All Application Inputs",
+            DescriptionContent = "• Global Select-All on Focus: Clicking or tabbing into any text input box, Wi-Fi password field, or numeric setting automatically selects and highlights all text.\n\n• Instant Overwrite Typing: Game Masters can immediately enter new venue names, countdown durations, or point penalties without manually deleting or double-clicking first.\n\n• Precision Editing: Subsequent clicks within an already focused field preserve standard cursor placement for pinpoint editing."
         });
 
         SelectedHelpTopic = HelpTopics.FirstOrDefault();

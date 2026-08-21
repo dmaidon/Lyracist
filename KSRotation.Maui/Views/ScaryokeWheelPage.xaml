@@ -32,7 +32,7 @@
                                     <Label Text="{Binding .}" VerticalOptions="Center" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="13" />
                                     <Button Grid.Column="1"
                                             Text="✕"
-                                            Command="{Binding BindingContext.RemoveCategoryCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ScaryokeWheelViewModel}, Mode=FindAncestorBindingContext}, Path=RemoveCategoryCommand}"
                                             CommandParameter="{Binding .}"
                                             BackgroundColor="Transparent"
                                             TextColor="#EF4444"

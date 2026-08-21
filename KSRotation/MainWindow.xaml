@@ -1,4 +1,4 @@
-<!-- Edited on Aug 20, 2026 @ 06:08:00 -> Upgraded Trivia and Trivia Settings tabs with 1-click launch, answer visualizer, and moderation in KSRotation -->
+<!-- Edited on Aug 21, 2026 @ 08:35:00 -> Update Help Tab content for 1st singer anchor, new singer auto-focus, and Trivia live sync -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -32,9 +32,9 @@
         <converters:NarrowWidthToBooleanConverter x:Key="NarrowWidthConverter" />
         <!-- Custom text box style inside ListView rows to ensure perfect contrast and theme syncing -->
         <Style x:Key="GridTextBoxStyle" TargetType="TextBox">
-            <Setter Property="Padding" Value="6,3" />
+            <Setter Property="Padding" Value="6,4" />
             <Setter Property="Margin" Value="2,1" />
-            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="MinHeight" Value="30" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
             <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
@@ -87,6 +87,7 @@
 
         <!-- Gold highlight for the currently-singing row and context menu -->
         <Style x:Key="CurrentSingerRowStyle" TargetType="ListViewItem">
+            <Setter Property="Padding" Value="0,1,0,1" />
             <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListView}}" />
             <Setter Property="ContextMenu">
                 <Setter.Value>
@@ -243,9 +244,9 @@
 
         <!-- Custom button style inside ListView rows to ensure perfect sizing and selection contrast -->
         <Style x:Key="GridButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
-            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="Padding" Value="6,2" />
             <Setter Property="FontSize" Value="12" />
-            <Setter Property="Height" Value="28" />
+            <Setter Property="Height" Value="30" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="BorderBrush" Value="{DynamicResource AppSecondaryButtonBorderBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource AppSecondaryButtonForegroundBrush}" />
@@ -631,7 +632,7 @@
                         Margin="0,8,0,8">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,0,1" Padding="0,4,0,6">
+                                    <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,0,1" Padding="2,6,2,10" MinHeight="80">
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
@@ -725,10 +726,10 @@
                                                      Width="220"
                                                      PopupAnimation="None">
                                                         <Border Background="{DynamicResource MaterialDesignPaper}"
-                                                                 BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                                                 BorderThickness="1"
-                                                                 CornerRadius="4"
-                                                                 MaxHeight="200">
+                                                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                                                BorderThickness="1"
+                                                                CornerRadius="4"
+                                                                MaxHeight="200">
                                                             <ListBox
                                                             x:Name="SuggestionsList"
                                                             ItemsSource="{Binding DataContext.FilteredSingers, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -790,7 +791,7 @@
                                                  Wide layout: checkboxes (left) and action buttons (right) share this one row.
                                                  Vertical mode (list narrower than 700px): checkboxes take the full row, and action
                                                  buttons drop to their own row below — giving the 3-row layout (Name+badge / checkboxes / buttons). -->
-                                            <Grid Grid.Row="1" Margin="38,4,4,0">
+                                            <Grid Grid.Row="1" Margin="38,6,4,2">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
@@ -861,11 +862,11 @@
                                                             Command="{Binding DataContext.FinishSingerSongCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                             CommandParameter="{Binding}"
                                                             Margin="0,0,6,0"
-                                                            Padding="8,2"
+                                                            Padding="10,2"
                                                             ToolTip="Finish current song and advance rotation">
                                                         <Button.Style>
                                                             <Style TargetType="Button" BasedOn="{StaticResource GridButtonStyle}">
-                                                                <Setter Property="MinWidth" Value="60" />
+                                                                <Setter Property="MinWidth" Value="72" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsInactive}" Value="True">
                                                                         <Setter Property="IsEnabled" Value="False" />
@@ -879,7 +880,7 @@
                                                             Style="{StaticResource GridButtonStyle}"
                                                             Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                             CommandParameter="{Binding}"
-                                                            Width="30"
+                                                            Width="32"
                                                             Margin="0,0,4,0"
                                                             ToolTip="Move Singer Up" />
 
@@ -887,7 +888,7 @@
                                                             Style="{StaticResource GridButtonStyle}"
                                                             Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                             CommandParameter="{Binding}"
-                                                            Width="30"
+                                                            Width="32"
                                                             ToolTip="Move Singer Down" />
                                                 </StackPanel>
                                             </Grid>
@@ -2612,7 +2613,13 @@
                                     <BulletDecorator.Bullet>
                                         <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
                                     </BulletDecorator.Bullet>
-                                    <TextBlock Text="Add Singer: Appends a new blank entry at the bottom of the list. Typing a name triggers auto-focus." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Text="Add Singer: Inserts a new performer at the end of the current active rotation round (right before the 1st singer anchor holding the '1ST' badge). Automatically scrolls to the row, focuses the name field, and highlights 'New Singer' for immediate overwrite typing." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="🚩 (1st Singer / Round Start): Marks the performer who started the rotation round with a red '1ST' badge and card highlight, synced across desktop, DJ tablet (dj.html), and patron portals." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 </BulletDecorator>
                                 <BulletDecorator Margin="0,2">
                                     <BulletDecorator.Bullet>
@@ -2636,7 +2643,7 @@
                                     <BulletDecorator.Bullet>
                                         <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
                                     </BulletDecorator.Bullet>
-                                    <TextBlock Text="X (Toggle Inactive): Grays out the singer and excludes them from the display rotation instead of deleting them. Use this if a singer steps out for a bit but will return later." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Text="X (Toggle Inactive): Grays out the singer and excludes them from the display rotation and singer count badge. Use this if a singer steps out for a bit but will return later." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                 </BulletDecorator>
                                 <BulletDecorator Margin="0,2">
                                     <BulletDecorator.Bullet>
@@ -2853,11 +2860,11 @@
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,16">
                                     <StackPanel>
                                         <TextBlock Text="🎮 Trivia Quick Start &amp; Pre-Game Lobby" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
-                                        <TextBlock Text="1. Category Selection: Choose from 14 starter curated categories (150 questions each / 2,100 total questions) or add unlimited custom JSON packs into TriviaData/packs/." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="1. Category Selection: Choose from 15 starter curated categories (150 questions each / 2,250 total questions) or add unlimited custom JSON packs into TriviaData/packs/." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                         <TextBlock Text="2. 1-Click Lobby Launch: Click 'Launch Pre-Game Lobby' to project the 70:30 widescreen lobby featuring 16:9 Category Announcement Banners, countdown clock, and stacked Wi-Fi &amp; Join QR codes." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
-                                        <TextBlock Text="3. Zero-Install Mobile Buzzers: Patrons scan the Join QR code (http://&lt;LAN-IP&gt;:8085/trivia) to register their name/team and receive an instant 4-button color buzzer with real-time answer elimination." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
-                                        <TextBlock Text="4. Authoritative Timer Control: The 'Question Answer Window' in Trivia Settings (default: 15s) is authoritative. Changing this setting to 10s, 20s, 30s, etc., overrides the question default across all rounds." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
-                                        <TextBlock Text="5. Scoring &amp; Penalties: 1,000 base points, +500 speed bonus, +10% streak multiplier, and optional wrong answer point deductions (0 to -500 pts)." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="3. Zero-Install Mobile Buzzers: Patrons scan the Join QR code (http://&lt;LAN-IP&gt;:8085/trivia) to register their name/team and receive an instant 4-button color buzzer with randomized answer elimination." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="4. Authoritative Live Timers: The 'Question Answer Window' in Trivia Settings (default: 15s) is authoritative and instantly synchronizes with the live game engine and saves to storage on change." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="5. Tiered Scoring &amp; Penalties: Tiered option value scoring (100% / 70% / 40%), up to +500 speed bonus, +10% streak multiplier, and optional wrong answer point deductions (0 to -500 pts)." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                         <TextBlock Text="6. Automatic Pause: When DJ Banners or Rotation screens are cast, Trivia automatically freezes and resumes when closed." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                         <TextBlock Text="7. Custom JSON Packs: Place any custom JSON file in TriviaData/packs/ (with PackId, Title, Category, Description, and Questions array with Prompt, 4 Options, and CorrectAnswerIndex) to auto-discover and load new categories." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                     </StackPanel>

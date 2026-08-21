@@ -1,4 +1,4 @@
-<!-- Edited on Aug 19, 2026 @ 13:34:00 -> Added dynamic auto-scaling Viewbox and enlarged font sizes for questions and answer choices -->
+<!-- Edited on Aug 20, 2026 @ 15:40:00 -> Placed venue name inline with Live Pub Trivia Night title and resolved scrunched QR codes with side-by-side Viewbox layout -->
 <Window x:Class="KSRotation.Windows.TriviaDisplayWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -54,7 +54,7 @@
         </Button>
 
         <!-- Main Content Area -->
-        <Grid Margin="32">
+        <Grid Margin="24,14">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -86,9 +86,9 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Category & Venue Title -->
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock FontSize="24" FontWeight="Black" TextTrimming="CharacterEllipsis">
+                <!-- Category / Live Pub Trivia Night Title & Inline Venue Name -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock FontSize="24" FontWeight="Black" VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Text" Value="{Binding CategoryTitle}" />
@@ -102,7 +102,26 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-                    <TextBlock Text="{Binding VenueName}" FontSize="14" FontWeight="SemiBold" Foreground="#64748B" />
+                    <TextBlock FontSize="24" FontWeight="Black" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#94A3B8" />
+                                <Setter Property="Text" Value="{Binding VenueName, StringFormat='•  {0}'}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding VenueName}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding VenueName}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsConnectInstructionsActive}" Value="True">
+                                        <Setter Property="Foreground" Value="#FBBF24" />
+                                        <Setter Property="Text" Value="{Binding VenueName, StringFormat='—  {0}'}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </StackPanel>
 
                 <!-- Circular/Pill Countdown Timer -->
@@ -140,7 +159,7 @@
 
             <!-- Middle Screen State Switcher -->
             <Grid Grid.Row="2">
-                <!-- 1. Unified Pre-Game Lobby Screen (Category Banner Left + Countdown/QR Right) -->
+                <!-- 1. Unified Pre-Game Lobby Screen (Category Banner Left + Side-by-Side Dual QR Right) -->
                 <Grid Margin="0,0,0,16">
                     <Grid.Style>
                         <Style TargetType="Grid">
@@ -157,9 +176,9 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="7*" />
-                        <ColumnDefinition Width="24" />
-                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="5.2*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="4.8*" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Game Master's Instruction/Welcome Banner (customizable in Settings) -->
@@ -238,16 +257,15 @@
                         </Grid>
                     </Border>
 
-                    <!-- Right Column: Countdown + Stacked Dual QR Cards (Wi-Fi & Trivia Join) -->
+                    <!-- Right Column: Countdown + Side-by-Side Dual QR Cards (Wi-Fi & Trivia Join) -->
                     <Grid Grid.Row="1" Grid.Column="2">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
-                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
                         <!-- Top Card: Game Start Countdown -->
-                        <Border Grid.Row="0" Background="#1E1B4B" CornerRadius="18" Padding="18,10" Margin="0,0,0,12" BorderBrush="#F59E0B" BorderThickness="2.5">
+                        <Border Grid.Row="0" Background="#1E1B4B" CornerRadius="16" Padding="16,10" Margin="0,0,0,12" BorderBrush="#F59E0B" BorderThickness="2.5">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -257,69 +275,84 @@
                                     <TextBlock Text="⏱️ GAME STARTS IN" FontSize="15" FontWeight="Black" Foreground="#FBBF24" />
                                     <TextBlock Text="Get your drinks and form your teams!" FontSize="11" Foreground="#CBD5E1" Margin="0,2,0,0" />
                                 </StackPanel>
-                                <Border Grid.Column="1" Background="#451A03" CornerRadius="10" Padding="18,4" VerticalAlignment="Center" BorderBrush="#F59E0B" BorderThickness="1.5">
-                                    <TextBlock Text="{Binding PreGameCountdownText}" FontWeight="Black" FontSize="28" Foreground="#FBBF24" />
+                                <Border Grid.Column="1" Background="#451A03" CornerRadius="10" Padding="16,4" VerticalAlignment="Center" BorderBrush="#F59E0B" BorderThickness="1.5">
+                                    <TextBlock Text="{Binding PreGameCountdownText}" FontWeight="Black" FontSize="26" Foreground="#FBBF24" />
                                 </Border>
                             </Grid>
                         </Border>
 
-                        <!-- Stacked Card 1: Wi-Fi Scan-to-Connect -->
-                        <Border Grid.Row="1" Background="#1B1744" CornerRadius="18" Padding="16,10" Margin="0,0,0,12" BorderBrush="#818CF8" BorderThickness="2.5">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,6">
-                                    <TextBlock Text="📶 1. CONNECT TO WI-FI" FontSize="16" FontWeight="Black" Foreground="#FBBF24" TextAlignment="Center" />
-                                    <TextBlock Text="Point phone camera at QR code to join venue Wi-Fi" FontSize="11" Foreground="#CBD5E1" TextAlignment="Center" />
-                                </StackPanel>
+                        <!-- Side-by-Side Dual QR Cards: Wi-Fi (Step 1) & Trivia Join (Step 2) -->
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                                <!-- QR Code Box -->
-                                <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="12" Padding="8" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#818CF8" BorderThickness="2">
-                                    <Image Source="{Binding WifiQrCodeImage}" Width="190" Height="190" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                                </Border>
+                            <!-- Card 1: Wi-Fi Scan-to-Connect -->
+                            <Border Grid.Column="0" Background="#1B1744" CornerRadius="18" Padding="14,12" BorderBrush="#818CF8" BorderThickness="2.5">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
 
-                                <!-- Wi-Fi Credentials Info -->
-                                <StackPanel Grid.Row="2" Margin="0,6,0,0" HorizontalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="Network: " FontWeight="Bold" FontSize="13" Foreground="#94A3B8" />
-                                        <TextBlock Text="{Binding WifiSsid}" FontWeight="Black" FontSize="13" Foreground="#38BDF8" Margin="0,0,12,0" />
-                                        <TextBlock Text="Pass: " FontWeight="Bold" FontSize="13" Foreground="#94A3B8" />
-                                        <TextBlock Text="{Binding WifiPasswordDisplay}" FontWeight="ExtraBold" FontSize="13" Foreground="#FBBF24" />
+                                    <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,8">
+                                        <TextBlock Text="📶 1. CONNECT WI-FI" FontSize="15" FontWeight="Black" Foreground="#FBBF24" TextAlignment="Center" />
+                                        <TextBlock Text="Scan to join venue Wi-Fi" FontSize="11" Foreground="#CBD5E1" TextAlignment="Center" />
                                     </StackPanel>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
 
-                        <!-- Stacked Card 2: Trivia Join & Buzzer -->
-                        <Border Grid.Row="2" Background="#0A2436" CornerRadius="18" Padding="16,10" BorderBrush="#38BDF8" BorderThickness="2.5">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,6">
-                                    <TextBlock Text="📱 2. JOIN TRIVIA GAME" FontSize="16" FontWeight="Black" Foreground="#38BDF8" TextAlignment="Center" />
-                                    <TextBlock Text="Scan to open mobile buzzer on your smartphone" FontSize="11" Foreground="#CBD5E1" TextAlignment="Center" />
-                                </StackPanel>
+                                    <!-- QR Code Box with Viewbox (scales cleanly, never scrunched) -->
+                                    <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="12" Padding="8" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#818CF8" BorderThickness="2">
+                                        <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="210" MaxHeight="210">
+                                            <Image Source="{Binding WifiQrCodeImage}" Width="190" Height="190" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                        </Viewbox>
+                                    </Border>
 
-                                <!-- QR Code Box -->
-                                <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="12" Padding="8" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#38BDF8" BorderThickness="2">
-                                    <Image Source="{Binding QrCodeImage}" Width="190" Height="190" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                                </Border>
-
-                                <!-- Web Link Text -->
-                                <StackPanel Grid.Row="2" Margin="0,6,0,0" HorizontalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="🌐 " FontSize="13" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding ConnectUrl}" FontWeight="Black" FontSize="14" Foreground="#38BDF8" VerticalAlignment="Center" />
+                                    <!-- Wi-Fi Credentials Info -->
+                                    <StackPanel Grid.Row="2" Margin="0,8,0,0" HorizontalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Text="Net: " FontWeight="Bold" FontSize="12" Foreground="#94A3B8" />
+                                            <TextBlock Text="{Binding WifiSsid}" FontWeight="Black" FontSize="12" Foreground="#38BDF8" Margin="0,0,6,0" TextTrimming="CharacterEllipsis" MaxWidth="110" />
+                                            <TextBlock Text="Pass: " FontWeight="Bold" FontSize="12" Foreground="#94A3B8" />
+                                            <TextBlock Text="{Binding WifiPasswordDisplay}" FontWeight="ExtraBold" FontSize="12" Foreground="#FBBF24" TextTrimming="CharacterEllipsis" MaxWidth="110" />
+                                        </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
+                                </Grid>
+                            </Border>
+
+                            <!-- Card 2: Trivia Join & Buzzer -->
+                            <Border Grid.Column="2" Background="#0A2436" CornerRadius="18" Padding="14,12" BorderBrush="#38BDF8" BorderThickness="2.5">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,8">
+                                        <TextBlock Text="📱 2. JOIN TRIVIA" FontSize="15" FontWeight="Black" Foreground="#38BDF8" TextAlignment="Center" />
+                                        <TextBlock Text="Scan to open mobile buzzer" FontSize="11" Foreground="#CBD5E1" TextAlignment="Center" />
+                                    </StackPanel>
+
+                                    <!-- QR Code Box with Viewbox (scales cleanly, never scrunched) -->
+                                    <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="12" Padding="8" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#38BDF8" BorderThickness="2">
+                                        <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="210" MaxHeight="210">
+                                            <Image Source="{Binding QrCodeImage}" Width="190" Height="190" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                        </Viewbox>
+                                    </Border>
+
+                                    <!-- Web Link Text -->
+                                    <StackPanel Grid.Row="2" Margin="0,8,0,0" HorizontalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Text="🌐 " FontSize="12" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding ConnectUrl}" FontWeight="Black" FontSize="12" Foreground="#38BDF8" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="180" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
                     </Grid>
                 </Grid>
 

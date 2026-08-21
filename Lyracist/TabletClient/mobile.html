@@ -1,4 +1,4 @@
-<!-- Edited on Aug 2, 2026 @ 09:16:00 -> Pass singerName parameter to SignalR hub connection -->
+<!-- Edited on Aug 21, 2026 @ 08:06:00 -> Add 1st singer badge and red styling to mobile queue list -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -243,6 +243,11 @@
                 border-bottom: none;
             }
 
+            .queue-item.rotation-start {
+                background-color: rgba(220, 38, 38, 0.12);
+                border-left: 3px solid #DC2626;
+            }
+
         .queue-details {
             display: flex;
             flex-direction: column;
@@ -272,6 +277,12 @@
             display: inline-block;
             vertical-align: middle;
             margin-left: 6px;
+        }
+
+        .badge-1st {
+            background-color: #DC2626;
+            color: #FFFFFF;
+            font-weight: 800;
         }
 
         .badge-local {
@@ -950,13 +961,16 @@
             let html = "";
             queue.forEach((item, idx) => {
                 const badgeClass = `badge badge-${(item.source || "local").toLowerCase()}`;
+                const startBadge = item.isRotationStart ? `<span class="badge badge-1st" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>` : "";
+                const itemClass = item.isRotationStart ? "queue-item rotation-start" : "queue-item";
                 html += `
-                            <div class="queue-item">
+                            <div class="${itemClass}">
                                 <div style="display: flex; align-items: center; overflow: hidden; width: 100%;">
                                     <span class="queue-index">${idx + 1}</span>
                                     <div class="queue-details">
                                         <div class="queue-singer">
                                             ${item.name}
+                                            ${startBadge}
                                             <span class="${badgeClass}">${item.source || "Local"}</span>
                                         </div>
                                         <div class="queue-song">${item.artist} - ${item.songTitle}</div>

@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 06:21:00 -> Added Tiered Option Value Scoring (100% / 70% / 40%) and progressive elimination during countdown in TriviaGameEngine
+// Edited on Aug 21, 2026 @ 07:49:00 -> Randomize wrong answer elimination order for unpredictable fading sequence
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -165,7 +165,13 @@ public class TriviaGameEngine : IDisposable
 
             EliminatedAnswerIndices.Clear();
             _pendingWrongIndices.Clear();
-            _pendingWrongIndices.AddRange(Enumerable.Range(0, q.Options.Count).Where(i => i != q.CorrectAnswerIndex));
+            var wrongIndices = Enumerable.Range(0, q.Options.Count).Where(i => i != q.CorrectAnswerIndex).ToList();
+            for (int i = wrongIndices.Count - 1; i > 0; i--)
+            {
+                int k = Random.Shared.Next(i + 1);
+                (wrongIndices[i], wrongIndices[k]) = (wrongIndices[k], wrongIndices[i]);
+            }
+            _pendingWrongIndices.AddRange(wrongIndices);
 
             TotalCountdownSeconds = Settings.DefaultQuestionSeconds > 0 ? Settings.DefaultQuestionSeconds : (q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : 15);
             RemainingSeconds = TotalCountdownSeconds;
@@ -299,9 +305,9 @@ public class TriviaGameEngine : IDisposable
             // open through the fade below - so they're only finalized (zeroed) once the answer
             // window fully closes in CompleteRevealAnswer.
 
-            // Identify wrong answer indices that have not yet been eliminated
-            var uneliminatedWrong = Enumerable.Range(0, q.Options.Count)
-                .Where(i => i != q.CorrectAnswerIndex && !EliminatedAnswerIndices.Contains(i))
+            // Identify wrong answer indices that have not yet been eliminated, preserving our shuffled order
+            var uneliminatedWrong = _pendingWrongIndices
+                .Where(i => !EliminatedAnswerIndices.Contains(i))
                 .ToList();
 
             if (uneliminatedWrong.Count > 0)

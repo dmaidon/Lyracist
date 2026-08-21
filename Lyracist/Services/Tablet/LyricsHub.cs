@@ -1,4 +1,4 @@
-// Edited on Aug 2, 2026 @ 09:16:00 -> Track connected performer portal clients in lyrics SignalR hub
+// Edited on Aug 21, 2026 @ 08:06:00 -> Include isRotationStart, isCurrent, isNext in initial queue payload
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Concurrent;
@@ -74,7 +74,12 @@ public class LyricsHub(RotationViewModel rotation, KaraokeViewModel karaoke) : H
             songTitle = s.SongTitle,
             artist = s.Artist,
             key = s.Key,
-            source = s.Source
+            source = s.Source,
+            isCurrent = s.IsCurrent,
+            isNext = s.IsNext,
+            isRotationStart = s.IsRotationStart,
+            isPaused = s.IsPaused,
+            isInactive = s.IsInactive
         }).ToList();
 
         await Clients.Caller.SendAsync("QueueUpdated", queueList);

@@ -1,4 +1,4 @@
-// Last Edit: Jun 30, 2026 08:29 - Added atomic JSON write helper to prevent file corruption on crash mid-write.
+// Edited on Aug 21, 2026 @ 08:28:00 -> Add fallback Copy/Delete strategy in AtomicJsonFile to prevent MoveFile file lock collisions on Windows
 using System.IO;
 using System.Text.Json;
 
@@ -30,6 +30,21 @@ public static class AtomicJsonFile
             stream.Flush(flushToDisk: true);
         }
 
-        File.Move(tempPath, path, overwrite: true);
+        try
+        {
+            File.Move(tempPath, path, overwrite: true);
+        }
+        catch
+        {
+            File.Copy(tempPath, path, overwrite: true);
+            try
+            {
+                File.Delete(tempPath);
+            }
+            catch
+            {
+                // Best effort cleanup
+            }
+        }
     }
 }

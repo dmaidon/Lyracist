@@ -1,7 +1,8 @@
-// Edited on Jul 16, 2026 @ 12:00:00 -> App initialization
+// Edited on Aug 21, 2026 @ 08:26:00 -> Enable global select-all on focus for all TextBoxes and numeric boxes
 using System.Configuration;
 using System.Data;
 using System.Windows;
+using Lyracist.Shared;
 
 namespace ScaryokeWheel
 {
@@ -12,9 +13,9 @@ namespace ScaryokeWheel
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
             Lyracist.Shared.Globals.LogAppStart("ScaryokeWheel");
             base.OnStartup(e);
         }
     }
-
 }

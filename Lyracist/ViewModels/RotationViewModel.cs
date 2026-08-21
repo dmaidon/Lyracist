@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 09:53:20 -> Add GetCurrentSinger, GetNextSinger, and SkipCurrentSinger methods for AutoAdvanceManager
+// Edited on Aug 21, 2026 @ 07:49:00 -> Insert new singers at end of current rotation round via RotationHelpers.InsertNewSinger
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,6 +9,7 @@ using Lyracist.Core.Interfaces;
 using Lyracist.Core.Models;
 using Lyracist.Models;
 using Lyracist.Services.Display;
+using Lyracist.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -520,7 +521,7 @@ public partial class RotationViewModel : BaseViewModel
             }
         });
 
-        Rotation.Add(new Singer
+        var newSinger = new Singer
         {
             Name = name,
             SongTitle = title,
@@ -535,7 +536,8 @@ public partial class RotationViewModel : BaseViewModel
             RatingCount = ratingCount,
             TotalSongsSung = totalSongsSung,
             IsMusic = isMusic
-        });
+        };
+        RotationHelpers.InsertNewSinger(Rotation, newSinger, FloatCurrentSingerToTop);
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
@@ -547,13 +549,14 @@ public partial class RotationViewModel : BaseViewModel
         if (string.IsNullOrWhiteSpace(NewSingerName))
             return;
 
-        Rotation.Add(new Singer
+        var newSinger = new Singer
         {
             Name = NameFormatting.ProperCase(NewSingerName),
             DuetPartnerName = NameFormatting.ProperCase(NewDuetPartnerName),
             Notes = NewSingerNotes,
             Key = NewSingerKey
-        });
+        };
+        RotationHelpers.InsertNewSinger(Rotation, newSinger, FloatCurrentSingerToTop);
 
         // Reset input properties
         NewSingerName = string.Empty;

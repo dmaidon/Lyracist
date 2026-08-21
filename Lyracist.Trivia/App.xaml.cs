@@ -1,6 +1,7 @@
-// Edited on Aug 20, 2026 @ 12:17:00 -> Added explicit OnExit process termination
+// Edited on Aug 21, 2026 @ 08:26:00 -> Enable global select-all on focus for all TextBoxes and numeric boxes
 using System.IO;
 using System.Windows;
+using Lyracist.Shared;
 using Lyracist.Trivia.Core.Services;
 using Lyracist.Trivia.Services;
 
@@ -10,6 +11,7 @@ public partial class App : System.Windows.Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
+        TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
         DispatcherUnhandledException += OnDispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;

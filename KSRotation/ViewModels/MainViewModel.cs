@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 19:35:00 -> Reposition TriviaDisplayWindow when SelectedMonitorDevice changes
+// Edited on Aug 21, 2026 @ 08:26:00 -> Track LastInsertedSinger for focus and select-all when new singer is added
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -647,8 +647,8 @@ namespace KSRotation.ViewModels
 
         public ObservableCollection<SingerEntry> Singers { get; } = [];
 
-        /// <summary>Count of karaoke singers in the rotation, excluding background music entries (<see cref="SingerEntry.IsMusic"/>).</summary>
-        public int SingersInRotationCount => Singers.Count(s => !s.IsMusic);
+        /// <summary>Count of active karaoke singers in the rotation, excluding background music entries (<see cref="SingerEntry.IsMusic"/>) and inactive singers (<see cref="SingerEntry.IsInactive"/>).</summary>
+        public int SingersInRotationCount => Singers.Count(s => !s.IsMusic && !s.IsInactive);
 
         public ObservableCollection<string> KnownSingers { get; } = [];
         public ObservableCollection<string> FilteredSingers { get; } = [];
@@ -1032,17 +1032,13 @@ namespace KSRotation.ViewModels
             }
         }
 
+        [ObservableProperty]
+        public partial SingerEntry? LastInsertedSinger { get; set; }
+
         private void AddActiveSinger(SingerEntry newSinger)
         {
-            int activeCount = 0;
-            for (int i = 0; i < Singers.Count; i++)
-            {
-                if (!Singers[i].IsInactive)
-                {
-                    activeCount++;
-                }
-            }
-            Singers.Insert(activeCount, newSinger);
+            LastInsertedSinger = newSinger;
+            RotationHelpers.InsertNewSinger(Singers, newSinger, FloatCurrentSingerToTop);
         }
 
         [RelayCommand]
@@ -2038,6 +2034,11 @@ namespace KSRotation.ViewModels
                 {
                     RebuildRotationJsonCacheNow();
                 }
+            }
+
+            if (e.PropertyName == nameof(SingerEntry.IsInactive) || e.PropertyName == nameof(SingerEntry.IsMusic))
+            {
+                OnPropertyChanged(nameof(SingersInRotationCount));
             }
         }
 

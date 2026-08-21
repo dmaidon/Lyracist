@@ -1,4 +1,4 @@
-// Created on Aug 19, 2026 @ 15:12:00 -> MainViewModel for TriviaDbCreator MVVM architecture
+// Edited on Aug 21, 2026 @ 08:34:00 -> Added Help Topic 9 Fast Editing & Textbox Auto-Selection
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -936,6 +936,19 @@ All applications in the Lyracist suite share the centralized directory:
 • `CorrectAnswerIndex`: 0-based integer pointing to the correct choice (0 = A, 1 = B, 2 = C, 3 = D).
 • `Options`: Exactly 4 non-empty string elements.
 • `TimeLimitSeconds`: Default 15 seconds (can be overridden globally in Game Master settings)."
+        });
+
+        HelpTopics.Add(new TriviaHelpTopic
+        {
+            Title = "9. Fast Editing & Textbox Auto-Selection",
+            Icon = "⚡",
+            AccentColor = "#F59E0B",
+            DescriptionHeader = "Automatic Textbox Highlighting Across the Entire Application",
+            DescriptionContent = 
+@"### Fast Editing & Auto-Selection:
+• **Global Select-All on Focus**: Clicking or tabbing into any text input box (Question Prompt, Choice A/B/C/D, Explanation, Pack Metadata, Search Filters) automatically highlights and selects all existing text.
+• **Instant Overwrite**: You can immediately type new prompts or options without having to manually backspace or double-click first.
+• **Precision Caret Placement**: Clicking again inside an already-focused text box places the cursor exactly where you click for fine adjustments."
         });
 
         SelectedHelpTopic = HelpTopics.FirstOrDefault();
