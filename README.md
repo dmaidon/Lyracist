@@ -1,8 +1,8 @@
-<!-- Edited on Aug 21, 2026 @ 09:03:00 -> Update README with KSRotation.Maui responsive vertical/horizontal layout -->
-Last Edit: Aug 21, 2026 - KSRotation.Maui Responsive Vertical & Horizontal Layout
+<!-- Edited on Aug 21, 2026 @ 12:12:00 -> Update README with Android deployment stability and MAUI layout dispatch safeguarding -->
+Last Edit: Aug 21, 2026 - KSRotation.Maui Responsive Vertical/Horizontal Layouts & Android Stability
 # Lyracist Pro
 
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts in `KSRotation.Maui`, integrated interactive pub/bar trivia with dedicated separate settings and live synchronization, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, integrated interactive pub/bar trivia with dedicated separate settings and live synchronization, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
 
 ---
 
@@ -29,12 +29,16 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **New Singer Addition Auto-Focus & Select-All**:
   - When adding a new performer to the rotation queue, the system automatically scrolls the list directly to the newly inserted row, focuses the singer name field, and highlights the default `"New Singer"` text so the host can instantly type the performer's actual name.
 
-### 📱 Responsive Tablet Layout in `KSRotation.Maui` (`Vertical & Horizontal Modes`)
+### 📱 Responsive Tablet Layout & Android Stability in `KSRotation.Maui`
 - **Vertical Mode (Portrait Orientation)**:
   - When the tablet is held vertically, the layout automatically reflows to place the **Active Rotation Queue at the top** of the screen across full width, and positions the **Patron Request Portal (QR code) and Incoming Requests side-by-side at the bottom** of the screen.
   - This eliminates wasted screen real estate on portrait tablets, maximizing vertical space for the performer list.
 - **Horizontal Mode (Landscape Orientation)**:
   - In landscape orientation, the layout retains the two-column view with Rotation on the left (`*`) and the Portal & Requests sidebar on the right (`280px`).
+- **Layout Dispatch Safeguarding**:
+  - Orientation layout updates are safely dispatched via `Dispatcher.Dispatch` with atomic collection assignment to guarantee smooth orientation transitions without re-entrant layout cycles.
+- **Android Self-Contained Deployment**:
+  - Embedded assembly packaging (`EmbedAssembliesIntoApk = true`) and platform OS guards ensure reliable, standalone deployment and launch on Android tablets without fast-deployment synchronization failures.
 
 ### 🛠️ Trivia Database Creator & Pack Studio (`TriviaDbCreator.exe`)
 - **Visual Category & Question Authoring**: Standalone WPF MVVM desktop app using Fluent UI (`WPF-UI`) for creating, editing, and expanding trivia question databases.

@@ -1,16 +1,19 @@
-// Edited on Aug 21, 2026 @ 09:03:00 -> Added documentation for KSRotation.Maui responsive vertical/horizontal layout, global TextBox select-all on focus, and singer rotation insertion
+// Edited on Aug 21, 2026 @ 12:12:00 -> Added documentation for KSRotation.Maui responsive vertical/horizontal layout, Android deployment stability, global TextBox select-all on focus, and singer rotation insertion
 Singer Rotation & Trivia Game Enhancements (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`) - (August 2026)
 
 Section: Performance & Rotation Operations / Singer Queue Management & Trivia Live Control
 
 [System Details]
-1. Responsive Tablet Layout (`KSRotation.Maui`):
+1. Responsive Tablet Layout & Android Deployment (`KSRotation.Maui`):
    - **Vertical Mode (Portrait Orientation)**:
      * When the tablet is held vertically, the layout dynamically reflows to place the Active Rotation Queue at the top across full screen width.
      * The Patron Request Portal (QR code, connection URL, DJ PIN toggle) and Incoming Requests list reflow side-by-side across the bottom (220px height).
      * Maximizes vertical screen area for long rotation queues on handheld tablets.
    - **Horizontal Mode (Landscape Orientation)**:
      * Retains the traditional two-column master layout with Rotation on the left and the Portal & Requests sidebar on the right (280px).
+   - **Orientation Dispatching & Android Launch Reliability**:
+     * Orientation reflows are scheduled safely on the UI dispatcher with atomic collection assignments to prevent re-entrant layout loops.
+     * Self-contained APK packaging (`EmbedAssembliesIntoApk = true`) and Android-safe network helper logic ensure dependable launching without Fast Deployment debugger lockups.
 
 2. Global Auto-Highlighting & Select-All on Focus (All Applications):
    - **Instant Text Selection Across All Inputs**:

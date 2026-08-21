@@ -42,25 +42,25 @@
             --btn-outline-text: #E9D5FF;
         }
 
-        :root[data-theme="light"] {
-            --bg-dark: #F1F5F9;
-            --card-bg: #FFFFFF;
-            --row-bg: #F8FAFC;
-            --row-start-bg: #FEF2F2;
-            --row-current-bg: #FFF7ED;
-            --row-next-bg: #EFF6FF;
-            --row-inactive-bg: #E2E8F0;
-            --input-bg: #F1F5F9;
-            --border-color: #E2E8F0;
-            --primary: #7C3AED;
-            --primary-hover: #6D28D9;
-            --text-main: #0F172A;
-            --text-muted: #64748B;
-            --accent-text: #7C3AED;
-            --panel-title-color: #7C3AED;
-            --btn-outline-border: #7C3AED;
-            --btn-outline-text: #7C3AED;
-        }
+            :root[data-theme="light"] {
+                --bg-dark: #F1F5F9;
+                --card-bg: #FFFFFF;
+                --row-bg: #F8FAFC;
+                --row-start-bg: #FEF2F2;
+                --row-current-bg: #FFF7ED;
+                --row-next-bg: #EFF6FF;
+                --row-inactive-bg: #E2E8F0;
+                --input-bg: #F1F5F9;
+                --border-color: #E2E8F0;
+                --primary: #7C3AED;
+                --primary-hover: #6D28D9;
+                --text-main: #0F172A;
+                --text-muted: #64748B;
+                --accent-text: #7C3AED;
+                --panel-title-color: #7C3AED;
+                --btn-outline-border: #7C3AED;
+                --btn-outline-text: #7C3AED;
+            }
 
         * {
             box-sizing: border-box;
@@ -128,11 +128,12 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        button.btn-outline:hover {
-            border-color: #DDD6FE;
-            background-color: rgba(196, 181, 253, 0.15);
-            color: #FFFFFF;
-        }
+
+            button.btn-outline:hover {
+                border-color: #DDD6FE;
+                background-color: rgba(196, 181, 253, 0.15);
+                color: #FFFFFF;
+            }
 
         /* Lock Screen (PIN modal / page) */
         .lock-screen, .lock-overlay {
@@ -144,6 +145,7 @@
             width: 100%;
             padding: 24px;
         }
+
         .pin-box, .lock-card {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -156,30 +158,34 @@
             flex-direction: column;
             gap: 12px;
         }
-        .pin-box h2, .lock-card h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
-        .pin-box p, .lock-card p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 4px;
-        }
-        .pin-input, .lock-card input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background-color: var(--input-bg);
-            color: var(--text-main);
-            font-size: 1.1rem;
-            text-align: center;
-            letter-spacing: 4px;
-            outline: none;
-        }
-        .pin-input:focus, .lock-card input:focus {
-            border-color: var(--primary);
-        }
+
+            .pin-box h2, .lock-card h2 {
+                font-size: 1.4rem;
+                font-weight: 700;
+            }
+
+            .pin-box p, .lock-card p {
+                color: var(--text-muted);
+                font-size: 0.9rem;
+                margin-bottom: 4px;
+            }
+
+            .pin-input, .lock-card input {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+                background-color: var(--input-bg);
+                color: var(--text-main);
+                font-size: 1.1rem;
+                text-align: center;
+                letter-spacing: 4px;
+                outline: none;
+            }
+
+                .pin-input:focus, .lock-card input:focus {
+                    border-color: var(--primary);
+                }
 
         /* Layout -> Single Column Layout */
         .main-layout {
@@ -226,25 +232,25 @@
             transition: all 0.2s;
         }
 
-        .singer-card.rotation-start {
-            border-color: var(--red);
-            background-color: var(--row-start-bg);
-        }
+            .singer-card.rotation-start {
+                border-color: var(--red);
+                background-color: var(--row-start-bg);
+            }
 
-        .singer-card.current {
-            border-color: var(--gold);
-            background-color: var(--row-current-bg);
-        }
+            .singer-card.current {
+                border-color: var(--gold);
+                background-color: var(--row-current-bg);
+            }
 
-        .singer-card.next {
-            border-color: var(--blue);
-            background-color: var(--row-next-bg);
-        }
+            .singer-card.next {
+                border-color: var(--blue);
+                background-color: var(--row-next-bg);
+            }
 
-        .singer-card.inactive, .singer-card.paused {
-            opacity: 0.45;
-            background-color: var(--row-inactive-bg);
-        }
+            .singer-card.inactive, .singer-card.paused {
+                opacity: 0.45;
+                background-color: var(--row-inactive-bg);
+            }
 
         .singer-details {
             display: flex;
@@ -285,18 +291,21 @@
             border-radius: 4px;
             text-transform: uppercase;
         }
-        .badge.rotation-start {
-            background-color: var(--red);
-            color: #FFF;
-        }
-        .badge.current {
-            background-color: var(--gold);
-            color: #000;
-        }
-        .badge.next {
-            background-color: var(--blue);
-            color: #FFF;
-        }
+
+            .badge.rotation-start {
+                background-color: var(--red);
+                color: #FFF;
+            }
+
+            .badge.current {
+                background-color: var(--gold);
+                color: #000;
+            }
+
+            .badge.next {
+                background-color: var(--blue);
+                color: #FFF;
+            }
 
         /* Round Checkboxes Row */
         .rounds-container {
@@ -304,6 +313,7 @@
             gap: 4px;
             flex-wrap: wrap;
         }
+
         .round-box {
             width: 24px;
             height: 24px;
@@ -319,20 +329,53 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .round-box.completed {
-            border-color: transparent;
-            color: #FFF;
-        }
-        .round-box.r1.completed { background-color: #E74C3C; }
-        .round-box.r2.completed { background-color: #E67E22; }
-        .round-box.r3.completed { background-color: #F1C40F; color: #000; }
-        .round-box.r4.completed { background-color: #2ECC71; }
-        .round-box.r5.completed { background-color: #1ABC9C; }
-        .round-box.r6.completed { background-color: #3498DB; }
-        .round-box.r7.completed { background-color: #9B59B6; }
-        .round-box.r8.completed { background-color: #FF1493; }
-        .round-box.r9.completed { background-color: #00E5FF; color: #000; }
-        .round-box.r10.completed { background-color: #E040FB; }
+
+            .round-box.completed {
+                border-color: transparent;
+                color: #FFF;
+            }
+
+            .round-box.r1.completed {
+                background-color: #E74C3C;
+            }
+
+            .round-box.r2.completed {
+                background-color: #E67E22;
+            }
+
+            .round-box.r3.completed {
+                background-color: #F1C40F;
+                color: #000;
+            }
+
+            .round-box.r4.completed {
+                background-color: #2ECC71;
+            }
+
+            .round-box.r5.completed {
+                background-color: #1ABC9C;
+            }
+
+            .round-box.r6.completed {
+                background-color: #3498DB;
+            }
+
+            .round-box.r7.completed {
+                background-color: #9B59B6;
+            }
+
+            .round-box.r8.completed {
+                background-color: #FF1493;
+            }
+
+            .round-box.r9.completed {
+                background-color: #00E5FF;
+                color: #000;
+            }
+
+            .round-box.r10.completed {
+                background-color: #E040FB;
+            }
 
         /* Row Action buttons */
         .actions-container {
@@ -355,16 +398,41 @@
             justify-content: center;
             transition: all 0.2s;
         }
-        .btn-circle:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        .btn-circle.green { border-color: var(--green); color: var(--green); }
-        .btn-circle.green:hover { background-color: rgba(16, 185, 129, 0.1); }
-        .btn-circle.blue { border-color: var(--blue); color: var(--blue); }
-        .btn-circle.blue:hover { background-color: rgba(59, 130, 246, 0.1); }
-        .btn-circle.red { border-color: var(--red); color: var(--red); }
-        .btn-circle.small { width: 22px; height: 22px; font-size: 0.7rem; flex-shrink: 0; }
+
+            .btn-circle:hover {
+                border-color: var(--primary);
+                color: var(--primary);
+            }
+
+            .btn-circle.green {
+                border-color: var(--green);
+                color: var(--green);
+            }
+
+                .btn-circle.green:hover {
+                    background-color: rgba(16, 185, 129, 0.1);
+                }
+
+            .btn-circle.blue {
+                border-color: var(--blue);
+                color: var(--blue);
+            }
+
+                .btn-circle.blue:hover {
+                    background-color: rgba(59, 130, 246, 0.1);
+                }
+
+            .btn-circle.red {
+                border-color: var(--red);
+                color: var(--red);
+            }
+
+            .btn-circle.small {
+                width: 22px;
+                height: 22px;
+                font-size: 0.7rem;
+                flex-shrink: 0;
+            }
 
         /* Queued songs list */
         .queued-songs {
@@ -372,6 +440,7 @@
             flex-direction: column;
             gap: 4px;
         }
+
         .queued-song-row {
             display: flex;
             align-items: center;
@@ -379,12 +448,16 @@
             font-size: 0.85rem;
             color: var(--text-muted);
         }
+
         .queued-song-text {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .btn-circle.red:hover { background-color: rgba(239, 68, 68, 0.1); }
+
+        .btn-circle.red:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
 
         .btn-text {
             border: 1px solid var(--border-color);
@@ -396,10 +469,24 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-text.pause { border-color: var(--orange); color: var(--orange); }
-        .btn-text.pause:hover { background-color: rgba(217, 119, 6, 0.1); }
-        .btn-text.resume { border-color: var(--green); color: var(--green); }
-        .btn-text.resume:hover { background-color: rgba(16, 185, 129, 0.1); }
+
+            .btn-text.pause {
+                border-color: var(--orange);
+                color: var(--orange);
+            }
+
+                .btn-text.pause:hover {
+                    background-color: rgba(217, 119, 6, 0.1);
+                }
+
+            .btn-text.resume {
+                border-color: var(--green);
+                color: var(--green);
+            }
+
+                .btn-text.resume:hover {
+                    background-color: rgba(16, 185, 129, 0.1);
+                }
 
         /* Form styling */
         .form-group {
@@ -407,24 +494,27 @@
             flex-direction: column;
             gap: 4px;
         }
-        .form-group label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-        .form-group input {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background-color: var(--input-bg);
-            color: var(--text-main);
-            outline: none;
-            font-size: 0.9rem;
-        }
-        .form-group input:focus {
-            border-color: var(--primary);
-        }
+
+            .form-group label {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--text-muted);
+                text-transform: uppercase;
+            }
+
+            .form-group input {
+                padding: 8px 12px;
+                border-radius: 6px;
+                border: 1px solid var(--border-color);
+                background-color: var(--input-bg);
+                color: var(--text-main);
+                outline: none;
+                font-size: 0.9rem;
+            }
+
+                .form-group input:focus {
+                    border-color: var(--primary);
+                }
 
         button.btn-primary {
             background-color: var(--primary);
@@ -437,9 +527,10 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        button.btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
+
+            button.btn-primary:hover {
+                background-color: var(--primary-hover);
+            }
 
         /* Requests column styling */
         .request-card {
@@ -451,15 +542,29 @@
             flex-direction: column;
             gap: 8px;
         }
+
         .request-details {
             display: flex;
             flex-direction: column;
             gap: 2px;
         }
-        .request-name { font-weight: 600; font-size: 0.95rem; }
-        .request-song { font-size: 0.85rem; font-style: italic; color: var(--accent-text); }
-        .request-artist { font-size: 0.8rem; color: var(--text-muted); }
-        
+
+        .request-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .request-song {
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--accent-text);
+        }
+
+        .request-artist {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
         .request-actions {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -478,32 +583,40 @@
             body {
                 padding: 8px;
             }
+
             .panel {
                 padding: 12px;
             }
+
             .singer-card {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 10px;
             }
+
             .actions-container {
                 justify-content: flex-end;
                 flex-wrap: wrap;
             }
+
             h1 {
                 font-size: 1.3rem;
             }
+
             .singer-name {
                 font-size: 1.1rem;
             }
+
             .singer-song {
                 font-size: 1.05rem;
             }
+
             .round-box {
                 width: 30px;
                 height: 30px;
                 font-size: 0.85rem;
             }
+
             button.btn-outline {
                 padding: 6px 12px;
                 font-size: 0.85rem;
@@ -532,7 +645,7 @@
 
         <!-- DJ Dashboard -->
         <div id="dashboard" class="dashboard" style="display: none;">
-            
+
             <div class="header">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <h1>🎧 Remote DJ Control</h1>
@@ -545,7 +658,7 @@
             </div>
 
             <div class="main-layout">
-                
+
                 <!-- Left Column: Singer Rotation Queue -->
                 <div class="panel">
                     <div class="panel-title">
@@ -562,7 +675,7 @@
 
                 <!-- Right Column: Controls, Add Singer, Events, Requests -->
                 <div style="display: flex; flex-direction: column; gap: 16px;">
-                    
+
                     <!-- Quick Add Singer Form -->
                     <div class="panel">
                         <div class="panel-title">Add Performer to Rotation</div>
@@ -615,9 +728,7 @@
                             <div class="no-data">No pending requests</div>
                         </div>
                     </div>
-
                 </div>
-
             </div>
         </div>
     </div>
@@ -701,7 +812,7 @@
             const pin = sessionStorage.getItem("dj_pin");
             const headers = { 'X-DJ-PIN': pin };
             const querySuffix = `?pin=${encodeURIComponent(pin)}`;
- 
+
             try {
                 // Fetch Rotation Queue
                 const rotResponse = await fetch(`/api/rotation${querySuffix}`, { headers });
@@ -712,7 +823,7 @@
                 }
                 const rotation = await rotResponse.json();
                 renderQueue(rotation);
- 
+
                 // Fetch Incoming Requests
                 const reqResponse = await fetch(`/api/requests${querySuffix}`, { headers });
                 const requests = await reqResponse.json();
@@ -829,7 +940,7 @@
             singers.forEach((s, index) => {
                 const cardId = `card-${s.id}`;
                 let card = existingCards.get(cardId);
-                
+
                 // Determine card classes
                 let cardClass = 'singer-card';
                 let badges = '';
@@ -839,7 +950,7 @@
                 }
                 if (s.isCurrent) {
                     cardClass += ' current';
-                    badges += s.isMusic 
+                    badges += s.isMusic
                         ? '<span class="badge current" style="background-color: var(--green); color: black;">Now Playing</span>'
                         : '<span class="badge current">Now Singing</span>';
                 } else if (s.isNext) {
@@ -884,16 +995,16 @@
                 let queuedSongsHtml = '';
                 if (s.queuedSongs && s.queuedSongs.length > 0) {
                     const rows = s.queuedSongs.map((q, idx) => `
-                        <div class="queued-song-row">
-                            <span class="queued-song-text">${escapeHtml(q.song)}${q.artist ? ' (' + escapeHtml(q.artist) + ')' : ''}</span>
-                            <button class="btn-circle red small" title="Remove from queue" onclick="sendAction('remove-queued-song', '${s.id}', ${idx})">✕</button>
-                        </div>
-                    `).join('');
+                            <div class="queued-song-row">
+                                <span class="queued-song-text">${escapeHtml(q.song)}${q.artist ? ' (' + escapeHtml(q.artist) + ')' : ''}</span>
+                                <button class="btn-circle red small" title="Remove from queue" onclick="sendAction('remove-queued-song', '${s.id}', ${idx})">✕</button>
+                            </div>
+                        `).join('');
                     queuedSongsHtml = `<div class="queued-songs">${rows}</div>`;
                 }
 
-                // Pause button text and state class
-                const pauseTextStr = s.isPaused ? "👁 Resume" : "👁 Pause";
+                // Pause button text and state class 👁
+                const pauseTextStr = s.isPaused ? "Resume" : "Pause";
                 const pauseClass = s.isPaused ? "btn-text resume" : "btn-text pause";
 
                 const pauseHtml = s.isInactive ? '' : `<button class="${pauseClass}" onclick="sendAction('toggle-inactive', '${s.id}')">${pauseTextStr}</button>`;
@@ -904,7 +1015,7 @@
                 const setStartClicked = (s.isInactive || s.isPaused) ? '' : `onclick="sendAction('set-rotation-start', '${s.id}')"`;
                 const startTitle = s.isRotationStart ? "1st Singer (Round Start Anchor)" : "Set as 1st Singer (Round Start)";
 
-                const deleteHtml = s.isInactive 
+                const deleteHtml = s.isInactive
                     ? `<button class="btn-text resume" title="Restore" onclick="sendAction('restore', '${s.id}')">↺ Restore</button>`
                     : `<button class="btn-circle red" title="Delete" onclick="sendAction('delete', '${s.id}')">🗑</button>`;
 
@@ -915,27 +1026,27 @@
                 }
 
                 const innerHTML = `
-                    <div class="singer-details">
-                        <div class="singer-info">
-                            <span class="singer-name" ${nameStyle}>${nameWithDuet}</span>
-                            ${detailsText}
-                            ${badges}
+                        <div class="singer-details">
+                            <div class="singer-info">
+                                <span class="singer-name" ${nameStyle}>${nameWithDuet}</span>
+                                ${detailsText}
+                                ${badges}
+                            </div>
+                            <div class="rounds-container">
+                                ${roundsHtml}
+                            </div>
+                            ${queuedSongsHtml}
                         </div>
-                        <div class="rounds-container">
-                            ${roundsHtml}
+                        <div class="actions-container">
+                            <button class="btn-circle red" title="${startTitle}" ${setStartClicked} ${setStyle}>🚩</button>
+                            <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
+                            <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
+                            <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
+                            <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>
+                            ${pauseHtml}
+                            ${deleteHtml}
                         </div>
-                        ${queuedSongsHtml}
-                    </div>
-                    <div class="actions-container">
-                        <button class="btn-circle red" title="${startTitle}" ${setStartClicked} ${setStyle}>🚩</button>
-                        <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
-                        <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
-                        <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
-                        <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>
-                        ${pauseHtml}
-                        ${deleteHtml}
-                    </div>
-                `;
+                    `;
 
                 if (!card) {
                     // Create new card
@@ -980,16 +1091,16 @@
                 if (r.songs && r.songs.length > 0) {
                     r.songs.forEach(s => {
                         songsHtml += `
-                            <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; padding-left: 6px;">
-                                • <strong>${escapeHtml(s.song)}</strong> - <em>${escapeHtml(s.artist || "Unknown Artist")}</em>
-                            </div>
-                        `;
+                                <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; padding-left: 6px;">
+                                    • <strong>${escapeHtml(s.song)}</strong> - <em>${escapeHtml(s.artist || "Unknown Artist")}</em>
+                                </div>
+                            `;
                     });
                 } else {
                     songsHtml = `
-                        <div class="request-song">${escapeHtml(r.song)}</div>
-                        <div class="request-artist">${escapeHtml(r.artist || "Unknown Artist")}</div>
-                    `;
+                            <div class="request-song">${escapeHtml(r.song)}</div>
+                            <div class="request-artist">${escapeHtml(r.artist || "Unknown Artist")}</div>
+                        `;
                 }
 
                 const isMusic = r.requestType === "Music";
@@ -1003,17 +1114,17 @@
                 }
 
                 html += `
-                    <div class="request-card">
-                        <div class="request-details">
-                            <div class="request-name">${reqNameDisplay}${badgeHtml}</div>
-                            ${songsHtml}
+                        <div class="request-card">
+                            <div class="request-details">
+                                <div class="request-name">${reqNameDisplay}${badgeHtml}</div>
+                                ${songsHtml}
+                            </div>
+                            <div class="request-actions">
+                                <button class="btn-outline" style="border-color: var(--green); color: var(--green);" onclick="sendRequestAction('accept', '${escapeJs(r.id)}')">✓ Accept</button>
+                                <button class="btn-outline" style="border-color: var(--red); color: var(--red);" onclick="sendRequestAction('decline', '${escapeJs(r.id)}')">✕ Decline</button>
+                            </div>
                         </div>
-                        <div class="request-actions">
-                            <button class="btn-outline" style="border-color: var(--green); color: var(--green);" onclick="sendRequestAction('accept', '${escapeJs(r.id)}')">✓ Accept</button>
-                            <button class="btn-outline" style="border-color: var(--red); color: var(--red);" onclick="sendRequestAction('decline', '${escapeJs(r.id)}')">✕ Decline</button>
-                        </div>
-                    </div>
-                `;
+                    `;
             });
 
             listDiv.innerHTML = html;
@@ -1109,7 +1220,7 @@
             return text
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
+                .replace( />/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }

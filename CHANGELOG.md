@@ -1,5 +1,5 @@
-<!-- Edited on Aug 21, 2026 @ 09:03:00 -> Added release notes for KSRotation.Maui responsive vertical/horizontal layout -->
-Last Edit: Aug 21, 2026 - KSRotation.Maui Responsive Vertical/Horizontal Layout and Global TextBox Select-All On Focus
+<!-- Edited on Aug 21, 2026 @ 12:12:00 -> Update CHANGELOG with Android deployment stability and MAUI layout dispatch safeguarding -->
+Last Edit: Aug 21, 2026 - KSRotation.Maui Responsive Layouts, Android Stability & Global TextBox Select-All On Focus
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -7,6 +7,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.21.1] - 2026-08-21
 
 ### Fixed & Enhanced
+- **Android Deployment & Layout Dispatch Safeguarding (`KSRotation.Maui`)**:
+  - Configured `<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>` and `<AndroidEnableFastDeployment>false</AndroidEnableFastDeployment>` in `KSRotation.Maui.csproj` to eliminate Visual Studio Android launcher errors (`DotNetDebugLaunchProvider.LaunchApplicationAsync` / `AggregateException`), ensuring a 100% self-contained APK package.
+  - Added an `OperatingSystem.IsWindows()` guard to `Shared/WifiHelper.cs` to immediately bypass native `wlanapi.dll` P/Invoke and `netsh` process spawning on non-Windows platforms (Android).
+  - Wrapped dynamic orientation changes in `Dispatcher.Dispatch(...)` and switched to atomic `ColumnDefinitionCollection` and `RowDefinitionCollection` assignments in `MainPage.xaml.cs`, eliminating re-entrant layout passes during orientation switching.
 - **Responsive Vertical & Horizontal Orientation Layouts in `KSRotation.Maui`**:
   - Implemented dynamic orientation handling in `MainPage.xaml` and `MainPage.xaml.cs` via `OnSizeAllocated` detection.
   - In **Vertical Mode (Portrait)**: The Active Rotation Queue spans the top across full width, and the Patron Request Portal (QR Code card) and Incoming Requests list reflow side-by-side across the bottom (220px height), maximizing vertical screen real estate for rotation management.
