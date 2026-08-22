@@ -2071,16 +2071,59 @@
                                     <!-- Live Question Controls -->
                                     <TextBlock Text="LIVE QUESTION CONTROLS" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,6" />
 
+                                    <!-- Question Navigation Row -->
+                                    <Grid Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Content="⏮ Prev" Command="{Binding PreviousTriviaQuestionCommand}" Style="{StaticResource StandardGameButton}" Height="30" Margin="0,0,4,0" ToolTip="Go back to previous question" />
+                                        <ComboBox Grid.Column="1" ItemsSource="{Binding TriviaAvailableQuestionNumbers}" SelectedItem="{Binding TriviaCurrentQuestionNumber}" Width="60" Height="30" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ToolTip="Jump directly to question #" />
+                                        <Button Grid.Column="2" Content="Next ⏭" Command="{Binding NextTriviaQuestionCommand}" Style="{StaticResource StandardGameButton}" Height="30" Margin="4,0,0,0" ToolTip="Advance to next question" />
+                                    </Grid>
+
+                                    <!-- Timer Quick-Adjust Row -->
+                                    <TextBlock Text="⏱ Timer Bump &amp; Pacing:" FontSize="10" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,3" />
+                                    <Grid Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Content="-5s" Command="{Binding AddTriviaTimerSecondsCommand}" CommandParameter="-5" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Margin="0,0,2,0" ToolTip="Subtract 5 seconds from question countdown" />
+                                        <Button Grid.Column="1" Content="+5s" Command="{Binding AddTriviaTimerSecondsCommand}" CommandParameter="5" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Margin="2,0,2,0" ToolTip="Add 5 seconds to question countdown" />
+                                        <Button Grid.Column="2" Content="+10s" Command="{Binding AddTriviaTimerSecondsCommand}" CommandParameter="10" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Margin="2,0,2,0" ToolTip="Add 10 seconds to question countdown" />
+                                        <Button Grid.Column="3" Content="🔄" Command="{Binding ResetTriviaTimerCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="28" Margin="2,0,0,0" ToolTip="Reset question countdown to full time" />
+                                    </Grid>
+
+                                    <Button Content="▶ Start Question &amp; Timer" Command="{Binding StartTriviaQuestionCommand}"
+                                            Style="{StaticResource StandardGameButton}"
+                                            Background="#3B82F6" Foreground="White"  Margin="0,0,0,6"
+                                            ToolTip="Start/restart the countdown for the current question (with Auto-Run off, questions open in reading/standby mode until you press this)" />
+
                                     <Button Content="{Binding TriviaPauseButtonText}" Command="{Binding ToggleTriviaPauseCommand}"
                                             Style="{StaticResource StandardGameButton}"
                                             Background="#F59E0B" Foreground="White"  Margin="0,0,0,6" />
+
+                                    <Grid Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Content="✂ Fade Option" Command="{Binding EliminateNextTriviaWrongCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="30" Margin="0,0,3,0" ToolTip="Manually eliminate/fade one wrong option" />
+                                        <Button Grid.Column="1" Content="⚡ Instant Reveal" Command="{Binding InstantRevealTriviaCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Height="30" Margin="3,0,0,0" ToolTip="Immediately reveal the correct answer" />
+                                    </Grid>
 
                                     <Button Content="🔓 Lock &amp; Reveal Answer" Command="{Binding LockAndRevealTriviaCommand}"
                                             Style="{StaticResource StandardGameButton}"
                                             Background="#8B5CF6" Foreground="White"  Margin="0,0,0,6" />
 
-                                    <Button Content="⏭ Next Question" Command="{Binding NextTriviaQuestionCommand}"
-                                            Style="{StaticResource StandardGameButton}" Height="32" Margin="0,0,0,6" />
+                                    <Button Content="❌ Void Question (No Penalty)" Command="{Binding VoidCurrentTriviaQuestionCommand}"
+                                            Style="{StaticResource StandardGameButton}"
+                                            Background="#DC2626" Foreground="White"  Margin="0,0,0,6"
+                                            ToolTip="Cancel question without penalizing players and advance" />
 
                                     <Button Content="🔄 Reset Game Session" Command="{Binding ResetTriviaCommand}"
                                             Style="{StaticResource StandardGameButton}" Height="30" Margin="0,0,0,12" />

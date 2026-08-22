@@ -54,6 +54,42 @@ namespace KSRotation.ViewModels
         public partial string TriviaActiveRoundTitle { get; set; } = "Round 1";
 
         [ObservableProperty]
+        public partial int TriviaCurrentQuestionNumber { get; set; } = 1;
+
+        partial void OnTriviaCurrentQuestionNumberChanged(int value)
+        {
+            // Guard against reacting to programmatic resets (e.g. pack-selection preview) - only
+            // a live/in-progress session should have question-jump navigation applied to it.
+            if (_triviaEngine?.CurrentSession?.CurrentRound != null &&
+                _triviaEngine.State != TriviaGameState.Lobby &&
+                _triviaEngine.State != TriviaGameState.GameComplete)
+            {
+                int targetIdx = value - 1;
+                if (targetIdx >= 0 && targetIdx < _triviaEngine.CurrentSession.CurrentRound.Questions.Count)
+                {
+                    if (_triviaEngine.CurrentSession.CurrentQuestionIndex != targetIdx)
+                    {
+                        _triviaEngine.GoToQuestion(targetIdx, startTimerImmediately: TriviaAutoAdvance);
+                    }
+                }
+            }
+        }
+
+        [ObservableProperty]
+        public partial int TriviaTotalQuestionsInRound { get; set; } = 1;
+
+        public ObservableCollection<int> TriviaAvailableQuestionNumbers { get; } = [];
+
+        private void UpdateTriviaAvailableQuestionNumbers(int count)
+        {
+            TriviaAvailableQuestionNumbers.Clear();
+            for (int i = 1; i <= count; i++)
+            {
+                TriviaAvailableQuestionNumbers.Add(i);
+            }
+        }
+
+        [ObservableProperty]
         public partial string TriviaCurrentQuestionPrompt { get; set; } = "No question active. Load a pack and click 'Start Game'.";
 
         [ObservableProperty]
@@ -426,6 +462,7 @@ namespace KSRotation.ViewModels
                     TriviaCorrectAnswerIndex = -1;
                     TriviaTotalSeconds = _triviaEngine.TotalCountdownSeconds;
                     TriviaRemainingSeconds = TriviaTotalSeconds;
+                    TriviaCurrentQuestionNumber = _triviaEngine.CurrentSession.CurrentQuestionIndex + 1;
                     TriviaAnswerDistribution.Clear();
                 });
             };
@@ -750,7 +787,12 @@ namespace KSRotation.ViewModels
 
                 _triviaEngine.StartGame(rounds, rounds[0].Title);
                 TriviaActiveRoundTitle = rounds[0].Title;
-                _triviaEngine.StartCurrentQuestion();
+                TriviaTotalQuestionsInRound = rounds[0].Questions.Count;
+                UpdateTriviaAvailableQuestionNumbers(TriviaTotalQuestionsInRound);
+                TriviaCurrentQuestionNumber = 1;
+
+                // Start 1st question (immediate timer if Auto-Run, or reading/standby state if manual)
+                _triviaEngine.PrepareCurrentQuestion(startTimerImmediately: TriviaAutoAdvance);
 
                 OpenTriviaDisplay();
             }
@@ -976,9 +1018,70 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
+        public void StartTriviaQuestion()
+        {
+            _triviaEngine?.StartCurrentQuestion();
+        }
+
+        [RelayCommand]
+        public void PreviousTriviaQuestion()
+        {
+            if (_triviaEngine == null) return;
+            bool hasPrev = _triviaEngine.PreviousQuestion(startTimerImmediately: TriviaAutoAdvance);
+            if (hasPrev && _triviaEngine.CurrentSession.CurrentQuestion != null)
+            {
+                TriviaCurrentQuestionNumber = _triviaEngine.CurrentSession.CurrentQuestionIndex + 1;
+            }
+        }
+
+        [RelayCommand]
         public void NextTriviaQuestion()
         {
-            _triviaEngine?.AdvanceToNextQuestion();
+            if (_triviaEngine == null) return;
+            bool hasNext = _triviaEngine.AdvanceToNextQuestion(startTimerImmediately: TriviaAutoAdvance);
+            if (hasNext && _triviaEngine.CurrentSession.CurrentQuestion != null)
+            {
+                TriviaCurrentQuestionNumber = _triviaEngine.CurrentSession.CurrentQuestionIndex + 1;
+            }
+        }
+
+        [RelayCommand]
+        public void AddTriviaTimerSeconds(object? parameter)
+        {
+            int seconds = 5;
+            if (parameter is int i) seconds = i;
+            else if (parameter is string s && int.TryParse(s, out int parsed)) seconds = parsed;
+
+            _triviaEngine?.AdjustRemainingSeconds(seconds);
+        }
+
+        [RelayCommand]
+        public void ResetTriviaTimer()
+        {
+            _triviaEngine?.ResetQuestionTimer();
+        }
+
+        [RelayCommand]
+        public void EliminateNextTriviaWrong()
+        {
+            _triviaEngine?.EliminateNextWrongAnswer();
+        }
+
+        [RelayCommand]
+        public void InstantRevealTrivia()
+        {
+            _triviaEngine?.InstantRevealAnswer();
+        }
+
+        [RelayCommand]
+        public void VoidCurrentTriviaQuestion()
+        {
+            if (_triviaEngine == null) return;
+            _triviaEngine.VoidCurrentQuestion();
+            if (_triviaEngine.CurrentSession.CurrentQuestion != null)
+            {
+                TriviaCurrentQuestionNumber = _triviaEngine.CurrentSession.CurrentQuestionIndex + 1;
+            }
         }
 
         [RelayCommand]
@@ -995,6 +1098,8 @@ namespace KSRotation.ViewModels
             TriviaCurrentQuestionPrompt = "Game reset. Click 'Start Game' to begin.";
             TriviaOptionA = TriviaOptionB = TriviaOptionC = TriviaOptionD = "";
             TriviaCorrectAnswerIndex = -1;
+            TriviaCurrentQuestionNumber = 1;
+            TriviaAvailableQuestionNumbers.Clear();
             TriviaAnswerDistribution.Clear();
         }
 
