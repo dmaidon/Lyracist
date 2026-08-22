@@ -1,12 +1,49 @@
-<!-- Edited on Aug 21, 2026 @ 12:34:00 -> Update CHANGELOG with Remote DJ app checkmark ordering and popup modal changes -->
-Last Edit: Aug 21, 2026 - Remote DJ Web Board Checkmark First & Add Performer Popup Modal, MAUI Responsive Layouts & Android Stability
+<!-- Edited on Aug 21, 2026 @ 18:30:00 -> Update CHANGELOG with kiosk security review fixes (JS injection, validation, duplicate file, dead code) -->
+Last Edit: Aug 21, 2026 - Tablet Kiosk Security & Cleanup Fixes: JS Injection, Field Validation, Deduplicated kiosk.html, Dead Code Removal
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [26.8.21.1] - 2026-08-21
+## [26.8.21.2] - 2026-08-21
 
-### Fixed & Enhanced
+### Added & Enhanced
+- **Cross-App Landscape Tablet Kiosk Request Station (`/kiosk`, `kiosk.html`)**:
+  - Implemented a dedicated split-screen landscape web portal designed specifically for venue tablets mounted as public singer kiosks across **all three applications** (`KSRotation`, `KSRotation.Maui`, and `Lyracist`).
+  - **Attractor / Welcome Screen & Idle Return**:
+    - Added an illuminated, full-screen Welcome & Attractor overlay (`#kiosk-welcome-screen`) when the kiosk is idle.
+    - **Hero & Call to Action**: Displays a pulsing glowing microphone icon, brand title, and an animated breathing call-to-action button: `✨ TOUCH SCREEN TO JOIN THE ROTATION ✨`.
+    - **4-Step User Instructions**: Features glassmorphic visual cards explaining the entire flow in 4 clear steps:
+      1. *Enter Your Name* (or tap your name in the live queue).
+      2. *Search Songs* (online catalog search or manual entry).
+      3. *Pitch Key Adjust* (vocal key adjustment from -2 to +2).
+      4. *Take the Stage* (submit and watch stage screens).
+    - **Live Stage Snapshot Bar**: Displays real-time live performance stats (🎤 *Now Singing*, ⏳ *Up Next*, and 👥 *Active/Total Queue count*) right on the welcome screen.
+    - **Touch Anywhere to Begin**: Touching or tapping anywhere on the screen seamlessly transitions to the request station and focuses the name field.
+    - **Automatic Idle Return**: After 45 seconds of inactivity or after request submission countdown, automatically clears the form and smoothly returns to the Welcome Screen.
+    - **Manual "Welcome" Header Button**: Allows KJ or users to immediately return to the attractor screen at any time.
+  - **PWA Standalone & Fullscreen Mode**: Added PWA meta tags (`apple-mobile-web-app-capable`, `mobile-web-app-capable`, `theme-color`) and an interactive `⛶ Fullscreen` toggle button in the header bar for full screen browser presentation on iOS/iPadOS and Android tablets without browser address bars.
+  - **Left Pane (Request Station - 62% width)**:
+    - Performer Name & optional Duet Partner input fields with auto-suggest and tap-to-select support.
+    - Request Type toggle (Karaoke Sing vs. Background Music Track Play).
+    - Online song catalog search via Apple iTunes Search API with debounced instant results and offline fallback.
+    - Manual song & artist inputs with Key / Pitch adjustment pill selector ($-2, -1, \text{Standard } 0, +1, +2$).
+    - Touch-optimized gradient **Submit Song Request** button.
+    - **Post-Submission Celebration & Auto-Reset**: 5-second countdown modal (`🎉 Request Received!`) that automatically clears the form for the next singer, or allows instant reset with the "Ready for Next Singer Now" button.
+    - **45-Second Inactivity Watchdog**: Automatically resets abandoned or half-filled forms after 45 seconds of touchscreen/keyboard idle time.
+  - **Right Pane (Live Rotation & Queue - 38% width)**:
+    - Real-time live rotation polling every 3 seconds with dual server fallback (`/api/rotation` and `/api/queue`).
+    - **Spotlight Cards**: High-visibility cards at the top for **🎤 Now Singing** (with illuminated gold styling) and **⏳ Up Next** (illuminated cyan styling).
+    - **Interactive Tap-to-Select**: Tapping any performer row on the right automatically populates that singer's name on the left request form, eliminating duplicate names and spelling errors.
+    - **Round Start & Status Badges**: Displays the `🚩 1st` round start anchor badge, `Singing`, `Up Next`, `Music`, and `Paused` status tags.
+    - **"Your Spot" Queue Preview**: Highlights an interactive slot at the bottom showing prospective singers their exact entry position (e.g., `✨ ➕ New signups enter here at Spot #X in rotation`) before submitting.
+- **KSRotation.Maui Kiosk & 3-Way QR Overlay Integration**:
+  - Embedded `kiosk.html` resource into `KSRotation.Maui.csproj` and linked to `PatronRequestServer`.
+  - Added 3-way mode switcher tabs (`📱 Patron`, `📟 Kiosk`, `🎧 DJ`) in `ConnectQrOverlay` in `MainPage.xaml` / `MainPage.xaml.cs`.
+- **Lyracist Kiosk Server & UI Integration**:
+  - Embedded `kiosk.html` in `TabletClient/kiosk.html` with `/kiosk`, `/kiosk.html`, `/api/rotation`, and `/api/request` routing in `TabletLyricsServer.cs`.
+  - Added `KioskUrl`, `KioskQrCodeImage`, and `OpenKioskQrWindowCommand` to `KaraokeViewModel.cs` and `SettingsViewModel.Network.cs`.
+  - Created `KioskQrCodePopoutWindow.xaml` with large QR code, URL copy, and kiosk tips.
+  - Added Kiosk QR buttons to `KaraokePage.xaml` and `SettingsPage.xaml`.
 - **Remote DJ Web Board Checkmark Action & Add Performer Modal Dialog (`dj.html`)**:
   - Reordered performer card action buttons so the finished song checkmark (`✓`) is positioned as the very first button in the actions bar, matching the ergonomics of desktop and MAUI consoles.
   - Converted the static inline "Add Performer to Rotation" card into a dedicated action button and top rotation toolbar shortcut that opens a popup modal overlay dialog (`#add-performer-modal`).
@@ -47,6 +84,12 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Game Complete & Intermission Screen Responsive Layout**:
   - Redesigned the Game Complete view in `Lyracist.Trivia` and `Lyracist` (`TriviaDisplayWindow.xaml`) to use a side-by-side 2-column layout (Leaderboard in Column 0, Intermission Sign-Up QR card in Column 1).
   - Both Wi-Fi and join QR codes are sized cleanly at 120x120px, preventing any vertical overflow or overlap with the bottom connection and copyright footer.
+
+### Fixed
+- **Kiosk Rotation List JS Injection (`kiosk.html`)**: The rotation list rendered each singer's name into an inline `onclick="selectSingerFromRotation('...')"` attribute using HTML-escaping only; since the browser decodes HTML entities back to literal characters before parsing the attribute as JS, a crafted singer name (typed on the kiosk itself) could break out of the string literal and execute arbitrary script on any device rendering the list, including the venue's stage displays. Replaced the inline handler with a `data-singer-name` attribute read by a single delegated click listener, so the name is never re-parsed as code. Fixed identically in `KSRotation/Resources/kiosk.html` and `Lyracist/TabletClient/kiosk.html` (now the same file, see below).
+- **Missing Field Length Validation (`TabletLyricsServer.cs`)**: The new `POST /api/request` kiosk endpoint skipped the `ExceedsLength` checks its sibling `POST /api/requests` endpoint enforces, allowing unbounded name/song/artist/notes submissions straight into the database and live rotation. Added the same length caps used elsewhere in the file.
+- **Duplicate `kiosk.html` (Lyracist)**: `Lyracist/TabletClient/kiosk.html` was a second, independent 1741-line copy of `KSRotation/Resources/kiosk.html` that could silently drift out of sync. Removed the duplicate and linked `Lyracist.csproj` to the single canonical copy, matching the link pattern `KSRotation.Maui.csproj` already used.
+- **Dead Code (`KSRotation.Maui/MainPage.xaml.cs`)**: Removed the orphaned `OnPortalTitleTapped` handler, left behind after the QR mode switcher was replaced by dedicated Patron/Kiosk/DJ buttons.
 
 ## [26.8.20.1] - 2026-08-20
 

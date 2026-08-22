@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 09:57:30 -> Add AutoAdvanceManager integration and StartSongNow/SkipSinger commands
+// Edited on Aug 21, 2026 @ 17:53:00 -> Add KioskUrl, KioskQrCodeImage and OpenKioskQrWindow command
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -305,18 +305,39 @@ public partial class KaraokeViewModel : BaseViewModel
     [ObservableProperty]
     private string _joinUrl = string.Empty;
 
+    [ObservableProperty]
+    private System.Windows.Media.Imaging.BitmapImage? _kioskQrCodeImage;
+
+    [ObservableProperty]
+    private string _kioskUrl = string.Empty;
+
+    [RelayCommand]
+    private void OpenKioskQrWindow()
+    {
+        var window = new Lyracist.Windows.KioskQrCodePopoutWindow();
+        window.Owner = System.Windows.Application.Current.MainWindow;
+        window.ShowDialog();
+    }
+
     public void RefreshQrCode()
     {
         try
         {
             string ip = AppSettings.GetActiveIPAddress();
             JoinUrl = $"http://{ip}:{AppSettings.TabletPort}";
+            KioskUrl = $"http://{ip}:{AppSettings.TabletPort}/kiosk.html";
 
             using var qrGenerator = new QRCoder.QRCodeGenerator();
+            
             using var qrCodeData = qrGenerator.CreateQrCode(JoinUrl, QRCoder.QRCodeGenerator.ECCLevel.Q);
             using var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
             byte[] qrCodeAsPngByteArr = qrCode.GetGraphic(20);
             QrCodeImage = LoadImage(qrCodeAsPngByteArr);
+
+            using var kioskQrCodeData = qrGenerator.CreateQrCode(KioskUrl, QRCoder.QRCodeGenerator.ECCLevel.Q);
+            using var kioskQrCode = new QRCoder.PngByteQRCode(kioskQrCodeData);
+            byte[] kioskQrCodeAsPngByteArr = kioskQrCode.GetGraphic(20);
+            KioskQrCodeImage = LoadImage(kioskQrCodeAsPngByteArr);
         }
         catch (System.Exception ex)
         {

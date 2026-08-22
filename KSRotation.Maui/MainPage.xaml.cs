@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 09:02:00 -> Add responsive portrait/vertical layout with rotation at top and QR code + requests at bottom
+// Edited on Aug 21, 2026 @ 17:50:00 -> Add OnSelectPatronQrClicked, OnSelectKioskQrClicked, and OnSelectDjQrClicked handlers
 using System;
 using System.Linq;
 using Microsoft.Maui.Controls;
@@ -428,10 +428,25 @@ public partial class MainPage : ContentPage
         }
     }
 
-    private void OnPortalTitleTapped(object? sender, EventArgs e)
+    private void OnSelectPatronQrClicked(object? sender, EventArgs e)
     {
         var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
-        vm.IsDjQrVisible = !vm.IsDjQrVisible;
+        vm.IsDjQrVisible = false;
+        vm.IsKioskQrVisible = false;
+    }
+
+    private void OnSelectKioskQrClicked(object? sender, EventArgs e)
+    {
+        var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
+        vm.IsDjQrVisible = false;
+        vm.IsKioskQrVisible = true;
+    }
+
+    private void OnSelectDjQrClicked(object? sender, EventArgs e)
+    {
+        var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
+        vm.IsDjQrVisible = true;
+        vm.IsKioskQrVisible = false;
     }
 
     private void OnShowConnectQrClicked(object? sender, EventArgs e)

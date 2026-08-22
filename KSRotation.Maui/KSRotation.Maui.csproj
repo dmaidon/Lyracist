@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 10:22:00 -> Set EmbedAssembliesIntoApk and disable FastDeployment for Android stability -->
+<!-- Edited on Aug 21, 2026 @ 17:48:00 -> Embed kiosk.html resource for Tablet Kiosk server support -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -43,9 +43,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.8.21.225</AssemblyVersion>
+		<AssemblyVersion>26.8.21.227</AssemblyVersion>
 
-		<FileVersion>26.8.21.225</FileVersion>
+		<FileVersion>26.8.21.227</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 
@@ -107,6 +107,7 @@
 	<ItemGroup>
 		<EmbeddedResource Include="..\KSRotation\Resources\PatronPortal.html" Link="Resources\PatronPortal.html" />
 		<EmbeddedResource Include="..\KSRotation\Resources\dj.html" Link="Resources\dj.html" />
+		<EmbeddedResource Include="..\KSRotation\Resources\kiosk.html" Link="Resources\kiosk.html" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="..\Lyracist\Assets\rotation_m.png" Link="rotation_m.png">

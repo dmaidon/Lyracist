@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 09:02:00 -> Add responsive portrait/vertical layout with rotation at top and QR code + requests at bottom -->
+<!-- Edited on Aug 21, 2026 @ 17:50:00 -> Add 3-way portal mode switcher for Patron, Kiosk, and DJ QR in ConnectQrOverlay -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -419,17 +419,27 @@
             </Border>
         </Grid>
 
-        <!-- Connect QR overlay: replaces the always-on QR card (which scrunched down to an
-             unreadable size on narrow/portrait tablets) with a single button + popup. -->
+        <!-- Connect QR overlay: replaces the always-on QR card with a popup and 3-way mode switcher. -->
         <Grid x:Name="ConnectQrOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False">
-            <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="280" HorizontalOptions="Center" VerticalOptions="Center">
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="300" HorizontalOptions="Center" VerticalOptions="Center">
                 <VerticalStackLayout Spacing="6">
-                    <!-- Tapping this title toggles DJ mode -->
-                    <Label Text="PATRON REQUEST PORTAL" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" HorizontalOptions="Center">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnPortalTitleTapped" />
-                        </Label.GestureRecognizers>
+                    <!-- Mode Switcher Tabs (Patron / Kiosk / DJ) -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4" Margin="0,0,0,6">
+                        <Button Text="📱 Patron" Clicked="OnSelectPatronQrClicked" FontSize="11" HeightRequest="30" Padding="0" CornerRadius="6"
+                                BackgroundColor="{AppThemeBinding Light=#EDE9FE, Dark=#312E81}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontAttributes="Bold" />
+                        <Button Text="📟 Kiosk" Clicked="OnSelectKioskQrClicked" FontSize="11" HeightRequest="30" Padding="0" CornerRadius="6"
+                                BackgroundColor="{AppThemeBinding Light=#EDE9FE, Dark=#312E81}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontAttributes="Bold" />
+                        <Button Text="🎧 DJ" Clicked="OnSelectDjQrClicked" FontSize="11" HeightRequest="30" Padding="0" CornerRadius="6"
+                                BackgroundColor="{AppThemeBinding Light=#FEE2E2, Dark=#7F1D1D}" TextColor="{AppThemeBinding Light=#DC2626, Dark=#FCA5A5}" FontAttributes="Bold" />
+                    </Grid>
+
+                    <!-- Title Header -->
+                    <Label Text="PATRON REQUEST PORTAL" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.2" HorizontalOptions="Center">
                         <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsKioskQrVisible}" Value="True">
+                                <Setter Property="Text" Value="📟 TABLET KIOSK STATION" />
+                                <Setter Property="TextColor" Value="#8B5CF6" />
+                            </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
                                 <Setter Property="Text" Value="⚠️ DJ CONTROL PORTAL" />
                                 <Setter Property="TextColor" Value="#EF4444" />
@@ -440,6 +450,9 @@
                     <Border StrokeShape="RoundRectangle 8" BackgroundColor="White" Padding="8" WidthRequest="180" HeightRequest="180" HorizontalOptions="Center" Margin="0,8">
                         <Image Source="{Binding QrCodeImage}" Aspect="AspectFit">
                             <Image.Triggers>
+                                <DataTrigger TargetType="Image" Binding="{Binding IsKioskQrVisible}" Value="True">
+                                    <Setter Property="Source" Value="{Binding KioskQrCodeImage}" />
+                                </DataTrigger>
                                 <DataTrigger TargetType="Image" Binding="{Binding IsDjQrVisible}" Value="True">
                                     <Setter Property="Source" Value="{Binding DjQrCodeImage}" />
                                 </DataTrigger>
@@ -449,6 +462,10 @@
 
                     <Label Text="{Binding ConnectionUrl}" TextColor="#10B981" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center">
                         <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsKioskQrVisible}" Value="True">
+                                <Setter Property="Text" Value="{Binding KioskConnectionUrl}" />
+                                <Setter Property="TextColor" Value="#8B5CF6" />
+                            </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
                                 <Setter Property="Text" Value="{Binding DjConnectionUrl}" />
                                 <Setter Property="TextColor" Value="#EF4444" />
@@ -458,6 +475,10 @@
 
                     <Label Text="Singers scan to connect &amp; request songs" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" HorizontalOptions="Center">
                         <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsKioskQrVisible}" Value="True">
+                                <Setter Property="Text" Value="Place tablet in landscape for self-service song requests" />
+                                <Setter Property="TextColor" Value="#8B5CF6" />
+                            </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
                                 <Setter Property="Text" Value="DJ ONLY: Remote dashboard login URL" />
                                 <Setter Property="TextColor" Value="#EF4444" />
@@ -467,7 +488,7 @@
 
                     <Label Text="{Binding DjPin, StringFormat='PIN: {0}'}" TextColor="#EF4444" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center" IsVisible="{Binding IsDjQrVisible}" />
 
-                    <Button Text="Close" Clicked="OnCloseConnectQrClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" HeightRequest="36" Margin="0,14,0,0" />
+                    <Button Text="Close" Clicked="OnCloseConnectQrClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" HeightRequest="36" Margin="0,12,0,0" />
                 </VerticalStackLayout>
             </Border>
         </Grid>

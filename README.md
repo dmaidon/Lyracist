@@ -1,12 +1,28 @@
-<!-- Edited on Aug 21, 2026 @ 12:34:00 -> Update README with Remote DJ Board checkmark first action and popup modal dialog -->
-Last Edit: Aug 21, 2026 - Remote DJ Web Board Checkmark First & Add Performer Modal Dialog, MAUI Responsive Layouts & Android Stability
+<!-- Edited on Aug 21, 2026 @ 18:00:00 -> Update README with Tablet Kiosk Attractor & Welcome Screen, Instructions, and Idle Auto-Return -->
+Last Edit: Aug 21, 2026 - Tablet Kiosk Attractor & Welcome Screen, Step-by-Step Instructions & Live Queue Snapshot
 # Lyracist Pro
 
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings and live synchronization, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings and live synchronization, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
 
 ---
 
 ## Key Features
+
+### 📟 Cross-App Landscape Tablet Kiosk Request Station (`/kiosk`, `kiosk.html`)
+- **Split-Screen Venue Kiosk UI Across All Apps (`KSRotation`, `KSRotation.Maui`, `Lyracist`)**:
+  - Designed specifically for venue-mounted landscape tablets, giving patrons a self-service kiosk to search songs and join rotation without disturbing the DJ.
+  - **Attractor / Welcome Screen**: Fullscreen ambient welcome screen when idle with glowing microphone hero, animated pulsing *"TOUCH SCREEN TO JOIN THE ROTATION"* call-to-action, live stage snapshot (*Now Singing*, *Up Next*, *Queue Count*), and 4 visual step-by-step instructions.
+  - **Touch-to-Start & Auto-Return**: Touching anywhere on the screen immediately enters the request station. The station automatically returns to the Attractor screen after 45s of inactivity or upon completing a request submission.
+  - **PWA Standalone & Fullscreen Mode**: Includes web app manifest meta tags and an interactive `⛶ Fullscreen` toggle button in the header bar for full screen presentation without browser address bars on iOS/iPadOS and Android tablets.
+  - **Left Side (62% width)**: Performer details with auto-fill, request type toggle (Karaoke vs Background Track), instant Apple iTunes catalog search with debounced dropdown, manual song & artist entry, and pitch key adjustment selector ($-2, -1, 0, +1, +2$).
+  - **Right Side (38% width)**: Real-time rotation queue with high-visibility **🎤 NOW SINGING** and **⏳ UP NEXT** spotlight cards at the top.
+  - **Tap-to-Select Performer Name**: Tapping any singer row on the right automatically populates that name into the request form on the left, preventing spelling variations across rounds.
+  - **Queue Slot Prediction**: Shows prospective singers where they will enter in the rotation (e.g. `➕ Spot #6 in rotation`) before submitting.
+  - **Auto-Reset & Inactivity Protection**: 5-second post-submission confirmation countdown modal and a 45-second inactivity watchdog that clears abandoned forms.
+- **Kiosk Setup & QR Popout in `KSRotation` & `Lyracist`**:
+  - One-click `[ Kiosk ]` button on the desktop Patron Portal panel and Settings pages opens `KioskQrCodePopoutWindow.xaml` with high-contrast QR code, direct URL, and clipboard copy.
+- **3-Way QR Portal Selector in `KSRotation.Maui`**:
+  - `ConnectQrOverlay` provides quick one-tap switching between `📱 Patron`, `📟 Kiosk`, and `🎧 DJ` QR codes and URLs.
 
 ### ⚡ Safe, DJ-Friendly Auto-Advance System
 - **Grace Period Timer & Fill-In Music**:

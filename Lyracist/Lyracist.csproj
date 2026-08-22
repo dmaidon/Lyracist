@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.8.20.442</AssemblyVersion>
-    <FileVersion>26.8.20.442</FileVersion>
+    <AssemblyVersion>26.8.21.443</AssemblyVersion>
+    <FileVersion>26.8.21.443</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -123,6 +123,11 @@
 
   <ItemGroup>
     <None Update="TabletClient\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- kiosk.html has one canonical copy (KSRotation/Resources/kiosk.html); link it in
+         here instead of maintaining a second physical copy that can drift out of sync. -->
+    <None Include="..\KSRotation\Resources\kiosk.html" Link="TabletClient\kiosk.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

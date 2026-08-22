@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 12:09:00 -> Add duet partner parsing and forwarding to PatronRequestServer
+// Edited on Aug 21, 2026 @ 17:18:00 -> Add /kiosk endpoint and kiosk.html embedded resource support
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -181,6 +181,10 @@ namespace KSRotation.Services
                         if (path == "/" || path == "/index.html")
                         {
                             await SendHtmlResponseAsync(stream, GetHtmlContent());
+                        }
+                        else if (path == "/kiosk" || path == "/kiosk.html")
+                        {
+                            await SendHtmlResponseAsync(stream, GetKioskHtmlContent());
                         }
                         else if (path == "/dj" || path == "/dj.html")
                         {
@@ -841,12 +845,14 @@ namespace KSRotation.Services
             return buffer;
         }
 
-        // The portal markup lives in Resources/PatronPortal.html and Resources/dj.html (embedded resources); loaded once on first request.
+        // The portal markup lives in Resources/PatronPortal.html, Resources/kiosk.html, and Resources/dj.html (embedded resources); loaded once on first request.
         private static readonly Lazy<string> CachedHtml = new(LoadHtmlContent);
         private static readonly Lazy<string> CachedDjHtml = new(LoadDjHtmlContent);
- 
+        private static readonly Lazy<string> CachedKioskHtml = new(LoadKioskHtmlContent);
+
         private static string GetHtmlContent() => CachedHtml.Value;
         private static string GetDjHtmlContent() => CachedDjHtml.Value;
+        private static string GetKioskHtmlContent() => CachedKioskHtml.Value;
  
         private static string LoadHtmlContent()
         {
@@ -892,6 +898,29 @@ namespace KSRotation.Services
                 "PatronRequestServer.LoadDjHtmlContent",
                 new InvalidOperationException("Embedded resource 'dj.html' was not found."));
             return "<!DOCTYPE html><html><body><h1>KSRotation</h1><p>DJ portal resource missing.</p></body></html>";
+        }
+
+        private static string LoadKioskHtmlContent()
+        {
+            Assembly assembly = typeof(PatronRequestServer).Assembly;
+            string? resourceName = Array.Find(
+                assembly.GetManifestResourceNames(),
+                n => n.EndsWith("kiosk.html", StringComparison.OrdinalIgnoreCase));
+
+            if (resourceName != null)
+            {
+                using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+                if (stream != null)
+                {
+                    using StreamReader reader = new(stream, Encoding.UTF8);
+                    return reader.ReadToEnd();
+                }
+            }
+
+            LoggerService.LogError(
+                "PatronRequestServer.LoadKioskHtmlContent",
+                new InvalidOperationException("Embedded resource 'kiosk.html' was not found."));
+            return "<!DOCTYPE html><html><body><h1>KSRotation</h1><p>Kiosk portal resource missing.</p></body></html>";
         }
     }
 }

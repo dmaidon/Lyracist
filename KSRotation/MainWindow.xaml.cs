@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:26:00 -> Focus and select-all on newly inserted singer row
+// Edited on Aug 21, 2026 @ 17:28:00 -> Add OnKioskQrCodeButtonClicked handler for kiosk QR popout
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -45,6 +45,19 @@ namespace KSRotation
             if (DataContext is ViewModels.MainViewModel vm && vm.IsDjQrVisible)
             {
                 var popout = new Windows.DjQrCodePopoutWindow
+                {
+                    Owner = this,
+                    DataContext = vm
+                };
+                popout.ShowDialog();
+            }
+        }
+
+        private void OnKioskQrCodeButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.MainViewModel vm)
+            {
+                var popout = new Windows.KioskQrCodePopoutWindow
                 {
                     Owner = this,
                     DataContext = vm

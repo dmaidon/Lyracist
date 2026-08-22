@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:06:00 -> Add set-rotation-start action to DJ remote handler
+// Edited on Aug 21, 2026 @ 17:49:00 -> Add IsKioskQrVisible property for tablet kiosk portal selection
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -39,7 +39,16 @@ namespace KSRotation.ViewModels
         public partial ImageSource? DjQrCodeImage { get; set; }
 
         [ObservableProperty]
+        public partial string KioskConnectionUrl { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial ImageSource? KioskQrCodeImage { get; set; }
+
+        [ObservableProperty]
         public partial bool IsDjQrVisible { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsKioskQrVisible { get; set; }
 
         [ObservableProperty]
         public partial string DjPin { get; set; } = string.Empty;
@@ -212,11 +221,16 @@ namespace KSRotation.ViewModels
             DjConnectionUrl = started
                 ? $"http://{host}:{activePort}/dj.html"
                 : "";
+
+            KioskConnectionUrl = started
+                ? $"http://{host}:{activePort}/kiosk.html"
+                : "";
  
             _activeServerPort = activePort;
  
             QrCodeImage = started ? GenerateQRCode(ConnectionUrl) : null;
             DjQrCodeImage = started ? GenerateQRCode(DjConnectionUrl) : null;
+            KioskQrCodeImage = started ? GenerateQRCode(KioskConnectionUrl) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             RefreshConnectInstructionsBanner();
         }
@@ -231,8 +245,10 @@ namespace KSRotation.ViewModels
             string host = ResolveConnectionHost();
             ConnectionUrl = $"http://{host}:{_activeServerPort}";
             DjConnectionUrl = $"http://{host}:{_activeServerPort}/dj.html";
+            KioskConnectionUrl = $"http://{host}:{_activeServerPort}/kiosk.html";
             QrCodeImage = GenerateQRCode(ConnectionUrl);
             DjQrCodeImage = GenerateQRCode(DjConnectionUrl);
+            KioskQrCodeImage = GenerateQRCode(KioskConnectionUrl);
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             // Debounced — this runs on every keystroke of PreferredHostIp (UpdateSourceTrigger=PropertyChanged),
             // and the banner regeneration underneath is a full QR render + PNG encode + disk write.

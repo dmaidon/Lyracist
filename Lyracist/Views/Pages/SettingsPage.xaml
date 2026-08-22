@@ -1,4 +1,4 @@
-<!-- Edited on Aug 18, 2026 @ 17:38:00 -> Remove Launch Trivia Night button from display settings connect instructions groupbox -->
+<!-- Edited on Aug 21, 2026 @ 17:54:00 -> Add Open Tablet Kiosk QR button under Tablet Server Settings -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -854,7 +854,7 @@
                                     <ui:TextBox Text="{Binding StaticIPAddress, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. 192.168.1.100" Margin="0,0,0,10" />
                                     <TextBlock Text="Server Status: " FontSize="12" FontWeight="SemiBold" Margin="0,0,0,2" />
                                     <TextBlock Text="{Binding TabletStatus}" FontSize="12" FontStyle="Italic" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,12" />
-                                    <Grid>
+                                    <Grid Margin="0,0,0,8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="8" />
@@ -863,6 +863,7 @@
                                         <ui:Button Grid.Column="0" Content="Start" Command="{Binding StartTabletServerCommand}" Appearance="Primary" HorizontalAlignment="Stretch" />
                                         <ui:Button Grid.Column="2" Content="Stop" Command="{Binding StopTabletServerCommand}" Appearance="Secondary" HorizontalAlignment="Stretch" />
                                     </Grid>
+                                    <ui:Button Content="Open Tablet Kiosk QR &amp; Link" Command="{Binding OpenKioskQrWindowCommand}" Icon="{ui:SymbolIcon Tablet24}" Appearance="Secondary" HorizontalAlignment="Stretch" ToolTip="Open enlarged QR code and link for tablet kiosk request station." />
                                 </StackPanel>
                             </GroupBox>
 

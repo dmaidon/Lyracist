@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 08:26:00 -> Include TextBoxSelectionHelper compile link -->
+<!-- Edited on Aug 21, 2026 @ 17:16:00 -> Include kiosk.html embedded resource for tablet kiosk mode -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.21.536</AssemblyVersion>
-    <FileVersion>26.8.21.536</FileVersion>
+    <AssemblyVersion>26.8.21.542</AssemblyVersion>
+    <FileVersion>26.8.21.542</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -77,6 +77,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\PatronPortal.html" />
     <EmbeddedResource Include="Resources\dj.html" />
+    <EmbeddedResource Include="Resources\kiosk.html" />
   </ItemGroup>
 
   <ItemGroup>

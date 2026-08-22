@@ -1,0 +1,150 @@
+<!-- Edited on Aug 21, 2026 @ 17:21:00 -> Fix PackIcon Kind to Tablet in KioskQrCodePopoutWindow -->
+<Window x:Class="KSRotation.Windows.KioskQrCodePopoutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:KSRotation.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="Tablet Kiosk Setup Portal"
+        Width="480"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource MaterialDesignPaper}"
+        Foreground="{DynamicResource MaterialDesignBody}"
+        Icon="/mic_64.png">
+
+    <Window.Resources>
+        <Style x:Key="PopoutCardBorder" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+            <Setter Property="BorderBrush" Value="#33CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="Auto" /> <!-- Large QR Container -->
+            <RowDefinition Height="Auto" /> <!-- URL and Copy -->
+            <RowDefinition Height="Auto" /> <!-- Tips Box -->
+            <RowDefinition Height="Auto" /> <!-- Action Button -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <materialDesign:PackIcon Kind="Tablet" Width="26" Height="26" Foreground="#8B5CF6" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Text="TABLET KIOSK PORTAL"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Foreground="#8B5CF6"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock Text="Scan code or visit URL on a venue tablet in landscape orientation"
+                       FontSize="12"
+                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                       HorizontalAlignment="Center"
+                       Margin="0,4,0,0"
+                       TextAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Large QR Container -->
+        <Border Grid.Row="1"
+                Width="280"
+                Height="280"
+                Background="White"
+                BorderBrush="#8B5CF6"
+                BorderThickness="3"
+                CornerRadius="10"
+                Padding="8"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,16">
+            <Image Source="{Binding KioskQrCodeImage}"
+                   Stretch="Uniform"
+                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- URL and Copy -->
+        <Border Grid.Row="2"
+                Style="{StaticResource PopoutCardBorder}"
+                Padding="12,10"
+                Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="KIOSK WEB ADDRESS"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                    <TextBox Text="{Binding KioskConnectionUrl, Mode=OneWay}"
+                             FontSize="14"
+                             FontWeight="SemiBold"
+                             Foreground="#A78BFA"
+                             IsReadOnly="True"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Padding="0"
+                             Margin="0,2,0,0" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Padding="10,4"
+                        Height="32"
+                        Margin="8,0,0,0"
+                        Click="OnCopyUrlClicked"
+                        ToolTip="Copy Kiosk URL to Clipboard">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentCopy" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="Copy URL" FontSize="12" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Tips Box -->
+        <Border Grid.Row="3"
+                Background="#1A8B5CF6"
+                BorderBrush="#8B5CF6"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="14,10"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="💡 KIOSK STATION FEATURES"
+                           FontSize="11"
+                           FontWeight="Bold"
+                           Foreground="#8B5CF6"
+                           Margin="0,0,0,4"/>
+                <TextBlock Text="• Landscape split layout with live rotation and tap-to-select singer name&#x0a;• Form automatically resets 5 seconds after submission&#x0a;• Auto-clears after 45 seconds of inactivity if abandoned"
+                           FontSize="11"
+                           Foreground="{DynamicResource MaterialDesignBody}"
+                           LineHeight="16"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Close Button -->
+        <Button Grid.Row="4"
+                IsCancel="True"
+                Style="{StaticResource MaterialDesignRaisedButton}"
+                Background="{DynamicResource MaterialDesignCardBackground}"
+                BorderBrush="#44CBD5E1"
+                Foreground="{DynamicResource MaterialDesignBody}"
+                HorizontalAlignment="Center"
+                Width="120"
+                Height="36"
+                Click="OnCloseClicked">
+            <TextBlock Text="Close" FontWeight="SemiBold" />
+        </Button>
+    </Grid>
+</Window>

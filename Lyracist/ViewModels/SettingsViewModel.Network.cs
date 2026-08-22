@@ -1,4 +1,4 @@
-// Created on Aug 6, 2026 @ 07:01:27 -> Split tablet server + KSRotation sync settings out of SettingsViewModel.cs (God-object cleanup); pure code move, no behavior change
+// Edited on Aug 21, 2026 @ 17:53:00 -> Add OpenKioskQrWindow command for Tablet Kiosk popout
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -61,5 +61,13 @@ public partial class SettingsViewModel
     {
         await _tablet.StopAsync();
         TabletStatus = "Stopped";
+    }
+
+    [RelayCommand]
+    private void OpenKioskQrWindow()
+    {
+        var window = new Lyracist.Windows.KioskQrCodePopoutWindow();
+        window.Owner = System.Windows.Application.Current.MainWindow;
+        window.ShowDialog();
     }
 }

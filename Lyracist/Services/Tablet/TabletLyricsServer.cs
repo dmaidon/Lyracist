@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:06:00 -> Include isRotationStart, isCurrent, isNext in Tablet Queue payload
+// Edited on Aug 21, 2026 @ 17:51:00 -> Add /kiosk endpoint, /api/rotation, and /api/request kiosk handling
 using System;
 using System.IO;
 using System.Linq;
@@ -154,6 +154,8 @@ public class TabletLyricsServer(
 
     public record MobileJoinDto(string? SingerName);
 
+    public record KioskRequestDto(string? Name, string? Song, string? Artist, string? RequestType, string? DuetPartner, string? Key, string? Notes);
+
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
         if (_webApp != null)
@@ -286,6 +288,8 @@ public class TabletLyricsServer(
         app.MapGet("/", () => Results.Content(GetMobilePortalHtml(), "text/html"));
         app.MapGet("/join", () => Results.Content(GetMobilePortalHtml(), "text/html"));
         app.MapGet("/request", () => Results.Content(GetMobilePortalHtml(), "text/html"));
+        app.MapGet("/kiosk", () => Results.Content(GetKioskHtml(), "text/html"));
+        app.MapGet("/kiosk.html", () => Results.Content(GetKioskHtml(), "text/html"));
     }
 
     /// <summary>The mutating actions a singer's phone can take: join, submit a request, rate a performance, spin the Scaryoke wheel.</summary>
@@ -403,6 +407,80 @@ public class TabletLyricsServer(
             }
 
             return Results.Ok(request);
+        }).RequireRateLimiting(MobilePortalWritePolicy);
+
+        // Kiosk request submission endpoint
+        app.MapPost("/api/request", (KioskRequestDto dto) =>
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return Results.BadRequest(new { error = "Name is required." });
+            }
+            if (string.IsNullOrWhiteSpace(dto.Song))
+            {
+                return Results.BadRequest(new { error = "Song title is required." });
+            }
+            if (ExceedsLength(dto.Name, MaxNameLength) ||
+                ExceedsLength(dto.DuetPartner, MaxNameLength) ||
+                ExceedsLength(dto.Song, MaxTitleOrArtistLength) ||
+                ExceedsLength(dto.Artist, MaxTitleOrArtistLength) ||
+                ExceedsLength(dto.Notes, MaxNotesLength) ||
+                ExceedsLength(dto.Key, MaxShortFieldLength) ||
+                ExceedsLength(dto.RequestType, MaxShortFieldLength))
+            {
+                return Results.BadRequest(new { error = "One or more fields exceed the maximum allowed length." });
+            }
+
+            string notes = !string.IsNullOrWhiteSpace(dto.DuetPartner) && dto.DuetPartner != "None"
+                ? $"Duet with {dto.DuetPartner}"
+                : (dto.Notes ?? string.Empty);
+
+            var request = _requests.AddRequest(
+                dto.Name,
+                dto.Song,
+                dto.Artist ?? string.Empty,
+                "Kiosk",
+                dto.RequestType ?? "Karaoke",
+                dto.Key ?? "0",
+                notes);
+
+            if (Lyracist.Core.Helpers.AppSettings.AutoAcceptRequests)
+            {
+                if (request.RequestType == "Music")
+                {
+                    _requests.Approve(request.Id);
+                    request.Status = RequestStatuses.Approved;
+                }
+                else
+                {
+                    bool queued = false;
+                    Exception? queueError = null;
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        try
+                        {
+                            _rotation.AddSinger(request.SingerName, request.Title, request.Artist, request.Key, request.Notes, request.Source);
+                            _requests.MarkQueued(request.Id);
+                            queued = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            queueError = ex;
+                        }
+                    });
+
+                    if (queued)
+                    {
+                        request.Status = RequestStatuses.Queued;
+                    }
+                    else
+                    {
+                        Lyracist.Shared.Globals.LogError("Lyracist", "Failed to auto-accept kiosk request into rotation", queueError!);
+                    }
+                }
+            }
+
+            return Results.Ok(new { success = true, request });
         }).RequireRateLimiting(MobilePortalWritePolicy);
 
         app.MapPost("/api/rate", async (MobileRatingDto dto, HttpContext context) =>
@@ -637,6 +715,7 @@ public class TabletLyricsServer(
         });
 
         app.MapGet("/api/queue", () => Results.Json(BuildQueuePayload()));
+        app.MapGet("/api/rotation", () => Results.Json(BuildQueuePayload()));
 
         app.MapGet("/api/catalog", async (string? query, string? scope, ILibraryService library, IOccasionService occasions) =>
         {
@@ -695,6 +774,7 @@ public class TabletLyricsServer(
         return _rotation.Rotation.Select(s => new
         {
             name = s.Name,
+            song = s.SongTitle,
             songTitle = s.SongTitle,
             artist = s.Artist,
             key = s.Key,
@@ -771,6 +851,24 @@ public class TabletLyricsServer(
             }
         }
         return _mobilePortalHtml;
+    }
+
+    private static string? _kioskHtml;
+    private static string GetKioskHtml()
+    {
+        if (_kioskHtml == null)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TabletClient", "kiosk.html");
+            if (File.Exists(path))
+            {
+                _kioskHtml = File.ReadAllText(path);
+            }
+            else
+            {
+                _kioskHtml = "<h1>Kiosk file not found.</h1>";
+            }
+        }
+        return _kioskHtml;
     }
 
     private void OnRotationChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
