@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 12:10:30 -> Added DisplayViewModel active state hydration unit test
+// Edited on Aug 22, 2026 @ 11:20:00 -> Added manual game flow controls unit tests for DJ and GameMaster
 using System;
 using System.Collections.Generic;
 using Lyracist.Trivia.Core.Models;
@@ -666,5 +666,174 @@ public class GameEngineTests
         Assert.Equal("Stevie Wonder", displayVm.OptionD);
         Assert.Equal(1.0, displayVm.OptionAOpacity);
         Assert.Equal(15, displayVm.TotalCountdownSeconds);
+    }
+
+    [Fact]
+    public void PreviousQuestion_NavigatesBackCorrectly()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        Assert.Equal("Q1", engine.CurrentSession.CurrentQuestion?.Id);
+
+        // Advance to Q2
+        engine.AdvanceToNextQuestion();
+        Assert.Equal("Q2", engine.CurrentSession.CurrentQuestion?.Id);
+
+        // Go back to Q1
+        bool ok = engine.PreviousQuestion();
+        Assert.True(ok);
+        Assert.Equal("Q1", engine.CurrentSession.CurrentQuestion?.Id);
+
+        // Attempting previous from Q1 returns false
+        bool atStart = engine.PreviousQuestion();
+        Assert.False(atStart);
+        Assert.Equal("Q1", engine.CurrentSession.CurrentQuestion?.Id);
+    }
+
+    [Fact]
+    public void GoToQuestion_JumpsToDirectIndex()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        Assert.Equal("Q1", engine.CurrentSession.CurrentQuestion?.Id);
+
+        bool jumped = engine.GoToQuestion(1);
+        Assert.True(jumped);
+        Assert.Equal("Q2", engine.CurrentSession.CurrentQuestion?.Id);
+        Assert.Equal(1, engine.CurrentSession.CurrentQuestionIndex);
+
+        bool invalid = engine.GoToQuestion(99);
+        Assert.False(invalid);
+        Assert.Equal(1, engine.CurrentSession.CurrentQuestionIndex);
+    }
+
+    [Fact]
+    public void VoidCurrentQuestion_RollsBackPointsAndAdvances()
+    {
+        var settings = new TriviaSettings
+        {
+            BasePointsPerQuestion = 1000,
+            SpeedBonusEnabled = false,
+            StreakBonusMultiplier = 0.0
+        };
+        using var engine = new TriviaGameEngine(settings);
+        var alice = engine.RegisterPlayer("Alice");
+        var bob = engine.RegisterPlayer("Bob");
+
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        engine.SubmitAnswer("Alice", 1); // correct
+        engine.SubmitAnswer("Bob", 0); // wrong
+
+        Assert.Equal(1000, alice.TotalScore);
+        Assert.Equal(1, alice.TotalAnswered);
+        Assert.Equal(1, alice.TotalCorrect);
+
+        // Void the question
+        engine.VoidCurrentQuestion();
+
+        // Alice's score and answered count must be rolled back
+        Assert.Equal(0, alice.TotalScore);
+        Assert.Equal(0, alice.TotalAnswered);
+        Assert.Equal(0, alice.TotalCorrect);
+        Assert.False(alice.HasAnsweredCurrentQuestion);
+
+        // Bob's answered count rolled back
+        Assert.Equal(0, bob.TotalAnswered);
+        Assert.False(bob.HasAnsweredCurrentQuestion);
+
+        // Game should have advanced to Q2
+        Assert.Equal("Q2", engine.CurrentSession.CurrentQuestion?.Id);
+    }
+
+    [Fact]
+    public void AdjustRemainingSeconds_AddsAndClampsTime()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        Assert.Equal(15, engine.RemainingSeconds);
+
+        engine.AdjustRemainingSeconds(5);
+        Assert.Equal(20, engine.RemainingSeconds);
+        Assert.Equal(20, engine.TotalCountdownSeconds);
+
+        engine.AdjustRemainingSeconds(-10);
+        Assert.Equal(10, engine.RemainingSeconds);
+
+        // Reducing to 0 triggers answer elimination
+        engine.AdjustRemainingSeconds(-20);
+        Assert.True(engine.State == TriviaGameState.EliminatingAnswers || engine.State == TriviaGameState.RevealAnswer || engine.State == TriviaGameState.AnsweringLocked);
+    }
+
+    [Fact]
+    public void ResetQuestionTimer_RestoresFullTimeAndClearsEliminations()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        engine.EliminateNextWrongAnswer();
+        Assert.NotEmpty(engine.EliminatedAnswerIndices);
+
+        engine.ResetQuestionTimer();
+        Assert.Equal(TriviaGameState.QuestionActive, engine.State);
+        Assert.Equal(15, engine.RemainingSeconds);
+        Assert.Empty(engine.EliminatedAnswerIndices);
+    }
+
+    [Fact]
+    public void EliminateNextWrongAnswer_StepwiseElimination()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        Assert.Empty(engine.EliminatedAnswerIndices);
+
+        engine.EliminateNextWrongAnswer();
+        Assert.Single(engine.EliminatedAnswerIndices);
+        Assert.DoesNotContain(1, engine.EliminatedAnswerIndices); // Correct answer index is 1 (Michael Jackson)
+
+        engine.EliminateNextWrongAnswer();
+        Assert.Equal(2, engine.EliminatedAnswerIndices.Count);
+        Assert.DoesNotContain(1, engine.EliminatedAnswerIndices);
+
+        engine.EliminateNextWrongAnswer();
+        Assert.Equal(TriviaGameState.RevealAnswer, engine.State);
+    }
+
+    [Fact]
+    public void InstantRevealAnswer_ImmediatelyRevealsCorrectAnswer()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        engine.InstantRevealAnswer();
+
+        Assert.Equal(TriviaGameState.RevealAnswer, engine.State);
+        Assert.Equal(3, engine.EliminatedAnswerIndices.Count);
+        Assert.DoesNotContain(1, engine.EliminatedAnswerIndices);
+    }
+
+    [Fact]
+    public void PrepareCurrentQuestion_HonorsStartTimerImmediately()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+
+        // Standby / DJ Reading mode (startTimerImmediately: false)
+        engine.PrepareCurrentQuestion(startTimerImmediately: false);
+
+        Assert.Equal(TriviaGameState.QuestionActive, engine.State);
+        Assert.Equal(15, engine.RemainingSeconds);
+        Assert.NotNull(engine.CurrentSession.CurrentQuestion);
     }
 }

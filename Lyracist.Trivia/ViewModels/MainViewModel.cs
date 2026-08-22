@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:35:00 -> Added Help Topic 9 Fast Input & Textbox Auto-Selection and updated Help Topics
+// Edited on Aug 22, 2026 @ 11:20:00 -> Added manual DJ/GameMaster flow commands, question navigation, timer bump/trim, and instant controls
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -68,6 +68,23 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     private int _currentQuestionNumber = 1;
+
+    partial void OnCurrentQuestionNumberChanged(int value)
+    {
+        if (_engine?.CurrentSession?.CurrentRound != null)
+        {
+            int targetIdx = value - 1;
+            if (targetIdx >= 0 && targetIdx < _engine.CurrentSession.CurrentRound.Questions.Count)
+            {
+                if (_engine.CurrentSession.CurrentQuestionIndex != targetIdx)
+                {
+                    _engine.GoToQuestion(targetIdx, startTimerImmediately: AutoAdvanceQuestions);
+                    ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
+                    IsTimerRunning = AutoAdvanceQuestions;
+                }
+            }
+        }
+    }
 
     [ObservableProperty]
     private int _totalQuestionsInRound = 5;
@@ -147,6 +164,16 @@ public partial class MainViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(AutoRunTimingSummary));
         SaveSettings();
     }
+
+    public int[] QuestionsPerGamePresets { get; } = [5, 10, 15, 20, 25, 50, 100];
+    public ObservableCollection<MonitorInfo> AvailableMonitors { get; } = [];
+    public ObservableCollection<TriviaQuestionPack> AvailablePacks { get; } = [];
+    public ObservableCollection<SelectableTriviaPack> SelectablePacks { get; } = [];
+    public ObservableCollection<TriviaPlayer> Players { get; } = [];
+    public ObservableCollection<AnswerDistributionItem> AnswerDistribution { get; } = [];
+    public ObservableCollection<TriviaHelpTopic> HelpTopics { get; } = [];
+    public ObservableCollection<AnnouncementHelper.AnnouncementImage> AvailableAnnouncements { get; } = [];
+    public ObservableCollection<int> AvailableQuestionNumbers { get; } = [];
 
     partial void OnAnswerEliminationIntervalSecondsChanged(int value)
     {
@@ -354,14 +381,14 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private MonitorInfo? _selectedMonitor;
 
-    public int[] QuestionsPerGamePresets { get; } = [5, 10, 15, 20, 25, 50, 100];
-    public ObservableCollection<MonitorInfo> AvailableMonitors { get; } = [];
-    public ObservableCollection<TriviaQuestionPack> AvailablePacks { get; } = [];
-    public ObservableCollection<SelectableTriviaPack> SelectablePacks { get; } = [];
-    public ObservableCollection<TriviaPlayer> Players { get; } = [];
-    public ObservableCollection<AnswerDistributionItem> AnswerDistribution { get; } = [];
-    public ObservableCollection<TriviaHelpTopic> HelpTopics { get; } = [];
-    public ObservableCollection<AnnouncementHelper.AnnouncementImage> AvailableAnnouncements { get; } = [];
+    private void UpdateAvailableQuestionNumbers(int count)
+    {
+        AvailableQuestionNumbers.Clear();
+        for (int i = 1; i <= count; i++)
+        {
+            AvailableQuestionNumbers.Add(i);
+        }
+    }
 
     [ObservableProperty]
     private AnnouncementHelper.AnnouncementImage? _selectedAnnouncement;
@@ -672,6 +699,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
         CurrentQuestionNumber = 1;
         TotalQuestionsInRound = Math.Clamp(QuestionsPerGame, 1, checkedPacks.Sum(p => p.Questions.Count));
+        UpdateAvailableQuestionNumbers(TotalQuestionsInRound);
         _activeDisplayVm?.UpdateFeaturedCategoryHeader(TotalQuestionsInRound, checkedPacks.Count);
 
         if (checkedPacks.Count == 1)
@@ -778,11 +806,13 @@ public partial class MainViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(GameProgressText));
         CurrentRoundTitle = round.Title;
         TotalQuestionsInRound = round.Questions.Count;
+        UpdateAvailableQuestionNumbers(TotalQuestionsInRound);
         CurrentQuestionNumber = 1;
         ActiveQuestion = round.Questions.FirstOrDefault();
 
-        // Start 1st question automatically
-        _engine.StartCurrentQuestion();
+        // Start 1st question (immediate timer if AutoAdvance, or ready/reading state if manual)
+        _engine.PrepareCurrentQuestion(startTimerImmediately: AutoAdvanceQuestions);
+        IsTimerRunning = AutoAdvanceQuestions;
 
         // Ensure big screen opens / focuses directly to active gameplay
         RequestOpenProjectionWindow?.Invoke(this, EventArgs.Empty);
@@ -1005,6 +1035,91 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private void StartQuestion()
     {
         _engine.StartCurrentQuestion();
+        IsTimerRunning = true;
+    }
+
+    [RelayCommand]
+    private void PreviousQuestion()
+    {
+        bool hasPrev = _engine.PreviousQuestion(startTimerImmediately: AutoAdvanceQuestions);
+        if (hasPrev && _engine.CurrentSession.CurrentQuestion != null)
+        {
+            CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
+            ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
+            IsTimerRunning = AutoAdvanceQuestions;
+        }
+    }
+
+    [RelayCommand]
+    private void NextQuestion()
+    {
+        bool hasNext = _engine.AdvanceToNextQuestion(startTimerImmediately: AutoAdvanceQuestions);
+        if (hasNext && _engine.CurrentSession.CurrentQuestion != null)
+        {
+            CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
+            ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
+            IsTimerRunning = AutoAdvanceQuestions;
+        }
+    }
+
+    [RelayCommand]
+    private void GoToQuestion(object? parameter)
+    {
+        int qNum = 1;
+        if (parameter is int i) qNum = i;
+        else if (parameter is string s && int.TryParse(s, out int parsed)) qNum = parsed;
+
+        if (qNum >= 1)
+        {
+            bool ok = _engine.GoToQuestion(qNum - 1, startTimerImmediately: AutoAdvanceQuestions);
+            if (ok && _engine.CurrentSession.CurrentQuestion != null)
+            {
+                CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
+                ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
+                IsTimerRunning = AutoAdvanceQuestions;
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void AddTimerSeconds(object? parameter)
+    {
+        int seconds = 5;
+        if (parameter is int i) seconds = i;
+        else if (parameter is string s && int.TryParse(s, out int parsed)) seconds = parsed;
+
+        _engine.AdjustRemainingSeconds(seconds);
+    }
+
+    [RelayCommand]
+    private void ResetTimer()
+    {
+        _engine.ResetQuestionTimer();
+        IsTimerRunning = true;
+    }
+
+    [RelayCommand]
+    private void EliminateNextWrong()
+    {
+        _engine.EliminateNextWrongAnswer();
+    }
+
+    [RelayCommand]
+    private void InstantReveal()
+    {
+        _engine.InstantRevealAnswer();
+    }
+
+    [RelayCommand]
+    private void VoidCurrentQuestion()
+    {
+        _engine.VoidCurrentQuestion();
+        if (_engine.CurrentSession.CurrentQuestion != null)
+        {
+            CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
+            ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
+            IsTimerRunning = AutoAdvanceQuestions;
+        }
     }
 
     [RelayCommand]
@@ -1017,17 +1132,6 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private void ShowLeaderboard()
     {
         _engine.ShowLeaderboard();
-    }
-
-    [RelayCommand]
-    private void NextQuestion()
-    {
-        bool hasNext = _engine.AdvanceToNextQuestion();
-        if (hasNext && _engine.CurrentSession.CurrentQuestion != null)
-        {
-            CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
-            ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
-        }
     }
 
     [RelayCommand]
@@ -1110,8 +1214,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
             Title = "🎯 1. Game Master Command Deck",
             Icon = "🎯",
             AccentColor = "#38BDF8",
-            DescriptionHeader = "Live Trivia Host Controls, Auto-Advance & Game Flow",
-            DescriptionContent = "• Category Pack Selection: Choose from any of the 14 built-in categories or custom JSON packs in TriviaData/packs/. The pack's questions, rules, and banner load immediately.\n\n• 🎯 1-Click Launch Pre-Game Lobby: Automatically opens and focuses the TV projection window on the configured monitor, syncs the 16:9 category banner, starts the pre-game countdown clock, and activates the lobby marquee.\n\n• ▶ Start Game Now (Skip Countdown): Immediately starts Question #1 without waiting for the pre-game countdown to expire.\n\n• 🔄 Auto-Advance Questions: When enabled, the game engine automatically runs the question timer, reveals the correct answer for 5 seconds with point awards, and smoothly transitions to the next question.\n\n• Manual Advance Controls: The host can pause/resume the game at any moment, manually reveal answers, or skip ahead.\n\n• Live Option Visualizer: Displays player response distribution bars (A, B, C, D) in real-time as submissions arrive from mobile devices."
+            DescriptionHeader = "Live Trivia Host Controls, Manual Flow & Keyboard Shortcuts",
+            DescriptionContent = "• Category Pack Selection: Choose from any of the 14 built-in categories or custom JSON packs in TriviaData/packs/. The pack's questions, rules, and banner load immediately.\n\n• 🎯 1-Click Launch Pre-Game Lobby: Automatically opens and focuses the TV projection window on the configured monitor, syncs the 16:9 category banner, starts the pre-game countdown clock, and activates the lobby marquee.\n\n• ▶ Start Game Now: Launches Question #1 immediately.\n\n• ⚡ Auto-Run vs 🎮 Manual DJ Mode: When Auto-Run is disabled, the game master controls the exact pacing: questions open in reading/standby mode, allowing the host to read the question over the microphone before starting the timer (Spacebar).\n\n• ⏱️ Live Timer Bump & Pacing: Instantly add or subtract countdown time ([-5s], [+5s], [+10s], [🔄 Reset]) on the fly to accommodate crowd discussion or Wi-Fi delays.\n\n• ⏭ Question Navigation & Direct Jump: Step backward (⏮ Prev) or forward (⏭ Next), or use the question number dropdown to jump directly to any question in the round.\n\n• ✂ Staged Fade, ⚡ Instant Reveal & ❌ Voiding: Manually eliminate wrong options one by one, immediately reveal correct answers, or nullify flawed questions without penalizing player scores.\n\n• ⌨️ DJ Keyboard Shortcuts: Hands-on-keyboard shortcuts for live hosting: Spacebar (Pause/Resume Timer), Right Arrow / PageDown (Next Question), Left Arrow / PageUp (Previous Question)."
         });
 
         HelpTopics.Add(new TriviaHelpTopic

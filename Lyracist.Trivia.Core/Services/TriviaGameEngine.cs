@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 07:49:00 -> Randomize wrong answer elimination order for unpredictable fading sequence
+// Edited on Aug 22, 2026 @ 11:20:00 -> Added manual game flow controls, question navigation, timer adjustments, and voiding support
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -148,6 +148,11 @@ public class TriviaGameEngine : IDisposable
 
     public void StartCurrentQuestion()
     {
+        PrepareCurrentQuestion(startTimerImmediately: true);
+    }
+
+    public void PrepareCurrentQuestion(bool startTimerImmediately)
+    {
         lock (_stateLock)
         {
             var q = CurrentSession.CurrentQuestion;
@@ -180,7 +185,10 @@ public class TriviaGameEngine : IDisposable
             QuestionStarted?.Invoke(this, q);
 
             _tickTimer.Stop();
-            _tickTimer.Start();
+            if (startTimerImmediately)
+            {
+                _tickTimer.Start();
+            }
         }
     }
 
@@ -288,6 +296,71 @@ public class TriviaGameEngine : IDisposable
         }
     }
 
+    public void InstantRevealAnswer()
+    {
+        lock (_stateLock)
+        {
+            if (State != TriviaGameState.QuestionActive && State != TriviaGameState.EliminatingAnswers && State != TriviaGameState.AnsweringLocked)
+            {
+                return;
+            }
+
+            _tickTimer.Stop();
+            var q = CurrentSession.CurrentQuestion;
+            if (q == null) return;
+
+            // Eliminate all wrong answers immediately
+            EliminatedAnswerIndices.Clear();
+            _pendingWrongIndices.Clear();
+            for (int i = 0; i < q.Options.Count; i++)
+            {
+                if (i != q.CorrectAnswerIndex)
+                {
+                    EliminatedAnswerIndices.Add(i);
+                }
+            }
+            AnswersEliminated?.Invoke(this, [.. EliminatedAnswerIndices]);
+            CompleteRevealAnswer();
+        }
+    }
+
+    public void EliminateNextWrongAnswer()
+    {
+        lock (_stateLock)
+        {
+            if (State != TriviaGameState.QuestionActive && State != TriviaGameState.EliminatingAnswers)
+            {
+                return;
+            }
+
+            var q = CurrentSession.CurrentQuestion;
+            if (q == null) return;
+
+            var uneliminatedWrong = _pendingWrongIndices
+                .Where(i => !EliminatedAnswerIndices.Contains(i))
+                .ToList();
+
+            if (uneliminatedWrong.Count > 0)
+            {
+                EliminatedAnswerIndices.Add(uneliminatedWrong[0]);
+                _pendingWrongIndices.Clear();
+                _pendingWrongIndices.AddRange(uneliminatedWrong.Skip(1));
+
+                SetState(TriviaGameState.EliminatingAnswers);
+                AnswersEliminated?.Invoke(this, [.. EliminatedAnswerIndices]);
+
+                if (_pendingWrongIndices.Count == 0)
+                {
+                    CompleteRevealAnswer();
+                }
+            }
+            else
+            {
+                CompleteRevealAnswer();
+            }
+        }
+    }
+
     public void StartAnswerElimination()
     {
         lock (_stateLock)
@@ -367,7 +440,7 @@ public class TriviaGameEngine : IDisposable
         }
     }
 
-    public bool AdvanceToNextQuestion()
+    public bool AdvanceToNextQuestion(bool startTimerImmediately = true)
     {
         lock (_stateLock)
         {
@@ -377,7 +450,7 @@ public class TriviaGameEngine : IDisposable
             if (CurrentSession.CurrentQuestionIndex + 1 < round.Questions.Count)
             {
                 CurrentSession.CurrentQuestionIndex++;
-                StartCurrentQuestion();
+                PrepareCurrentQuestion(startTimerImmediately);
                 return true;
             }
 
@@ -386,13 +459,156 @@ public class TriviaGameEngine : IDisposable
             {
                 CurrentSession.CurrentRoundIndex++;
                 CurrentSession.CurrentQuestionIndex = 0;
-                StartCurrentQuestion();
+                PrepareCurrentQuestion(startTimerImmediately);
                 return true;
             }
 
             // End of game!
             CompleteGame();
             return false;
+        }
+    }
+
+    public bool PreviousQuestion(bool startTimerImmediately = true)
+    {
+        lock (_stateLock)
+        {
+            var round = CurrentSession.CurrentRound;
+            if (round == null) return false;
+
+            if (CurrentSession.CurrentQuestionIndex > 0)
+            {
+                CurrentSession.CurrentQuestionIndex--;
+                PrepareCurrentQuestion(startTimerImmediately);
+                return true;
+            }
+
+            // Previous round if applicable
+            if (CurrentSession.CurrentRoundIndex > 0)
+            {
+                CurrentSession.CurrentRoundIndex--;
+                var prevRound = CurrentSession.Rounds[CurrentSession.CurrentRoundIndex];
+                CurrentSession.CurrentQuestionIndex = Math.Max(0, prevRound.Questions.Count - 1);
+                PrepareCurrentQuestion(startTimerImmediately);
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    public bool GoToQuestion(int questionIndex, int roundIndex = -1, bool startTimerImmediately = true)
+    {
+        lock (_stateLock)
+        {
+            if (roundIndex >= 0 && roundIndex < CurrentSession.Rounds.Count)
+            {
+                CurrentSession.CurrentRoundIndex = roundIndex;
+            }
+
+            var round = CurrentSession.CurrentRound;
+            if (round == null) return false;
+
+            if (questionIndex >= 0 && questionIndex < round.Questions.Count)
+            {
+                CurrentSession.CurrentQuestionIndex = questionIndex;
+                PrepareCurrentQuestion(startTimerImmediately);
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    public void VoidCurrentQuestion()
+    {
+        lock (_stateLock)
+        {
+            var q = CurrentSession.CurrentQuestion;
+            if (q == null) return;
+
+            _tickTimer.Stop();
+
+            // Reverse score adjustments and stats for players who answered this question
+            foreach (var p in _players.Values)
+            {
+                if (p.HasAnsweredCurrentQuestion)
+                {
+                    p.TotalScore -= p.LastPointsEarned;
+                    p.TotalAnswered = Math.Max(0, p.TotalAnswered - 1);
+                    if (p.LastPointsEarned > 0)
+                    {
+                        p.TotalCorrect = Math.Max(0, p.TotalCorrect - 1);
+                    }
+                    p.LastPointsEarned = 0;
+                    p.LastAnswerIndex = -1;
+                    p.HasAnsweredCurrentQuestion = false;
+                }
+            }
+
+            LeaderboardUpdated?.Invoke(this, GetPlayers());
+            AdvanceToNextQuestion(Settings.AutoAdvanceQuestions);
+        }
+    }
+
+    public void AdjustRemainingSeconds(int deltaSeconds)
+    {
+        lock (_stateLock)
+        {
+            if (State != TriviaGameState.QuestionActive && State != TriviaGameState.EliminatingAnswers)
+            {
+                return;
+            }
+
+            int newSeconds = RemainingSeconds + deltaSeconds;
+            if (newSeconds <= 0)
+            {
+                RemainingSeconds = 0;
+                TimerTick?.Invoke(this, 0);
+                StartAnswerElimination();
+                return;
+            }
+
+            RemainingSeconds = newSeconds;
+            if (RemainingSeconds > TotalCountdownSeconds)
+            {
+                TotalCountdownSeconds = RemainingSeconds;
+            }
+
+            TimerTick?.Invoke(this, RemainingSeconds);
+        }
+    }
+
+    public void ResetQuestionTimer()
+    {
+        lock (_stateLock)
+        {
+            if (State != TriviaGameState.QuestionActive && State != TriviaGameState.EliminatingAnswers)
+            {
+                return;
+            }
+
+            var q = CurrentSession.CurrentQuestion;
+            TotalCountdownSeconds = Settings.DefaultQuestionSeconds > 0 ? Settings.DefaultQuestionSeconds : (q?.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : 15);
+            RemainingSeconds = TotalCountdownSeconds;
+            EliminatedAnswerIndices.Clear();
+
+            if (q != null)
+            {
+                var wrongIndices = Enumerable.Range(0, q.Options.Count).Where(i => i != q.CorrectAnswerIndex).ToList();
+                for (int i = wrongIndices.Count - 1; i > 0; i--)
+                {
+                    int k = Random.Shared.Next(i + 1);
+                    (wrongIndices[i], wrongIndices[k]) = (wrongIndices[k], wrongIndices[i]);
+                }
+                _pendingWrongIndices.Clear();
+                _pendingWrongIndices.AddRange(wrongIndices);
+            }
+
+            SetState(TriviaGameState.QuestionActive);
+            TimerTick?.Invoke(this, RemainingSeconds);
+            AnswersEliminated?.Invoke(this, []);
+            _tickTimer.Start();
         }
     }
 

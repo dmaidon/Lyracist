@@ -1,8 +1,32 @@
-<!-- Edited on Aug 21, 2026 @ 18:30:00 -> Update CHANGELOG with kiosk security review fixes (JS injection, validation, duplicate file, dead code) -->
-Last Edit: Aug 21, 2026 - Tablet Kiosk Security & Cleanup Fixes: JS Injection, Field Validation, Deduplicated kiosk.html, Dead Code Removal
+<!-- Edited on Aug 22, 2026 @ 11:22:00 -> Update CHANGELOG with Manual Game Flow Control for DJ / Game Master in Lyracist.Trivia -->
+Last Edit: Aug 22, 2026 - Manual DJ / Game Master Flow Controls, Question Navigation, Timer Bump/Trim, Staged Fade, and Keyboard Shortcuts
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.22.1] - 2026-08-22
+
+### Added & Enhanced
+- **Manual Game Flow Controls for DJ / Game Master (`Lyracist.Trivia`)**:
+  - **Interactive Host Pacing (Manual Mode)**: When `⚡ Auto-Run Game` is disabled, new questions load into a ready **Reading / Standby** state with full time on the clock and the timer paused, allowing the DJ/Game Master to read the prompt over the microphone before starting the timer via `▶ Start Question & Timer` or `Spacebar`.
+  - **Question Navigation & Direct Jump**:
+    - Added `⏮ Prev` button (`Left Arrow` / `PageUp`) to safely step backward to the preceding question in the round.
+    - Added `Next ⏭` button (`Right Arrow` / `PageDown`) to advance questions on demand.
+    - Added a direct **Question Jump ComboBox** selector (Questions 1 through $N$) for instant navigation to any specific question without restarting the game.
+  - **On-the-Fly Timer Bump & Trim Pacing**:
+    - Added quick-action timer adjustment buttons (`[-5s]`, `[+5s]`, `[+10s]`, `[🔄 Reset]`) to dynamically extend or shorten active countdowns on the fly based on venue crowd discussion or mobile Wi-Fi latency.
+    - Timer increases automatically adjust `TotalCountdownSeconds` and warning state thresholds.
+  - **Stepwise Wrong Option Elimination & Instant Reveal**:
+    - Added `✂ Fade Option` (`EliminateNextWrongCommand`) to manually fade out wrong answer choices one by one for 50/50 clues or interactive hints.
+    - Added `⚡ Instant Reveal` (`InstantRevealCommand`) to immediately bypass multi-second countdowns and display the correct answer and explanation.
+  - **Question Voiding without Penalty**:
+    - Added `❌ Void Question (No Penalty)` (`VoidCurrentQuestionCommand`) to nullify spoiled or flawed questions, rolling back any points earned or lost by players for that specific question and preserving existing streaks.
+  - **DJ Keyboard Shortcuts**:
+    - Hooked global window hotkeys in `MainWindow.xaml`: `Spacebar` (Pause/Resume Timer), `Right Arrow` / `PageDown` (Next Question), and `Left Arrow` / `PageUp` (Previous Question).
+  - **Two-Line Wi-Fi Credentials Layout on Connect Screen (`Lyracist.Trivia`, `Lyracist`, `KSRotation`)**:
+    - Updated `TriviaDisplayWindow.xaml` across all applications so that `Wifi Network:` and `Password:` appear on clean, stacked individual lines with expanded max widths, preventing character clipping and improving readability from across the room.
+  - **Updated Help Topics**:
+    - Expanded Help Topic 1 (*Game Master Command Deck*) in `MainViewModel.cs` with complete documentation for manual flow controls, pacing buttons, and hotkeys.
 
 ## [26.8.21.2] - 2026-08-21
 

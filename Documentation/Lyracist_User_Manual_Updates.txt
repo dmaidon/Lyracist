@@ -835,3 +835,35 @@ A dynamic tiered scoring system has been integrated into Lyracist, KSRotation, a
 3. Trivia Settings & Configuration:
    - Toggle checkbox: "Tiered Option Value (4=100%, 3=70%, 2=40%)"
    - Customizable percentage fields for 4 Opt (%), 3 Opt (%), and 2 Opt (%) across Lyracist (`TriviaSettingsPage.xaml`), KSRotation (`MainWindow.xaml`), and Lyracist.Trivia (`MainWindow.xaml`).
+
+
+Section: Live Trivia / Manual DJ & Game Master Flow Controls (`Lyracist.Trivia`)
+
+[Update Details]
+Added a complete manual game flow control suite to `Lyracist.Trivia` enabling live, interactive host pacing, question navigation, timer adjustments, option fading, and keyboard shortcuts.
+
+1. Interactive Manual Mode & Standby State:
+   - When **⚡ Auto-Run Game** is toggled off, questions load into a ready **Reading / Standby** state with full time on the clock and the countdown timer paused.
+   - Allows the DJ/Game Master to read the question prompt and choices over the microphone before starting the timer via **`▶ Start Question & Timer`** or pressing `Spacebar`.
+
+2. Question Navigation & Direct Jump:
+   - **`[⏮ Prev]`** (`Left Arrow` / `PageUp`): Safely steps backward to the previous question in the round.
+   - **`[Next ⏭]`** (`Right Arrow` / `PageDown`): Advances to the next question.
+   - **Question Jump Dropdown**: Select any question number (1 through N) to immediately present that question without resetting game or player state.
+
+3. On-the-Fly Timer Bump & Trim:
+   - Quick-action buttons **`[-5s]`**, **`[+5s]`**, **`[+10s]`**, and **`[🔄 Reset]`** dynamically adjust active countdown time to match crowd discussions, buzzer latency, or venue announcements.
+
+4. Stepwise Elimination, Instant Reveal & Question Voiding:
+   - **`[✂ Fade Option]`**: Manually eliminates wrong answer choices one by one for 50/50 clues or staged hints.
+   - **`[⚡ Instant Reveal]`**: Bypasses countdown animations to immediately show the answer and explanation.
+   - **`[❌ Void Question]`**: Nullifies flawed questions without penalizing player scores or streaks.
+
+5. DJ Keyboard Shortcuts:
+   - `Spacebar`: Start / Pause / Resume timer.
+   - `Right Arrow` / `PageDown`: Next Question.
+   - `Left Arrow` / `PageUp`: Previous Question.
+
+6. Two-Line Wi-Fi Credentials Layout on Connect Screen:
+   - On the Pre-Game Lobby & Connect Screen (`TriviaDisplayWindow.xaml`), `Wifi Network:` and `Password:` are stacked on individual lines with expanded max width, ensuring maximum legibility on big screen projectors and TVs.
+
