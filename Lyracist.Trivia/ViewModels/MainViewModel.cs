@@ -71,7 +71,12 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     partial void OnCurrentQuestionNumberChanged(int value)
     {
-        if (_engine?.CurrentSession?.CurrentRound != null)
+        // Guard against reacting to programmatic resets (e.g. UpdateSelectedPacksPreview setting
+        // CurrentQuestionNumber = 1 while the DJ is browsing packs for the *next* game) - only a
+        // live/in-progress session should have question-jump navigation applied to it.
+        if (_engine?.CurrentSession?.CurrentRound != null &&
+            _engine.State != TriviaGameState.Lobby &&
+            _engine.State != TriviaGameState.GameComplete)
         {
             int targetIdx = value - 1;
             if (targetIdx >= 0 && targetIdx < _engine.CurrentSession.CurrentRound.Questions.Count)
@@ -1059,25 +1064,6 @@ public partial class MainViewModel : ObservableObject, IDisposable
             CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
             ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
             IsTimerRunning = AutoAdvanceQuestions;
-        }
-    }
-
-    [RelayCommand]
-    private void GoToQuestion(object? parameter)
-    {
-        int qNum = 1;
-        if (parameter is int i) qNum = i;
-        else if (parameter is string s && int.TryParse(s, out int parsed)) qNum = parsed;
-
-        if (qNum >= 1)
-        {
-            bool ok = _engine.GoToQuestion(qNum - 1, startTimerImmediately: AutoAdvanceQuestions);
-            if (ok && _engine.CurrentSession.CurrentQuestion != null)
-            {
-                CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
-                ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
-                IsTimerRunning = AutoAdvanceQuestions;
-            }
         }
     }
 

@@ -318,7 +318,7 @@
                                     <StackPanel Grid.Row="2" Margin="0,8,0,0" HorizontalAlignment="Center">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,2">
                                             <TextBlock Text="Wifi Network: " FontWeight="Bold" FontSize="24" Foreground="#94A3B8" />
-                                            <TextBlock Text="{Binding WifiSsid}" FontWeight="Black" FontSize="24" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" MaxWidth="225   " />
+                                            <TextBlock Text="{Binding WifiSsid}" FontWeight="Black" FontSize="24" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" MaxWidth="225" />
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                             <TextBlock Text="Password: " FontWeight="Bold" FontSize="24" Foreground="#94A3B8" />

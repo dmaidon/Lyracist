@@ -346,6 +346,7 @@ public class TriviaGameEngine : IDisposable
                 _pendingWrongIndices.Clear();
                 _pendingWrongIndices.AddRange(uneliminatedWrong.Skip(1));
 
+                _eliminationCountdownSeconds = Settings.AnswerEliminationIntervalSeconds > 0 ? Settings.AnswerEliminationIntervalSeconds : 5;
                 SetState(TriviaGameState.EliminatingAnswers);
                 AnswersEliminated?.Invoke(this, [.. EliminatedAnswerIndices]);
 
@@ -524,6 +525,11 @@ public class TriviaGameEngine : IDisposable
     {
         lock (_stateLock)
         {
+            if (State == TriviaGameState.Lobby || State == TriviaGameState.GameComplete)
+            {
+                return;
+            }
+
             var q = CurrentSession.CurrentQuestion;
             if (q == null) return;
 
@@ -555,7 +561,10 @@ public class TriviaGameEngine : IDisposable
     {
         lock (_stateLock)
         {
-            if (State != TriviaGameState.QuestionActive && State != TriviaGameState.EliminatingAnswers)
+            // Only the main question countdown can be bumped/trimmed - EliminatingAnswers runs
+            // its own separate short interval (_eliminationCountdownSeconds) that this isn't
+            // wired to, so touching RemainingSeconds there would just desync the on-screen timer.
+            if (State != TriviaGameState.QuestionActive)
             {
                 return;
             }
