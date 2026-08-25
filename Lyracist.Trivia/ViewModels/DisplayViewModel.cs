@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 12:10:30 -> Added SyncWithEngine and engine-state hydration to DisplayViewModel
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix CS8799 partial method accessors, RCS1163 unused handler params, and S2325
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,7 +19,7 @@ public partial class DisplayViewModel : ObservableObject
 {
     private readonly TriviaGameEngine _engine;
 
-    public string Copyright => Lyracist.Shared.Globals.Copyright;
+    public static string Copyright => Lyracist.Shared.Globals.Copyright;
 
     [ObservableProperty]
     private string _venueName = "The Main Stage Lounge";
@@ -179,10 +179,11 @@ public partial class DisplayViewModel : ObservableObject
     public ObservableCollection<MarqueeScoreItem> MarqueeScores { get; } = [];
     public ObservableCollection<AnswerDistributionItem> AnswerStats { get; } = [];
 
-    public DisplayViewModel(TriviaGameEngine engine, string venueName, string connectUrl, BitmapSource? qrCode, string? wifiSsid = null, string? wifiPassword = null, int preGameSecondsRemaining = 300)
+    public DisplayViewModel(TriviaGameEngine engine, string venueName, string connectUrl, BitmapSource? qrCode, string? wifiSsid = null, string? wifiPassword = null, int preGameSecondsRemaining = 300, string? hostName = null)
     {
         _engine = engine;
         _venueName = venueName;
+        _hostName = hostName ?? "Trivia Master";
         _connectUrl = connectUrl;
         _qrCodeImage = qrCode ?? GenerateQrBitmap(connectUrl);
         _isConnectInstructionsActive = (_engine.State == TriviaGameState.Lobby);
@@ -191,15 +192,15 @@ public partial class DisplayViewModel : ObservableObject
         UpdatePreGameCountdown(preGameSecondsRemaining);
         RefreshWelcomeBannerText();
 
-        _engine.StateChanged += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleStateChanged(e));
-        _engine.TimerTick += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleTimerTick(e));
-        _engine.QuestionStarted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleQuestionStarted(e));
-        _engine.AnswersEliminated += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswersEliminated(e));
-        _engine.AnswerRevealed += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswerRevealed(e));
-        _engine.LeaderboardUpdated += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => RefreshTopPlayers(e));
-        _engine.GameCompleted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleGameCompleted(e));
-        _engine.IntermissionTick += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionTick(e));
-        _engine.IntermissionCompleted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionCompleted());
+        _engine.StateChanged += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleStateChanged(e));
+        _engine.TimerTick += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleTimerTick(e));
+        _engine.QuestionStarted += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleQuestionStarted(e));
+        _engine.AnswersEliminated += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswersEliminated(e));
+        _engine.AnswerRevealed += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswerRevealed(e));
+        _engine.LeaderboardUpdated += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => RefreshTopPlayers(e));
+        _engine.GameCompleted += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleGameCompleted(e));
+        _engine.IntermissionTick += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionTick(e));
+        _engine.IntermissionCompleted += (_, _) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionCompleted());
 
         SyncWithEngine();
     }
@@ -337,9 +338,9 @@ public partial class DisplayViewModel : ObservableObject
         PreGameCountdownText = $"{mins:D2}:{secs:D2}";
     }
 
-    /// Shows a pre-game advertisement banner full-screen, ahead of the connect instructions
-    /// screen. Loaded fresh from disk each call rather than cached, since these banners are
-    /// large (1-2 MB) and only shown occasionally.
+    // Shows a pre-game advertisement banner full-screen, ahead of the connect instructions
+    // screen. Loaded fresh from disk each call rather than cached, since these banners are
+    // large (1-2 MB) and only shown occasionally.
     public void ShowAnnouncement(string imagePath, string displayName)
     {
         try

@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 13:21:45 -> Added JsonStringEnumConverter for string-based enum deserialization
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1146 conditional access
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,7 +46,7 @@ public static class TriviaPackManager
             {
                 string json = File.ReadAllText(file);
                 var pack = JsonSerializer.Deserialize<TriviaQuestionPack>(json, JsonOptions);
-                if (pack != null && pack.Questions.Count > 0)
+                if (pack?.Questions.Count > 0)
                 {
                     if (string.IsNullOrWhiteSpace(pack.PackId))
                     {

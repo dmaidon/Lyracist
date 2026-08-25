@@ -1,4 +1,4 @@
-// Edited on Aug 7, 2026 @ 08:35:00 -> Create FTS5 virtual table using raw SQL in migration instead of regular table
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1021 expression-bodied lambda syntax
 using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -56,10 +56,7 @@ namespace Lyracist.Data.Migrations
                     VocalRange = table.Column<string>(type: "TEXT", nullable: false),
                     CustomTitle = table.Column<string>(type: "TEXT", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Singers", x => x.SingerId);
-                });
+                constraints: table => table.PrimaryKey("PK_Singers", x => x.SingerId));
 
             migrationBuilder.CreateTable(
                 name: "Songs",
@@ -81,10 +78,7 @@ namespace Lyracist.Data.Migrations
                     LastPlayed = table.Column<DateTime>(type: "TEXT", nullable: true),
                     PlayCount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Songs", x => x.SongId);
-                });
+                constraints: table => table.PrimaryKey("PK_Songs", x => x.SongId));
 
             migrationBuilder.Sql("CREATE VIRTUAL TABLE SongSearch USING fts5(SongId UNINDEXED, Title, Artist, NormalizedTitle, NormalizedArtist);");
 

@@ -1,4 +1,4 @@
-// Edited on Aug 22, 2026 @ 11:20:00 -> Added manual DJ/GameMaster flow commands, question navigation, timer bump/trim, and instant controls
+// Edited on Aug 25, 2026 @ 06:33:00 -> Fix CS8799 partial accessors, RCS1139 doc comments, S1066, and RCS1075 catch blocks
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -79,14 +79,11 @@ public partial class MainViewModel : ObservableObject, IDisposable
             _engine.State != TriviaGameState.GameComplete)
         {
             int targetIdx = value - 1;
-            if (targetIdx >= 0 && targetIdx < _engine.CurrentSession.CurrentRound.Questions.Count)
+            if (targetIdx >= 0 && targetIdx < _engine.CurrentSession.CurrentRound.Questions.Count && _engine.CurrentSession.CurrentQuestionIndex != targetIdx)
             {
-                if (_engine.CurrentSession.CurrentQuestionIndex != targetIdx)
-                {
-                    _engine.GoToQuestion(targetIdx, startTimerImmediately: AutoAdvanceQuestions);
-                    ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
-                    IsTimerRunning = AutoAdvanceQuestions;
-                }
+                _engine.GoToQuestion(targetIdx, startTimerImmediately: AutoAdvanceQuestions);
+                ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
+                IsTimerRunning = AutoAdvanceQuestions;
             }
         }
     }
@@ -121,10 +118,12 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private int _nextGameDelayMinutes = 3;
 
+    ///<summary>
     /// 0 (or blank) means unlimited - auto-start just keeps looping forever like before. A
     /// positive value preloads that many games' worth of questions up front (see
     /// StartGameWithSelectedPack/_preloadedGameQuestionSets) and stops auto-restarting once
     /// TriviaGameEngine.HasReachedGamesCap trips.
+    ///</summary>
     [ObservableProperty]
     private int _totalGamesToPlay = 0;
 
@@ -156,9 +155,11 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private int _postRevealDelaySeconds = 5;
 
+    /// <summary>
     /// Live summary of the auto-run timing (shown under the "Auto-Run Game" toggle) so the
     /// header always reflects the game master's actual configured timings instead of a
     /// hardcoded "15s answer • 5s fade • 5s reveal" that goes stale the moment they're changed.
+    /// </summary>
     public string AutoRunTimingSummary =>
         $"{DefaultQuestionSeconds}s answer • {AnswerEliminationIntervalSeconds}s fade • {PostRevealDelaySeconds}s reveal";
 
@@ -427,16 +428,17 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private TriviaHelpTopic? _selectedHelpTopic;
 
-    public string AppName => "Lyracist Trivia Pro";
-    public string AppVersion => "26.8.19.20";
-    public string Company => "PAROLE Software";
-    public string Author => "Dennis N. Maidon";
-    public string Copyright => "Copyright © 2026 PAROLE Software. All rights reserved.";
-    public string AppDescription => "Interactive live pub & bar trivia hosting engine with synchronized mobile player buzzers, dynamic custom database auto-discovery, 14 starter curated category databases (2,100 questions), dual-screen 70:30 pre-game lobby with 16:9 category announcement banners, multi-monitor projection, dynamic speed/streak scoring, and seamless karaoke integration.";
+    public static string AppName => "Lyracist Trivia Pro";
+    public static string AppVersion => "26.8.19.20";
+    public static string Company => "PAROLE Software";
+    public static string Author => "Dennis N. Maidon";
+    public static string Copyright => "Copyright © 2026 PAROLE Software. All rights reserved.";
+    public static string AppDescription => "Interactive live pub & bar trivia hosting engine with synchronized mobile player buzzers, dynamic custom database auto-discovery, 14 starter curated category databases (2,100 questions), dual-screen 70:30 pre-game lobby with 16:9 category announcement banners, multi-monitor projection, dynamic speed/streak scoring, and seamless karaoke integration.";
 
     public TriviaGameEngine Engine => _engine;
 
     public event EventHandler<string>? TargetMonitorChanged;
+
     public event EventHandler? RequestOpenProjectionWindow;
 
     private readonly System.Timers.Timer _preGameTimer = new(1000);
@@ -454,7 +456,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
                 string json = File.ReadAllText(settingsPath);
                 loadedSettings = JsonSerializer.Deserialize<TriviaSettings>(json);
             }
-            catch { }
+            catch (Exception)
+            {
+                // Fall back to default settings on read error
+            }
         }
 
         _settings = loadedSettings ?? new TriviaSettings();
@@ -492,14 +497,14 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _webServer = new TriviaWebServer(_engine, _settings.Port);
 
         // Wire engine events
-        _engine.StateChanged += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleStateChanged(e));
-        _engine.TimerTick += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleTimerTick(e));
-        _engine.QuestionStarted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleQuestionStarted(e));
-        _engine.AnswerRevealed += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswerRevealed(e));
-        _engine.LeaderboardUpdated += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => RefreshPlayers(e));
-        _engine.GameCompleted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleGameCompleted(e));
-        _engine.IntermissionTick += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionTick(e));
-        _engine.IntermissionCompleted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionCompleted());
+        _engine.StateChanged += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleStateChanged(e));
+        _engine.TimerTick += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleTimerTick(e));
+        _engine.QuestionStarted += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleQuestionStarted(e));
+        _engine.AnswerRevealed += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswerRevealed(e));
+        _engine.LeaderboardUpdated += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => RefreshPlayers(e));
+        _engine.GameCompleted += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleGameCompleted(e));
+        _engine.IntermissionTick += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionTick(e));
+        _engine.IntermissionCompleted += (_, _) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionCompleted());
 
         // Setup Pre-Game ticker (started when screen is cast or manually started)
         _isPreGameCountdownRunning = false;
@@ -575,7 +580,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     partial void OnVenueNameChanged(string value)
     {
         Settings.VenueName = value;
-        if (_engine != null && _engine.CurrentSession != null)
+        if (_engine?.CurrentSession != null)
         {
             _engine.CurrentSession.VenueName = value;
         }
@@ -619,7 +624,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
             string json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(path, json);
         }
-        catch { }
+        catch (Exception)
+        {
+            // Settings persistence error ignored
+        }
     }
 
     private void DetermineConnectUrl()
@@ -647,7 +655,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
             image.Freeze();
             QrCodeImage = image;
         }
-        catch { }
+        catch (Exception)
+        {
+            // QR generation failure ignored
+        }
     }
 
     public void LoadQuestionPacks()
@@ -862,9 +873,11 @@ public partial class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    public void RegisterDisplayViewModel(DisplayViewModel dvm)
+    public void RegisterDisplayViewModel(DisplayViewModel? dvm)
     {
         _activeDisplayVm = dvm;
+        if (dvm == null) return;
+
         dvm.HostName = HostName;
         dvm.VenueName = VenueName;
         dvm.UpdateInstructionBannerTemplate(InstructionBannerText);
@@ -1282,8 +1295,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
-        try { _preGameTimer.Stop(); } catch { }
-        try { _preGameTimer.Dispose(); } catch { }
+        try { _preGameTimer.Stop(); } catch (Exception) { /* Ignored */ }
+        try { _preGameTimer.Dispose(); } catch (Exception) { /* Ignored */ }
         _webServer.Dispose();
         _engine.Dispose();
         _dbService.Dispose();

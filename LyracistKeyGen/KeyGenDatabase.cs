@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:43:00 -> Avoid UNIQUE constraint error on duplicate key generation using INSERT OR REPLACE
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1037 trailing whitespace
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,39 +10,26 @@ namespace LyracistKeyGen
 
     public static class KeyGenDatabase
     {
-        private static readonly string DbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "keygen.db");
-        private static readonly string ConnectionString = $"Data Source={DbPath}";
+        private static string DbPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keygen.db");
+        private static string ConnectionString => $"Data Source={DbPath}";
 
         public static void Initialize()
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(DbPath)!;
-                if (!Directory.Exists(dir))
-                {
-                    Directory.CreateDirectory(dir);
-                }
+            using var conn = new SqliteConnection(ConnectionString);
+            conn.Open();
 
-                using var conn = new SqliteConnection(ConnectionString);
-                conn.Open();
-
-                using var cmd = conn.CreateCommand();
-                cmd.CommandText = @"
-                    CREATE TABLE IF NOT EXISTS Licenses (
-                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        FirstName TEXT NOT NULL,
-                        LastName TEXT NOT NULL,
-                        StageName TEXT NOT NULL,
-                        Email TEXT NOT NULL,
-                        LicenseKey TEXT NOT NULL UNIQUE,
-                        CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
-                    );";
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to initialize database: {ex.Message}");
-            }
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Licenses (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    FirstName TEXT NOT NULL,
+                    LastName TEXT NOT NULL,
+                    StageName TEXT,
+                    Email TEXT NOT NULL,
+                    LicenseKey TEXT NOT NULL UNIQUE,
+                    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+                );";
+            cmd.ExecuteNonQuery();
         }
 
         public static void SaveLicense(string firstName, string lastName, string stageName, string email, string key)
@@ -54,7 +41,7 @@ namespace LyracistKeyGen
             cmd.CommandText = @"
                 INSERT OR REPLACE INTO Licenses (FirstName, LastName, StageName, Email, LicenseKey)
                 VALUES ($firstName, $lastName, $stageName, $email, $key);";
-            
+
             cmd.Parameters.AddWithValue("$firstName", firstName.Trim());
             cmd.Parameters.AddWithValue("$lastName", lastName.Trim());
             cmd.Parameters.AddWithValue("$stageName", string.IsNullOrWhiteSpace(stageName) ? "None" : stageName.Trim());

@@ -1,4 +1,4 @@
-// Created on Aug 1, 2026 @ 13:10:00 -> Add ChromecastDiscoveryService implementation
+// Edited on Aug 25, 2026 @ 06:40:00 -> Use conditional access (RCS1146)
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -316,7 +316,7 @@ namespace Lyracist.Shared
                 if (instanceName != null)
                 {
                     var srv = records.FirstOrDefault(r => r.Type == 33 && r.Name.Equals(instanceName, StringComparison.OrdinalIgnoreCase));
-                    if (srv != null && srv.RDataLength > 6)
+                    if (srv?.RDataLength > 6)
                     {
                         int srvNamePos = srv.RDataStart + 6; // priority(2) + weight(2) + port(2)
                         targetHost = ReadName(buffer, ref srvNamePos);
@@ -328,7 +328,7 @@ namespace Lyracist.Shared
                     : records.FirstOrDefault(r => r.Type == 1);
 
                 IPAddress? address = null;
-                if (aRecord != null && aRecord.RDataLength == 4)
+                if (aRecord?.RDataLength == 4)
                 {
                     address = new IPAddress(new[]
                     {

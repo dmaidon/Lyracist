@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 06:23:00 -> Added tiered scoring properties and potential points to /api/trivia/state payload
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1085, CA2016, RCS1261 async disposals, RCS1146, and RCS1118 const in TriviaWebServer.cs
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,7 +22,6 @@ public class TriviaWebServer : IDisposable
     private static readonly TimeSpan RequestReadTimeout = TimeSpan.FromSeconds(15);
 
     private readonly TriviaGameEngine _engine;
-    private readonly int _port;
     private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
 
     private TcpListener? _listener;
@@ -31,12 +30,12 @@ public class TriviaWebServer : IDisposable
     private bool _disposed;
 
     public bool IsRunning { get; private set; }
-    public int Port => _port;
+    public int Port { get; }
 
     public TriviaWebServer(TriviaGameEngine engine, int port = 8085)
     {
         _engine = engine;
-        _port = port;
+        Port = port;
     }
 
     public void Start()
@@ -46,7 +45,7 @@ public class TriviaWebServer : IDisposable
         try
         {
             _cts = new CancellationTokenSource();
-            _listener = new TcpListener(IPAddress.Any, _port);
+            _listener = new TcpListener(IPAddress.Any, Port);
             _listener.Start();
             IsRunning = true;
 
@@ -54,7 +53,7 @@ public class TriviaWebServer : IDisposable
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"TriviaWebServer Start failed on port {_port}: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"TriviaWebServer Start failed on port {Port}: {ex.Message}");
             IsRunning = false;
         }
     }
@@ -86,7 +85,7 @@ public class TriviaWebServer : IDisposable
             {
                 var client = await _listener.AcceptTcpClientAsync(token);
 
-                if (!_connectionLimiter.Wait(0))
+                if (!_connectionLimiter.Wait(0, CancellationToken.None))
                 {
                     client.Dispose();
                     continue;
@@ -122,8 +121,8 @@ public class TriviaWebServer : IDisposable
     private async Task HandleClientAsync(TcpClient client, CancellationToken serverToken)
     {
         using (client)
-        using (var stream = client.GetStream())
-        using (var readStream = new BufferedStream(stream, 4096))
+        await using (var stream = client.GetStream())
+        await using (var readStream = new BufferedStream(stream, 4096))
         using (var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(serverToken))
         {
             timeoutCts.CancelAfter(RequestReadTimeout);
@@ -222,7 +221,7 @@ public class TriviaWebServer : IDisposable
                     bool isSamePlayer = existing != null && !string.IsNullOrEmpty(joinReq.PlayerId) &&
                         string.Equals(existing.PlayerId, joinReq.PlayerId, StringComparison.OrdinalIgnoreCase);
 
-                    if (existing != null && existing.IsConnected && !isSamePlayer)
+                    if (existing?.IsConnected == true && !isSamePlayer)
                     {
                         await SendResponseAsync(stream, 409, "application/json; charset=utf-8",
                             Encoding.UTF8.GetBytes("{\"error\":\"That name is already in use this game. Please choose a different name.\"}"));
@@ -380,7 +379,7 @@ public class TriviaWebServer : IDisposable
         if (_cachedHtml == null)
         {
             var asm = Assembly.GetExecutingAssembly();
-            using var stream = asm.GetManifestResourceStream("Lyracist.Trivia.Core.Resources.trivia.html");
+            await using var stream = asm.GetManifestResourceStream("Lyracist.Trivia.Core.Resources.trivia.html");
             if (stream != null)
             {
                 using var reader = new StreamReader(stream);
@@ -404,13 +403,13 @@ public class TriviaWebServer : IDisposable
 
     private static async Task SendCorsPreflightResponseAsync(NetworkStream stream)
     {
-        string response = "HTTP/1.1 204 No Content\r\n" +
-                          "Access-Control-Allow-Origin: *\r\n" +
-                          "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
-                          "Access-Control-Allow-Headers: Content-Type\r\n" +
-                          "Access-Control-Max-Age: 86400\r\n" +
-                          "Connection: close\r\n" +
-                          "Content-Length: 0\r\n\r\n";
+        const string response = "HTTP/1.1 204 No Content\r\n" +
+                                "Access-Control-Allow-Origin: *\r\n" +
+                                "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
+                                "Access-Control-Allow-Headers: Content-Type\r\n" +
+                                "Access-Control-Max-Age: 86400\r\n" +
+                                "Connection: close\r\n" +
+                                "Content-Length: 0\r\n\r\n";
         byte[] bytes = Encoding.UTF8.GetBytes(response);
         await stream.WriteAsync(bytes);
     }
@@ -445,7 +444,7 @@ public class TriviaWebServer : IDisposable
 
     private static async Task<string> ReadHeadersAsync(BufferedStream stream, CancellationToken token)
     {
-        using var ms = new MemoryStream();
+        await using var ms = new MemoryStream();
         byte[] buffer = new byte[1];
         int pattern = 0; // Tracks \r\n\r\n
 

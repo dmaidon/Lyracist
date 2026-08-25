@@ -1,3 +1,4 @@
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1118 const variables and RCS1123 arithmetic parentheses
 using System;
 using System.IO;
 
@@ -10,7 +11,7 @@ public static class ScaryokeAudio
         var ms = new MemoryStream();
         using (var writer = new BinaryWriter(ms, System.Text.Encoding.UTF8, true))
         {
-            int sampleRate = 11025;
+            const int sampleRate = 11025;
             writer.Write("RIFF".ToCharArray());
             writer.Write(0); // Placeholder
             writer.Write("WAVE".ToCharArray());
@@ -26,7 +27,7 @@ public static class ScaryokeAudio
             writer.Write(0); // Placeholder
 
             // Ticking sound: a very short click wave (~10 ms)
-            int sampleCount = 120;
+            const int sampleCount = 120;
             for (int i = 0; i < sampleCount; i++)
             {
                 double fade = (double)(sampleCount - i) / sampleCount;
@@ -50,7 +51,7 @@ public static class ScaryokeAudio
         var ms = new MemoryStream();
         using (var writer = new BinaryWriter(ms, System.Text.Encoding.UTF8, true))
         {
-            int sampleRate = 22050;
+            const int sampleRate = 22050;
             writer.Write("RIFF".ToCharArray());
             writer.Write(0); // Placeholder
             writer.Write("WAVE".ToCharArray());
@@ -66,33 +67,33 @@ public static class ScaryokeAudio
             writer.Write(0); // Placeholder
 
             // Descending "ha ha ha" laughs
-            int numSyllables = 8;
-            double durationPerSyllable = 0.20; // seconds
-            double gapDuration = 0.04; // seconds
+            const int numSyllables = 8;
+            const double durationPerSyllable = 0.20; // seconds
+            const double gapDuration = 0.04; // seconds
+            const int sylSamples = (int)(sampleRate * durationPerSyllable);
+            const int gapSamples = (int)(sampleRate * gapDuration);
             int totalSamples = 0;
             var random = new Random();
 
             for (int s = 0; s < numSyllables; s++)
             {
                 double baseFreq = 170 - (s * 12); // descending pitch
-                int sylSamples = (int)(sampleRate * durationPerSyllable);
-                int gapSamples = (int)(sampleRate * gapDuration);
 
                 // Syllable burst
                 for (int i = 0; i < sylSamples; i++)
                 {
                     double t = (double)i / sampleRate;
                     // Pitch envelope: slides down rapidly
-                    double freq = baseFreq * (1.6 - 0.6 * (t / durationPerSyllable));
-                    
+                    double freq = baseFreq * (1.6 - (0.6 * (t / durationPerSyllable)));
+
                     // Raspy frequency modulation (spooky vibrato)
                     freq += 18 * Math.Sin(2 * Math.PI * 40 * t);
 
                     double phase = 2 * Math.PI * freq * t;
                     double wave = Math.Sin(phase);
-                    
+
                     // Add noise component
-                    double noise = (random.NextDouble() * 2.0 - 1.0) * 0.35;
+                    double noise = ((random.NextDouble() * 2.0) - 1.0) * 0.35;
                     double val = wave + noise;
 
                     // Envelope: fast attack, linear decay

@@ -1,21 +1,4 @@
-// Created on Aug 1, 2026 @ 12:08:00 -> Add BrowserCastServer HTTP listener server
-// Rewritten on Aug 1, 2026 -> Replace HttpListener with a raw TcpListener. HttpListener binds
-// through the HTTP.sys kernel driver, which requires either Administrator or a one-time `netsh
-// http add urlacl` reservation for any prefix other than localhost - neither of which this app
-// has, so a wildcard bind silently fell back to localhost-only and became unreachable from any
-// device on the network (a cast target's image requests never even connected, showing a black
-// screen). TcpListener has no such restriction and needs nothing beyond the normal firewall rule.
-// Rewritten again on Aug 1, 2026 -> Serve an MJPEG multipart stream instead of one-shot images.
-// The rotation frame changes continuously (marquee bulb chase, crawl scroll, singer changes), but
-// a single static-image response can only be refreshed by having the caller issue a brand new Cast
-// LOAD command - and every LOAD is a full media transition on the receiver, which is what showed up
-// as visible flicker/blinking on the TV, while also being far too infrequent to show fast animations
-// like the marquee chase at all. A `multipart/x-mixed-replace` stream keeps one connection open and
-// pushes fresh frames down it continuously - no reload transition per frame, and pushed often enough
-// to actually show motion. This is the standard technique for casting a live/IP-camera-style image
-// feed to a Chromecast's Default Media Receiver (LOAD contentType "multipart/x-mixed-replace",
-// streamType "LIVE", no repeat LOAD needed).
-// Moved to Shared on Aug 1, 2026 -> byte-for-byte duplicated between Lyracist and KSRotation.
+// Edited on Aug 25, 2026 @ 06:40:00 -> Fix RCS1261 await using stream and RCS1118 const header
 using System;
 using System.IO;
 using System.Net;
@@ -29,7 +12,7 @@ namespace Lyracist.Shared;
 
 public class BrowserCastServer
 {
-    private const string MjpegBoundary = "lyracistframe";
+    public const string MjpegBoundary = "lyracistframe";
     private static readonly TimeSpan FrameInterval = TimeSpan.FromMilliseconds(400);
 
     private TcpListener? _listener;
@@ -91,7 +74,7 @@ public class BrowserCastServer
             try
             {
                 client.NoDelay = true;
-                using var stream = client.GetStream();
+                await using var stream = client.GetStream();
 
                 // Minimal HTTP/1.1 request read: enough to know the request is complete before
                 // we respond. We don't care about the path or headers - any request gets the
@@ -103,7 +86,7 @@ public class BrowserCastServer
 
                 Globals.LogInfo("Shared", $"BrowserCastServer stream started for {remote}");
 
-                var header =
+                const string header =
                     "HTTP/1.1 200 OK\r\n" +
                     $"Content-Type: multipart/x-mixed-replace; boundary={MjpegBoundary}\r\n" +
                     "Cache-Control: no-store\r\n" +

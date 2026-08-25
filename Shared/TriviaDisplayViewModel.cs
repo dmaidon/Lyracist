@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 12:10:30 -> Added SyncWithEngine and active state hydration to TriviaDisplayViewModel
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix S2325 static Copyright and RCS1163 event parameter discards
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,7 +18,7 @@ public partial class TriviaDisplayViewModel : ObservableObject
     private readonly TriviaGameEngine _engine;
     private readonly string _brandName;
 
-    public string Copyright => Lyracist.Shared.Globals.Copyright;
+    public static string Copyright => Lyracist.Shared.Globals.Copyright;
 
     [ObservableProperty]
     private string _venueName = "Main Stage";
@@ -126,10 +126,19 @@ public partial class TriviaDisplayViewModel : ObservableObject
     private string _winningTeamMembersRoster = string.Empty;
 
     [ObservableProperty]
-    private string _marqueeSummaryText = "🎯 LYRACIST LIVE TRIVIA • Scan the QR code on your phone to join now!";
+    private string _marqueeSummaryText = "🎯 LIVE TRIVIA • Scan the QR code on your phone to join now!";
 
     [ObservableProperty]
     private bool _isConnectInstructionsActive = true;
+
+    [ObservableProperty]
+    private bool _isAnnouncementActive;
+
+    [ObservableProperty]
+    private BitmapSource? _announcementImage;
+
+    [ObservableProperty]
+    private string _announcementDisplayName = string.Empty;
 
     [ObservableProperty]
     private BitmapSource? _wifiQrCodeImage;
@@ -169,11 +178,21 @@ public partial class TriviaDisplayViewModel : ObservableObject
     public ObservableCollection<TriviaMarqueeScoreItem> MarqueeScores { get; } = [];
     public ObservableCollection<AnswerDistributionItem> AnswerStats { get; } = [];
 
-    public TriviaDisplayViewModel(TriviaGameEngine engine, string venueName, string connectUrl, BitmapSource? qrCode, string? wifiSsid = null, string? wifiPassword = null, int preGameSecondsRemaining = 300, string brandName = "LYRACIST")
+    public TriviaDisplayViewModel(
+        TriviaGameEngine engine,
+        string venueName,
+        string connectUrl,
+        BitmapSource? qrCode,
+        string? wifiSsid = null,
+        string? wifiPassword = null,
+        int preGameSecondsRemaining = 300,
+        string brandName = "LYRACIST",
+        string? hostName = null)
     {
         _engine = engine;
-        _brandName = brandName;
         _venueName = venueName;
+        _hostName = hostName ?? "Trivia Master";
+        _brandName = string.IsNullOrWhiteSpace(brandName) ? "LYRACIST" : brandName;
         _connectUrl = connectUrl;
         _qrCodeImage = qrCode ?? GenerateQrBitmap(connectUrl);
         _isConnectInstructionsActive = (_engine.State == TriviaGameState.Lobby);
@@ -183,15 +202,15 @@ public partial class TriviaDisplayViewModel : ObservableObject
         UpdatePreGameCountdown(preGameSecondsRemaining);
         RefreshWelcomeBannerText();
 
-        _engine.StateChanged += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleStateChanged(e));
-        _engine.TimerTick += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleTimerTick(e));
-        _engine.QuestionStarted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleQuestionStarted(e));
-        _engine.AnswersEliminated += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswersEliminated(e));
-        _engine.AnswerRevealed += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswerRevealed(e));
-        _engine.LeaderboardUpdated += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => RefreshTopPlayers(e));
-        _engine.GameCompleted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleGameCompleted(e));
-        _engine.IntermissionTick += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionTick(e));
-        _engine.IntermissionCompleted += (s, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionCompleted());
+        _engine.StateChanged += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleStateChanged(e));
+        _engine.TimerTick += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleTimerTick(e));
+        _engine.QuestionStarted += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleQuestionStarted(e));
+        _engine.AnswersEliminated += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswersEliminated(e));
+        _engine.AnswerRevealed += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswerRevealed(e));
+        _engine.LeaderboardUpdated += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => RefreshTopPlayers(e));
+        _engine.GameCompleted += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleGameCompleted(e));
+        _engine.IntermissionTick += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionTick(e));
+        _engine.IntermissionCompleted += (_, _) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionCompleted());
 
         SyncWithEngine();
     }

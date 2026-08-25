@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 09:32:00 -> Remove hardcoded counts, timers, and scoring rules from category banners
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1118 const variables and RCS1123 parentheses
 using System;
 using System.Globalization;
 using System.IO;
@@ -304,7 +304,7 @@ public static class TriviaBannerGenerator
                 new SolidColorBrush(MediaColor.FromArgb(0xAA, 0, 0, 0)),
                 1.0
             );
-            double titleY = 410;
+            const double titleY = 410;
             dc.DrawText(titleShadow, new WpfPoint(((width - titleText.Width) / 2.0) + 4, titleY + 4));
             dc.DrawText(titleText, new WpfPoint((width - titleText.Width) / 2.0, titleY));
 
@@ -448,8 +448,8 @@ public static class TriviaBannerGenerator
             const double chipHeight = 150;
             const double chipGapX = 30;
             const double chipGapY = 26;
-            double gridWidth = columns * chipWidth + (columns - 1) * chipGapX;
-            double gridHeight = rows * chipHeight + Math.Max(0, rows - 1) * chipGapY;
+            double gridWidth = (columns * chipWidth) + ((columns - 1) * chipGapX);
+            double gridHeight = (rows * chipHeight) + (Math.Max(0, rows - 1) * chipGapY);
             double gridX = (width - gridWidth) / 2.0;
             const double gridY = 470;
 
@@ -457,8 +457,8 @@ public static class TriviaBannerGenerator
             {
                 int col = i % columns;
                 int row = i / columns;
-                double x = gridX + col * (chipWidth + chipGapX);
-                double y = gridY + row * (chipHeight + chipGapY);
+                double x = gridX + (col * (chipWidth + chipGapX));
+                double y = gridY + (row * (chipHeight + chipGapY));
                 DrawChip(dc, packs[i].Title, ResolveChipStyle(packs[i]), x, y, chipWidth, chipHeight);
             }
 
@@ -559,7 +559,7 @@ public static class TriviaBannerGenerator
             style.Icon, CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight,
             new Typeface(new MediaFontFamily("Segoe UI Emoji"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
             52, MediaBrushes.White, 1.0);
-        dc.DrawText(iconText, new WpfPoint(x + 20, y + (h - iconText.Height) / 2.0));
+        dc.DrawText(iconText, new WpfPoint(x + 20, y + ((h - iconText.Height) / 2.0)));
 
         var labelText = new FormattedText(
             label.ToUpperInvariant(), CultureInfo.InvariantCulture, WpfFlowDirection.LeftToRight,
@@ -570,6 +570,6 @@ public static class TriviaBannerGenerator
             MaxTextHeight = h - 20,
             Trimming = TextTrimming.CharacterEllipsis
         };
-        dc.DrawText(labelText, new WpfPoint(x + 95, y + (h - Math.Min(labelText.Height, h - 20)) / 2.0));
+        dc.DrawText(labelText, new WpfPoint(x + 95, y + ((h - Math.Min(labelText.Height, h - 20)) / 2.0)));
     }
 }

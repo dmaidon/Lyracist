@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 09:50:00 -> Add SetLastSongBanner stub to DisplayWindowService shim
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1163 parameter discards in WpfShims.cs
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -15,7 +15,7 @@ namespace System.Windows.Threading
         {
             _timer = new System.Timers.Timer();
             _timer.AutoReset = false;
-            _timer.Elapsed += (s, e) =>
+            _timer.Elapsed += (_, _) =>
             {
                 Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
                 {
@@ -43,6 +43,8 @@ namespace System.Windows
     {
         public static MessageBoxResult Show(string messageBoxText, string caption, MessageBoxButton button, MessageBoxImage icon)
         {
+            _ = button;
+            _ = icon;
             Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(async () =>
             {
                 if (Microsoft.Maui.Controls.Shell.Current?.CurrentPage != null)

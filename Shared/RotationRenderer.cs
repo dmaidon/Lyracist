@@ -1,11 +1,4 @@
-// Created on Aug 1, 2026 @ 12:05:00 -> Add RotationRenderer implementation
-// Moved to Shared on Aug 1, 2026 -> generalized to ICaptureSource so both apps' rotation display
-// windows (Lyracist.RotationWindow, KSRotation.SingerDisplayWindow) can share this. The window is
-// captured via a lazily-invoked delegate rather than injected directly - CastingService holds an
-// IRotationRenderer for its whole lifetime, and if constructing this eagerly touched the actual
-// window (a DI singleton with its own constructor dependency chain), that chain running mid-startup
-// caused a circular DI resolution hang in Lyracist. Deferring the window lookup until a frame is
-// actually requested (i.e. only once a cast is really happening) avoids that entirely.
+// Edited on Aug 25, 2026 @ 06:41:00 -> Fix RCS1146 conditional access
 using System;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -39,7 +32,7 @@ public class RotationRenderer : IRotationRenderer
             dispatcher.Invoke(() =>
             {
                 var window = _windowProvider();
-                if (window != null && window.IsLoaded)
+                if (window?.IsLoaded == true)
                 {
                     var bmp = window.CaptureBitmap();
                     bmp.Freeze();

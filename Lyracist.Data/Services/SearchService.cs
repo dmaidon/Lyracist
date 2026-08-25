@@ -1,4 +1,4 @@
-// Edited on Aug 7, 2026 @ 08:30:00 -> Add self-healing FTS5 virtual table detection and recreation
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1261 async disposal on commands and RCS1118 const SQL strings
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -37,7 +37,7 @@ namespace Lyracist.Data.Services
             var conn = new SqliteConnection(LyracistDbContext.GetConnectionString());
             await conn.OpenAsync();
 
-            using (var cmd = conn.CreateCommand())
+            await using (var cmd = conn.CreateCommand())
             {
                 cmd.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
                 await cmd.ExecuteNonQueryAsync();
@@ -203,7 +203,7 @@ namespace Lyracist.Data.Services
                 var connection = await GetSharedConnectionAsync();
 
                 // Query matching songs and join with their respective audio settings, clamping to 150 items max
-                string sql = @"
+                const string sql = @"
                     SELECT s.*, a.* 
                     FROM Songs s
                     LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId
@@ -285,7 +285,7 @@ namespace Lyracist.Data.Services
 
             try
             {
-                using var command = connection.CreateCommand();
+                await using var command = connection.CreateCommand();
                 var currentTransaction = _context.Database.CurrentTransaction?.GetDbTransaction();
                 if (currentTransaction != null)
                 {
@@ -365,7 +365,7 @@ namespace Lyracist.Data.Services
                     cmd.ExecuteNonQuery();
                 }
 
-                string sql = @"
+                const string sql = @"
                     SELECT s.*, a.* 
                     FROM Songs s
                     LEFT JOIN SongAudioSettings a ON s.SongId = a.SongId

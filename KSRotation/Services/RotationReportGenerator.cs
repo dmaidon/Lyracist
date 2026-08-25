@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 12:29:00 -> Include Duet Partner in PDF and CSV reports
+// Edited on Aug 25, 2026 @ 06:39:00 -> Fix RCS1118 const variable in DrawSummary
 using KSRotation.Models;
 using PdfSharp;
 using PdfSharp.Drawing;
@@ -336,7 +336,7 @@ namespace KSRotation.Services
                 int totalKaraokeSingers, int activeKaraokeSingers, int inactiveKaraokeSingers, int totalKaraokeSongs,
                 int totalMusicRequesters, int totalMusicTracks)
             {
-                double height = 60;
+                const double height = 60;
                 if (_yPos + height > _pageHeight - _margin)
                 {
                     AddNewPage();

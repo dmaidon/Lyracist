@@ -1,6 +1,4 @@
-// Edited on Aug 1, 2026 @ 12:50:00 -> Register DisplayTarget enum in AppJsonContext
-// Edited on Jul 16, 2026 @ 11:00:00 -> JSON context generation
-// Last Edit: Jun 30, 2026 08:40 - Source-generated JSON metadata for the app's persisted types and the rotation feed.
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1251 empty braces formatting
 using KSRotation.Models;
 using Lyracist.Shared;
 using System.Collections.Generic;
@@ -26,7 +24,5 @@ namespace KSRotation.Services
     [JsonSerializable(typeof(List<PatronRequest>))]
     [JsonSerializable(typeof(RequestedSong))]
     [JsonSerializable(typeof(List<RequestedSong>))]
-    public partial class AppJsonContext : JsonSerializerContext
-    {
-    }
+    public partial class AppJsonContext : JsonSerializerContext;
 }

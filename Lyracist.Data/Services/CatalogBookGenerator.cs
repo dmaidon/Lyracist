@@ -1,4 +1,4 @@
-// Edited on Aug 5, 2026 @ 06:58:00 -> Add txt file support for catalog book generator
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix S1192 duplicated string literals with private constants
 using System;
 using System.IO;
 using System.Linq;
@@ -15,6 +15,12 @@ namespace Lyracist.Data.Services
 {
     public static class CatalogBookGenerator
     {
+        private const string KaraokeCatalogTitle = "Karaoke Catalog";
+        private const string MusicCatalogTitle = "Music Catalog";
+        private const string BorderColor = "D3D3D3";
+        private const string InsideBorderColor = "E0E0E0";
+        private const string ArialFontFamily = "Arial";
+
         static CatalogBookGenerator()
         {
             try
@@ -48,7 +54,7 @@ namespace Lyracist.Data.Services
                     new ParagraphProperties(new Justification() { Val = JustificationValues.Center }),
                     new Run(
                         new RunProperties(new Bold(), new FontSize() { Val = "32" }), // 16pt font size
-                        new Text(isKaraoke ? "Karaoke Catalog" : "Music Catalog")
+                        new Text(isKaraoke ? KaraokeCatalogTitle : MusicCatalogTitle)
                     )
                 );
                 body.Append(titlePara);
@@ -62,12 +68,12 @@ namespace Lyracist.Data.Services
                 // Style borders & widths
                 TableProperties tblProp = new TableProperties(
                     new TableBorders(
-                        new TopBorder() { Val = BorderValues.Single, Size = 4, Color = "D3D3D3" },
-                        new BottomBorder() { Val = BorderValues.Single, Size = 4, Color = "D3D3D3" },
-                        new LeftBorder() { Val = BorderValues.Single, Size = 4, Color = "D3D3D3" },
-                        new RightBorder() { Val = BorderValues.Single, Size = 4, Color = "D3D3D3" },
-                        new InsideHorizontalBorder() { Val = BorderValues.Single, Size = 4, Color = "E0E0E0" },
-                        new InsideVerticalBorder() { Val = BorderValues.Single, Size = 4, Color = "E0E0E0" }
+                        new TopBorder() { Val = BorderValues.Single, Size = 4, Color = BorderColor },
+                        new BottomBorder() { Val = BorderValues.Single, Size = 4, Color = BorderColor },
+                        new LeftBorder() { Val = BorderValues.Single, Size = 4, Color = BorderColor },
+                        new RightBorder() { Val = BorderValues.Single, Size = 4, Color = BorderColor },
+                        new InsideHorizontalBorder() { Val = BorderValues.Single, Size = 4, Color = InsideBorderColor },
+                        new InsideVerticalBorder() { Val = BorderValues.Single, Size = 4, Color = InsideBorderColor }
                     ),
                     new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct }
                 );
@@ -139,13 +145,13 @@ namespace Lyracist.Data.Services
             string filePath = Path.Combine(ReportsDirectory, fileName);
 
             PdfDocument document = new();
-            document.Info.Title = isKaraoke ? "Karaoke Catalog" : "Music Catalog";
+            document.Info.Title = isKaraoke ? KaraokeCatalogTitle : MusicCatalogTitle;
             document.Info.Author = "Lyracist System";
 
-            XFont titleFont = new("Arial", 14, XFontStyleEx.Bold);
-            XFont headerFont = new("Arial", 10, XFontStyleEx.Bold);
-            XFont dataFont = new("Arial", 9, XFontStyleEx.Regular);
-            XFont footerFont = new("Arial", 8, XFontStyleEx.Regular);
+            XFont titleFont = new(ArialFontFamily, 14, XFontStyleEx.Bold);
+            XFont headerFont = new(ArialFontFamily, 10, XFontStyleEx.Bold);
+            XFont dataFont = new(ArialFontFamily, 9, XFontStyleEx.Regular);
+            XFont footerFont = new(ArialFontFamily, 8, XFontStyleEx.Regular);
 
             XStringFormat leftAlign = new() { Alignment = XStringAlignment.Near, LineAlignment = XLineAlignment.Center };
 
@@ -170,7 +176,7 @@ namespace Lyracist.Data.Services
                 pageNumber++;
 
                 // Draw title
-                gfx.DrawString(isKaraoke ? "Karaoke Catalog" : "Music Catalog", titleFont, XBrushes.DarkSlateGray, new XRect(40, 30, 532, 20), leftAlign);
+                gfx.DrawString(isKaraoke ? KaraokeCatalogTitle : MusicCatalogTitle, titleFont, XBrushes.DarkSlateGray, new XRect(40, 30, 532, 20), leftAlign);
 
                 // Draw table header
                 gfx.DrawRectangle(XBrushes.GhostWhite, new XRect(40, 55, 532, 20));
@@ -236,7 +242,7 @@ namespace Lyracist.Data.Services
 
             using (var writer = new StreamWriter(filePath))
             {
-                string title = isKaraoke ? "Karaoke Catalog" : "Music Catalog";
+                string title = isKaraoke ? KaraokeCatalogTitle : MusicCatalogTitle;
                 writer.WriteLine(title);
                 writer.WriteLine(new string('=', title.Length));
                 writer.WriteLine();
@@ -308,7 +314,6 @@ namespace Lyracist.Data.Services
                 {
                     return File.ReadAllBytes(fontPath);
                 }
-                
                 // Fallback to regular arial
                 fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts", "arial.ttf");
                 if (File.Exists(fontPath))
@@ -319,15 +324,15 @@ namespace Lyracist.Data.Services
                 return null;
             }
 
-            public PdfSharp.Fonts.FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
+            public PdfSharp.Fonts.FontResolverInfo ResolveTypeface(string familyName, bool bold, bool italic)
             {
                 if (familyName.Equals("Arial", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (isBold && isItalic)
+                    if (bold && italic)
                         return new PdfSharp.Fonts.FontResolverInfo("Arial-BoldItalic");
-                    else if (isBold)
+                    else if (bold)
                         return new PdfSharp.Fonts.FontResolverInfo("Arial-Bold");
-                    else if (isItalic)
+                    else if (italic)
                         return new PdfSharp.Fonts.FontResolverInfo("Arial-Italic");
                     else
                         return new PdfSharp.Fonts.FontResolverInfo("Arial");

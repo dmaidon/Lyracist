@@ -1,4 +1,4 @@
-// Last Edit: Jun 30, 2026 08:40 - Round-trip tests for StringListStore, SettingsService, and NightDatabaseService.
+// Edited on Aug 25, 2026 @ 06:39:00 -> Fix xUnit2033 return values of Assert.Single
 using KSRotation.Models;
 using KSRotation.Services;
 
@@ -67,11 +67,11 @@ public class PersistenceTests
         NightDatabaseService.Save([singer], history);
         NightDbState loaded = NightDatabaseService.Load();
 
-        Assert.Single(loaded.ActiveQueue);
-        Assert.Equal("Alice", loaded.ActiveQueue[0].Name);
-        Assert.Equal(singer.Id, loaded.ActiveQueue[0].Id); // stable Guid survives round-trip
-        Assert.Single(loaded.PerformanceHistory);
-        Assert.Equal(1, loaded.PerformanceHistory[0].Round);
+        var loadedSinger = Assert.Single(loaded.ActiveQueue);
+        Assert.Equal("Alice", loadedSinger.Name);
+        Assert.Equal(singer.Id, loadedSinger.Id); // stable Guid survives round-trip
+        var loadedHistory = Assert.Single(loaded.PerformanceHistory);
+        Assert.Equal(1, loadedHistory.Round);
 
         NightDatabaseService.Flush();
         NightDbState afterFlush = NightDatabaseService.Load();

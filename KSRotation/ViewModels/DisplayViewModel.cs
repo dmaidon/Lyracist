@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 12:11:00 -> Format singer names with duet partner for billboard projection
+// Edited on Aug 25, 2026 @ 06:37:00 -> Clean up whitespace (RCS1037)
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System.Collections.Generic;
@@ -219,7 +219,7 @@ namespace KSRotation.ViewModels
                     FullRotation.Add(singer);
 
                     string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
-                    string prefixAndSinger = singer.IsMusic 
+                    string prefixAndSinger = singer.IsMusic
                         ? $"{(offset == 0 ? "★" : $"{offset + 1}")}. [MUSIC]"
                         : $"{(offset == 0 ? "★" : $"{offset + 1}")}. {sName}";
 

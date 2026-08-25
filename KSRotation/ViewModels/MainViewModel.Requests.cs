@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 17:49:00 -> Add IsKioskQrVisible property for tablet kiosk portal selection
+// Edited on Aug 25, 2026 @ 06:37:00 -> Fix RCS1146 conditional access, RCS1196 extension calls, and RCS1037 whitespace
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -72,9 +72,9 @@ namespace KSRotation.ViewModels
                 ).Trim();
             }
 
-            var requestedSongs = request.Songs != null && request.Songs.Count > 0
+            var requestedSongs = request.Songs?.Count > 0
                 ? request.Songs
-                : new List<RequestedSong> { new RequestedSong(request.Song, request.Artist) };
+                : [new RequestedSong(request.Song, request.Artist)];
 
             var existingSinger = Singers.FirstOrDefault(s => IsSameSingerName(s.Name, normalizedName) && s.IsMusic == (request.RequestType == "Music"));
             if (existingSinger != null)
@@ -184,8 +184,8 @@ namespace KSRotation.ViewModels
                 try
                 {
                     _requestServer = new PatronRequestServer(
-                        p, 
-                        HandleRequestReceived, 
+                        p,
+                        HandleRequestReceived,
                         GetRotationJson,
                         VerifyDjPin,
                         GetRequestsJson,
@@ -225,7 +225,7 @@ namespace KSRotation.ViewModels
             KioskConnectionUrl = started
                 ? $"http://{host}:{activePort}/kiosk.html"
                 : "";
- 
+
             _activeServerPort = activePort;
  
             QrCodeImage = started ? GenerateQRCode(ConnectionUrl) : null;
@@ -276,7 +276,7 @@ namespace KSRotation.ViewModels
         private static ImageSource? GenerateQRCode(string text, byte[]? darkColorRgb = null, byte[]? lightColorRgb = null)
         {
             if (string.IsNullOrEmpty(text)) return null;
- 
+
             try
             {
                 using QRCodeGenerator qrGenerator = new();
@@ -357,7 +357,7 @@ namespace KSRotation.ViewModels
                 isRotationStart = s.IsRotationStart,
                 vocalRange = s.VocalRange,
                 customTitle = s.CustomTitle,
-                queuedSongs = s.QueuedSongs.Select(q => new QueuedSongDto { song = q.Song, artist = q.Artist }).ToList(),
+                queuedSongs = s.QueuedSongs.ConvertAll(q => new QueuedSongDto { song = q.Song, artist = q.Artist }),
                 song1Completed = s.Song1Completed,
                 song2Completed = s.Song2Completed,
                 song3Completed = s.Song3Completed,
@@ -706,12 +706,12 @@ namespace KSRotation.ViewModels
                     {
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
                         if (singer == null) return "Singer not found.";
-                        
+
                         if (int.TryParse(extraData, out int round) && round >= 1 && round <= 10)
                         {
                             bool isCompleted = action.Equals("complete-round", StringComparison.OrdinalIgnoreCase);
                             singer.SetRoundCompleted(round, isCompleted);
-                            
+
                             RotationHelpers.UpdateNextSingerHighlight(Singers);
                             RebuildRotationJsonCacheNow();
                             QueueSaveDatabase();
@@ -756,7 +756,7 @@ namespace KSRotation.ViewModels
 
         private void AcceptAllPendingRequests()
         {
-            var requests = System.Linq.Enumerable.ToList(IncomingRequests);
+            var requests = IncomingRequests.ToList();
             foreach (var req in requests)
             {
                 AcceptRequest(req);
