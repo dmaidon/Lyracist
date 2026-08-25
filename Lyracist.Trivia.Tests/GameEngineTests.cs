@@ -50,6 +50,26 @@ public class GameEngineTests
     }
 
     [Fact]
+    public void RegisterPlayer_TruncatesOverlongNameAndTeamName()
+    {
+        using var engine = new TriviaGameEngine();
+        string longName = new string('A', 40);
+        string longTeam = new string('B', 40);
+
+        var player = engine.RegisterPlayer(longName, longTeam);
+
+        Assert.Equal(TriviaGameEngine.MaxPlayerNameLength, player.Name.Length);
+        Assert.Equal(new string('A', TriviaGameEngine.MaxPlayerNameLength), player.Name);
+        Assert.Equal(TriviaGameEngine.MaxPlayerNameLength, player.TeamName.Length);
+
+        // A second registration with the same overlong name must resolve back to the same
+        // truncated player instead of silently creating a duplicate.
+        var again = engine.RegisterPlayer(longName);
+        Assert.Same(player, again);
+        Assert.Single(engine.GetPlayers());
+    }
+
+    [Fact]
     public void StartGame_ResetsPlayerScoresAndSetsLobbyState()
     {
         using var engine = new TriviaGameEngine();
