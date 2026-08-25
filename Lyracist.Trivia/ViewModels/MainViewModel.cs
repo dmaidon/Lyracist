@@ -1032,6 +1032,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         if (player != null)
         {
+            _engine.RemovePlayer(player.Name);
             Players.Remove(player);
         }
     }

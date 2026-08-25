@@ -211,7 +211,7 @@ public class TriviaWebServer : IDisposable
                 var joinReq = JsonSerializer.Deserialize<JoinRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 if (joinReq != null && !string.IsNullOrWhiteSpace(joinReq.Name))
                 {
-                    string trimmedName = joinReq.Name.Trim();
+                    string trimmedName = TriviaGameEngine.NormalizePlayerName(joinReq.Name);
 
                     // If someone is already actively connected under this name, only let the join
                     // through if the request carries that same player's PlayerId (a legitimate
@@ -252,7 +252,7 @@ public class TriviaWebServer : IDisposable
                 var subReq = JsonSerializer.Deserialize<SubmitRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 if (subReq != null && !string.IsNullOrWhiteSpace(subReq.PlayerName))
                 {
-                    string trimmedName = subReq.PlayerName.Trim();
+                    string trimmedName = TriviaGameEngine.NormalizePlayerName(subReq.PlayerName);
 
                     // If this name's PlayerId no longer matches who the caller thinks they are,
                     // another device has since taken over that name (or the caller's own session
@@ -295,7 +295,7 @@ public class TriviaWebServer : IDisposable
             if (!string.IsNullOrEmpty(queryString))
             {
                 var qParams = HttpUtility.ParseQueryString(queryString);
-                playerName = qParams["player"] ?? "";
+                playerName = TriviaGameEngine.NormalizePlayerName(qParams["player"]);
                 requestPlayerId = qParams["playerId"] ?? "";
             }
 

@@ -80,6 +80,21 @@ public class TriviaGameEngine : IDisposable
         return _players.Values.OrderByDescending(p => p.TotalScore).ToList();
     }
 
+    /// Matches the mobile join form's maxlength="24" on both the name and team inputs - that
+    /// attribute is client-side only, so this is the actual enforcement point. Callers that
+    /// look a player up by name (TriviaWebServer's join/submit/state handlers) must run the raw
+    /// client-supplied name through NormalizePlayerName before comparing/looking up, so a long
+    /// name always resolves to the same truncated key RegisterPlayer stores it under - otherwise
+    /// a stale untruncated name from a client that never learned about the truncation would
+    /// silently fail to match its own player.
+    public const int MaxPlayerNameLength = 24;
+
+    public static string NormalizePlayerName(string? name)
+    {
+        string trimmed = (name ?? string.Empty).Trim();
+        return trimmed.Length > MaxPlayerNameLength ? trimmed[..MaxPlayerNameLength].TrimEnd() : trimmed;
+    }
+
     public bool RemovePlayer(string name)
     {
         if (!_players.TryRemove(name.Trim(), out _)) return false;
@@ -89,16 +104,17 @@ public class TriviaGameEngine : IDisposable
 
     public TriviaPlayer RegisterPlayer(string name, string teamName = "")
     {
-        string trimmed = name.Trim();
+        string trimmed = NormalizePlayerName(name);
         if (string.IsNullOrWhiteSpace(trimmed))
         {
             trimmed = $"Player_{_players.Count + 1}";
         }
+        string cleanTeam = NormalizePlayerName(teamName);
 
         var player = _players.GetOrAdd(trimmed, key => new TriviaPlayer
         {
             Name = key,
-            TeamName = string.IsNullOrWhiteSpace(teamName) ? string.Empty : teamName.Trim(),
+            TeamName = cleanTeam,
             IsConnected = true,
             ConnectedAt = DateTime.Now,
             LastSeenAt = DateTime.Now
@@ -255,6 +271,8 @@ public class TriviaGameEngine : IDisposable
     private void ScoreAnswer(TriviaPlayer p, TriviaQuestion q)
     {
         double roundMultiplier = CurrentSession.CurrentRound?.PointMultiplier ?? 1.0;
+        p.StreakBeforeAnswer = p.CurrentStreak;
+        p.MaxStreakBeforeAnswer = p.MaxStreak;
         p.TotalAnswered++;
 
         if (p.LastAnswerIndex == q.CorrectAnswerIndex)
@@ -546,6 +564,8 @@ public class TriviaGameEngine : IDisposable
                     {
                         p.TotalCorrect = Math.Max(0, p.TotalCorrect - 1);
                     }
+                    p.CurrentStreak = p.StreakBeforeAnswer;
+                    p.MaxStreak = p.MaxStreakBeforeAnswer;
                     p.LastPointsEarned = 0;
                     p.LastAnswerIndex = -1;
                     p.HasAnsweredCurrentQuestion = false;
