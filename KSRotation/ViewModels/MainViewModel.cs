@@ -646,6 +646,9 @@ namespace KSRotation.ViewModels
         /// <summary>Count of active karaoke singers in the rotation, excluding background music entries (<see cref="SingerEntry.IsMusic"/>) and inactive singers (<see cref="SingerEntry.IsInactive"/>).</summary>
         public int SingersInRotationCount => Singers.Count(s => !s.IsMusic && !s.IsInactive);
 
+        /// <summary>Whether "Load Test Data" is safe to use — false once a real, in-progress queue exists, so an accidental tap can't wipe it.</summary>
+        public bool CanLoadTestData => Singers.Count == 0;
+
         public ObservableCollection<string> KnownSingers { get; } = [];
         public ObservableCollection<string> FilteredSingers { get; } = [];
 
@@ -1816,6 +1819,7 @@ namespace KSRotation.ViewModels
 
             RebuildRotationJsonCacheNow();
             OnPropertyChanged(nameof(SingersInRotationCount));
+            OnPropertyChanged(nameof(CanLoadTestData));
         }
 
         private void OnSingerEntryPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

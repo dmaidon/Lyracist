@@ -49,10 +49,16 @@ namespace KSRotation.Services
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, PinAttemptState> _pinAttemptsByIp = new();
 
+        // Once distinct client IPs pile up (long event, many patron devices), sweep out entries that
+        // haven't attempted in a while so the dictionary doesn't grow for the lifetime of the server.
+        private const int PinAttemptSweepThreshold = 256;
+        private static readonly TimeSpan PinAttemptStaleThreshold = TimeSpan.FromMinutes(30);
+
         private sealed class PinAttemptState
         {
             public int FailedCount;
             public DateTime LockedUntilUtc;
+            public DateTime LastAttemptUtc;
         }
 
         public void Start()
@@ -73,6 +79,11 @@ namespace KSRotation.Services
             catch (Exception ex)
             {
                 LoggerService.LogError("PatronRequestServer.Stop", ex);
+            }
+            finally
+            {
+                _cts?.Dispose();
+                _cts = null;
             }
         }
 
@@ -771,8 +782,11 @@ namespace KSRotation.Services
         {
             PinAttemptState state = _pinAttemptsByIp.GetOrAdd(clientIp, _ => new PinAttemptState());
 
+            bool result;
             lock (state)
             {
+                state.LastAttemptUtc = DateTime.UtcNow;
+
                 if (DateTime.UtcNow < state.LockedUntilUtc)
                 {
                     lockedOut = true;
@@ -784,18 +798,39 @@ namespace KSRotation.Services
                     state.FailedCount = 0;
                     state.LockedUntilUtc = DateTime.MinValue;
                     lockedOut = false;
-                    return true;
+                    result = true;
                 }
-
-                state.FailedCount++;
-                if (state.FailedCount >= MaxPinAttemptsBeforeLockout)
+                else
                 {
-                    state.LockedUntilUtc = DateTime.UtcNow.Add(PinLockoutDuration);
-                    state.FailedCount = 0;
-                }
+                    state.FailedCount++;
+                    if (state.FailedCount >= MaxPinAttemptsBeforeLockout)
+                    {
+                        state.LockedUntilUtc = DateTime.UtcNow.Add(PinLockoutDuration);
+                        state.FailedCount = 0;
+                    }
 
-                lockedOut = false;
-                return false;
+                    lockedOut = false;
+                    result = false;
+                }
+            }
+
+            if (_pinAttemptsByIp.Count > PinAttemptSweepThreshold)
+            {
+                SweepStalePinAttempts();
+            }
+
+            return result;
+        }
+
+        private void SweepStalePinAttempts()
+        {
+            DateTime cutoff = DateTime.UtcNow - PinAttemptStaleThreshold;
+            foreach (KeyValuePair<string, PinAttemptState> entry in _pinAttemptsByIp)
+            {
+                if (entry.Value.LastAttemptUtc < cutoff)
+                {
+                    _pinAttemptsByIp.TryRemove(entry.Key, out _);
+                }
             }
         }
 

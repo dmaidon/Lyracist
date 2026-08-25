@@ -73,6 +73,8 @@ public class TriviaWebServer : IDisposable
         }
         finally
         {
+            _cts?.Dispose();
+            _cts = null;
             IsRunning = false;
         }
     }
