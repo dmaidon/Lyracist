@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 17:48:00 -> Embed kiosk.html resource for Tablet Kiosk server support -->
+<!-- Edited on Aug 25, 2026 @ 06:15:00 -> Add AllowUnsafeBlocks for WinUI/CsWinRT interop -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -9,6 +9,7 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DefineConstants>MAUI;$(DefineConstants)</DefineConstants>
 		<NoWarn>$(NoWarn);CA1416;CA1422;0436</NoWarn>
 
@@ -43,9 +44,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.8.22.228</AssemblyVersion>
+		<AssemblyVersion>26.8.22.229</AssemblyVersion>
 
-		<FileVersion>26.8.22.228</FileVersion>
+		<FileVersion>26.8.22.229</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 

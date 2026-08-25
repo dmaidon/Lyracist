@@ -1,14 +1,8 @@
-// Edited on Aug 4, 2026 @ 10:48:00 -> Disable CA1416 warning for Android target compatibility
-// Created on Aug 1, 2026 @ 12:00:00 -> Add LocalNetworkHelper for resolving the machine's LAN IPv4 address
-// Updated on Aug 1, 2026 @ 12:05:00 -> Prefer private-range (RFC 1918) addresses; machines with a second NIC
-// on a public/routed network (e.g. a dedicated WAN circuit) would otherwise have that adapter
-// picked over the actual LAN, since interface order here has nothing to do with route metric.
+// Edited on Aug 25, 2026 @ 06:40:00 -> Remove unnecessary pragma restore (IDE0079) and clean up LINQ predicates
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-
-#pragma warning disable CA1416 // Validate platform compatibility
 
 namespace Lyracist.Shared
 {
@@ -30,11 +24,10 @@ namespace Lyracist.Shared
             try
             {
                 var candidates = NetworkInterface.GetAllNetworkInterfaces()
-                    .Where(nic => nic.OperationalStatus == OperationalStatus.Up)
-                    .Where(nic => nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet
-                               || nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
-                    .Where(nic => nic.GetIPProperties().GatewayAddresses
-                        .Any(g => g.Address.AddressFamily == AddressFamily.InterNetwork))
+                    .Where(nic => nic.OperationalStatus == OperationalStatus.Up
+                               && (nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+                                   || nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
+                               && nic.GetIPProperties().GatewayAddresses.Any(g => g.Address.AddressFamily == AddressFamily.InterNetwork))
                     .SelectMany(nic => nic.GetIPProperties().UnicastAddresses)
                     .Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
                     .Select(a => a.Address)
@@ -82,5 +75,3 @@ namespace Lyracist.Shared
         }
     }
 }
-
-#pragma warning restore CA1416

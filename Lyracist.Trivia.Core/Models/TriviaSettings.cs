@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 06:18:00 -> Added TieredScoringEnabled, Points4OptionsPercent, Points3OptionsPercent, and Points2OptionsPercent settings
+// Edited on Aug 25, 2026 @ 06:15:00 -> Add XML summary tags to TotalGamesToPlay documentation comment
 using System;
 
 namespace Lyracist.Trivia.Core.Models;
@@ -26,6 +26,7 @@ public class TriviaSettings
 
     // Tiered Option Value Scoring (100% / 70% / 40%)
     public bool TieredScoringEnabled { get; set; } = true;
+
     public int Points4OptionsPercent { get; set; } = 100;
     public int Points3OptionsPercent { get; set; } = 70;
     public int Points2OptionsPercent { get; set; } = 40;
@@ -35,10 +36,13 @@ public class TriviaSettings
     public bool AutoStartNextGameEnabled { get; set; } = true;
     public int NextGameDelayMinutes { get; set; } = 3;
 
+    /// <summary>
     /// Caps how many games auto-start plays before stopping instead of looping forever.
     /// 0 (or less) means unlimited - the pre-existing behavior. Only meaningful when
     /// AutoStartNextGameEnabled is true; see TriviaGameEngine.GamesPlayedCount/CompleteGame.
+    /// </summary>
     public int TotalGamesToPlay { get; set; } = 0;
+
     public bool MarqueeEnabled { get; set; } = true;
     public double MarqueeSpeed { get; set; } = 50.0;
     public int DisplayMonitorIndex { get; set; } = 1;

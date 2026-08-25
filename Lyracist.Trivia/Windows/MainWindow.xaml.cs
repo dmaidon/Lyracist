@@ -1,6 +1,7 @@
-// Edited on Aug 20, 2026 @ 12:17:00 -> Added ExitButton_Click and explicit Application.Current.Shutdown on close
+// Edited on Aug 25, 2026 @ 06:43:00 -> Fix projection window wiring and event handlers
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using Lyracist.Shared;
 using Lyracist.Trivia.ViewModels;
@@ -20,50 +21,34 @@ public partial class MainWindow : Window
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        // Subscribe to TargetMonitorChanged so when the Game Master selects a monitor in settings,
+        // the TV display window immediately repositions to that physical display.
         if (DataContext is MainViewModel vm)
         {
-            vm.TargetMonitorChanged += (s, deviceName) =>
+            vm.TargetMonitorChanged += (_, _) =>
             {
-                Dispatcher.Invoke(() => PositionDisplayWindow(deviceName));
+                Dispatcher.Invoke(RepositionDisplayWindow);
             };
-            vm.RequestOpenProjectionWindow += (s, e) =>
+
+            // Hook up projection window actions
+            vm.RequestOpenProjectionWindow += (_, _) =>
             {
-                Dispatcher.Invoke(() => OpenProjectionWindow_Click(this, new RoutedEventArgs()));
+                Dispatcher.Invoke(() => EnsureDisplayWindowOpen(vm));
             };
+
+            // Register the DisplayViewModel on startup if the window is open
+            if (_displayWindow?.DataContext is DisplayViewModel dvm)
+            {
+                vm.RegisterDisplayViewModel(dvm);
+            }
         }
     }
 
     private void OpenProjectionWindow_Click(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not MainViewModel vm) return;
-
-        // Start pre-game countdown when screen is cast to monitor
-        vm.OnProjectionOpened();
-
-        if (_displayWindow == null || !_displayWindow.IsLoaded)
+        if (DataContext is MainViewModel vm)
         {
-            var displayVm = new DisplayViewModel(vm.Engine, vm.VenueName, vm.ConnectUrl, vm.QrCodeImage, vm.WifiSsid, vm.WifiPassword, vm.PreGameSecondsRemaining);
-            vm.RegisterDisplayViewModel(displayVm);
-            _displayWindow = new TriviaDisplayWindow
-            {
-                DataContext = displayVm
-            };
-            _displayWindow.Closed += (s, e) =>
-            {
-                _displayWindow = null;
-            };
-            PositionDisplayWindow(vm.SelectedMonitor?.DeviceName);
-            _displayWindow.Show();
-            PositionDisplayWindow(vm.SelectedMonitor?.DeviceName);
-        }
-        else
-        {
-            if (_displayWindow.DataContext is DisplayViewModel existingDvm)
-            {
-                vm.RegisterDisplayViewModel(existingDvm);
-            }
-            PositionDisplayWindow(vm.SelectedMonitor?.DeviceName);
-            _displayWindow.Activate();
+            EnsureDisplayWindowOpen(vm);
         }
     }
 
@@ -72,15 +57,53 @@ public partial class MainWindow : Window
         Close();
     }
 
-    private void PositionDisplayWindow(string? deviceName)
+    private void EnsureDisplayWindowOpen(MainViewModel mainVm)
+    {
+        if (_displayWindow == null || !_displayWindow.IsLoaded)
+        {
+            var displayVm = new DisplayViewModel(
+                mainVm.Engine,
+                mainVm.VenueName,
+                mainVm.ConnectUrl,
+                mainVm.QrCodeImage,
+                mainVm.WifiSsid,
+                mainVm.WifiPassword,
+                mainVm.PreGameSecondsRemaining,
+                mainVm.HostName);
+
+            _displayWindow = new TriviaDisplayWindow
+            {
+                DataContext = displayVm
+            };
+            _displayWindow.Closed += (_, _) =>
+            {
+                _displayWindow = null;
+                mainVm.RegisterDisplayViewModel(null);
+            };
+            mainVm.RegisterDisplayViewModel(displayVm);
+            RepositionDisplayWindow();
+            _displayWindow.Show();
+            mainVm.OnProjectionOpened();
+        }
+        else
+        {
+            RepositionDisplayWindow();
+            _displayWindow.Activate();
+            mainVm.OnProjectionOpened();
+        }
+    }
+
+    private void RepositionDisplayWindow()
     {
         if (_displayWindow == null) return;
 
-        var screens = Screen.AllScreens;
-        var targetScreen = WindowPositioner.ResolveByDeviceName(screens, deviceName);
-        if (targetScreen != null)
+        if (DataContext is MainViewModel vm)
         {
-            _displayWindow.WindowState = WindowState.Normal;
+            string targetDevice = vm.Settings.SelectedMonitorDevice;
+            Screen targetScreen = Screen.AllScreens.FirstOrDefault(s => s.DeviceName == targetDevice)
+                ?? Screen.PrimaryScreen
+                ?? Screen.AllScreens[0];
+
             _displayWindow.WindowStartupLocation = WindowStartupLocation.Manual;
             WindowPositioner.FillArea(_displayWindow, targetScreen.Bounds);
         }
@@ -92,7 +115,10 @@ public partial class MainWindow : Window
         {
             _displayWindow?.Close();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _ = ex;
+        }
 
         if (DataContext is IDisposable disposable)
         {
@@ -100,7 +126,10 @@ public partial class MainWindow : Window
             {
                 disposable.Dispose();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _ = ex;
+            }
         }
 
         System.Windows.Application.Current?.Shutdown();

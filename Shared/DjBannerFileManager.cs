@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 11:05:00 -> Update Wi-Fi QR code to high-contrast black on white
+// Edited on Aug 25, 2026 @ 06:40:00 -> Fix RCS1123 parentheses, CA1859 BitmapImage type, and RCS1118 consts
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -110,7 +110,7 @@ public static class DjBannerFileManager
 
             var goldPen = new System.Windows.Media.Pen(
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)), 8 * scale);
-            dc.DrawRectangle(null, goldPen, new System.Windows.Rect(28 * scale, 28 * scale, width - 56 * scale, height - 56 * scale));
+            dc.DrawRectangle(null, goldPen, new System.Windows.Rect(28 * scale, 28 * scale, width - (56 * scale), height - (56 * scale)));
 
             var headerText = new System.Windows.Media.FormattedText(
                 "HOW TO CONNECT & REQUEST SONGS",
@@ -140,7 +140,7 @@ public static class DjBannerFileManager
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(233, 213, 255)),
                 1.0)
             { TextAlignment = System.Windows.TextAlignment.Center };
-            dc.DrawText(wifiTitle, new System.Windows.Point((72 + 850 / 2.0) * scale, 190 * scale));
+            dc.DrawText(wifiTitle, new System.Windows.Point((72 + (850 / 2.0)) * scale, 190 * scale));
 
             var ssidText = new System.Windows.Media.FormattedText(
                 $"Network: {activeSsid}",
@@ -151,7 +151,7 @@ public static class DjBannerFileManager
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White),
                 1.0)
             { TextAlignment = System.Windows.TextAlignment.Center };
-            dc.DrawText(ssidText, new System.Windows.Point((72 + 850 / 2.0) * scale, 260 * scale));
+            dc.DrawText(ssidText, new System.Windows.Point((72 + (850 / 2.0)) * scale, 260 * scale));
 
             var pwdText = new System.Windows.Media.FormattedText(
                 $"Password: {pwdDisplay}",
@@ -162,7 +162,7 @@ public static class DjBannerFileManager
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(203, 213, 225)),
                 1.0)
             { TextAlignment = System.Windows.TextAlignment.Center };
-            dc.DrawText(pwdText, new System.Windows.Point((72 + 850 / 2.0) * scale, 315 * scale));
+            dc.DrawText(pwdText, new System.Windows.Point((72 + (850 / 2.0)) * scale, 315 * scale));
 
             if (wifiQrSource != null)
             {
@@ -179,7 +179,7 @@ public static class DjBannerFileManager
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)),
                 1.0)
             { TextAlignment = System.Windows.TextAlignment.Center };
-            dc.DrawText(wifiInstruction, new System.Windows.Point((72 + 850 / 2.0) * scale, 845 * scale));
+            dc.DrawText(wifiInstruction, new System.Windows.Point((72 + (850 / 2.0)) * scale, 845 * scale));
 
             // Right Card: Song Requests
             dc.DrawRoundedRectangle(cardBg, cardPen, new System.Windows.Rect(998 * scale, 160 * scale, 850 * scale, 760 * scale), 20 * scale, 20 * scale);
@@ -193,7 +193,7 @@ public static class DjBannerFileManager
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(233, 213, 255)),
                 1.0)
             { TextAlignment = System.Windows.TextAlignment.Center };
-            dc.DrawText(portalTitle, new System.Windows.Point((998 + 850 / 2.0) * scale, 190 * scale));
+            dc.DrawText(portalTitle, new System.Windows.Point((998 + (850 / 2.0)) * scale, 190 * scale));
 
             var urlText = new System.Windows.Media.FormattedText(
                 activeUrl,
@@ -204,7 +204,7 @@ public static class DjBannerFileManager
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(56, 189, 248)),
                 1.0)
             { TextAlignment = System.Windows.TextAlignment.Center };
-            dc.DrawText(urlText, new System.Windows.Point((998 + 850 / 2.0) * scale, 260 * scale));
+            dc.DrawText(urlText, new System.Windows.Point((998 + (850 / 2.0)) * scale, 260 * scale));
 
             if (portalQrSource != null)
             {
@@ -221,7 +221,7 @@ public static class DjBannerFileManager
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)),
                 1.0)
             { TextAlignment = System.Windows.TextAlignment.Center };
-            dc.DrawText(portalInstruction, new System.Windows.Point((998 + 850 / 2.0) * scale, 845 * scale));
+            dc.DrawText(portalInstruction, new System.Windows.Point((998 + (850 / 2.0)) * scale, 845 * scale));
 
             var footerText = new System.Windows.Media.FormattedText(
                 "Browse Catalog • Submit Songs & Dedications • View Live Performer Rotation",
@@ -243,7 +243,7 @@ public static class DjBannerFileManager
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(148, 163, 184)),
                 1.0)
             { TextAlignment = System.Windows.TextAlignment.Center };
-            dc.DrawText(copyrightText, new System.Windows.Point(width / 2.0, height - 70 * scale));
+            dc.DrawText(copyrightText, new System.Windows.Point(width / 2.0, height - (70 * scale)));
         }
 
         var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
@@ -268,7 +268,7 @@ public static class DjBannerFileManager
             .Replace(":", "\\:");
     }
 
-    private static System.Windows.Media.ImageSource? GenerateQrBitmap(string payload, System.Windows.Media.Color darkColor, int pixelsPerModule = 40)
+    private static System.Windows.Media.Imaging.BitmapImage? GenerateQrBitmap(string payload, System.Windows.Media.Color darkColor, int pixelsPerModule = 40)
     {
         using var qrGenerator = new QRCoder.QRCodeGenerator();
         using var qrCodeData = qrGenerator.CreateQrCode(payload, QRCoder.QRCodeGenerator.ECCLevel.Q);
@@ -287,8 +287,8 @@ public static class DjBannerFileManager
 
     private static void CreateDefaultBannerPng(string filePath, string title)
     {
-        int width = 3840;
-        int height = 2160;
+        const int width = 3840;
+        const int height = 2160;
 
         var visual = new System.Windows.Media.DrawingVisual();
         using (var dc = visual.RenderOpen())
@@ -354,24 +354,24 @@ public static class DjBannerFileManager
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)), 10 * scale);
             var innerGoldPen = new System.Windows.Media.Pen(
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 255, 215, 0)), 3 * scale);
-            dc.DrawRectangle(null, goldPen, new System.Windows.Rect(30 * scale, 30 * scale, width - 60 * scale, height - 60 * scale));
-            dc.DrawRectangle(null, innerGoldPen, new System.Windows.Rect(45 * scale, 45 * scale, width - 90 * scale, height - 90 * scale));
+            dc.DrawRectangle(null, goldPen, new System.Windows.Rect(30 * scale, 30 * scale, width - (60 * scale), height - (60 * scale)));
+            dc.DrawRectangle(null, innerGoldPen, new System.Windows.Rect(45 * scale, 45 * scale, width - (90 * scale), height - (90 * scale)));
 
             // 3. Vector Fireworks / Starbursts (Top-Left & Top-Right)
             DrawFireworks(dc, new System.Windows.Point(220 * scale, 220 * scale), scale);
-            DrawFireworks(dc, new System.Windows.Point(width - 220 * scale, 220 * scale), scale);
+            DrawFireworks(dc, new System.Windows.Point(width - (220 * scale), 220 * scale), scale);
 
             // 4. Vector Balloons (Left & Right margins)
             DrawBalloons(dc, new System.Windows.Point(140 * scale, height * 0.65), scale, System.Windows.Media.Color.FromRgb(236, 72, 153)); // Pink/Magenta
             DrawBalloons(dc, new System.Windows.Point(230 * scale, height * 0.75), scale * 0.85, System.Windows.Media.Color.FromRgb(6, 182, 212)); // Cyan
-            DrawBalloons(dc, new System.Windows.Point(width - 140 * scale, height * 0.65), scale, System.Windows.Media.Color.FromRgb(245, 158, 11)); // Gold
-            DrawBalloons(dc, new System.Windows.Point(width - 230 * scale, height * 0.75), scale * 0.85, System.Windows.Media.Color.FromRgb(168, 85, 247)); // Purple
+            DrawBalloons(dc, new System.Windows.Point(width - (140 * scale), height * 0.65), scale, System.Windows.Media.Color.FromRgb(245, 158, 11)); // Gold
+            DrawBalloons(dc, new System.Windows.Point(width - (230 * scale), height * 0.75), scale * 0.85, System.Windows.Media.Color.FromRgb(168, 85, 247)); // Purple
 
             // 5. Floating Music Notes
             DrawMusicNote(dc, new System.Windows.Point(340 * scale, height * 0.35), scale * 1.2, System.Windows.Media.Color.FromRgb(255, 215, 0));
-            DrawMusicNote(dc, new System.Windows.Point(width - 340 * scale, height * 0.38), scale * 1.1, System.Windows.Media.Color.FromRgb(6, 182, 212));
+            DrawMusicNote(dc, new System.Windows.Point(width - (340 * scale), height * 0.38), scale * 1.1, System.Windows.Media.Color.FromRgb(6, 182, 212));
             DrawMusicNote(dc, new System.Windows.Point(400 * scale, height * 0.82), scale * 0.9, System.Windows.Media.Color.FromRgb(236, 72, 153));
-            DrawMusicNote(dc, new System.Windows.Point(width - 400 * scale, height * 0.80), scale * 1.0, System.Windows.Media.Color.FromRgb(255, 215, 0));
+            DrawMusicNote(dc, new System.Windows.Point(width - (400 * scale), height * 0.80), scale * 1.0, System.Windows.Media.Color.FromRgb(255, 215, 0));
 
             // 6. Header Text: "HAPPY BIRTHDAY!"
             var headerText = new System.Windows.Media.FormattedText(
@@ -405,7 +405,7 @@ public static class DjBannerFileManager
             {
                 TextAlignment = System.Windows.TextAlignment.Center
             };
-            dc.DrawText(nameShadowText, new System.Windows.Point((width / 2.0) + (6 * scale), (height / 2.0 - nameShadowText.Height / 2.0) + (6 * scale)));
+            dc.DrawText(nameShadowText, new System.Windows.Point((width / 2.0) + (6 * scale), ((height / 2.0) - (nameShadowText.Height / 2.0)) + (6 * scale)));
 
             // Name Foreground Text (Gold Gradient / Glow)
             var nameText = new System.Windows.Media.FormattedText(
@@ -421,7 +421,7 @@ public static class DjBannerFileManager
             {
                 TextAlignment = System.Windows.TextAlignment.Center
             };
-            dc.DrawText(nameText, new System.Windows.Point(width / 2.0, height / 2.0 - nameText.Height / 2.0));
+            dc.DrawText(nameText, new System.Windows.Point(width / 2.0, (height / 2.0) - (nameText.Height / 2.0)));
 
             // 8. Footer Badge: "VIP KARAOKE CELEBRATION"
             var footerText = new System.Windows.Media.FormattedText(
@@ -454,7 +454,7 @@ public static class DjBannerFileManager
         var penCyan = new System.Windows.Media.Pen(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(6, 182, 212)), 2 * scale);
         var penPink = new System.Windows.Media.Pen(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(236, 72, 153)), 2 * scale);
 
-        int count = 12;
+        const int count = 12;
         double radius = 90 * scale;
         for (int i = 0; i < count; i++)
         {
@@ -462,8 +462,8 @@ public static class DjBannerFileManager
             double innerR = 25 * scale;
             double outerR = radius;
 
-            var p1 = new System.Windows.Point(center.X + Math.Cos(angle) * innerR, center.Y + Math.Sin(angle) * innerR);
-            var p2 = new System.Windows.Point(center.X + Math.Cos(angle) * outerR, center.Y + Math.Sin(angle) * outerR);
+            var p1 = new System.Windows.Point(center.X + (Math.Cos(angle) * innerR), center.Y + (Math.Sin(angle) * innerR));
+            var p2 = new System.Windows.Point(center.X + (Math.Cos(angle) * outerR), center.Y + (Math.Sin(angle) * outerR));
 
             var pen = (i % 3 == 0) ? penGold : (i % 3 == 1) ? penCyan : penPink;
             dc.DrawLine(pen, p1, p2);
@@ -535,20 +535,20 @@ public static class DjBannerFileManager
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(245, 158, 11)), 10 * scale);
             var innerGoldPen = new System.Windows.Media.Pen(
                 new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(190, 255, 215, 0)), 3 * scale);
-            dc.DrawRectangle(null, goldPen, new System.Windows.Rect(30 * scale, 30 * scale, width - 60 * scale, height - 60 * scale));
-            dc.DrawRectangle(null, innerGoldPen, new System.Windows.Rect(45 * scale, 45 * scale, width - 90 * scale, height - 90 * scale));
+            dc.DrawRectangle(null, goldPen, new System.Windows.Rect(30 * scale, 30 * scale, width - (60 * scale), height - (60 * scale)));
+            dc.DrawRectangle(null, innerGoldPen, new System.Windows.Rect(45 * scale, 45 * scale, width - (90 * scale), height - (90 * scale)));
 
             // 3. Ornate Fireworks / Starbursts (All 4 corners)
             DrawFireworks(dc, new System.Windows.Point(220 * scale, 220 * scale), scale);
-            DrawFireworks(dc, new System.Windows.Point(width - 220 * scale, 220 * scale), scale);
-            DrawFireworks(dc, new System.Windows.Point(220 * scale, height - 220 * scale), scale * 0.85);
-            DrawFireworks(dc, new System.Windows.Point(width - 220 * scale, height - 220 * scale), scale * 0.85);
+            DrawFireworks(dc, new System.Windows.Point(width - (220 * scale), 220 * scale), scale);
+            DrawFireworks(dc, new System.Windows.Point(220 * scale, height - (220 * scale)), scale * 0.85);
+            DrawFireworks(dc, new System.Windows.Point(width - (220 * scale), height - (220 * scale)), scale * 0.85);
 
             // 4. Floating Music Notes
             DrawMusicNote(dc, new System.Windows.Point(360 * scale, height * 0.38), scale * 1.3, System.Windows.Media.Color.FromRgb(255, 215, 0));
-            DrawMusicNote(dc, new System.Windows.Point(width - 360 * scale, height * 0.38), scale * 1.3, System.Windows.Media.Color.FromRgb(255, 215, 0));
+            DrawMusicNote(dc, new System.Windows.Point(width - (360 * scale), height * 0.38), scale * 1.3, System.Windows.Media.Color.FromRgb(255, 215, 0));
             DrawMusicNote(dc, new System.Windows.Point(420 * scale, height * 0.78), scale * 1.0, System.Windows.Media.Color.FromRgb(6, 182, 212));
-            DrawMusicNote(dc, new System.Windows.Point(width - 420 * scale, height * 0.78), scale * 1.0, System.Windows.Media.Color.FromRgb(6, 182, 212));
+            DrawMusicNote(dc, new System.Windows.Point(width - (420 * scale), height * 0.78), scale * 1.0, System.Windows.Media.Color.FromRgb(6, 182, 212));
 
             // 5. Header: "★ FINALE PERFORMANCE ★"
             var headerText = new System.Windows.Media.FormattedText(
@@ -565,7 +565,7 @@ public static class DjBannerFileManager
             dc.DrawText(headerText, new System.Windows.Point(width / 2.0, 180 * scale));
 
             // 6. Main Title: "LAST SONG OF THE NIGHT"
-            string mainTitle = "LAST SONG OF THE NIGHT";
+            const string mainTitle = "LAST SONG OF THE NIGHT";
             double titleFontSize = 125 * scale;
 
             // Shadow / 3D Depth
@@ -580,7 +580,7 @@ public static class DjBannerFileManager
             {
                 TextAlignment = System.Windows.TextAlignment.Center
             };
-            dc.DrawText(titleShadow, new System.Windows.Point((width / 2.0) + (6 * scale), (height / 2.0 - titleShadow.Height / 2.0 - 40 * scale) + (6 * scale)));
+            dc.DrawText(titleShadow, new System.Windows.Point((width / 2.0) + (6 * scale), ((height / 2.0) - (titleShadow.Height / 2.0) - (40 * scale)) + (6 * scale)));
 
             // Foreground Text (Golden/Amber Glow Gradient)
             var titleText = new System.Windows.Media.FormattedText(
@@ -596,7 +596,7 @@ public static class DjBannerFileManager
             {
                 TextAlignment = System.Windows.TextAlignment.Center
             };
-            dc.DrawText(titleText, new System.Windows.Point(width / 2.0, height / 2.0 - titleText.Height / 2.0 - 40 * scale));
+            dc.DrawText(titleText, new System.Windows.Point(width / 2.0, (height / 2.0) - (titleText.Height / 2.0) - (40 * scale)));
 
             // 7. Subtitle: "THANK YOU FOR SINGING WITH US!"
             var subtitleText = new System.Windows.Media.FormattedText(
@@ -610,7 +610,7 @@ public static class DjBannerFileManager
             {
                 TextAlignment = System.Windows.TextAlignment.Center
             };
-            dc.DrawText(subtitleText, new System.Windows.Point(width / 2.0, height / 2.0 + 80 * scale));
+            dc.DrawText(subtitleText, new System.Windows.Point(width / 2.0, (height / 2.0) + (80 * scale)));
 
             // 8. Footer: "★ DRIVE SAFE • SEE YOU NEXT TIME! ★"
             var footerText = new System.Windows.Media.FormattedText(
@@ -641,10 +641,17 @@ public static class DjBannerFileManager
 #if MAUI
     public static void CreatePersonalizedBirthdayBannerPng(string filePath, string performerName, int targetWidth = 1920, int targetHeight = 1080)
     {
+        _ = filePath;
+        _ = performerName;
+        _ = targetWidth;
+        _ = targetHeight;
     }
 
     public static void CreateLastSongBannerPng(string filePath, int targetWidth = 1920, int targetHeight = 1080)
     {
+        _ = filePath;
+        _ = targetWidth;
+        _ = targetHeight;
     }
 #endif
 

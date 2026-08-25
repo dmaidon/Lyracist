@@ -1,3 +1,4 @@
+// Edited on Aug 25, 2026 @ 06:15:00 -> Remove dead suppression targets (IDE0076)
 // This file is used by Code Analysis to maintain SuppressMessage
 // attributes that are applied to this project.
 // Project-level suppressions either have no target or are given
@@ -24,7 +25,6 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.ThemeService.Apply(System.String)")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.ThemeService.IsSystemDarkMode~System.Boolean")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.ViewModels.MainViewModel.#ctor")]
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.ViewModels.MainViewModel.GenerateQRCode(System.String)~System.Windows.Media.ImageSource")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.ViewModels.MainViewModel.GetLocalIPAddress~System.String")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.ViewModels.MainViewModel.LoadKnownSingers")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.ViewModels.MainViewModel.SaveKnownSingers")]
@@ -33,6 +33,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.ViewModels.MainViewModel.StartRequestServer")]
 [assembly: SuppressMessage("Performance", "CA1835:Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.PatronRequestServer.SendBadRequestAsync(System.Net.Sockets.NetworkStream,System.String)~System.Threading.Tasks.Task")]
 [assembly: SuppressMessage("Performance", "CA1835:Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.PatronRequestServer.SendCorsPreflightResponseAsync(System.Net.Sockets.NetworkStream)~System.Threading.Tasks.Task")]
-[assembly: SuppressMessage("Performance", "CA1835:Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.PatronRequestServer.SendHtmlResponseAsync(System.Net.Sockets.NetworkStream)~System.Threading.Tasks.Task")]
 [assembly: SuppressMessage("Performance", "CA1835:Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.PatronRequestServer.SendJsonResponseAsync(System.Net.Sockets.NetworkStream,System.String)~System.Threading.Tasks.Task")]
 [assembly: SuppressMessage("Performance", "CA1835:Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'", Justification = "<Pending>", Scope = "member", Target = "~M:KSRotation.Services.PatronRequestServer.SendNotFoundAsync(System.Net.Sockets.NetworkStream)~System.Threading.Tasks.Task")]

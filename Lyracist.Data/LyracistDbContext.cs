@@ -1,4 +1,4 @@
-// Edited on Jul 16, 2026 @ 12:00:00 -> Shared sqlite connection string
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1261 async disposal on DbCommand
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -161,11 +161,11 @@ namespace Lyracist.Data
         }
 
         public override async Task ConnectionOpenedAsync(
-            DbConnection connection, 
-            ConnectionEndEventData eventData, 
+            DbConnection connection,
+            ConnectionEndEventData eventData,
             CancellationToken cancellationToken = default)
         {
-            using var command = connection.CreateCommand();
+            await using var command = connection.CreateCommand();
             command.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
             await command.ExecuteNonQueryAsync(cancellationToken);
         }

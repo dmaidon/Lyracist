@@ -1,4 +1,4 @@
-// Created on Aug 20, 2026 @ 07:05:00 -> AnnouncementHelper for loading and saving custom lobby announcement banner images
+// Edited on Aug 25, 2026 @ 06:34:00 -> Add summary elements to documentation comments (RCS1139)
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +17,9 @@ public static class AnnouncementHelper
 {
     public record AnnouncementImage(string FileName, string FullPath)
     {
+        /// <summary>
         /// A readable label derived from the filename, e.g. "announce_cartoon.png" -> "Cartoon".
+        /// </summary>
         public string DisplayName => BuildDisplayName(FileName);
 
         private static string BuildDisplayName(string fileName)
@@ -61,9 +63,11 @@ public static class AnnouncementHelper
     private static string GetSelectionPath() =>
         Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Announcements", "selected_announcement.json");
 
+    /// <summary>
     /// Remembers the game master's last pick across app restarts. Stored inside the
     /// Announcements folder itself, not the shared TriviaData settings file, since this is a
     /// Lyracist.Trivia-only preference.
+    /// </summary>
     public static string? LoadSelectedFileName()
     {
         try

@@ -22,17 +22,6 @@ public partial class MainPage : ContentPage
         {
             ThemeBtn.Text = Application.Current.UserAppTheme == AppTheme.Light ? "🌙 Dark Mode" : "☀️ Light Mode";
         }
-
-        // Safety: don't let a real, in-progress queue get wiped by an accidental "Load Test Data" tap.
-        UpdateLoadTestDataEnabled(vm);
-        vm.Singers.CollectionChanged += (_, _) => UpdateLoadTestDataEnabled(vm);
-    }
-
-    private void UpdateLoadTestDataEnabled(KSRotation.ViewModels.MainViewModel vm)
-    {
-        bool enabled = vm.Singers.Count == 0;
-        LoadTestDataBtn.IsEnabled = enabled;
-        LoadTestDataBtn.Opacity = enabled ? 1.0 : 0.35;
     }
 
     private void OnAddPerformerClicked(object? sender, EventArgs e)

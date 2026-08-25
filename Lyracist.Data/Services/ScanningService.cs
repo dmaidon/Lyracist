@@ -1,14 +1,9 @@
-// Edited on Aug 6, 2026 @ 09:20:50 -> Fetch online tags and missing artists using MusicBrainz and Spotify in ProbeMissingMetadataAsync
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+// Edited on Aug 25, 2026 @ 06:35:00 -> Fix RCS1155 string comparison and RCS1075 catch block
 using Lyracist.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 namespace Lyracist.Data.Services
 {
@@ -22,6 +17,7 @@ namespace Lyracist.Data.Services
 
     public class ScanningService(LyracistDbContext context)
     {
+        private const string UnknownArtist = "Unknown Artist";
         private readonly LyracistDbContext _context = context;
 
         // ==========================================
@@ -38,7 +34,7 @@ namespace Lyracist.Data.Services
             // 2. Strip track/index numbers (e.g., "01 - ...", "01. ...")
             cleaned = Regex.Replace(cleaned, @"^\d+\s*[-.]\s*", "");
 
-            string artist = "Unknown Artist";
+            string artist = UnknownArtist;
             string title = cleaned.Trim();
 
             // 3. Split by " - " to differentiate Artist and Title
@@ -55,7 +51,7 @@ namespace Lyracist.Data.Services
         public static (string Artist, string Title, string KaraokeType, bool IsKaraoke) ParseStoreDownload(string filePath)
         {
             string filename = Path.GetFileNameWithoutExtension(filePath);
-            string artist = "Unknown Artist";
+            string artist = UnknownArtist;
             string title = filename.Trim();
             string karaokeType = "";
             bool isKaraoke = false;
@@ -174,7 +170,7 @@ namespace Lyracist.Data.Services
             return (artist, title, karaokeType, isKaraoke);
         }
 
-        private bool IsMp4Karaoke(string filePath)
+        private static bool IsMp4Karaoke(string filePath)
         {
             string pathLower = filePath.ToLowerInvariant();
             return pathLower.Contains("karaoke") ||
@@ -188,7 +184,7 @@ namespace Lyracist.Data.Services
         // ZIP/CDG ARCHIVE CHECKER
         // ==========================================
 
-        private (bool IsKaraoke, string AudioEntryName) CheckZipKaraoke(string zipPath)
+        private static (bool IsKaraoke, string AudioEntryName) CheckZipKaraoke(string zipPath)
         {
             try
             {
@@ -248,7 +244,7 @@ namespace Lyracist.Data.Services
 
             // Build a set of all CDG file paths for quick validation in MP3+G detection
             var cdgFileSet = candidateFiles
-                .Where(f => Path.GetExtension(f).ToLowerInvariant() == ".cdg")
+                .Where(f => f.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase))
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             var searchService = new SearchService(_context);
@@ -260,25 +256,9 @@ namespace Lyracist.Data.Services
 
             // Clean up dead records for files that no longer exist under the scanned directory paths.
             // Committed immediately (not batched with the scan below) since this list is normally small.
-            var songsToRemove = new List<Song>();
-            foreach (var kvp in existingSongsMap)
-            {
-                var s = kvp.Value;
-                bool isInScannedPath = false;
-                foreach (var path in paths)
-                {
-                    if (IsPathUnderDirectory(s.FilePath, path))
-                    {
-                        isInScannedPath = true;
-                        break;
-                    }
-                }
-
-                if (isInScannedPath && !File.Exists(s.FilePath))
-                {
-                    songsToRemove.Add(s);
-                }
-            }
+            var songsToRemove = existingSongsMap.Values
+                .Where(s => paths.Any(p => IsPathUnderDirectory(s.FilePath, p)) && !File.Exists(s.FilePath))
+                .ToList();
 
             if (songsToRemove.Count > 0)
             {
@@ -461,7 +441,7 @@ namespace Lyracist.Data.Services
                                     string tempPath = string.Empty;
                                     try
                                     {
-                                        using var archive = ZipFile.OpenRead(song.FilePath);
+                                        await using var archive = ZipFile.OpenRead(song.FilePath);
                                         var entry = archive.GetEntry(audioEntryName);
                                         if (entry != null)
                                         {
@@ -481,7 +461,7 @@ namespace Lyracist.Data.Services
                                     {
                                         if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
                                         {
-                                            try { File.Delete(tempPath); } catch { }
+                                            try { File.Delete(tempPath); } catch (Exception ex) { _ = ex; }
                                         }
                                     }
                                 }
@@ -497,7 +477,7 @@ namespace Lyracist.Data.Services
                         // 2. Online API Tag & Artist Resolution (only for unresolved karaoke artists to keep scans fast)
                         if (song.IsKaraoke && (song.Artist == "Unknown Artist" || string.IsNullOrEmpty(song.Artist) || song.Artist == null))
                         {
-                            if (song.Tags == null || song.Tags == "")
+                            if (string.IsNullOrEmpty(song.Tags))
                             {
                                 try
                                 {
@@ -535,7 +515,7 @@ namespace Lyracist.Data.Services
                         else
                         {
                             // Known artist or standard music track: Fall back to local file genre if tags are empty, avoiding network rate-limit delay
-                            if (song.Tags == null || song.Tags == "")
+                            if (string.IsNullOrEmpty(song.Tags))
                             {
                                 song.Tags = !string.IsNullOrWhiteSpace(song.Genre) ? song.Genre : "none";
                             }
@@ -607,7 +587,7 @@ namespace Lyracist.Data.Services
                         {
                             var di = new DirectoryInfo(d);
                             // Skip hidden or system directories to avoid permissions issues/recycle bin/system volume info
-                            if ((di.Attributes & FileAttributes.Hidden) != 0 || 
+                            if ((di.Attributes & FileAttributes.Hidden) != 0 ||
                                 (di.Attributes & FileAttributes.System) != 0)
                             {
                                 continue;

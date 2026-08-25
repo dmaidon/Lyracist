@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 10:06:00 -> Add ContextMenu actions for resending email, copying keys, and viewing info popup
+// Edited on Aug 25, 2026 @ 06:35:00 -> Clean up whitespace (RCS1037)
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -13,10 +13,10 @@ namespace LyracistKeyGen
         public MainWindow()
         {
             InitializeComponent();
-            
+
             // Initialize Database
             KeyGenDatabase.Initialize();
-            
+
             // Load Settings
             LoadSmtpSettings();
 
@@ -37,7 +37,7 @@ namespace LyracistKeyGen
 
         private SmtpSettings GetSettingsFromUi()
         {
-            int.TryParse(TxtSmtpPort.Text, out int port);
+            _ = int.TryParse(TxtSmtpPort.Text, out int port);
             if (port <= 0) port = 587;
 
             return new SmtpSettings
@@ -68,7 +68,7 @@ namespace LyracistKeyGen
         private void BtnTestSmtp_Click(object sender, RoutedEventArgs e)
         {
             string recipient = TxtTestRecipient.Text;
-            if (string.IsNullOrWhiteSpace(recipient) || !recipient.Contains("@"))
+            if (string.IsNullOrWhiteSpace(recipient) || !recipient.Contains('@'))
             {
                 MessageBox.Show("Please enter a valid recipient email address.", "Invalid Email", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -99,7 +99,7 @@ namespace LyracistKeyGen
                 return;
             }
 
-            if (!email.Contains("@"))
+            if (!email.Contains('@'))
             {
                 MessageBox.Show("Please enter a valid email address.", "Invalid Email", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;

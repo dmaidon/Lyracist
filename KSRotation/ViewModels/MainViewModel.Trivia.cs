@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:18:00 -> Add live settings synchronization and persistence for all Trivia settings
+// Edited on Aug 25, 2026 @ 06:37:00 -> Fix RCS1139 summary tags, RCS1163 unused parameters, RCS1021, and RCS1146
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -178,9 +178,11 @@ namespace KSRotation.ViewModels
             TriviaStorageHelper.SaveSettings(TriviaSettings);
         }
 
+        /// <summary>
         /// Live summary of the auto-run timing (shown under the "Auto-Run Game" toggle) so the
         /// header always reflects the game master's actual configured timings instead of a
         /// hardcoded "15s answer • 5s fade • 5s reveal" that goes stale the moment they're changed.
+        /// </summary>
         public string TriviaAutoRunTimingSummary =>
             $"{TriviaDefaultQuestionSeconds}s answer • {TriviaAnswerEliminationIntervalSeconds}s fade • {TriviaPostRevealDelaySeconds}s reveal";
 
@@ -418,7 +420,7 @@ namespace KSRotation.ViewModels
         {
             if (_triviaEngine == null) return;
 
-            _triviaEngine.StateChanged += (s, state) =>
+            _triviaEngine.StateChanged += (_, state) =>
             {
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
@@ -427,7 +429,7 @@ namespace KSRotation.ViewModels
                 });
             };
 
-            _triviaEngine.TimerTick += (s, remaining) =>
+            _triviaEngine.TimerTick += (_, remaining) =>
             {
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
@@ -436,7 +438,7 @@ namespace KSRotation.ViewModels
                 });
             };
 
-            _triviaEngine.QuestionStarted += (s, q) =>
+            _triviaEngine.QuestionStarted += (_, q) =>
             {
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
@@ -453,7 +455,7 @@ namespace KSRotation.ViewModels
                 });
             };
 
-            _triviaEngine.AnswerRevealed += (s, q) =>
+            _triviaEngine.AnswerRevealed += (_, q) =>
             {
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
@@ -472,7 +474,7 @@ namespace KSRotation.ViewModels
                 });
             };
 
-            _triviaEngine.LeaderboardUpdated += (s, playersList) =>
+            _triviaEngine.LeaderboardUpdated += (_, playersList) =>
             {
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
@@ -485,7 +487,7 @@ namespace KSRotation.ViewModels
                 });
             };
 
-            _triviaEngine.GamePaused += (s, reason) =>
+            _triviaEngine.GamePaused += (_, reason) =>
             {
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
@@ -495,7 +497,7 @@ namespace KSRotation.ViewModels
                 });
             };
 
-            _triviaEngine.GameResumed += (s, e) =>
+            _triviaEngine.GameResumed += (_, _) =>
             {
                 System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
                 {
@@ -505,12 +507,9 @@ namespace KSRotation.ViewModels
                 });
             };
 
-            _triviaEngine.IntermissionCompleted += (s, e) =>
+            _triviaEngine.IntermissionCompleted += (_, _) =>
             {
-                System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
-                {
-                    StartTrivia();
-                });
+                System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => StartTrivia());
             };
         }
 
@@ -792,7 +791,7 @@ namespace KSRotation.ViewModels
         [RelayCommand]
         public void ToggleTriviaDisplay()
         {
-            if (_triviaDisplayWindow != null && _triviaDisplayWindow.IsLoaded)
+            if (_triviaDisplayWindow?.IsLoaded == true)
             {
                 CloseTriviaDisplay();
             }
@@ -807,7 +806,7 @@ namespace KSRotation.ViewModels
         {
             if (_triviaEngine == null) return;
 
-            if (_triviaDisplayWindow == null || !_triviaDisplayWindow.IsLoaded)
+            if (_triviaDisplayWindow?.IsLoaded != true)
             {
                 _triviaDisplayVm = new TriviaDisplayViewModel(
                     _triviaEngine,
@@ -869,7 +868,7 @@ namespace KSRotation.ViewModels
         [RelayCommand]
         public void CloseTriviaDisplay()
         {
-            if (_triviaDisplayWindow != null && _triviaDisplayWindow.IsLoaded)
+            if (_triviaDisplayWindow?.IsLoaded == true)
             {
                 _triviaDisplayWindow.Close();
                 _triviaDisplayWindow = null;
@@ -880,7 +879,7 @@ namespace KSRotation.ViewModels
 
         public void PositionTriviaDisplayWindow(string? deviceName)
         {
-            if (_triviaDisplayWindow == null || !_triviaDisplayWindow.IsLoaded) return;
+            if (_triviaDisplayWindow?.IsLoaded != true) return;
 
             var screens = System.Windows.Forms.Screen.AllScreens;
             var targetScreen = WindowPositioner.ResolveByDeviceName(screens, deviceName);
@@ -901,7 +900,7 @@ namespace KSRotation.ViewModels
         [RelayCommand]
         public void CloseTriviaDisplay() { }
 
-        public void PositionTriviaDisplayWindow(string? deviceName) { }
+        public void PositionTriviaDisplayWindow(string? deviceName) { _ = deviceName; }
 #endif
 
         [RelayCommand]

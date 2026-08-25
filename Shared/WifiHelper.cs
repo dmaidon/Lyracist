@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 10:05:00 -> Add OperatingSystem.IsWindows check to prevent DllNotFoundException and netsh launch on Android
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1118 const and CA1806 discarded return value in WifiHelper.cs
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -89,14 +89,14 @@ public static class WifiHelper
     [DllImport("wlanapi.dll", SetLastError = true)]
     private static extern uint WlanQueryInterface(
         IntPtr hClientHandle,
-        ref Guid pInterfaceGuid,
+        [In] ref Guid pInterfaceGuid,
         WLAN_INTF_OPCODE OpCode,
         IntPtr pReserved,
         out uint pdwDataSize,
         out IntPtr ppData,
         out WLAN_OPCODE_VALUE_TYPE pWlanOpcodeValueType);
 
-    [DllImport("wlanapi.dll", SetLastError = true)]
+    [DllImport("wlanapi.dll")]
     private static extern void WlanFreeMemory(IntPtr pMemory);
 
     private enum WLAN_INTF_OPCODE
@@ -106,10 +106,7 @@ public static class WifiHelper
 
     private enum WLAN_OPCODE_VALUE_TYPE
     {
-        wlan_opcode_value_type_query_only = 0,
-        wlan_opcode_value_type_set_by_group_policy = 1,
-        wlan_opcode_value_type_set_by_user = 2,
-        wlan_opcode_value_type_invalid = 3
+        wlan_opcode_value_type_query_only = 0
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -190,7 +187,7 @@ public static class WifiHelper
             uint dwNumberOfItems = (uint)Marshal.ReadInt32(pIfList);
             if (dwNumberOfItems == 0) return null;
 
-            int headerSize = 8; // dwNumberOfItems (4) + dwIndex (4)
+            const int headerSize = 8; // dwNumberOfItems (4) + dwIndex (4)
             int interfaceInfoSize = Marshal.SizeOf<WLAN_INTERFACE_INFO>();
 
             for (int i = 0; i < dwNumberOfItems; i++)
@@ -225,7 +222,7 @@ public static class WifiHelper
         {
             if (pConnAttr != IntPtr.Zero) WlanFreeMemory(pConnAttr);
             if (pIfList != IntPtr.Zero) WlanFreeMemory(pIfList);
-            if (hClient != IntPtr.Zero) WlanCloseHandle(hClient, IntPtr.Zero);
+            if (hClient != IntPtr.Zero) _ = WlanCloseHandle(hClient, IntPtr.Zero);
         }
 
         return null;

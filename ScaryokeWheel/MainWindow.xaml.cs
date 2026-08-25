@@ -1,4 +1,4 @@
-// Edited on Jul 27, 2026 @ 13:35:00 -> Add tick sound buffering and throttling to prevent laptop audio driver choke
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1123 arithmetic parentheses
 using System;
 using System.Collections.Specialized;
 using System.IO;
@@ -65,7 +65,7 @@ public partial class MainWindow : Window
     private static Point Polar(double angleDegrees, double radius)
     {
         double rad = angleDegrees * Math.PI / 180.0;
-        return new Point(Radius + radius * Math.Sin(rad), Radius - radius * Math.Cos(rad));
+        return new Point(Radius + (radius * Math.Sin(rad)), Radius - (radius * Math.Cos(rad)));
     }
 
     private void BuildWheel()
@@ -97,7 +97,7 @@ public partial class MainWindow : Window
             WheelCanvas.Children.Add(slice);
 
             // Labels
-            double mid = start + sweep / 2;
+            double mid = start + (sweep / 2);
             var labelPos = Polar(mid, Radius * 0.62);
             double textAngle = mid - 90;
             if (mid > 180) textAngle += 180;
@@ -122,8 +122,8 @@ public partial class MainWindow : Window
                 VerticalAlignment = VerticalAlignment.Center
             });
 
-            Canvas.SetLeft(label, labelPos.X - label.Width / 2);
-            Canvas.SetTop(label, labelPos.Y - label.Height / 2);
+            Canvas.SetLeft(label, labelPos.X - (label.Width / 2));
+            Canvas.SetTop(label, labelPos.Y - (label.Height / 2));
             WheelCanvas.Children.Add(label);
 
             start = end;
@@ -191,7 +191,7 @@ public partial class MainWindow : Window
         RebuildWheel();
 
         // 4-6 full turns plus a random landing angle
-        double target = _currentAngle + 1440 + Random.Shared.NextDouble() * 720;
+        double target = _currentAngle + 1440 + (Random.Shared.NextDouble() * 720);
         var animation = new DoubleAnimation(_currentAngle, target, TimeSpan.FromSeconds(4.2))
         {
             DecelerationRatio = 0.9,
@@ -309,10 +309,7 @@ public partial class MainWindow : Window
             }
             catch (Exception ex)
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    System.Windows.MessageBox.Show($"Failed to play fallback evil laugh: {ex.Message}", "Sound Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                });
+                Dispatcher.Invoke(() => System.Windows.MessageBox.Show($"Failed to play fallback evil laugh: {ex.Message}", "Sound Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error));
             }
         });
     }

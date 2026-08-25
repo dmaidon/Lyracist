@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 07:49:00 -> Add unit tests for InsertNewSinger at end of rotation round
+// Edited on Aug 25, 2026 @ 06:39:00 -> Fix RCS1118 const, RCS1215/S3981, and xUnit2033
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -12,7 +12,7 @@ public class WifiPasswordStoreTests
     public void SetAndGetPasswordForSsid_SavesAndRecallsCorrectly()
     {
         string ssid = "TestVenueWiFi_" + Guid.NewGuid().ToString("N")[..6];
-        string password = "SecretPassword123";
+        const string password = "SecretPassword123";
 
         WifiPasswordStore.SetPasswordForSsid(ssid, password);
         string recalled = WifiPasswordStore.GetPasswordForSsid(ssid);
@@ -24,7 +24,7 @@ public class WifiPasswordStoreTests
     public void SetPasswordForSsid_CaseInsensitiveRecall()
     {
         string ssid = "MyTravelRouter_" + Guid.NewGuid().ToString("N")[..6];
-        string password = "RouterPassword999";
+        const string password = "RouterPassword999";
 
         WifiPasswordStore.SetPasswordForSsid(ssid.ToLowerInvariant(), password);
         string recalled = WifiPasswordStore.GetPasswordForSsid(ssid.ToUpperInvariant());
@@ -432,16 +432,15 @@ public class MainViewModelTests
         // Assert
         Assert.True(addedFirst);
         Assert.True(addedSecond);
-        Assert.Single(vm.Singers);
-        
-        var singer = vm.Singers[0];
+        var singer = Assert.Single(vm.Singers);
+
         Assert.Equal("Dennis Maidon", singer.Name);
         Assert.Equal("Song A", singer.Song);
         Assert.Equal("Artist A", singer.Artist);
-        
-        Assert.Single(singer.QueuedSongs);
-        Assert.Equal("Song B", singer.QueuedSongs[0].Song);
-        Assert.Equal("Artist B", singer.QueuedSongs[0].Artist);
+
+        var queuedSong = Assert.Single(singer.QueuedSongs);
+        Assert.Equal("Song B", queuedSong.Song);
+        Assert.Equal("Artist B", queuedSong.Artist);
     }
 
     [Fact]
@@ -461,14 +460,13 @@ public class MainViewModelTests
         // Assert
         Assert.True(addedFirst);
         Assert.True(addedSecond);
-        Assert.Single(vm.Singers);
+        var singer = Assert.Single(vm.Singers);
 
-        var singer = vm.Singers[0];
         Assert.Equal("Dennis Maidon", singer.Name); // ProperCased
         Assert.Equal("Song A", singer.Song);
-        
-        Assert.Single(singer.QueuedSongs);
-        Assert.Equal("Song B", singer.QueuedSongs[0].Song);
+
+        var queuedSong = Assert.Single(singer.QueuedSongs);
+        Assert.Equal("Song B", queuedSong.Song);
     }
 
     [Fact]
@@ -483,7 +481,7 @@ public class MainViewModelTests
 
         // Add an existing singer with a song
         vm.TryAddPerformer("Dennis Maidon", "Song A", "Artist A");
-        
+
         // Add a new blank row, then set song/artist
         var duplicateRow = new SingerEntry { Name = "New Singer" };
         vm.Singers.Add(duplicateRow);
@@ -494,15 +492,14 @@ public class MainViewModelTests
         duplicateRow.Name = "Dennis Maidon";
 
         // Assert
-        Assert.Single(vm.Singers); // The duplicate row should be removed/merged!
-        
-        var singer = vm.Singers[0];
+        var singer = Assert.Single(vm.Singers); // The duplicate row should be removed/merged!
+
         Assert.Equal("Dennis Maidon", singer.Name);
         Assert.Equal("Song A", singer.Song);
-        
-        Assert.Single(singer.QueuedSongs);
-        Assert.Equal("Song B", singer.QueuedSongs[0].Song);
-        Assert.Equal("Artist B", singer.QueuedSongs[0].Artist);
+
+        var queuedSong = Assert.Single(singer.QueuedSongs);
+        Assert.Equal("Song B", queuedSong.Song);
+        Assert.Equal("Artist B", queuedSong.Artist);
     }
 
     [Fact]
@@ -530,8 +527,7 @@ public class MainViewModelTests
         vm.AcceptRequest(request);
 
         // Assert
-        Assert.Single(vm.Singers);
-        var singer = vm.Singers[0];
+        var singer = Assert.Single(vm.Singers);
         Assert.Equal("Alice", singer.Name);
         Assert.Equal("Song 1", singer.Song);
         Assert.Equal("Artist 1", singer.Artist);
@@ -572,8 +568,8 @@ public class MainViewModelTests
         // Assert - should automatically promote the next song from queue
         Assert.Equal("Next Song", entry.Song);
         Assert.Equal("Next Artist", entry.Artist);
-        Assert.Single(entry.QueuedSongs);
-        Assert.Equal("Third Song", entry.QueuedSongs[0].Song);
+        var queued = Assert.Single(entry.QueuedSongs);
+        Assert.Equal("Third Song", queued.Song);
     }
 
     [Fact]
@@ -614,8 +610,7 @@ public class MainViewModelTests
         vm.AcceptRequest(request);
 
         // Assert - should only add Song 3 once, ignoring other duplicates
-        Assert.Single(vm.Singers);
-        var singer = vm.Singers[0];
+        var singer = Assert.Single(vm.Singers);
         Assert.Equal("Alice", singer.Name);
         Assert.Equal("Song 1", singer.Song);
 
@@ -905,11 +900,11 @@ public class MainViewModelTests
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
         var history = (List<SongPerformance>)getHistoryMethod.Invoke(vm, null)!;
 
-        Assert.Single(history);
-        Assert.Equal("John", history[0].SingerName);
-        Assert.Equal("Jane", history[0].DuetPartnerName);
-        Assert.Equal("Endless Love", history[0].SongTitle);
-        Assert.True(history[0].IsDuet);
+        var performance = Assert.Single(history);
+        Assert.Equal("John", performance.SingerName);
+        Assert.Equal("Jane", performance.DuetPartnerName);
+        Assert.Equal("Endless Love", performance.SongTitle);
+        Assert.True(performance.IsDuet);
     }
 
     [Fact]
@@ -990,11 +985,9 @@ public class MainViewModelTests
     [Fact]
     public void WifiHelper_GetConnectedSsid_DoesNotThrow()
     {
-        // Act
-        string? ssid = WifiHelper.GetConnectedSsid();
-
-        // Assert - Should return a string or null without throwing any exception
-        Assert.True(ssid == null || ssid.Length >= 0);
+        // Act & Assert - Should return a string or null without throwing any exception
+        var exception = Record.Exception(() => WifiHelper.GetConnectedSsid());
+        Assert.Null(exception);
     }
 
     [Fact]
@@ -1222,8 +1215,8 @@ public class MainViewModelTests
 
         RotationHelpers.InsertNewSinger(list, newSinger);
 
-        Assert.Single(list);
-        Assert.Same(newSinger, list[0]);
+        var singer = Assert.Single(list);
+        Assert.Same(newSinger, singer);
         Assert.True(newSinger.IsRotationStart);
     }
 

@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 17:28:00 -> Add OnKioskQrCodeButtonClicked handler for kiosk QR popout
+// Edited on Aug 25, 2026 @ 06:36:00 -> Use conditional access (RCS1146)
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -106,7 +106,7 @@ namespace KSRotation
             if (sender is not WpfTextBox textBox) return;
 
             var (popup, listBox) = GetSuggestionControls(textBox);
-            if (popup == null || !popup.IsOpen || listBox == null) return;
+            if (popup?.IsOpen != true || listBox == null) return;
 
             if (e.Key == Key.Down)
             {
@@ -134,7 +134,7 @@ namespace KSRotation
             Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
             {
                 var (_, lb) = GetSuggestionControls(textBox);
-                if (lb != null && !lb.IsKeyboardFocusWithin && !textBox.IsFocused)
+                if (lb?.IsKeyboardFocusWithin == false && !textBox.IsFocused)
                     popup.IsOpen = false;
             }));
         }

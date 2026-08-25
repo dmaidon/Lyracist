@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 09:50:00 -> Add SetLastSongBanner to manage Last Song overlay on SingerDisplayWindow
+// Edited on Aug 25, 2026 @ 06:36:00 -> Use concrete type for _casting (CA1859) and clean whitespace (RCS1037)
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -31,7 +31,7 @@ namespace KSRotation.Services
             }
         }
 
-        private readonly ICastingService _casting;
+        private readonly CastingService _casting;
         private DisplayTarget _rotationTarget = DisplayTarget.Monitor;
 
         public ChromecastDevice? SelectedDevice
@@ -215,7 +215,7 @@ namespace KSRotation.Services
         private void EnsureWindowOffScreen()
         {
             if (_window == null) return;
-            
+
             _window.WindowStartupLocation = WindowStartupLocation.Manual;
             _window.Left = -20000;
             _window.Top = -20000;

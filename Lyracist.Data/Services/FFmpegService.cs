@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Read ffmpeg stdout/stderr concurrently to prevent process deadlock on large stderr output
+// Edited on Aug 25, 2026 @ 06:34:00 -> Fix RCS1155 string comparisons and RCS1261 async disposal
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -142,7 +142,7 @@ namespace Lyracist.Data.Services
                 string mp3Path = string.Empty;
                 string cdgPath = string.Empty;
 
-                using (var archive = ZipFile.OpenRead(zipPath))
+                await using (var archive = ZipFile.OpenRead(zipPath))
                 {
                     foreach (var entry in archive.Entries)
                     {
@@ -272,17 +272,15 @@ namespace Lyracist.Data.Services
             }
 
             // 2. ZIP checking (contains a CDG and audio)
-            if (ext == ".zip")
+            if (string.Equals(ext, ".zip", StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
                     using var archive = ZipFile.OpenRead(filePath);
-                    bool hasCdg = archive.Entries.Any(e => Path.GetExtension(e.FullName).ToLowerInvariant() == ".cdg");
+                    bool hasCdg = archive.Entries.Any(e => e.FullName.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase));
                     bool hasAudio = archive.Entries.Any(e =>
-                    {
-                        string entryExt = Path.GetExtension(e.FullName).ToLowerInvariant();
-                        return entryExt == ".mp3" || entryExt == ".wav";
-                    });
+                        e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ||
+                        e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
                     return hasCdg && hasAudio;
                 }
                 catch

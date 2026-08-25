@@ -1,4 +1,4 @@
-// Edited on Jul 31, 2026 @ 12:08:52 -> Update tests for separate Karaoke vs Music report rows
+// Edited on Aug 25, 2026 @ 06:39:00 -> Fix xUnit2033 return values of Assert.Single
 using KSRotation.Models;
 using KSRotation.Services;
 using System;
@@ -24,12 +24,12 @@ public class BuildReportRowsTests
 
         var rows = RotationReportGenerator.BuildReportRows([singer], history);
 
-        Assert.Single(rows);
-        Assert.Equal("Alice", rows[0].SingerName);
-        Assert.Equal(2, rows[0].Performances.Count);
+        var row = Assert.Single(rows);
+        Assert.Equal("Alice", row.SingerName);
+        Assert.Equal(2, row.Performances.Count);
         // Rounds are ordered ascending.
-        Assert.Equal(1, rows[0].Performances[0].Round);
-        Assert.Equal(2, rows[0].Performances[1].Round);
+        Assert.Equal(1, row.Performances[0].Round);
+        Assert.Equal(2, row.Performances[1].Round);
     }
 
     [Fact]
@@ -43,9 +43,9 @@ public class BuildReportRowsTests
 
         var rows = RotationReportGenerator.BuildReportRows([singer], history);
 
-        Assert.Single(rows);
-        Assert.Equal("Bob", rows[0].SingerName);
-        Assert.Single(rows[0].Performances);
+        var row = Assert.Single(rows);
+        Assert.Equal("Bob", row.SingerName);
+        Assert.Single(row.Performances);
     }
 
     [Fact]

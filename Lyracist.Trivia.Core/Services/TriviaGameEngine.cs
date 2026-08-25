@@ -1,10 +1,7 @@
-// Edited on Aug 22, 2026 @ 11:20:00 -> Added manual game flow controls, question navigation, timer adjustments, and voiding support
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Timers;
+// Edited on Aug 25, 2026 @ 06:34:00 -> Fix RCS1139 doc comments, S3358 nested ternaries, and S3881 dispose pattern
 using Lyracist.Trivia.Core.Models;
+using System.Collections.Concurrent;
+using System.Timers;
 
 namespace Lyracist.Trivia.Core.Services;
 
@@ -32,23 +29,33 @@ public class TriviaGameEngine : IDisposable
     public int IntermissionSecondsRemaining { get; private set; }
     public bool IsInIntermission => State == TriviaGameState.GameComplete && IntermissionSecondsRemaining > 0;
 
-    /// Counts every StartGame() call this session (each auto-restart calls it again), so
-    /// CompleteGame can stop auto-restarting once Settings.TotalGamesToPlay is reached.
+    // Counts every StartGame() call this session (each auto-restart calls it again), so
+    // CompleteGame can stop auto-restarting once Settings.TotalGamesToPlay is reached.
     public int GamesPlayedCount { get; private set; }
 
     public bool IsPaused { get; private set; }
     public string? PauseReason { get; private set; }
 
     public event EventHandler<TriviaGameState>? StateChanged;
+
     public event EventHandler<int>? TimerTick;
+
     public event EventHandler<TriviaQuestion>? QuestionStarted;
+
     public event EventHandler<List<int>>? AnswersEliminated;
+
     public event EventHandler<TriviaQuestion>? AnswerRevealed;
+
     public event EventHandler<List<TriviaPlayer>>? LeaderboardUpdated;
+
     public event EventHandler<TriviaGameResult>? GameCompleted;
+
     public event EventHandler<int>? IntermissionTick;
+
     public event EventHandler? IntermissionCompleted;
+
     public event EventHandler<string?>? GamePaused;
+
     public event EventHandler? GameResumed;
 
     public TriviaGameEngine(TriviaSettings? settings = null)
@@ -194,7 +201,8 @@ public class TriviaGameEngine : IDisposable
             }
             _pendingWrongIndices.AddRange(wrongIndices);
 
-            TotalCountdownSeconds = Settings.DefaultQuestionSeconds > 0 ? Settings.DefaultQuestionSeconds : (q.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : 15);
+            int countdown = Settings.DefaultQuestionSeconds > 0 ? Settings.DefaultQuestionSeconds : q.TimeLimitSeconds;
+            TotalCountdownSeconds = countdown > 0 ? countdown : 15;
             RemainingSeconds = TotalCountdownSeconds;
 
             SetState(TriviaGameState.QuestionActive);
@@ -264,10 +272,12 @@ public class TriviaGameEngine : IDisposable
         }
     }
 
+    /// <summary>
     /// Scores one player's answer immediately at submission time, using however many options
     /// were visible for them right then (see VisibleOptionsAtSubmission/GetTierPercent). Called
     /// from SubmitAnswer only - unanswered players are scored (zeroed) later, once the answer
     /// window fully closes in CompleteRevealAnswer.
+    /// </summary>
     private void ScoreAnswer(TriviaPlayer p, TriviaQuestion q)
     {
         double roundMultiplier = CurrentSession.CurrentRound?.PointMultiplier ?? 1.0;
@@ -652,7 +662,8 @@ public class TriviaGameEngine : IDisposable
             }
 
             var q = CurrentSession.CurrentQuestion;
-            TotalCountdownSeconds = Settings.DefaultQuestionSeconds > 0 ? Settings.DefaultQuestionSeconds : (q?.TimeLimitSeconds > 0 ? q.TimeLimitSeconds : 15);
+            int countdown = Settings.DefaultQuestionSeconds > 0 ? Settings.DefaultQuestionSeconds : (q?.TimeLimitSeconds ?? 0);
+            TotalCountdownSeconds = countdown > 0 ? countdown : 15;
             RemainingSeconds = TotalCountdownSeconds;
             EliminatedAnswerIndices.Clear();
 
@@ -675,8 +686,10 @@ public class TriviaGameEngine : IDisposable
         }
     }
 
+    /// <summary>
     /// True once Settings.TotalGamesToPlay (if set) has been reached - CompleteGame stops
     /// auto-restarting at that point instead of looping forever.
+    /// </summary>
     public bool HasReachedGamesCap => Settings.TotalGamesToPlay > 0 && GamesPlayedCount >= Settings.TotalGamesToPlay;
 
     private void CompleteGame()
@@ -767,7 +780,7 @@ public class TriviaGameEngine : IDisposable
 
     public void ResumeTimer()
     {
-        if ((State == TriviaGameState.QuestionActive || State == TriviaGameState.EliminatingAnswers || State == TriviaGameState.RevealAnswer || State == TriviaGameState.RoundLeaderboard || State == TriviaGameState.GameComplete))
+        if (State == TriviaGameState.QuestionActive || State == TriviaGameState.EliminatingAnswers || State == TriviaGameState.RevealAnswer || State == TriviaGameState.RoundLeaderboard || State == TriviaGameState.GameComplete)
         {
             _tickTimer.Start();
         }
@@ -897,10 +910,12 @@ public class TriviaGameEngine : IDisposable
         else PauseGame(reason);
     }
 
+    /// <summary>
     /// Percent of base points awarded for a correct answer submitted while
     /// <paramref name="visibleOptionsCount"/> options are still visible (100/70/40 tiers).
     /// Single source of truth for the tier lookup - used for actual scoring here and by
     /// TriviaWebServer for the live "potential points" badge shown to players.
+    /// </summary>
     public int GetTierPercent(int visibleOptionsCount)
     {
         if (!Settings.TieredScoringEnabled) return 100;
@@ -931,10 +946,18 @@ public class TriviaGameEngine : IDisposable
         StateChanged?.Invoke(this, newState);
     }
 
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _tickTimer.Stop();
+            _tickTimer.Dispose();
+        }
+    }
+
     public void Dispose()
     {
-        _tickTimer.Stop();
-        _tickTimer.Dispose();
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 }

@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Read ffprobe stdout/stderr concurrently to prevent process deadlock
+// Edited on Aug 25, 2026 @ 06:35:00 -> Make FFprobeRunner static class (RCS1102)
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -18,7 +18,7 @@ namespace Lyracist.Data.Services
         public string CommentTag { get; set; } = string.Empty;
     }
 
-    public class FFprobeRunner
+    public static class FFprobeRunner
     {
         public static string FFprobePath { get; set; } = "ffprobe";
 

@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 17:18:00 -> Add /kiosk endpoint and kiosk.html embedded resource support
+// Edited on Aug 25, 2026 @ 06:36:00 -> Fix CA1835 Memory stream overloads, RCS1213 unused MAUI methods, and RCS1261
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,8 +18,8 @@ using System.Security.Cryptography;
 namespace KSRotation.Services
 {
     public class PatronRequestServer(
-        int port, 
-        Action<string, List<RequestedSong>, string, string> onRequestReceived, 
+        int port,
+        Action<string, List<RequestedSong>, string, string> onRequestReceived,
         Func<string> onGetRotationJson,
         Func<string, bool> onVerifyPin,
         Func<string> onGetRequestsJson,
@@ -49,10 +49,16 @@ namespace KSRotation.Services
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, PinAttemptState> _pinAttemptsByIp = new();
 
+        // Once distinct client IPs pile up (long event, many patron devices), sweep out entries that
+        // haven't attempted in a while so the dictionary doesn't grow for the lifetime of the server.
+        private const int PinAttemptSweepThreshold = 256;
+        private static readonly TimeSpan PinAttemptStaleThreshold = TimeSpan.FromMinutes(30);
+
         private sealed class PinAttemptState
         {
             public int FailedCount;
             public DateTime LockedUntilUtc;
+            public DateTime LastAttemptUtc;
         }
 
         public void Start()
@@ -74,6 +80,11 @@ namespace KSRotation.Services
             {
                 LoggerService.LogError("PatronRequestServer.Stop", ex);
             }
+            finally
+            {
+                _cts?.Dispose();
+                _cts = null;
+            }
         }
 
         private async Task AcceptConnectionsAsync(CancellationToken token)
@@ -85,7 +96,7 @@ namespace KSRotation.Services
                     TcpClient client = await _listener!.AcceptTcpClientAsync(token);
 
                     // Cap concurrent in-flight connections so a burst of requests can't exhaust threads/sockets.
-                    if (!_connectionLimiter.Wait(0))
+                    if (!_connectionLimiter.Wait(0, CancellationToken.None))
                     {
                         client.Dispose();
                         continue;
@@ -116,10 +127,10 @@ namespace KSRotation.Services
             string clientIp = (client.Client.RemoteEndPoint as IPEndPoint)?.Address.ToString() ?? "unknown";
 
             using (client)
-            using (NetworkStream stream = client.GetStream())
+            await using (NetworkStream stream = client.GetStream())
             // Reads go through a small buffer so header/body parsing isn't one syscall per byte;
             // responses are still written directly to `stream`, unbuffered.
-            using (BufferedStream readStream = new(stream, 4096))
+            await using (BufferedStream readStream = new(stream, 4096))
             using (CancellationTokenSource readTimeoutCts = new(RequestReadTimeout))
             {
                 try
@@ -257,7 +268,7 @@ namespace KSRotation.Services
                             }
 
 #if !MAUI
-                            using var context = new Lyracist.Data.LyracistDbContext();
+                            await using var context = new Lyracist.Data.LyracistDbContext();
                             var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == queryName);
                             if (dbSinger != null)
                             {
@@ -391,7 +402,7 @@ namespace KSRotation.Services
                             return;
                         }
 
-                        using var context = new Lyracist.Data.LyracistDbContext();
+                        await using var context = new Lyracist.Data.LyracistDbContext();
                         var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name);
                         if (dbSinger == null)
                         {
@@ -458,7 +469,7 @@ namespace KSRotation.Services
                         string vocalRange = root.TryGetProperty("vocalRange", out var vrProp) ? (vrProp.GetString() ?? "") : "";
                         string customTitle = root.TryGetProperty("customTitle", out var ctProp) ? (ctProp.GetString() ?? "") : "";
 
-                        using var context = new Lyracist.Data.LyracistDbContext();
+                        await using var context = new Lyracist.Data.LyracistDbContext();
                         var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name && s.PinCode == singerPin);
                         if (dbSinger == null)
                         {
@@ -493,7 +504,7 @@ namespace KSRotation.Services
                         string singerPin = root.TryGetProperty("pin", out var pProp) ? (pProp.GetString() ?? "") : "";
                         string imageBase64 = root.TryGetProperty("image", out var imgProp) ? (imgProp.GetString() ?? "") : "";
 
-                        using var context = new Lyracist.Data.LyracistDbContext();
+                        await using var context = new Lyracist.Data.LyracistDbContext();
                         var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name && s.PinCode == singerPin);
                         if (dbSinger == null)
                         {
@@ -503,9 +514,9 @@ namespace KSRotation.Services
 
                         if (!string.IsNullOrEmpty(imageBase64))
                         {
-                            if (imageBase64.Contains(","))
+                            if (imageBase64.Contains(','))
                             {
-                                imageBase64 = imageBase64[(imageBase64.IndexOf(",") + 1)..];
+                                imageBase64 = imageBase64[(imageBase64.IndexOf(',') + 1)..];
                             }
                             byte[] imgBytes = Convert.FromBase64String(imageBase64);
 
@@ -603,7 +614,7 @@ namespace KSRotation.Services
         private static async Task<string> ReadHeadersAsync(Stream stream, CancellationToken cancellationToken)
         {
             const int maxHeaderBytes = 16_384;
-            using MemoryStream headerBuffer = new();
+            await using MemoryStream headerBuffer = new();
             byte[] singleByte = new byte[1];
 
             while (headerBuffer.Length < maxHeaderBytes)
@@ -652,7 +663,7 @@ namespace KSRotation.Services
                 $"Content-Length: {Encoding.UTF8.GetByteCount(html)}\r\n" +
                 "Connection: close\r\n\r\n" +
                 html);
-            await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+            await stream.WriteAsync(responseBytes);
         }
 
         private static async Task SendJsonResponseAsync(NetworkStream stream, string json)
@@ -664,7 +675,7 @@ namespace KSRotation.Services
                 $"Content-Length: {Encoding.UTF8.GetByteCount(json)}\r\n" +
                 "Connection: close\r\n\r\n" +
                 json);
-            await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+            await stream.WriteAsync(responseBytes);
         }
 
         private static async Task SendCorsPreflightResponseAsync(NetworkStream stream)
@@ -675,13 +686,13 @@ namespace KSRotation.Services
                 "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
                 "Access-Control-Allow-Headers: Content-Type, X-DJ-PIN\r\n" +
                 "Connection: close\r\n\r\n");
-            await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+            await stream.WriteAsync(responseBytes);
         }
 
         private static async Task SendNotFoundAsync(NetworkStream stream)
         {
             byte[] responseBytes = Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
-            await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+            await stream.WriteAsync(responseBytes);
         }
 
         private static async Task SendUnauthorizedAsync(NetworkStream stream)
@@ -692,7 +703,7 @@ namespace KSRotation.Services
                 "Content-Length: 25\r\n" +
                 "Connection: close\r\n\r\n" +
                 "{\"error\":\"Unauthorized\"}");
-            await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+            await stream.WriteAsync(responseBytes);
         }
 
         private static async Task SendTooManyRequestsAsync(NetworkStream stream)
@@ -704,7 +715,7 @@ namespace KSRotation.Services
                 $"Content-Length: {Encoding.UTF8.GetByteCount(json)}\r\n" +
                 "Connection: close\r\n\r\n" +
                 json);
-            await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+            await stream.WriteAsync(responseBytes);
         }
 
         private static async Task SendRedirectResponseAsync(NetworkStream stream, string redirectUrl)
@@ -715,9 +726,10 @@ namespace KSRotation.Services
                 "Access-Control-Allow-Origin: *\r\n" +
                 "Content-Length: 0\r\n" +
                 "Connection: close\r\n\r\n");
-            await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+            await stream.WriteAsync(responseBytes);
         }
 
+#if !MAUI
         private static async Task SendImageResponseAsync(NetworkStream stream, byte[] imageBytes)
         {
             byte[] responseBytes = Encoding.UTF8.GetBytes(
@@ -726,25 +738,19 @@ namespace KSRotation.Services
                 "Access-Control-Allow-Origin: *\r\n" +
                 $"Content-Length: {imageBytes.Length}\r\n" +
                 "Connection: close\r\n\r\n");
-            
+
             byte[] fullResponse = new byte[responseBytes.Length + imageBytes.Length];
             Buffer.BlockCopy(responseBytes, 0, fullResponse, 0, responseBytes.Length);
             Buffer.BlockCopy(imageBytes, 0, fullResponse, responseBytes.Length, imageBytes.Length);
-            
-            await stream.WriteAsync(fullResponse, 0, fullResponse.Length);
+
+            await stream.WriteAsync(fullResponse);
         }
 
         private static string MD5Hash(string input)
         {
-            using var md5 = System.Security.Cryptography.MD5.Create();
             byte[] inputBytes = Encoding.UTF8.GetBytes(input.Trim().ToLowerInvariant());
-            byte[] hashBytes = md5.ComputeHash(inputBytes);
-            StringBuilder sb = new();
-            for (int i = 0; i < hashBytes.Length; i++)
-            {
-                sb.Append(hashBytes[i].ToString("x2"));
-            }
-            return sb.ToString();
+            byte[] hashBytes = System.Security.Cryptography.MD5.HashData(inputBytes);
+            return Convert.ToHexStringLower(hashBytes);
         }
 
         /// <summary>
@@ -765,6 +771,7 @@ namespace KSRotation.Services
             string jail = fullAvatarsDir.EndsWith(Path.DirectorySeparatorChar) ? fullAvatarsDir : fullAvatarsDir + Path.DirectorySeparatorChar;
             return fullPath.StartsWith(jail, StringComparison.OrdinalIgnoreCase) ? fullPath : null;
         }
+#endif
 
         /// <summary>
         /// Verifies the DJ PIN for <paramref name="clientIp"/>, tracking failed attempts per IP and
@@ -775,8 +782,11 @@ namespace KSRotation.Services
         {
             PinAttemptState state = _pinAttemptsByIp.GetOrAdd(clientIp, _ => new PinAttemptState());
 
+            bool result;
             lock (state)
             {
+                state.LastAttemptUtc = DateTime.UtcNow;
+
                 if (DateTime.UtcNow < state.LockedUntilUtc)
                 {
                     lockedOut = true;
@@ -788,18 +798,39 @@ namespace KSRotation.Services
                     state.FailedCount = 0;
                     state.LockedUntilUtc = DateTime.MinValue;
                     lockedOut = false;
-                    return true;
+                    result = true;
                 }
-
-                state.FailedCount++;
-                if (state.FailedCount >= MaxPinAttemptsBeforeLockout)
+                else
                 {
-                    state.LockedUntilUtc = DateTime.UtcNow.Add(PinLockoutDuration);
-                    state.FailedCount = 0;
-                }
+                    state.FailedCount++;
+                    if (state.FailedCount >= MaxPinAttemptsBeforeLockout)
+                    {
+                        state.LockedUntilUtc = DateTime.UtcNow.Add(PinLockoutDuration);
+                        state.FailedCount = 0;
+                    }
 
-                lockedOut = false;
-                return false;
+                    lockedOut = false;
+                    result = false;
+                }
+            }
+
+            if (_pinAttemptsByIp.Count > PinAttemptSweepThreshold)
+            {
+                SweepStalePinAttempts();
+            }
+
+            return result;
+        }
+
+        private void SweepStalePinAttempts()
+        {
+            DateTime cutoff = DateTime.UtcNow - PinAttemptStaleThreshold;
+            foreach (KeyValuePair<string, PinAttemptState> entry in _pinAttemptsByIp)
+            {
+                if (entry.Value.LastAttemptUtc < cutoff)
+                {
+                    _pinAttemptsByIp.TryRemove(entry.Key, out _);
+                }
             }
         }
 
@@ -811,7 +842,7 @@ namespace KSRotation.Services
                 $"Content-Length: {Encoding.UTF8.GetByteCount(jsonError)}\r\n" +
                 "Connection: close\r\n\r\n" +
                 jsonError);
-            await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+            await stream.WriteAsync(responseBytes);
         }
 
         private static string ParseHeader(string[] headerLines, string headerName)
@@ -853,14 +884,14 @@ namespace KSRotation.Services
         private static string GetHtmlContent() => CachedHtml.Value;
         private static string GetDjHtmlContent() => CachedDjHtml.Value;
         private static string GetKioskHtmlContent() => CachedKioskHtml.Value;
- 
+
         private static string LoadHtmlContent()
         {
             Assembly assembly = typeof(PatronRequestServer).Assembly;
             string? resourceName = Array.Find(
                 assembly.GetManifestResourceNames(),
                 n => n.EndsWith("PatronPortal.html", StringComparison.OrdinalIgnoreCase));
- 
+
             if (resourceName != null)
             {
                 using Stream? stream = assembly.GetManifestResourceStream(resourceName);
@@ -870,7 +901,7 @@ namespace KSRotation.Services
                     return reader.ReadToEnd();
                 }
             }
- 
+
             LoggerService.LogError(
                 "PatronRequestServer.LoadHtmlContent",
                 new InvalidOperationException("Embedded resource 'PatronPortal.html' was not found."));
@@ -883,7 +914,7 @@ namespace KSRotation.Services
             string? resourceName = Array.Find(
                 assembly.GetManifestResourceNames(),
                 n => n.EndsWith("dj.html", StringComparison.OrdinalIgnoreCase));
- 
+
             if (resourceName != null)
             {
                 using Stream? stream = assembly.GetManifestResourceStream(resourceName);
@@ -893,7 +924,7 @@ namespace KSRotation.Services
                     return reader.ReadToEnd();
                 }
             }
- 
+
             LoggerService.LogError(
                 "PatronRequestServer.LoadDjHtmlContent",
                 new InvalidOperationException("Embedded resource 'dj.html' was not found."));

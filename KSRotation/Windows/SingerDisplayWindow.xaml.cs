@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 09:50:00 -> Add UpdateLastSongBanner to show Last Song banner overlay on rotation screen
+// Edited on Aug 25, 2026 @ 06:38:00 -> Fix RCS1118 const inset and RCS1001 if braces
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -375,7 +375,7 @@ namespace KSRotation.Windows
 
             const double bulb = 26;
             const double spacing = 54;
-            double inset = bulb / 2; // center bulbs on the frame edge
+            const double inset = bulb / 2; // center bulbs on the frame edge
 
             // Walk the perimeter clockwise so the lit pattern marches smoothly around the loop.
             var positions = new List<System.Windows.Point>();
@@ -816,9 +816,11 @@ namespace KSRotation.Windows
 
                     string songLine = entry.Song ?? string.Empty;
                     if (!string.IsNullOrWhiteSpace(entry.Artist))
+                    {
                         songLine += string.IsNullOrWhiteSpace(songLine)
                             ? entry.Artist
                             : $"  –  {entry.Artist}";
+                    }
 
                     if (!string.IsNullOrWhiteSpace(songLine))
                     {

@@ -1,4 +1,4 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> RSA key signing and management
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1192 verbatim string prefix
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -7,7 +7,7 @@ namespace LyracistKeyGen
 {
     public static class LicenseManager
     {
-        private const string PrivateKeyXml = @"<RSAKeyValue><Modulus>yNiIy7PlY5E+t5x1vy7xL7dVSc4IiuCbQSAEH6CdDnkPaZRniMRSPnTTBoIk2VU4uI08OJT0xWPswZB8krolhaDIihMsRNCqZvqfBZo2d/b2mp/BxVsJpGmQzbVK4CVJitEp38Om0QpZg6TZDRLkJoImTu129mh/JX+0UvTVwS0=</Modulus><Exponent>AQAB</Exponent><P>3V9G8OhBMX0vJQXdrpgruLwWFTpBgHWN+8bl+eQeX654MZXq/k6OxARirVqS1gVmkKRErKwUx4JOy1Z8qtXUbw==</P><Q>6ENKq3dcwZExBWWEPo96QGgMhUECUK0QF4bIXWIiqrPi/yTZlrT8Cz+KtcE8apL8XLu8/HundS4EI6pKofiqIw==</Q><DP>pC+JLx4jVDAzqjLqkxbbvp0Jh974O+10TBvd7/QoLvD4xlYZv1nGe02BXm+B3miNBJRBNww+MSbNh/RybEZB0w==</DP><DQ>ZYK7iNNDO+pcFXK36KvGj42qIzc1btMknFOxEHdKlXbHeCG/44k4OyZLVoKdCCszlsgKogLdPm6dKoVL1xyaJw==</DQ><InverseQ>0x4x+D2tQ6xVutL5/7G5kOpEjY7HgX3ak8mEqgFJkxMHJ2g3ykDt2pa2m0zjhpqNwy5O7HIfWbpbIsHJCT1UKQ==</InverseQ><D>NlOT1P3JG4CLJWE13EvXQ1/kuvz3BJGyjRAa7W8lbGfEintw8eaglHJHLmh/jSXnHMxfMLLh7o6T2Nu7RnkBcsQRZj7EJpKlBJbGkQxbiOOOTZantpxVmDo3F8H3oA3H4PMVepXH5lRPB4CqrpE2myWf6gCDKan13LD1T95YcGU=</D></RSAKeyValue>";
+        private const string PrivateKeyXml = "<RSAKeyValue><Modulus>yNiIy7PlY5E+t5x1vy7xL7dVSc4IiuCbQSAEH6CdDnkPaZRniMRSPnTTBoIk2VU4uI08OJT0xWPswZB8krolhaDIihMsRNCqZvqfBZo2d/b2mp/BxVsJpGmQzbVK4CVJitEp38Om0QpZg6TZDRLkJoImTu129mh/JX+0UvTVwS0=</Modulus><Exponent>AQAB</Exponent><P>3V9G8OhBMX0vJQXdrpgruLwWFTpBgHWN+8bl+eQeX654MZXq/k6OxARirVqS1gVmkKRErKwUx4JOy1Z8qtXUbw==</P><Q>6ENKq3dcwZExBWWEPo96QGgMhUECUK0QF4bIXWIiqrPi/yTZlrT8Cz+KtcE8apL8XLu8/HundS4EI6pKofiqIw==</Q><DP>pC+JLx4jVDAzqjLqkxbbvp0Jh974O+10TBvd7/QoLvD4xlYZv1nGe02BXm+B3miNBJRBNww+MSbNh/RybEZB0w==</DP><DQ>ZYK7iNNDO+pcFXK36KvGj42qIzc1btMknFOxEHdKlXbHeCG/44k4OyZLVoKdCCszlsgKogLdPm6dKoVL1xyaJw==</DQ><InverseQ>0x4x+D2tQ6xVutL5/7G5kOpEjY7HgX3ak8mEqgFJkxMHJ2g3ykDt2pa2m0zjhpqNwy5O7HIfWbpbIsHJCT1UKQ==</InverseQ><D>NlOT1P3JG4CLJWE13EvXQ1/kuvz3BJGyjRAa7W8lbGfEintw8eaglHJHLmh/jSXnHMxfMLLh7o6T2Nu7RnkBcsQRZj7EJpKlBJbGkQxbiOOOTZantpxVmDo3F8H3oA3H4PMVepXH5lRPB4CqrpE2myWf6gCDKan13LD1T95YcGU=</D></RSAKeyValue>";
 
         /// <summary>
         /// Generates a cryptographically valid asymmetric RSA signature of the registration parameters as the serial key.

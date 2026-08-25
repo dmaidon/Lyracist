@@ -1,9 +1,4 @@
-// Rewritten on Aug 1, 2026 @ 13:20:00 -> Implement the real CASTV2 protocol (TLS + protobuf CastMessage
-// framing + CONNECT/heartbeat/LAUNCH/LOAD handshake) instead of plaintext JSON over a raw socket.
-// Google Cast receivers (including TV-built-in Chromecast) require a TLS session on port 8009 and
-// reject anything else outright, and LAUNCH requires a registered appId - a raw URL is not valid.
-// We use Google's Default Media Receiver (CC1AD845) and drive it with LOAD, since we don't own a
-// registered custom receiver app id.
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix CsWinRT1028 partial class on CastSession
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -86,7 +81,7 @@ namespace Lyracist.Shared
     /// Holds one persistent TLS connection to a Cast device and drives the CONNECT/heartbeat/
     /// LAUNCH/LOAD handshake over it. One instance per device.
     /// </summary>
-    internal sealed class CastSession : IDisposable
+    internal sealed partial class CastSession : IDisposable
     {
         private const string SenderId = "sender-0";
         private const string PlatformDestinationId = "receiver-0";

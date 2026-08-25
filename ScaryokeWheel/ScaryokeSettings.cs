@@ -1,4 +1,4 @@
-// Edited on Jul 16, 2026 @ 12:00:00 -> Load dynamic configs
+// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1146 conditional access
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,7 +35,7 @@ public class ScaryokeSettings
             {
                 string json = File.ReadAllText(SettingsPath);
                 var settings = JsonSerializer.Deserialize<ScaryokeSettings>(json);
-                if (settings != null && settings.Categories != null)
+                if (settings?.Categories != null)
                 {
                     if (settings.Categories.Count > 11)
                     {
