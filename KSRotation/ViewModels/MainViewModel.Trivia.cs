@@ -58,21 +58,7 @@ namespace KSRotation.ViewModels
 
         partial void OnTriviaCurrentQuestionNumberChanged(int value)
         {
-            // Guard against reacting to programmatic resets (e.g. pack-selection preview) - only
-            // a live/in-progress session should have question-jump navigation applied to it.
-            if (_triviaEngine?.CurrentSession?.CurrentRound != null &&
-                _triviaEngine.State != TriviaGameState.Lobby &&
-                _triviaEngine.State != TriviaGameState.GameComplete)
-            {
-                int targetIdx = value - 1;
-                if (targetIdx >= 0 && targetIdx < _triviaEngine.CurrentSession.CurrentRound.Questions.Count)
-                {
-                    if (_triviaEngine.CurrentSession.CurrentQuestionIndex != targetIdx)
-                    {
-                        _triviaEngine.GoToQuestion(targetIdx, startTimerImmediately: TriviaAutoAdvance);
-                    }
-                }
-            }
+            _triviaEngine?.TryNavigateToQuestionNumber(value, TriviaAutoAdvance);
         }
 
         [ObservableProperty]
