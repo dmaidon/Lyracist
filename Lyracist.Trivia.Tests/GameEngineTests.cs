@@ -727,12 +727,20 @@ public class GameEngineTests
         engine.StartGame([CreateSampleRound()]);
         engine.StartCurrentQuestion();
 
+        // Bob walks into this question with an existing streak that his wrong answer will
+        // reset to 0 - voiding the question should restore it, not just leave it zeroed.
+        bob.CurrentStreak = 3;
+        bob.MaxStreak = 3;
+
         engine.SubmitAnswer("Alice", 1); // correct
         engine.SubmitAnswer("Bob", 0); // wrong
 
         Assert.Equal(1000, alice.TotalScore);
         Assert.Equal(1, alice.TotalAnswered);
         Assert.Equal(1, alice.TotalCorrect);
+        Assert.Equal(1, alice.CurrentStreak);
+        Assert.Equal(1, alice.MaxStreak);
+        Assert.Equal(0, bob.CurrentStreak);
 
         // Void the question
         engine.VoidCurrentQuestion();
@@ -743,9 +751,17 @@ public class GameEngineTests
         Assert.Equal(0, alice.TotalCorrect);
         Assert.False(alice.HasAnsweredCurrentQuestion);
 
+        // Alice's streak (built by this voided question) must be rolled back too, not left inflated
+        Assert.Equal(0, alice.CurrentStreak);
+        Assert.Equal(0, alice.MaxStreak);
+
         // Bob's answered count rolled back
         Assert.Equal(0, bob.TotalAnswered);
         Assert.False(bob.HasAnsweredCurrentQuestion);
+
+        // Bob's pre-existing streak (wiped by this voided question's wrong answer) must be restored
+        Assert.Equal(3, bob.CurrentStreak);
+        Assert.Equal(3, bob.MaxStreak);
 
         // Game should have advanced to Q2
         Assert.Equal("Q2", engine.CurrentSession.CurrentQuestion?.Id);

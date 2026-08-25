@@ -255,6 +255,8 @@ public class TriviaGameEngine : IDisposable
     private void ScoreAnswer(TriviaPlayer p, TriviaQuestion q)
     {
         double roundMultiplier = CurrentSession.CurrentRound?.PointMultiplier ?? 1.0;
+        p.StreakBeforeAnswer = p.CurrentStreak;
+        p.MaxStreakBeforeAnswer = p.MaxStreak;
         p.TotalAnswered++;
 
         if (p.LastAnswerIndex == q.CorrectAnswerIndex)
@@ -540,6 +542,8 @@ public class TriviaGameEngine : IDisposable
                     {
                         p.TotalCorrect = Math.Max(0, p.TotalCorrect - 1);
                     }
+                    p.CurrentStreak = p.StreakBeforeAnswer;
+                    p.MaxStreak = p.MaxStreakBeforeAnswer;
                     p.LastPointsEarned = 0;
                     p.LastAnswerIndex = -1;
                     p.HasAnsweredCurrentQuestion = false;

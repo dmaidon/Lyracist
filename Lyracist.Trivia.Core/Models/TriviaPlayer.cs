@@ -19,6 +19,12 @@ public class TriviaPlayer
     public int LastPointsEarned { get; set; } = 0;
     public int VisibleOptionsAtSubmission { get; set; } = 4;
     public int RemainingSecondsAtSubmission { get; set; } = 0;
+
+    /// CurrentStreak/MaxStreak as they stood immediately before this question's answer was
+    /// scored - lets TriviaGameEngine.VoidCurrentQuestion restore them exactly instead of
+    /// leaving streak counters inflated by a voided question. See ScoreAnswer.
+    public int StreakBeforeAnswer { get; set; } = 0;
+    public int MaxStreakBeforeAnswer { get; set; } = 0;
     public bool IsConnected { get; set; } = true;
     public DateTime ConnectedAt { get; set; } = DateTime.Now;
     public DateTime LastSeenAt { get; set; } = DateTime.Now;
