@@ -106,15 +106,8 @@ public static class TriviaStorageHelper
         }
     }
 
-    public static string? GetBannerPathForPack(string? packIdOrCategory)
+    private static readonly System.Collections.Generic.Dictionary<string, string> BannerFileNameMappings = new(StringComparer.OrdinalIgnoreCase)
     {
-        if (string.IsNullOrWhiteSpace(packIdOrCategory)) return null;
-
-        string bannersDir = GetBannersDirectory();
-        string clean = packIdOrCategory.Trim().ToLowerInvariant().Replace(" ", "_").Replace("-", "_").Replace("&", "and");
-
-        System.Collections.Generic.Dictionary<string, string> mappings = new(StringComparer.OrdinalIgnoreCase)
-        {
             ["biker_trivia"] = "biker_trivia.png",
             ["biker-trivia"] = "biker_trivia.png",
             ["bikers_and_motorcycles"] = "biker_trivia.png",
@@ -151,9 +144,16 @@ public static class TriviaStorageHelper
             ["pub-general-knowledge"] = "pub_general_knowledge.png",
             ["pub_trivia_all_stars"] = "pub_general_knowledge.png",
             ["pub-trivia-all-stars"] = "pub_general_knowledge.png"
-        };
+    };
 
-        if (mappings.TryGetValue(clean, out var fileName))
+    public static string? GetBannerPathForPack(string? packIdOrCategory)
+    {
+        if (string.IsNullOrWhiteSpace(packIdOrCategory)) return null;
+
+        string bannersDir = GetBannersDirectory();
+        string clean = packIdOrCategory.Trim().ToLowerInvariant().Replace(" ", "_").Replace("-", "_").Replace("&", "and");
+
+        if (BannerFileNameMappings.TryGetValue(clean, out var fileName))
         {
             string full = Path.Combine(bannersDir, fileName);
             if (File.Exists(full)) return full;

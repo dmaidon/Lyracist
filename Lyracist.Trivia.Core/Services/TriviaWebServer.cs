@@ -124,10 +124,10 @@ public class TriviaWebServer : IDisposable
     {
         using (client)
         await using (var stream = client.GetStream())
-        await using (var readStream = new BufferedStream(stream, 4096))
         using (var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(serverToken))
         {
             timeoutCts.CancelAfter(RequestReadTimeout);
+            var readStream = new ChunkedReader(stream);
 
             try
             {
@@ -300,8 +300,13 @@ public class TriviaWebServer : IDisposable
                 requestPlayerId = qParams["playerId"] ?? "";
             }
 
+            // Fetched once and reused below (identity lookup, GetGameResult, leaderboard) instead
+            // of calling GetPlayers() up to three times per poll - this endpoint is hit roughly
+            // once a second by every connected phone, and each call re-scans/re-sorts every player.
+            var allPlayers = _engine.GetPlayers();
+
             var player = !string.IsNullOrEmpty(playerName)
-                ? _engine.GetPlayers().FirstOrDefault(p => p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase))
+                ? allPlayers.FirstOrDefault(p => p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase))
                 : null;
 
             // A playerId that doesn't match means another device has since taken over this name
@@ -321,7 +326,7 @@ public class TriviaWebServer : IDisposable
 
             var q = _engine.CurrentSession.CurrentQuestion;
             bool isCorrect = player != null && q != null && player.LastAnswerIndex == q.CorrectAnswerIndex;
-            var gameResult = _engine.GetGameResult();
+            var gameResult = _engine.GetGameResult(allPlayers);
 
             int visibleCount = Math.Max(1, (q?.Options.Count ?? 4) - _engine.EliminatedAnswerIndices.Count);
             int currentPercent = _engine.GetTierPercent(visibleCount);
@@ -359,7 +364,7 @@ public class TriviaWebServer : IDisposable
                 winningTeamMembersRoster = gameResult.WinningTeamMembersRoster,
                 intermissionSecondsRemaining = _engine.IntermissionSecondsRemaining,
                 isIntermissionActive = _engine.IsInIntermission,
-                leaderboard = _engine.GetPlayers().Take(10).Select((p, idx) => new
+                leaderboard = allPlayers.Take(10).Select((p, idx) => new
                 {
                     rank = idx + 1,
                     name = p.Name,
@@ -444,28 +449,67 @@ public class TriviaWebServer : IDisposable
         }
     }
 
-    private static async Task<string> ReadHeadersAsync(BufferedStream stream, CancellationToken token)
+    private static async Task<string> ReadHeadersAsync(ChunkedReader stream, CancellationToken token)
     {
         await using var ms = new MemoryStream();
-        byte[] buffer = new byte[1];
         int pattern = 0; // Tracks \r\n\r\n
 
         while (ms.Length < 8192)
         {
-            int read = await stream.ReadAsync(buffer.AsMemory(0, 1), token);
-            if (read == 0) break;
+            int b = await stream.ReadByteAsync(token);
+            if (b < 0) break;
 
-            ms.WriteByte(buffer[0]);
+            ms.WriteByte((byte)b);
 
-            if (buffer[0] == '\r' && (pattern == 0 || pattern == 2)) pattern++;
-            else if (buffer[0] == '\n' && (pattern == 1 || pattern == 3)) pattern++;
-            else if (buffer[0] == '\r') pattern = 1;
+            if (b == '\r' && (pattern == 0 || pattern == 2)) pattern++;
+            else if (b == '\n' && (pattern == 1 || pattern == 3)) pattern++;
+            else if (b == '\r') pattern = 1;
             else pattern = 0;
 
             if (pattern == 4) break;
         }
 
         return Encoding.UTF8.GetString(ms.ToArray());
+    }
+
+    /// <summary>
+    /// Minimal buffered reader over the raw NetworkStream, used only for the request-parsing side
+    /// of a connection. ReadHeadersAsync used to pull one byte at a time straight off a
+    /// BufferedStream, which meant an await/state-machine resume per header byte (~300-500 per
+    /// request) even though the underlying socket read was already batched - this collapses that
+    /// down to one resume per internal-buffer refill (every 4KB). ReadAsync drains any bytes left
+    /// over from that buffer (e.g. the start of the body, if the client sent header+body in one
+    /// packet) before falling through to the underlying stream, so body reads stay correct.
+    /// </summary>
+    private sealed class ChunkedReader(Stream inner)
+    {
+        private readonly byte[] _buffer = new byte[4096];
+        private int _pos;
+        private int _len;
+
+        public async Task<int> ReadByteAsync(CancellationToken token)
+        {
+            if (_pos >= _len)
+            {
+                _len = await inner.ReadAsync(_buffer.AsMemory(0, _buffer.Length), token);
+                _pos = 0;
+                if (_len == 0) return -1;
+            }
+            return _buffer[_pos++];
+        }
+
+        public async Task<int> ReadAsync(Memory<byte> destination, CancellationToken token)
+        {
+            if (_pos < _len)
+            {
+                int available = _len - _pos;
+                int toCopy = Math.Min(available, destination.Length);
+                _buffer.AsSpan(_pos, toCopy).CopyTo(destination.Span);
+                _pos += toCopy;
+                return toCopy;
+            }
+            return await inner.ReadAsync(destination, token);
+        }
     }
 
     private static int ParseContentLength(string[] headerLines)
