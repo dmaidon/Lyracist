@@ -77,6 +77,7 @@ public partial class MainWindow : Window
             };
             _displayWindow.Closed += (_, _) =>
             {
+                displayVm.Dispose();
                 _displayWindow = null;
                 mainVm.RegisterDisplayViewModel(null);
             };

@@ -22,8 +22,9 @@ public partial class App : System.Windows.Application
         base.OnStartup(e);
         try
         {
-            TriviaBannerGenerator.GenerateAllBanners();
-            if (e.Args.Length > 0 && (e.Args[0] == "--generate-banners" || e.Args[0] == "--headless-banners"))
+            bool forceRegenerateBanners = e.Args.Length > 0 && (e.Args[0] == "--generate-banners" || e.Args[0] == "--headless-banners");
+            TriviaBannerGenerator.GenerateAllBanners(force: forceRegenerateBanners);
+            if (forceRegenerateBanners)
             {
                 Shutdown(0);
             }

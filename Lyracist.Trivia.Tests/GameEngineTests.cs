@@ -1,4 +1,4 @@
-// Edited on Aug 22, 2026 @ 11:20:00 -> Added manual game flow controls unit tests for DJ and GameMaster
+// Edited on Aug 26, 2026 @ 07:15:00 -> Add unit tests to verify manual DJ flow controls and timer countdown standby mode
 using System;
 using System.Collections.Generic;
 using Lyracist.Trivia.Core.Models;
@@ -945,5 +945,23 @@ public class GameEngineTests
         Assert.Equal(TriviaGameState.QuestionActive, engine.State);
         Assert.Equal(15, engine.RemainingSeconds);
         Assert.NotNull(engine.CurrentSession.CurrentQuestion);
+    }
+
+    [Fact]
+    public void ManualGameFlow_DJFlowControl_StandbyAndStartTimer()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+
+        // 1. Advance to next question in manual mode (startTimerImmediately: false)
+        bool hasNext = engine.AdvanceToNextQuestion(startTimerImmediately: false);
+        Assert.True(hasNext);
+        Assert.Equal(TriviaGameState.QuestionActive, engine.State);
+        Assert.Equal(15, engine.RemainingSeconds);
+
+        // 2. Start the timer manually
+        engine.StartCurrentQuestion();
+        Assert.Equal(TriviaGameState.QuestionActive, engine.State);
+        Assert.Equal(15, engine.RemainingSeconds);
     }
 }

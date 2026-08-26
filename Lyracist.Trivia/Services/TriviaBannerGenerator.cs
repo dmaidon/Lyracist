@@ -182,7 +182,14 @@ public static class TriviaBannerGenerator
         )
     ];
 
-    public static void GenerateAllBanners(string? outputDir = null)
+    /// <summary>
+    /// Renders every built-in banner into <paramref name="outputDir"/>. Banner content is fully
+    /// deterministic, so by default a file that already exists is left alone instead of being
+    /// re-rendered/re-encoded on every single app launch - pass <paramref name="force"/> (wired up
+    /// to the app's --generate-banners/--headless-banners startup flags) to regenerate everything
+    /// regardless, e.g. after changing this generator's output.
+    /// </summary>
+    public static void GenerateAllBanners(string? outputDir = null, bool force = false)
     {
         string dir = outputDir ?? TriviaStorageHelper.GetBannersDirectory();
         if (!Directory.Exists(dir))
@@ -193,6 +200,7 @@ public static class TriviaBannerGenerator
         foreach (var def in AllBanners)
         {
             string outPath = Path.Combine(dir, def.FileName);
+            if (!force && File.Exists(outPath)) continue;
             GenerateBanner(def, outPath);
         }
     }

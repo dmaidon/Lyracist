@@ -722,9 +722,15 @@ public class TriviaGameEngine : IDisposable
         }
     }
 
-    public TriviaGameResult GetGameResult()
+    public TriviaGameResult GetGameResult() => GetGameResult(GetPlayers());
+
+    /// <summary>
+    /// Overload for callers (e.g. TriviaWebServer's /api/trivia/state, polled once per second by
+    /// every connected phone) that already fetched GetPlayers() for their own use and would
+    /// otherwise force a second full player-list scan/sort just to build this result.
+    /// </summary>
+    public TriviaGameResult GetGameResult(List<TriviaPlayer> ranked)
     {
-        var ranked = GetPlayers();
         var result = new TriviaGameResult
         {
             RankedPlayers = ranked

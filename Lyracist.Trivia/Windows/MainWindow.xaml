@@ -821,13 +821,28 @@
             <TabItem Header="❓ Help">
                 <Border Background="#1E293B" CornerRadius="12" Padding="20" Margin="0,12,0,0" BorderBrush="#14FFFFFF" BorderThickness="1">
                     <Grid>
+                        <Grid.Resources>
+                            <Style TargetType="GridSplitter">
+                                <Setter Property="Cursor" Value="SizeWE" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#334155" />
+                                    </Trigger>
+                                    <Trigger Property="IsDragging" Value="True">
+                                        <Setter Property="Background" Value="#334155" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Resources>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="280" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" MinWidth="180" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" MinWidth="300" />
                         </Grid.ColumnDefinitions>
 
                         <!-- Left Topic Selector -->
-                        <Border Grid.Column="0" Background="#0F172A" CornerRadius="8" Padding="8" Margin="0,0,16,0" BorderBrush="#14FFFFFF" BorderThickness="1">
+                        <Border Grid.Column="0" Background="#0F172A" CornerRadius="8" Padding="8" BorderBrush="#14FFFFFF" BorderThickness="1">
                             <ListBox ItemsSource="{Binding HelpTopics}" SelectedItem="{Binding SelectedHelpTopic}" Background="Transparent" BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
@@ -842,8 +857,11 @@
                             </ListBox>
                         </Border>
 
+                        <!-- Column Splitter -->
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ShowsPreview="False" />
+
                         <!-- Right Topic Content -->
-                        <Border Grid.Column="1" Background="#0F172A" CornerRadius="8" Padding="24" BorderBrush="#14FFFFFF" BorderThickness="1">
+                        <Border Grid.Column="2" Background="#0F172A" CornerRadius="8" Padding="24" BorderBrush="#14FFFFFF" BorderThickness="1">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
                                 <StackPanel DataContext="{Binding SelectedHelpTopic}">
                                     <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="Black" Foreground="{Binding AccentColor}" Margin="0,0,0,4" />

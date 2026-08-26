@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.8.22.445</AssemblyVersion>
-    <FileVersion>26.8.22.445</FileVersion>
+    <AssemblyVersion>26.8.26.448</AssemblyVersion>
+    <FileVersion>26.8.26.448</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\README.md">
+    <None Include="C:\VB26\Lyracist\README.md" Link="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

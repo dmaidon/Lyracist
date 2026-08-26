@@ -1,11 +1,11 @@
-<!-- Edited on Aug 25, 2026 @ 06:56:00 -> Update README with solution-wide zero-warning code quality and analyzer cleanup -->
-Last Edit: Aug 25, 2026 - Solution-Wide Zero-Warning Cleanliness, Code Diagnostics, and xUnit v3 Test Coverage
+<!-- Edited on Aug 26, 2026 @ 07:34:00 -> Update README with manual/automatic trivia help and resizable index column details -->
+Last Edit: Aug 26, 2026 -  Help System Manual/Automatic Trivia Instructions, Resizable Index Column, and manual flow unit tests
 # Lyracist Pro
-
+    
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
 
 ---
-
+    
 ## Key Features
 
 ### 📟 Cross-App Landscape Tablet Kiosk Request Station (`/kiosk`, `kiosk.html`)
@@ -262,6 +262,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 
 ### ❓ Split-Pane Help System
 - **Interactive Index Menu**: Left-pane sidebar allowing direct navigation between 12 detailed help categories covering every user-facing page and setting.
+- **Resizable Index Column**: Integrated a vertical `GridSplitter` allowing users to click and drag the column boundary to manually resize the index list width, preventing text truncation on different screen sizes.
 - **Rich Detail Panel**: Right-pane scroll-contained viewer displaying page guides, setting definitions, tone balancing parameters, decoders, and API settings, preventing excessive page scrolling.
 
 ---
