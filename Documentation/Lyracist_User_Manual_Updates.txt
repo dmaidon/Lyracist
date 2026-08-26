@@ -1,5 +1,22 @@
-// Edited on Aug 21, 2026 @ 12:34:00 -> Added documentation for Remote DJ Board checkmark first action, popup modal performer entry, KSRotation.Maui responsive layout, and Android stability
+// Edited on Aug 26, 2026 @ 07:29:00 -> Added manual index column resize option on Help Page to Help system and updates log
 Singer Rotation & Trivia Game Enhancements (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`) - (August 2026)
+
+Section: Live Trivia / Manual DJ & Game Master Flow Controls (`Lyracist.Trivia`, `KSRotation`, & `Lyracist`)
+
+[Gameplay Modes Details]
+1. Manual vs. Automatic Trivia Flow Control:
+   - **Manual Mode (Auto-Run unchecked)**: 
+     * Questions load in a 'standby/reading' state with the timer paused, allowing the DJ to read the prompt over the microphone.
+     * The DJ starts the countdown clock on demand (Spacebar or 'Start Question & Timer').
+     * The DJ can adjust countdown timing on the fly (`-5s`, `+5s`, `+10s`, `🔄 Reset`), manually fade out wrong options (`✂ Fade Option`), or reveal the answer early (`⚡ Instant Reveal`).
+     * The game will not automatically advance after answer reveal or intermission. The DJ advances manually when ready using 'Next ⏭' or keyboard shortcuts (Right Arrow / PageDown).
+   - **Automatic Mode (Auto-Run checked)**:
+     * The entire game runs unattended: timers count down immediately upon loading, wrong answers are eliminated automatically, correct answers are revealed, and the engine automatically advances to the next question after a 5-second reveal buffer.
+2. Custom Countdown Time Limits:
+     * DJs can customize 'Default Question Time (Sec)' (persisted as DefaultQuestionSeconds in settings), which overrides default JSON pack time limits during live trivia games.
+3. Help Page Index Column Width Resizing:
+     * A `GridSplitter` was integrated into the Help page to allow users to manually click and drag the index column's right border.
+     * Prevents truncation of long category index descriptions and supports custom layout dimensions on different screens.
 
 Section: Performance & Rotation Operations / Singer Queue Management & Trivia Live Control
 

@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 17:21:00 -> Fix PackIcon Kind to Tablet on Kiosk button -->
+<!-- Edited on Aug 26, 2026 @ 07:18:00 -> Add manual vs automatic trivia gameplay instructions to Help panel -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -2926,6 +2926,14 @@
                                         <TextBlock Text="5. Tiered Scoring &amp; Penalties: Tiered option value scoring (100% / 70% / 40%), up to +500 speed bonus, +10% streak multiplier, and optional wrong answer point deductions (0 to -500 pts)." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                         <TextBlock Text="6. Automatic Pause: When DJ Banners or Rotation screens are cast, Trivia automatically freezes and resumes when closed." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                         <TextBlock Text="7. Custom JSON Packs: Place any custom JSON file in TriviaData/packs/ (with PackId, Title, Category, Description, and Questions array with Prompt, 4 Options, and CorrectAnswerIndex) to auto-discover and load new categories." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="⚡ Gameplay Modes: Manual vs. Automatic" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="• 🎮 Manual DJ Mode (Auto-Run unchecked): Questions load in a 'standby/reading' state with the timer paused, allowing the DJ to read the prompt over the microphone. The DJ starts the countdown clock on demand (Spacebar or 'Start Question &amp; Timer' button), adjusts pacing using timer bumps, and manually triggers answer reveals and question progression (Next ⏭)." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                        <TextBlock Text="• ⚡ Automatic Mode (Auto-Run checked): The entire game runs unattended. Question timers start counting down immediately upon loading, wrong answers are eliminated automatically, correct answers are revealed after countdown, and the engine automatically advances to the next question after a 5-second reveal buffer." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

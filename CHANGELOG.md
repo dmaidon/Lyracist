@@ -1,8 +1,25 @@
-<!-- Edited on Aug 25, 2026 @ 06:56:00 -> Update CHANGELOG with zero-warning code quality, Roslynator, and compiler cleanup -->
-Last Edit: Aug 25, 2026 - Solution-Wide Code Quality, Roslynator Warnings, Compiler Cleanliness, and xUnit v3 Test Suite Improvements
+<!-- Edited on Aug 26, 2026 @ 07:34:00 -> Update CHANGELOG with manual/automatic trivia help and resizable index column details -->
+Last Edit: Aug 26, 2026 - Help System Manual/Automatic Trivia Instructions, Resizable Index Column, and manual flow unit tests
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.26.1] - 2026-08-26
+
+### Added & Enhanced
+- **Help System & User Manual updates log for Manual/Automatic Trivia Modes (`Lyracist`, `KSRotation`, and `Lyracist.Trivia`)**:
+  - Added detailed instructions detailing the distinct behaviors of **Manual DJ Mode** (Auto-Run unchecked: questions standby, manual start timer via Spacebar, manual wrong answer fades, manual next progression) versus **Automatic Mode** (Auto-Run checked: automatic countdowns, automatic fades, automatic reveal, and auto-advance after 5s buffer).
+  - Updated Help Topic 17 in `Lyracist` (`HelpViewModel.cs`), Help Topic 3 in `Lyracist.Trivia` (`MainViewModel.cs`), and Help Topic 6 in `KSRotation` (`MainWindow.xaml`).
+  - Recorded detailed changes in `Lyracist_User_Manual_Updates.txt` for main user manual maintenance.
+- **Manual Help Page Index Column Width Resizing (`Lyracist`)**:
+  - Integrated a vertical `GridSplitter` into the Help Page layout (`HelpPage.xaml`), allowing users to manually click and drag to adjust the index column width.
+  - Set robust minimum width constraints (`MinWidth="180"` for the index column, and `MinWidth="300"` for the details pane) to prevent accidental layout collapse.
+  - Avoids truncation of long help topic index headers, ensuring readability on diverse screen sizes.
+
+### Testing & Verification
+- **Manual Trivia Flow Unit Tests (`Lyracist.Trivia.Tests`)**:
+  - Added `ManualGameFlow_DJFlowControl_StandbyAndStartTimer` unit test to `GameEngineTests.cs` to verify question loading in standby mode and subsequent manual timer activation by the DJ.
+  - Successfully verified solution-wide compilation and test execution with 100% pass rate.
 
 ## [26.8.25.1] - 2026-08-25
 
