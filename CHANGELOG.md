@@ -24,6 +24,9 @@ All notable changes to the Lyracist project are documented here. The format is b
     - Preserves standard music acronyms (`DJ`, `MC`, `TV`, `CD`, `DVD`) and Roman numerals (`II`, `III`, `IV`, `VI`, `VII`, `VIII`, `IX`, `X`, `XI`, `XII`), while keeping song title contractions correctly lowercased (e.g. `Don't Stop Believin'`, `Rock 'N' Roll`).
   - **Application Integration**:
     - Integrated across `Lyracist` (`RotationViewModel`, `EditSingerViewModel`, `KaraokeViewModel`, `RequestService`), `KSRotation` & `KSRotation.Maui` (`SingerEntry`), and `LyracistDbEditor` (`MainViewModel`).
+  - **Pinned .NET 10 SDK Version (`global.json`)**:
+    - Added `global.json` pinning the build tooling to the stable GA .NET 10 SDK (`10.0.400`), ensuring Visual Studio and the `dotnet` CLI compile with .NET 10 tools and preventing preview SDK fallback warnings (`NETSDK1057`).
+
 
 ### Testing & Verification
 
