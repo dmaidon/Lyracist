@@ -1,0 +1,2344 @@
+{
+  "PackId": "complete-the-lyric",
+  "Title": "Complete the Lyric - Karaoke Singalongs",
+  "Category": "Complete the Lyric",
+  "Description": "150 curated questions covering Complete the Lyric.",
+  "Questions": [
+    {
+      "Id": "CTL-001",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Journey - Don't Stop Believin': 'Just a small town girl, living in a lonely world. She took the midnight train going...'",
+      "Options": [
+        "Anywhere",
+        "Back home again",
+        "To Hollywood",
+        "To the city lights"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'She took the midnight train going anywhere' opens the 1981 smash hit.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-002",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Bon Jovi - Livin' on a Prayer: 'Tommy used to work on the docks, union's been on strike, he's down on his luck, it's tough...'",
+      "Options": [
+        "Every night",
+        "All day",
+        "So tough",
+        "In the street"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'It's tough, so tough' is sung in the iconic opening verse.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-003",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Neil Diamond - Sweet Caroline: 'Hands, touching hands, reaching out, touching me...'",
+      "Options": [
+        "Touching all",
+        "Touching you",
+        "Holding on",
+        "Loving you"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Touching me, touching you! SWEET CAROLINE!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-004",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Queen - Bohemian Rhapsody: 'Is this the real life? Is this just...'",
+      "Options": [
+        "A mystery",
+        "A dream to me",
+        "Make believe",
+        "Fantasy"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'Is this just fantasy? Caught in a landslide, no escape from reality.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-005",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Beatles - Hey Jude: 'Hey Jude, don't make it bad. Take a sad song and make it...'",
+      "Options": [
+        "Better",
+        "Brighter",
+        "Louder",
+        "Sweeter"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Paul McCartney wrote Hey Jude for Julian Lennon in 1968.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-006",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Whitney Houston - I Wanna Dance with Somebody: 'Oh, I wanna dance with somebody, I wanna feel the heat with somebody, yeah, I wanna dance with somebody, with somebody who...'",
+      "Options": [
+        "Holds me",
+        "Loves me",
+        "Knows me",
+        "Feels me"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'With somebody who loves me' tops the legendary 1987 chorus.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-007",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Michael Jackson - Billie Jean: 'Billie Jean is not my lover, she's just a girl who claims that I am the one, but the kid is...'",
+      "Options": [
+        "Just someone",
+        "On the run",
+        "Having fun",
+        "Not my son"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'But the kid is not my son' is sung with Michael's trademark vocal hiccup.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-008",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Garth Brooks - Friends in Low Places: 'Blame it all on my roots, I showed up in boots and ruined your...'",
+      "Options": [
+        "Black tie affair",
+        "High class dinner",
+        "Evening wear",
+        "Fancy party"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'And ruined your black tie affair' kicks off the #1 country singalong.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-009",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Cyndi Lauper - Girls Just Want to Have Fun: 'I come home in the morning light, my mother says when you gonna live your...'",
+      "Options": [
+        "Own fight",
+        "Way tonight",
+        "Own dream",
+        "Life right"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'When you gonna live your life right? Oh mother dear we're not the fortunate ones...'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-010",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Eagles - Hotel California: 'Welcome to the Hotel California, such a lovely place, such a...'",
+      "Options": [
+        "Sunny place",
+        "Lovely space",
+        "Lovely face",
+        "Warm embrace"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Such a lovely place, such a lovely face.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-011",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "ABBA - Dancing Queen: 'You can dance, you can jive, having the time of your...'",
+      "Options": [
+        "Youth",
+        "Life",
+        "Days",
+        "Night"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Having the time of your life! See that girl, watch that scene, dig in the dancing queen!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-012",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Killers - Mr. Brightside: 'Coming out of my cage and I've been doing just fine, gotta gotta be down because I...'",
+      "Options": [
+        "Want it all",
+        "Cannot fall",
+        "Lost my mind",
+        "Feel alive"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'...gotta gotta be down because I want it all.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-013",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Bryan Adams - Summer of '69: 'I got my first real six-string, bought it at the...'",
+      "Options": [
+        "Corner store",
+        "Thrift shop line",
+        "Five-and-dime",
+        "Music store"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Bought it at the five-and-dime, played it 'til my fingers bled.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-014",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Oasis - Wonderwall: 'Because maybe, you're gonna be the one that...'",
+      "Options": [
+        "Needs me",
+        "Saves me",
+        "Loves me",
+        "Finds me"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'And after all, you're my wonderwall.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-015",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Lynyrd Skynyrd - Sweet Home Alabama: 'Sweet home Alabama, where the skies are so blue. Sweet home Alabama, Lord, I'm coming...'",
+      "Options": [
+        "Down to you",
+        "Home to you",
+        "Straight to you",
+        "Back to you"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Lord, I'm coming home to you' echoes through the iconic Southern anthem.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-016",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Dolly Parton - 9 to 5: 'Working 9 to 5, what a way to make a...'",
+      "Options": [
+        "Future",
+        "Living",
+        "Fortune",
+        "Dollar"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Barely getting by, it's all taking and no giving.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-017",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Rick Astley - Never Gonna Give You Up: 'Never gonna give you up, never gonna let you...'",
+      "Options": [
+        "Down",
+        "Cry",
+        "Fall",
+        "Go"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Never gonna run around and desert you.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-018",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Billy Joel - Piano Man: 'Sing us a song, you're the piano man, sing us a song tonight. Well, we're all in the mood for a melody, and you've got us...'",
+      "Options": [
+        "Feeling alright",
+        "Dancing tonight",
+        "Feeling so fine",
+        "Singing in time"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'...and you've got us feeling alright.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-019",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Toto - Africa: 'It's gonna take a lot to drag me away from you. There's nothing that a hundred men or more could ever do. I bless the...'",
+      "Options": [
+        "Winds down in Africa",
+        "Plains down in Africa",
+        "Rains down in Africa",
+        "Sun down in Africa"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'I bless the rains down in Africa.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-020",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Survivor - Eye of the Tiger: 'It's the eye of the tiger, it's the thrill of the...'",
+      "Options": [
+        "Fight",
+        "Ring",
+        "Night",
+        "Game"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Rising up to the challenge of our rival.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-021",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Fleetwood Mac - Go Your Own Way: 'You can go your own way, go your own way. You can call it another lonely...'",
+      "Options": [
+        "Road",
+        "Day",
+        "Night",
+        "Flight"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Lindsey Buckingham wrote the bitter breakup track for the Rumours album.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-022",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Don McLean - American Pie: 'A long, long time ago, I can still remember how that music used to make me...'",
+      "Options": [
+        "Smile",
+        "Dance",
+        "Cry",
+        "Sing"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'And I knew if I had my chance, that I could make those people dance...'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-023",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Guns N' Roses - Sweet Child o' Mine: 'She's got a smile that it seems to me reminds me of childhood...'",
+      "Options": [
+        "Fantasies",
+        "Memories",
+        "Reveries",
+        "Melodies"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Where everything was as fresh as the bright blue sky.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-024",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "John Denver - Take Me Home, Country Roads: 'Almost heaven, West Virginia, Blue Ridge Mountains...'",
+      "Options": [
+        "Appalachian River",
+        "Shenandoah River",
+        "Potomac River",
+        "Ohio River"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Life is old there, older than the trees, younger than the mountains, growin' like a breeze.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-025",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Temptations - My Girl: 'I've got sunshine on a cloudy day. When it's cold outside, I've got the month of...'",
+      "Options": [
+        "April",
+        "Spring",
+        "June",
+        "May"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Smokey Robinson wrote My Girl for The Temptations in 1964.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-026",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Aerosmith - Dream On: 'Sing with me, sing for the year, sing for the laughter and sing for the...'",
+      "Options": [
+        "Tear",
+        "Cheer",
+        "Clear",
+        "Fear"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Sing with me, if it's just for today, maybe tomorrow the good Lord will take you away.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-027",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Def Leppard - Pour Some Sugar on Me: 'Step inside, walk this way, you and me babe, hey hey...'",
+      "Options": [
+        "Let's play",
+        "Hey hey",
+        "All day",
+        "Okay"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Def Leppard's signature rock anthem was released on Hysteria in 1987.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-028",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Red Hot Chili Peppers - Under the Bridge: 'Sometimes I feel like I don't have a partner, sometimes I feel like my only friend is the city I live in, the City of...'",
+      "Options": [
+        "Angels",
+        "Stars",
+        "Light",
+        "Dreams"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Anthony Kiedis wrote the lyrics reflecting on his life in Los Angeles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-029",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Shania Twain - That Don't Impress Me Much: 'So you're Brad Pitt? That don't impress me...'",
+      "Options": [
+        "One bit",
+        "Too much",
+        "Much",
+        "At all"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'So you've got the looks, but have you got the touch?'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-030",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Backstreet Boys - I Want It That Way: 'Tell me why, ain't nothing but a heartache. Tell me why, ain't nothing but a...'",
+      "Options": [
+        "Mistake",
+        "Bad break",
+        "Cold ache",
+        "Heartbreak"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Tell me why, I never wanna hear you say: I want it that way.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-031",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "AC/DC - You Shook Me All Night Long: 'She was a fast machine, she kept her motor clean, she was the best damn woman that I...'",
+      "Options": [
+        "Ever had",
+        "Ever knew",
+        "Ever loved",
+        "Ever seen"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'She had the sightless eyes, telling me no lies, knocking me out with those American thighs.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-032",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Toby Keith - I Love This Bar: 'I like my chicken fried, cold beer on a Friday night, a pair of jeans that fit just right, and the radio...'",
+      "Options": [
+        "Playing",
+        "On",
+        "Up (Note: this is Zac Brown Band)",
+        "Loud"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Zac Brown Band sang 'Chicken Fried', featuring 'and the radio up'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-033",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Kenny Loggins - Footloose: 'Tonight I gotta cut loose, footloose, kick off your...'",
+      "Options": [
+        "Heavy boots",
+        "Sunday shoes",
+        "Dancing shoes",
+        "Working shoes"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Please, Louise, pull me off of my knees!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-034",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Green Day - Good Riddance (Time of Your Life): 'Another turning point, a fork stuck in the road. Time grabs you by the wrist, directs you where to...'",
+      "Options": [
+        "Grow",
+        "Show",
+        "Go",
+        "Flow"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'So make the best of this test, and don't ask why.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-035",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Wham! - Careless Whisper: 'I'm never gonna dance again, guilty feet have got no...'",
+      "Options": [
+        "Mercy",
+        "Reason",
+        "Rhythm",
+        "Feeling"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Though it's easy to pretend, I know you're not a fool.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-036",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Police - Every Breath You Take: 'Every breath you take and every move you make, every bond you break, every step you take, I'll be...'",
+      "Options": [
+        "Watching you",
+        "Thinking of you",
+        "Following you",
+        "Loving you"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sting wrote the brooding classic in 1982 during a stay in Jamaica.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-037",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Meat Loaf - I'd Do Anything for Love: 'And I would do anything for love, I'd run right into hell and back. I would do anything for love, I'd never lie to you and that's a fact. But I'll never...'",
+      "Options": [
+        "Let you go",
+        "Say goodbye",
+        "Do that",
+        "Forget the way you feel right now"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'No, I won't do that.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-038",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Smash Mouth - All Star: 'Somebody once told me the world is gonna roll me, I ain't the sharpest tool in the...'",
+      "Options": [
+        "Barn",
+        "Shed",
+        "Box",
+        "Bed"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'She was looking kind of dumb with her finger and her thumb in the shape of an L on her forehead.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-039",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Vanilla Ice - Ice Ice Baby: 'Yo, VIP, let's kick it! Ice Ice Baby, Ice Ice Baby. All right stop, collaborate and...'",
+      "Options": [
+        "Hear this",
+        "Check it",
+        "Listen",
+        "Watch me"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Ice is back with my brand new invention.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-040",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Kansas - Carry On Wayward Son: 'Carry on, my wayward son, there'll be peace when you are...'",
+      "Options": [
+        "Run",
+        "Done",
+        "Gone",
+        "Won"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Lay your weary head to rest, don't you cry no more.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-041",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Queen - Don't Stop Me Now: 'Tonight I'm gonna have myself a real good time, I feel alive, and the world I'll turn it inside out, yeah, I'm floating around in ecstasy, so don't stop me now, 'cause I'm having a good time, having a good time. I'm a shooting star leaping through the sky like a tiger defying the laws of...'",
+      "Options": [
+        "Nature",
+        "Gravity",
+        "Reality",
+        "Society"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'I'm a racing car passing by like Lady Godiva.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-042",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Prince - Purple Rain: 'I never meant to cause you any sorrow, I never meant to cause you any...'",
+      "Options": [
+        "Shame",
+        "Heartache",
+        "Grief",
+        "Pain"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'I only wanted to one time to see you laughing in the purple rain.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-043",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Billy Joel - We Didn't Start the Fire: 'Harry Truman, Doris Day, Red China, Johnnie Ray, South Pacific, Walter Winchell...'",
+      "Options": [
+        "Joe McCarthy",
+        "Joe DiMaggio",
+        "Sugar Ray",
+        "Marilyn Monroe"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Billy Joel lists major historical headlines from 1949 to 1989.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-044",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Clash - Should I Stay or Should I Go: 'Darling, you got to let me know, should I stay or should I go? If you say that you are mine, I'll be here 'til the end of...'",
+      "Options": [
+        "Line",
+        "Time",
+        "Mind",
+        "Night"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'So you got to let me know: should I stay or should I go?'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-045",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Elton John - Tiny Dancer: 'Hold me closer, tiny dancer, count the headlights on the...'",
+      "Options": [
+        "Driveway",
+        "Highway",
+        "Freeway",
+        "Byway"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Lay me down in sheets of linen, you had a busy day today.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-046",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "R.E.M. - Losing My Religion: 'That's me in the corner, that's me in the spotlight, losing my...'",
+      "Options": [
+        "Mind",
+        "Direction",
+        "Patience",
+        "Religion"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'Trying to keep up with you, and I don't know if I can do it.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-047",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Garth Brooks - The Dance: 'And now I'm glad I didn't know the way it all would end, the way it all would go. Our lives are better left to chance, I could have missed the pain, but I'd have had to miss...'",
+      "Options": [
+        "The glance",
+        "Our chance",
+        "The dance",
+        "The romance"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Written by Tony Arata, The Dance was the final single from Garth's 1989 debut.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-048",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Counting Crows - Mr. Jones: 'Pass me a bottle, Mr. Jones, believe in me. Help me believe in anything, 'cause I want to be someone who...'",
+      "Options": [
+        "Sees",
+        "Dreams",
+        "Believes",
+        "Feels"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Mr. Jones and me tell each other fairy tales.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-049",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Simon & Garfunkel - The Sound of Silence: 'Hello darkness, my old friend, I've come to talk with you again. Because a vision softly creeping, left its seeds while I was...'",
+      "Options": [
+        "Sleeping",
+        "Dreaming",
+        "Weeping",
+        "Thinking"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'And the vision that was planted in my brain still remains, within the sound of silence.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-050",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Nirvana - Smells Like Teen Spirit: 'With the lights out, it's less dangerous, here we are now, entertain us. I feel stupid and contagious, here we are now...'",
+      "Options": [
+        "Sing with us",
+        "Join with us",
+        "Entertain us",
+        "Look at us"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Kurt Cobain wrote the anthem defining the 90s alternative rock movement.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-051",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Madonna - Like a Prayer: 'Life is a mystery, everyone must stand alone. I hear you call my name and it feels like...'",
+      "Options": [
+        "Home",
+        "Love",
+        "Rain",
+        "Heaven"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'When you call my name, it's like a little prayer.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-052",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Spice Girls - Wannabe: 'If you want my future, forget my past. If you wanna get with me, better make it...'",
+      "Options": [
+        "Fast",
+        "Last",
+        "Blast",
+        "Class"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Now don't go wasting my precious time, get your act together we could be just fine.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-053",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Britney Spears - ...Baby One More Time: 'My loneliness is killing me (and I), I must confess I still...'",
+      "Options": [
+        "Care",
+        "Believe",
+        "Feel",
+        "Love"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'When I'm not with you I lose my mind, give me a sign: hit me baby one more time!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-054",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Céline Dion - My Heart Will Go On: 'Near, far, wherever you are, I believe that the heart does...'",
+      "Options": [
+        "Beat on",
+        "Go on",
+        "Live on",
+        "Stay strong"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Once more you open the door, and you're here in my heart and my heart will go on and on.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-055",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Beach Boys - Good Vibrations: 'I'm pickin' up good vibrations, she's giving me...'",
+      "Options": [
+        "Sensations",
+        "Sweet sensations",
+        "Inspirations",
+        "Excitations"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Brian Wilson produced Good Vibrations using a customized Electro-Theremin in 1966.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-056",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Tears for Fears - Everybody Wants to Rule the World: 'Welcome to your life, there's no turning...'",
+      "Options": [
+        "Around",
+        "Down",
+        "Away",
+        "Back"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'Even while we sleep, we will find you acting on your best behaviour.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-057",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Fleetwood Mac - Dreams: 'Thunder only happens when it's raining, players only love you when they're...'",
+      "Options": [
+        "Playing",
+        "Staying",
+        "Saying",
+        "Praying"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Stevie Nicks wrote Dreams in about 10 minutes in Sausalito, California.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-058",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Stevie Wonder - Superstition: 'Very superstitious, writing's on the...'",
+      "Options": [
+        "Door",
+        "Hall",
+        "Wall",
+        "Floor"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Very superstitious, ladder's 'bout to fall!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-059",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Proclaimers - I'm Gonna Be (500 Miles): 'But I would walk 500 miles and I would walk 500 more, just to be the man who walked a thousand miles to fall down at your...'",
+      "Options": [
+        "Door",
+        "Shore",
+        "Floor",
+        "Store"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Scottish twin brothers Craig and Charlie Reid scored a global hit with 500 Miles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-060",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Dexys Midnight Runners - Come On Eileen: 'Come on Eileen, oh I swear (what he means), at this moment, you mean...'",
+      "Options": [
+        "The whole world",
+        "So much to me",
+        "More than anything",
+        "Everything"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'You in that dress, my thoughts I confess converge on dirty.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-061",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Tracy Chapman - Fast Car: 'You got a fast car, I want a ticket to...'",
+      "Options": [
+        "Paradise",
+        "Anywhere",
+        "The other side",
+        "A better place"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Maybe we make a deal, maybe together we can get somewhere.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-062",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Whitesnake - Here I Go Again: 'Here I go again on my own, goin' down the only road I've ever...'",
+      "Options": [
+        "Flown",
+        "Known",
+        "Shown",
+        "Grown"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Like a drifter I was born to walk alone.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-063",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Foreigner - I Want to Know What Love Is: 'I wanna know what love is, I want you to...'",
+      "Options": [
+        "Show me",
+        "Tell me",
+        "Hold me",
+        "Teach me"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'I wanna feel what love is, I know you can show me.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-064",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Joan Jett & the Blackhearts - I Love Rock 'n Roll: 'I love rock 'n roll, so put another dime in the jukebox...'",
+      "Options": [
+        "Tonight",
+        "Darling",
+        "Honey",
+        "Baby"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'I love rock 'n roll, so come and take your time and dance with me!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-065",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Monkees - I'm a Believer: 'Then I saw her face, now I'm a...'",
+      "Options": [
+        "Believer now",
+        "Dreamer",
+        "True lover",
+        "Believer"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Neil Diamond wrote I'm a Believer, which spent 7 weeks at #1 in 1966.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-066",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Creedence Clearwater Revival - Bad Moon Rising: 'I see the bad moon arising, I see trouble on the...'",
+      "Options": [
+        "Stray",
+        "Day",
+        "Bay",
+        "Way"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'I see earthquakes and lightnin', I see bad times today.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-067",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Kenny Rogers - The Gambler: 'You've got to know when to hold 'em, know when to fold 'em, know when to walk away, and know when to...'",
+      "Options": [
+        "Stay",
+        "Hide",
+        "Pass",
+        "Run"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'You never count your money when you're sittin' at the table.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-068",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Alanis Morissette - Ironic: 'It's like rain on your wedding day, it's a free ride when you've already...'",
+      "Options": [
+        "Stayed",
+        "Paid",
+        "Played",
+        "Strayed"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'It's the good advice that you just didn't take.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-069",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "No Doubt - Don't Speak: 'Don't speak, I know just what you're saying, so please stop explaining, don't tell me 'cause it...'",
+      "Options": [
+        "Cries",
+        "Burns",
+        "Stings",
+        "Hurts"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Gwen Stefani wrote the song after breaking up with bassist Tony Kanal.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-070",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Mamas & The Papas - California Dreamin': 'All the leaves are brown and the sky is...'",
+      "Options": [
+        "Bleak",
+        "Cold",
+        "Dark",
+        "Gray"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'I've been for a walk on a winter's day.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-071",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Meat Loaf - Paradise by the Dashboard Light: 'Ain't no doubt about it, we were doubly blessed, 'cause we were barely seventeen and we were barely...'",
+      "Options": [
+        "Stressed",
+        "Obsessed",
+        "Blessed",
+        "Dressed"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Jim Steinman composed the epic three-part rock opera in 1977.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-072",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Bruce Springsteen - Dancing in the Dark: 'You can't start a fire, you can't start a fire without a spark. This gun's for hire, even if we're just dancing in the...'",
+      "Options": [
+        "Park",
+        "Dark",
+        "Mark",
+        "Heart"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Dancing in the Dark spent four weeks at #2 on the Billboard Hot 100 in 1984.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-073",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Pearl Jam - Alive: 'Son, she said, have I got a little story for you. What you thought was your daddy was nothing but a...'",
+      "Options": [
+        "Lie",
+        "Dream",
+        "Man",
+        "Ghost"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Eddie Vedder wrote the autobiographical lyrics for Pearl Jam's debut single.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-074",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Chumbawamba - Tubthumping: 'I get knocked down, but I get up again, you're never gonna keep me...'",
+      "Options": [
+        "Around",
+        "Round",
+        "Down",
+        "Bound"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Pissing the night away, he drinks a Whiskey drink, he drinks a Vodka drink...'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-075",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Tom Petty - Free Fallin': 'She's a good girl, loves her mama, loves Jesus and America...'",
+      "Options": [
+        "True",
+        "Too",
+        "Blue",
+        "Through"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'And I'm a bad boy 'cause I don't even miss her.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-076",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Marvin Gaye & Tammi Terrell - Ain't No Mountain High Enough: 'Ain't no mountain high enough, ain't no valley low enough, ain't no river wide enough to keep me from...'",
+      "Options": [
+        "Loving you, babe",
+        "Holding you, babe",
+        "Getting to you, babe",
+        "Reaching you, babe"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Nickolas Ashford and Valerie Simpson wrote the Motown masterpiece in 1966.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-077",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "R.E.M. - It's the End of the World as We Know It (And I Feel Fine): 'That's great, it starts with an earthquake, birds and snakes, an aeroplane, and Lenny...'",
+      "Options": [
+        "Bruce is not afraid",
+        "Kravitz in the sky",
+        "Bruce in the dark",
+        "Bernstein in the rain"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Eye of a hurricane, listen to yourself churn.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-078",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Clash - Rock the Casbah: 'Now the king told the boogie men: you have to let that raga drop. The oil down the desert way has been...'",
+      "Options": [
+        "Shaking to the top",
+        "Flowing through the pipeline",
+        "Pumping night and day",
+        "Running hot and dry"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Drummer Topper Headon composed the piano and drum tracks for Rock the Casbah.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-079",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Bill Withers - Lean on Me: 'Lean on me when you're not strong, and I'll be your friend, I'll help you carry...'",
+      "Options": [
+        "Along",
+        "On",
+        "Through",
+        "Your song"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'For it won't be long 'til I'm gonna need somebody to lean on.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-080",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Cranberries - Zombie: 'In your head, in your head, zombie, zombie, zombie-ie-ie. What's in your head, in your head, zombie, zombie, zombie-ie-ie, oh...'",
+      "Options": [
+        "Do-do-do-do, do-do-do-do",
+        "Yeah-yeah-yeah-yeah",
+        "Oh-oh-oh-oh, oh-oh-oh-oh",
+        "Hey-hey-hey-hey, hey-hey-hey-hey"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Dolores O'Riordan wrote Zombie about the 1993 Warrington bombing.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-081",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Elvis Presley - Can't Help Falling in Love: 'Wise men say only fools rush in, but I can't help falling in love with...'",
+      "Options": [
+        "Life",
+        "Love",
+        "Her",
+        "You"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'Shall I stay? Would it be a sin if I can't help falling in love with you?'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-082",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Billy Ray Cyrus - Achy Breaky Heart: 'Don't tell my heart, my achy breaky heart, I just don't think he'd understand. And if you tell my heart, my achy breaky heart, he might blow up and...'",
+      "Options": [
+        "Drop right down",
+        "Break in two",
+        "Run away",
+        "Kill this man"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Don Von Tress wrote Achy Breaky Heart, recorded in 1992.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-083",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Grover Washington Jr. & Bill Withers - Just the Two of Us: 'Just the two of us, we can make it if we try, just the two of us, you and...'",
+      "Options": [
+        "Us",
+        "Mine",
+        "Me",
+        "I"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'Building castles in the sky, just the two of us, you and I.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-084",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Temptations - Ain't Too Proud to Beg: 'I know you wanna leave me, but I refuse to let you go. If I have to beg, plead for your sympathy, I don't mind 'cause you mean that much to...'",
+      "Options": [
+        "My heart",
+        "Me",
+        "My soul",
+        "My life"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Ain't too proud to beg, sweet darling, please don't leave me girl, don't you go!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-085",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Jackson 5 - ABC: 'ABC, easy as one, two, three. Ah, simple as...'",
+      "Options": [
+        "A-B-C",
+        "One-two-three",
+        "Do-re-mi",
+        "You and me"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'ABC, 1-2-3, baby, you and me girl!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-086",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Men at Work - Down Under: 'Travelling in a fried-out Kombi, on a hippie trail, head full of zombie. I met a strange lady, she made me nervous, she took me in and gave me...'",
+      "Options": [
+        "A cold beer",
+        "Breakfast",
+        "Some shelter",
+        "A Vegemite sandwich"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'She took me in and made me breakfast, and she said: Do you come from a land down under?'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-087",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "John Mellencamp - Jack & Diane: 'A little ditty 'bout Jack & Diane, two American kids growin' up in the...'",
+      "Options": [
+        "Farmland",
+        "Southland",
+        "Midwest",
+        "Heartland"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'Jackie say, \"Hey Diane, let's run off behind a shadowy shed...\"'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-088",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Foreigner - Cold as Ice: 'You're as cold as ice, you're willing to sacrifice our...'",
+      "Options": [
+        "Love",
+        "Trust",
+        "Hearts",
+        "Dreams"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'You want paradise, but someday you'll pay the price, I know.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-089",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Styx - Come Sail Away: 'I'm sailing away, set an open course for the...'",
+      "Options": [
+        "Midnight sea",
+        "Southern sea",
+        "Open sea",
+        "Virgin Sea"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Dennis DeYoung wrote the progressive rock ballad for The Grand Illusion album.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-090",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Bob Dylan - Like a Rolling Stone: 'How does it feel? How does it feel to be without a home, like a complete unknown, like a...'",
+      "Options": [
+        "Fading song",
+        "Wandering soul",
+        "Rolling stone",
+        "Drifter alone"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Rolling Stone magazine ranked it #1 on their 500 Greatest Songs of All Time.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-091",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Talking Heads - Once in a Lifetime: 'And you may find yourself behind the wheel of a large automobile. And you may find yourself in a beautiful house, with a beautiful wife. And you may ask yourself: Well, how did I...'",
+      "Options": [
+        "Find this?",
+        "Lose this?",
+        "Make this?",
+        "Get here?"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "David Byrne delivered the spoken-word verse on the 1980 Remain in Light album.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-092",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Otis Redding - (Sittin' On) The Dock of the Bay: 'Sittin' in the mornin' sun, I'll be sittin' when the evenin' comes. Watching the ships roll in, and then I watch 'em...'",
+      "Options": [
+        "Turn away again",
+        "Drift away again",
+        "Sail away again",
+        "Roll away again"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Recorded in December 1967 just days before Otis Redding died in a plane crash.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-093",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Righteous Brothers - Unchained Melody: 'Oh, my love, my darling, I've hungered for your touch a long, lonely time. And time goes by so slowly, and time can do so much, are you...'",
+      "Options": [
+        "Still mine?",
+        "With me?",
+        "Holding on?",
+        "By my side?"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'I need your love, I need your love, God speed your love to me!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-094",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Lou Reed - Walk on the Wild Side: 'Holly came from Miami, F-L-A, hitchhiked her way across the USA. Plucked her eyebrows on the way, shaved her legs and then he was a...'",
+      "Options": [
+        "Queen",
+        "Star",
+        "She",
+        "Lady"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'She says, \"Hey babe, take a walk on the wild side.\"'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-095",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Warren Zevon - Werewolves of London: 'I saw a werewolf with a Chinese menu in his hand, walking through the streets of Soho in the rain. He was looking for the place called...'",
+      "Options": [
+        "Trader Vic's",
+        "Golden Bowl",
+        "The Red Dragon",
+        "Lee Ho Fooks"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'Gonna get a big dish of beef chow mein. Awoo! Werewolves of London!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-096",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Duran Duran - Hungry Like the Wolf: 'Dark in the city, night is a wire, steam in the subway, earth is a...'",
+      "Options": [
+        "Mire",
+        "Pyre",
+        "Fire",
+        "Desire"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Do-do-do-do, do-do-do, do-do-do, do-do-do! I'm on the hunt, I'm after you!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-097",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Kool & The Gang - Celebration: 'Celebrate good times, come on! (Let's celebrate). There's a party goin' on right here, a celebration to last throughout the...'",
+      "Options": [
+        "World",
+        "Night",
+        "Years",
+        "Town"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'So bring your good times and your laughter too, we gonna celebrate your party with you.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-098",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The B-52's - Love Shack: 'I got me a car, it's as big as a whale and it's about to set...'",
+      "Options": [
+        "Sail",
+        "Fire",
+        "Free",
+        "Off"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'I got me a Chrysler, it seats about twenty, so hurry up and bring your jukebox money!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-099",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "The Beach Boys - Sloop John B: 'We come on the sloop John B, my grandfather and me. Around Nassau town we did roam. Drinking all night, got into a...'",
+      "Options": [
+        "Sight",
+        "Jam",
+        "Fight",
+        "Plight"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Well, I feel so broke up, I wanna go home!'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CTL-100",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Don Henley - The Boys of Summer: 'Nobody on the road, nobody on the beach, I feel it in the air, the summer's out of reach. Empty lake, empty streets, the sun goes down...'",
+      "Options": [
+        "Down slow",
+        "Tonight",
+        "In gold",
+        "Alone"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "'I'm drivin' by your house, though I know you're not at home.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Kansas - Carry On Wayward Son: 'Carry on, my wayward son, there'll be peace when you are done. Lay your weary head to rest, don't you...'",
+      "Options": [
+        "Weep no more",
+        "Cry no more",
+        "Fret no more",
+        "Look no more"
+      ],
+      "Explanation": "'Carry on, my wayward son, there'll be peace when you are done. Lay your weary head to rest, don't you cry no more.'",
+      "Id": "CTL-101",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Tom Petty - Free Fallin': 'She's a good girl, loves her mama, loves Jesus and America too. She's a good girl, crazy 'bout Elvis, loves horses and her...'",
+      "Options": [
+        "Country too",
+        "Daddy too",
+        "Family too",
+        "Boyfriend too"
+      ],
+      "Explanation": "'...loves horses and her boyfriend too.'",
+      "Id": "CTL-102",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Bob Seger - Old Time Rock and Roll: 'Just take those old records off the shelf, I'll sit and listen to 'em by myself. Today's music ain't got the same soul, I like that...'",
+      "Options": [
+        "Good old rhythm and blues",
+        "Classic country roll",
+        "Old time rock and roll",
+        "Rock and roll tonight"
+      ],
+      "Explanation": "'...I like that old time rock and roll.'",
+      "Id": "CTL-103",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Billy Idol - Rebel Yell: 'In the midnight hour, she cried more, more, more! With a rebel yell she cried...'",
+      "Options": [
+        "Ooh, ooh, ooh!",
+        "Go, go, go!",
+        "Yeah, yeah, yeah!",
+        "More, more, more!"
+      ],
+      "Explanation": "'With a rebel yell she cried more, more, more!'",
+      "Id": "CTL-104",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Wham! - Wake Me Up Before You Go-Go: 'Wake me up before you go-go, don't leave me hanging on like a...'",
+      "Options": [
+        "Shadow",
+        "No-show",
+        "Yo-yo",
+        "Solo"
+      ],
+      "Explanation": "'Wake me up before you go-go, don't leave me hanging on like a yo-yo.'",
+      "Id": "CTL-105",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Joan Jett - I Love Rock 'n' Roll: 'I love rock 'n' roll, so put another dime in the jukebox, baby! I love rock 'n' roll, so come an' take your time an'...' ",
+      "Options": [
+        "Dance with me",
+        "Play with me",
+        "Sing with me",
+        "Rock with me"
+      ],
+      "Explanation": "'...so come an' take your time an' dance with me!'",
+      "Id": "CTL-106",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Steppenwolf - Born to Be Wild: 'Get your motor runnin', head out on the highway, lookin' for adventure, in whatever comes our...' ",
+      "Options": [
+        "Play",
+        "Bay",
+        "Day",
+        "Way"
+      ],
+      "Explanation": "'...in whatever comes our way. Yeah, darlin' go make it happen...'",
+      "Id": "CTL-107",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "TLC - Waterfalls: 'Don't go chasing waterfalls, please stick to the rivers and the lakes that you're...'",
+      "Options": [
+        "Next to",
+        "Used to",
+        "Close to",
+        "Near to"
+      ],
+      "Explanation": "'...please stick to the rivers and the lakes that you're used to.'",
+      "Id": "CTL-109",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Blink-182 - All the Small Things: 'All the small things, true care, truth brings. I'll take one lift, your ride, best...'",
+      "Options": [
+        "Gift",
+        "Wish",
+        "Trip",
+        "Kiss"
+      ],
+      "Explanation": "'I'll take one lift, your ride, best trip. Always I know, you'll be at my show...'",
+      "Id": "CTL-110",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Chumbawamba - Tubthumping: 'I get knocked down, but I get up again, you are never gonna keep me...'",
+      "Options": [
+        "Out",
+        "Bound",
+        "Down",
+        "Round"
+      ],
+      "Explanation": "'...you are never gonna keep me down!'",
+      "Id": "CTL-111",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "The Monkees - I'm a Believer: 'Then I saw her face, now I'm a believer! Not a trace of doubt in my...'",
+      "Options": [
+        "Mind",
+        "Heart",
+        "Soul",
+        "Eyes"
+      ],
+      "Explanation": "'Not a trace of doubt in my mind. I'm in love, ooh, I'm a believer!'",
+      "Id": "CTL-113",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Carly Simon - You're So Vain: 'You're so vain, you probably think this song is about you. You're so vain, I'll bet you think this song is...'",
+      "Options": [
+        "All for you, don't you?",
+        "True, don't you?",
+        "About you, don't you?",
+        "Written for you, don't you?"
+      ],
+      "Explanation": "'...I'll bet you think this song is about you, don't you? Don't you?'",
+      "Id": "CTL-114",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Marvin Gaye & Tammi Terrell - Ain't No Mountain High Enough: 'Ain't no mountain high enough, ain't no valley low enough, ain't no river wide enough, to keep me from...'",
+      "Options": [
+        "Loving you, babe",
+        "Getting to you, babe",
+        "Holding you, babe",
+        "Reaching you, babe"
+      ],
+      "Explanation": "'...to keep me from getting to you, babe.'",
+      "Id": "CTL-115",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Van Morrison - Brown Eyed Girl: 'Do you remember when we used to sing: Sha-la-la-la-la-la-la-la-la-la-la-te-da, just like...'",
+      "Options": [
+        "Before",
+        "Yesterday",
+        "A song",
+        "That"
+      ],
+      "Explanation": "'...just like that, sha-la-la-la-la-la-la-la-la-la-la-te-da, my brown-eyed girl.'",
+      "Id": "CTL-116",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Jimmy Buffett - Margaritaville: 'Wasted away again in Margaritaville, searchin' for my lost shaker of...'",
+      "Options": [
+        "Lime",
+        "Ice",
+        "Rum",
+        "Salt"
+      ],
+      "Explanation": "'...searchin' for my lost shaker of salt. Some people claim that there's a woman to blame...'",
+      "Id": "CTL-118",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Meat Loaf - Two Out of Three Ain't Bad: 'I want you, I need you, but there ain't no way I'm ever gonna love you. Now don't be sad, 'cause two out of three...'",
+      "Options": [
+        "Will do",
+        "Is all you get",
+        "Ain't bad",
+        "Can make it"
+      ],
+      "Explanation": "'...now don't be sad, 'cause two out of three ain't bad.'",
+      "Id": "CTL-119",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Pat Benatar - Hit Me With Your Best Shot: 'Hit me with your best shot! Why don't you hit me with your best shot? Hit me with your best shot, fire...'",
+      "Options": [
+        "Tonight!",
+        "Away!",
+        "Alright!",
+        "Today!"
+      ],
+      "Explanation": "'...hit me with your best shot, fire away!'",
+      "Id": "CTL-120",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Simple Minds - Don't You (Forget About Me): 'Don't you forget about me, don't, don't, don't, don't, don't you...'",
+      "Options": [
+        "Forget about me",
+        "Let me go",
+        "Leave me alone",
+        "Turn away from me"
+      ],
+      "Explanation": "'...don't, don't, don't, don't, don't you forget about me.'",
+      "Id": "CTL-121",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "B-52's - Love Shack: 'The Love Shack is a little old place where we can...'",
+      "Options": [
+        "Hide away",
+        "Dance all night",
+        "Get together",
+        "Have a party"
+      ],
+      "Explanation": "'The Love Shack is a little old place where we can get together. Love Shack baby!'",
+      "Id": "CTL-122",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Sublime - Santeria: 'I don't practice Santeria, I ain't got no crystal ball. Well, I had a million dollars but I, I'd...'",
+      "Options": [
+        "Blew it fast",
+        "Spent it all",
+        "Lost it all",
+        "Gave it away"
+      ],
+      "Explanation": "'...well, I had a million dollars but I, I'd spent it all.'",
+      "Id": "CTL-123",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Alanis Morissette - Ironic: 'An old man turned ninety-eight, he won the lottery and died the next...'",
+      "Options": [
+        "Day",
+        "Week",
+        "Night",
+        "Hour"
+      ],
+      "Explanation": "'...he won the lottery and died the next day. Isn't it ironic, don't you think?'",
+      "Id": "CTL-124",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Soft Cell - Tainted Love: 'Sometimes I feel I've got to run away, I've got to get away from the pain you drive into the heart of...'",
+      "Options": [
+        "Us",
+        "Men",
+        "Me",
+        "Love"
+      ],
+      "Explanation": "'...the pain you drive into the heart of me.'",
+      "Id": "CTL-125",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "The Clash - Should I Stay or Should I Go: 'Should I stay or should I go now? If I go, there will be trouble, and if I stay it will be...'",
+      "Options": [
+        "Double",
+        "Bad",
+        "Worse",
+        "Trouble too"
+      ],
+      "Explanation": "'...and if I stay it will be double! So come on and let me know...'",
+      "Id": "CTL-126",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Survivor - High on You: 'I was talkin' to myself, I was thinkin' 'bout someone else. But you came along and made me...'",
+      "Options": [
+        "Lose control",
+        "High on you",
+        "Change my mind",
+        "Fall in love"
+      ],
+      "Explanation": "'High on You' was a top-10 pop rock hit for Survivor in 1985.",
+      "Id": "CTL-127",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Lynyrd Skynyrd - Free Bird: 'If I leave here tomorrow, would you still...'",
+      "Options": [
+        "Look for me?",
+        "Wait for me?",
+        "Care for me?",
+        "Remember me?"
+      ],
+      "Explanation": "'If I leave here tomorrow, would you still remember me? For I must be traveling on now...'",
+      "Id": "CTL-128",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "The Proclaimers - I'm Gonna Be (500 Miles): 'But I would walk 500 miles, and I would walk 500 more, just to be the man who walked a thousand miles to...'",
+      "Options": [
+        "Fall down at your door",
+        "Be with you once more",
+        "Stand outside your door",
+        "Knock upon your door"
+      ],
+      "Explanation": "'...just to be the man who walked a thousand miles to fall down at your door.'",
+      "Id": "CTL-129",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Creedence Clearwater Revival - Bad Moon Rising: 'I see the bad moon a-rising, I see trouble on the way. I see earthquakes and lightnin', I see...'",
+      "Options": [
+        "Rough seas today",
+        "Bad times today",
+        "Dark clouds today",
+        "Stormy days today"
+      ],
+      "Explanation": "'...I see bad times today. Don't go 'round tonight, well it's bound to take your life...'",
+      "Id": "CTL-130",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Bryan Adams - (Everything I Do) I Do It for You: 'Look into my eyes, you will see what you mean to me. Search your heart, search your soul, and when you find me there you'll...'",
+      "Options": [
+        "Know it's true",
+        "Hold me close",
+        "Let me in",
+        "Search no more"
+      ],
+      "Explanation": "'...and when you find me there you'll search no more.'",
+      "Id": "CTL-131",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "George Michael - Careless Whisper: 'I'm never gonna dance again, guilty feet have got no...'",
+      "Options": [
+        "Timing",
+        "Rhythm",
+        "Reason",
+        "Feeling"
+      ],
+      "Explanation": "'...guilty feet have got no rhythm. Though it's easy to pretend, I know you're not a fool...'",
+      "Id": "CTL-132",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Poison - Every Rose Has Its Thorn: 'Every rose has its thorn, just like every night has its dawn. Just like every cowboy sings a...'",
+      "Options": [
+        "Country song",
+        "Lonely song",
+        "Sad, sad song",
+        "Heartbreak song"
+      ],
+      "Explanation": "'...just like every cowboy sings a sad, sad song.'",
+      "Id": "CTL-133",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Prince - 1999: 'Tonight I'm gonna party like it's...'",
+      "Options": [
+        "A holiday",
+        "1989",
+        "Saturday night",
+        "1999"
+      ],
+      "Explanation": "'...party over, oops, out of time! Tonight I'm gonna party like it's 1999!'",
+      "Id": "CTL-134",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Garth Brooks - The Dance: 'And now I'm glad I didn't know the way it all would end, the way it all would go. Our lives are better left to chance, I could have missed the pain, but I'd have had to...'",
+      "Options": [
+        "Miss the dance",
+        "Turn around",
+        "Lose your love",
+        "Walk away"
+      ],
+      "Explanation": "'...I could have missed the pain, but I'd have had to miss the dance.'",
+      "Id": "CTL-135",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Quiet Riot - Cum On Feel the Noize: 'Cum on feel the noize, girls rock your boys, we'll get wild, wild...'",
+      "Options": [
+        "All night",
+        "Wild",
+        "Right",
+        "Tonight"
+      ],
+      "Explanation": "'...we'll get wild, wild, wild! Wild, wild, wild!'",
+      "Id": "CTL-136",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Tom Petty - I Won't Back Down: 'Well I won't back down, no I won't back down. You can stand me up at the gates of hell, but I...'",
+      "Options": [
+        "Won't turn around",
+        "Will stand my ground",
+        "Won't back down",
+        "Will never run"
+      ],
+      "Explanation": "'...you can stand me up at the gates of hell, but I won't back down.'",
+      "Id": "CTL-137",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Smokey Robinson - The Tracks of My Tears: 'People say I'm the life of the party 'cause I tell a joke or two. Although I might be laughing loud and hearty, deep inside I'm...'",
+      "Options": [
+        "Blue",
+        "Crying for you",
+        "Lost in you",
+        "Hurting too"
+      ],
+      "Explanation": "'...deep inside I'm blue. So take a good look at my face, you'll see my smile looks out of place...'",
+      "Id": "CTL-138",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Culture Club - Karma Chameleon: 'Karma, karma, karma, karma, karma chameleon, you come and go, you come and...'",
+      "Options": [
+        "Stay",
+        "Show",
+        "Go",
+        "Flow"
+      ],
+      "Explanation": "'...loving would be easy if your colors were like my dreams, red, gold and green!'",
+      "Id": "CTL-139",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Twisted Sister - We're Not Gonna Take It: 'We're not gonna take it! No, we ain't gonna take it! We're not gonna take it...'",
+      "Options": [
+        "Any longer!",
+        "From you!",
+        "Anymore!",
+        "Tonight!"
+      ],
+      "Explanation": "'We're not gonna take it anymore! We've got the right to choose and there ain't no way we'll lose it...'",
+      "Id": "CTL-140",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Foreigner - I Want to Know What Love Is: 'I wanna know what love is, I want you to show me. I wanna feel what love is, I know you can...'",
+      "Options": [
+        "Show me",
+        "Guide me",
+        "Heal me",
+        "Love me"
+      ],
+      "Explanation": "'...I wanna feel what love is, I know you can show me.'",
+      "Id": "CTL-141",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Lionel Richie - All Night Long: 'Well, my friends, the time has come to raise the roof and have some fun. Throw away the work to be done, let the music...'",
+      "Options": [
+        "Play on",
+        "Never stop",
+        "Take over",
+        "Move you"
+      ],
+      "Explanation": "'...throw away the work to be done, let the music play on!'",
+      "Id": "CTL-142",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Europe - The Final Countdown: 'We're leaving together, but still it's farewell. And maybe we'll come back to Earth, who can tell? I guess there is no one to blame, we're leaving ground: Will things ever be the...'",
+      "Options": [
+        "Way they were?",
+        "Same again?",
+        "Best again?",
+        "Right way round?"
+      ],
+      "Explanation": "'...will things ever be the same again? It's the final countdown!'",
+      "Id": "CTL-144",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Billy Ray Cyrus - Achy Breaky Heart: 'Don't tell my heart, my achy breaky heart, I just don't think he'd...'",
+      "Options": [
+        "Understand",
+        "Make it through",
+        "Take the news",
+        "Live through it"
+      ],
+      "Explanation": "'...and if you tell my heart, my achy breaky heart, he might blow up and kill this man.'",
+      "Id": "CTL-145",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Tears for Fears - Everybody Wants to Rule the World: 'Welcome to your life, there's no turning back. Even while we sleep, we will find you acting on your best behaviour, turn your back on...'",
+      "Options": [
+        "Mother Nature",
+        "Every stranger",
+        "All the danger",
+        "Human nature"
+      ],
+      "Explanation": "'...acting on your best behaviour, turn your back on Mother Nature. Everybody wants to rule the world.'",
+      "Id": "CTL-146",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "R.E.M. - Losing My Religion: 'That's me in the corner, that's me in the spotlight, losing my religion. Trying to keep up with you, and I don't know if I can do it. Oh no, I've said...'",
+      "Options": [
+        "It wrong",
+        "Enough",
+        "It all",
+        "Too much"
+      ],
+      "Explanation": "'...oh no, I've said too much, I haven't said enough.'",
+      "Id": "CTL-147",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Bonnie Tyler - Total Eclipse of the Heart: 'Turn around, every now and then I get a little bit lonely and you're never coming 'round. Turn around, every now and then I get a little bit tired of listening to the sound of my...'",
+      "Options": [
+        "Heart",
+        "Voice",
+        "Pain",
+        "Tears"
+      ],
+      "Explanation": "'...tired of listening to the sound of my tears. Turn around, look at what you've done...'",
+      "Id": "CTL-148",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Alannah Myles - Black Velvet: 'Black velvet that little boy's smile, black velvet with that slow southern style. A new religion that'll bring you to your knees, black velvet if you...'",
+      "Options": [
+        "See",
+        "Believe",
+        "Please",
+        "Feel"
+      ],
+      "Explanation": "'...black velvet if you please.'",
+      "Id": "CTL-149",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Reo Speedwagon - Keep On Loving You: 'And I'm gonna keep on loving you, 'cause it's the only thing I wanna do. I don't wanna sleep, I just wanna keep on...'",
+      "Options": [
+        "Holding you",
+        "Dreaming of you",
+        "Loving you",
+        "Kissing you"
+      ],
+      "Explanation": "'...I don't wanna sleep, I just wanna keep on loving you.'",
+      "Id": "CTL-150",
+      "Category": "Complete the Lyric",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    }
+  ]
+}

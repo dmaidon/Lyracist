@@ -1,0 +1,328 @@
+<!-- Edited on Aug 27, 2026 @ 15:27:15 -> SettingsView with multi-monitor selector, audience projector controls, and 3-column layout -->
+<UserControl x:Class="KnockoutTrivia.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:KnockoutTrivia.Models"
+             mc:Ignorable="d"
+             d:DesignHeight="750" d:DesignWidth="1180"
+             Background="#0B0A0E">
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <!-- Top Header -->
+            <RowDefinition Height="Auto" />
+            <!-- Main 3-Column Settings Layout -->
+            <RowDefinition Height="*" />
+            <!-- Bottom Save / Status Bar -->
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Top Header -->
+        <Border Grid.Row="0" Background="#14121F" CornerRadius="10" Padding="15,10" Margin="0,0,0,12" BorderBrush="#252136" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="⚙️ KNOCKOUT GAME &amp; DJ CONFIGURATION" FontSize="18" FontWeight="Black" Foreground="#10B981" />
+                    <TextBlock Text="Configure game scoring, token thresholds, active database packs, and multi-monitor routing."
+                               FontSize="11" Foreground="#9CA3AF" Margin="0,2,0,0" />
+                </StackPanel>
+                <Border Grid.Column="1" Background="#1F1B2E" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding TotalSelectedQuestions, StringFormat='{}{0} Questions Selected'}"
+                               FontSize="12" FontWeight="Bold" Foreground="#38BDF8" />
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- 3-Column Layout -->
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <!-- Column 0: Game Rules & Scoring -->
+                <ColumnDefinition Width="*" />
+                <!-- Column 1: Shield Tokens & Super Streak -->
+                <ColumnDefinition Width="*" />
+                <!-- Column 2: Database & Pack Selection + Multi-Monitor Routing -->
+                <ColumnDefinition Width="1.35*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- COLUMN 0: Game Rules & Scoring -->
+            <Border Grid.Column="0" Background="#14121F" CornerRadius="10" BorderBrush="#262238" BorderThickness="1" Padding="15" Margin="0,0,6,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="🎮 Scoring &amp; Game Flow" FontSize="15" FontWeight="Bold" Foreground="#F59E0B" Margin="0,0,0,12" />
+
+                        <!-- Points per correct answer -->
+                        <TextBlock Text="Points Per Correct Answer" FontWeight="SemiBold" Foreground="White" FontSize="12" />
+                        <TextBlock Text="Score awarded for correct answers." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding Settings.PointsPerCorrectAnswer, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left" Margin="0,0,0,12" />
+
+                        <!-- Questions per game -->
+                        <TextBlock Text="Questions Per Game" FontWeight="SemiBold" Foreground="White" FontSize="12" />
+                        <TextBlock Text="Total questions in a round (0 = Unlimited)." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding Settings.NumberOfQuestionsPerGame, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left"  Margin="0,0,0,12" />
+
+                        <!-- Game Advance Mode -->
+                        <TextBlock Text="Game Advance Mode" FontWeight="SemiBold" Foreground="White" FontSize="12" />
+                        <TextBlock Text="Manual (DJ advances) or Automatic." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ComboBox SelectedIndex="{Binding Settings.GameMode, Mode=TwoWay}" Height="32" Width="200" HorizontalAlignment="Left" Margin="0,0,0,12">
+                            <ComboBoxItem Content="Manual (DJ Controlled)" />
+                            <ComboBoxItem Content="Automatic (Auto Advance)" />
+                        </ComboBox>
+
+                        <!-- Auto Advance Delay -->
+                        <TextBlock Text="Auto Advance Buffer (Seconds)" FontWeight="SemiBold" Foreground="White" FontSize="12" />
+                        <TextBlock Text="Buffer time after answer reveal." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,16" />
+                        <ui:TextBox Text="{Binding Settings.AutoAdvanceDelaySeconds, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left"  Margin="0,0,0,16" />
+
+                        <!-- Audio & Visual FX -->
+                        <TextBlock Text="🔊 Audio &amp; Visual FX" FontSize="13" FontWeight="Bold" Foreground="#A78BFA" Margin="0,0,0,8" />
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Sound Effects (Strikes, Wheel, Timer)" FontSize="11" Foreground="#E5E7EB" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="1" IsChecked="{Binding Settings.EnableSoundEffects}" VerticalAlignment="Center" />
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Dynamic Animations &amp; Transitions" FontSize="11" Foreground="#E5E7EB" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="1" IsChecked="{Binding Settings.EnableAnimations}" VerticalAlignment="Center" />
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- COLUMN 1: Shield Tokens & Super Streak -->
+            <Border Grid.Column="1" Background="#14121F" CornerRadius="10" BorderBrush="#262238" BorderThickness="1" Padding="15" Margin="4,0,4,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="🛡️ Shields &amp; Super Streak" FontSize="15" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,12" />
+
+                        <!-- Max Shield Tokens -->
+                        <TextBlock Text="Max Shield Tokens (Cap)" FontWeight="SemiBold" Foreground="White" FontSize="12" />
+                        <TextBlock Text="Maximum shields a player can hold." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding Settings.MaxTokens, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left" Margin="0,0,0,12" />
+
+                        <!-- Streak Requirement -->
+                        <TextBlock Text="Streak Requirement" FontWeight="SemiBold" Foreground="White" FontSize="12" />
+                        <TextBlock Text="Correct answers to earn 1 shield (Default: 5)." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding Settings.StreakRequirement, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left"  Margin="0,0,0,12" />
+
+                        <!-- Super Streak Threshold -->
+                        <TextBlock Text="⚡ Super Streak Threshold" FontWeight="SemiBold" Foreground="#A78BFA" FontSize="12" />
+                        <TextBlock Text="Streak to trigger Rotary Wheel (Default: 20)." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding Settings.SuperStreakThreshold, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left"  Margin="0,0,0,12" />
+
+                        <!-- Tokens Deducted Per Hit -->
+                        <TextBlock Text="Shields Deducted Per Wheel Hit" FontWeight="SemiBold" Foreground="White" FontSize="12" />
+                        <TextBlock Text="Shields stolen/removed on target." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding Settings.SuperStreakTokensRemovedPerHit, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left"  Margin="0,0,0,12" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- COLUMN 2: Database & Pack Selection ListBox + Multi-Monitor Routing -->
+            <Border Grid.Column="2" Background="#14121F" CornerRadius="10" BorderBrush="#262238" BorderThickness="1" Padding="15" Margin="6,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Databases Header & Buttons -->
+                        <RowDefinition Height="Auto" />
+                        <!-- Databases ListBox -->
+                        <RowDefinition Height="1.2*" />
+                        <!-- Multi-Monitor Section Header -->
+                        <RowDefinition Height="Auto" />
+                        <!-- Multi-Monitor Routing Controls -->
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 0: DB Header & Select All -->
+                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="💾 Databases &amp; Packs" FontSize="15" FontWeight="Bold" Foreground="#10B981" />
+                            <TextBlock Text="Select active trivia sources:" FontSize="10" Foreground="#9CA3AF" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <ui:Button Content="All"
+                                       Height="26" Width="40"
+                                       Margin="0,0,4,0"
+                                       Appearance="Secondary"
+                                       Command="{Binding SelectAllSourcesCommand}"
+                                       Cursor="Hand" />
+                            <ui:Button Content="Clear"
+                                       Height="26" Width="45"
+                                       Appearance="Secondary"
+                                       Command="{Binding DeselectAllSourcesCommand}"
+                                       Cursor="Hand" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Row 1: Source ListBox with Checkboxes -->
+                    <Border Grid.Row="1" Background="#1B1729" CornerRadius="8" BorderBrush="#332B45" BorderThickness="1" Margin="0,0,0,10">
+                        <ListBox ItemsSource="{Binding AvailableSources}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="Padding" Value="8,4" />
+                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                    <Setter Property="BorderBrush" Value="#252136" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type models:SelectableTriviaSource}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Selection Checkbox -->
+                                        <CheckBox Grid.Column="0"
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0,0,8,0"
+                                                  Command="{Binding DataContext.UpdateSelectedQuestionsCountCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+
+                                        <!-- Name & Category Subtitle -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12" Foreground="White" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding DisplaySubtitle}" FontSize="10" Foreground="#9CA3AF" />
+                                        </StackPanel>
+
+                                        <!-- Badge -->
+                                        <Border Grid.Column="2" CornerRadius="4" Padding="6,2" Background="#261E38" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding TypeBadge}" FontSize="9" FontWeight="Bold" Foreground="{Binding TypeBadgeColor}" />
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+
+                    <!-- Row 2: Multi-Monitor Header & Detect -->
+                    <Grid Grid.Row="2" Margin="0,4,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" MinWidth="124.433" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="🖥️ Multi-Monitor &amp; TV Routing" FontSize="14" FontWeight="Bold" Foreground="#38BDF8" />
+                            <TextBlock Text="Route DJ Console &amp; Audience Big Screen:" FontSize="10" Foreground="#9CA3AF" />
+                        </StackPanel>
+                        <ui:Button Grid.Column="1"
+                                   Content="🔄 Detect"
+                                   Appearance="Secondary"
+                                   Command="{Binding RefreshMonitorsCommand}"
+                                   ToolTip="Detect connected TVs and projectors"
+                                   Cursor="Hand" HorizontalAlignment="Stretch" Margin="0,0,14,0" VerticalAlignment="Stretch" />
+                    </Grid>
+
+                    <!-- Row 3: Monitor Selectors & Audience Projection Button -->
+                    <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <!-- Host Monitor -->
+                            <TextBlock Text="DJ Host Console Screen" FontWeight="SemiBold" Foreground="White" FontSize="11" />
+                            <Grid Margin="0,2,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="4*" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0"
+                                          ItemsSource="{Binding AvailableDisplayOptions}"
+                                          SelectedItem="{Binding SelectedHostMonitor, Mode=TwoWay}"
+                                          DisplayMemberPath="DisplayLabel"
+                                          Height="35"
+                                          Margin="0,0,6,0" />
+                                <ui:Button Grid.Column="1"
+                                           Content="Move"
+                                           Height="30" Width="93"
+                                           Appearance="Secondary"
+                                           Command="{Binding MoveHostWindowCommand}"
+                                           ToolTip="Move Host window to selected screen"
+                                           Cursor="Hand" />
+                            </Grid>
+
+                            <!-- Audience Big Screen Monitor -->
+                            <TextBlock Text="Audience TV / Projector Screen" FontWeight="SemiBold" Foreground="White" FontSize="11" />
+                            <Grid Margin="0,2,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="4*" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox ItemsSource="{Binding AvailableDisplayOptions}"
+                                      SelectedItem="{Binding SelectedAudienceMonitor, Mode=TwoWay}"
+                                      DisplayMemberPath="DisplayLabel"
+                                      Height="35"
+                                      Margin="0,2,0,10" />
+                            </Grid>
+                            <!-- Audience Projection Toggle Button -->
+                            <ui:Button Height="36"
+                                       Margin="0,2,0,0"
+                                       Command="{Binding ToggleAudienceDisplayCommand}"
+                                       Cursor="Hand">
+                                <ui:Button.Style>
+                                    <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                        <Setter Property="Appearance" Value="Primary" />
+                                        <Setter Property="Background" Value="#3B82F6" />
+                                        <Setter Property="Content" Value="📺 Open Audience Display" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAudienceDisplayActive}" Value="True">
+                                                <Setter Property="Background" Value="#EF4444" />
+                                                <Setter Property="Content" Value="🛑 Close Audience Display" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:Button.Style>
+                            </ui:Button>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Bottom Save Toolbar -->
+        <Border Grid.Row="2" Background="#14121F" CornerRadius="8" Padding="12,8" BorderBrush="#252136" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" FontSize="12" FontWeight="Bold" Foreground="#10B981" VerticalAlignment="Center" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <ui:Button Content="Restore Defaults"
+                               Height="34" Width="130"
+                               Appearance="Secondary"
+                               Margin="0,0,10,0"
+                               Command="{Binding ResetDefaultsCommand}"
+                               Cursor="Hand" />
+
+                    <ui:Button Content="Save &amp; Load Databases"
+                               Height="34" Width="170"
+                               Appearance="Primary"
+                               Background="#10B981"
+                               Foreground="White"
+                               Command="{Binding SaveSettingsCommand}"
+                               Cursor="Hand" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

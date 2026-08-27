@@ -1,5 +1,5 @@
-<!-- Edited on Aug 27, 2026 @ 07:14:00 -> Add 26.8.27.1 release notes for smart Name and Artist proper-casing engine -->
-Last Edit: Aug 27, 2026 - Intelligent Name, Artist, and Song Title Proper-Casing Engine across all apps
+<!-- Edited on Aug 27, 2026 @ 16:00:10 -> Added Knockout Trivia game module, multi-monitor routing, Help system, and 3-column settings -->
+Last Edit: Aug 27, 2026 - Knockout Trivia game module with multi-monitor routing, Help system, 3-column settings, and question randomization
 
 # Changelog
 
@@ -8,6 +8,39 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.27.1] - 2026-08-27
 
 ### Added & Enhanced
+
+- **Knockout Trivia Standalone Game Project (`KnockoutTrivia`)**:
+  - Generated a clean, professional, MVVM-based WPF standalone game project targeting **.NET 10** with modern Fluent UI (`WPF-UI 4.3.0`) dark theme.
+  - **Directory & Resource Architecture (`/KoTrivia`)**:
+    - Created dedicated asset and data hierarchy: `/KoTrivia/Data` (SQLite trivia databases), `/KoTrivia/Packs` (JSON trivia packs), `/KoTrivia/Logs` (game logs), `/KoTrivia/Banners` (static 16:9 banners), `/KoTrivia/Config` (JSON game settings), `/KoTrivia/Assets` (official `kotrv_logo.png` & `kotrv_logo.webp`), and `/KoTrivia/Temp`.
+  - **Core MVVM ViewModels & Views**:
+    - `MainViewModel` / `MainView.xaml`: Host command console for rapid question flow, instant answer reveals, and quick player response adjudication.
+    - `ScoreboardViewModel` / `ScoreboardView.xaml`: Horizontal player status cards with dynamic strike color-coding (Green -> Yellow -> Orange -> Dimmed Red), shield tokens (0-3), and 5-block streak meters.
+    - `QuestionViewModel` / `QuestionView.xaml`: High-visibility 16:9 bar-friendly question board with category pill, question count, countdown timer, high-contrast option cards, and explanation reveals.
+    - `WheelViewModel` / `WheelView.xaml`: Scaryoke-style rotary Super Streak wheel rendering player wedges for all token holders and animated spin targeting.
+    - `BannerViewModel` / `BannerView.xaml`: 16:9 auto-scaling presentation banner system with letterbox/pillarbox support and official Knockout Trivia branding.
+    - `HelpViewModel` / `HelpView.xaml`: Split-pane DJ guide with 8 detailed topics explaining game rules, strike colors, shield tokens, 5-block streak meters, Super Streak wheels, live adjudication, and settings.
+    - **Automatic Question Deck Randomization & Shuffling**:
+      * Implemented automatic Fisher-Yates randomization across all loaded SQLite databases and JSON category packs, guaranteeing questions from different categories and themes are mixed rather than served in sequential primary key / database insertion order.
+      * Questions automatically re-shuffle upon starting a new game, resetting games, or clicking the live DJ **`🔀 Shuffle`** button on the host console.
+    - `SettingsViewModel` / `SettingsView.xaml`: Redesigned 3-column responsive DJ host panel eliminating vertical scrolling:
+      * **Column 1**: Points per question, total questions, auto-advance delays, manual vs automatic game mode, and audio/visual FX toggles.
+      * **Column 2**: Shield token maximum caps, streak requirements, and Super Streak wheel thresholds.
+      * **Column 3**: Interactive Multi-Database & Pack selection ListBox (with checkboxes, 'All' and 'Clear' buttons, and live question count badges) alongside Multi-Monitor & TV Routing controls.
+    - **Multi-Monitor Routing & Dedicated Audience Projection Window (`AudienceWindow`)**:
+      * Implemented native display enumeration with `IDisplayService` detecting hardware display names, primary status, and resolutions.
+      * Added dedicated borderless 16:9 **`AudienceWindow`** positioned automatically on secondary TVs/projectors, keeping host controls (scoring, adjudication, settings, help) private to the DJ.
+      * Added titlebar quick-action **`📺 Audience Screen`** button for instant one-click projection toggle.
+    - `AboutViewModel` / `AboutView.xaml`: Official branding modal with PAROLE Software metadata and shared database compatibility notes.
+  - **Service Layer Architecture**:
+    - `ITriviaDataService` / `TriviaDataService`: SQLite database & JSON pack ingestion compatible with `Lyracist.Trivia`.
+    - `IGameStateService` / `GameStateService`: Player lifecycle, scoring, strike accumulation, and Super Streak triggers.
+    - `ITokenService` / `TokenService`: Shield token awards, deductions, and animation event routing.
+    - `IStreakService` / `StreakService`: 5-block streak tracking, token reward milestones, and Super Streak triggers.
+    - `IWheelService` / `WheelService`: Dynamic wheel segment construction and target selection.
+    - `IBannerService` / `BannerService`: 16:9 dynamic banner generation and static asset loader.
+    - `IDisplayService` / `DisplayService`: Native Win32 monitor enumeration and multi-screen assignment.
+    - `IConfigService` / `ConfigService`: JSON persistence for game settings (`KoTrivia/Config/game_settings.json`).
 
 - **Intelligent Name, Artist & Song Proper-Casing Engine (`Shared/NameFormatting.cs`)**:
   - Implemented a centralized, robust proper-casing utility shared across **all solution applications** (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `LyracistDbEditor`, `ScaryokeWheel`).

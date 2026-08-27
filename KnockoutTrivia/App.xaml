@@ -1,0 +1,45 @@
+<!-- Edited on Aug 27, 2026 @ 15:08:35 -> Added HelpViewModel DataTemplate -->
+<Application x:Class="KnockoutTrivia.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:vm="clr-namespace:KnockoutTrivia.ViewModels"
+             xmlns:views="clr-namespace:KnockoutTrivia.Views">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemesDictionary Theme="Dark" />
+                <ui:ControlsDictionary />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Official Knockout Trivia Logo Resource -->
+            <BitmapImage x:Key="KnockoutLogo" UriSource="pack://application:,,,/KoTrivia/Assets/kotrv_logo.png" />
+
+            <!-- MVVM ViewModel -> View DataTemplates -->
+            <DataTemplate DataType="{x:Type vm:GameViewModel}">
+                <views:MainView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ScoreboardViewModel}">
+                <views:ScoreboardView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:QuestionViewModel}">
+                <views:QuestionView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:WheelViewModel}">
+                <views:WheelView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:BannerViewModel}">
+                <views:BannerView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                <views:SettingsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:HelpViewModel}">
+                <views:HelpView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AboutViewModel}">
+                <views:AboutView />
+            </DataTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,2408 @@
+{
+  "PackId": "music-legends",
+  "Title": "Music & Karaoke Legends",
+  "Category": "Music Legends",
+  "Description": "150 curated questions covering Music Legends.",
+  "Questions": [
+    {
+      "Id": "LEG-001",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is universally known as the 'King of Pop'?",
+      "Options": [
+        "Stevie Wonder",
+        "Michael Jackson",
+        "Prince",
+        "Elvis Presley"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Michael Jackson earned the title 'King of Pop' with record-shattering albums like Thriller and Bad.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-002",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as the 'Queen of Soul'?",
+      "Options": [
+        "Aretha Franklin",
+        "Whitney Houston",
+        "Tina Turner",
+        "Diana Ross"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Aretha Franklin won 18 Grammy Awards and was the first woman inducted into the Rock and Roll Hall of Fame.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-003",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What legendary singer was nicknamed 'Ol' Blue Eyes' and 'The Chairman of the Board'?",
+      "Options": [
+        "Tony Bennett",
+        "Dean Martin",
+        "Frank Sinatra",
+        "Bing Crosby"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Frank Sinatra was one of the best-selling music artists of all time and leader of the Rat Pack.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-004",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as the 'Queen of Rock 'n' Roll' with hits like 'What's Love Got to Do with It'?",
+      "Options": [
+        "Tina Turner",
+        "Janis Joplin",
+        "Stevie Nicks",
+        "Joan Jett"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tina Turner sold over 100 million records and won 12 Grammy Awards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-005",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which pop icon is known as the 'Material Girl' and the best-selling female recording artist of all time?",
+      "Options": [
+        "Cyndi Lauper",
+        "Madonna",
+        "Paula Abdul",
+        "Cher"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Madonna has sold more than 300 million records worldwide.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-006",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the legendary lead singer and showman of Queen until his passing in 1991?",
+      "Options": [
+        "John Deacon",
+        "Brian May",
+        "Freddie Mercury",
+        "Roger Taylor"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Freddie Mercury was celebrated for his powerful four-octave vocal range and flamboyant stage presence.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-007",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What country music icon built the Dollywood theme park in Pigeon Forge, Tennessee?",
+      "Options": [
+        "Tammy Wynette",
+        "Dolly Parton",
+        "Reba McEntire",
+        "Loretta Lynn"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Dolly Parton has composed over 3,000 songs including 'I Will Always Love You' and 'Jolene'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-008",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as the 'Piano Man'?",
+      "Options": [
+        "Elton John",
+        "Billy Joel",
+        "Ray Charles",
+        "Stevie Wonder"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Billy Joel released 'Piano Man' in 1973 based on his experiences playing at The Executive Room bar.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-009",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which legendary singer was nicknamed 'The Man in Black'?",
+      "Options": [
+        "Kris Kristofferson",
+        "Waylon Jennings",
+        "Merle Haggard",
+        "Johnny Cash"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Johnny Cash famously wore all-black clothing on stage to symbolize solidarity with the downtrodden.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-010",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang the iconic 1992 version of 'I Will Always Love You' for 'The Bodyguard' soundtrack?",
+      "Options": [
+        "Céline Dion",
+        "Toni Braxton",
+        "Whitney Houston",
+        "Mariah Carey"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Whitney Houston's cover spent 14 weeks at #1 on the Billboard Hot 100.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-011",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which British artist is famous for flamboyant eyeglasses, extravagant costumes, and hits like 'Rocket Man'?",
+      "Options": [
+        "Elton John",
+        "David Bowie",
+        "George Michael",
+        "Rod Stewart"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sir Elton John has scored over 50 Top 40 hits and sold 300+ million records.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-012",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What reggae icon popularized the genre worldwide with hits like 'No Woman, No Cry' and 'One Love'?",
+      "Options": [
+        "Peter Tosh",
+        "Jimmy Cliff",
+        "Ziggy Marley",
+        "Bob Marley"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Bob Marley and the Wailers brought Jamaican reggae and Rastafari culture to a global audience.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-013",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as 'The Boss' in rock music?",
+      "Options": [
+        "Bob Seger",
+        "Tom Petty",
+        "Bruce Springsteen",
+        "John Mellencamp"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Bruce Springsteen and the E Street Band are known for epic 3-4 hour marathon concert performances.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-014",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which female artist is known as the 'Goddess of Pop' and won an Oscar for 'Moonstruck'?",
+      "Options": [
+        "Bette Midler",
+        "Barbra Streisand",
+        "Cher",
+        "Diana Ross"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Cher is the only artist to date to have a #1 single on a Billboard chart in six consecutive decades.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-015",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What blind musical prodigy signed with Motown at age 11 as 'Little Stevie'?",
+      "Options": [
+        "Doc Watson",
+        "Stevie Wonder",
+        "Ronnie Milsap",
+        "Ray Charles"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Stevie Wonder has won 25 Grammy Awards, the most by any solo male artist in history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-016",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the legendary lead guitarist who played the 'Star-Spangled Banner' at Woodstock in 1969?",
+      "Options": [
+        "Jimmy Page",
+        "Carlos Santana",
+        "Jimi Hendrix",
+        "Eric Clapton"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Jimi Hendrix's psychedelic rendition at Woodstock became an iconic moment of the 1960s counterculture.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-017",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Canadian singer achieved worldwide fame with the 'Titanic' ballad 'My Heart Will Go On'?",
+      "Options": [
+        "Sarah McLachlan",
+        "Shania Twain",
+        "Céline Dion",
+        "Alanis Morissette"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Céline Dion has sold over 200 million albums worldwide and performed legendary Las Vegas residencies.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-018",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of The Doors, known as 'The Lizard King'?",
+      "Options": [
+        "Robby Krieger",
+        "Ray Manzarek",
+        "Jim Morrison",
+        "John Densmore"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Jim Morrison was the poetic and charismatic frontman of The Doors until his death in Paris in 1971.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-019",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as the 'Godfather of Soul' and the 'Hardest Working Man in Show Business'?",
+      "Options": [
+        "Wilson Pickett",
+        "Otis Redding",
+        "Sam Cooke",
+        "James Brown"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "James Brown pioneered funk music and dynamic stage footwork that influenced Michael Jackson and Prince.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-020",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What female singer is known for her 5-octave vocal range and her holiday classic 'All I Want for Christmas Is You'?",
+      "Options": [
+        "Kelly Clarkson",
+        "Christina Aguilera",
+        "Ariana Grande",
+        "Mariah Carey"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Mariah Carey has achieved 19 Billboard Hot 100 #1 singles, the most for any solo artist in history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-021",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Minneapolis music genius played 27 different instruments on his debut album 'For You'?",
+      "Options": [
+        "Stevie Wonder",
+        "Rick James",
+        "Morris Day",
+        "Prince"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Prince Rogers Nelson wrote, arranged, produced, and played every instrument on his 1978 debut.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-022",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which member of The Beatles was nicknamed 'The Quiet Beatle'?",
+      "Options": [
+        "John Lennon",
+        "George Harrison",
+        "Paul McCartney",
+        "Ringo Starr"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "George Harrison introduced Indian classical music and the sitar to Western rock and roll.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-023",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the legendary jazz trumpeter nicknamed 'Satchmo' who sang 'What a Wonderful World'?",
+      "Options": [
+        "Dizzy Gillespie",
+        "Louis Armstrong",
+        "Miles Davis",
+        "Chet Baker"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Louis Armstrong was one of the foundational figures in the history of American jazz.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-024",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which British rock legend adopted the alter ego 'Ziggy Stardust' in 1972?",
+      "Options": [
+        "Marc Bolan",
+        "Bryan Ferry",
+        "David Bowie",
+        "Mick Jagger"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "David Bowie reinvented himself through personae like Ziggy Stardust, Aladdin Sane, and The Thin White Duke.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-025",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the founding leader and primary songwriter of The Beach Boys who composed 'Pet Sounds'?",
+      "Options": [
+        "Carl Wilson",
+        "Mike Love",
+        "Brian Wilson",
+        "Dennis Wilson"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Brian Wilson's intricate studio arrangements on Pet Sounds transformed 1960s pop production.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-026",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which singer-songwriter released the seminal 1971 album 'Tapestry', winning four Grammy Awards?",
+      "Options": [
+        "Carole King",
+        "Joni Mitchell",
+        "Carly Simon",
+        "James Taylor"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Carole King's Tapestry remained on the Billboard charts for over 300 weeks.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-027",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the blind singer and pianist known as 'The Genius' with hits like 'Georgia on My Mind'?",
+      "Options": [
+        "Art Tatum",
+        "Ray Charles",
+        "Stevie Wonder",
+        "Ronnie Milsap"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Ray Charles pioneered soul music by combining blues, rhythm & blues, and gospel styles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-028",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which lead vocalist of Led Zeppelin was renowned for his powerful wide vocal range and high-pitched wails?",
+      "Options": [
+        "Robert Plant",
+        "David Coverdale",
+        "Ian Gillan",
+        "Paul Rodgers"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Robert Plant's vocal style helped define heavy metal and hard rock singing.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-029",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of Fleetwood Mac who wrote and sang 'Rhiannon' and 'Landslide'?",
+      "Options": [
+        "Stevie Nicks",
+        "Christine McVie",
+        "Grace Slick",
+        "Ann Wilson"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Stevie Nicks was inducted into the Rock and Roll Hall of Fame both as a band member and as a solo artist.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-030",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What folk rock legend was awarded the Nobel Prize in Literature in 2016 for 'new poetic expressions'?",
+      "Options": [
+        "Neil Young",
+        "Leonard Cohen",
+        "Bob Dylan",
+        "Paul Simon"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Bob Dylan became the first musician to ever receive the Nobel Prize in Literature.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-031",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of The Supremes before launching a massive solo career with 'Ain't No Mountain High Enough'?",
+      "Options": [
+        "Mary Wilson",
+        "Diana Ross",
+        "Martha Reeves",
+        "Florence Ballard"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Diana Ross led The Supremes to 12 #1 hit singles on the Billboard Hot 100.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-032",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which British rock singer is famed for his gravelly voice, blond rooster hair, and hits like 'Maggie May'?",
+      "Options": [
+        "Rod Stewart",
+        "Joe Cocker",
+        "Peter Gabriel",
+        "Phil Collins"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sir Rod Stewart has sold over 250 million records and had six consecutive #1 albums in the UK.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-033",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the female blues-rock singer who sang 'Piece of My Heart' and 'Me and Bobby McGee' with Big Brother and the Holding Company?",
+      "Options": [
+        "Janis Joplin",
+        "Linda Ronstadt",
+        "Patti Smith",
+        "Grace Slick"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Janis Joplin's raw, passionate vocal performances made her an icon of the Woodstock generation.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-034",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which multi-talented drummer and singer took over lead vocals for Genesis after Peter Gabriel's departure?",
+      "Options": [
+        "Chester Thompson",
+        "Mike Rutherford",
+        "Phil Collins",
+        "Bill Bruford"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Phil Collins scored multiple #1 solo hits including 'In the Air Tonight' and 'Against All Odds'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-035",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as the 'Queen of Country' and was the first woman to win CMA Entertainer of the Year in 1972?",
+      "Options": [
+        "Loretta Lynn",
+        "Tammy Wynette",
+        "Kitty Wells",
+        "Dolly Parton"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Loretta Lynn wrote autobiographical anthems like 'Coal Miner's Daughter' and 'Don't Come Home A-Drinkin''.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-036",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer and co-founder of Creedence Clearwater Revival?",
+      "Options": [
+        "Doug Clifford",
+        "John Fogerty",
+        "Stu Cook",
+        "Tom Fogerty"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "John Fogerty wrote nearly all of CCR's hits including 'Proud Mary', 'Fortunate Son', and 'Bad Moon Rising'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-037",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Latin pop superstar brought international attention to Latin pop with the 1999 smash 'Livin' la Vida Loca'?",
+      "Options": [
+        "Enrique Iglesias",
+        "Marc Anthony",
+        "Luis Miguel",
+        "Ricky Martin"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ricky Martin's 1999 Grammy performance and hit single ignited the Latin music explosion.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-038",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which English singer-songwriter rose to global superstardom with Wham! and his solo masterpiece album 'Faith'?",
+      "Options": [
+        "Tony Hadley",
+        "Boy George",
+        "Simon Le Bon",
+        "George Michael"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "George Michael won Album of the Year at the 31st Grammy Awards for 'Faith'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-039",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of rock band Heart alongside her sister Nancy Wilson on lead guitar?",
+      "Options": [
+        "Joan Jett",
+        "Pat Benatar",
+        "Ann Wilson",
+        "Debbie Harry"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Ann Wilson is celebrated as one of the most powerful vocalists in rock history ('Barracuda', 'Alone').",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-040",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What American singer-songwriter was known as 'The High Priestess of Soul' ('Feeling Good', 'I Put a Spell on You')?",
+      "Options": [
+        "Ella Fitzgerald",
+        "Billie Holiday",
+        "Nina Simone",
+        "Etta James"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Nina Simone blended classical piano, jazz, blues, folk, and civil rights activism.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-041",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous backing group of studio musicians played on hundreds of Motown #1 hits in Detroit?",
+      "Options": [
+        "The Memphis Horns",
+        "Muscle Shoals Rhythm Section",
+        "The Wrecking Crew",
+        "The Funk Brothers"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Funk Brothers played on more #1 records than The Beatles, Elvis Presley, The Beach Boys, and The Rolling Stones combined.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-042",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the Los Angeles studio session musicians who played on hits for The Beach Boys, Sinatra, and Simon & Garfunkel?",
+      "Options": [
+        "The Section",
+        "The Wrecking Crew",
+        "The Swampers",
+        "The Funk Brothers"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Wrecking Crew included bassist Carol Kaye, drummer Hal Blaine, and guitarist Glen Campbell.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-043",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous jazz singer was known as 'Lady Day' and recorded the powerful anti-lynching song 'Strange Fruit' in 1939?",
+      "Options": [
+        "Ella Fitzgerald",
+        "Dinah Washington",
+        "Sarah Vaughan",
+        "Billie Holiday"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Billie Holiday was given the nickname 'Lady Day' by saxophonist Lester Young.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-044",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which guitarist was voted #1 on Rolling Stone's list of '100 Greatest Guitarists of All Time'?",
+      "Options": [
+        "B.B. King",
+        "Eric Clapton",
+        "Jimmy Page",
+        "Jimi Hendrix"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Jimi Hendrix revolutionized electric guitar playing with his innovative use of feedback and distortion.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-045",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the female vocalist who duetted with Meat Loaf on 'Paradise by the Dashboard Light'?",
+      "Options": [
+        "Bonnie Tyler",
+        "Karla DeVito",
+        "Cher",
+        "Ellen Foley"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ellen Foley sang the studio vocal on the Bat Out of Hell album; Karla DeVito appeared in the music video.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-046",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous Delta blues musician is said to have sold his soul to the devil at a Mississippi crossroads?",
+      "Options": [
+        "Lead Belly",
+        "Robert Johnson",
+        "Son House",
+        "Charley Patton"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Robert Johnson recorded 29 landmark blues songs in 1936-1937 that influenced Eric Clapton and Keith Richards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-047",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead guitarist for Ozzy Osbourne who tragically died in a plane accident in 1982 at age 25?",
+      "Options": [
+        "Randy Rhoads",
+        "Jake E. Lee",
+        "Tony Iommi",
+        "Zakk Wylde"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Randy Rhoads pioneered neoclassical metal guitar playing on 'Crazy Train' and 'Mr. Crowley'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-048",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the first music video ever broadcast on MTV when the network launched on August 1, 1981?",
+      "Options": [
+        "'Take On Me' by a-ha",
+        "'Thriller' by Michael Jackson",
+        "'Video Killed the Radio Star' by The Buggles",
+        "'Money for Nothing' by Dire Straits"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Buggles' 1979 synth-pop song was the symbolic first video on MTV.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-049",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country legend recorded two live albums inside California state prisons: Folsom Prison (1968) and San Quentin (1969)?",
+      "Options": [
+        "Johnny Cash",
+        "Merle Haggard",
+        "Willie Nelson",
+        "Waylon Jennings"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Johnny Cash's prison concerts revitalized his career and produced the hit 'A Boy Named Sue'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-050",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the primary songwriter and co-lead singer of Steely Dan alongside Walter Becker?",
+      "Options": [
+        "Michael McDonald",
+        "Jeff Baxter",
+        "Larry Carlton",
+        "Donald Fagen"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Donald Fagen and Walter Becker were renowned for their obsessive studio perfectionism and jazz-rock harmonies.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-051",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as the 'First Lady of Song' and 'Queen of Jazz', famous for her scat singing?",
+      "Options": [
+        "Sarah Vaughan",
+        "Ella Fitzgerald",
+        "Peggy Lee",
+        "Carmen McRae"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Ella Fitzgerald won 14 Grammy Awards and recorded the legendary Great American Songbook series.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-052",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang the 1968 hit 'Stand by Your Man', one of the best-known songs in country music history?",
+      "Options": [
+        "Tammy Wynette",
+        "Dolly Parton",
+        "Patsy Cline",
+        "Loretta Lynn"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tammy Wynette was known as the 'First Lady of Country Music'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-053",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which pop icon is known for the hits 'Bad Romance', 'Poker Face', and her starring role in 'A Star Is Born'?",
+      "Options": [
+        "Katy Perry",
+        "Britney Spears",
+        "Lady Gaga",
+        "Kylie Minogue"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Lady Gaga has won an Academy Award, 13 Grammy Awards, and a BAFTA Award.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-054",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What blues legend named his beloved Gibson guitars 'Lucille'?",
+      "Options": [
+        "Freddie King",
+        "Albert King",
+        "B.B. King",
+        "Muddy Waters"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "B.B. King named his guitar Lucille after running into a burning dance hall to save his acoustic instrument.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-055",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What British singer-songwriter had smash hits with 'Someone Like You' and 'Rolling in the Deep'?",
+      "Options": [
+        "Adele",
+        "Jessie J",
+        "Amy Winehouse",
+        "Dua Lipa"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Adele's album '21' spent 24 weeks at #1 on the Billboard 200.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-056",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the frontman of The Rolling Stones famous for his energetic moves and swagger?",
+      "Options": [
+        "Mick Jagger",
+        "Keith Richards",
+        "Charlie Watts",
+        "Ronnie Wood"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sir Mick Jagger has fronted The Rolling Stones for more than six decades.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-057",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Canadian singer-songwriter wrote and sang 'Hallelujah', one of the most covered songs in history?",
+      "Options": [
+        "Joni Mitchell",
+        "Leonard Cohen",
+        "Neil Young",
+        "Gordon Lightfoot"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Leonard Cohen released Hallelujah in 1984 on his Various Positions album.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-058",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is the country superstar behind 'Friends in Low Places' and the highest-selling solo artist in US history?",
+      "Options": [
+        "George Strait",
+        "Kenny Chesney",
+        "Garth Brooks",
+        "Alan Jackson"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Garth Brooks is the only artist to have released 9 Diamond-certified albums in the United States.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-059",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which female rock singer is known as the 'Godmother of Punk' ('Because the Night')?",
+      "Options": [
+        "Chrissie Hynde",
+        "Patti Smith",
+        "Debbie Harry",
+        "Siouxsie Sioux"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Patti Smith's 1975 debut album 'Horses' was a major influence on the punk rock movement.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-060",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the legendary singer of 'At Last' and 'I'd Rather Go Blind'?",
+      "Options": [
+        "Etta James",
+        "Koko Taylor",
+        "Ruth Brown",
+        "Big Mama Thornton"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Etta James' signature version of 'At Last' in 1960 became an enduring American standard.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-061",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which singer had the best-selling single of all time with the 1997 charity re-recording of 'Candle in the Wind'?",
+      "Options": [
+        "Michael Jackson",
+        "George Michael",
+        "Elton John",
+        "Paul McCartney"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "'Candle in the Wind 1997' was re-recorded in tribute to Princess Diana and sold over 33 million copies.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-062",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What British singer-songwriter had a breakout jazz-soul album with 'Back to Black' in 2006?",
+      "Options": [
+        "Duffy",
+        "Joss Stone",
+        "Amy Winehouse",
+        "Corinne Bailey Rae"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Amy Winehouse won 5 Grammy Awards at the 50th Annual Grammy Awards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-063",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country star has scored 60 #1 country hits, more than any other artist in music history?",
+      "Options": [
+        "George Strait",
+        "Merle Haggard",
+        "Ronnie Milsap",
+        "Conway Twitty"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "George Strait, the 'King of Country', holds the record with 60 #1 singles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-064",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of The Police who scored massive solo hits with 'Fields of Gold' and 'Englishman in New York'?",
+      "Options": [
+        "Sting (Gordon Sumner)",
+        "Stewart Copeland",
+        "Peter Gabriel",
+        "Andy Summers"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sting has received 17 Grammy Awards and an induction into the Songwriters Hall of Fame.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-065",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What iconic soul singer wrote and recorded 'A Change Is Gonna Come' in 1964?",
+      "Options": [
+        "Marvin Gaye",
+        "Jackie Wilson",
+        "Sam Cooke",
+        "Otis Redding"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Sam Cooke was known as the 'King of Soul' and a crucial figure in the Civil Rights Movement.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-066",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which legendary rock band was fronted by Roger Daltrey with Pete Townshend on guitar?",
+      "Options": [
+        "The Kinks",
+        "The Yardbirds",
+        "Cream",
+        "The Who"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Who pioneered rock operas with Tommy (1969) and Quadrophenia (1973).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-067",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead vocalist and primary songwriter for the new wave band Blondie?",
+      "Options": [
+        "Joan Jett",
+        "Pat Benatar",
+        "Annie Lennox",
+        "Debbie Harry"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Debbie Harry scored #1 hits across punk, disco, pop, and early hip hop with Blondie.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-068",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What singer was known as 'The Velvet Fog' for his smooth baritone jazz vocals?",
+      "Options": [
+        "Bobby Darin",
+        "Vic Damone",
+        "Nat King Cole",
+        "Mel Tormé"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Mel Tormé also co-wrote 'The Christmas Song' ('Chestnuts Roasting on an Open Fire').",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-069",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer and lyricist of Black Sabbath before launching a massively successful solo reality TV and music career?",
+      "Options": [
+        "Glenn Hughes",
+        "Ian Gillan",
+        "Ronnie James Dio",
+        "Ozzy Osbourne"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ozzy Osbourne is widely revered as the 'Prince of Darkness' and godfather of heavy metal.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-070",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which female singer-songwriter had hits with 'You're So Vain' and the Bond theme 'Nobody Does It Better'?",
+      "Options": [
+        "Linda Ronstadt",
+        "Joni Mitchell",
+        "Carole King",
+        "Carly Simon"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Carly Simon won the Academy Award, Golden Globe, and Grammy for 'Let the River Run' in 1989.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-071",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the backing band that accompanied Bob Dylan on his 1966 electric tour and recorded 'The Weight'?",
+      "Options": [
+        "Crazy Horse",
+        "The Hawks",
+        "The Byrds",
+        "The Band"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Levon Helm, Robbie Robertson, Rick Danko, Richard Manuel, and Garth Hudson formed The Band.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-072",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the only musician to be inducted into the Rock and Roll Hall of Fame three separate times?",
+      "Options": [
+        "Neil Young",
+        "Paul McCartney",
+        "Jimmy Page",
+        "Eric Clapton (The Yardbirds, Cream, Solo)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Eric Clapton was inducted as a member of The Yardbirds, Cream, and as a solo artist.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-073",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What legendary soul singer recorded '(Sittin' On) The Dock of the Bay' three days before dying in a plane crash in 1967?",
+      "Options": [
+        "Arthur Conley",
+        "Eddie Floyd",
+        "Otis Redding",
+        "Sam Cooke"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "It became the first posthumous #1 single in US chart history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-074",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which legendary record producer created the famous 'Wall of Sound' recording technique in the 1960s?",
+      "Options": [
+        "Berry Gordy",
+        "Phil Spector",
+        "George Martin",
+        "Quincy Jones"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Phil Spector layered dozens of instruments and acoustic echo chambers to create dense orchestral pop.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-075",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What country music outlaw was nicknamed 'The Red Headed Stranger'?",
+      "Options": [
+        "Willie Nelson",
+        "Bobby Bare",
+        "Kris Kristofferson",
+        "Waylon Jennings"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Willie Nelson released his concept album 'Red Headed Stranger' in 1975.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-076",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the first rap song to hit #1 on the Billboard Hot 100 chart in 1990?",
+      "Options": [
+        "'Rapper's Delight' by Sugarhill Gang",
+        "'Ice Ice Baby' by Vanilla Ice",
+        "'U Can't Touch This' by MC Hammer",
+        "'Bust a Move' by Young MC"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Ice Ice Baby' topped the Billboard Hot 100 on November 3, 1990.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-077",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who wrote the iconic 1967 soul hit 'Respect' made legendary by Aretha Franklin?",
+      "Options": [
+        "Wilson Pickett",
+        "Sam Cooke",
+        "Steve Cropper",
+        "Otis Redding"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Otis Redding originally wrote and recorded 'Respect' in 1965 before Aretha transformed it into a feminist anthem.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-078",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What English singer-songwriter and producer was the mastermind behind Electric Light Orchestra (ELO)?",
+      "Options": [
+        "Jeff Lynne",
+        "Roy Wood",
+        "Richard Tandy",
+        "Bev Bevan"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Jeff Lynne composed and produced ELO's string-infused rock hits and was a member of The Traveling Wilburys.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-079",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which legendary jazz saxophonist was nicknamed 'Bird' and pioneered bebop with Dizzy Gillespie?",
+      "Options": [
+        "Sonny Rollins",
+        "Cannonball Adderley",
+        "John Coltrane",
+        "Charlie Parker"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Charlie Parker was one of the most influential soloists in the development of modern jazz.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-080",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who played the blistering electric guitar solo on Michael Jackson's 1982 hit 'Beat It'?",
+      "Options": [
+        "Eddie Van Halen",
+        "Brian May",
+        "Steve Lukather",
+        "Slash"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Eddie Van Halen recorded his famous solo for free as a favor to producer Quincy Jones.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-081",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the legendary lead singer of AC/DC from 1980 onward, debuting on 'Back in Black'?",
+      "Options": [
+        "Axl Rose",
+        "Dave Evans",
+        "Bon Scott",
+        "Brian Johnson"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Brian Johnson replaced the late Bon Scott and led 'Back in Black' to over 50 million sales.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-082",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which pop sensation rose to fame on the Mickey Mouse Club and released '...Baby One More Time' in 1998?",
+      "Options": [
+        "Christina Aguilera",
+        "Mandy Moore",
+        "Britney Spears",
+        "Jessica Simpson"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Britney Spears became a global pop icon and the best-selling teenage artist of all time.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-083",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of The Jackson 5 who launched his solo career with 'Off the Wall'?",
+      "Options": [
+        "Tito Jackson",
+        "Michael Jackson",
+        "Jackie Jackson",
+        "Jermaine Jackson"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Michael Jackson achieved four Top 10 singles from 'Off the Wall' in 1979.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-084",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which American rock icon is famous for 'American Girl', 'Free Fallin'', and leading The Heartbreakers?",
+      "Options": [
+        "Jackson Browne",
+        "Tom Petty",
+        "Don Henley",
+        "Bob Seger"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Tom Petty sold more than 80 million records and was inducted into the Rock and Roll Hall of Fame in 2002.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-085",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang the 1971 classic feminist anthem 'I Am Woman' ('Hear me roar')?",
+      "Options": [
+        "Helen Reddy",
+        "Olivia Newton-John",
+        "Rita Coolidge",
+        "Anne Murray"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Australian singer Helen Reddy won a Grammy Award and thanked God 'because She makes everything possible'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-086",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous singer and actress won an Emmy, Grammy, Oscar, and Tony (EGOT) and starred in 'Funny Girl'?",
+      "Options": [
+        "Liza Minnelli",
+        "Barbra Streisand",
+        "Bette Midler",
+        "Audrey Hepburn"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Barbra Streisand is among the few elite performers in entertainment history to achieve EGOT status.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-087",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which blues-rock guitar virtuoso from Texas rose to fame with his band Double Trouble ('Pride and Joy')?",
+      "Options": [
+        "Stevie Ray Vaughan",
+        "Johnny Winter",
+        "Kenny Wayne Shepherd",
+        "Gary Clark Jr."
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Stevie Ray Vaughan ignited the 1980s blues revival before his untimely death in 1990.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-088",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer and songwriter of The Cure, known for his smeared red lipstick and wild hair?",
+      "Options": [
+        "Robert Smith",
+        "Simon Gallup",
+        "Porl Thompson",
+        "Lol Tolhurst"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Robert Smith has been the sole continuous member of The Cure since 1978.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-089",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which pop diva released the iconic dance hit 'Believe' in 1998, popularizing the Auto-Tune effect?",
+      "Options": [
+        "Cher",
+        "Kylie Minogue",
+        "Paula Abdul",
+        "Madonna"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "'Believe' became the best-selling single of 1999 and the biggest hit of Cher's career.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-090",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the lead singer of The Smashing Pumpkins on landmark 1990s albums 'Siamese Dream' and 'Mellon Collie'?",
+      "Options": [
+        "D'arcy Wretzky",
+        "Jimmy Chamberlin",
+        "James Iha",
+        "Billy Corgan"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Billy Corgan was the driving creative force and principal songwriter of the alternative rock band.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-091",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What legendary record label did Berry Gordy Jr. found in Detroit in 1959 with an $800 loan?",
+      "Options": [
+        "Chess Records",
+        "Motown (Tamla Records)",
+        "Atlantic Records",
+        "Stax Records"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Berry Gordy created 'Hitsville U.S.A.', establishing the most successful Black-owned music company in history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-092",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which legendary jazz pianist composed 'Take Five' and 'Blue Rondo à la Turk' in unusual time signatures?",
+      "Options": [
+        "Thelonious Monk",
+        "Dave Brubeck",
+        "Bill Evans",
+        "Bud Powell"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Dave Brubeck Quartet released 'Time Out' in 1959, the first jazz album to sell over one million copies.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-093",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the female country trailblazer who was the first solo female artist to sell a million country albums with 'It Wasn't God Who Made Honky Tonk Angels' in 1952?",
+      "Options": [
+        "Rose Maddox",
+        "Kitty Wells",
+        "Jean Shepard",
+        "Patsy Cline"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Kitty Wells broke gender barriers in the country music industry and earned the title 'Queen of Country Music'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-094",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Swedish music producer and songwriter has written or co-written 25+ Billboard Hot 100 #1 hits for Britney Spears, Taylor Swift, and Katy Perry?",
+      "Options": [
+        "Shellback",
+        "Rami Yacoub",
+        "Max Martin",
+        "Dr. Luke"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Max Martin is third all-time for most #1 singles on the Billboard Hot 100, behind Paul McCartney and John Lennon.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-095",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the London recording studio where The Beatles recorded nearly all their albums from 1962 to 1970?",
+      "Options": [
+        "Abbey Road Studios (EMI Studios)",
+        "Trident Studios",
+        "Air Studios",
+        "Olympic Studios"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Beatles commemorated the studio by naming their 1969 album Abbey Road and walking across the zebra crossing outside.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-096",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the female singer behind 'Girls Just Want to Have Fun' and 'Time After Time'?",
+      "Options": [
+        "Pat Benatar",
+        "Belinda Carlisle",
+        "Cyndi Lauper",
+        "Madonna"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Cyndi Lauper was the first female artist to achieve four top-five singles from a debut album (She's So Unusual).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-097",
+      "Category": "Music Legends",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Motown legend sang 'Let's Get It On', 'Sexual Healing', and the masterpiece album 'What's Going On'?",
+      "Options": [
+        "Stevie Wonder",
+        "Smokey Robinson",
+        "Marvin Gaye",
+        "Al Green"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Marvin Gaye was known as the 'Prince of Motown' and 'Prince of Soul'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-098",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which British rock band featured singer Robert Smith, guitarist Porl Thompson, and bassist Simon Gallup?",
+      "Options": [
+        "Depeche Mode",
+        "The Smiths",
+        "The Cure",
+        "New Order"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Cure scored massive international hits like 'Just Like Heaven' and 'Friday I'm in Love'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-099",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What album by Michael Jackson won a record-setting eight Grammy Awards in a single night in 1984?",
+      "Options": [
+        "Off the Wall",
+        "Thriller",
+        "Bad",
+        "Dangerous"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Thriller won 8 Grammys at the 26th Annual Grammy Awards, setting an all-time record.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LEG-100",
+      "Category": "Music Legends",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which guitarist played the legendary rock solo on 'Hotel California' trading riffs with Don Felder?",
+      "Options": [
+        "Glenn Frey",
+        "Bernie Leadon",
+        "Randy Meisner",
+        "Joe Walsh"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Joe Walsh and Don Felder's dual guitar counterpoint on Hotel California was voted one of the greatest guitar solos of all time.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which legendary musician was known as the 'King of Pop' and released 'Thriller' in 1982?",
+      "Options": [
+        "Prince",
+        "Michael Jackson",
+        "Stevie Wonder",
+        "James Brown"
+      ],
+      "Explanation": "Michael Jackson transformed music videos, dancing, and pop music worldwide.",
+      "Id": "MUS-101",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was known as the 'Queen of Soul' and demanded 'R-E-S-P-E-C-T'?",
+      "Options": [
+        "Etta James",
+        "Diana Ross",
+        "Gladys Knight",
+        "Aretha Franklin"
+      ],
+      "Explanation": "Aretha Franklin was the first woman inducted into the Rock and Roll Hall of Fame.",
+      "Id": "MUS-102",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which iconic singer and pianist was blind from infancy and recorded 'Superstition' and 'Sir Duke'?",
+      "Options": [
+        "Stevie Wonder",
+        "Ray Charles",
+        "Art Tatum",
+        "Ronnie Milsap"
+      ],
+      "Explanation": "Stevie Wonder won 25 Grammy Awards and an Academy Award.",
+      "Id": "MUS-103",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was known as the 'Godfather of Soul' and legendary for songs like 'Papa's Got a Brand New Bag'?",
+      "Options": [
+        "Sam Cooke",
+        "Otis Redding",
+        "Wilson Pickett",
+        "James Brown"
+      ],
+      "Explanation": "James Brown ('The Hardest Working Man in Show Business') pioneered funk music.",
+      "Id": "MUS-104",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which reggae legend from Jamaica recorded 'No Woman, No Cry' and 'One Love'?",
+      "Options": [
+        "Toots Hibbert",
+        "Bob Marley",
+        "Jimmy Cliff",
+        "Peter Tosh"
+      ],
+      "Explanation": "Bob Marley popularized reggae globally with his band The Wailers.",
+      "Id": "MUS-105",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the lead singer of Queen celebrated for his 4-octave vocal range and theatrical stage presence?",
+      "Options": [
+        "Roger Daltrey",
+        "David Bowie",
+        "Robert Plant",
+        "Freddie Mercury"
+      ],
+      "Explanation": "Freddie Mercury was born Farrokh Bulsara in Zanzibar.",
+      "Id": "MUS-106",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which legendary artist from Minneapolis played 27 instruments on his debut album and recorded 'Purple Rain'?",
+      "Options": [
+        "Rick James",
+        "Lenny Kravitz",
+        "Michael Jackson",
+        "Prince"
+      ],
+      "Explanation": "Prince was a musical prodigy, virtuoso guitarist, and prolific songwriter.",
+      "Id": "MUS-107",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was known as 'The Voice' and recorded mega-hits like 'I Will Always Love You' and 'Greatest Love of All'?",
+      "Options": [
+        "Celine Dion",
+        "Mariah Carey",
+        "Tina Turner",
+        "Whitney Houston"
+      ],
+      "Explanation": "Whitney Houston remains the most awarded female artist of all time.",
+      "Id": "MUS-108",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which legendary jazz trumpeter and singer recorded 'What a Wonderful World' and was nicknamed 'Satchmo'?",
+      "Options": [
+        "Chet Baker",
+        "Miles Davis",
+        "Louis Armstrong",
+        "Dizzy Gillespie"
+      ],
+      "Explanation": "Louis Armstrong was foundational to the birth of 20th-century jazz.",
+      "Id": "MUS-109",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded 'Ring of Fire' and 'Walk the Line' and became an icon of outlaw American music?",
+      "Options": [
+        "Willie Nelson",
+        "Waylon Jennings",
+        "Merle Haggard",
+        "Johnny Cash"
+      ],
+      "Explanation": "Johnny Cash performed in signature black attire for decades.",
+      "Id": "MUS-110",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which singer was nicknamed 'Ol' Blue Eyes' and 'The Chairman of the Board'?",
+      "Options": [
+        "Perry Como",
+        "Dean Martin",
+        "Tony Bennett",
+        "Frank Sinatra"
+      ],
+      "Explanation": "Frank Sinatra led the legendary Rat Pack in Las Vegas.",
+      "Id": "MUS-111",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the primary songwriter and creative visionary behind The Beach Boys' masterpiece 'Pet Sounds'?",
+      "Options": [
+        "Brian Wilson",
+        "Carl Wilson",
+        "Dennis Wilson",
+        "Mike Love"
+      ],
+      "Explanation": "Brian Wilson arranged complex orchestral pop harmonies in 1966.",
+      "Id": "MUS-112",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which rock and blues guitar pioneer famously played the Star-Spangled Banner at Woodstock in 1969?",
+      "Options": [
+        "Jimi Hendrix",
+        "Pete Townshend",
+        "Eric Clapton",
+        "Carlos Santana"
+      ],
+      "Explanation": "Jimi Hendrix electrified Woodstock with his feedback-drenched rendition.",
+      "Id": "MUS-113",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was known as the 'Queen of Rock 'n' Roll' with hits like 'Proud Mary' and 'What's Love Got to Do with It'?",
+      "Options": [
+        "Tina Turner",
+        "Patti LaBelle",
+        "Aretha Franklin",
+        "Janis Joplin"
+      ],
+      "Explanation": "Tina Turner staged one of the greatest career comebacks in music history in 1984.",
+      "Id": "MUS-114",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which British pop legend has sold over 300 million records and recorded 'Rocket Man' and 'Your Song'?",
+      "Options": [
+        "Rod Stewart",
+        "David Bowie",
+        "Elton John",
+        "Paul McCartney"
+      ],
+      "Explanation": "Elton John formed a songwriting partnership with lyricist Bernie Taupin.",
+      "Id": "MUS-115",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the 'High Priestess of Soul' famous for 'Feeling Good' and 'I Put a Spell on You'?",
+      "Options": [
+        "Sarah Vaughan",
+        "Nina Simone",
+        "Billie Holiday",
+        "Ella Fitzgerald"
+      ],
+      "Explanation": "Nina Simone was a brilliant civil rights activist, pianist, and vocalist.",
+      "Id": "MUS-116",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which artist recorded 'Space Oddity', 'Heroes', and adopted the persona Ziggy Stardust?",
+      "Options": [
+        "Marc Bolan",
+        "Lou Reed",
+        "Iggy Pop",
+        "David Bowie"
+      ],
+      "Explanation": "David Bowie was music's supreme chameleon and innovator.",
+      "Id": "MUS-117",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was known as the 'First Lady of Song' and 'Queen of Jazz' famous for her scat singing?",
+      "Options": [
+        "Peggy Lee",
+        "Billie Holiday",
+        "Ella Fitzgerald",
+        "Dinah Washington"
+      ],
+      "Explanation": "Ella Fitzgerald had pristine vocal clarity and remarkable improvisational mastery.",
+      "Id": "MUS-118",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which legendary musician wrote 'Like a Rolling Stone' and won the 2016 Nobel Prize in Literature?",
+      "Options": [
+        "Leonard Cohen",
+        "Neil Young",
+        "Bob Dylan",
+        "Paul Simon"
+      ],
+      "Explanation": "Bob Dylan reshaped modern songwriting and folk-rock poetry.",
+      "Id": "MUS-119",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the lead singer of The Doors known as 'The Lizard King'?",
+      "Options": [
+        "Jim Morrison",
+        "John Densmore",
+        "Robby Krieger",
+        "Ray Manzarek"
+      ],
+      "Explanation": "Jim Morrison wrote dark, poetic rock lyrics for The Doors.",
+      "Id": "MUS-120",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Motown superstar recorded 'Let's Get It On', 'Sexual Healing', and 'What's Going On'?",
+      "Options": [
+        "Stevie Wonder",
+        "Marvin Gaye",
+        "Smokey Robinson",
+        "Otis Redding"
+      ],
+      "Explanation": "Marvin Gaye was the iconic Prince of Motown.",
+      "Id": "MUS-121",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded 'At Last' and is considered one of blues and soul's greatest vocal powerhouses?",
+      "Options": [
+        "Etta James",
+        "Big Mama Thornton",
+        "Koko Taylor",
+        "Ruth Brown"
+      ],
+      "Explanation": "Etta James bridged the gap between rhythm & blues, rock, and jazz.",
+      "Id": "MUS-122",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which singer was nicknamed 'The Boss' and released the multi-platinum 'Born in the U.S.A.'?",
+      "Options": [
+        "John Mellencamp",
+        "Bob Seger",
+        "Tom Petty",
+        "Bruce Springsteen"
+      ],
+      "Explanation": "Bruce Springsteen has fronted the E Street Band since 1972.",
+      "Id": "MUS-123",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the female blues-rock icon known for raw, passionate vocals on 'Piece of My Heart' and 'Me and Bobby McGee'?",
+      "Options": [
+        "Janis Joplin",
+        "Stevie Nicks",
+        "Joan Baez",
+        "Grace Slick"
+      ],
+      "Explanation": "Janis Joplin rose to fame at the Monterey Pop Festival in 1967.",
+      "Id": "MUS-124",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which pianist and composer founded Motown Records in Detroit, Michigan in 1959?",
+      "Options": [
+        "Clive Davis",
+        "Berry Gordy Jr.",
+        "Quincy Jones",
+        "Smokey Robinson"
+      ],
+      "Explanation": "Berry Gordy Jr. built 'Hitsville U.S.A.' into a cultural empire.",
+      "Id": "MUS-125",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who is the legendary lead singer of Fleetwood Mac famous for 'Rhiannon', 'Dreams', and her shawl-draped stage outfits?",
+      "Options": [
+        "Ann Wilson",
+        "Debbie Harry",
+        "Stevie Nicks",
+        "Christine McVie"
+      ],
+      "Explanation": "Stevie Nicks was the first woman inducted twice into the Rock and Roll Hall of Fame.",
+      "Id": "MUS-126",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which jazz trumpeter recorded the best-selling jazz album of all time, 'Kind of Blue', in 1959?",
+      "Options": [
+        "Miles Davis",
+        "John Coltrane",
+        "Bill Evans",
+        "Thelonious Monk"
+      ],
+      "Explanation": "Miles Davis revolutionized modal jazz and jazz fusion throughout his career.",
+      "Id": "MUS-127",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was known as 'The King of Rock and Roll' and bought the Graceland estate in Memphis?",
+      "Options": [
+        "Little Richard",
+        "Elvis Presley",
+        "Buddy Holly",
+        "Jerry Lee Lewis"
+      ],
+      "Explanation": "Elvis Presley revolutionized global culture starting with his 1954 Sun Records sessions.",
+      "Id": "MUS-128",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which legendary artist wrote and recorded 'Super Freak' and produced the Mary Jane Girls?",
+      "Options": [
+        "Rick James",
+        "Prince",
+        "Bootsy Collins",
+        "George Clinton"
+      ],
+      "Explanation": "Rick James was the pioneer of 'Punk Funk' in the late 1970s and 1980s.",
+      "Id": "MUS-129",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who sang lead on The Jackson 5's hits 'I Want You Back' and 'ABC' at age 11?",
+      "Options": [
+        "Jermaine Jackson",
+        "Jackie Jackson",
+        "Michael Jackson",
+        "Tito Jackson"
+      ],
+      "Explanation": "Young Michael Jackson's precocious talent made the group an international sensation.",
+      "Id": "MUS-130",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country legend had hits with 'Jolene' and 'I Will Always Love You' and composed both on the same afternoon?",
+      "Options": [
+        "Tammy Wynette",
+        "Loretta Lynn",
+        "Patsy Cline",
+        "Dolly Parton"
+      ],
+      "Explanation": "Dolly Parton wrote both legendary songs in a single songwriting session in 1973.",
+      "Id": "MUS-131",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the 'Father of the Blues' or 'King of the Blues' famous for his Gibson guitar named 'Lucille'?",
+      "Options": [
+        "B.B. King",
+        "Muddy Waters",
+        "Albert King",
+        "Freddie King"
+      ],
+      "Explanation": "B.B. King named his guitar Lucille after running into a burning dance hall to rescue it.",
+      "Id": "MUS-132",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which legendary English rock guitarist recorded with Cream, The Yardbirds, Derek and the Dominos, and as a solo artist?",
+      "Options": [
+        "Jimmy Page",
+        "Eric Clapton",
+        "Jeff Beck",
+        "Mark Knopfler"
+      ],
+      "Explanation": "Eric Clapton is the only three-time inductee into the Rock and Roll Hall of Fame.",
+      "Id": "MUS-133",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the lead singer and songwriter of Creedence Clearwater Revival?",
+      "Options": [
+        "John Fogerty",
+        "Stu Cook",
+        "Doug Clifford",
+        "Tom Fogerty"
+      ],
+      "Explanation": "John Fogerty penned almost all of CCR's swamp-rock classics in a rapid 3-year span.",
+      "Id": "MUS-134",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which disco superstar was known as the 'Queen of Disco' with hits like 'Hot Stuff' and 'Last Dance'?",
+      "Options": [
+        "Diana Ross",
+        "Chaka Khan",
+        "Gloria Gaynor",
+        "Donna Summer"
+      ],
+      "Explanation": "Donna Summer dominated dance floors and charts worldwide in the 1970s.",
+      "Id": "MUS-135",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded the 1971 protest and soul masterpiece '(Sittin' On) The Dock of the Bay' before his tragic death?",
+      "Options": [
+        "Sam Cooke",
+        "Otis Redding",
+        "Jackie Wilson",
+        "Arthur Conley"
+      ],
+      "Explanation": "Otis Redding recorded the whistling classic days before his fatal plane crash in 1967.",
+      "Id": "MUS-136",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which multi-instrumentalist formed Parliament-Funkadelic and created P-Funk mythology?",
+      "Options": [
+        "Sly Stone",
+        "George Clinton",
+        "Maurice White",
+        "Bootsy Collins"
+      ],
+      "Explanation": "George Clinton brought the 'Mothership' to arenas with wild theatrical funk.",
+      "Id": "MUS-137",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the leader and driving creative force behind Earth, Wind & Fire?",
+      "Options": [
+        "Maurice White",
+        "Verdine White",
+        "Philip Bailey",
+        "Al McKay"
+      ],
+      "Explanation": "Maurice White combined funk, soul, disco, and African kalimba into timeless anthems.",
+      "Id": "MUS-138",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which legendary artist was known as the 'Architect of Rock and Roll' shouting 'Tutti Frutti' and 'Good Golly, Miss Molly'?",
+      "Options": [
+        "Bo Diddley",
+        "Chuck Berry",
+        "Little Richard",
+        "Fats Domino"
+      ],
+      "Explanation": "Little Richard's explosive piano and vocal delivery shaped rock music forever.",
+      "Id": "MUS-139",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who wrote and recorded 'Johnny B. Goode' and established rock guitar's signature duck walk?",
+      "Options": [
+        "Bo Diddley",
+        "Link Wray",
+        "Chuck Berry",
+        "Carl Perkins"
+      ],
+      "Explanation": "Chuck Berry defined the guitar vocabulary and lyrical themes of rock and roll.",
+      "Id": "MUS-140",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which singer was nicknamed the 'Queen of Tejano Music' before her tragic death in 1995?",
+      "Options": [
+        "Jenni Rivera",
+        "Gloria Estefan",
+        "Selena Quintanilla",
+        "Rocío Dúrcal"
+      ],
+      "Explanation": "Selena broke records as the top Latin music artist in the United States.",
+      "Id": "MUS-141",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the lead vocalist and primary songwriter for The Velvet Underground?",
+      "Options": [
+        "John Cale",
+        "Sterling Morrison",
+        "Nico",
+        "Lou Reed"
+      ],
+      "Explanation": "Lou Reed later scored a major solo hit with 'Walk on the Wild Side'.",
+      "Id": "MUS-142",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which French-Canadian diva has won 5 Grammy Awards and recorded 'My Heart Will Go On'?",
+      "Options": [
+        "Alanis Morissette",
+        "Celine Dion",
+        "Shania Twain",
+        "Sarah McLachlan"
+      ],
+      "Explanation": "Celine Dion has sold over 200 million records worldwide.",
+      "Id": "MUS-143",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who fronted Sly and the Family Stone, pioneering psychedelic soul and funk at Woodstock?",
+      "Options": [
+        "Cynthia Robinson",
+        "Sly Stone",
+        "Larry Graham",
+        "Freddie Stone"
+      ],
+      "Explanation": "Sly Stone created multi-racial, co-ed funk masterpieces like 'Everyday People'.",
+      "Id": "MUS-144",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Latin rock guitar legend fused Afro-Cuban rhythms with rock on 'Oye Como Va' and 'Black Magic Woman'?",
+      "Options": [
+        "Al Di Meola",
+        "Paco de Lucía",
+        "Carlos Santana",
+        "Richie Valens"
+      ],
+      "Explanation": "Carlos Santana has captivated audiences with his singing guitar sustain since Woodstock.",
+      "Id": "MUS-145",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded the iconic American folk anthems 'This Land Is Your Land' and 'Pastures of Plenty'?",
+      "Options": [
+        "Lead Belly",
+        "Pete Seeger",
+        "Arlo Guthrie",
+        "Woody Guthrie"
+      ],
+      "Explanation": "Woody Guthrie had the words 'This Machine Kills Fascists' written on his acoustic guitar.",
+      "Id": "MUS-146",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Canadian singer-songwriter recorded 'Heart of Gold' and was a member of Buffalo Springfield and CSNY?",
+      "Options": [
+        "Neil Young",
+        "Bruce Cockburn",
+        "Gordon Lightfoot",
+        "Joni Mitchell"
+      ],
+      "Explanation": "Neil Young has maintained an uncompromising 6-decade rock and folk career.",
+      "Id": "MUS-147",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who composed and performed the landmark folk-rock albums 'Blue' and 'Court and Spark'?",
+      "Options": [
+        "Joan Baez",
+        "Joni Mitchell",
+        "Judy Collins",
+        "Carole King"
+      ],
+      "Explanation": "Joni Mitchell is revered for her open guitar tunings and sophisticated lyrics.",
+      "Id": "MUS-148",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which female singer-songwriter composed 'Tapestry' in 1971, one of the best-selling pop albums in history?",
+      "Options": [
+        "Linda Ronstadt",
+        "Carole King",
+        "Carly Simon",
+        "Laura Nyro"
+      ],
+      "Explanation": "Carole King had previously written dozens of Brill Building #1 hits in the 1960s.",
+      "Id": "MUS-149",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the dynamic frontman of AC/DC from 1974 until his death in 1980 who sang on 'Highway to Hell'?",
+      "Options": [
+        "Axl Rose",
+        "Bon Scott",
+        "Brian Johnson",
+        "Dave Evans"
+      ],
+      "Explanation": "Bon Scott's raspy charisma and witty lyrics defined AC/DC's rise to international fame.",
+      "Id": "MUS-150",
+      "Category": "Music Legends",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    }
+  ]
+}

@@ -1,4 +1,52 @@
-// Edited on Aug 27, 2026 @ 07:14:00 -> Document intelligent Name, Artist, and Song Title proper-casing engine
+// Edited on Aug 27, 2026 @ 15:09:45 -> Document Knockout Trivia Help system and 3-column multi-database settings
+Knockout Trivia Standalone Game Module (`KnockoutTrivia.exe`) - (August 2026)
+
+Section: Standalone Games & Pub Trivia / Knockout Trivia Showdown
+
+[Overview & UI System]
+1. Standalone WPF Game Project:
+   - Designed around a modern Fluent UI dark interface (`WPF-UI 4.3.0`) targeting .NET 10.
+   - Built specifically for fast-paced bar trivia, game nights, and competitive tournament rounds.
+   - Integrates with existing Lyracist.Trivia SQLite databases (`KoTrivia/Data/trivia.db`) and JSON pack files (`KoTrivia/Packs/*.json`).
+
+[Game Mechanics & Rules]
+1. Horizontal Scoreboard & Dynamic Strike Tinting:
+   - Player cards dynamically tint their background and borders according to strike accumulation:
+     * 0 Strikes: Emerald Green (#10B981) - Active & healthy.
+     * 1 Strike: Amber Yellow (#EAB308) - Caution status.
+     * 2 Strikes: Danger Orange (#F97316) - One strike away from elimination.
+     * 3 Strikes: Dimmed Knockout Red (#EF4444) - Knocked out of the round.
+2. Shield Tokens (0–3 Max):
+   - Shield tokens act as armor against incorrect answers. When an incorrect answer is submitted, 1 shield token is consumed instead of adding a strike.
+3. Streak Meters (5 Blocks):
+   - Every correct answer advances the player's 5-block streak meter.
+   - Filling all 5 blocks awards 1 shield token (up to the configurable maximum) and resets the streak counter.
+4. ⚡ Super Streak Rotary Target Wheel:
+   - Achieving a consecutive streak of 20 correct answers unlocks the Super Streak challenge.
+   - Pauses normal gameplay and opens a Scaryoke-style rotary wheel populated with slices for all active opponents currently holding shield tokens.
+   - Spinning the wheel randomly targets an opponent and strips away one of their shields (or awards +50 bonus points if no opponents have tokens).
+
+[DJ Operations, Help Guide & Settings]
+1. Split-Pane Help & Host Rules Guide (`HelpView.xaml`):
+   - 8 comprehensive topics covering Game Overview, Scoreboard Strike Tiers, Shield Defense, Streak Meters, Super Streak Wheel, DJ Live Operations, 16:9 Banners, and Database Selection.
+2. 3-Column Settings Layout (`SettingsView.xaml`):
+   - Column 1: Points per answer, question limits, auto/manual game mode, advance delay buffers, and audio/visual FX toggles.
+   - Column 2: Shield caps, streak requirements, and Super Streak thresholds.
+   - Column 3: Multi-Database and Pack selection ListBox (with individual checkboxes, 'All' and 'Clear' buttons, and live question count badges) alongside Multi-Monitor & TV Routing controls.
+3. 🔀 Automatic Question Randomization & Category Shuffling:
+   - Full Fisher-Yates randomization is applied across all loaded SQLite databases and category packs on load and reset, ensuring diverse category mixing rather than sequential insertion order.
+   - Includes on-demand DJ '🔀 Shuffle' button on the live Host console to reshuffle questions on the fly.
+4. 🖥️ Multi-Monitor Routing & Dedicated Audience Screen (`AudienceWindow.xaml`):
+   - Supports independent monitor assignment for DJ Host Console and Audience Big Screen (TV / Projector).
+   - Dedicated borderless 16:9 auto-scaling Audience Window displays questions, answers, rotary wheel, and scoreboards to the crowd while keeping DJ controls, scoring buttons, and configuration private.
+   - One-click titlebar toggle button `[ 📺 Audience Screen ]` for instant projector control.
+
+[Presentation & Banners]
+1. 16:9 Auto-Scaling Display:
+   - Logical 1920x1080 canvas auto-scales uniformly to fit any monitor aspect ratio with seamless letterboxing/pillarboxing.
+   - High-contrast bar presentation readable from a distance across the venue.
+   - Auto-generates game-show screens: Intro Screen, Round Intermission, Champion Celebration, Knockout Elimination, and Super Streak Alerts featuring the official Knockout Trivia branding (`kotrv_logo.png` / `kotrv_logo.webp`).
+
 Intelligent Name & Artist Capitalization Engine (`All Applications`) - (August 2026)
 
 Section: Performance & Rotation Operations / Performer & Song Data Entry (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `LyracistDbEditor`, `ScaryokeWheel`)

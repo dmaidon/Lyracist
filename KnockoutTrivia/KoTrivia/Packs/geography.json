@@ -1,0 +1,2408 @@
+{
+  "PackId": "geography",
+  "Title": "World Geography & Landmarks",
+  "Category": "Geography",
+  "Description": "150 curated questions covering Geography.",
+  "Questions": [
+    {
+      "Id": "GEO-001",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the largest ocean on Earth?",
+      "Options": [
+        "Arctic Ocean",
+        "Atlantic Ocean",
+        "Pacific Ocean",
+        "Indian Ocean"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Pacific Ocean covers more than 30% of the Earth's surface area.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-002",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the highest mountain peak in the world?",
+      "Options": [
+        "Kangchenjunga",
+        "Mount Everest",
+        "K2",
+        "Mount Kilimanjaro"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Mount Everest stands at 8,848.86 meters (29,031.7 ft) in the Himalayas.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-003",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the largest country in the world by land area?",
+      "Options": [
+        "China",
+        "Canada",
+        "United States",
+        "Russia"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Russia spans over 17 million square kilometers across eleven time zones.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-004",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which river flows through the Grand Canyon in Arizona?",
+      "Options": [
+        "Columbia River",
+        "Colorado River",
+        "Mississippi River",
+        "Rio Grande"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Colorado River carved the Grand Canyon over millions of years.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-005",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the smallest country in the world by area and population?",
+      "Options": [
+        "San Marino",
+        "Vatican City",
+        "Monaco",
+        "Liechtenstein"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Vatican City covers just 0.49 square kilometers inside Rome, Italy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-006",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "On which continent is the Sahara Desert located?",
+      "Options": [
+        "Africa",
+        "South America",
+        "Asia",
+        "Australia"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Sahara covers most of North Africa, spanning over 9 million square kilometers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-007",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the longest river in South America?",
+      "Options": [
+        "Orinoco River",
+        "Paraná River",
+        "Amazon River",
+        "Magdalena River"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Amazon River is the largest river by water discharge volume in the world.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-008",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which European country is shaped like a high-heeled boot?",
+      "Options": [
+        "Spain",
+        "Greece",
+        "Portugal",
+        "Italy"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Italy's peninsula extends into the Mediterranean Sea in the shape of a boot.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-009",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What country has the greatest number of natural lakes in the world?",
+      "Options": [
+        "Canada",
+        "Finland",
+        "Russia",
+        "Sweden"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Canada contains over 60% of all natural lakes on Earth.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-010",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital city of France?",
+      "Options": [
+        "Marseille",
+        "Nice",
+        "Paris",
+        "Lyon"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Paris is the capital and most populous city of France.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-011",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which canal connects the Atlantic Ocean and the Pacific Ocean?",
+      "Options": [
+        "Erie Canal",
+        "Panama Canal",
+        "Kiel Canal",
+        "Suez Canal"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Panama Canal opened in 1914 across the Isthmus of Panama.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-012",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the largest island in the world?",
+      "Options": [
+        "New Guinea",
+        "Greenland",
+        "Borneo",
+        "Madagascar"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Greenland is an autonomous territory of Denmark and the world's largest non-continental island.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-013",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country is home to the ancient ruins of Machu Picchu?",
+      "Options": [
+        "Ecuador",
+        "Bolivia",
+        "Peru",
+        "Chile"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Machu Picchu is a 15th-century Inca citadel located in the Andes of Peru.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-014",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the highest mountain peak in Africa?",
+      "Options": [
+        "Mount Kilimanjaro",
+        "Mount Stanley",
+        "Atlas Mountains",
+        "Mount Kenya"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Mount Kilimanjaro is a dormant volcano in Tanzania rising 5,895 meters.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-015",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Great Lake is the largest by surface area?",
+      "Options": [
+        "Lake Michigan",
+        "Lake Erie",
+        "Lake Huron",
+        "Lake Superior"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Lake Superior is the largest freshwater lake in the world by surface area.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-016",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the longest continental mountain range in the world?",
+      "Options": [
+        "The Himalayas",
+        "The Rocky Mountains",
+        "The Alps",
+        "The Andes"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Andes stretch over 7,000 kilometers along the western coast of South America.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-017",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In which country is the famous Taj Mahal located?",
+      "Options": [
+        "India",
+        "Bangladesh",
+        "Nepal",
+        "Pakistan"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Taj Mahal is an ivory-white marble mausoleum in Agra, India.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-018",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which two countries share the longest international land border in the world?",
+      "Options": [
+        "United States and Canada",
+        "Russia and China",
+        "Argentina and Chile",
+        "Brazil and Bolivia"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The US-Canada border stretches 8,891 kilometers (5,525 miles).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-019",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of the United Kingdom?",
+      "Options": [
+        "London",
+        "Belfast",
+        "Edinburgh",
+        "Cardiff"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "London is situated on the River Thames in south-east England.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-020",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the driest non-polar desert on Earth?",
+      "Options": [
+        "Kalahari Desert",
+        "Atacama Desert",
+        "Sahara Desert",
+        "Gobi Desert"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Atacama Desert in Chile receives virtually no rainfall for decades at a time.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-021",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the deepest known point in Earth's oceans?",
+      "Options": [
+        "Tonga Trench",
+        "Puerto Rico Trench",
+        "Challenger Deep (Mariana Trench)",
+        "Java Trench"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Challenger Deep reaches a depth of approximately 10,994 meters (36,070 ft).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-022",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which European capital city is built on 14 islands connected by over 50 bridges?",
+      "Options": [
+        "Venice",
+        "Stockholm",
+        "Copenhagen",
+        "Amsterdam"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Stockholm, Sweden is often called the 'Venice of the North'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-023",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What strait separates the continent of Africa from Europe?",
+      "Options": [
+        "Bosphorus Strait",
+        "Bab-el-Mandeb",
+        "Strait of Hormuz",
+        "Strait of Gibraltar"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Strait of Gibraltar connects the Atlantic Ocean to the Mediterranean Sea.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-024",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country has the most time zones in total, including its overseas territories?",
+      "Options": [
+        "France (12 time zones)",
+        "United States (11 time zones)",
+        "United Kingdom (9 time zones)",
+        "Russia (11 time zones)"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "France spans 12 time zones due to its overseas departments and territories.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-025",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the largest landlocked country in the world by area?",
+      "Options": [
+        "Chad",
+        "Bolivia",
+        "Kazakhstan",
+        "Mongolia"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Kazakhstan covers 2.7 million square kilometers in Central Asia.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-026",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What river flows through 10 countries in Central and Eastern Europe, emptying into the Black Sea?",
+      "Options": [
+        "Danube River",
+        "Volga River",
+        "Rhine River",
+        "Elbe River"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Danube passes through Germany, Austria, Slovakia, Hungary, Croatia, Serbia, Bulgaria, Romania, Moldova, and Ukraine.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-027",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which US state has the longest coastline?",
+      "Options": [
+        "California",
+        "Florida",
+        "Alaska",
+        "Hawaii"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Alaska has over 6,600 miles of coastline, more than all other US states combined.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-028",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the highest uninterrupted waterfall in the world?",
+      "Options": [
+        "Iguazu Falls",
+        "Victoria Falls",
+        "Niagara Falls",
+        "Angel Falls (Venezuela)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Angel Falls plunges 979 meters (3,212 ft) from the Auyán-tepui mountain.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-029",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which African lake is the second-largest freshwater lake by surface area in the world?",
+      "Options": [
+        "Lake Victoria",
+        "Lake Chad",
+        "Lake Tanganyika",
+        "Lake Malawi"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Lake Victoria spans Uganda, Kenya, and Tanzania.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-030",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the official currency of Japan?",
+      "Options": [
+        "Yuan",
+        "Ringgit",
+        "Yen",
+        "Won"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Japanese Yen is the third most traded currency in the foreign exchange market.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-031",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which island nation in the Indian Ocean is the fourth-largest island on Earth?",
+      "Options": [
+        "Sri Lanka",
+        "Madagascar",
+        "Mauritius",
+        "Seychelles"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Madagascar is renowned for its high percentage of endemic wildlife like lemurs.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-032",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What sea is bordered by Jordan, Israel, and Palestine and has an extremely high salt concentration?",
+      "Options": [
+        "The Dead Sea",
+        "The Red Sea",
+        "The Black Sea",
+        "The Caspian Sea"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Dead Sea's hypersalinity allows people to effortlessly float on its surface.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-033",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country features the world's longest coastline?",
+      "Options": [
+        "Norway",
+        "Indonesia",
+        "Canada",
+        "Russia"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Canada's coastline measures over 243,000 kilometers including its arctic islands.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-034",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Brazil?",
+      "Options": [
+        "Salvador",
+        "Brasília",
+        "São Paulo",
+        "Rio de Janeiro"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Brasília was planned and built in 1960 to move the capital inland.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-035",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which mountain range separates Europe from Asia?",
+      "Options": [
+        "Scandinavian Mountains",
+        "Caucasus Mountains",
+        "Carpathian Mountains",
+        "Ural Mountains"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Ural Mountains in Russia form the conventional boundary between Europe and Asia.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-036",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Canada?",
+      "Options": [
+        "Vancouver",
+        "Toronto",
+        "Ottawa",
+        "Montreal"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Queen Victoria chose Ottawa as the capital of Canada in 1857.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-037",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Southeast Asian country was formerly known as Siam?",
+      "Options": [
+        "Myanmar",
+        "Cambodia",
+        "Thailand",
+        "Laos"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Siam officially changed its name to Thailand in 1939.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-038",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country spans both Europe and Asia with the city of Istanbul bridging both continents?",
+      "Options": [
+        "Russia",
+        "Azerbaijan",
+        "Georgia",
+        "Turkey"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Istanbul is the only metropolis in the world located on two continents.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-039",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the largest island in the Mediterranean Sea?",
+      "Options": [
+        "Sardinia",
+        "Cyprus",
+        "Corsica",
+        "Sicily"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Sicily covers 25,711 square kilometers at the toe of Italy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-040",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of New Zealand?",
+      "Options": [
+        "Christchurch",
+        "Wellington",
+        "Hamilton",
+        "Auckland"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Wellington is the southernmost capital city in the world.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-041",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the only sea on Earth that does not have any land coastline?",
+      "Options": [
+        "Coral Sea",
+        "Sargasso Sea",
+        "Bering Sea",
+        "Weddell Sea"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Sargasso Sea in the North Atlantic is defined entirely by ocean currents.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-042",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the world's deepest lake, containing 20% of Earth's unfrozen surface freshwater?",
+      "Options": [
+        "Lake Tanganyika",
+        "Lake Baikal (Russia)",
+        "Caspian Sea",
+        "Lake Superior"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Lake Baikal reaches a maximum depth of 1,642 meters (5,387 ft) in Siberia.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-043",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country is completely surrounded by South Africa?",
+      "Options": [
+        "Eswatini",
+        "Botswana",
+        "Namibia",
+        "Lesotho"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Lesotho is an enclaved sovereign kingdom situated entirely inside South Africa.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-044",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What island group off the coast of Argentina was the subject of a 1982 war with the UK?",
+      "Options": [
+        "South Georgia",
+        "Falkland Islands (Islas Malvinas)",
+        "Tierra del Fuego",
+        "Galapagos Islands"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Falklands War lasted 74 days between Argentina and the United Kingdom.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-045",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital city of Australia?",
+      "Options": [
+        "Adelaide",
+        "Melbourne",
+        "Sydney",
+        "Canberra"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Canberra was founded in 1913 as the designated federal capital.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-046",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country has the most natural volcanoes in the world?",
+      "Options": [
+        "United States",
+        "Indonesia",
+        "Chile",
+        "Japan"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Indonesia sits along the Pacific Ring of Fire with over 130 active volcanoes.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-047",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the northernmost permanent settlement in the world with a population over 1,000?",
+      "Options": [
+        "Hammerfest, Norway",
+        "Utqiagvik, Alaska",
+        "Longyearbyen, Svalbard (Norway)",
+        "Alert, Canada"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Longyearbyen is located at 78 degrees North on the Arctic archipelago of Svalbard.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-048",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the narrow strip of land in Central America that connects North and South America?",
+      "Options": [
+        "Isthmus of Panama",
+        "Isthmus of Tehuantepec",
+        "Isthmus of Kra",
+        "Isthmus of Corinth"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Isthmus of Panama formed approximately 3 million years ago.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-049",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country has the highest average elevation in the world?",
+      "Options": [
+        "Tajikistan",
+        "Lesotho",
+        "Bhutan",
+        "Nepal"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Bhutan's average elevation is approximately 3,280 meters (10,760 ft) above sea level.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-050",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What African river crosses the Equator twice along its course?",
+      "Options": [
+        "Zambezi River",
+        "Niger River",
+        "Congo River",
+        "Nile River"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Congo River is the deepest river in the world and crosses the equator twice.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-051",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the largest hot desert in the world?",
+      "Options": [
+        "Sahara Desert",
+        "Arabian Desert",
+        "Kalahari Desert",
+        "Gobi Desert"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Sahara Desert is the largest subtropical hot desert on the planet.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-052",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In which country is Mount Fuji located?",
+      "Options": [
+        "China",
+        "South Korea",
+        "Japan",
+        "Philippines"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Mount Fuji is an active stratovolcano and the highest peak in Japan at 3,776 meters.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-053",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What ocean lies between North America and Europe?",
+      "Options": [
+        "Arctic Ocean",
+        "Pacific Ocean",
+        "Indian Ocean",
+        "Atlantic Ocean"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Atlantic Ocean separates North and South America from Europe and Africa.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-054",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Germany?",
+      "Options": [
+        "Munich",
+        "Hamburg",
+        "Frankfurt",
+        "Berlin"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Berlin was reunified as the capital of Germany in 1990 following the fall of the Berlin Wall.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-055",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country is famous for the ancient Pyramids of Giza?",
+      "Options": [
+        "Mexico",
+        "Egypt",
+        "Jordan",
+        "Sudan"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Great Pyramid of Giza is the oldest of the Seven Wonders of the Ancient World.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-056",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which island state is the smallest US state by land area?",
+      "Options": [
+        "Hawaii",
+        "Rhode Island",
+        "Connecticut",
+        "Delaware"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Rhode Island spans approximately 1,214 square miles.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-057",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What river flows through London, England?",
+      "Options": [
+        "River Thames",
+        "River Rhine",
+        "River Tiber",
+        "River Seine"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The River Thames flows 215 miles through southern England.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-058",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Italy?",
+      "Options": [
+        "Naples",
+        "Milan",
+        "Florence",
+        "Rome"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Rome, known as the 'Eternal City', has been a major world capital for over two millennia.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-059",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What body of water lies between the east coast of Florida and the Bahamas?",
+      "Options": [
+        "Gulf of Mexico",
+        "Chesapeake Bay",
+        "Caribbean Sea",
+        "Straits of Florida"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Straits of Florida connect the Gulf of Mexico to the Atlantic Ocean.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-060",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which continent has the largest human population?",
+      "Options": [
+        "North America",
+        "Africa",
+        "Europe",
+        "Asia"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Asia is home to approximately 4.7 billion people, over 60% of the world total.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-061",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital city of Turkey?",
+      "Options": [
+        "Antalya",
+        "Istanbul",
+        "Izmir",
+        "Ankara"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ankara became the capital of the Republic of Turkey in 1923, replacing Istanbul.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-062",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which European country is famous for its fjords, like Geirangerfjord?",
+      "Options": [
+        "Norway",
+        "Sweden",
+        "Iceland",
+        "Finland"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Norway's coastline is carved with thousands of deep glacial fjords.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-063",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the largest lake located entirely within the borders of the United States?",
+      "Options": [
+        "Lake Michigan",
+        "Great Salt Lake",
+        "Lake Okeechobee",
+        "Lake Superior"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Lake Michigan is the only Great Lake located wholly within US territory.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-064",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Egypt?",
+      "Options": [
+        "Alexandria",
+        "Luxor",
+        "Giza",
+        "Cairo"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Cairo is the largest city in the Arab world and sits on the Nile River.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-065",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country has three official capital cities (Pretoria, Cape Town, and Bloemfontein)?",
+      "Options": [
+        "South Africa",
+        "Malaysia",
+        "Bolivia",
+        "Chile"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "South Africa divides executive, legislative, and judicial branches among three cities.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-066",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which mountain range contains the famous Matterhorn peak on the Swiss-Italian border?",
+      "Options": [
+        "The Pyrenees",
+        "The Apennines",
+        "The Dolomites",
+        "The Alps"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Matterhorn is an iconic pyramid-shaped summit rising 4,478 meters in the Alps.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-067",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What river flows through Paris, France?",
+      "Options": [
+        "Loire",
+        "Rhône",
+        "Garonne",
+        "Seine"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Seine flows 483 miles through northern France and under 37 bridges in Paris.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-068",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the largest peninsula in the world?",
+      "Options": [
+        "Iberian Peninsula",
+        "Arabian Peninsula",
+        "Scandinavian Peninsula",
+        "Balkan Peninsula"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Arabian Peninsula spans approximately 3.2 million square kilometers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-069",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Spain?",
+      "Options": [
+        "Seville",
+        "Madrid",
+        "Barcelona",
+        "Valencia"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Madrid is located in the center of the Iberian Peninsula.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-070",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country is home to the famous Cliffs of Moher?",
+      "Options": [
+        "Wales",
+        "Ireland",
+        "Scotland",
+        "England"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Cliffs of Moher tower over the Atlantic Ocean in County Clare, Ireland.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-071",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the active volcano on the Italian island of Sicily?",
+      "Options": [
+        "Stromboli",
+        "Mount Etna",
+        "Mount Vesuvius",
+        "Vulcano"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Mount Etna is one of the most active volcanoes in the world.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-072",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the only capital city in the world that borders two separate foreign countries?",
+      "Options": [
+        "Budapest (Hungary)",
+        "Vienna (Austria)",
+        "Vientiane (Laos)",
+        "Bratislava (Slovakia)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Bratislava borders both Austria and Hungary.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-073",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the desert in northern China and southern Mongolia?",
+      "Options": [
+        "Thar Desert",
+        "Gobi Desert",
+        "Karakum Desert",
+        "Taklamakan Desert"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Gobi is a cold desert subject to rapid temperature swings.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-074",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What body of water separates Saudi Arabia from Iran?",
+      "Options": [
+        "Red Sea",
+        "Persian Gulf",
+        "Gulf of Oman",
+        "Gulf of Aden"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Persian Gulf is a vital waterway for global petroleum transport.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-075",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the strait separating the Russian Far East and Alaska?",
+      "Options": [
+        "Davis Strait",
+        "Bass Strait",
+        "Bering Strait",
+        "Cook Strait"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Bering Strait connects the Arctic Ocean with the Bering Sea.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-076",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country in South America has two official capital cities: Sucre and La Paz?",
+      "Options": [
+        "Bolivia",
+        "Guyana",
+        "Paraguay",
+        "Ecuador"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sucre is the constitutional capital and La Paz is the seat of government.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-077",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the largest island in the Caribbean by land area?",
+      "Options": [
+        "Cuba",
+        "Hispaniola",
+        "Puerto Rico",
+        "Jamaica"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Cuba covers 109,884 square kilometers in the northern Caribbean Sea.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-078",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country has the most natural islands of any nation on Earth?",
+      "Options": [
+        "Norway",
+        "Sweden (approx 267,570)",
+        "Finland",
+        "Canada"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Sweden leads the world with over 267,000 islands along its coasts and lakes.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-079",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the point in the Pacific Ocean furthest from any land on Earth?",
+      "Options": [
+        "Bouvet Island",
+        "Null Island",
+        "Tristan da Cunha",
+        "Point Nemo"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Point Nemo is the oceanic pole of inaccessibility, 1,670 miles from the nearest land.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-080",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the official language spoken in Suriname, South America?",
+      "Options": [
+        "Dutch",
+        "Spanish",
+        "Portuguese",
+        "French"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Suriname was a former colony of the Netherlands and retains Dutch as its official tongue.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-081",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Mexico?",
+      "Options": [
+        "Monterrey",
+        "Mexico City",
+        "Cancun",
+        "Guadalajara"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Mexico City is built on the ruins of the ancient Aztec capital Tenochtitlan.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-082",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What ocean is on the West Coast of the United States?",
+      "Options": [
+        "Pacific Ocean",
+        "Atlantic Ocean",
+        "Arctic Ocean",
+        "Indian Ocean"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Pacific Ocean borders California, Oregon, Washington, Hawaii, and Alaska.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-083",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In which country is the famous Great Barrier Reef located?",
+      "Options": [
+        "Fiji",
+        "New Zealand",
+        "Australia",
+        "Indonesia"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Great Barrier Reef off Queensland is the largest coral reef system on Earth.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-084",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Greece?",
+      "Options": [
+        "Thessaloniki",
+        "Patras",
+        "Athens",
+        "Heraklion"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Athens is one of the world's oldest named cities, with a recorded history of 3,400+ years.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-085",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country has the city of Dublin as its capital?",
+      "Options": [
+        "Ireland",
+        "Iceland",
+        "Northern Ireland",
+        "Scotland"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Dublin is the historic capital on the east coast of Ireland.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-086",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What mountain range runs along the border between France and Spain?",
+      "Options": [
+        "The Pyrenees",
+        "The Apennines",
+        "The Alps",
+        "The Carpathians"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Pyrenees mountains stretch 430 kilometers from the Atlantic to the Mediterranean.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-087",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Argentina?",
+      "Options": [
+        "Cordoba",
+        "Mendoza",
+        "Buenos Aires",
+        "Rosario"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Buenos Aires is located on the western shore of the Rio de la Plata estuary.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-088",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which African nation was formerly known as Abyssinia?",
+      "Options": [
+        "Sudan",
+        "Eritrea",
+        "Somalia",
+        "Ethiopia"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ethiopia is one of the oldest independent nations in the world.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-089",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What sea borders northern Russia and northern Europe?",
+      "Options": [
+        "North Sea",
+        "Barents Sea",
+        "Baltic Sea",
+        "Black Sea"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Barents Sea is a marginal sea of the Arctic Ocean.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-090",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Iceland?",
+      "Options": [
+        "Akureyri",
+        "Hafnarfjordur",
+        "Reykjavik",
+        "Keflavik"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Reykjavik is the northernmost capital of a sovereign state in the world.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-091",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the world's highest navigable lake at 3,812 meters above sea level?",
+      "Options": [
+        "Lake Titicaca",
+        "Lake Geneva",
+        "Lake Victoria",
+        "Lake Tahoe"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Lake Titicaca straddles the high Andes border between Peru and Bolivia.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-092",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Switzerland?",
+      "Options": [
+        "Zurich",
+        "Bern (de facto Federal City)",
+        "Basel",
+        "Geneva"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Switzerland does not have a constitutional capital; Bern serves as the federal city.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-093",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which sea lies between Greece and Turkey?",
+      "Options": [
+        "Ionian Sea",
+        "Adriatic Sea",
+        "Tyrrhenian Sea",
+        "Aegean Sea"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Aegean Sea contains thousands of Greek islands.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-094",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the peninsula that contains Spain and Portugal?",
+      "Options": [
+        "Balkan Peninsula",
+        "Iberian Peninsula",
+        "Jutland Peninsula",
+        "Peloponnese Peninsula"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Iberian Peninsula is situated in the southwest corner of Europe.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-095",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country is home to the ancient Nabataean rock city of Petra?",
+      "Options": [
+        "Israel",
+        "Syria",
+        "Lebanon",
+        "Jordan"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Petra was carved directly into pink sandstone cliffs in southern Jordan.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-096",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of China?",
+      "Options": [
+        "Beijing",
+        "Guangzhou",
+        "Hong Kong",
+        "Shanghai"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Beijing is the political and cultural capital of the People's Republic of China.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-097",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which European country is known for its canals, tulips, and windmills?",
+      "Options": [
+        "Austria",
+        "Belgium",
+        "Denmark",
+        "The Netherlands"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Netherlands is famous for its low-lying polders and iconic windmills.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-098",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the capital of Poland?",
+      "Options": [
+        "Wroclaw",
+        "Krakow",
+        "Gdansk",
+        "Warsaw"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Warsaw is situated on the Vistula River in east-central Poland.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-099",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the southernmost tip of South America?",
+      "Options": [
+        "Cape Horn",
+        "Cape of Good Hope",
+        "Cape Leeuwin",
+        "Cape Hatteras"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Cape Horn marks the northern boundary of the stormy Drake Passage.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "GEO-100",
+      "Category": "Geography",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which ocean contains the volcanic island of Saint Helena where Napoleon was exiled?",
+      "Options": [
+        "Atlantic Ocean",
+        "Pacific Ocean",
+        "Southern Ocean",
+        "Indian Ocean"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Saint Helena is an isolated British Overseas Territory in the South Atlantic Ocean.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the longest river in the world, flowing through northeastern Africa into the Mediterranean Sea?",
+      "Options": [
+        "The Mississippi River",
+        "The Amazon River",
+        "The Nile River",
+        "The Yangtze River"
+      ],
+      "Explanation": "The Nile River stretches approximately 4,132 miles (6,650 km) through 11 countries.",
+      "Id": "GEO-101",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country has the most natural lakes in the world, with over 60% of all lakes on Earth?",
+      "Options": [
+        "United States",
+        "Russia",
+        "Canada",
+        "Finland"
+      ],
+      "Explanation": "Canada contains an estimated 2 million lakes, covering roughly 9% of its total land area.",
+      "Id": "GEO-102",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the highest mountain peak in the world above sea level, located in the Himalayas?",
+      "Options": [
+        "Lhotse",
+        "Kangchenjunga",
+        "K2",
+        "Mount Everest (8,848 m)"
+      ],
+      "Explanation": "Mount Everest straddles the border between Nepal and Tibet (China).",
+      "Id": "GEO-103",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which continent is home to the largest hot desert on Earth, the Sahara Desert?",
+      "Options": [
+        "Africa",
+        "Asia",
+        "Australia",
+        "South America"
+      ],
+      "Explanation": "The Sahara Desert covers over 3.5 million square miles across North Africa.",
+      "Id": "GEO-104",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the smallest independent country in the world by both area and population?",
+      "Options": [
+        "Vatican City",
+        "San Marino",
+        "Nauru",
+        "Monaco"
+      ],
+      "Explanation": "Vatican City is an enclaved city-state within Rome, Italy, covering just 121 acres.",
+      "Id": "GEO-105",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which body of water separates the United Kingdom from mainland Europe at its narrowest point?",
+      "Options": [
+        "The Bay of Biscay",
+        "The North Sea",
+        "The English Channel (Strait of Dover)",
+        "The Irish Sea"
+      ],
+      "Explanation": "The Strait of Dover is just 21 miles (34 km) wide between Dover and Calais.",
+      "Id": "GEO-106",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital city of Australia, chosen as a compromise between Sydney and Melbourne?",
+      "Options": [
+        "Melbourne",
+        "Canberra",
+        "Brisbane",
+        "Sydney"
+      ],
+      "Explanation": "Canberra was planned and established as Australia's federal capital in 1913.",
+      "Id": "GEO-107",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which South American country has the longest coastline along the Pacific Ocean and is the narrowest country in the world?",
+      "Options": [
+        "Chile",
+        "Argentina",
+        "Ecuador",
+        "Peru"
+      ],
+      "Explanation": "Chile averages only 110 miles wide but stretches 2,653 miles from north to south.",
+      "Id": "GEO-108",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the largest island in the world that is not considered a continent?",
+      "Options": [
+        "New Guinea",
+        "Greenland",
+        "Madagascar",
+        "Borneo"
+      ],
+      "Explanation": "Greenland covers over 836,000 square miles as an autonomous territory of Denmark.",
+      "Id": "GEO-109",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which ocean is the largest and deepest on Earth, covering more surface area than all land combined?",
+      "Options": [
+        "Southern Ocean",
+        "Indian Ocean",
+        "Pacific Ocean",
+        "Atlantic Ocean"
+      ],
+      "Explanation": "The Pacific Ocean contains the Mariana Trench and Challenger Deep, the lowest point on Earth.",
+      "Id": "GEO-110",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What African waterfall on the Zambezi River is locally called 'Mosi-oa-Tunya' ('The Smoke That Thunders')?",
+      "Options": [
+        "Angel Falls",
+        "Niagara Falls",
+        "Victoria Falls",
+        "Iguazu Falls"
+      ],
+      "Explanation": "Victoria Falls spans the border between Zambia and Zimbabwe.",
+      "Id": "GEO-111",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which European country is shaped like a high-heeled boot kicking the island of Sicily?",
+      "Options": [
+        "Greece",
+        "Portugal",
+        "Italy",
+        "Spain"
+      ],
+      "Explanation": "The Italian Peninsula extends into the central Mediterranean Sea.",
+      "Id": "GEO-112",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the deepest lake in the world, containing roughly 20% of Earth's unfrozen surface freshwater?",
+      "Options": [
+        "Lake Superior",
+        "Lake Tanganyika",
+        "Lake Victoria",
+        "Lake Baikal (Russia)"
+      ],
+      "Explanation": "Lake Baikal in Siberia reaches a maximum depth of 5,387 feet (1,642 meters).",
+      "Id": "GEO-113",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which mountain range separates Europe from Asia in western Russia?",
+      "Options": [
+        "The Alps",
+        "The Caucasus Mountains",
+        "The Ural Mountains",
+        "The Carpathians"
+      ],
+      "Explanation": "The Urals form the traditional geographical boundary between European and Asian Russia.",
+      "Id": "GEO-114",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the largest country in South America by both land area and population?",
+      "Options": [
+        "Argentina",
+        "Peru",
+        "Brazil",
+        "Colombia"
+      ],
+      "Explanation": "Brazil occupies almost half of the South American continent and borders every South American nation except Ecuador and Chile.",
+      "Id": "GEO-115",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which strait connects the Atlantic Ocean to the Mediterranean Sea between Spain and Morocco?",
+      "Options": [
+        "Bosphorus Strait",
+        "Strait of Hormuz",
+        "Strait of Malacca",
+        "Strait of Gibraltar"
+      ],
+      "Explanation": "The Strait of Gibraltar is just 8.9 miles (14.3 km) wide at its narrowest point.",
+      "Id": "GEO-116",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the world's highest uninterrupted waterfall, dropping 3,212 feet (979 m) in Venezuela?",
+      "Options": [
+        "Niagara Falls",
+        "Tugela Falls",
+        "Yosemite Falls",
+        "Angel Falls"
+      ],
+      "Explanation": "Angel Falls plunges from the Auyán-tepui mountain in Canaima National Park.",
+      "Id": "GEO-117",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which sea is located between Jordan and Israel and is famous for high salinity that allows swimmers to float effortlessly?",
+      "Options": [
+        "The Caspian Sea",
+        "The Black Sea",
+        "The Dead Sea",
+        "The Red Sea"
+      ],
+      "Explanation": "The Dead Sea's shore is the lowest land-based elevation on Earth at 1,410 feet below sea level.",
+      "Id": "GEO-118",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the only continent on Earth without any permanent human population or native reptiles?",
+      "Options": [
+        "Arctic",
+        "Antarctica",
+        "Greenland",
+        "Australia"
+      ],
+      "Explanation": "Antarctica is Earth's coldest, windiest, and driest continent, covered by ice sheets.",
+      "Id": "GEO-119",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Japan, known as the most populous metropolitan area in the world?",
+      "Options": [
+        "Tokyo",
+        "Kyoto",
+        "Osaka",
+        "Yokohama"
+      ],
+      "Explanation": "Greater Tokyo is home to over 37 million people.",
+      "Id": "GEO-121",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which river flows through the Grand Canyon in Arizona, carving the massive gorge over millions of years?",
+      "Options": [
+        "The Rio Grande",
+        "The Colorado River",
+        "The Snake River",
+        "The Columbia River"
+      ],
+      "Explanation": "The Colorado River carved the 277-mile-long Grand Canyon.",
+      "Id": "GEO-122",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country has the most natural islands in the world, with over 267,000 islands?",
+      "Options": [
+        "Indonesia",
+        "Norway",
+        "Finland",
+        "Sweden"
+      ],
+      "Explanation": "Sweden tops the global island count, followed by Norway and Finland.",
+      "Id": "GEO-123",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Egypt, located near the Great Pyramids of Giza on the Nile River?",
+      "Options": [
+        "Luxor",
+        "Cairo",
+        "Giza",
+        "Alexandria"
+      ],
+      "Explanation": "Cairo is the largest city in the Arab world and the Middle East.",
+      "Id": "GEO-124",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which European nation is divided into 26 sovereign cantons and has four official languages?",
+      "Options": [
+        "Switzerland",
+        "Belgium",
+        "Austria",
+        "Luxembourg"
+      ],
+      "Explanation": "Switzerland's official languages are German, French, Italian, and Romansh.",
+      "Id": "GEO-125",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the highest active volcano in Europe, located on the island of Sicily?",
+      "Options": [
+        "Mount Etna",
+        "Santorini",
+        "Mount Vesuvius",
+        "Stromboli"
+      ],
+      "Explanation": "Mount Etna is one of the world's most active volcanoes with almost continuous eruptions.",
+      "Id": "GEO-126",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which desert is the driest non-polar desert in the world, located in northern Chile?",
+      "Options": [
+        "Mojave Desert",
+        "Kalahari Desert",
+        "Atacama Desert",
+        "Gobi Desert"
+      ],
+      "Explanation": "Some weather stations in the Atacama have never recorded a single drop of rain.",
+      "Id": "GEO-127",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital and largest city of Argentina, known as the 'Paris of South America'?",
+      "Options": [
+        "Buenos Aires",
+        "Córdoba",
+        "Rosario",
+        "Mendoza"
+      ],
+      "Explanation": "Buenos Aires is located on the western shore of the Río de la Plata estuary.",
+      "Id": "GEO-128",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country is completely surrounded by South Africa as an enclaved sovereign kingdom?",
+      "Options": [
+        "Namibia",
+        "Eswatini (Swaziland)",
+        "Lesotho",
+        "Botswana"
+      ],
+      "Explanation": "The Kingdom of Lesotho is an independent high-altitude enclave within South Africa.",
+      "Id": "GEO-129",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What major river flows through London, England, emptying into the North Sea?",
+      "Options": [
+        "The River Mersey",
+        "The River Thames",
+        "The River Severn",
+        "The River Clyde"
+      ],
+      "Explanation": "The River Thames flows 215 miles through southern England.",
+      "Id": "GEO-130",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Asian country was formerly known as Siam until 1939?",
+      "Options": [
+        "Laos",
+        "Myanmar (Burma)",
+        "Cambodia",
+        "Thailand"
+      ],
+      "Explanation": "Thailand was the only Southeast Asian nation never colonized by a European power.",
+      "Id": "GEO-131",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the largest enclosed inland body of water on Earth by surface area?",
+      "Options": [
+        "The Black Sea",
+        "Lake Superior",
+        "The Caspian Sea",
+        "Lake Victoria"
+      ],
+      "Explanation": "The Caspian Sea is classified as both the world's largest lake and a full inland sea.",
+      "Id": "GEO-132",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Canadian province is the only one with French as its sole official provincial language?",
+      "Options": [
+        "Nova Scotia",
+        "Ontario",
+        "New Brunswick",
+        "Quebec"
+      ],
+      "Explanation": "Quebec is Canada's largest province by area and the second most populous.",
+      "Id": "GEO-133",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital city of Kenya, known as the 'Green City in the Sun'?",
+      "Options": [
+        "Nakuru",
+        "Mombasa",
+        "Kisumu",
+        "Nairobi"
+      ],
+      "Explanation": "Nairobi is home to Nairobi National Park, a wildlife park directly bordering the city.",
+      "Id": "GEO-134",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which US state has the longest coastline, spanning over 6,600 miles of coastline?",
+      "Options": [
+        "California",
+        "Hawaii",
+        "Florida",
+        "Alaska"
+      ],
+      "Explanation": "Alaska's coastline is longer than all other US states' coastlines combined.",
+      "Id": "GEO-135",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the largest archipelago nation in the world, consisting of over 17,000 islands across the equator?",
+      "Options": [
+        "Indonesia",
+        "Philippines",
+        "Maldives",
+        "Japan"
+      ],
+      "Explanation": "Indonesia includes major islands Java, Sumatra, Borneo (Kalimantan), Sulawesi, and New Guinea (Papua).",
+      "Id": "GEO-136",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which mountain range extends 4,500 miles along the western coast of South America?",
+      "Options": [
+        "The Rockies",
+        "The Andes Mountains",
+        "The Alps",
+        "The Cascades"
+      ],
+      "Explanation": "The Andes is the longest continental mountain range in the world.",
+      "Id": "GEO-137",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Spain, located in the geographical center of the Iberian Peninsula?",
+      "Options": [
+        "Seville",
+        "Barcelona",
+        "Madrid",
+        "Valencia"
+      ],
+      "Explanation": "Madrid has been the capital of Spain since King Philip II established his court there in 1561.",
+      "Id": "GEO-138",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which river forms a large section of the international border between the United States and Mexico?",
+      "Options": [
+        "The Colorado River",
+        "The Pecos River",
+        "The Rio Grande (Río Bravo)",
+        "The Red River"
+      ],
+      "Explanation": "The Rio Grande flows from Colorado into the Gulf of Mexico.",
+      "Id": "GEO-139",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the highest mountain peak in North America, located in the Alaska Range?",
+      "Options": [
+        "Denali (Mount McKinley - 20,310 ft)",
+        "Mount Whitney",
+        "Mount Rainier",
+        "Mount Logan"
+      ],
+      "Explanation": "Denali has the third most prominent and isolated peak in the world.",
+      "Id": "GEO-140",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which European capital is built across 14 islands connected by over 50 bridges in the Baltic Sea?",
+      "Options": [
+        "Stockholm, Sweden",
+        "Copenhagen, Denmark",
+        "Amsterdam, Netherlands",
+        "Helsinki, Finland"
+      ],
+      "Explanation": "Stockholm is often nicknamed 'Venice of the North'.",
+      "Id": "GEO-141",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of New Zealand, recognized as the southernmost capital city in the world?",
+      "Options": [
+        "Christchurch",
+        "Queenstown",
+        "Auckland",
+        "Wellington"
+      ],
+      "Explanation": "Wellington replaced Auckland as New Zealand's capital in 1865.",
+      "Id": "GEO-142",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which sea is connected to the Atlantic Ocean and almost completely enclosed by southern Europe, northern Africa, and western Asia?",
+      "Options": [
+        "The Mediterranean Sea",
+        "The Caribbean Sea",
+        "The Baltic Sea",
+        "The Red Sea"
+      ],
+      "Explanation": "The Mediterranean Sea covers approximately 970,000 square miles.",
+      "Id": "GEO-143",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the second most populous country in the world, recently reaching over 1.4 billion people?",
+      "Options": [
+        "Pakistan",
+        "China (or India)",
+        "Indonesia",
+        "United States"
+      ],
+      "Explanation": "India and China are the only two nations with populations exceeding 1.4 billion people.",
+      "Id": "GEO-144",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country in the Horn of Africa was never colonized by European powers during the Scramble for Africa?",
+      "Options": [
+        "Somalia",
+        "Ethiopia",
+        "Djibouti",
+        "Eritrea"
+      ],
+      "Explanation": "Ethiopia successfully defended its sovereignty at the Battle of Adwa in 1896.",
+      "Id": "GEO-145",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital and largest city of Ireland, located at the mouth of the River Liffey?",
+      "Options": [
+        "Galway",
+        "Limerick",
+        "Dublin",
+        "Cork"
+      ],
+      "Explanation": "Dublin was founded as a Viking settlement in the 9th century.",
+      "Id": "GEO-146",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which major river passes through ten European countries, more than any other river in the world?",
+      "Options": [
+        "The Danube River",
+        "The Rhine River",
+        "The Volga River",
+        "The Seine River"
+      ],
+      "Explanation": "The Danube flows from Germany's Black Forest into the Black Sea.",
+      "Id": "GEO-147",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the capital of Iceland, powered almost entirely by geothermal energy?",
+      "Options": [
+        "Akureyri",
+        "Keflavik",
+        "Reykjavik",
+        "Vik"
+      ],
+      "Explanation": "Reykjavik is the northernmost capital of a sovereign state in the world.",
+      "Id": "GEO-148",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which island in the Mediterranean is divided into Greek Cypriot and Turkish Cypriot sectors?",
+      "Options": [
+        "Crete",
+        "Malta",
+        "Cyprus",
+        "Rhodes"
+      ],
+      "Explanation": "The UN Buffer Zone ('Green Line') divides Nicosia, the capital of Cyprus.",
+      "Id": "GEO-149",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the highest paved road in North America, reaching 14,130 feet above sea level?",
+      "Options": [
+        "Pikes Peak Highway",
+        "Mount Blue Sky (Mount Evans) Scenic Byway, Colorado",
+        "Trail Ridge Road",
+        "Beartooth Highway"
+      ],
+      "Explanation": "The highway in Colorado climbs to within 130 feet of the 14,264-foot summit.",
+      "Id": "GEO-150",
+      "Category": "Geography",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which line of longitude, passing through Greenwich, England, is designated as 0° and used as the reference point for world time zones?",
+      "Options": [
+        "The Prime Meridian",
+        "The Equator",
+        "The International Date Line",
+        "The Tropic of Cancer"
+      ],
+      "Explanation": "The Prime Meridian at 0° longitude passes through the Royal Observatory in Greenwich and anchors the world's time zone system.",
+      "Id": "GEO-151",
+      "Category": "Geography",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    }
+  ]
+}

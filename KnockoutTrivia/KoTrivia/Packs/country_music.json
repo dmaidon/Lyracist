@@ -1,0 +1,2408 @@
+{
+  "PackId": "country-music",
+  "Title": "Country Music Classics & Legends",
+  "Category": "Country Music",
+  "Description": "150 curated questions covering Country Music.",
+  "Questions": [
+    {
+      "Id": "CM-001",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as the 'Man in Black'?",
+      "Options": [
+        "Willie Nelson",
+        "Waylon Jennings",
+        "Johnny Cash",
+        "Merle Haggard"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Johnny Cash earned the moniker 'The Man in Black' for his signature all-black stage wardrobe.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-002",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country star sang 'Friends in Low Places'?",
+      "Options": [
+        "George Strait",
+        "Garth Brooks",
+        "Clint Black",
+        "Alan Jackson"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Garth Brooks released the legendary singalong anthem in 1990.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-003",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang the 1973 classic 'Jolene'?",
+      "Options": [
+        "Tammy Wynette",
+        "Dolly Parton",
+        "Loretta Lynn",
+        "Patsy Cline"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Dolly Parton wrote and recorded Jolene, one of the most covered country songs of all time.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-004",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as the 'King of Country' with over 60 #1 country hits?",
+      "Options": [
+        "Garth Brooks",
+        "Randy Travis",
+        "George Strait",
+        "Hank Williams Jr."
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "George Strait has scored more #1 hits than any other artist in any music genre.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-005",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which female country star released 'Before He Cheats' in 2006?",
+      "Options": [
+        "Kelly Clarkson",
+        "Taylor Swift",
+        "Miranda Lambert",
+        "Carrie Underwood"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Carrie Underwood's revenge anthem won two Grammy Awards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-006",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous country venue and radio show began broadcasting from Nashville in 1925?",
+      "Options": [
+        "The Grand Ole Opry",
+        "Bluebird Cafe",
+        "Austin City Limits",
+        "The Ryman Auditorium"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Grand Ole Opry is the longest-running radio broadcast in American history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-007",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country music legend wrote 'On the Road Again' on an airsickness bag?",
+      "Options": [
+        "Kris Kristofferson",
+        "Glen Campbell",
+        "Waylon Jennings",
+        "Willie Nelson"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Willie Nelson composed On the Road Again while on a flight with movie director Sydney Pollack.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-008",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang the heartbreaking 1961 ballad 'Crazy'?",
+      "Options": [
+        "Tammy Wynette",
+        "Patsy Cline",
+        "Connie Francis",
+        "Brenda Lee"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Patsy Cline made Willie Nelson's song 'Crazy' a crossover pop and country standard.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-009",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country artist sang 'Chattahoochee' and 'Gone Country'?",
+      "Options": [
+        "Tim McGraw",
+        "Toby Keith",
+        "Alan Jackson",
+        "Trace Adkins"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Alan Jackson released Chattahoochee on his 1992 album A Lot About Livin'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-010",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the title of Shania Twain's smash hit that begins with 'Let's go, girls'?",
+      "Options": [
+        "You're Still the One",
+        "Man! I Feel Like a Woman!",
+        "That Don't Impress Me Much",
+        "Any Man of Mine"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Man! I Feel Like a Woman! was released in 1999 and became an iconic female anthem.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-011",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'Stand by Your Man' in 1968?",
+      "Options": [
+        "Tammy Wynette",
+        "Donna Fargo",
+        "Loretta Lynn",
+        "Lynn Anderson"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tammy Wynette co-wrote and recorded the best-selling female country single in history at the time.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-012",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country outlaw wrote and performed 'Mammas Don't Let Your Babies Grow Up to Be Cowboys'?",
+      "Options": [
+        "David Allan Coe",
+        "Ed Bruce",
+        "Merle Haggard",
+        "Waylon Jennings & Willie Nelson"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Waylon Jennings and Willie Nelson's 1978 duet spent 4 weeks at #1.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-013",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who recorded 'The Gambler' in 1978?",
+      "Options": [
+        "Kenny Rogers",
+        "Don Williams",
+        "Charley Pride",
+        "Ronnie Milsap"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Kenny Rogers' recording of Don Schlitz's song earned him a Grammy and spawned TV movies.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-014",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which female country star is known for 'Coal Miner's Daughter'?",
+      "Options": [
+        "Dottie West",
+        "Jean Shepard",
+        "Kitty Wells",
+        "Loretta Lynn"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Loretta Lynn wrote Coal Miner's Daughter about her humble Kentucky upbringing.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-015",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which duo recorded 'Boot Scootin' Boogie' and 'Neon Moon'?",
+      "Options": [
+        "Florida Georgia Line",
+        "Big & Rich",
+        "Dan + Shay",
+        "Brooks & Dunn"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Kix Brooks and Ronnie Dunn formed Brooks & Dunn in 1990.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-016",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'Live Like You Were Dying' in 2004?",
+      "Options": [
+        "Tim McGraw",
+        "Brad Paisley",
+        "Keith Urban",
+        "Kenny Chesney"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tim McGraw recorded the poignant song following the passing of his father Tug McGraw.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-017",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country star is famous for 'Rhinestone Cowboy'?",
+      "Options": [
+        "Glen Campbell",
+        "John Denver",
+        "Mac Davis",
+        "Jerry Reed"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Glen Campbell topped both the pop and country Billboard charts in 1975.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-018",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What theme park in Pigeon Forge, Tennessee is co-owned by Dolly Parton?",
+      "Options": [
+        "Dollywood",
+        "Opryland",
+        "Silver Dollar City",
+        "Grand Country USA"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Dollywood opened in 1986 and hosts over 3 million visitors annually.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-019",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who recorded 'Courtesy of the Red, White and Blue' in 2002?",
+      "Options": [
+        "Aaron Tippin",
+        "Trace Adkins",
+        "Darryl Worley",
+        "Toby Keith"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Toby Keith wrote the patriotic anthem in response to the September 11 attacks.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-020",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country artist is famous for 'Take Me Home, Country Roads'?",
+      "Options": [
+        "Gordon Lightfoot",
+        "John Denver",
+        "James Taylor",
+        "Jim Croce"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "John Denver's 1971 classic is an official state song of West Virginia.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-021",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of Hank Williams' famous backing band?",
+      "Options": [
+        "The Buckaroos",
+        "The Texas Playboys",
+        "The Strangers",
+        "The Drifting Cowboys"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Hank Williams and the Drifting Cowboys defined early honky-tonk country.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-022",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who recorded the landmark 1968 live album 'At Folsom Prison'?",
+      "Options": [
+        "Merle Haggard",
+        "Waylon Jennings",
+        "Johnny Paycheck",
+        "Johnny Cash"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Johnny Cash's performance at Folsom Prison revitalized his career.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-023",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country artist was nicknamed the 'Hag'?",
+      "Options": [
+        "Lefty Frizzell",
+        "Hank Thompson",
+        "Merle Haggard",
+        "George Jones"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Merle Haggard had 38 number-one country hits between the 1960s and 1980s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-024",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was George Jones married to from 1969 to 1975, recording famous duets together?",
+      "Options": [
+        "Tammy Wynette",
+        "Loretta Lynn",
+        "Melba Montgomery",
+        "Connie Smith"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "George Jones and Tammy Wynette were known as the President and First Lady of Country Music.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-025",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which supergroup comprised Johnny Cash, Waylon Jennings, Willie Nelson, and Kris Kristofferson?",
+      "Options": [
+        "The Traveling Wilburys",
+        "The Outlaws",
+        "The Highwaymen",
+        "The Flatlanders"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Highwaymen recorded three albums and won a Grammy Award for their self-titled single.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-026",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who wrote the country standard 'Always on My Mind' popularized by Willie Nelson in 1982?",
+      "Options": [
+        "Kris Kristofferson",
+        "Willie Nelson",
+        "Mickey Newbury",
+        "Wayne Carson, Johnny Christopher, Mark James"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Willie Nelson's version won three Grammys, including Song of the Year.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-027",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What guitar does Willie Nelson famously play, named after Roy Rogers' horse?",
+      "Options": [
+        "Champion",
+        "Trigger",
+        "Bullet",
+        "Silver"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Trigger is a 1969 Martin N-20 nylon-string classical acoustic guitar.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-028",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country superstar released 'No Shoes, No Shirt, No Problems'?",
+      "Options": [
+        "Jake Owen",
+        "Kenny Chesney",
+        "Jimmy Buffett",
+        "Zac Brown Band"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Kenny Chesney became one of country music's biggest stadium-touring acts.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-029",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang the 1992 country hit 'Achy Breaky Heart'?",
+      "Options": [
+        "Travis Tritt",
+        "Dwight Yoakam",
+        "Billy Ray Cyrus",
+        "Collin Raye"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Billy Ray Cyrus's single launched a worldwide line-dancing craze.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-030",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which female country star had hits with 'Strawberry Wine' and 'Did I Shave My Legs for This?'",
+      "Options": [
+        "Terri Clark",
+        "Jo Dee Messina",
+        "Deana Carter",
+        "Patty Loveless"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Deana Carter's 1996 debut album went 5x multi-platinum.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-031",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the first country song to hit #1 on the Billboard pop charts in the 1980s?",
+      "Options": [
+        "9 to 5 by Dolly Parton",
+        "Lady by Kenny Rogers",
+        "I Love a Rainy Night by Eddie Rabbitt",
+        "Lookin' for Love by Johnny Lee"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Dolly Parton's theme from the movie 9 to 5 achieved #1 on pop, country, and adult contemporary.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-032",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was known as the 'Possum' and recorded 'He Stopped Loving Her Today'?",
+      "Options": [
+        "Porter Wagoner",
+        "George Jones",
+        "Hank Williams",
+        "Faron Young"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "George Jones's 1980 ballad is widely considered one of the greatest country recordings ever made.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-033",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which modern country star formed the Zac Brown Band and sang 'Chicken Fried'?",
+      "Options": [
+        "Eric Church",
+        "Luke Combs",
+        "Zac Brown",
+        "Chris Stapleton"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Chicken Fried was the breakout #1 hit for the Zac Brown Band in 2008.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-034",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'Forever and Ever, Amen' in 1987?",
+      "Options": [
+        "Keith Whitley",
+        "Randy Travis",
+        "Ricky Skaggs",
+        "George Strait"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Randy Travis helped launch the neo-traditionalist country movement with this hit.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-035",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Australian musician became a massive American country superstar with 'Somebody Like You'?",
+      "Options": [
+        "Kasey Chambers",
+        "Keith Urban",
+        "Troy Cassar-Daley",
+        "Morgan Evans"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Keith Urban won four Grammy Awards and was inducted into the Grand Ole Opry.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-036",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What instrument is Earl Scruggs famous for playing with a legendary 3-finger picking style?",
+      "Options": [
+        "Mandolin",
+        "Fiddle",
+        "Dobro",
+        "5-String Banjo"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Earl Scruggs pioneered 'Scruggs-style' banjo playing in bluegrass and country.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-037",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country star sang 'Independence Day' in 1994?",
+      "Options": [
+        "Martina McBride",
+        "Mary Chapin Carpenter",
+        "Trisha Yearwood",
+        "Pam Tillis"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Martina McBride's performance of Gretchen Peters' song won CMA Song of the Year.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-038",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who recorded 'Amarillo by Morning' in 1983?",
+      "Options": [
+        "George Strait",
+        "Chris LeDoux",
+        "Terry Stafford",
+        "Gary P. Nunn"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "George Strait's recording about rodeo life became one of his definitive signature hits.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-039",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What female country trio released 'Wide Open Spaces' and 'Cowboy Take Me Away'?",
+      "Options": [
+        "SheDAISY",
+        "Pistol Annies",
+        "The Judds",
+        "The Chicks (Dixie Chicks)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Chicks sold over 30 million albums and won 13 Grammy Awards.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-040",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang the outlaw anthem 'Take This Job and Shove It'?",
+      "Options": [
+        "Johnny Paycheck",
+        "Bobby Bare",
+        "Charlie Daniels",
+        "David Allan Coe"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Johnny Paycheck hit #1 with the David Allan Coe-penned blue-collar anthem in 1977.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-041",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the first million-selling country record in history, recorded in 1924 by Vernon Dalhart?",
+      "Options": [
+        "In the Baggage Coach Ahead",
+        "Can the Circle Be Unbroken",
+        "Wildwood Flower",
+        "The Wreck of the Old 97"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Wreck of the Old 97 sold an estimated 6 million copies on Victor Records.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-042",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What historic 1927 recording sessions in Tennessee are considered the 'Big Bang' of modern country music?",
+      "Options": [
+        "The Muscle Shoals Sessions",
+        "The Bristol Sessions",
+        "The Nashville Sound Sessions",
+        "The Memphis Sessions"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Ralph Peer discovered Jimmie Rodgers and the Carter Family at the Bristol Sessions in 1927.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-043",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which blind country star had 35 #1 hits including 'Smoky Mountain Rain' and 'It Was Almost Like a Song'?",
+      "Options": [
+        "Doc Watson",
+        "Leon Russell",
+        "Blind Willie McTell",
+        "Ronnie Milsap"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ronnie Milsap was one of country music's most versatile and successful crossover pianists.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-044",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the real first and middle name of Hank Williams?",
+      "Options": [
+        "Henry James Williams",
+        "Hiram King Williams",
+        "Howard Ray Williams",
+        "Harold Lee Williams"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Hank Williams was born Hiram King Williams in Butler County, Alabama in 1923.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-045",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first Black artist to perform at the Grand Ole Opry in the 1920s playing the harmonica?",
+      "Options": [
+        "Big Bill Broonzy",
+        "DeFord Bailey",
+        "Charley Pride",
+        "Lead Belly"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "DeFord Bailey was a founding Opry star known as the 'Harmonica Wizard'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-046",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1976 compilation was the first country album certified Platinum (1 million sales)?",
+      "Options": [
+        "Red Headed Stranger",
+        "Honky Tonk Heroes",
+        "Wanted! The Outlaws",
+        "At Folsom Prison"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Wanted! The Outlaws featured Waylon Jennings, Willie Nelson, Jessi Colter, and Tompall Glaser.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-047",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country legend wrote the song 'Me and Bobby McGee' made famous by Janis Joplin?",
+      "Options": [
+        "Billy Swan",
+        "Kris Kristofferson",
+        "Fred Foster",
+        "Shel Silverstein"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Kris Kristofferson co-wrote the song with Monument Records founder Fred Foster.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-048",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What instrument did country virtuoso Roy Clark play during his lightning-fast 'Hee Haw' solos?",
+      "Options": [
+        "Guitar, Banjo, and Fiddle",
+        "Mandolin only",
+        "Accordion",
+        "Steel Guitar"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Roy Clark was a multi-instrumentalist master on guitar, 5-string banjo, and fiddle.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-049",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the mother-daughter duo that won 5 Grammy Awards before Naomi retired in 1991?",
+      "Options": [
+        "The Carters",
+        "The Mandrells",
+        "The Whites",
+        "The Judds"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Naomi and Wynonna Judd scored 14 number-one hits as The Judds.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-050",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year was the Country Music Association (CMA) founded in Nashville?",
+      "Options": [
+        "1948",
+        "1958",
+        "1963",
+        "1972"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The CMA was founded in 1958 to promote country music globally.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-051",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'She's in Love with the Boy' in 1991?",
+      "Options": [
+        "Faith Hill",
+        "Reba McEntire",
+        "Trisha Yearwood",
+        "Martina McBride"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Trisha Yearwood's debut single went straight to #1 on the Billboard Hot Country Singles chart.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-052",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country superstar sings 'Tennessee Whiskey'?",
+      "Options": [
+        "Thomas Rhett",
+        "Jason Aldean",
+        "Chris Stapleton",
+        "Luke Bryan"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Chris Stapleton performed a bluesy version of the Dean Dillon / Linda Hargrove classic in 2015.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-053",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which band sang 'The Devil Went Down to Georgia'?",
+      "Options": [
+        "The Marshall Tucker Band",
+        "The Outlaws",
+        "Alabama",
+        "The Charlie Daniels Band"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Charlie Daniels won a Grammy for his blistering fiddle duel song in 1979.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-054",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who is known as the 'First Lady of Country Music' with hits like 'Stand by Your Man'?",
+      "Options": [
+        "Dolly Parton",
+        "Kitty Wells",
+        "Tammy Wynette",
+        "Patsy Cline"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Tammy Wynette earned the title 'First Lady of Country Music' throughout her career.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-055",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country artist had 21 consecutive #1 country singles in the 1980s?",
+      "Options": [
+        "Exile",
+        "Alabama",
+        "George Strait",
+        "The Oak Ridge Boys"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The band Alabama dominated the 1980s country charts with 21 consecutive number-ones.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-056",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'Should've Been a Cowboy' in 1993?",
+      "Options": [
+        "Toby Keith",
+        "Tim McGraw",
+        "Mark Chesnutt",
+        "John Michael Montgomery"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Should've Been a Cowboy was Toby Keith's debut single and became the most played country song of the 1990s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-057",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country star sang 'Check Yes or No'?",
+      "Options": [
+        "Clay Walker",
+        "George Strait",
+        "Tracy Byrd",
+        "Collin Raye"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "George Strait won CMA Single of the Year with Check Yes or No in 1996.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-058",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What city is celebrated worldwide as 'Music City, USA'?",
+      "Options": [
+        "Nashville, Tennessee",
+        "Memphis, Tennessee",
+        "Branson, Missouri",
+        "Austin, Texas"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Nashville is the historic global capital of the country music recording industry.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-059",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who recorded 'Kiss an Angel Good Mornin'' in 1971?",
+      "Options": [
+        "Charley Pride",
+        "Freddie Hart",
+        "Faron Young",
+        "Sonny James"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Charley Pride scored his biggest crossover hit with Kiss an Angel Good Mornin'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-060",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country artist sang 'I Walk the Line' in 1956?",
+      "Options": [
+        "Marty Robbins",
+        "Carl Perkins",
+        "Johnny Cash",
+        "Tennessee Ernie Ford"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "I Walk the Line was Johnny Cash's first Billboard number-one country hit.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-061",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous song tells the story of a shootout in a West Texas town over a Mexican maiden named Faleena?",
+      "Options": [
+        "Big Iron",
+        "Streets of Laredo",
+        "El Paso",
+        "The Running Gun"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Marty Robbins recorded the Western epic El Paso in 1959.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-062",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the host of the popular country television variety show 'The Porter Wagoner Show'?",
+      "Options": [
+        "Johnny Cash",
+        "Porter Wagoner",
+        "Bobby Lord",
+        "Glen Campbell"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Porter Wagoner introduced Dolly Parton on his nationally syndicated show in 1967.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-063",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country legend recorded 'He'll Have to Go' in 1959?",
+      "Options": [
+        "Jim Reeves",
+        "Ray Price",
+        "Don Gibson",
+        "Eddy Arnold"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Jim Reeves was a pioneer of the smooth 'Nashville Sound' style of country.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-064",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country song features the chorus 'Lord, I've got a lot of friends in low places / where the whiskey drowns and the beer chases'?",
+      "Options": [
+        "Whiskey River",
+        "I Love This Bar",
+        "Friends in Low Places",
+        "Two Pina Coladas"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Written by Dewayne Blackwell and Earl Bud Lee, Garth Brooks recorded the famous smash.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-065",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'When You Say Nothing at All' before Alison Krauss recorded her version?",
+      "Options": [
+        "Gene Watson",
+        "Vern Gosdin",
+        "Don Williams",
+        "Keith Whitley"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Keith Whitley topped the country charts with the romantic ballad in 1988.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-066",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which female country artist sang 'Fancy' and 'The Night the Lights Went Out in Georgia'?",
+      "Options": [
+        "Tanya Tucker",
+        "Reba McEntire",
+        "Vicki Lawrence",
+        "Bobbie Gentry"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Reba McEntire scored iconic country hits with both Southern story songs.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-067",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What band recorded 'Mountain Music' and 'Dixieland Delight'?",
+      "Options": [
+        "Alabama",
+        "Diamond Rio",
+        "Restless Heart",
+        "Shenandoah"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Alabama brought rock production aesthetics and stadium shows to country music.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-068",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'Guitars, Cadillacs' in 1986?",
+      "Options": [
+        "Marty Stuart",
+        "Lyle Lovett",
+        "Steve Earle",
+        "Dwight Yoakam"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Dwight Yoakam led the California Bakersfield revival with Guitars, Cadillacs.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-069",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country star sang 'I Swear' before All-4-One covered it for pop radio?",
+      "Options": [
+        "Clay Walker",
+        "Tracy Lawrence",
+        "John Michael Montgomery",
+        "Bryan White"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "John Michael Montgomery spent 4 weeks at #1 on the country charts with I Swear in 1994.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-070",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who recorded 'Blue Clear Sky' and 'Ocean Front Property'?",
+      "Options": [
+        "George Strait",
+        "Joe Diffie",
+        "Sammy Kershaw",
+        "Mark Wills"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "George Strait's Ocean Front Property was the first album in history to debut at #1 on Billboard Country.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-071",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What song did Hank Williams write that was released shortly after his death on New Year's Day 1953?",
+      "Options": [
+        "Hey, Good Lookin'",
+        "Your Cheatin' Heart",
+        "I'll Never Get Out of This World Alive",
+        "Cold, Cold Heart"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "I'll Never Get Out of This World Alive hit #1 shortly after his untimely death at age 29.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-072",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the famous pedal steel guitarist who played on sessions for George Jones, Roger Miller, and Paul McCartney?",
+      "Options": [
+        "Buddy Emmons",
+        "Pete Drake",
+        "Sneaky Pete Kleinow",
+        "Lloyd Green"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Lloyd Green played on over 100 number-one records and pioneered modern steel licks.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-073",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the real first name of country singer Conway Twitty?",
+      "Options": [
+        "William Jenkins",
+        "Kenneth Twitty",
+        "Conway Jenkins",
+        "Harold Lloyd Jenkins"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Harold Lloyd Jenkins took his stage name from Conway, Arkansas and Twitty, Texas.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-074",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which artist wrote 'Always on My Mind' and 'Suspicious Minds'?",
+      "Options": [
+        "Johnny Christopher",
+        "Mark James",
+        "Dallas Frazier",
+        "Wayne Carson"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Mark James wrote Suspicious Minds for Elvis and co-wrote Always on My Mind.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-075",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What bluegrass pioneer formed the Blue Grass Boys in 1939 and played the mandolin?",
+      "Options": [
+        "Doc Watson",
+        "Lester Flatt",
+        "Ralph Stanley",
+        "Bill Monroe"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Bill Monroe is revered as the 'Father of Bluegrass Music'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-076",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Texas dancehall in New Braunfels is recognized as the oldest continuously operating dance hall in Texas?",
+      "Options": [
+        "Luckenbach Dance Hall",
+        "Broken Spoke",
+        "Floore's Country Store",
+        "Gruene Hall"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Gruene Hall was built in 1878 and has hosted nearly every major country music legend.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-077",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang the 1968 crossover hit 'Harper Valley PTA'?",
+      "Options": [
+        "Tom T. Hall",
+        "Jeannie C. Riley",
+        "Lynn Anderson",
+        "Bobbie Gentry"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Tom T. Hall wrote the song and Jeannie C. Riley became the first woman to top both pop and country charts with it.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-078",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the first music video played on Country Music Television (CMT) when it launched in 1983?",
+      "Options": [
+        "You're the Reason God Made Oklahoma",
+        "It Ain't Cool to Be Crazy About You by George Strait",
+        "Blood-Red and Goin' Down by Tanya Tucker",
+        "Crying My Heart Out Over You"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "CMT launched on March 5, 1983.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-079",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which songwriter was known as 'The Storyteller' and wrote 'Old Dogs, Children and Watermelon Wine'?",
+      "Options": [
+        "Tom T. Hall",
+        "Roger Miller",
+        "Harlan Howard",
+        "Bobby Braddock"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Tom T. Hall was inducted into the Country Music Hall of Fame in 2008.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-080",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What hit country ballad was written after songwriter Hugh Prestwood saw a news story about an endangered tiger?",
+      "Options": [
+        "Hard Rock Bottom of Your Heart by Randy Travis",
+        "The Whiskey Ain't Workin'",
+        "Ghost in This House",
+        "The Sound of Goodbye by Crystal Gayle"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Randy Travis spent four weeks at #1 with Hard Rock Bottom of Your Heart in 1990.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-081",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country superstar is married to Faith Hill?",
+      "Options": [
+        "Brad Paisley",
+        "Tim McGraw",
+        "Keith Urban",
+        "Blake Shelton"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Tim McGraw and Faith Hill married in 1996 and have toured together on the Soul2Soul Tour.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-082",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'I Hope You Dance' in 2000?",
+      "Options": [
+        "Trisha Yearwood",
+        "Sara Evans",
+        "Lee Ann Womack",
+        "Jo Dee Messina"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Lee Ann Womack's single reached #1 country and #14 pop, winning CMA Single of the Year.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-083",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which artist had a smash hit with 'Pickup Man' and 'John Deere Green'?",
+      "Options": [
+        "Aaron Tippin",
+        "Joe Diffie",
+        "Travis Tritt",
+        "Tracy Byrd"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Joe Diffie was one of the most beloved hitmakers of 90s honky-tonk country.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-084",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'Ring of Fire' with its famous Spanish horn section?",
+      "Options": [
+        "Johnny Cash",
+        "Waylon Jennings",
+        "Bobby Bare",
+        "Hank Williams Jr."
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "June Carter and Merle Kilgore wrote Ring of Fire for Johnny Cash in 1963.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-085",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What country singer released 'Cruise' with Florida Georgia Line?",
+      "Options": [
+        "Sugarland",
+        "Florida Georgia Line (Tyler Hubbard & Brian Kelley)",
+        "Dan + Shay",
+        "Big & Rich"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Cruise spent 24 weeks atop the Billboard Hot Country Songs chart.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-086",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who recorded 'King of the Road' in 1965?",
+      "Options": [
+        "Bobby Bare",
+        "Ray Stevens",
+        "Roger Miller",
+        "Buck Owens"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Roger Miller wrote and snapped his fingers to the iconic vagabond song.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-087",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which female country artist had hits with 'Eighteen Wheels and a Dozen Roses'?",
+      "Options": [
+        "Kathy Mattea",
+        "Suzy Bogguss",
+        "Lorrie Morgan",
+        "Patty Loveless"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Kathy Mattea won CMA Single of the Year in 1988 with the trucker love ballad.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-088",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who recorded 'Watermelon Crawl' in 1994?",
+      "Options": [
+        "Mark Chesnutt",
+        "Rhett Akins",
+        "Sammy Kershaw",
+        "Tracy Byrd"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Tracy Byrd sang the Georgia watermelon festival line-dancing anthem.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-089",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'Coat of Many Colors', inspired by a real coat her mother stitched from rags?",
+      "Options": [
+        "Tammy Wynette",
+        "Tanya Tucker",
+        "Loretta Lynn",
+        "Dolly Parton"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Dolly Parton considers Coat of Many Colors her favorite song she has ever written.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-090",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which artist had hits with 'Whose Bed Have Your Boots Been Under?' and 'Any Man of Mine'?",
+      "Options": [
+        "Terri Clark",
+        "Martina McBride",
+        "Shania Twain",
+        "Faith Hill"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Shania Twain burst onto the global charts with her 1995 album The Woman in Me.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-091",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What country artist hosted the 'Buck Owens' Ranch Show' and co-hosted 'Hee Haw'?",
+      "Options": [
+        "Minnie Pearl",
+        "Roy Clark",
+        "Buck Owens",
+        "Archie Campbell"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Buck Owens and his Buckaroos pioneered the electric Bakersfield Sound.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-092",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the first woman to win the CMA Entertainer of the Year award in 1972?",
+      "Options": [
+        "Kitty Wells",
+        "Loretta Lynn",
+        "Dolly Parton",
+        "Tammy Wynette"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Loretta Lynn made history as the first woman to win the CMA's highest honor.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-093",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which record producer created the lush 'Nashville Sound' alongside Owen Bradley?",
+      "Options": [
+        "Billy Sherrill",
+        "Ken Nelson",
+        "Chet Atkins",
+        "Don Law"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Chet Atkins was RCA Records' Nashville chief and a master fingerstyle guitarist.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-094",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who wrote the country hit 'The Dance', recorded by Garth Brooks?",
+      "Options": [
+        "Pat Alger",
+        "Kent Blazy",
+        "Bob DiPiero",
+        "Tony Arata"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Tony Arata wrote The Dance after watching the movie The Goodbye Girl.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-095",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the backing band for country singer Marty Robbins called?",
+      "Options": [
+        "The Strangers",
+        "The Teardrops",
+        "The Jordanaires",
+        "The Clinch Mountain Boys"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Marty Robbins recorded with his backing band The Teardrops.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-096",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who sang 'Save a Horse (Ride a Cowboy)'?",
+      "Options": [
+        "Locash",
+        "Brooks & Dunn",
+        "Montgomery Gentry",
+        "Big & Rich"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Big & Rich released the high-energy country-rap-rock crossover in 2004.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-097",
+      "Category": "Country Music",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country superstar sings 'Fast Car' and 'Beautiful Crazy'?",
+      "Options": [
+        "Kane Brown",
+        "Cody Johnson",
+        "Luke Combs",
+        "Morgan Wallen"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Luke Combs topped the country charts with his cover of Tracy Chapman's Fast Car.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-098",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who recorded 'Copperhead Road' in 1988?",
+      "Options": [
+        "Travis Tritt",
+        "Steve Earle",
+        "Hank Williams Jr.",
+        "Charlie Daniels"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Steve Earle fused outlaw country with Scottish bagpipes and rock drums on Copperhead Road.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-099",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the title of the first country music concept album, released by Willie Nelson in 1975?",
+      "Options": [
+        "Red Headed Stranger",
+        "Shotgun Willie",
+        "Yesterday's Wine",
+        "Phases and Stages"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Red Headed Stranger featured Blue Eyes Crying in the Rain and established outlaw country.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "CM-100",
+      "Category": "Country Music",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which legendary steel guitarist invented the modern pedal steel guitar mechanism with Paul Bigsby?",
+      "Options": [
+        "Jerry Byrd",
+        "Bud Isaacs",
+        "Curly Chalker",
+        "Speedy West"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Bud Isaacs' 1953 recording of 'Slowly' with Webb Pierce was the first hit with pedal steel.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who is known as the 'Man in Black' and recorded legendary live albums at Folsom Prison and San Quentin?",
+      "Options": [
+        "Johnny Cash",
+        "Kris Kristofferson",
+        "Waylon Jennings",
+        "Merle Haggard"
+      ],
+      "Explanation": "Johnny Cash wore black in solidarity with the poor and incarcerated.",
+      "Id": "CTY-101",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country legend wrote the classic hit 'Crazy' made famous by Patsy Cline?",
+      "Options": [
+        "Willie Nelson",
+        "Hank Williams",
+        "Kris Kristofferson",
+        "Harlan Howard"
+      ],
+      "Explanation": "Willie Nelson wrote 'Crazy' before finding his own solo stardom.",
+      "Id": "CTY-102",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded the smash hit 'Check Yes or No' and holds the record for most #1 country singles?",
+      "Options": [
+        "George Strait",
+        "Alan Jackson",
+        "Conway Twitty",
+        "Garth Brooks"
+      ],
+      "Explanation": "George Strait ('The King of Country') has amassed 60 #1 singles.",
+      "Id": "CTY-103",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country music superstar is famous for her theme park Dollywood in Pigeon Forge, Tennessee?",
+      "Options": [
+        "Loretta Lynn",
+        "Reba McEntire",
+        "Dolly Parton",
+        "Tammy Wynette"
+      ],
+      "Explanation": "Dolly Parton opened Dollywood in 1986 in the Great Smoky Mountains.",
+      "Id": "CTY-104",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who had a massive 1993 hit with 'Chattahoochee' singing about water skiing in jeans?",
+      "Options": [
+        "Clint Black",
+        "Mark Chesnutt",
+        "Alan Jackson",
+        "Travis Tritt"
+      ],
+      "Explanation": "Alan Jackson's 'Chattahoochee' became one of the biggest country songs of the 1990s.",
+      "Id": "CTY-105",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country outlaw recorded 'Mama Tried' and 'Okie from Muskogee'?",
+      "Options": [
+        "Merle Haggard",
+        "Waylon Jennings",
+        "Hank Williams Jr.",
+        "David Allan Coe"
+      ],
+      "Explanation": "Merle Haggard pioneered the gritty Bakersfield Sound.",
+      "Id": "CTY-106",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who sang 'Stand by Your Man', one of the best-selling country singles of all time?",
+      "Options": [
+        "Lynn Anderson",
+        "Patsy Cline",
+        "Loretta Lynn",
+        "Tammy Wynette"
+      ],
+      "Explanation": "Tammy Wynette co-wrote and recorded 'Stand by Your Man' in 1968.",
+      "Id": "CTY-107",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country superstar sang 'Independence Day' and 'A Broken Wing'?",
+      "Options": [
+        "Faith Hill",
+        "Martina McBride",
+        "Jo Dee Messina",
+        "Trisha Yearwood"
+      ],
+      "Explanation": "Martina McBride is celebrated for her powerful soprano vocals.",
+      "Id": "CTY-108",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who is the lead singer of the country powerhouse group Brooks & Dunn?",
+      "Options": [
+        "Kix Brooks",
+        "Ronnie Dunn",
+        "Charles Kelley",
+        "Gary LeVox"
+      ],
+      "Explanation": "Ronnie Dunn sang lead on hits like 'Neon Moon' and 'Boot Scootin' Boogie'.",
+      "Id": "CTY-109",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country group recorded the singalong anthem 'Chicken Fried' in 2008?",
+      "Options": [
+        "Rascal Flatts",
+        "Old Dominion",
+        "Zac Brown Band",
+        "Little Big Town"
+      ],
+      "Explanation": "Zac Brown Band broke into superstardom with their debut hit 'Chicken Fried'.",
+      "Id": "CTY-110",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who released the hit album 'Wide Open Spaces' in 1998?",
+      "Options": [
+        "The Chicks (Dixie Chicks)",
+        "Pistol Annies",
+        "SHeDAISY",
+        "The Judds"
+      ],
+      "Explanation": "The Chicks became the best-selling female group in country music history.",
+      "Id": "CTY-111",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country legend recorded 'He Stopped Loving Her Today', often voted the greatest country song of all time?",
+      "Options": [
+        "Keith Whitley",
+        "Vern Gosdin",
+        "Conway Twitty",
+        "George Jones"
+      ],
+      "Explanation": "George Jones ('The Possum') recorded the heartbreaking ballad in 1980.",
+      "Id": "CTY-112",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who had a breakout #1 smash in 2005 with 'Jesus, Take the Wheel'?",
+      "Options": [
+        "Carrie Underwood",
+        "Miranda Lambert",
+        "LeAnn Rimes",
+        "Kellie Pickler"
+      ],
+      "Explanation": "Carrie Underwood launched her country career following her American Idol win.",
+      "Id": "CTY-113",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which artist recorded 'Live Like You Were Dying' in memory of his father Tug McGraw?",
+      "Options": [
+        "Tim McGraw",
+        "Kenny Chesney",
+        "Brad Paisley",
+        "Toby Keith"
+      ],
+      "Explanation": "Tim McGraw's emotional 2004 single won Grammy and CMA Song of the Year.",
+      "Id": "CTY-114",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What instrument is country virtuoso Brad Paisley most celebrated for playing on his albums?",
+      "Options": [
+        "Fender Telecaster Guitar",
+        "Pedal Steel",
+        "Banjo",
+        "Fiddle"
+      ],
+      "Explanation": "Brad Paisley is renowned as one of the fastest and cleanest Telecaster pickers in music.",
+      "Id": "CTY-115",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded the smash party anthem 'Red Solo Cup' in 2011?",
+      "Options": [
+        "Blake Shelton",
+        "Toby Keith",
+        "Luke Bryan",
+        "Trace Adkins"
+      ],
+      "Explanation": "Toby Keith called 'Red Solo Cup' the 'stupidest song I ever heard in my life — but it's genius.'",
+      "Id": "CTY-116",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which famous singing family duo consisted of Naomi Judd and her daughter Wynonna?",
+      "Options": [
+        "The Whites",
+        "The Judds",
+        "The Mandrells",
+        "The Carters"
+      ],
+      "Explanation": "The Judds scored 14 #1 country hits throughout the 1980s and 1990s.",
+      "Id": "CTY-117",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded the 1989 classic 'Killin' Time' and 'A Better Man'?",
+      "Options": [
+        "Clint Black",
+        "Dwight Yoakam",
+        "Vince Gill",
+        "Travis Tritt"
+      ],
+      "Explanation": "Clint Black wrote or co-wrote every track on his multi-platinum debut 'Killin' Time'.",
+      "Id": "CTY-118",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which female country singer released 'Blue' in 1996 when she was just 13 years old?",
+      "Options": [
+        "Brenda Lee",
+        "LeAnn Rimes",
+        "Taylor Swift",
+        "Tanya Tucker"
+      ],
+      "Explanation": "LeAnn Rimes stunned the music world with her Patsy Cline-esque voice on 'Blue'.",
+      "Id": "CTY-119",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded the 1991 hit 'I'm Gonna Be Somebody' and 'Here's a Quarter (Call Someone Who Cares)'?",
+      "Options": [
+        "Aaron Tippin",
+        "Collin Raye",
+        "Travis Tritt",
+        "Marty Stuart"
+      ],
+      "Explanation": "Travis Tritt fused Southern rock grit with traditional country.",
+      "Id": "CTY-120",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which artist recorded 'Boot Scootin' Boogie', popularizing line dancing across America in 1992?",
+      "Options": [
+        "Brooks & Dunn",
+        "John Michael Montgomery",
+        "Tracy Byrd",
+        "Billy Ray Cyrus"
+      ],
+      "Explanation": "Brooks & Dunn's version triggered a nationwide line dancing craze.",
+      "Id": "CTY-121",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded the outlaw anthem 'Are You Sure Hank Done It This Way'?",
+      "Options": [
+        "Jerry Jeff Walker",
+        "Hank Williams Jr.",
+        "Waylon Jennings",
+        "Billy Joe Shaver"
+      ],
+      "Explanation": "Waylon Jennings questioned the polished Nashville establishment on his 1975 track.",
+      "Id": "CTY-122",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which female country star recorded 'Strawberry Wine' in 1996?",
+      "Options": [
+        "Deana Carter",
+        "Terri Clark",
+        "Sara Evans",
+        "Jo Dee Messina"
+      ],
+      "Explanation": "Deana Carter's debut single 'Strawberry Wine' won CMA Single of the Year.",
+      "Id": "CTY-123",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded 'Guitars, Cadillacs' and brought the honky-tonk Bakersfield sound to MTV in 1986?",
+      "Options": [
+        "George Strait",
+        "Ricky Skaggs",
+        "Randy Travis",
+        "Dwight Yoakam"
+      ],
+      "Explanation": "Dwight Yoakam spearheaded the neotraditional country movement.",
+      "Id": "CTY-124",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country star won 6 consecutive CMA Male Vocalist of the Year awards and hosted the CMAs with Carrie Underwood?",
+      "Options": [
+        "Keith Urban",
+        "Vince Gill",
+        "Blake Shelton",
+        "Brad Paisley"
+      ],
+      "Explanation": "Brad Paisley and Carrie Underwood hosted the CMA Awards together for 11 years.",
+      "Id": "CTY-125",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What famous historic radio barn dance has been broadcasting live country music from Nashville since 1925?",
+      "Options": [
+        "Louisiana Hayride",
+        "WWVA Jamboree",
+        "Grand Ole Opry",
+        "Midwest Hayride"
+      ],
+      "Explanation": "The Grand Ole Opry is the longest-running radio broadcast in American history.",
+      "Id": "CTY-126",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded the 1994 hit 'Pickup Man' about trucks and love?",
+      "Options": [
+        "John Anderson",
+        "Clay Walker",
+        "Tracy Lawrence",
+        "Joe Diffie"
+      ],
+      "Explanation": "Joe Diffie spent four weeks at #1 with 'Pickup Man'.",
+      "Id": "CTY-127",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country artist sang 'When You Say Nothing at All' and 'I'm No Stranger to the Rain' before his untimely passing in 1989?",
+      "Options": [
+        "Rich Mullins",
+        "Daryle Singletary",
+        "Chris LeDoux",
+        "Keith Whitley"
+      ],
+      "Explanation": "Keith Whitley is regarded as one of the greatest traditional country vocalists of all time.",
+      "Id": "CTY-128",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who wrote and recorded 'Coat of Many Colors' based on a true childhood story?",
+      "Options": [
+        "Kitty Wells",
+        "Loretta Lynn",
+        "Dolly Parton",
+        "Patsy Cline"
+      ],
+      "Explanation": "Dolly Parton's mother stitched together rags to make her beloved school coat.",
+      "Id": "CTY-129",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Australian guitarist became a top country superstar with hits like 'Somebody Like You' and 'Days Go By'?",
+      "Options": [
+        "Troy Cassar-Daley",
+        "Lee Kernaghan",
+        "Keith Urban",
+        "Kasey Chambers"
+      ],
+      "Explanation": "Keith Urban won Grammy and CMA Entertainer of the Year honors.",
+      "Id": "CTY-130",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who sang 'I Hope You Dance', which crossed over to become a massive pop and wedding anthem in 2000?",
+      "Options": [
+        "Faith Hill",
+        "Trisha Yearwood",
+        "LeAnn Rimes",
+        "Lee Ann Womack"
+      ],
+      "Explanation": "Lee Ann Womack featured Sons of the Desert on background harmonies.",
+      "Id": "CTY-131",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the first woman to win CMA Entertainer of the Year in 1972?",
+      "Options": [
+        "Barbara Mandrell",
+        "Tammy Wynette",
+        "Loretta Lynn",
+        "Dolly Parton"
+      ],
+      "Explanation": "Loretta Lynn broke gender barriers with songs like 'Coal Miner's Daughter'.",
+      "Id": "CTY-132",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which artist recorded 'Where the Green Grass Grows' and 'Something Like That' (the BBQ stain on my white t-shirt song)?",
+      "Options": [
+        "Jason Aldean",
+        "Toby Keith",
+        "Kenny Chesney",
+        "Tim McGraw"
+      ],
+      "Explanation": "Tim McGraw recorded 'Something Like That' on his 1999 album A Place in the Sun.",
+      "Id": "CTY-133",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded the smash revenge hit 'Before He Cheats' in 2006?",
+      "Options": [
+        "Gretchen Wilson",
+        "Kacey Musgraves",
+        "Carrie Underwood",
+        "Miranda Lambert"
+      ],
+      "Explanation": "Carrie Underwood's song describes carving her name into the leather seats.",
+      "Id": "CTY-134",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country music trio includes Gary LeVox, Jay DeMarcus, and Joe Don Rooney?",
+      "Options": [
+        "BlackHawk",
+        "Rascal Flatts",
+        "Restless Heart",
+        "Lady A"
+      ],
+      "Explanation": "Rascal Flatts had huge hits with 'Life is a Highway' and 'Bless the Broken Road'.",
+      "Id": "CTY-135",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded 'Whiskey Lullaby' as a devastating duet with Alison Krauss in 2004?",
+      "Options": [
+        "George Strait",
+        "Vince Gill",
+        "Brad Paisley",
+        "Alan Jackson"
+      ],
+      "Explanation": "Brad Paisley and Alison Krauss won CMA Song and Musical Event of the Year.",
+      "Id": "CTY-136",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which artist sang 'Should've Been a Cowboy', the most-played country song of the 1990s?",
+      "Options": [
+        "Garth Brooks",
+        "Clint Black",
+        "Toby Keith",
+        "Tim McGraw"
+      ],
+      "Explanation": "Toby Keith wrote 'Should've Been a Cowboy' in a hotel bathroom in Dodge City, Kansas.",
+      "Id": "CTY-137",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who sang 'How Do I Live' which competed against LeAnn Rimes' version on the charts in 1997?",
+      "Options": [
+        "Faith Hill",
+        "Trisha Yearwood",
+        "Martina McBride",
+        "Shania Twain"
+      ],
+      "Explanation": "Trisha Yearwood's version was featured in the soundtrack for Con Air and won a Grammy.",
+      "Id": "CTY-138",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who is known as 'The Red Headed Stranger'?",
+      "Options": [
+        "Willie Nelson",
+        "Merle Haggard",
+        "Johnny Cash",
+        "Waylon Jennings"
+      ],
+      "Explanation": "Willie Nelson released the concept album 'Red Headed Stranger' in 1975.",
+      "Id": "CTY-139",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which artist recorded 'Dust on the Bottle' in 1995?",
+      "Options": [
+        "Ty Herndon",
+        "Rhett Akins",
+        "David Ball",
+        "David Lee Murphy"
+      ],
+      "Explanation": "David Lee Murphy scored a #1 hit with his self-penned song.",
+      "Id": "CTY-140",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded 'She's in Love with the Boy' in 1991, becoming the first female artist to hit #1 with a debut single in 27 years?",
+      "Options": [
+        "Trisha Yearwood",
+        "Terri Clark",
+        "Deana Carter",
+        "Faith Hill"
+      ],
+      "Explanation": "Trisha Yearwood introduced the story of Katie and Tommy.",
+      "Id": "CTY-141",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which female country star had breakthrough hits with 'Breathe' and 'This Kiss'?",
+      "Options": [
+        "Shania Twain",
+        "Jo Dee Messina",
+        "Martina McBride",
+        "Faith Hill"
+      ],
+      "Explanation": "Faith Hill became a global pop-country superstar in the late 1990s.",
+      "Id": "CTY-142",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What country superstar retired in 2001 and came out of retirement for an iconic Las Vegas residency and stadium tour?",
+      "Options": [
+        "Alan Jackson",
+        "Kenny Chesney",
+        "Garth Brooks",
+        "George Strait"
+      ],
+      "Explanation": "Garth Brooks is the only artist in history with nine RIAA Diamond-certified albums.",
+      "Id": "CTY-143",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded 'Redneck Woman' in 2004 proudly singing about Tanya Tucker and Walmart?",
+      "Options": [
+        "Kellie Pickler",
+        "Gretchen Wilson",
+        "Miranda Lambert",
+        "Sara Evans"
+      ],
+      "Explanation": "Gretchen Wilson's debut album 'Here for the Party' sold over 5 million copies.",
+      "Id": "CTY-144",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which country singer was known for 'When the Sun Goes Down' and his 'No Shoes Nation' fan club?",
+      "Options": [
+        "Tim McGraw",
+        "Kenny Chesney",
+        "Keith Urban",
+        "Luke Bryan"
+      ],
+      "Explanation": "Kenny Chesney is famous for his island-themed summer stadium tours.",
+      "Id": "CTY-145",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded 'The Night the Lights Went Out in Georgia' in 1991 (originally by Vicki Lawrence)?",
+      "Options": [
+        "Lorrie Morgan",
+        "Pam Tillis",
+        "Patty Loveless",
+        "Reba McEntire"
+      ],
+      "Explanation": "Reba McEntire recorded a dramatic story-song version and cinematic music video.",
+      "Id": "CTY-146",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which artist recorded 'Amarillo by Morning' about a rodeo cowboy travelling in a broken trailer?",
+      "Options": [
+        "Garth Brooks",
+        "Chris LeDoux",
+        "Gene Watson",
+        "George Strait"
+      ],
+      "Explanation": "George Strait made Terry Stafford's song one of the greatest rodeo ballads in history.",
+      "Id": "CTY-147",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who had a major hit with 'Sold (The Groundhogg-Hunting Single's Song)' about an auctioneer?",
+      "Options": [
+        "John Michael Montgomery",
+        "Billy Ray Cyrus",
+        "Trace Adkins",
+        "Joe Diffie"
+      ],
+      "Explanation": "John Michael Montgomery sang 'Sold (The Grundy County Auction Incident)' in 1995.",
+      "Id": "CTY-148",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which female country star recorded 'Kerosene' and 'Gunpowder & Lead'?",
+      "Options": [
+        "Miranda Lambert",
+        "Kacey Musgraves",
+        "Carrie Underwood",
+        "Ashley McBryde"
+      ],
+      "Explanation": "Miranda Lambert built her superstar career on fierce, outlaw-flavored country rock.",
+      "Id": "CTY-149",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who recorded 'I Like It, I Love It' in 1995, which became a staple goal horn song for the Nashville Predators?",
+      "Options": [
+        "Tracy Byrd",
+        "Alan Jackson",
+        "Tim McGraw",
+        "Clay Walker"
+      ],
+      "Explanation": "Tim McGraw scored a multi-week #1 hit with 'I Like It, I Love It'.",
+      "Id": "CTY-150",
+      "Category": "Country Music",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    }
+  ]
+}

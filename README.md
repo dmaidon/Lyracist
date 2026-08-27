@@ -1,12 +1,42 @@
-<!-- Edited on Aug 27, 2026 @ 07:14:00 -> Update README with intelligent Name and Artist proper-casing engine details -->
-Last Edit: Aug 27, 2026 - Intelligent Name, Artist, and Song Title Proper-Casing Engine across all apps
+<!-- Edited on Aug 27, 2026 @ 16:00:00 -> Added Knockout Trivia game module, multi-monitor routing, Help system, and 3-column settings -->
+Last Edit: Aug 27, 2026 - Knockout Trivia game module with multi-monitor routing, Help system, 3-column settings, and question randomization
 # Lyracist Pro
     
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module (`KnockoutTrivia.exe`), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
 
 ---
     
 ## Key Features
+
+### 🥊 Knockout Trivia Standalone Game Module (`KnockoutTrivia`)
+- **Fast-Paced Bar-Friendly Elimination Game**:
+  - Standalone MVVM WPF desktop app targeting .NET 10 with modern Fluent UI dark styling (`WPF-UI`).
+  - Compatible with the shared `Lyracist.Trivia` SQLite databases (`KoTrivia/Data/trivia.db`) and JSON trivia packs (`KoTrivia/Packs/*.json`).
+- **Horizontal Dynamic Scoreboard**:
+  - Dynamic strike-tinted player status bars: Green (0 strikes), Yellow (1 strike), Orange (2 strikes), and dimmed Red (Knocked Out / 3 strikes).
+  - **Shield Tokens**: Hold 0 to 3 shield tokens that absorb strikes when an incorrect answer is given.
+  - **Streak Meters**: 5-block streak progress meters that award a shield token and reset upon reaching 5 consecutive correct answers.
+- **⚡ Super Streak Scaryoke-Style Target Wheel**:
+  - Reaching the Super Streak threshold (default: 20 consecutive correct answers) triggers a rotary wheel containing all opponents who currently hold tokens.
+- **🔀 Automatic Question Randomization & Inter-Category Shuffling**:
+  - Full deck shuffling across all loaded SQLite databases and category packs on startup and game resets, ensuring categories are thoroughly mixed rather than presented in sequential category chunks. Includes on-demand DJ '🔀 Shuffle' control.
+- **❓ Comprehensive DJ Help & Rules Guide**:
+  - Built-in split-pane Help system covering game rules, elimination mechanics, shield token defense, 5-block streak meters, Super Streak wheels, live DJ adjudication, 16:9 banner projection, and configuration options.
+- **3-Column DJ Settings & Multi-Database Selection ListBox**:
+  - 3-column responsive layout preventing vertical scrolling:
+    * **Column 1**: Game scoring, question count, auto/manual flow buffers, and audio/visual FX toggles.
+    * **Column 2**: Shield caps, streak requirements, and Super Streak wheel settings.
+    * **Column 3**: Interactive Database & Pack selection ListBox (with individual checkboxes, 'All' and 'Clear' buttons, and live question count badges) alongside Multi-Monitor & TV Routing controls.
+- **🖥️ Multi-Monitor Routing & Dedicated Audience Projection Window (`AudienceWindow`)**:
+  - Automatically enumerates all connected physical displays, laptops, secondary TVs, and venue projectors with hardware names and resolutions.
+  - Independent monitor routing: DJ Host Screen assignment and Audience Big Screen assignment.
+  - Dedicated borderless 16:9 auto-scaling **Audience Window** (`AudienceWindow.xaml`) that displays high-contrast questions, reveals, rotary wheels, and scoreboards to the crowd while keeping DJ controls (scoring, adjudication, settings, help) private to the host.
+  - Titlebar quick-action **`📺 Audience Screen`** button for instant one-click projection toggle.
+- **16:9 Auto-Scaling Presentation Banners**:
+  - Dynamically generated 16:9 game-show screens (Intro, Intermission, Champion Winner, Elimination, Super Streak) with official Knockout Trivia branding (`kotrv_logo.png` / `kotrv_logo.webp`).
+- **DJ Control Center & Multi-Monitor Support**:
+  - Dual-monitor routing for DJ host console and audience screens.
+  - Configurable points per answer, question limits, timers, token caps, super streak thresholds, and audio/visual toggles.
 
 ### 🔤 Intelligent Name & Artist Capitalization Engine (`All Applications`)
 - **Centralized Smart Proper-Casing (`Shared/NameFormatting.cs`)**:

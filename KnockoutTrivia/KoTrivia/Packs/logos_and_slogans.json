@@ -1,0 +1,2408 @@
+{
+  "PackId": "logos-and-slogans",
+  "Title": "Logos, Brands & Commercial Slogans",
+  "Category": "Logos & Brand Slogans",
+  "Description": "150 curated questions covering Logos & Brand Slogans.",
+  "Questions": [
+    {
+      "Id": "LS-001",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which athletic apparel brand uses the famous tagline 'Just Do It'?",
+      "Options": [
+        "Adidas",
+        "Puma",
+        "Under Armour",
+        "Nike"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Wieden+Kennedy coined 'Just Do It' for Nike in 1988.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-002",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What fast-food restaurant chain has the slogan 'I'm Lovin' It'?",
+      "Options": [
+        "KFC",
+        "Burger King",
+        "McDonald's",
+        "Wendy's"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "McDonald's launched the global 'I'm Lovin' It' campaign featuring Justin Timberlake in 2003.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-003",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What candy is famous for the slogan 'Melts in your mouth, not in your hands'?",
+      "Options": [
+        "Reese's Pieces",
+        "M&M's",
+        "Skittles",
+        "Smarties"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Forrest Mars Sr. created M&M's with a hard candy shell so soldiers in WWII could carry chocolate without melting.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-004",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What restaurant chain famously challenged competitors with the catchphrase 'Where's the beef?' in 1984?",
+      "Options": [
+        "Arby's",
+        "Wendy's",
+        "Hardee's",
+        "Jack in the Box"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Clara Peller starred in the iconic Wendy's commercials poking fun at competitors' small burger patties.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-005",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the mascot of Kellogg's Frosted Flakes who says 'They're Gr-r-reat!'?",
+      "Options": [
+        "Snap, Crackle and Pop",
+        "Dig 'Em Frog",
+        "Tony the Tiger",
+        "Toucan Sam"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Tony the Tiger has been voiced by Thurl Ravenscroft and other voice actors since 1952.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-006",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which insurance company is famous for its animated green gecko with a British accent?",
+      "Options": [
+        "GEICO",
+        "State Farm",
+        "Allstate",
+        "Progressive"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The GEICO Gecko debuted in 1999 during the Screen Actors Guild strike.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-007",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What technology company's logo is a silhouette of an apple with a single bite taken out?",
+      "Options": [
+        "Microsoft",
+        "Google",
+        "Apple Inc.",
+        "IBM"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Rob Janoff designed the iconic Apple logo with a bite to give it scale so it wouldn't be mistaken for a cherry.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-008",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What car company uses the tagline 'The Ultimate Driving Machine'?",
+      "Options": [
+        "Mercedes-Benz",
+        "BMW",
+        "Audi",
+        "Porsche"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "BMW has used 'The Ultimate Driving Machine' in North America since 1974.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-009",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What fast-food restaurant's slogan is 'Finger Lickin' Good'?",
+      "Options": [
+        "Bojangles",
+        "KFC (Kentucky Fried Chicken)",
+        "Popeyes",
+        "Church's Chicken"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Colonel Harland Sanders popularized the famous KFC slogan in the 1950s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-010",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What company asks consumers 'What's in your wallet?' in its credit card commercials?",
+      "Options": [
+        "Discover",
+        "Chase",
+        "American Express",
+        "Capital One"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Capital One popularized 'What's in your wallet?' with celebrity spokespersons.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-011",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which energy drink company's slogan promises that it 'Gives You Wings'?",
+      "Options": [
+        "Rockstar",
+        "5-Hour Energy",
+        "Red Bull",
+        "Monster Energy"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Red Bull was created in Austria by Dietrich Mateschitz and Chaleo Yoovidhya.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-012",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which battery brand features a pink bunny with sunglasses beating a bass drum?",
+      "Options": [
+        "Energizer",
+        "Duracell",
+        "Rayovac",
+        "Panasonic"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Energizer Bunny debuted in 1989 as a parody of a Duracell mascot.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-013",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the slogan of Subway restaurants?",
+      "Options": [
+        "Have It Your Way",
+        "Better Ingredients, Better Pizza",
+        "Think Outside the Bun",
+        "Eat Fresh"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Subway emphasizes fresh vegetables and baked bread with 'Eat Fresh'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-014",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What insurance company uses the motto 'Like a good neighbor, State Farm is there'?",
+      "Options": [
+        "Allstate",
+        "Farmers Insurance",
+        "Nationwide",
+        "State Farm"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Barry Manilow famously wrote the State Farm commercial jingle in 1971.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-015",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What candy's tagline invites people to 'Taste the Rainbow'?",
+      "Options": [
+        "Starburst",
+        "Skittles",
+        "Jolly Rancher",
+        "M&M's"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Skittles launched the 'Taste the Rainbow' theme in 1994.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-016",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What coffee company's logo features a twin-tailed siren mermaid?",
+      "Options": [
+        "Peet's Coffee",
+        "Dunkin'",
+        "Tim Hortons",
+        "Starbucks"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Starbucks took its name and maritime siren logo from the seafaring history of Seattle.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-017",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which shipping company has a hidden right-pointing arrow between the letters 'E' and 'x' in its logo?",
+      "Options": [
+        "DHL",
+        "UPS",
+        "USPS",
+        "FedEx"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Lindon Leader designed the FedEx logo in 1994, incorporating the optical illusion arrow.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-018",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What fast-food burger chain has the slogan 'Have It Your Way'?",
+      "Options": [
+        "Five Guys",
+        "In-N-Out",
+        "Wendy's",
+        "Burger King"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Burger King introduced 'Have It Your Way' in 1974 to emphasize custom orders.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-019",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What insurance company claims 'You're in good hands with...'?",
+      "Options": [
+        "Nationwide",
+        "Liberty Mutual",
+        "State Farm",
+        "Allstate"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Allstate has featured actor Dennis Haysbert as its deep-voiced spokesperson since 2003.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-020",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What candy bar claims 'You're not you when you're hungry'?",
+      "Options": [
+        "Kit Kat",
+        "Milky Way",
+        "Snickers",
+        "Twix"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Snickers launched the campaign during the 2010 Super Bowl starring Betty White.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-021",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What car company's luxury logo consists of four interlocking metal rings representing four merged auto manufacturers?",
+      "Options": [
+        "Subaru",
+        "Audi",
+        "Mercedes-Benz",
+        "Toyota"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The four rings represent Audi, DKW, Horch, and Wanderer forming Auto Union in 1932.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-022",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What potato chip brand boasted 'Betcha can't eat just one'?",
+      "Options": [
+        "Ruffles",
+        "Lay's",
+        "Doritos",
+        "Pringles"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Lay's launched the campaign in the 1960s starring actor Bert Lahr.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-023",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous slogan was used by De Beers to promote diamond engagement rings since 1947?",
+      "Options": [
+        "Diamonds Are a Girl's Best Friend",
+        "Nothing Beats a Diamond",
+        "A Diamond Is Forever",
+        "Pure Brilliance"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Copywriter Frances Gerety wrote 'A Diamond Is Forever' for N.W. Ayer & Son.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-024",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of gum invites consumers to 'Double your pleasure, double your fun'?",
+      "Options": [
+        "Juicy Fruit",
+        "Wrigley's Doublemint Gum",
+        "Big Red",
+        "Spearmint"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Wrigley featured real-life identical twins in its Doublemint commercials for decades.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-025",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the yellow arrow underneath the 'Amazon' logo point from and to?",
+      "Options": [
+        "A package smile",
+        "From 'a' to 'z' (indicating they sell everything from A to Z)",
+        "Smiling customer only",
+        "From left to right (speed)"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The curved smile arrow connects 'a' to 'z' and resembles a happy smile.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-026",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which hotel chain promises that 'We'll leave the light on for you'?",
+      "Options": [
+        "Holiday Inn",
+        "Motel 6",
+        "Super 8",
+        "Best Western"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Tom Bodett has voiced the down-to-earth Motel 6 radio commercials since 1986.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-027",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What beer claims to be 'The King of Beers'?",
+      "Options": [
+        "Coors Light",
+        "Budweiser",
+        "Heineken",
+        "Miller Lite"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Anheuser-Busch adopted 'The King of Beers' for Budweiser in the late 19th century.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-028",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What candy asks consumers 'Gimme a break, break me off a piece of that...'?",
+      "Options": [
+        "Butterfinger",
+        "Twix",
+        "Kit Kat Bar",
+        "Hershey Bar"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Michael A. Levine composed the famous Kit Kat commercial jingle in 1986.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-029",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What luxury jewelry company is famous for its proprietary robin's egg blue packaging color (No. 1837)?",
+      "Options": [
+        "Harry Winston",
+        "Tiffany & Co.",
+        "Van Cleef & Arpels",
+        "Cartier"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Tiffany Blue' has been used for the iconic Blue Box since 1845.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-030",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of soup promoted itself with the jingle 'Mmm, Mmm, Good'?",
+      "Options": [
+        "Swanson",
+        "Progresso",
+        "Lipton",
+        "Campbell's Soup"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Campbell's began using 'Mmm! Mmm! Good!' on radio broadcasts in the 1930s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-031",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What car brand's logo is a stylized depiction of the Pleiades star cluster (Seven Sisters)?",
+      "Options": [
+        "Hyundai",
+        "Subaru",
+        "Nissan",
+        "Mazda"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "'Subaru' is the Japanese name for the Pleiades constellation M45.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-032",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What company used the slogan 'When it absolutely, positively has to be there overnight'?",
+      "Options": [
+        "FedEx",
+        "UPS",
+        "DHL",
+        "Emery Worldwide"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "FedEx established its overnight delivery dominance with this famous slogan in 1978.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-033",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What breakfast cereal is 'Kid-tested, mother-approved'?",
+      "Options": [
+        "Cheerios",
+        "Wheaties",
+        "Life",
+        "Kix"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "General Mills introduced the Kix tagline in 1978.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-034",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What pizza chain has the slogan 'Better Ingredients, Better Pizza'?",
+      "Options": [
+        "Papa John's",
+        "Domino's",
+        "Pizza Hut",
+        "Little Caesars"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Papa John's trademarked the slogan in the 1990s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-035",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the doughy white baker mascot for the Pillsbury brand?",
+      "Options": [
+        "Baking Bob",
+        "Poppin' Fresh (Pillsbury Doughboy)",
+        "Chef Boyardee",
+        "Little Baker"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Poppin' Fresh debuted in 1965 giggling when poked in the stomach.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-036",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which automobile manufacturer has a three-pointed star logo inside a circle?",
+      "Options": [
+        "Chrysler",
+        "Mercedes-Benz",
+        "Tesla",
+        "Mitsubishi"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Gottlieb Daimler's three-pointed star represented motorized dominance on land, sea, and air.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-037",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What dairy product brand uses the slogan 'Got Milk?' created in 1993?",
+      "Options": [
+        "Dean Foods",
+        "Horizon Organic",
+        "California Milk Processor Board",
+        "Borden"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Goodby Silverstein & Partners created 'Got Milk?' directed by Michael Bay.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-038",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What cracker brand's slogan asks 'Who's that eating my...'?",
+      "Options": [
+        "Ritz Crackers",
+        "Club Crackers",
+        "Wheat Thins",
+        "Cheez-It"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Ritz Crackers were introduced by Nabisco in 1934 during the Great Depression.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-039",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of potato chips has the slogan 'Once you pop, the fun don't stop'?",
+      "Options": [
+        "Doritos",
+        "Stax",
+        "Pringles",
+        "Lay's"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Pringles come in a distinctive cylindrical can designed by Fred Baur.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-040",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which retail chain uses the slogan 'Expect More. Pay Less.'?",
+      "Options": [
+        "Kmart",
+        "Walmart",
+        "Target",
+        "Costco"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Target adopted the red bullseye logo and the slogan in the 1990s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-041",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the Michelin tire mascot made out of stacked white tires?",
+      "Options": [
+        "Pierre le Pneu",
+        "Rubber Ralph",
+        "Tire Tim",
+        "Bibendum (The Michelin Man)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Édouard and André Michelin created Bibendum in 1898 from a stack of bicycle tires.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-042",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was Nike's original company name when founded by Phil Knight and Bill Bowerman in 1964?",
+      "Options": [
+        "Blue Ribbon Sports",
+        "Olympus Athletics",
+        "Dimension Six",
+        "Bowerman Shoes"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Blue Ribbon Sports officially became Nike, Inc. (named for the Greek goddess of victory) in 1971.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-043",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "How much did graphic design student Carolyn Davidson get paid in 1971 to design Nike's iconic 'Swoosh' logo?",
+      "Options": [
+        "$500",
+        "$35",
+        "$50",
+        "$1,000"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "She was paid $35 ($2/hour), though Phil Knight later gifted her 500 shares of Nike stock.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-044",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is hidden in the mountain of the Toblerone chocolate logo?",
+      "Options": [
+        "A wolf",
+        "An eagle",
+        "A Swiss flag",
+        "A dancing bear"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "A silhouette of a bear is hidden in the Matterhorn mountain, representing Bern, Switzerland ('City of Bears').",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-045",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the name 'LEGO' mean, derived from the Danish phrase 'leg godt'?",
+      "Options": [
+        "'Smart toys'",
+        "'Little blocks'",
+        "'Play well'",
+        "'Build strong'"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Ole Kirk Christiansen coined LEGO from 'leg godt' meaning 'play well' in Danish.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-046",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the first product ever scanned with a UPC barcode in a supermarket in June 1974?",
+      "Options": [
+        "A 10-pack of Wrigley's Juicy Fruit chewing gum",
+        "A can of Campbell's Soup",
+        "A box of Kellogg's Corn Flakes",
+        "A bottle of Coca-Cola"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Scanned at a Marsh Supermarket in Troy, Ohio; the scanner is now in the Smithsonian.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-047",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the monocled, top-hat-wearing peanut mascot for Planters?",
+      "Options": [
+        "Count Peanut",
+        "Peanut Pete",
+        "Mr. Peanut (Bartholomew Richard Fitzgerald-Smythe)",
+        "Sir Peanut"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "A 14-year-old schoolboy named Antonio Gentile drew Mr. Peanut in a 1916 contest.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-048",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What fruit was original 7-Up soda formulated with when it debuted as 'Bib-Label Lithiated Lemon-Lime Soda' in 1929?",
+      "Options": [
+        "Lithium citrate (mood stabilizer)",
+        "Real Lime only",
+        "Pomegranate",
+        "Grapefruit juice"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "7-Up originally contained lithium citrate until the ingredient was banned by the FDA in 1948.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-049",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What animal is featured on the luxury logo of the Porsche automobile company?",
+      "Options": [
+        "A soaring falcon",
+        "A black prancing horse (from Stuttgart's coat of arms)",
+        "A charging bull",
+        "A roaring lion"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The horse honors Stuttgart, Germany, which was founded as a stud farm (Stutengarten).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-050",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the acronym 'IKEA' stand for?",
+      "Options": [
+        "Ingvar Kamprad Elmtaryd Agunnaryd",
+        "Ingmar's Knowledgeable Engineers Association",
+        "Innovative Kingdom of European Appliances",
+        "International Kitchen & Equipment Association"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Founder Ingvar Kamprad combined his initials with Elmtaryd (his family farm) and Agunnaryd (his hometown).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-051",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What cereal brand is known for the phrase 'Silky rabbit, Trix are for kids'?",
+      "Options": [
+        "Cocoa Puffs",
+        "Trix",
+        "Lucky Charms",
+        "Froot Loops"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Trix Rabbit has been attempting to eat a bowl of Trix since 1959.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-052",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What Mexican fast-food chain invites customers to 'Live Más'?",
+      "Options": [
+        "Taco Bell",
+        "Chipotle",
+        "Del Taco",
+        "Qdoba"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Taco Bell replaced 'Think Outside the Bun' with 'Live Más' in 2012.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-053",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of pain reliever claims to be 'The Everyday Miracle'?",
+      "Options": [
+        "Aleve",
+        "Bayer Aspirin",
+        "Tylenol",
+        "Advil"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Bayer trademarked the term Aspirin in 1899.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-054",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What chocolate candy asks 'There's no wrong way to eat a...'?",
+      "Options": [
+        "M&M's",
+        "Reese's Peanut Butter Cup",
+        "Butterfinger",
+        "Hershey Bar"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Reese's Peanut Butter Cups were invented by H.B. Reese in 1928.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-055",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What paper towel brand boasts of being 'The Quicker Picker Upper'?",
+      "Options": [
+        "Bounty",
+        "Brawny",
+        "Scott",
+        "Viva"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Procter & Gamble launched Bounty's 'Quicker Picker Upper' campaign in 1965 with Rosie the Waitress.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-056",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the slogan of cereal brand Wheaties?",
+      "Options": [
+        "Good to the Last Drop",
+        "They're Gr-r-reat!",
+        "The Breakfast of Champions",
+        "Snap! Crackle! Pop!"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Wheaties has featured iconic athletes on its orange boxes since the 1930s.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-057",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What coffee brand uses the slogan 'Good to the last drop', purportedly approved by Teddy Roosevelt?",
+      "Options": [
+        "Maxwell House",
+        "Folgers",
+        "Eight O'Clock",
+        "Chock full o'Nuts"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Maxwell House adopted the slogan in 1915 after Theodore Roosevelt reportedly praised it at The Hermitage.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-058",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of potato chips has the slogan 'Ruffles Have Ridges'?",
+      "Options": [
+        "Pringles",
+        "Cape Cod",
+        "Lay's",
+        "Ruffles"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Frito-Lay introduced Ruffles' crinkle-cut ridges in 1958.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-059",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What automotive manufacturer uses the slogan 'Built Ford Tough'?",
+      "Options": [
+        "Chevrolet",
+        "GMC",
+        "Ford",
+        "Dodge"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Ford launched the 'Built Ford Tough' campaign for the F-Series in 1977.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-060",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of credit card had the famous tagline 'Don't leave home without it'?",
+      "Options": [
+        "Visa",
+        "Mastercard",
+        "Discover",
+        "American Express"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Karl Malden and other celebrities starred in American Express Traveler's Cheques ads starting in 1975.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-061",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What coffee brand boasts that 'The best part of waking up is Folgers in your cup'?",
+      "Options": [
+        "Gevalia",
+        "Maxwell House",
+        "Nescafe",
+        "Folgers"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Folgers jingle was composed in 1984 by Susan Spiegel Solovay and Jerry Kanner.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-062",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of mayonnaise claims 'Bring out the Best Foods and bring out the best' (or Hellmann's)?",
+      "Options": [
+        "Kraft",
+        "Duke's",
+        "Miracle Whip",
+        "Hellmann's / Best Foods"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Richard Hellmann created the recipe in New York; Best Foods acquired the brand in 1927.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-063",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What credit card brand promises 'For everything else, there's Mastercard' following its 'Priceless' ads?",
+      "Options": [
+        "Mastercard",
+        "Amex",
+        "Discover",
+        "Visa"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "McCann Erickson created the award-winning 'Priceless' campaign in 1997.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-064",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What footwear brand's slogan is 'Off the Wall'?",
+      "Options": [
+        "Reebok",
+        "DC Shoes",
+        "Vans",
+        "Converse"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Vans originated in Anaheim, California in 1966 for skateboarders and surfers.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-065",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What retail giant uses the slogan 'Save Money. Live Better.'?",
+      "Options": [
+        "Walmart",
+        "Target",
+        "Costco",
+        "Sam's Club"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Walmart updated its slogan from 'Always Low Prices' to 'Save Money. Live Better.' in 2007.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-066",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What luxury car brand's logo is a charging golden bull?",
+      "Options": [
+        "Maserati",
+        "Alfa Romeo",
+        "Ferrari",
+        "Lamborghini"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Ferruccio Lamborghini was a Taurus by zodiac and passionate about Spanish bullfighting.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-067",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What chocolate mint brand is famous for the question 'How do you eat a...'?",
+      "Options": [
+        "Junior Mints",
+        "After Eight",
+        "Andes Mints",
+        "York Peppermint Pattie"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "York Peppermint Patties feature 'get the sensation' cooling winter breeze effects in ads.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-068",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What camera and film company had the slogan 'Share moments. Share life.' (and the 'Kodak moment')?",
+      "Options": [
+        "Fujifilm",
+        "Polaroid",
+        "Canon",
+        "Kodak"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "George Eastman founded Eastman Kodak in 1888 with the slogan 'You press the button, we do the rest.'",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-069",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What wireless phone company used the slogan 'Can you hear me now? Good' with the Test Man?",
+      "Options": [
+        "AT&T",
+        "Verizon",
+        "Sprint",
+        "T-Mobile"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Actor Paul Marcarelli played the Verizon Test Man from 2002 to 2011.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-070",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What luxury sports car logo features a trident inspired by the Fountain of Neptune in Bologna?",
+      "Options": [
+        "Bugatti",
+        "Maserati",
+        "Jaguar",
+        "Pagani"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Mario Maserati designed the trident logo based on the statue of Neptune in Piazza Maggiore.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-071",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What three colors comprise the three vertical stripes of the BMW M-division motorsports logo?",
+      "Options": [
+        "Light Blue, Dark Blue, and Red",
+        "Yellow, Black, and Red",
+        "Blue, Green, and Black",
+        "Red, White, and Blue"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Blue represents BMW, Red represents Texaco (early racing partner), and Purple/Dark Blue was their union.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-072",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the original name of Google when Larry Page and Sergey Brin began developing the search algorithm at Stanford in 1996?",
+      "Options": [
+        "BackRub",
+        "PageRank",
+        "Stanford Search",
+        "Googol"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "It was called BackRub because the system analyzed web 'backlinks' to estimate site importance.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-073",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What candy bar brand was named after Frank C. Mars's favorite racehorse?",
+      "Options": [
+        "Mars Bar",
+        "Snickers",
+        "3 Musketeers",
+        "Milky Way"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Snickers was named in 1930 after the Mars family's beloved horse who passed away before product launch.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-074",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the two-tailed female figure on the Starbucks coffee logo officially classified as?",
+      "Options": [
+        "A Mermaid",
+        "A Siren (twin-tailed mermaid)",
+        "A Nereid",
+        "A Valkyrie"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The image was derived from a 16th-century Norse woodcut of a twin-tailed siren.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-075",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which athletic brand takes its name from an African antelope (rhebok)?",
+      "Options": [
+        "Saucony",
+        "Asics",
+        "Puma",
+        "Reebok"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Founded in Bolton, England as J.W. Foster and Sons, renamed Reebok in 1958.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-076",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the acronym 'ASICS' stand for in Latin?",
+      "Options": [
+        "Ad Scientiam In Corpore Sano",
+        "Anima Sana In Corpore Sano ('A sound mind in a sound body')",
+        "Action Sport Innovation Company System",
+        "Athletics Sport International Corporation Shoes"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Founder Kihachiro Onitsuka adopted the Roman quote from Juvenal as his company philosophy in 1977.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-077",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous toy brand was named as a portmanteau of the Japanese words 'Pockette Monster'?",
+      "Options": [
+        "Digimon",
+        "Bakugan",
+        "Pokémon",
+        "Tamagotchi"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Satoshi Tajiri created Pocket Monsters, abbreviated to Pokémon in 1996.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-078",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What beverage company created the modern red-and-white image of Santa Claus in 1930s advertisements?",
+      "Options": [
+        "Budweiser",
+        "Dr Pepper",
+        "PepsiCo",
+        "The Coca-Cola Company"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Illustrator Haddon Sundblom painted Santa Claus for Coca-Cola ads starting in 1931.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-079",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the dog on the classic RCA Victor records logo listening to a gramophone?",
+      "Options": [
+        "Buster",
+        "Rover",
+        "Spot",
+        "Nipper"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Francis Barraud painted 'His Master's Voice' depicting his terrier Nipper listening to a phonograph.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-080",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What airline uses the logo of a red-robed kangaroo nicknamed 'The Flying Kangaroo'?",
+      "Options": [
+        "Qantas (Australia)",
+        "Singapore Airlines",
+        "Virgin Australia",
+        "Air New Zealand"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Qantas (Queensland and Northern Territory Aerial Services) introduced the kangaroo in 1944.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-081",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of cat food asks cats to 'Meow Meow Meow Meow'?",
+      "Options": [
+        "Whiskas",
+        "Friskies",
+        "Meow Mix",
+        "Purina Cat Chow"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Meow Mix theme song debuted in 1974 with singing cats and bouncing ball lyrics.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-082",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of hot dogs claims that 'Plump when you cook 'em'?",
+      "Options": [
+        "Oscar Mayer",
+        "Hebrew National",
+        "Ball Park Franks",
+        "Nathan's Famous"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Ball Park Franks were originally created for the Detroit Tigers at Tiger Stadium.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-083",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of tissues has become the generic name for facial tissues?",
+      "Options": [
+        "Kleenex",
+        "Scotties",
+        "Puffs",
+        "Charmin"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Kimberly-Clark introduced Kleenex in 1924 originally as a cold-cream remover.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-084",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of hot dogs boasts that they 'Answer to a higher authority'?",
+      "Options": [
+        "Farmer John",
+        "Oscar Mayer",
+        "Hebrew National",
+        "Nathan's"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Hebrew National emphasized their strict kosher standards in ads.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-085",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What department store mascot is a red-nosed reindeer created for a 1939 coloring book?",
+      "Options": [
+        "Rudolph the Red-Nosed Reindeer (Montgomery Ward)",
+        "Sears",
+        "Macy's",
+        "JCPenney"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Copywriter Robert L. May created Rudolph for Montgomery Ward department stores in Chicago.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-086",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What car brand has a logo featuring a stylized blue-and-white propeller (or Bavarian flag colors)?",
+      "Options": [
+        "Mercedes-Benz",
+        "BMW",
+        "Volkswagen",
+        "Porsche"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The blue and white quarters represent the official state colors of Bavaria.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-087",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of chewing gum is advertised with the phrase 'Get your shine on'?",
+      "Options": [
+        "Trident",
+        "Eclipse",
+        "Extra Gum",
+        "Orbit Gum"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Extra Gum is manufactured by the Wrigley Company.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-088",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of disinfectant spray claims to kill '99.9% of viruses and bacteria'?",
+      "Options": [
+        "Lysol",
+        "Clorox",
+        "Pine-Sol",
+        "Scrubbing Bubbles"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Lysol was introduced in Germany in 1889 to help end a cholera epidemic.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-089",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What airline has a heart logo and traded on the NYSE under the ticker symbol 'LUV'?",
+      "Options": [
+        "Southwest Airlines",
+        "JetBlue",
+        "Delta Air Lines",
+        "Spirit Airlines"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Southwest began operations out of Dallas Love Field in 1971.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-090",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of laundry detergent is known for the slogan 'Tide's in, dirt's out'?",
+      "Options": [
+        "Arm & Hammer",
+        "All",
+        "Gain",
+        "Tide"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Procter & Gamble introduced Tide in 1946 as the world's first heavy-duty synthetic detergent.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-091",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the name 'PEPSI' originate from, named in 1898 by pharmacist Caleb Bradham?",
+      "Options": [
+        "Peppermint flavoring",
+        "Phosphorus soda",
+        "Pepsin (digestive enzyme)",
+        "Pep (energy)"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Bradham formulated 'Brad's Drink' to aid digestion and renamed it Pepsi-Cola in 1898.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-092",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What is the name of the sailor boy and dog duo on the Cracker Jack box?",
+      "Options": [
+        "Skipper and Barnaby",
+        "Captain Jack and Spot",
+        "Sailor Jack and Bingo",
+        "Sailor Dan and Buster"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Sailor Jack was modeled after founder F.W. Rueckheim's young grandson Robert.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-093",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the name 'Adidas' stand for, created by its German founder?",
+      "Options": [
+        "Athletic Dynamic Innovation Dassler",
+        "Adler Dassler International",
+        "All Day I Dream About Sports",
+        "Adi Dassler (Adolf Dassler)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Adolf 'Adi' Dassler combined his nickname and surname in 1949 after splitting with his brother Rudi (Puma).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-094",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the original mascot for Wendy's restaurants modeled after?",
+      "Options": [
+        "A contest winner",
+        "Dave Thomas's wife",
+        "Melinda Lou 'Wendy' Thomas (founder Dave Thomas's daughter)",
+        "An illustration in a cookbook"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Dave Thomas named the restaurant and drew the pigtail logo after his 8-year-old daughter Wendy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-095",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What does the acronym 'M&M' stand for in M&M's candies?",
+      "Options": [
+        "More & More",
+        "Mars & Murrie (Forrest Mars and Bruce Murrie)",
+        "Modern & Miniature",
+        "Milk & Melt"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Bruce Murrie was the son of Hershey Chocolate president William Murrie, providing Hershey chocolate during WWII rationing.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-096",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What pizza chain's mascot says 'Pizza! Pizza!'?",
+      "Options": [
+        "Domino's",
+        "Chuck E. Cheese",
+        "Little Caesars",
+        "Papa John's"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Little Caesars introduced the catchphrase in 1979 offering two pizzas for the price of one.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-097",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What brand of toilet paper featured the animated bear family telling people 'Enjoy the go'?",
+      "Options": [
+        "Charmin",
+        "Cottonelle",
+        "Quilted Northern",
+        "Angel Soft"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Charmin Bears have starred in commercials since 2000.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-098",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What athletic brand's three-stripe logo is known as 'The Brand with the 3 Stripes'?",
+      "Options": [
+        "Fila",
+        "Puma",
+        "Adidas",
+        "Nike"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Adidas purchased the three-stripe trademark from Finnish sports brand Karhu in 1952.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-099",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the original flavor of filling inside Hostess Twinkies when invented in 1930?",
+      "Options": [
+        "Strawberry cream",
+        "Banana cream",
+        "Custard",
+        "Vanilla cream"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Hostess switched to vanilla cream during WWII when bananas were rationed.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "LS-100",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What do the four colors in the Microsoft Windows flag logo represent?",
+      "Options": [
+        "Red (Office), Green (Xbox/Services), Blue (Windows/Cloud), Yellow (Bing)",
+        "North, South, East, West",
+        "Earth, Air, Fire, Water",
+        "Spring, Summer, Autumn, Winter"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The 4 colored tiles align with major pillars of Microsoft's software and product ecosystem.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What famous slogan was introduced by Nike in 1988, inspired by the last words of Gary Gilmore?",
+      "Options": [
+        "'I Can.'",
+        "'Just Do It.'",
+        "'Find Your Greatness.'",
+        "'Impossible is Nothing.'"
+      ],
+      "Explanation": "Ad agency Wieden+Kennedy created Nike's iconic slogan 'Just Do It'.",
+      "Id": "LOG-101",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which fast-food chain has used the slogan 'Finger Lickin' Good' since the 1950s?",
+      "Options": [
+        "KFC (Kentucky Fried Chicken)",
+        "Church's Chicken",
+        "Chick-fil-A",
+        "Popeyes"
+      ],
+      "Explanation": "Colonel Harland Sanders popularized KFC's secret recipe of 11 herbs and spices.",
+      "Id": "LOG-102",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What animal is depicted leaping in the official logo of the sports apparel brand Puma?",
+      "Options": [
+        "Jaguar",
+        "Puma / Cougar",
+        "Leopard",
+        "Cheetah"
+      ],
+      "Explanation": "Founded by Rudolf Dassler in Germany, Puma uses a jumping big cat silhouette.",
+      "Id": "LOG-103",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which insurance company features the animated Australian Gecko as its mascot with '15 minutes could save you 15% or more'?",
+      "Options": [
+        "Progressive",
+        "GEICO",
+        "State Farm",
+        "Allstate"
+      ],
+      "Explanation": "The GEICO Gecko debuted during the 1999–2000 television season.",
+      "Id": "LOG-104",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What luxury sports car manufacturer features a black prancing stallion on a yellow shield in its badge?",
+      "Options": [
+        "Lamborghini",
+        "Porsche",
+        "Ferrari",
+        "Maserati"
+      ],
+      "Explanation": "Enzo Ferrari used the prancing horse ('Cavallino Rampante') of WWI ace Francesco Baracca.",
+      "Id": "LOG-105",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which candy brand used the long-running slogan 'Melts in your mouth, not in your hand'?",
+      "Options": [
+        "Reese's Pieces",
+        "M&M's",
+        "Smarties",
+        "Skittles"
+      ],
+      "Explanation": "Forrest Mars Sr. created M&M's candy shell to prevent chocolate from melting in military rations.",
+      "Id": "LOG-106",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What tech company used the slogan 'Think Different' with posters of Albert Einstein, Martin Luther King, and Gandhi?",
+      "Options": [
+        "Intel",
+        "Microsoft",
+        "Apple",
+        "IBM"
+      ],
+      "Explanation": "Apple launched the 'Think Different' campaign in 1997 upon Steve Jobs' return.",
+      "Id": "LOG-107",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which car brand's logo consists of four interlocking metal rings representing four merged companies?",
+      "Options": [
+        "Volkswagen",
+        "Audi",
+        "BMW",
+        "Mercedes-Benz"
+      ],
+      "Explanation": "The four rings represent the merger of Audi, DKW, Horch, and Wanderer into Auto Union.",
+      "Id": "LOG-108",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What battery brand uses an energetic pink robotic bunny beating a bass drum in its advertisements?",
+      "Options": [
+        "Panasonic",
+        "Duracell",
+        "Energizer",
+        "Rayovac"
+      ],
+      "Explanation": "The Energizer Bunny debuted in 1989 parodying Duracell's European mascot.",
+      "Id": "LOG-109",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which fast-food chain's slogan since 1974 promised customers: 'Have It Your Way'?",
+      "Options": [
+        "Burger King",
+        "Hardee's",
+        "McDonald's",
+        "Wendy's"
+      ],
+      "Explanation": "Burger King emphasized customizable Whoppers made to order.",
+      "Id": "LOG-110",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What candy brand tells customers to 'Taste the Rainbow'?",
+      "Options": [
+        "Starburst",
+        "Jolly Rancher",
+        "Airheads",
+        "Skittles"
+      ],
+      "Explanation": "Wrigley's Skittles feature colorful fruit flavors.",
+      "Id": "LOG-111",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which company's logo is a green, two-tailed mermaid or Siren crowned on a circular green badge?",
+      "Options": [
+        "Peet's Coffee",
+        "Caribou Coffee",
+        "Starbucks Coffee",
+        "Dunkin'"
+      ],
+      "Explanation": "Starbucks adopted the 16th-century Norse woodcut siren symbol in Seattle in 1971.",
+      "Id": "LOG-112",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What company used the slogan 'The Ultimate Driving Machine' for decades?",
+      "Options": [
+        "Mercedes-Benz",
+        "BMW",
+        "Audi",
+        "Porsche"
+      ],
+      "Explanation": "Ad agency Ammirati & Puris created the slogan for BMW of North America in 1973.",
+      "Id": "LOG-113",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which delivery company is known for its fleet of brown trucks and the slogan 'What can Brown do for you?'?",
+      "Options": [
+        "UPS (United Parcel Service)",
+        "USPS",
+        "DHL",
+        "FedEx"
+      ],
+      "Explanation": "UPS's Pullman brown color was chosen in 1919 for its clean, professional appearance.",
+      "Id": "LOG-114",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What shape is hidden in the negative space between the letters 'E' and 'x' in the FedEx logo?",
+      "Options": [
+        "A forward-pointing arrow",
+        "A lightning bolt",
+        "A star",
+        "A package"
+      ],
+      "Explanation": "Designer Lindon Leader designed the famous hidden arrow in 1994.",
+      "Id": "LOG-115",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which company is known for the slogan 'Like a good neighbor, State Farm is there'?",
+      "Options": [
+        "Nationwide",
+        "Liberty Mutual",
+        "Allstate",
+        "State Farm"
+      ],
+      "Explanation": "Barry Manilow famously wrote the State Farm jingle in 1971.",
+      "Id": "LOG-116",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What cereal brand features Tony the Tiger roaring 'They're Gr-r-reat!'?",
+      "Options": [
+        "Frosted Mini-Wheats",
+        "Kellogg's Frosted Flakes",
+        "Trix",
+        "Cap'n Crunch"
+      ],
+      "Explanation": "Thurl Ravenscroft provided the booming voice for Tony the Tiger for over 50 years.",
+      "Id": "LOG-117",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which company's logo features a colorful peacock with six colored feathers representing its broadcast divisions?",
+      "Options": [
+        "NBC",
+        "ABC",
+        "PBS",
+        "CBS"
+      ],
+      "Explanation": "NBC introduced the peacock in 1956 to promote color television broadcasting.",
+      "Id": "LOG-118",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What watch brand uses a five-pointed golden coronet / crown as its official logo?",
+      "Options": [
+        "Rolex",
+        "Breitling",
+        "Omega",
+        "TAG Heuer"
+      ],
+      "Explanation": "Rolex's crown logo embodies its slogan 'A Crown for Every Achievement'.",
+      "Id": "LOG-119",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which potato chip brand used the challenge slogan 'Betcha can't eat just one'?",
+      "Options": [
+        "Lay's",
+        "Pringles",
+        "Doritos",
+        "Ruffles"
+      ],
+      "Explanation": "Lay's potato chips introduced the slogan in 1963 featuring actor Bert Lahr.",
+      "Id": "LOG-120",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What company uses the slogan 'Every kiss begins with Kay'?",
+      "Options": [
+        "Zales",
+        "Jared",
+        "Kay Jewelers",
+        "Tiffany & Co."
+      ],
+      "Explanation": "Kay Jewelers is one of America's largest specialty jewelry chains.",
+      "Id": "LOG-121",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which automotive company features a three-pointed star inside a circle symbolizing dominance on land, sea, and air?",
+      "Options": [
+        "Mitsubishi",
+        "Volvo",
+        "BMW",
+        "Mercedes-Benz"
+      ],
+      "Explanation": "Gottlieb Daimler designed the three-pointed star in 1909.",
+      "Id": "LOG-122",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What chocolate bar used the slogan 'You're not you when you're hungry'?",
+      "Options": [
+        "Snickers",
+        "Milky Way",
+        "Butterfinger",
+        "Twix"
+      ],
+      "Explanation": "The campaign debuted at Super Bowl XLIV in 2010 starring Betty White.",
+      "Id": "LOG-123",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which company features the silhouette of Mickey Mouse's circular ears as its global corporate emblem?",
+      "Options": [
+        "Universal Studios",
+        "DreamWorks",
+        "Warner Bros.",
+        "The Walt Disney Company"
+      ],
+      "Explanation": "The three circles representing Mickey's head and ears are recognized worldwide.",
+      "Id": "LOG-124",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What soft drink brand used the famous 1970s slogan 'It's the Real Thing'?",
+      "Options": [
+        "7UP",
+        "Coca-Cola",
+        "Dr Pepper",
+        "Pepsi"
+      ],
+      "Explanation": "Coca-Cola used 'It's the Real Thing' and the 'I'd Like to Buy the World a Coke' hilltop ad in 1971.",
+      "Id": "LOG-125",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which shoe brand features three parallel diagonal stripes across all its footwear and apparel?",
+      "Options": [
+        "Adidas",
+        "New Balance",
+        "Puma",
+        "Reebok"
+      ],
+      "Explanation": "Adolf 'Adi' Dassler founded Adidas and acquired the 3-stripe trademark from Karhu in 1952.",
+      "Id": "LOG-126",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What is the slogan of Disneyland and the Magic Kingdom?",
+      "Options": [
+        "'Where Dreams Come True'",
+        "'Discover the Magic'",
+        "'The Happiest Place on Earth'",
+        "'The Most Magical Place on Earth'"
+      ],
+      "Explanation": "Disneyland in California is 'The Happiest Place on Earth'; Walt Disney World is 'The Most Magical Place on Earth'.",
+      "Id": "LOG-127",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which airline used the classic slogan 'Fly the Friendly Skies'?",
+      "Options": [
+        "United Airlines",
+        "Delta Air Lines",
+        "Southwest Airlines",
+        "American Airlines"
+      ],
+      "Explanation": "United Airlines introduced the famous slogan in 1965.",
+      "Id": "LOG-128",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What brand of cereal features a leprechaun named Lucky advertising 'Hearts, Stars, Horseshoes, Clovers and Blue Moons'?",
+      "Options": [
+        "Cocoa Puffs",
+        "Trix",
+        "Lucky Charms",
+        "Froot Loops"
+      ],
+      "Explanation": "Lucky the Leprechaun proudly claims his cereal is 'Magically Delicious!'.",
+      "Id": "LOG-129",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which credit card company used the slogan 'Don't leave home without it'?",
+      "Options": [
+        "Mastercard",
+        "Discover",
+        "Visa",
+        "American Express"
+      ],
+      "Explanation": "American Express featured Karl Malden and famous travelers in the 1970s and 1980s.",
+      "Id": "LOG-130",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What luxury jewelry retailer is famous for its trademarked robin's-egg blue gift boxes tied with white satin ribbons?",
+      "Options": [
+        "Bulgari",
+        "Harry Winston",
+        "Cartier",
+        "Tiffany & Co."
+      ],
+      "Explanation": "Tiffany Blue (PMS 1837) has been used on Tiffany boxes since 1845.",
+      "Id": "LOG-131",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which department store used the slogan 'Expect More. Pay Less.' and features a red bullseye logo?",
+      "Options": [
+        "Kmart",
+        "Kohl's",
+        "Target",
+        "Walmart"
+      ],
+      "Explanation": "Target adopted the red bullseye in 1962.",
+      "Id": "LOG-132",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What company uses the slogan 'Quality never goes out of style' and has a Two-Horse leather patch on its jeans?",
+      "Options": [
+        "Wrangler",
+        "Levi Strauss & Co. (Levi's)",
+        "Calvin Klein",
+        "Lee"
+      ],
+      "Explanation": "The Two-Horse brand trademark was first used on Levi's 501 jeans in 1886.",
+      "Id": "LOG-133",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which coffee brand used the morning wake-up jingle 'The best part of wakin' up is Folgers in your cup'?",
+      "Options": [
+        "Eight O'Clock",
+        "Maxwell House",
+        "Gevalia",
+        "Folgers"
+      ],
+      "Explanation": "Composed in 1984, the Folgers jingle is one of the most recognized advertising songs in history.",
+      "Id": "LOG-134",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What video game company used the 1990s marketing slogan 'Genesis does what Nintendon't'?",
+      "Options": [
+        "Sony",
+        "Atari",
+        "NEC",
+        "Sega"
+      ],
+      "Explanation": "Sega ran aggressive ad campaigns highlighting the speed of the 16-bit Genesis.",
+      "Id": "LOG-135",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which car rental company used the slogan 'We try harder' acknowledging its #2 position behind Hertz?",
+      "Options": [
+        "National",
+        "Enterprise",
+        "Avis",
+        "Budget"
+      ],
+      "Explanation": "Created by DDB in 1962, the campaign dramatically grew Avis's market share.",
+      "Id": "LOG-136",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What motorcycle company's logo is the 'Bar & Shield' emblem first trademarked in 1910?",
+      "Options": [
+        "Ducati",
+        "Indian Motorcycle",
+        "Harley-Davidson",
+        "Triumph"
+      ],
+      "Explanation": "Harley-Davidson's Bar & Shield is one of the most tattooed corporate logos in the world.",
+      "Id": "LOG-137",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which cleaning product brand featured Mr. Clean, a muscular bald man with a gold hoop earring?",
+      "Options": [
+        "Mr. Clean (Procter & Gamble)",
+        "Pine-Sol",
+        "Fabuloso",
+        "Lysol"
+      ],
+      "Explanation": "Mr. Clean debuted in 1958 and became a household staple.",
+      "Id": "LOG-138",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What company uses the tagline 'Belong Anywhere' and a looped coral logo called the 'Bélo'?",
+      "Options": [
+        "Airbnb",
+        "Booking.com",
+        "Uber",
+        "Expedia"
+      ],
+      "Explanation": "Airbnb rebranded in 2014 with the Bélo symbol representing people, places, love, and Airbnb.",
+      "Id": "LOG-139",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which chewing gum brand used the twin jingle 'Double your pleasure, double your fun'?",
+      "Options": [
+        "Spearmint",
+        "Big Red",
+        "Juicy Fruit",
+        "Wrigley's Doublemint"
+      ],
+      "Explanation": "Wrigley's featured real-life identical twins in its classic television commercials.",
+      "Id": "LOG-140",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What computer brand's logo is four colored squares (Red, Green, Blue, Yellow) forming a window?",
+      "Options": [
+        "Microsoft Windows",
+        "Lenovo",
+        "Google Chrome",
+        "Intel"
+      ],
+      "Explanation": "The four-color window symbol has represented Microsoft Windows since Windows 95.",
+      "Id": "LOG-141",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which potato crisp brand is packaged in a cylindrical can and asks 'Once you pop, the fun don't stop'?",
+      "Options": [
+        "Lay's Stax",
+        "Doritos",
+        "Pringles",
+        "Cheetos"
+      ],
+      "Explanation": "Pringles feature the mustache-wearing mascot Julius Pringle.",
+      "Id": "LOG-142",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What motor oil brand features a green oval badge with red and white lettering founded in England in 1899?",
+      "Options": [
+        "Valvoline",
+        "Mobil 1",
+        "Pennzoil",
+        "Castrol"
+      ],
+      "Explanation": "Castrol's name was derived from adding castor oil to their lubricants.",
+      "Id": "LOG-143",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which automotive brand's emblem is the 'Blue Oval' with white Spencerian script introduced by Henry Ford?",
+      "Options": [
+        "Chevrolet",
+        "Chrysler",
+        "Dodge",
+        "Ford"
+      ],
+      "Explanation": "The Ford script was designed by Childe Harold Wills in 1907.",
+      "Id": "LOG-144",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What credit card company ran the 'Priceless' ad campaign listing everyday costs and 'There are some things money can't buy'?",
+      "Options": [
+        "Visa",
+        "Mastercard",
+        "Discover",
+        "American Express"
+      ],
+      "Explanation": "The 'Priceless' campaign debuted in 1997 with a father taking his son to a baseball game.",
+      "Id": "LOG-145",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which ice cream chain is famous for '31 Flavors' represented by the pink '31' hidden inside the 'B' and 'R' of its logo?",
+      "Options": [
+        "Dairy Queen",
+        "Cold Stone Creamery",
+        "Ben & Jerry's",
+        "Baskin-Robbins"
+      ],
+      "Explanation": "Baskin-Robbins was founded by Burt Baskin and Irv Robbins in Glendale, California.",
+      "Id": "LOG-146",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What battery brand uses the slogan 'Trusted Everywhere' with a copper top battery design?",
+      "Options": [
+        "Energizer",
+        "Rayovac",
+        "EverActive",
+        "Duracell"
+      ],
+      "Explanation": "Duracell's two-tone copper and black casing is trademarked worldwide.",
+      "Id": "LOG-147",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which restaurant chain is famous for the catchphrase 'Eat Mor Chikin' painted on billboards by mischievous cows?",
+      "Options": [
+        "Zaxby's",
+        "KFC",
+        "Chick-fil-A",
+        "Boston Market"
+      ],
+      "Explanation": "The 'Eat Mor Chikin' cows campaign debuted in 1995.",
+      "Id": "LOG-148",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What camera and film company used the slogan 'Share moments. Share life.' and 'For Kodak moments'?",
+      "Options": [
+        "Kodak",
+        "Fujifilm",
+        "Polaroid",
+        "Canon"
+      ],
+      "Explanation": "The phrase 'a Kodak moment' entered the English lexicon to describe picture-perfect memories.",
+      "Id": "LOG-149",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which deodorant brand for men used the marketing slogan 'The Axe Effect'?",
+      "Options": [
+        "Axe (Lynx)",
+        "Degree",
+        "Old Spice",
+        "Right Guard"
+      ],
+      "Explanation": "Unilever's Axe body spray targeted young men across global markets.",
+      "Id": "LOG-150",
+      "Category": "Logos & Brand Slogans",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    }
+  ]
+}

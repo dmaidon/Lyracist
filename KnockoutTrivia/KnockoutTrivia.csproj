@@ -1,0 +1,44 @@
+<!-- Created on Aug 27, 2026 @ 14:35:00 -> KnockoutTrivia project configuration with WPF-UI, CommunityToolkit.Mvvm, and SQLite -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <Company>PAROLE Software</Company>
+    <Copyright>Copyright © 2026 PAROLE Software</Copyright>
+    <Title>Knockout Trivia</Title>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <AssemblyVersion>26.8.27.14</AssemblyVersion>
+    <FileVersion>26.8.27.14</FileVersion>
+    <Authors>Dennis N. Maidon</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="KoTrivia\Assets\kotrv_logo.png" />
+    <Resource Include="KoTrivia\Assets\kotrv_logo.webp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="KoTrivia\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Globals.cs" Link="Shared\Globals.cs" />
+    <Compile Include="..\Shared\MonitorInfo.cs" Link="Shared\MonitorInfo.cs" />
+    <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="Shared\TextBoxSelectionHelper.cs" />
+    <Compile Include="..\Shared\NameFormatting.cs" Link="Shared\NameFormatting.cs" />
+  </ItemGroup>
+
+</Project>

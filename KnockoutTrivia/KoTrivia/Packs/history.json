@@ -1,0 +1,2408 @@
+{
+  "PackId": "history",
+  "Title": "World & American History",
+  "Category": "History",
+  "Description": "150 curated questions covering History.",
+  "Questions": [
+    {
+      "Id": "HIS-001",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first President of the United States?",
+      "Options": [
+        "Benjamin Franklin",
+        "George Washington",
+        "Thomas Jefferson",
+        "John Adams"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "George Washington served as the first US President from 1789 to 1797.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-002",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year did the United States declare its independence?",
+      "Options": [
+        "1789",
+        "1776",
+        "1781",
+        "1775"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Declaration of Independence was adopted on July 4, 1776.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-003",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which ancient civilization built the Colosseum in Rome?",
+      "Options": [
+        "The Persians",
+        "The Romans",
+        "The Egyptians",
+        "The Greeks"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Flavian Amphitheatre (Colosseum) was completed in 80 AD under Emperor Titus.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-004",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the 16th US President who led the nation through the Civil War?",
+      "Options": [
+        "James Buchanan",
+        "Andrew Johnson",
+        "Abraham Lincoln",
+        "Ulysses S. Grant"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Abraham Lincoln issued the Emancipation Proclamation and gave the Gettysburg Address.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-005",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In which year did Christopher Columbus make his first voyage to the Americas?",
+      "Options": [
+        "1502",
+        "1488",
+        "1492",
+        "1498"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Columbus sailed with the Nina, Pinta, and Santa Maria in 1492.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-006",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first human to step foot on the Moon in July 1969?",
+      "Options": [
+        "Yuri Gagarin",
+        "Michael Collins",
+        "Buzz Aldrin",
+        "Neil Armstrong"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Neil Armstrong stepped onto the lunar surface during Apollo 11.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-007",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous wall in Germany fell in November 1989?",
+      "Options": [
+        "The Munich Wall",
+        "The Rhine Wall",
+        "The Hadrian Wall",
+        "The Berlin Wall"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The fall of the Berlin Wall symbolized the end of the Cold War and paved the way for German reunification.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-008",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What ship sank in the North Atlantic in April 1912 after hitting an iceberg?",
+      "Options": [
+        "SS Andrea Doria",
+        "RMS Titanic",
+        "RMS Britannic",
+        "RMS Lusitania"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Titanic sank on its maiden voyage from Southampton to New York City.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-009",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the female Egyptian pharaoh famous for her relationships with Julius Caesar and Mark Antony?",
+      "Options": [
+        "Cleopatra VII",
+        "Nefertiti",
+        "Hatshepsut",
+        "Ankhesenamun"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Cleopatra was the last active ruler of the Ptolemaic Kingdom of Egypt.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-010",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country gifted the Statue of Liberty to the United States?",
+      "Options": [
+        "Italy",
+        "France",
+        "United Kingdom",
+        "Spain"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "France gifted Lady Liberty in 1886 to commemorate the US centennial of independence.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-011",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who wrote the Declaration of Independence?",
+      "Options": [
+        "Alexander Hamilton",
+        "John Adams",
+        "Thomas Jefferson",
+        "Benjamin Franklin"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Thomas Jefferson was the principal author of the Declaration.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-012",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What war was fought between the American North (Union) and South (Confederacy)?",
+      "Options": [
+        "The American Civil War",
+        "The Mexican-American War",
+        "The Revolutionary War",
+        "The War of 1812"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The American Civil War was fought from 1861 to 1865.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-013",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What global conflict lasted from 1914 to 1918?",
+      "Options": [
+        "World War II",
+        "The Franco-Prussian War",
+        "World War I",
+        "The Korean War"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "World War I, originally known as the Great War, concluded with the 1918 Armistice.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-014",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the Prime Minister of the United Kingdom during most of World War II?",
+      "Options": [
+        "Clement Attlee",
+        "Neville Chamberlain",
+        "Anthony Eden",
+        "Winston Churchill"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Winston Churchill rallied the British people with his inspirational speeches.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-015",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year did World War II end?",
+      "Options": [
+        "1946",
+        "1945",
+        "1944",
+        "1939"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "World War II ended in 1945 following the surrender of Germany in May and Japan in September.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-016",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which French general and emperor crowned himself Emperor of the French in 1804?",
+      "Options": [
+        "Louis XIV",
+        "Napoleon Bonaparte",
+        "Charles de Gaulle",
+        "Marquis de Lafayette"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Napoleon conquered much of continental Europe before his defeat at Waterloo in 1815.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-017",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who delivered the famous 'I Have a Dream' speech in Washington, D.C. in 1963?",
+      "Options": [
+        "Malcolm X",
+        "Thurgood Marshall",
+        "Martin Luther King Jr.",
+        "John Lewis"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Dr. King delivered his speech at the Lincoln Memorial during the March on Washington.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-018",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What ancient Greek philosopher was the teacher of Alexander the Great?",
+      "Options": [
+        "Aristotle",
+        "Plato",
+        "Pythagoras",
+        "Socrates"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Aristotle tutored young Alexander in Macedonia starting in 343 BC.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-019",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What volcanic eruption destroyed the ancient Roman city of Pompeii in 79 AD?",
+      "Options": [
+        "Mount Etna",
+        "Santorini",
+        "Krakatoa",
+        "Mount Vesuvius"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Mount Vesuvius buried Pompeii and Herculaneum under thick ash and pumice.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-020",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first woman to fly solo across the Atlantic Ocean in 1932?",
+      "Options": [
+        "Bessie Coleman",
+        "Harriet Quimby",
+        "Jacqueline Cochran",
+        "Amelia Earhart"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Amelia Earhart flew non-stop from Newfoundland to Northern Ireland in 1932.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-021",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What English charter, signed by King John at Runnymede in 1215, established the rule of law?",
+      "Options": [
+        "Petition of Right",
+        "Habeas Corpus Act",
+        "Magna Carta",
+        "Bill of Rights"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Magna Carta ('Great Charter') limited royal power and inspired modern constitutional law.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-022",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which US President purchased the Louisiana Territory from France in 1803?",
+      "Options": [
+        "Thomas Jefferson",
+        "James Monroe",
+        "John Adams",
+        "James Madison"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Jefferson acquired 828,000 square miles for $15 million, doubling the size of the US.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-023",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What pandemic killed an estimated 30-60% of Europe's population in the 14th century?",
+      "Options": [
+        "The Black Death (Bubonic Plague)",
+        "The Spanish Flu",
+        "The Antonine Plague",
+        "Cholera"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Black Death swept across Europe between 1346 and 1353.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-024",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who invented the movable-type printing press in Europe around 1440?",
+      "Options": [
+        "Johannes Gutenberg",
+        "William Caxton",
+        "Albrecht Dürer",
+        "Aldus Manutius"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Gutenberg's printing press catalyzed the European Renaissance and the spread of literacy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-025",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous battle on October 14, 1066 led to the Norman conquest of England?",
+      "Options": [
+        "Battle of Stamford Bridge",
+        "Battle of Hastings",
+        "Battle of Agincourt",
+        "Battle of Bannockburn"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "William the Conqueror defeated King Harold II at Hastings.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-026",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Soviet cosmonaut became the first human to travel into outer space in 1961?",
+      "Options": [
+        "Alexei Leonov",
+        "Yuri Gagarin",
+        "Gherman Titov",
+        "Valentina Tereshkova"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Yuri Gagarin completed a single orbit of Earth aboard Vostok 1 on April 12, 1961.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-027",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the female British nurse known as 'The Lady with the Lamp' during the Crimean War?",
+      "Options": [
+        "Clara Barton",
+        "Florence Nightingale",
+        "Mary Seacole",
+        "Edith Cavell"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Florence Nightingale laid the foundations of professional nursing and sanitation.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-028",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1848 discovery at Sutter's Mill in California sparked a massive westward migration?",
+      "Options": [
+        "Silver",
+        "Oil",
+        "Gold",
+        "Copper"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The California Gold Rush brought over 300,000 'forty-niners' to California.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-029",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the longest-reigning British monarch in history, serving for 70 years until 2022?",
+      "Options": [
+        "Queen Elizabeth II",
+        "King Henry VIII",
+        "King George III",
+        "Queen Victoria"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Queen Elizabeth II reigned for 70 years and 214 days (1952–2022).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-030",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which US President signed the Civil Rights Act of 1964 into law?",
+      "Options": [
+        "Richard Nixon",
+        "John F. Kennedy",
+        "Dwight D. Eisenhower",
+        "Lyndon B. Johnson"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "LBJ pushed the landmark legislation through Congress prohibiting discrimination.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-031",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What secret project during World War II developed the first atomic weapons?",
+      "Options": [
+        "The Manhattan Project",
+        "Operation Overlord",
+        "Operation Paperclip",
+        "Project Mercury"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Led by J. Robert Oppenheimer and General Leslie Groves at Los Alamos, NM.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-032",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What naval battle in June 1942 is considered the turning point of the Pacific War in WWII?",
+      "Options": [
+        "Battle of Leyte Gulf",
+        "Battle of Coral Sea",
+        "Battle of Midway",
+        "Battle of Guadalcanal"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The US Navy sank four Japanese aircraft carriers at Midway.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-033",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who led the expedition that first circumnavigated the globe (1519-1522)?",
+      "Options": [
+        "Ferdinand Magellan / Juan Sebastián Elcano",
+        "Hernan Cortes",
+        "Francis Drake",
+        "Vasco da Gama"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Magellan died in the Philippines; Juan Sebastián Elcano completed the historic global voyage.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-034",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year was the Transcontinental Railroad completed with the Golden Spike at Promontory Summit, Utah?",
+      "Options": [
+        "1869",
+        "1876",
+        "1865",
+        "1880"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Golden Spike connected the Central Pacific and Union Pacific railroads on May 10, 1869.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-035",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Russian Tsar Westernized Russia and founded a new capital on the Baltic Sea in 1703?",
+      "Options": [
+        "Nicholas II",
+        "Peter the Great",
+        "Alexander II",
+        "Ivan the Terrible"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Peter the Great founded Saint Petersburg as a 'window to Europe'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-036",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the first permanent English settlement in North America, founded in 1607?",
+      "Options": [
+        "Plymouth Colony",
+        "St. Augustine",
+        "Roanoke Colony",
+        "Jamestown, Virginia"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Jamestown was founded on the James River by the Virginia Company of London.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-037",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Chinese dynasty built the majority of the visible Great Wall of China today?",
+      "Options": [
+        "Ming Dynasty",
+        "Qin Dynasty",
+        "Tang Dynasty",
+        "Han Dynasty"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Ming Dynasty (1368–1644) constructed the iconic brick and stone battlements.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-038",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the leader of the Soviet Union during the Cuban Missile Crisis in 1962?",
+      "Options": [
+        "Nikita Khrushchev",
+        "Mikhail Gorbachev",
+        "Joseph Stalin",
+        "Leonid Brezhnev"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Khrushchev negotiated a resolution with President John F. Kennedy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-039",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which amendment to the US Constitution granted women the right to vote in 1920?",
+      "Options": [
+        "21st Amendment",
+        "19th Amendment",
+        "15th Amendment",
+        "18th Amendment"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The 19th Amendment ratified women's suffrage nationwide in August 1920.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-040",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What war ended with the signing of the Treaty of Versailles in 1919?",
+      "Options": [
+        "Seven Years' War",
+        "Franco-Prussian War",
+        "Crimean War",
+        "World War I"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Treaty of Versailles formally concluded World War I in the Hall of Mirrors.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-041",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What year did the Western Roman Empire officially fall when Romulus Augustulus was deposed?",
+      "Options": [
+        "1453 AD",
+        "410 AD",
+        "476 AD",
+        "395 AD"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Germanic chieftain Odoacer deposed the last Western Roman emperor in 476 AD.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-042",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first female Prime Minister of the United Kingdom, elected in 1979?",
+      "Options": [
+        "Gro Harlem Brundtland",
+        "Theresa May",
+        "Mary Robinson",
+        "Margaret Thatcher"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Margaret Thatcher was known as the 'Iron Lady' and served as PM from 1979 to 1990.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-043",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the battle in 31 BC where Octavian defeated Mark Antony and Cleopatra?",
+      "Options": [
+        "Battle of Pharsalus",
+        "Battle of Philippi",
+        "Battle of Cannae",
+        "Battle of Actium"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The naval Battle of Actium made Octavian the undisputed master of the Roman world (Augustus).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-044",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Mughal Emperor constructed the Taj Mahal in memory of his favorite wife Mumtaz Mahal?",
+      "Options": [
+        "Aurangzeb",
+        "Akbar the Great",
+        "Babur",
+        "Shah Jahan"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Shah Jahan commissioned the magnificent white marble monument in 1632.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-045",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the Confederate General who surrendered to Ulysses S. Grant at Appomattox Court House in 1865?",
+      "Options": [
+        "Stonewall Jackson",
+        "J.E.B. Stuart",
+        "Robert E. Lee",
+        "James Longstreet"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "General Lee surrendered the Army of Northern Virginia on April 9, 1865.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-046",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the code name for the Allied invasion of Normandy on D-Day, June 6, 1944?",
+      "Options": [
+        "Operation Overlord",
+        "Operation Market Garden",
+        "Operation Husky",
+        "Operation Torch"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Operation Overlord was the largest amphibious invasion in military history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-047",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which treaty ended the American Revolutionary War in 1783, recognizing US independence?",
+      "Options": [
+        "Treaty of Ghent",
+        "Treaty of Alliance",
+        "Treaty of Utrecht",
+        "Treaty of Paris (1783)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Benjamin Franklin, John Adams, and John Jay negotiated the Treaty of Paris with Great Britain.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-048",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the capital of the Byzantine Empire until it fell to the Ottoman Empire in 1453?",
+      "Options": [
+        "Thessalonica",
+        "Alexandria",
+        "Antioch",
+        "Constantinople"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Sultan Mehmed II conquered Constantinople in 1453, ending the Eastern Roman Empire.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-049",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the second President of the United States?",
+      "Options": [
+        "Thomas Jefferson",
+        "John Adams",
+        "James Madison",
+        "Alexander Hamilton"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "John Adams served as the second US President from 1797 to 1801.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-050",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year did the Chernobyl nuclear disaster occur in Soviet Ukraine?",
+      "Options": [
+        "1983",
+        "1979",
+        "1991",
+        "1986"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Reactor No. 4 exploded during a safety test on April 26, 1986.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-051",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What ancient wonder was located in Alexandria, Egypt and guided sailors for centuries?",
+      "Options": [
+        "The Colossus of Rhodes",
+        "The Temple of Artemis",
+        "The Hanging Gardens",
+        "The Lighthouse of Alexandria"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Pharos of Alexandria stood over 100 meters tall.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-052",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the President of the United States during the Great Depression and World War II?",
+      "Options": [
+        "Herbert Hoover",
+        "Woodrow Wilson",
+        "Harry S. Truman",
+        "Franklin D. Roosevelt"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "FDR was elected to four terms as President from 1933 until his death in 1945.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-053",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the primary language of the ancient Roman Empire?",
+      "Options": [
+        "Latin",
+        "Italian",
+        "Aramaic",
+        "Greek"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Latin was the official language of administration and law in the Roman Empire.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-054",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the famous French heroine who led troops in the Hundred Years' War and was canonized as a saint?",
+      "Options": [
+        "Catherine de' Medici",
+        "Joan of Arc",
+        "Marie Antoinette",
+        "Eleanor of Aquitaine"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Joan of Arc helped lift the Siege of Orleans in 1429.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-055",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which US state was bought from Russia in 1867 in a deal called 'Seward's Folly'?",
+      "Options": [
+        "Washington",
+        "Oregon",
+        "Hawaii",
+        "Alaska"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Secretary of State William H. Seward purchased Alaska for $7.2 million (about 2 cents per acre).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-056",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the leader of South Africa's anti-apartheid movement who spent 27 years in prison before becoming President?",
+      "Options": [
+        "Desmond Tutu",
+        "Steve Biko",
+        "Oliver Tambo",
+        "Nelson Mandela"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Nelson Mandela was released in 1990 and elected President in 1994.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-057",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year did the Japanese attack Pearl Harbor, bringing the US into World War II?",
+      "Options": [
+        "1945",
+        "1942",
+        "1941",
+        "1939"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The surprise attack occurred on December 7, 1941, 'a date which will live in infamy'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-058",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the famous King of England who had six wives?",
+      "Options": [
+        "Henry V",
+        "George III",
+        "Richard the Lionheart",
+        "Henry VIII"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "King Henry VIII separated the Church of England from Rome to marry Anne Boleyn.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-059",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous prison fortress was stormed by French revolutionaries on July 14, 1789?",
+      "Options": [
+        "The Bastille",
+        "Château d'If",
+        "The Conciergerie",
+        "Tower of London"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Storming of the Bastille ignited the French Revolution and is celebrated as Bastille Day.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-060",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the young Dutch girl whose World War II diary became an international bestseller?",
+      "Options": [
+        "Corrie ten Boom",
+        "Audrey Hepburn",
+        "Anne Frank",
+        "Sophie Scholl"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Anne Frank hid in an Amsterdam secret annex for over two years.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-061",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What ancient trade route connected China and the Mediterranean across Central Asia?",
+      "Options": [
+        "The Royal Road",
+        "The Amber Road",
+        "The Silk Road",
+        "The Incense Route"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Silk Road facilitated commercial trade, culture, and technology across Eurasia.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-062",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first female ruler of Habsburg Austria, reigning from 1740 to 1780?",
+      "Options": [
+        "Maria Theresa",
+        "Catherine the Great",
+        "Marie Antoinette",
+        "Isabella I"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Maria Theresa reformed the Austrian military, education, and economy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-063",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1961 failed CIA-backed invasion attempted to overthrow Fidel Castro in Cuba?",
+      "Options": [
+        "Cuban Missile Crisis",
+        "Operation Mongoose",
+        "Operation Urgent Fury",
+        "Bay of Pigs Invasion"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Bay of Pigs invasion ended in defeat within three days.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-064",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the legendary Mongolian warrior who unified nomadic tribes and created the Mongol Empire in 1206?",
+      "Options": [
+        "Kublai Khan",
+        "Genghis Khan",
+        "Tamerlane",
+        "Ogedei Khan"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Genghis Khan established the largest contiguous land empire in world history.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-065",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous battle in 1815 marked the final defeat of Napoleon Bonaparte?",
+      "Options": [
+        "Battle of Waterloo",
+        "Battle of Leipzig",
+        "Battle of Austerlitz",
+        "Battle of Borodino"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Duke of Wellington and Gebhard Leberecht von Blücher defeated Napoleon in modern-day Belgium.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-066",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What American document beginning with 'We the People' was drafted in Philadelphia in 1787?",
+      "Options": [
+        "The Declaration of Independence",
+        "The United States Constitution",
+        "The Federalist Papers",
+        "The Articles of Confederation"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The US Constitution is the supreme law of the United States and the oldest written constitution in force.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-067",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the Emperor of Ethiopia who resisted Italian colonization at the Battle of Adwa in 1896?",
+      "Options": [
+        "Tewodros II",
+        "Yohannes IV",
+        "Menelik II",
+        "Haile Selassie"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Emperor Menelik II secured Ethiopian sovereignty against European colonial expansion.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-068",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year did the Boston Tea Party protest occur?",
+      "Options": [
+        "1770",
+        "1773",
+        "1776",
+        "1765"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Sons of Liberty dumped 342 chests of British tea into Boston Harbor in December 1773.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-069",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Polish-French scientist was the first woman to win a Nobel Prize and the only person to win in two different scientific fields?",
+      "Options": [
+        "Rosalind Franklin",
+        "Ada Lovelace",
+        "Marie Curie",
+        "Lise Meitner"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Marie Curie won Nobel Prizes in Physics (1903) and Chemistry (1911) for her pioneering work on radioactivity.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-070",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What German luxury passenger airship exploded and was destroyed in Lakehurst, New Jersey in 1937?",
+      "Options": [
+        "LZ 129 Hindenburg",
+        "USS Shenandoah",
+        "USS Akron",
+        "Graf Zeppelin"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Hindenburg disaster brought the era of commercial passenger airships to an abrupt end.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-071",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the treaty that divided the newly discovered lands outside Europe between Portugal and Spain in 1494?",
+      "Options": [
+        "Treaty of Alcáçovas",
+        "Treaty of Zaragoza",
+        "Treaty of Utrecht",
+        "Treaty of Tordesillas"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Pope Alexander VI and the Treaty of Tordesillas established a meridian 370 leagues west of Cape Verde.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-072",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the Athenian statesman who oversaw the construction of the Parthenon and the Golden Age of Athens?",
+      "Options": [
+        "Themistocles",
+        "Pericles",
+        "Solon",
+        "Cleisthenes"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Pericles led Athens from 461 to 429 BC, promoting democracy and arts.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-073",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the first written law code in ancient Mesopotamia, dating to circa 1750 BC?",
+      "Options": [
+        "Code of Ur-Nammu",
+        "Laws of Eshnunna",
+        "Code of Lipit-Ishtar",
+        "Code of Hammurabi"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Code of Hammurabi featured 282 edicts based on 'an eye for an eye'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-074",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the shortest war in recorded history, lasting between 38 and 45 minutes on August 27, 1896?",
+      "Options": [
+        "Anglo-Zanzibar War",
+        "Football War",
+        "Six-Day War",
+        "War of Jenkins' Ear"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The British Royal Navy bombarded the Sultan's palace in Zanzibar, ending the conflict in under 45 minutes.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-075",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Roman Emperor made Christianity the official state religion with the Edict of Thessalonica in 380 AD?",
+      "Options": [
+        "Justinian I",
+        "Diocletian",
+        "Theodosius I",
+        "Constantine the Great"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Theodosius I established Nicene Christianity as the official church of the Roman Empire.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-076",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1648 series of peace treaties ended the Thirty Years' War in Europe and established national sovereignty?",
+      "Options": [
+        "Peace of Augsburg",
+        "Peace of Westphalia",
+        "Treaty of Utrecht",
+        "Treaty of Aix-la-Chapelle"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Peace of Westphalia established the principle of state sovereignty in international diplomacy.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-077",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first Roman Emperor, ruling from 27 BC until his death in 14 AD?",
+      "Options": [
+        "Claudius",
+        "Julius Caesar",
+        "Tiberius",
+        "Augustus (Octavian)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Augustus founded the Roman Empire and the era of the Pax Romana.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-078",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1917 British government declaration expressed support for the establishment of a 'national home for the Jewish people'?",
+      "Options": [
+        "The Sykes-Picot Agreement",
+        "The Balfour Declaration",
+        "The White Paper of 1939",
+        "The McMahon-Hussein Correspondence"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Foreign Secretary Arthur Balfour sent the letter to Lord Rothschild in November 1917.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-079",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the German code cipher machine cracked by Alan Turing and Bletchley Park during WWII?",
+      "Options": [
+        "Typex Machine",
+        "Enigma Machine",
+        "Lorenz Cipher",
+        "Purple Machine"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Turing's 'Bombe' machine decrypted millions of military messages encoded by the Enigma.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-080",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the first European explorer to reach India by sea, sailing around the Cape of Good Hope in 1498?",
+      "Options": [
+        "Bartolomeu Dias",
+        "Pedro Alvares Cabral",
+        "Vasco da Gama",
+        "Afonso de Albuquerque"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Vasco da Gama arrived in Calicut (Kozhikode), opening the spice route to Asia.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-081",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which US President delivered the Gettysburg Address in 1863?",
+      "Options": [
+        "Abraham Lincoln",
+        "James Buchanan",
+        "Ulysses S. Grant",
+        "Andrew Johnson"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Lincoln's 272-word address began with 'Four score and seven years ago...'.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-082",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What year did the Titanic sink on its maiden voyage?",
+      "Options": [
+        "1912",
+        "1920",
+        "1915",
+        "1905"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Titanic sank in the early morning of April 15, 1912.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-083",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the primary leader of India's nonviolent independence movement against British rule?",
+      "Options": [
+        "Jawaharlal Nehru",
+        "Mahatma Gandhi",
+        "Subhas Chandra Bose",
+        "Sardar Patel"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Mahatma Gandhi pioneered satyagraha (nonviolent civil disobedience).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-084",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What wall divided the capital of Germany during the Cold War from 1961 to 1989?",
+      "Options": [
+        "The Berlin Wall",
+        "The Iron Wall",
+        "The Brandenburg Wall",
+        "The Munich Wall"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Berlin Wall was constructed by East Germany (GDR) to prevent defection to the West.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-085",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which country launched the first artificial satellite, Sputnik 1, into space in October 1957?",
+      "Options": [
+        "The Soviet Union",
+        "The United Kingdom",
+        "The United States",
+        "France"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Sputnik 1 triggered the Space Race between the USSR and the USA.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-086",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the leader of the Bolshevik Revolution in Russia in 1917?",
+      "Options": [
+        "Vladimir Lenin",
+        "Leon Trotsky",
+        "Nikolai Bukharin",
+        "Joseph Stalin"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Lenin founded the Russian Communist Party and led the creation of the Soviet Union.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-087",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What famous battle in 1836 saw Jim Bowie and Davy Crockett defend a mission against Mexican forces?",
+      "Options": [
+        "Battle of Goliad",
+        "Battle of Gonzales",
+        "Battle of the Alamo",
+        "Battle of San Jacinto"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "The Alamo fell to General Santa Anna's army after a 13-day siege.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-088",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the German general nicknamed the 'Desert Fox' during WWII?",
+      "Options": [
+        "Erwin Rommel",
+        "Gerd von Rundstedt",
+        "Erich von Manstein",
+        "Heinz Guderian"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Rommel commanded the Afrika Korps in North Africa.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-089",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "In what year did the French Revolution begin with the storming of the Bastille?",
+      "Options": [
+        "1789",
+        "1776",
+        "1804",
+        "1799"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The French Revolution began in 1789 and transformed modern political thought.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-090",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the King of the United Kingdom during the American Revolutionary War?",
+      "Options": [
+        "King George III",
+        "King George IV",
+        "King William IV",
+        "King George II"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "King George III reigned from 1760 to 1820.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-091",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1898 war resulted in the United States acquiring Puerto Rico, Guam, and the Philippines?",
+      "Options": [
+        "War of 1812",
+        "Philippine-American War",
+        "Mexican-American War",
+        "Spanish-American War"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "The Treaty of Paris (1898) ended the Spanish-American War.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-092",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the Ottoman Sultan known as 'The Magnificent' who ruled at the peak of the empire's power (1520-1566)?",
+      "Options": [
+        "Selim I",
+        "Murad IV",
+        "Suleiman the Magnificent",
+        "Mehmed II"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Suleiman I expanded the Ottoman Empire across the Middle East, North Africa, and Eastern Europe.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-093",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1928 discovery by Alexander Fleming revolutionized modern medicine and antibiotic treatments?",
+      "Options": [
+        "Insulin",
+        "Aspirin",
+        "Penicillin",
+        "Streptomycin"
+      ],
+      "CorrectAnswerIndex": 2,
+      "Explanation": "Fleming discovered penicillin growing on a contaminated staphylococcus petri dish.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-094",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the secret code name for the 1940 German plan to invade the United Kingdom?",
+      "Options": [
+        "Operation Typhoon",
+        "Operation Sea Lion (Unternehmen Seelöwe)",
+        "Operation Citadel",
+        "Operation Barbarossa"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Operation Sea Lion was postponed indefinitely following the Royal Air Force's victory in the Battle of Britain.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-095",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Chinese philosophy founded by Laozi emphasized living in harmony with 'The Way'?",
+      "Options": [
+        "Confucianism",
+        "Mohism",
+        "Legalism",
+        "Daoism (Taoism)"
+      ],
+      "CorrectAnswerIndex": 3,
+      "Explanation": "Daoism is centered on the Tao Te Ching and the concept of wu wei (natural action).",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-096",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Who was the third President of the United States?",
+      "Options": [
+        "James Monroe",
+        "Thomas Jefferson",
+        "John Adams",
+        "James Madison"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "Thomas Jefferson served from 1801 to 1809.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-097",
+      "Category": "History",
+      "Difficulty": "Easy",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which civilization constructed the ancient city of Machu Picchu in Peru?",
+      "Options": [
+        "The Incas",
+        "The Olmecs",
+        "The Aztecs",
+        "The Mayans"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "The Inca Empire built Machu Picchu in the 15th century.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-098",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What 1944 economic conference established the International Monetary Fund (IMF) and the World Bank?",
+      "Options": [
+        "Bretton Woods Conference",
+        "Yalta Conference",
+        "Potsdam Conference",
+        "Geneva Accords"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Delegates from 44 Allied nations met at the Mount Washington Hotel in Bretton Woods, NH.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-099",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "What was the name of the Swedish warship that sank on its maiden voyage in Stockholm harbour in 1628 and was salvaged almost intact in 1961?",
+      "Options": [
+        "Kronan",
+        "Vasa",
+        "Mars",
+        "Svärdet"
+      ],
+      "CorrectAnswerIndex": 1,
+      "Explanation": "The Vasa was salvaged in 1961 and is displayed in the Vasa Museum in Stockholm.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Id": "HIS-100",
+      "Category": "History",
+      "Difficulty": "Hard",
+      "QuestionType": "MultipleChoice",
+      "Prompt": "Which Roman general defeated Hannibal Barca at the Battle of Zama in 202 BC, ending the Second Punic War?",
+      "Options": [
+        "Scipio Africanus",
+        "Marcus Claudius Marcellus",
+        "Lucius Aemilius Paullus",
+        "Fabius Maximus"
+      ],
+      "CorrectAnswerIndex": 0,
+      "Explanation": "Scipio Africanus was awarded the agnomen 'Africanus' for his decisive victory over Carthage.",
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In what year did the United States declare independence from Great Britain?",
+      "Options": [
+        "1812",
+        "1789",
+        "1787",
+        "1776"
+      ],
+      "Explanation": "The Continental Congress adopted the Declaration of Independence on July 4, 1776.",
+      "Id": "HIS-101",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the first President of the United States, serving from 1789 to 1797?",
+      "Options": [
+        "John Adams",
+        "James Madison",
+        "George Washington",
+        "Thomas Jefferson"
+      ],
+      "Explanation": "George Washington was unanimously elected by the Electoral College twice.",
+      "Id": "HIS-102",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What ancient Egyptian pharaoh's nearly intact tomb was discovered by Howard Carter in 1922?",
+      "Options": [
+        "Ramesses II",
+        "Tutankhamun (King Tut)",
+        "Khufu",
+        "Akhenaten"
+      ],
+      "Explanation": "The tomb in the Valley of the Kings contained over 5,000 pristine gold artifacts.",
+      "Id": "HIS-103",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In what year did Christopher Columbus make his first voyage across the Atlantic Ocean to the Americas?",
+      "Options": [
+        "1504",
+        "1517",
+        "1492",
+        "1488"
+      ],
+      "Explanation": "Columbus sailed on the Niña, Pinta, and Santa María, landing in the Bahamas.",
+      "Id": "HIS-104",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which French military and political leader rose to prominence during the French Revolution and crowned himself Emperor in 1804?",
+      "Options": [
+        "Robespierre",
+        "Charles de Gaulle",
+        "Napoleon Bonaparte",
+        "Louis XIV"
+      ],
+      "Explanation": "Napoleon conquered much of continental Europe before his defeat at Waterloo in 1815.",
+      "Id": "HIS-105",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What catastrophic pandemic swept through Europe from 1346 to 1353, killing an estimated 30-60% of the population?",
+      "Options": [
+        "The Black Death (Bubonic Plague)",
+        "The Spanish Flu",
+        "Smallpox",
+        "The Antonine Plague"
+      ],
+      "Explanation": "The plague was caused by the bacterium Yersinia pestis transmitted by flea-infested rats.",
+      "Id": "HIS-106",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which treaty signed in 1919 officially brought an end to World War I?",
+      "Options": [
+        "The Treaty of Paris",
+        "The Treaty of Versailles",
+        "The Treaty of Utrecht",
+        "The Treaty of Ghent"
+      ],
+      "Explanation": "The Treaty of Versailles imposed heavy financial reparations and territorial losses on Germany.",
+      "Id": "HIS-107",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the British Prime Minister who led Great Britain to victory during World War II with inspiring wartime speeches?",
+      "Options": [
+        "Clement Attlee",
+        "Neville Chamberlain",
+        "Winston Churchill",
+        "Anthony Eden"
+      ],
+      "Explanation": "Churchill famously promised 'We shall fight on the beaches, we shall never surrender'.",
+      "Id": "HIS-108",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In what year did the Berlin Wall fall, symbolizing the impending collapse of Soviet communism in Eastern Europe?",
+      "Options": [
+        "1985",
+        "1991",
+        "1979",
+        "1989"
+      ],
+      "Explanation": "The Berlin Wall was breached on November 9, 1989, reunifying Germany in 1990.",
+      "Id": "HIS-109",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which ancient civilization constructed Machu Picchu high in the Andes mountains of Peru around 1450 AD?",
+      "Options": [
+        "The Olmecs",
+        "The Aztec Empire",
+        "The Maya Civilization",
+        "The Inca Empire"
+      ],
+      "Explanation": "Machu Picchu was built as an estate for the Inca emperor Pachacuti.",
+      "Id": "HIS-110",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who assassinated President Abraham Lincoln at Ford's Theatre in Washington, D.C. on April 14, 1865?",
+      "Options": [
+        "Charles Guiteau",
+        "John Wilkes Booth",
+        "Lee Harvey Oswald",
+        "Leon Czolgosz"
+      ],
+      "Explanation": "Booth was a Confederate sympathizer and well-known stage actor.",
+      "Id": "HIS-111",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Roman general crossed the Rubicon river in 49 BC and became dictator of Rome before being assassinated on the Ides of March?",
+      "Options": [
+        "Mark Antony",
+        "Julius Caesar",
+        "Augustus",
+        "Pompey the Great"
+      ],
+      "Explanation": "Caesar was assassinated by Roman senators led by Brutus and Cassius in 44 BC.",
+      "Id": "HIS-112",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What major American conflict was fought between the Union and the Confederacy from 1861 to 1865?",
+      "Options": [
+        "The American Civil War",
+        "The Spanish-American War",
+        "The Revolutionary War",
+        "The War of 1812"
+      ],
+      "Explanation": "The Civil War began when Confederate forces fired on Fort Sumter in South Carolina.",
+      "Id": "HIS-113",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the longest-reigning British monarch in history, reigning for 70 years from 1952 until 2022?",
+      "Options": [
+        "Queen Victoria",
+        "Queen Elizabeth II",
+        "King George III",
+        "King Henry VIII"
+      ],
+      "Explanation": "Queen Elizabeth II celebrated her Platinum Jubilee months before passing away at age 96.",
+      "Id": "HIS-114",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What dramatic event on December 7, 1941, led directly to the United States entering World War II?",
+      "Options": [
+        "The Invasion of Poland",
+        "The Battle of Midway",
+        "The Sinking of the Lusitania",
+        "The Attack on Pearl Harbor"
+      ],
+      "Explanation": "President Franklin D. Roosevelt declared it 'a date which will live in infamy'.",
+      "Id": "HIS-115",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which monk started the Protestant Reformation in 1517 by nailing his 95 Theses to the door of Wittenberg Castle church?",
+      "Options": [
+        "Ulrich Zwingli",
+        "John Calvin",
+        "Martin Luther",
+        "John Knox"
+      ],
+      "Explanation": "Martin Luther challenged the Catholic Church's sale of papal indulgences.",
+      "Id": "HIS-116",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In what year did humans first set foot on the Moon during the Apollo 11 mission?",
+      "Options": [
+        "1967",
+        "1969",
+        "1971",
+        "1972"
+      ],
+      "Explanation": "Neil Armstrong and Buzz Aldrin landed the Lunar Module Eagle on the Moon on July 20, 1969.",
+      "Id": "HIS-117",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Greek city-state was famous for its rigorous military culture and the legendary Battle of Thermopylae?",
+      "Options": [
+        "Corinth",
+        "Sparta",
+        "Athens",
+        "Thebes"
+      ],
+      "Explanation": "King Leonidas and 300 Spartans held off the massive Persian army of Xerxes I in 480 BC.",
+      "Id": "HIS-118",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the female pharaoh of ancient Egypt who formed political and romantic alliances with Julius Caesar and Mark Antony?",
+      "Options": [
+        "Sobekneferu",
+        "Nefertiti",
+        "Hatshepsut",
+        "Cleopatra VII"
+      ],
+      "Explanation": "Cleopatra was the last active ruler of the Ptolemaic Kingdom of Egypt.",
+      "Id": "HIS-119",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What iconic ocean liner struck an iceberg on its maiden voyage and sank in the North Atlantic in April 1912?",
+      "Options": [
+        "RMS Britannic",
+        "RMS Titanic",
+        "SS Andrea Doria",
+        "RMS Lusitania"
+      ],
+      "Explanation": "Over 1,500 people perished when the 'unsinkable' ship foundered.",
+      "Id": "HIS-120",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Mongol warrior founded the Mongol Empire in 1206, creating the largest contiguous land empire in history?",
+      "Options": [
+        "Kublai Khan",
+        "Tamerlane",
+        "Ögedei Khan",
+        "Genghis Khan (Temüjin)"
+      ],
+      "Explanation": "Genghis Khan united nomadic tribes and conquered vast territories across Asia and Europe.",
+      "Id": "HIS-121",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What famous document signed by King John of England at Runnymede in 1215 established that everyone, even the king, is subject to the law?",
+      "Options": [
+        "The English Bill of Rights",
+        "The Petition of Right",
+        "The Domesday Book",
+        "Magna Carta"
+      ],
+      "Explanation": "Magna Carta ('The Great Charter') became a foundational cornerstone of constitutional law.",
+      "Id": "HIS-122",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which United States President issued the Emancipation Proclamation on January 1, 1863?",
+      "Options": [
+        "Andrew Johnson",
+        "James Buchanan",
+        "Abraham Lincoln",
+        "Ulysses S. Grant"
+      ],
+      "Explanation": "The proclamation declared that all enslaved persons in rebellious Confederate states were free.",
+      "Id": "HIS-123",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What massive fortress-prison in Paris was stormed by revolutionaries on July 14, 1789, igniting the French Revolution?",
+      "Options": [
+        "The Bastille",
+        "Versailles",
+        "The Conciergerie",
+        "The Tuileries Palace"
+      ],
+      "Explanation": "Bastille Day is celebrated every July 14th as France's National Day.",
+      "Id": "HIS-124",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who discovered penicillin, the world's first true antibiotic, in 1928 at St Mary's Hospital in London?",
+      "Options": [
+        "Alexander Fleming",
+        "Louis Pasteur",
+        "Joseph Lister",
+        "Robert Koch"
+      ],
+      "Explanation": "Fleming noticed that a mold called Penicillium notatum killed bacteria in his petri dish.",
+      "Id": "HIS-125",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In what year did the Soviet Union officially dissolve, ending the Cold War?",
+      "Options": [
+        "1989",
+        "1993",
+        "1985",
+        "1991"
+      ],
+      "Explanation": "Mikhail Gorbachev resigned as Soviet president on Christmas Day, December 25, 1991.",
+      "Id": "HIS-126",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which explorer led the first expedition to successfully circumnavigate the globe from 1519 to 1522?",
+      "Options": [
+        "Vasco da Gama",
+        "Hernán Cortés",
+        "Francis Drake",
+        "Ferdinand Magellan (completed by Juan Sebastián Elcano)"
+      ],
+      "Explanation": "Magellan was killed in the Philippines, and Elcano completed the voyage on the Victoria.",
+      "Id": "HIS-127",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What ancient Mesoamerican empire was conquered by Spanish conquistador Hernán Cortés in 1521?",
+      "Options": [
+        "The Maya Empire",
+        "The Toltec Empire",
+        "The Aztec Empire",
+        "The Inca Empire"
+      ],
+      "Explanation": "Cortés captured the island capital of Tenochtitlan from Emperor Cuauhtémoc.",
+      "Id": "HIS-128",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who delivered the historic 'I Have a Dream' speech during the March on Washington for Jobs and Freedom in August 1963?",
+      "Options": [
+        "Dr. Martin Luther King Jr.",
+        "Malcolm X",
+        "Medgar Evers",
+        "John Lewis"
+      ],
+      "Explanation": "Over 250,000 civil rights supporters gathered at the Lincoln Memorial.",
+      "Id": "HIS-129",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Russian monarch Westernized Russia, founded St. Petersburg in 1703, and proclaimed the Russian Empire in 1721?",
+      "Options": [
+        "Catherine the Great",
+        "Nicholas II",
+        "Peter the Great (Peter I)",
+        "Ivan the Terrible"
+      ],
+      "Explanation": "Peter the Great modernized Russian government, military, and naval power.",
+      "Id": "HIS-130",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What was the code name for the Allied amphibious invasion of Normandy, France on June 6, 1944 (D-Day)?",
+      "Options": [
+        "Operation Torch",
+        "Operation Barbarossa",
+        "Operation Overlord",
+        "Operation Market Garden"
+      ],
+      "Explanation": "General Dwight D. Eisenhower served as Supreme Allied Commander for the invasion.",
+      "Id": "HIS-131",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which Roman Emperor legalized Christianity throughout the Roman Empire with the Edict of Milan in 313 AD?",
+      "Options": [
+        "Marcus Aurelius",
+        "Nero",
+        "Diocletian",
+        "Constantine the Great"
+      ],
+      "Explanation": "Constantine also founded Constantinople (modern Istanbul) as the new eastern capital.",
+      "Id": "HIS-132",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What purchase in 1803 from Napoleonic France doubled the land size of the United States for $15 million?",
+      "Options": [
+        "The Florida Purchase",
+        "The Alaska Purchase",
+        "The Louisiana Purchase",
+        "The Gadsden Purchase"
+      ],
+      "Explanation": "President Thomas Jefferson dispatched Meriwether Lewis and William Clark to explore the territory.",
+      "Id": "HIS-133",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the first woman to win a Nobel Prize, and the only person to win Nobel Prizes in two different scientific fields?",
+      "Options": [
+        "Lise Meitner",
+        "Rosalind Franklin",
+        "Marie Curie (Physics & Chemistry)",
+        "Ada Lovelace"
+      ],
+      "Explanation": "Marie Curie discovered radium and polonium and pioneered research on radioactivity.",
+      "Id": "HIS-134",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which English King broke from the Roman Catholic Church and married six different wives?",
+      "Options": [
+        "Henry V",
+        "Henry VIII",
+        "George III",
+        "Charles I"
+      ],
+      "Explanation": "Divorced, beheaded, died; divorced, beheaded, survived describes the fates of his wives.",
+      "Id": "HIS-135",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1962 confrontation between the United States and the Soviet Union brought the world to the brink of nuclear war?",
+      "Options": [
+        "The Korean War",
+        "The Berlin Airlift",
+        "The Cuban Missile Crisis",
+        "The Suez Crisis"
+      ],
+      "Explanation": "President John F. Kennedy imposed a naval quarantine on Soviet nuclear missiles in Cuba.",
+      "Id": "HIS-136",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "In what year did the Titanic sink after hitting an iceberg on April 15?",
+      "Options": [
+        "1920",
+        "1914",
+        "1912",
+        "1908"
+      ],
+      "Explanation": "The ship was sailing from Southampton to New York City.",
+      "Id": "HIS-137",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who served as the first female Prime Minister of the United Kingdom from 1979 to 1990, nicknamed the 'Iron Lady'?",
+      "Options": [
+        "Indira Gandhi",
+        "Margaret Thatcher",
+        "Theresa May",
+        "Liz Truss"
+      ],
+      "Explanation": "Thatcher was the longest-serving British Prime Minister of the 20th century.",
+      "Id": "HIS-138",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What famous wall was built by the Roman Empire across northern England in 122 AD to keep out northern tribes?",
+      "Options": [
+        "Offa's Dyke",
+        "Hadrian's Wall",
+        "The Antonine Wall",
+        "The Aurelian Walls"
+      ],
+      "Explanation": "Hadrian's Wall stretched 73 miles from the River Tyne to the Solway Firth.",
+      "Id": "HIS-139",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which American president was the only one to resign from office following the Watergate scandal in August 1974?",
+      "Options": [
+        "Lyndon B. Johnson",
+        "Jimmy Carter",
+        "Richard Nixon",
+        "Gerald Ford"
+      ],
+      "Explanation": "Nixon resigned facing near-certain impeachment and removal from office.",
+      "Id": "HIS-140",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who led the Indian independence movement against British colonial rule using nonviolent civil disobedience?",
+      "Options": [
+        "Mahatma Gandhi",
+        "Sardar Patel",
+        "Jawaharlal Nehru",
+        "Subhas Chandra Bose"
+      ],
+      "Explanation": "Gandhi inspired civil rights movements worldwide with satyagraha (truth/nonviolence).",
+      "Id": "HIS-141",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What ancient Wonder of the World is the only one still largely intact today?",
+      "Options": [
+        "The Great Pyramid of Giza",
+        "The Lighthouse of Alexandria",
+        "The Hanging Gardens of Babylon",
+        "The Colossus of Rhodes"
+      ],
+      "Explanation": "Built for Pharaoh Khufu around 2560 BC, it was the tallest man-made structure for over 3,800 years.",
+      "Id": "HIS-142",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which war was fought between Great Britain and Argentina in 1982 over islands in the South Atlantic?",
+      "Options": [
+        "The Boer War",
+        "The Suez Conflict",
+        "The Falklands War",
+        "The Crimean War"
+      ],
+      "Explanation": "British forces liberated the Falkland Islands (Islas Malvinas) in 74 days.",
+      "Id": "HIS-143",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the Soviet cosmonaut who became the first human to journey into outer space in April 1961?",
+      "Options": [
+        "Yuri Gagarin",
+        "Valentina Tereshkova",
+        "Gherman Titov",
+        "Alexei Leonov"
+      ],
+      "Explanation": "Gagarin orbited the Earth aboard Vostok 1 on April 12, 1961.",
+      "Id": "HIS-144",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 0,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What 1848 event in Coloma, California triggered a massive migration of over 300,000 'forty-niners'?",
+      "Options": [
+        "The Comstock Lode",
+        "The California Gold Rush",
+        "The Klondike Gold Rush",
+        "Pikes Peak Gold Rush"
+      ],
+      "Explanation": "James W. Marshall discovered gold flakes at Sutter's Mill.",
+      "Id": "HIS-145",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which military commander led Carthage's army across the Alps with war elephants to attack Rome in 218 BC?",
+      "Options": [
+        "Hasdrubal",
+        "Hamilcar Barca",
+        "Scipio Africanus",
+        "Hannibal Barca"
+      ],
+      "Explanation": "Hannibal inflicted crushing defeats on Roman legions at Cannae and Lake Trasimene.",
+      "Id": "HIS-146",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What historic wall dividing East and West Berlin was constructed by East Germany in August 1961?",
+      "Options": [
+        "The Iron Curtain Barrier",
+        "The Berlin Wall",
+        "The Maginot Line",
+        "Checkpoint Charlie"
+      ],
+      "Explanation": "The wall stood for 28 years as the physical symbol of the Cold War.",
+      "Id": "HIS-147",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 1,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Who was the Polish astronomer who proposed the heliocentric model where the Earth revolves around the Sun in 1543?",
+      "Options": [
+        "Galileo Galilei",
+        "Tycho Brahe",
+        "Nicolaus Copernicus",
+        "Johannes Kepler"
+      ],
+      "Explanation": "Copernicus published 'De revolutionibus orbium coelestium' on his deathbed.",
+      "Id": "HIS-148",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "Which US president was assassinated in Dallas, Texas on November 22, 1963?",
+      "Options": [
+        "William McKinley",
+        "Robert F. Kennedy",
+        "John F. Kennedy",
+        "James A. Garfield"
+      ],
+      "Explanation": "Lee Harvey Oswald shot President Kennedy in Dealey Plaza.",
+      "Id": "HIS-149",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 2,
+      "TimeLimitSeconds": 15
+    },
+    {
+      "Prompt": "What ancient Greek philosopher was sentenced to death by drinking hemlock in 399 BC for 'corrupting the youth' of Athens?",
+      "Options": [
+        "Aristotle",
+        "Epicurus",
+        "Plato",
+        "Socrates"
+      ],
+      "Explanation": "Socrates never wrote down his philosophy; his dialogues were recorded by his student Plato.",
+      "Id": "HIS-150",
+      "Category": "History",
+      "Difficulty": "Medium",
+      "QuestionType": "MultipleChoice",
+      "CorrectAnswerIndex": 3,
+      "TimeLimitSeconds": 15
+    }
+  ]
+}
