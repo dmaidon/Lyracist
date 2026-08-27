@@ -1,4 +1,20 @@
-// Edited on Aug 26, 2026 @ 07:29:00 -> Added manual index column resize option on Help Page to Help system and updates log
+// Edited on Aug 27, 2026 @ 07:14:00 -> Document intelligent Name, Artist, and Song Title proper-casing engine
+Intelligent Name & Artist Capitalization Engine (`All Applications`) - (August 2026)
+
+Section: Performance & Rotation Operations / Performer & Song Data Entry (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `LyracistDbEditor`, `ScaryokeWheel`)
+
+[Smart Capitalization Rules]
+1. Mixed-Case & Stylized Performer Names (e.g. "DeaR", "McDonald", "LeBron", "MacDonald"):
+   - The system automatically capitalizes the initial letter of every word while intelligently preserving intentional internal and trailing capital letters typed by users (such as "DeaR", "LeBron", or "vanBuren") rather than forcing them to lowercase.
+2. Apostrophe Name Prefixes (e.g. "O'Neal", "D'Angelo", "L'Amour", "M'Baku"):
+   - When entering Irish, Scottish, Italian, or French names with single-letter prefixes and apostrophes (e.g. "o'neal", "O'neal", "O'NEAL", "d'angelo"), the system automatically capitalizes both the prefix and the root surname ("O'Neal", "D'Angelo", "L'Amour").
+3. Scottish & Irish "Mc" Prefixes (e.g. "McDonald", "McCartney"):
+   - Surnames starting with "Mc" are automatically recognized and capitalized with the secondary root capital ("McDonald", "McCartney").
+4. Hyphenated Names & Titles:
+   - Compound names separated by hyphens (e.g. "mary-ann smith", "smith-o'neal") are capitalized on all segment boundaries ("Mary-Ann Smith", "Smith-O'Neal").
+5. Acronyms, Roman Numerals & Common Contractions:
+   - Preserves standard music acronyms and Roman numerals (e.g. "DJ", "MC", "II", "III", "IV", "VIII") and cleanly formats contractions in song titles (e.g. "Don't Stop Believin'", "Rock 'N' Roll").
+
 Singer Rotation & Trivia Game Enhancements (`Lyracist`, `KSRotation`, & `Lyracist.Trivia`) - (August 2026)
 
 Section: Live Trivia / Manual DJ & Game Master Flow Controls (`Lyracist.Trivia`, `KSRotation`, & `Lyracist`)

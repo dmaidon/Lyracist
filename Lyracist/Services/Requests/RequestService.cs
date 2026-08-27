@@ -1,13 +1,14 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Replace magic status strings with RequestStatuses constants
+// Edited on Aug 27, 2026 @ 07:07:00 -> Use Lyracist.Shared.NameFormatting
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Lyracist.Data;
 using Lyracist.Data.Models;
 using Lyracist.Models;
+using Lyracist.Shared;
+
 
 namespace Lyracist.Services.Requests;
 

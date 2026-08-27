@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 17:53:00 -> Add KioskUrl, KioskQrCodeImage and OpenKioskQrWindow command
+// Edited on Aug 27, 2026 @ 07:07:00 -> Use Lyracist.Shared for NameFormatting
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -15,8 +15,10 @@ using Lyracist.Services.Integration;
 using Lyracist.Services.Database;
 using Lyracist.Services.Media;
 using Lyracist.Models;
+using Lyracist.Shared;
 using Microsoft.EntityFrameworkCore;
 using Wpf.Ui;
+
 
 namespace Lyracist.ViewModels;
 

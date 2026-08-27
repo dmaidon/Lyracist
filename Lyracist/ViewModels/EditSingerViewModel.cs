@@ -1,6 +1,7 @@
+// Edited on Aug 27, 2026 @ 07:07:00 -> Use Lyracist.Shared.NameFormatting and apply ProperCase to song title and artist
 using CommunityToolkit.Mvvm.ComponentModel;
-using Lyracist.Core.Helpers;
 using Lyracist.Models;
+using Lyracist.Shared;
 
 namespace Lyracist.ViewModels
 {
@@ -59,11 +60,12 @@ namespace Lyracist.ViewModels
 
             _target.Name = NameFormatting.ProperCase(trimmedName);
             _target.DuetPartnerName = NameFormatting.ProperCase(DuetPartnerName?.Trim() ?? string.Empty);
-            _target.SongTitle = SongTitle?.Trim() ?? string.Empty;
-            _target.Artist = Artist?.Trim() ?? string.Empty;
+            _target.SongTitle = NameFormatting.ProperCase(SongTitle?.Trim() ?? string.Empty);
+            _target.Artist = NameFormatting.ProperCase(Artist?.Trim() ?? string.Empty);
             _target.Key = string.IsNullOrWhiteSpace(Key) ? "0" : Key.Trim();
             _target.Notes = Notes ?? string.Empty;
             return true;
         }
     }
 }
+

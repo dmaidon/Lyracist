@@ -1,8 +1,32 @@
-<!-- Edited on Aug 26, 2026 @ 07:34:00 -> Update CHANGELOG with manual/automatic trivia help and resizable index column details -->
-Last Edit: Aug 26, 2026 - Help System Manual/Automatic Trivia Instructions, Resizable Index Column, and manual flow unit tests
+<!-- Edited on Aug 27, 2026 @ 07:14:00 -> Add 26.8.27.1 release notes for smart Name and Artist proper-casing engine -->
+Last Edit: Aug 27, 2026 - Intelligent Name, Artist, and Song Title Proper-Casing Engine across all apps
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [26.8.27.1] - 2026-08-27
+
+### Added & Enhanced
+- **Intelligent Name, Artist & Song Proper-Casing Engine (`Shared/NameFormatting.cs`)**:
+  - Implemented a centralized, robust proper-casing utility shared across **all solution applications** (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `LyracistDbEditor`, `ScaryokeWheel`).
+  - **Mixed-Case Preservation**:
+    - Ensures the initial letter of every word is capitalized while preserving intentional inner and trailing uppercase letters typed by the user (e.g. `DeaR` -> `DeaR`, `deaR` -> `DeaR`, `LeBron` -> `LeBron`, `vanBuren` -> `VanBuren`, `MacDonald` -> `MacDonald`).
+    - Eliminates the previous bug where `.ToLowerInvariant()` clobbered custom singer and artist stylizations into plain lowercase letters (e.g. converting `DeaR` into `Dear`).
+  - **Apostrophe Name Prefixes**:
+    - Added smart detection for single-letter name prefixes followed by apostrophes (e.g. `O'`, `D'`, `L'`, `M'`), properly capitalizing both the prefix and the root surname (e.g. `o'neal` / `O'neal` / `O'NEAL` -> `O'Neal`, `d'angelo` -> `D'Angelo`, `l'amour` -> `L'Amour`).
+  - **Scottish & Irish "Mc" Prefixes**:
+    - Automatically capitalizes `Mc` prefixes (e.g. `mcdonald` / `MCDONALD` -> `McDonald`, `mccartney` -> `McCartney`).
+  - **Hyphenated Names & Word Boundary Handling**:
+    - Correctly capitalizes all hyphenated segments (e.g. `mary-ann smith` -> `Mary-Ann Smith`, `smith-o'neal` -> `Smith-O'Neal`).
+  - **Acronyms, Roman Numerals & Contractions**:
+    - Preserves standard music acronyms (`DJ`, `MC`, `TV`, `CD`, `DVD`) and Roman numerals (`II`, `III`, `IV`, `VI`, `VII`, `VIII`, `IX`, `X`, `XI`, `XII`), while keeping song title contractions correctly lowercased (e.g. `Don't Stop Believin'`, `Rock 'N' Roll`).
+  - **Application Integration**:
+    - Integrated across `Lyracist` (`RotationViewModel`, `EditSingerViewModel`, `KaraokeViewModel`, `RequestService`), `KSRotation` & `KSRotation.Maui` (`SingerEntry`), and `LyracistDbEditor` (`MainViewModel`).
+
+### Testing & Verification
+- **Expanded NameFormatting Unit Tests (`Lyracist.Tests`)**:
+  - Added comprehensive test cases covering mixed case (`DeaR`, `deaR`), apostrophe prefixes (`O'Neal`, `o'neal`, `O'neal`, `O'NEAL`, `D'Angelo`, `L'Amour`), Mc prefixes (`McDonald`, `MCDONALD`, `McCartney`), hyphens (`Mary-Ann Smith`, `Smith-O'Neal`), contractions (`Don't Stop Believin'`), acronyms (`DJ Khaled`, `MC Hammer`), Roman numerals (`Henry VIII`), and all-caps inputs (`DENNIS MAIDON`).
+  - Verified 100% test pass rate across all 238 unit tests in the solution.
 
 ## [26.8.26.1] - 2026-08-26
 

@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:24:00 -> Add IsRotationStart property to track rotation round starting anchor
+// Edited on Aug 27, 2026 @ 07:07:00 -> Delegate ProperCase to centralized Lyracist.Shared.NameFormatting
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -79,11 +79,7 @@ namespace KSRotation.Models
             set => SetProperty(ref _artist, ProperCase(value));
         }
 
-        private static string ProperCase(string? input)
-        {
-            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
-            return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLowerInvariant());
-        }
+        private static string ProperCase(string? input) => Lyracist.Shared.NameFormatting.ProperCase(input);
 
         /// <summary>True when this singer is the one currently at the mic.</summary>
         [ObservableProperty]

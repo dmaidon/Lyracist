@@ -1,7 +1,9 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Fix test to use the corrected XP-progress threshold formula (25*(l-1)*l, not the buggy 50*(l-1)*l)
+// Edited on Aug 27, 2026 @ 07:07:00 -> Add comprehensive tests for mixed-case, prefix apostrophe, Mc, and acronym proper-casing
 using Lyracist.Core.Helpers;
+using Lyracist.Shared;
 
 namespace Lyracist.Tests;
+
 
 public class SingerXpHelperTests
 {
@@ -100,7 +102,41 @@ public class NameFormattingTests
 {
     [Theory]
     [InlineData("dennis maidon", "Dennis Maidon")]
+    [InlineData("DENNIS MAIDON", "Dennis Maidon")]
     [InlineData("  DENNIS   MAIDON  ", "  Dennis   Maidon  ")]
+    [InlineData("DeaR", "DeaR")]
+    [InlineData("deaR", "DeaR")]
+    [InlineData("dear", "Dear")]
+    [InlineData("DEAR", "Dear")]
+    [InlineData("O'Neal", "O'Neal")]
+    [InlineData("O'neal", "O'Neal")]
+    [InlineData("o'neal", "O'Neal")]
+    [InlineData("O'NEAL", "O'Neal")]
+    [InlineData("D'Angelo", "D'Angelo")]
+    [InlineData("d'angelo", "D'Angelo")]
+    [InlineData("D'ANGELO", "D'Angelo")]
+    [InlineData("L'Amour", "L'Amour")]
+    [InlineData("l'amour", "L'Amour")]
+    [InlineData("McDonald", "McDonald")]
+    [InlineData("mcdonald", "McDonald")]
+    [InlineData("MCDONALD", "McDonald")]
+    [InlineData("McCartney", "McCartney")]
+    [InlineData("mccartney", "McCartney")]
+    [InlineData("Mary-Ann Smith", "Mary-Ann Smith")]
+    [InlineData("mary-ann smith", "Mary-Ann Smith")]
+    [InlineData("MARY-ANN SMITH", "Mary-Ann Smith")]
+    [InlineData("Smith-O'Neal", "Smith-O'Neal")]
+    [InlineData("smith-o'neal", "Smith-O'Neal")]
+    [InlineData("Don't Stop Believin'", "Don't Stop Believin'")]
+    [InlineData("don't stop believin'", "Don't Stop Believin'")]
+    [InlineData("DON'T STOP BELIEVIN'", "Don't Stop Believin'")]
+    [InlineData("DJ Khaled", "DJ Khaled")]
+    [InlineData("dj khaled", "DJ Khaled")]
+    [InlineData("MC Hammer", "MC Hammer")]
+    [InlineData("mc hammer", "MC Hammer")]
+    [InlineData("Henry VIII", "Henry VIII")]
+    [InlineData("henry viii", "Henry VIII")]
+    [InlineData("John Doe Jr.", "John Doe Jr.")]
     [InlineData("", "")]
     [InlineData(null, "")]
     public void ProperCase_FormatsAsExpected(string? input, string expected)
@@ -113,5 +149,7 @@ public class NameFormattingTests
     {
         Assert.Equal("None", NameFormatting.ProperCase("NONE"));
         Assert.Equal("None", NameFormatting.ProperCase("none"));
+        Assert.Equal("None", NameFormatting.ProperCase("None"));
     }
 }
+

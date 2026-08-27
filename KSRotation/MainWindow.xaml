@@ -1,4 +1,4 @@
-<!-- Edited on Aug 26, 2026 @ 07:18:00 -> Add manual vs automatic trivia gameplay instructions to Help panel -->
+<!-- Edited on Aug 27, 2026 @ 07:20:00 -> Add smart name and artist proper-casing instructions to Help panel -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -2673,6 +2673,12 @@
                                         <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
                                     </BulletDecorator.Bullet>
                                     <TextBlock Text="Add Singer: Inserts a new performer at the end of the current active rotation round (right before the 1st singer anchor holding the '1ST' badge). Automatically scrolls to the row, focuses the name field, and highlights 'New Singer' for immediate overwrite typing." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="Smart Proper-Casing: Automatically capitalizes performer names, duet partners, artists, and song titles while preserving intentional mixed-case capitalizations (such as 'DeaR' or 'LeBron') and correctly capitalizing prefix names (like 'O'Neal', 'D'Angelo', 'L'Amour') and Scottish/Irish 'Mc' surnames ('McDonald')." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 </BulletDecorator>
                                 <BulletDecorator Margin="0,2">
                                     <BulletDecorator.Bullet>

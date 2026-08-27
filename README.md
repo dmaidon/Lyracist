@@ -1,12 +1,28 @@
-<!-- Edited on Aug 26, 2026 @ 07:34:00 -> Update README with manual/automatic trivia help and resizable index column details -->
-Last Edit: Aug 26, 2026 -  Help System Manual/Automatic Trivia Instructions, Resizable Index Column, and manual flow unit tests
+<!-- Edited on Aug 27, 2026 @ 07:14:00 -> Update README with intelligent Name and Artist proper-casing engine details -->
+Last Edit: Aug 27, 2026 - Intelligent Name, Artist, and Song Title Proper-Casing Engine across all apps
 # Lyracist Pro
     
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
 
 ---
     
 ## Key Features
+
+### 🔤 Intelligent Name & Artist Capitalization Engine (`All Applications`)
+- **Centralized Smart Proper-Casing (`Shared/NameFormatting.cs`)**:
+  - Automatically capitalizes singer names, duet partners, artists, and song titles cleanly across all applications (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `LyracistDbEditor`, `ScaryokeWheel`).
+- **Mixed-Case Preservation**:
+  - Capitalizes the initial letter of every word while preserving user-typed internal or trailing uppercase letters (e.g. `DeaR` -> `DeaR`, `deaR` -> `DeaR`, `LeBron` -> `LeBron`, `vanBuren` -> `VanBuren`, `MacDonald` -> `MacDonald`).
+  - Completely fixes the bug where previous lowercase transformations wiped out custom performer or band stylizations (e.g. turning `DeaR` into `Dear`).
+- **Apostrophe Name Prefixes**:
+  - Automatically detects single-letter surname prefixes with apostrophes (e.g. `O'`, `D'`, `L'`, `M'`) and capitalizes both the prefix and the root surname (e.g. `o'neal` / `O'neal` / `O'NEAL` -> `O'Neal`, `d'angelo` -> `D'Angelo`, `l'amour` -> `L'Amour`).
+- **Scottish & Irish "Mc" Prefixes**:
+  - Surnames starting with `Mc` automatically receive root-letter capitalization (e.g. `mcdonald` / `MCDONALD` -> `McDonald`, `mccartney` -> `McCartney`).
+- **Hyphenated Compound Names**:
+  - Capitalizes words separated by hyphens (e.g. `mary-ann smith` -> `Mary-Ann Smith`, `smith-o'neal` -> `Smith-O'Neal`).
+- **Acronyms, Roman Numerals & Contractions**:
+  - Intelligently preserves uppercase for standard audio acronyms (`DJ`, `MC`, `TV`, `CD`, `DVD`) and Roman numerals (`II`, `III`, `IV`, `VI`, `VII`, `VIII`, `IX`, `X`, `XI`, `XII`), while keeping song title contractions correctly lowercased (e.g. `Don't Stop Believin'`, `Rock 'N' Roll`).
+
 
 ### 📟 Cross-App Landscape Tablet Kiosk Request Station (`/kiosk`, `kiosk.html`)
 - **Split-Screen Venue Kiosk UI Across All Apps (`KSRotation`, `KSRotation.Maui`, `Lyracist`)**:

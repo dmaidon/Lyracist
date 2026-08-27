@@ -1,4 +1,4 @@
-<!-- Edited on Aug 25, 2026 @ 06:15:00 -> Add AllowUnsafeBlocks for WinUI/CsWinRT interop -->
+<!-- Edited on Aug 27, 2026 @ 07:07:00 -> Added NameFormatting linked compile reference -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -44,9 +44,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.8.25.230</AssemblyVersion>
+		<AssemblyVersion>26.8.26.235</AssemblyVersion>
 
-		<FileVersion>26.8.25.230</FileVersion>
+		<FileVersion>26.8.26.235</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 
@@ -158,6 +158,7 @@
 		<Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
 		<Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
 		<Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
+		<Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
 	</ItemGroup>
 
 	<!-- Project References -->

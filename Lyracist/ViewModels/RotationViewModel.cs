@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 07:49:00 -> Insert new singers at end of current rotation round via RotationHelpers.InsertNewSinger
+// Edited on Aug 27, 2026 @ 07:07:00 -> Use Lyracist.Shared.NameFormatting and proper-case title and artist
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -370,6 +370,8 @@ public partial class RotationViewModel : BaseViewModel
     {
         name = NameFormatting.ProperCase(name);
         duetPartner = NameFormatting.ProperCase(duetPartner);
+        title = NameFormatting.ProperCase(title);
+        artist = NameFormatting.ProperCase(artist);
 
         if (isMusic)
         {

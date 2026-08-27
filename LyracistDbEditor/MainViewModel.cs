@@ -1,4 +1,4 @@
-// Edited on Aug 7, 2026 @ 07:56:00 -> Fix search and edit bindings, add OnlyShowMissingArtist filter
+// Edited on Aug 27, 2026 @ 07:07:00 -> Apply Lyracist.Shared.NameFormatting.ProperCase when saving song artist and title
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +13,7 @@ using CommunityToolkit.Mvvm.Input;
 using Lyracist.Data;
 using Lyracist.Data.Models;
 using Lyracist.Data.Services;
+using Lyracist.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace LyracistDbEditor;
@@ -164,8 +165,8 @@ public partial class MainViewModel : ObservableObject
             var dbSong = await context.Songs.FirstOrDefaultAsync(s => s.SongId == SelectedSong.SongId);
             if (dbSong != null)
             {
-                dbSong.Artist = EditArtist;
-                dbSong.Title = EditTitle;
+                dbSong.Artist = NameFormatting.ProperCase(EditArtist);
+                dbSong.Title = NameFormatting.ProperCase(EditTitle);
                 dbSong.Genre = SelectedSong.Genre;
                 dbSong.Tags = SelectedSong.Tags;
                 dbSong.Duration = SelectedSong.Duration;

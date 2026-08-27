@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 17:16:00 -> Include kiosk.html embedded resource for tablet kiosk mode -->
+<!-- Edited on Aug 27, 2026 @ 07:07:00 -> Added NameFormatting linked compile reference -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.25.547</AssemblyVersion>
-    <FileVersion>26.8.25.547</FileVersion>
+    <AssemblyVersion>26.8.27.552</AssemblyVersion>
+    <FileVersion>26.8.27.552</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -134,6 +134,7 @@
     <Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
     <Compile Include="..\Shared\TriviaDisplayViewModel.cs" Link="TriviaDisplayViewModel.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
+    <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
