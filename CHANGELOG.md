@@ -1,12 +1,14 @@
 <!-- Edited on Aug 27, 2026 @ 07:14:00 -> Add 26.8.27.1 release notes for smart Name and Artist proper-casing engine -->
 Last Edit: Aug 27, 2026 - Intelligent Name, Artist, and Song Title Proper-Casing Engine across all apps
+
 # Changelog
 
-All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [26.8.27.1] - 2026-08-27
 
 ### Added & Enhanced
+
 - **Intelligent Name, Artist & Song Proper-Casing Engine (`Shared/NameFormatting.cs`)**:
   - Implemented a centralized, robust proper-casing utility shared across **all solution applications** (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `LyracistDbEditor`, `ScaryokeWheel`).
   - **Mixed-Case Preservation**:
@@ -24,6 +26,7 @@ All notable changes to the Lyracist project are documented here. The format is b
     - Integrated across `Lyracist` (`RotationViewModel`, `EditSingerViewModel`, `KaraokeViewModel`, `RequestService`), `KSRotation` & `KSRotation.Maui` (`SingerEntry`), and `LyracistDbEditor` (`MainViewModel`).
 
 ### Testing & Verification
+
 - **Expanded NameFormatting Unit Tests (`Lyracist.Tests`)**:
   - Added comprehensive test cases covering mixed case (`DeaR`, `deaR`), apostrophe prefixes (`O'Neal`, `o'neal`, `O'neal`, `O'NEAL`, `D'Angelo`, `L'Amour`), Mc prefixes (`McDonald`, `MCDONALD`, `McCartney`), hyphens (`Mary-Ann Smith`, `Smith-O'Neal`), contractions (`Don't Stop Believin'`), acronyms (`DJ Khaled`, `MC Hammer`), Roman numerals (`Henry VIII`), and all-caps inputs (`DENNIS MAIDON`).
   - Verified 100% test pass rate across all 238 unit tests in the solution.
@@ -31,6 +34,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.26.1] - 2026-08-26
 
 ### Added & Enhanced
+
 - **Help System & User Manual updates log for Manual/Automatic Trivia Modes (`Lyracist`, `KSRotation`, and `Lyracist.Trivia`)**:
   - Added detailed instructions detailing the distinct behaviors of **Manual DJ Mode** (Auto-Run unchecked: questions standby, manual start timer via Spacebar, manual wrong answer fades, manual next progression) versus **Automatic Mode** (Auto-Run checked: automatic countdowns, automatic fades, automatic reveal, and auto-advance after 5s buffer).
   - Updated Help Topic 17 in `Lyracist` (`HelpViewModel.cs`), Help Topic 3 in `Lyracist.Trivia` (`MainViewModel.cs`), and Help Topic 6 in `KSRotation` (`MainWindow.xaml`).
@@ -41,6 +45,7 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Avoids truncation of long help topic index headers, ensuring readability on diverse screen sizes.
 
 ### Testing & Verification
+
 - **Manual Trivia Flow Unit Tests (`Lyracist.Trivia.Tests`)**:
   - Added `ManualGameFlow_DJFlowControl_StandbyAndStartTimer` unit test to `GameEngineTests.cs` to verify question loading in standby mode and subsequent manual timer activation by the DJ.
   - Successfully verified solution-wide compilation and test execution with 100% pass rate.
@@ -48,6 +53,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.25.1] - 2026-08-25
 
 ### Code Quality, Diagnostics & Compiler Cleanliness
+
 - **Solution-Wide Zero-Warning Compiler & Analyzer Cleanliness**:
   - Resolved all Roslyn compiler errors (`CS8799`, `CS0133`, `CS1061`, `CS0103`), Roslynator warnings/messages (`RCS1021`, `RCS1037`, `RCS1075`, `RCS1077`, `RCS1102`, `RCS1118`, `RCS1123`, `RCS1139`, `RCS1146`, `RCS1155`, `RCS1163`, `RCS1187`, `RCS1196`, `RCS1213`, `RCS1215`, `RCS1235`, `RCS1261`), SonarAnalyzer rules (`S927`, `S1066`, `S3358`, `S3881`, `S3981`), and code analysis diagnostics (`CA1835`, `CA1850`, `CA1859`, `IDE0079`) across all 11 projects in `Lyracist.slnx`.
   - **`Lyracist.Trivia` & `Lyracist.Trivia.Core`**:
@@ -74,6 +80,7 @@ All notable changes to the Lyracist project are documented here. The format is b
     - Verified 100% test pass rate across all 202 unit tests in the solution.
 
 ### Added & Enhanced
+
 - **Manual Game Flow Controls for DJ / Game Master (`Lyracist.Trivia`)**:
   - **Interactive Host Pacing (Manual Mode)**: When `⚡ Auto-Run Game` is disabled, new questions load into a ready **Reading / Standby** state with full time on the clock and the timer paused, allowing the DJ/Game Master to read the prompt over the microphone before starting the timer via `▶ Start Question & Timer` or `Spacebar`.
   - **Question Navigation & Direct Jump**:
@@ -98,6 +105,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.21.2] - 2026-08-21
 
 ### Added & Enhanced
+
 - **Cross-App Landscape Tablet Kiosk Request Station (`/kiosk`, `kiosk.html`)**:
   - Implemented a dedicated split-screen landscape web portal designed specifically for venue tablets mounted as public singer kiosks across **all three applications** (`KSRotation`, `KSRotation.Maui`, and `Lyracist`).
   - **Attractor / Welcome Screen & Idle Return**:
@@ -177,6 +185,7 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Both Wi-Fi and join QR codes are sized cleanly at 120x120px, preventing any vertical overflow or overlap with the bottom connection and copyright footer.
 
 ### Fixed
+
 - **Kiosk Rotation List JS Injection (`kiosk.html`)**: The rotation list rendered each singer's name into an inline `onclick="selectSingerFromRotation('...')"` attribute using HTML-escaping only; since the browser decodes HTML entities back to literal characters before parsing the attribute as JS, a crafted singer name (typed on the kiosk itself) could break out of the string literal and execute arbitrary script on any device rendering the list, including the venue's stage displays. Replaced the inline handler with a `data-singer-name` attribute read by a single delegated click listener, so the name is never re-parsed as code. Fixed identically in `KSRotation/Resources/kiosk.html` and `Lyracist/TabletClient/kiosk.html` (now the same file, see below).
 - **Missing Field Length Validation (`TabletLyricsServer.cs`)**: The new `POST /api/request` kiosk endpoint skipped the `ExceedsLength` checks its sibling `POST /api/requests` endpoint enforces, allowing unbounded name/song/artist/notes submissions straight into the database and live rotation. Added the same length caps used elsewhere in the file.
 - **Duplicate `kiosk.html` (Lyracist)**: `Lyracist/TabletClient/kiosk.html` was a second, independent 1741-line copy of `KSRotation/Resources/kiosk.html` that could silently drift out of sync. Removed the duplicate and linked `Lyracist.csproj` to the single canonical copy, matching the link pattern `KSRotation.Maui.csproj` already used.
@@ -185,6 +194,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.20.1] - 2026-08-20
 
 ### Added & Enhanced
+
 - **Trivia Display Countdown Screen QR Layout & Inline Venue Name Across `Lyracist.Trivia`, `Lyracist`, and `KSRotation`**:
   - Integrated the venue name directly on the same line as the main title (`"🎮 LIVE PUB TRIVIA NIGHT — {VenueName}"`) on the pre-game countdown lobby screen and inline with categories (`"{CategoryTitle} • {VenueName}"`) during gameplay.
   - Eliminated the separate bulky venue banner row to recover vertical screen real estate.
@@ -203,31 +213,31 @@ All notable changes to the Lyracist project are documented here. The format is b
 
 - **Safe, DJ-Friendly Auto-Advance System for Karaoke Hosting**:
   - **Grace Period Lifecycle & Timer**:
-    * Configurable post-performance grace period countdown (default 15 seconds, adjustable in Settings).
-    * Natural playback completion via LibVLC & FFME `EndReached` events triggers the grace period transition automatically.
-    * Smooth fill-in background music starts ducked during the grace period while stage billboard displays announcement banner: `"Next singer: {name} — please come to the stage"`.
+    - Configurable post-performance grace period countdown (default 15 seconds, adjustable in Settings).
+    - Natural playback completion via LibVLC & FFME `EndReached` events triggers the grace period transition automatically.
+    - Smooth fill-in background music starts ducked during the grace period while stage billboard displays announcement banner: `"Next singer: {name} — please come to the stage"`.
   - **Large High-Contrast DJ Control Panel Buttons**:
-    * Added `BigDJButton` style with high contrast, large bold text, rounded glow styling, and touch/click accessibility.
-    * **`▶ START SONG`** (`StartSongButton`): Instantly cancels grace timer, halts/ducks fill-in music, loads the current singer's song, synchronizes projection window and mobile lyrics server, and begins audio/video playback.
-    * **`⏭ SKIP SINGER`** (`SkipSingerButton`): Advances singer queue without completing or scoring skipped song, keeps fill-in music playing, and restarts a fresh grace period for the next performer.
+    - Added `BigDJButton` style with high contrast, large bold text, rounded glow styling, and touch/click accessibility.
+    - **`▶ START SONG`** (`StartSongButton`): Instantly cancels grace timer, halts/ducks fill-in music, loads the current singer's song, synchronizes projection window and mobile lyrics server, and begins audio/video playback.
+    - **`⏭ SKIP SINGER`** (`SkipSingerButton`): Advances singer queue without completing or scoring skipped song, keeps fill-in music playing, and restarts a fresh grace period for the next performer.
   - **Multi-Subsystem Synchronization & State Machine**:
-    * Created `AutoAdvanceManager` coordinating `IMediaEngine`, `IShowFlowService`, `IDisplayService`, `RotationViewModel`, `ITabletLyricsServer`, `LyricsWindowViewModel`, and `KaraokeViewModel`.
-    * Implemented `AutoAdvanceState` enum (`Idle`, `GracePeriod`, `WaitingForSongSelection`, `ReadyToStart`, `StartingSong`) preventing accidental double-starts.
-    * Safe mode interlocks: Auto-advance automatically suppresses execution during active Trivia and Scaryoke modes.
-    * Empty queue / missing singer protection: Auto-advance safely returns to `Idle` if no active singers exist.
-    * Missing song detection: Transitions to `WaitingForSongSelection` with billboard prompt if singer has no song selected yet.
+    - Created `AutoAdvanceManager` coordinating `IMediaEngine`, `IShowFlowService`, `IDisplayService`, `RotationViewModel`, `ITabletLyricsServer`, `LyricsWindowViewModel`, and `KaraokeViewModel`.
+    - Implemented `AutoAdvanceState` enum (`Idle`, `GracePeriod`, `WaitingForSongSelection`, `ReadyToStart`, `StartingSong`) preventing accidental double-starts.
+    - Safe mode interlocks: Auto-advance automatically suppresses execution during active Trivia and Scaryoke modes.
+    - Empty queue / missing singer protection: Auto-advance safely returns to `Idle` if no active singers exist.
+    - Missing song detection: Transitions to `WaitingForSongSelection` with billboard prompt if singer has no song selected yet.
 
 - **Tiered Option Value Scoring (100% / 70% / 40%) Across `Lyracist`, `KSRotation`, and `Lyracist.Trivia`**:
   - **Dynamic Multiplier Tiers**: Base points scale according to the number of visible options remaining at the exact moment of player answer submission:
-    * **4 Options Visible (0 Eliminated)**: 100% of Base Points (1,000 pts default). Rewarding early, confident buzz-ins before any wrong options fade.
-    * **3 Options Visible (1 Eliminated)**: 70% of Base Points (700 pts default). Triggered when the first wrong option fades at the 2/3 question countdown mark.
-    * **2 Options Visible (2 Eliminated / 50-50)**: 40% of Base Points (400 pts default). Triggered when the second wrong option fades at the 1/3 question countdown mark.
-    * **Mathematical Balance**: Gives early knowledgeable players a decisive 2.5× scoring advantage (1,000 pts vs 400 pts) while casual patrons can still score meaningful points on 50/50 guesses.
+    - **4 Options Visible (0 Eliminated)**: 100% of Base Points (1,000 pts default). Rewarding early, confident buzz-ins before any wrong options fade.
+    - **3 Options Visible (1 Eliminated)**: 70% of Base Points (700 pts default). Triggered when the first wrong option fades at the 2/3 question countdown mark.
+    - **2 Options Visible (2 Eliminated / 50-50)**: 40% of Base Points (400 pts default). Triggered when the second wrong option fades at the 1/3 question countdown mark.
+    - **Mathematical Balance**: Gives early knowledgeable players a decisive 2.5× scoring advantage (1,000 pts vs 400 pts) while casual patrons can still score meaningful points on 50/50 guesses.
   - **Mobile Buzzer Web App (`trivia.html`) Real-Time Multiplier Pill**:
-    * Added dynamic `#value-multiplier-pill` right above the 4 buzzer buttons updating in real time as options fade: `⚡ 100% VALUE (1,000 pts)`, `⚡ 70% VALUE (700 pts)`, `⚡ 40% VALUE (400 pts)`.
-    * Synchronized buzzer button elimination and disable state during question active countdown.
+    - Added dynamic `#value-multiplier-pill` right above the 4 buzzer buttons updating in real time as options fade: `⚡ 100% VALUE (1,000 pts)`, `⚡ 70% VALUE (700 pts)`, `⚡ 40% VALUE (400 pts)`.
+    - Synchronized buzzer button elimination and disable state during question active countdown.
   - **Configuration Controls in Trivia Settings**:
-    * Added `Tiered Option Value (4=100%, 3=70%, 2=40%)` toggle and customizable percentage fields across `Lyracist` (`TriviaSettingsPage.xaml`), `KSRotation` (`MainWindow.xaml`), and `Lyracist.Trivia` (`MainWindow.xaml`).
+    - Added `Tiered Option Value (4=100%, 3=70%, 2=40%)` toggle and customizable percentage fields across `Lyracist` (`TriviaSettingsPage.xaml`), `KSRotation` (`MainWindow.xaml`), and `Lyracist.Trivia` (`MainWindow.xaml`).
 - **Unified Trivia Parity & Feature Alignment Across `Lyracist`, `KSRotation`, and `Lyracist.Trivia`**:
   - Brought complete visual, behavioral, and architectural feature parity between standalone `Lyracist.Trivia` and the embedded trivia engines in `Lyracist` and `KSRotation`.
   - **16:9 Big Screen Projection Window (`TriviaDisplayWindow`) in `Lyracist` and `KSRotation`**:
@@ -254,6 +264,7 @@ All notable changes to the Lyracist project are documented here. The format is b
     - When song performance finishes and rotation yields, Trivia automatically resumes seamlessly.
 
 ### Added
+
 - **New Category Pack: "Famous Lines & Sayings From Movies" (150 Questions)**:
   - Created a dedicated 150-question database (`TriviaData/packs/famous_movie_quotes.json`) packed with iconic cinematic catchphrases, memorable movie quotes, AFI Top 100 quotes, and legendary film lines.
   - Covers golden age classics (*Casablanca, Gone with the Wind, The Wizard of Oz, Citizen Kane, Sunset Boulevard*), blockbuster sci-fi (*Star Wars, The Godfather, Jaws, Terminator, Matrix, Alien, Blade Runner*), 80s/90s hits (*Top Gun, Dirty Harry, Die Hard, Forrest Gump, Pulp Fiction, Jerry Maguire, A Few Good Men, Silence of the Lambs, Goodfellas, Titanic, The Big Lebowski, Fight Club*), and hilarious comedies (*Airplane!, Monty Python, Ghostbusters, Caddyshack, Anchorman, Groundhog Day, The Princess Bride, Mean Girls, Ferris Bueller*).
@@ -337,6 +348,7 @@ All notable changes to the Lyracist project are documented here. The format is b
     7. **Movies, TV Shows & Pop Culture Icons**: *Easy Rider* (Captain America & Billy Bike), *The Wild One* (Marlon Brando), *Sons of Anarchy* (SAMCRO & Jax Teller), *Terminator 2* (Fat Boy), Evel Knievel, *Long Way Round*, and *On Any Sunday*.
 
 ### Changed
+
 - **`Lyracist.Trivia` 3-Column No-Scroll Settings Dashboard**:
   - Converted the **⚙️ Settings & Display** tab into an equal 3-column dashboard layout so Game Masters and hosts can view and edit all configuration fields without vertical scrolling.
   - **Column 1**: Venue & Host Branding (Venue Name, Game Master / Host Name) and Intermission & Auto-Flow controls.
@@ -347,6 +359,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.18.0] - 2026-08-18
 
 ### Added
+
 - **Multi-Monitor Big Screen Projection & Auto-Casting (`KSRotation`)**:
   - Integrated full-screen 16:9 venue projection (`TriviaDisplayWindow` & `TriviaDisplayViewModel`) into `KSRotation`.
   - Added **"📡 Open Big Screen"** button to the `🎯 Trivia Game Control` tab, allowing hosts to toggle and focus the big-screen display window on the configured target monitor.
@@ -358,11 +371,13 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Synchronized scoring engine (`TriviaGameEngine`), SQLite persistence, and mobile player buzzer feedback displaying deducted points (e.g., `"❌ Incorrect (-250 pts)"`).
 
 ### Changed / Cleaned Up
+
 - **Toolbar & Settings Streamlining**:
   - **`KSRotation`**: Removed the redundant `"📡 Connect Screen"` and `"🎯 Trivia Night"` quick-launch buttons from the primary Rotation page toolbar. The Connect Instructions screen remains accessible directly within `Connect & Request Instructions` under the **Display** settings tab, while Trivia Night controls remain cleanly dedicated to the **Trivia** and **Trivia Settings** tabs.
   - **`Lyracist` & `KSRotation` Display Settings**: Removed the `"🎯 Launch Trivia Night"` button from the `Connect & Request Instructions` groupbox on the settings pages, keeping Trivia configuration exclusively on dedicated Trivia pages.
 
 ### Added
+
 - **Float Current Singer to Top of Rotation Option**:
   - Added a togglable option in `Lyracist`, `KSRotation` (WPF), and `KSRotation.Maui`:
     - **`Lyracist`**: Checkbox on the **Rotation** page toolbar, the **Karaoke** control page queue options bar, and persistent toggle under **Settings -> Monitors & Screen Assignments**.
@@ -385,6 +400,7 @@ All notable changes to the Lyracist project are documented here. The format is b
     - `isRotationStart` is included in the REST/WebSocket `/api/rotation` payload and synchronized between `KSRotation` and `Lyracist`.
 
 ### Fixed
+
 - **`Lyracist`: Float Current Singer to Top not floating the new current singer after "Finish Song"**: A `Rotation.CollectionChanged` handler re-triggered the float-to-top logic on every intermediate list mutation performed internally by the shared rotation-advance helper, undoing its own "move the finished singer to the bottom" step before it completed. The song would advance, but the rotation order never visibly changed. Fixed by suppressing that auto-sync handler while a rotation-reordering operation is already in progress and syncing once after it completes.
 - **"Clear 1st Singer Badge" appearing to do nothing**: Clearing the badge fell back to reassigning it to "the first active singer in list order" — which, with Float Current Singer to Top enabled, is almost always the very singer you just cleared it from (they're floated to the top). Clearing now hands the flag to the next active singer in rotation order instead, so it can no longer reassign back to the singer being cleared.
 - **`KSRotation`**: Closed a related reentrancy gap where `EnsureRotationStartFlag` could re-run mid-operation during rotation-advance/reorder calls; it's now suppressed during those operations (matching the rest of the class's existing reentrancy guard) and re-run once explicitly afterward, including when a fully-played music request holding the flag is auto-removed from the rotation.
@@ -392,6 +408,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.17.0] - 2026-08-17
 
 ### Added
+
 - **Full Trivia Engine & Host Deck Integration into `Lyracist` and `KSRotation`**:
   - **`Lyracist` App**: Added primary navigation items **`Trivia`** (interactive Game Master host console) and **`Trivia Settings`** (dedicated separate settings page for question timers, scoring rules, bonuses, and local Wi-Fi credentials).
   - **`KSRotation` App**: Added dedicated top-level tabs **`TabItem Header="Trivia"`** and **`TabItem Header="Trivia Settings"`**, backed by the `MainViewModel.Trivia.cs` partial class.
@@ -486,6 +503,7 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Added high-fidelity vector banner generator `CreateLastSongBannerPng` in `DjBannerFileManager.cs` with deep velvet gradients, radial golden glow, starburst fireworks, music notes, and glowing "LAST SONG OF THE NIGHT" typography.
 
 ### Fixed & Improved
+
 - **Rotation Queue Editable Input Boxes Standout Styling (`GridTextBoxStyle`)**: Enhanced the rotation queue editable textboxes (Singer Name, Duet Partner, Song, Artist) to be distinctly outlined and visible without having to focus or click into them:
   - Added a visible 1px card container border (`{DynamicResource MaterialDesignDivider}`) and card background (`{DynamicResource MaterialDesignCardBackground}`) with rounded corners (`CornerRadius="4"`).
   - Added clear column margin separation (`Margin="2,1"`) and comfortable padding (`Padding="6,3"`).
@@ -504,12 +522,14 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.16.0] - 2026-08-16
 
 ### Added
+
 - **Session Performed Songs History (Singer Rotation Page)**: Added Column 2 to `RotationPage.xaml` featuring live tracking of all performed songs in the current session. Includes:
   - Dual view tabs: **5-Color List Tab** (rotating Violet, Cyan, Emerald, Amber, Rose cards adapting dynamically to Light & Dark themes via `PerformedSongColorConverter`) and **Session Textbox Tab** (multi-line copyable text log).
   - Quick action buttons: **Copy Session Songs to Clipboard** and **Clear Session Performed Songs**.
 - **`PerformedSong` Model (`PerformedSong.cs`)**: Created model tracking performer name, song title, artist, key transposition, timestamp, order number (`ColorIndex => (OrderNumber - 1) % 5`), and `HasKeyChange` helper property.
 
 ### Fixed & Improved
+
 - **Assembly Metadata Standardization**: Standardized `<Authors>` (`Dennis N. Maidon`), `<Company>` (`PAROLE Software`), and `<Copyright>` (`Copyright © 2026 PAROLE Software`) across all solution `.csproj` files (`Lyracist`, `Lyracist.Data`, `KSRotation`, `LyracistDbEditor`, `ScaryokeWheel`, `KSRotation.Maui`, `LyracistKeyGen`).
 - **Compact Queue Layout Spacing (`RotationPage.xaml` & `KaraokePage.xaml`)**: Reduced vertical padding and card margins on performed song cards in Column 2 and active performer queue rows on the Karaoke Control page, fitting more singers on screen without scrolling.
 - **Load & Play Selected Performer Button Positioning**: Restructured middle column `Grid.RowDefinitions` in `KaraokePage.xaml` to 3 explicit rows (`Auto`, `*`, `Auto`), locking the **Load & Play Selected Performer** button to `Grid.Row="2"` at the bottom of the Singer Queue panel.
@@ -520,6 +540,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.15.0] - 2026-08-15
 
 ### Added
+
 - **Dedicated 4-Column "Display" Tab in Settings (`SettingsPage.xaml`)**: Reorganized the Settings page into a clean top-level tab control featuring a dedicated **Display** tab laid out into 4 equal columns (matching `KSRotation` layout):
   - *Column 1*: Monitors & Screen Assignments (Lyrics Projection, Singer Rotation Billboard, DJ Banner Screen, Billboard View Mode, Mirror Lyrics).
   - *Column 2*: DJ & Event Banners (DJ Banner Upload/Select/Delete, Request QR Code Overlay toggle, Special Event Banners Mapping & Save).
@@ -530,14 +551,17 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **MAUI Stub for `CreatePersonalizedBirthdayBannerPng`**: Added `#if MAUI` no-op stub in `Shared/DjBannerFileManager.cs` to resolve cross-platform build dependency for `KSRotation.Maui`.
 
 ### Updated
+
 - **Help System & User Manual**: Expanded `HelpViewModel.cs` topic 5 (*Settings: Display & Projectors*) and topic 15 (*Connect & Request Instructions Screen*) and updated `Lyracist_User_Manual_Updates.txt`.
 
 ## [26.8.13.1] - 2026-08-13
 
 ### Added
+
 - **Tablet/Vertical-Mode Rotation List Layout (KSRotation)**: The rotation list in `MainWindow.xaml` now responsively reflows into a 3-row per-singer layout (Name + current-singer badge / round checkboxes / action buttons) and stacks the Incoming Requests sidebar below the list instead of beside it, once the window narrows below ~1050px — sized for real 11" tablet portrait use rather than desktop widths. Backed by a new `NarrowWidthToBooleanConverter`.
 
 ### Fixed
+
 - **KSRotation.Maui Singer Row Overlap**: Restructured the per-singer `DataTemplate` in `MainPage.xaml` from a 2-column Grid into a stacked `VerticalStackLayout`. The previous layout centered the (7-button) actions panel vertically across the whole row, which landed it directly on top of the round-checkbox row once that row was added — now each section gets its own full-width row.
 - **DJ Banner Window Not Actually Closing**: The `IsShuttingDown` flag added to gate `OnClosing` cancellation was never set to `true` anywhere, so DJ banner windows were only ever hidden, not closed, on app exit. Now set before `Close()` in KSRotation's `DjBannerWindowService` and during `OnExit` in Lyracist's `App.xaml.cs`.
 - **Doubled DJ Banner Decode on Every Switch**: `GetDecodeTargetWidth`'s width probe used `BitmapCacheOption.OnLoad`, forcing a full eager pixel decode just to read a dimension before the real, capped decode ran right after. Switched to `OnDemand` in both KSRotation and Lyracist.
@@ -550,23 +574,28 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **`WifiPasswordStore` Crash-Safety**: Switched from `File.WriteAllText` to the existing `AtomicJsonFile.Serialize` write-to-temp-then-rename helper, matching every other settings store in the codebase, so a crash mid-write can no longer truncate `wifi_passwords.json`.
 
 ### Changed
+
 - **Dead Branch Cleanup**: Removed two structurally-unreachable OR branches from `GetTargetScreenResolution`'s monitor-match logic in Lyracist's `SettingsViewModel.Display.cs`.
 
 ## [26.8.13.0] - 2026-08-13
 
 ### Added
+
 - **Global `CA1416` Platform Warning Suppression**: Added `CA1416` and `CA1422` suppressions to `Directory.Build.props` and `KSRotation.Maui.csproj` to eliminate 160 platform dependent API warnings, keeping the build error list completely clean at 0 warnings and 0 errors.
 
 ### Fixed
+
 - **Android Design-Time File Lock Workarounds (`MSB3374` & `XARLP7000`)**: Added `AndroidDesignTimeFileLockWorkaround` target and pre-build directory creation (`android\bin`, `android\assets`, `designtime\stamp`) to `KSRotation.Maui.csproj` to prevent MSBuild file handle collisions when Visual Studio design-time compiler background builds run concurrently.
 
 ## [26.8.12.0] - 2026-08-13
 
 ### Added
+
 - **Dynamic Theme Info Text Brush (`AppInfoTextBrush`)**: Added `AppInfoTextBrush` resource in `LyracistThemeManager` (`#A7F3D0` for Dark / `#047857` for Light) and bound settings info text blocks for optimal contrast in all theme modes.
 - **Secondary Button & Info Theme Overrides**: Extended `ThemeService.cs` in KSRotation with explicit dynamic secondary button border (`#C4B5FD` / `#7C3AED`), foreground (`#E9D5FF` / `#6D28D9`), and info text brush resource overrides across system, light, and dark theme modes.
 
 ### Fixed
+
 - **Simplified Singer Song Completion**: Streamlined `FinishSingerSong` in `MainViewModel.cs` to sequentially check off completed song checkboxes for active singers.
 - **MAUI Resizetizer Build Target (`EnsureMauiResizetizerDirectoriesExist`)**: Added pre-build target to `KSRotation.Maui.csproj` ensuring intermediate resizetizer directories exist to prevent build exceptions (`MSB3371`/`CS7064`).
 - **KeyGen Icon Reference & Package Cleanup**: Corrected icon asset path in `LyracistKeyGen.csproj` pointing to `Assets\lyracist_mic.ico` and removed unused `ProtectedData` package dependency.
@@ -575,6 +604,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.10.1] - 2026-08-10
 
 ### Added
+
 - **Scan-to-Connect Wi-Fi & Request Instructions Dynamic Graphic**: Added dynamic vector graphic generator for `ConnectInstructions.png` with dual high-density QR codes: Wi-Fi join (WPA/WPA2/NoPass) and Song Request Portal URL.
 - **Dynamic Resolution Screen Detection**: Automatically detects physical target screen dimensions (`1080p`, `1440p`, `4K 3840x2160`, etc.) and scales vector elements and QR module density (`pixelsPerModule = (int)(40 * scale)`) for 1:1 pixel-sharp rendering.
 - **Persistent Wi-Fi Password Store (`wifi_passwords.json`)**: Created `WifiPasswordStore.cs` in `Shared` layer. Automatically saves and recalls Wi-Fi passwords per connected SSID (venue Wi-Fi, travel router, mobile hotspot) so passwords do not need to be re-entered.
@@ -582,15 +612,18 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Comprehensive Help System Expansion**: Added dedicated `"📡 Connect & Wi-Fi Instructions"` topic in KSRotation and `"15. Connect & Request Instructions Screen"` in Lyracist (`HelpViewModel.cs`), detailing dual QR codes, Wi-Fi password store, dynamic resolution detection, and expanding all 15 help topics for complete clarity.
 
 ### Fixed
+
 - **Clean App Shutdown & Process Lingering**: Updated `DjBannerWindow.xaml.cs` with an `IsShuttingDown` flag to ensure closing events are not canceled during application exit, preventing orphaned background processes.
 - **Explicit WPF Application Termination**: Added `Application.Current.Shutdown()` in `MainWindow.xaml.cs` when the main window is closed.
 
 ## [26.8.10.0] - 2026-08-10
 
 ### Added
+
 - **"Last Song" Default Event Banner**: Added `"Last Song"` (`LastSong.png`) to standard pre-saved event banners alongside `Birthday`, `Wedding`, `Engagement`, and `Anniversary` across both Lyracist and KSRotation. Standard pre-saved events are protected from deletion and automatically mapped to their respective graphics.
 
 ### Fixed
+
 - **1-Click Rotation Advancement & Rollover**: Created `AdvanceRotationAfterFinished` in `RotationHelpers.cs` to advance rotation sequence sequentially relative to the finished performer. When the last singer in rotation finishes, rotation automatically rolls over to the top performer in 1 click without needing multiple clicks or manual reset.
 - **Out-of-Sync `IsCurrent` Recovery**: Fixed a bug where checking off a singer when `IsCurrent` was out of sync or unassigned failed to advance the rotation indicator. Rotation now advances reliably starting from the finished singer's position.
 - **Web Portal Round Checkbox Sync**: Updated `OnSingerEntryPropertyChanged` in `MainViewModel.cs` so that toggling round completion checkboxes triggers an immediate web JSON cache rebuild for DJ and Patron web views.
@@ -598,16 +631,19 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.9.0] - 2026-08-09
 
 ### Added
+
 - **Special Event Banner Management in KSRotation**: Added **Upload Banner**, **Add Event**, and **Delete Event** controls to the Display tab in KSRotation, allowing hosts to upload image/video banners directly to `EventBanners` and manage custom event mappings.
 - **Pre-Saved Standard Event Protection**: Guaranteed the presence of 4 standard pre-saved events (`Birthday`, `Wedding`, `Engagement`, `Anniversary`) in `Globals.EventBannersDir` with auto-generated 16:9 banner graphics if missing, and protected standard events from accidental deletion.
 - **Remote Active Special Event Synchronization**: Added public `/api/special-event/active` GET endpoint and extended `KSRotationSyncService` to synchronize active special event banner projections in real-time between KSRotation and Lyracist.
 
 ### Fixed
+
 - **DJ Web App Special Event Loading**: Fixed an HTTP route matching bug in `PatronRequestServer.cs` where GET `/api/special-events` was intercepted by the `404 Not Found` fallback, allowing the remote DJ dashboard (`dj.html`) to load special event buttons properly instead of hanging on `"Loading events..."`.
 - **Mouse Cursor Flickering in KSRotation**: Eliminated mouse cursor flickering by disabling Win32 layered popup transparency and drop-shadow effects on autocomplete suggestion popups inside ListViews, and lowering marquee timer execution priority to `DispatcherPriority.Background`.
 - **KSRotation Finished Song Rotation Advance**: Updated `FinishSingerSong` in `MainViewModel.cs` so that performers who have completed all 10 round checkboxes still have their rotation position advanced, queued songs promoted, and 11th+ song performances logged to database history upon clicking **Finished Song**.
 
 ### Changed
+
 - **High-Contrast Light Lavender UI Styling**: Updated button text, button borders (`#C4B5FD`), and RadioButton labels in `MainWindow.xaml` and `dj.html` to a bright light lavender purple (`#E9D5FF`) for high legibility against dark green/teal backgrounds.
 - **Clean Standard Banner Mapping Interface**: Simplified the **Special Event Banners Mapping** panel in KSRotation by hiding drop-down list boxes (ComboBoxes), TextBoxes, and Delete buttons for standard pre-saved events, reserving edit controls exclusively for custom events.
 - **High-Contrast DJ QR Code Color**: Changed the DJ QR Code foreground color from bright crimson red (`RGB(239, 68, 68)`) to a dark maroon/brick-red (`RGB(128, 0, 32)` / `#800020`), maximizing contrast against white background tiles for optical scanning by mobile cameras.
@@ -615,21 +651,25 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.7.0] - 2026-08-07
 
 ### Fixed
+
 - **Database Manager Search and Bindings**: Fixed data binding mismatches in the Database Manager (`LyracistDbEditor`) that broke track search, filtering, right-click metadata scanning, and saving track edits.
 - **SQLite FTS5 MATCH Query Exception**: Added a self-healing detection check in the search service that automatically drops and recreates `SongSearch` as a true FTS5 virtual table if it is detected as a regular SQL table, preventing the `'no such column: SongSearch'` exception when searching.
 - **Initial Database Creation Migration**: Updated the consolidated EF Core migration to directly use raw SQL to create the `SongSearch` virtual table on any fresh installations.
 
 ### Changed
+
 - **ListBox Layout Compactness**: Changed the search results list layout from 3 lines to 2 lines, merging the track title and artist into a single line (`Title (Artist)`) while preserving font size and weights, and moving the file location path to the second line.
 - **Subtle Alternating Rows**: Configured the search results list to display alternating row backgrounds using the Fluent theme's intermediate control brush for a polished, low-contrast UI.
 
 ## [26.8.6.0] - 2026-08-06
 
 ### Added
+
 - **Plain-Text Catalog Export**: The Database Manager's Catalog Book Exporter now supports exporting the Karaoke or Music catalog as a plain text (.txt) file, in addition to PDF and Word. Format dropdown reordered to PDF, Text, Word.
 - **Failed Artist Update Report**: The Database Manager's Slow Metadata Scan now tracks any songs whose artist could not be resolved and, on completion or cancellation, exports the unresolved file paths to a timestamped report in the app's `Reports` folder.
 
 ### Fixed
+
 - **Singer XP Progress Bar**: Corrected the level-progress calculation, which was off by a factor of two and caused the progress bar to sit near 0% for almost an entire level before jumping.
 - **FFmpeg/FFprobe Conversion Hangs**: Stdout and stderr are now read concurrently from ffmpeg/ffprobe child processes instead of sequentially, eliminating a potential deadlock when a conversion or metadata probe produces enough stderr output to fill the OS pipe buffer.
 - **CDG Playback Race Condition**: Synchronized the CDG frame scheduler's internal state so a song stop/reload can no longer race an in-flight background frame decode and hand back a stale or torn packet index.
@@ -646,48 +686,57 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Reliability & Error Logging**: Several background database operations that previously failed silently now log errors for troubleshooting, and the YouTube integration now retries automatically on transient network failures instead of failing on the first hiccup.
 
 ### Changed
+
 - **Karaoke & Settings ViewModel Cleanup**: Reorganized the two largest internal ViewModel files (DJ banners, Party Tyme, external search, display/monitor assignment, stress-test simulator, and more) into focused files by feature area, with no change in app behavior — purely an internal maintainability cleanup.
 
 ### Removed
+
 - **Party Tyme Karaoke Integration**: Completely removed the commercial streaming/caching karaoke integration (tabs, UI inputs, settings, model definitions, and backend service code) from the application.
 
 ## [26.8.4.0] - 2026-08-04
 
 ### Added
+
 - **DJ Banner QR Code Overlay**: Toggles a floating patron web portal QR code overlay in the bottom-right corner of the full-screen DJ Banner projection window.
 - **DJ Banner QR Code Settings Toggle**: Added a check box under the Select DJ Banner dropdown to enable or disable showing the request QR code overlay.
 
 ### Changed
+
 - **Display Tab Rename**: Renamed the "Casting" tab to "Display" across all UI tabs, help documentation topics, and code comments to better describe its display projection capabilities.
 - **Skipped Performer Round Tracking**: Corrected sequential round-checking logic to check the active show round rather than the first incomplete round when a performer skips their turn.
 - **Immediate Auto-Accept Processing**: Checking the "Auto-accept incoming requests" box now immediately processes and approves all currently pending requests in the queue.
 
 ### Fixed
+
 - **Settings tab height and scrolling**: Shortened the Appearance GroupBox's RowSpan from 6 to 3 to align with Email Settings and prevent Settings tab scrollbars.
 
 ## [26.8.3.0] - 2026-08-03
 
 ### Added
+
 - **Auto-Accept Requests**: New toggle in both Lyracist (Requests page) and KSRotation (next to the Incoming Requests list, including the KSRotation.Maui tablet app) that skips manual DJ approval — Karaoke requests go straight into the rotation and Music requests go straight to Approved the instant they arrive.
 - **Shared DJ Banners Folder**: KSRotation and Lyracist now read and write DJ banners from a single shared `DJBanners` folder next to the app installation, so a banner uploaded from either app (or dropped in by hand) is immediately available to both.
 
 ### Fixed
+
 - **Multi-Monitor DPI Positioning**: The rotation display and DJ banner windows now report the correct physical resolution and position/size correctly on mixed-DPI multi-monitor setups (e.g. a 100% laptop panel plus a 125% external monitor), instead of using a stale DPI reading from whichever monitor the window happened to start on.
 - **Unwanted Auto-Casting**: Enabling the local rotation display, changing the Casting tab's target, or simply launching KSRotation no longer automatically starts (or resumes) casting to Miracast/Chromecast/BrowserCast/AirPlay. Casting now only ever starts from an explicit "Cast Rotation" action.
 - **KSRotation Monitor Selector**: Restored the Target Monitor dropdown and Refresh button to the Settings page (removing an accidental duplicate on the Rotation page) and fixed it being incorrectly greyed out / unable to select a second monitor.
 - **DJ Banner / Rotation Display Conflict**: Simplified so enabling the rotation display always disables the DJ Banner (and vice versa) regardless of which monitor each is targeting, instead of only when they happened to target the exact same monitor.
 
 ### Changed
+
 - **Shared Code Consolidation**: Moved DJ banner file management, monitor enumeration, DPI-aware window positioning, and the crash-safe `AtomicJsonFile` writer out of per-app duplicates and into `Shared/`, used by both KSRotation and Lyracist (and KSRotation.Maui where applicable) so future fixes only need to happen once.
 - **KSRotation Settings Layout**: Removed the internal debug-only "Form Size" panel and moved Email Settings into its place.
 
 ## [26.8.2.0] - 2026-08-02
 
 ### Added
+
 - **Looping MP4 DJ Banners**: Added full support for displaying looping `.mp4` video files as full-screen borderless DJ promotional and branding banners. Includes same-screen collision priority with the rotation billboard display window.
 - **Settings Category Visual Styling**: Color-coded the Settings category group boxes in KSRotation (Purple, Blue, Navy, Slate) to visually differentiate settings categories.
 - **Wireless Casting Support**: Introduced target options for casting the singer rotation billboard directly to Miracast, Chromecast, AirPlay, Wireless HDMI, or Browser Cast. Used high-performance off-screen buffer rendering to run without cluttered windows on the host desktop.
-- **Browser Cast Server**: Self-hosts a local web server (http://localhost:8080/rotation/) to allow any browser on the local network to view the singer rotation billboard in real-time.
+- **Browser Cast Server**: Self-hosts a local web server (<http://localhost:8080/rotation/>) to allow any browser on the local network to view the singer rotation billboard in real-time.
 - **Display Monitor Selection**: Added a Target Monitor dropdown to allow operators to select a specific monitor for projecting both the Singer Display Window and DJ Banner Window, with dynamic redirection and automatic fallback to secondary/primary screens if unplugged.
 - **DJ Banner Projection Screen**: Added support for configuring and projecting borderless, full-screen custom DJ branding/promotional banners (PNG, JPG, JPEG, GIF, BMP, etc.). Includes uploading banners, selecting the active banner, and deleting custom banners.
 - **DJ Banner Same-Screen Collision Priority**: Added same-screen deconfliction logic that automatically disables and hides the DJ Banner when the Rotation Display is active on the same monitor.
@@ -699,31 +748,37 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Help System Updates**: Updated both Lyracist and KSRotation integrated help panels to document wireless casting options, custom DJ banner configurations, iTunes online lookup, background music requests, remote DJ console locking/PIN protection, and deleted split-flap FlipTile references.
 
 ### Removed
+
 - **FlipTile Board View Mode**: Deprecated and completely removed the obsolete Split-Flap FlipTile view mode from the projection options and code.
 
 ## [26.7.31.0] - 2026-07-31
 
 ### Fixed
+
 - **Nullability Warnings**: Resolved possible null reference return (CS8603) and dereference warnings (CS8602) in `CatalogBookGenerator.cs` and `CatalogBookGeneratorTests.cs`.
 - **Android SDK Build Issue**: Cleaned locked `bin`/`obj` folders under `KSRotation.Maui` to resolve clean/rebuild directory deletion errors.
 
 ## [26.7.25.0] - 2026-07-25
 
 ### Fixed
+
 - **Pending Model Changes EF Exception**: Generated the missing `MakeSongFilePathIndexUnique` migration to resolve the `PendingModelChangesWarning` exception that blocked new database schema migrations on fresh installations.
 
 ### Changed
+
 - **Build Output Cleanup**: Configured the build system to target English resources exclusively (`<SatelliteResourceLanguages>en</SatelliteResourceLanguages>` in `Directory.Build.props`), completely removing foreign language satellite folders (`cs`, `de`, `es`, etc.) from the build output directory.
 
 ## [26.7.10.1] - 2026-07-10
 
 ### Added
+
 - **Karaoke/Music Request Indicator Bulbs**: Two glowing "K" (yellow) and "M" (neon green) bulb indicators on the Karaoke page header light up and gently pulse whenever a pending karaoke or music request is waiting for review, and go dim again automatically once it's approved or rejected.
 - **Separate Karaoke vs. Music Requests**: The mobile portal and the KJ's request queue now distinguish "Karaoke" requests (a singer performing) from "Music" requests (just play the track), end-to-end. Added a "Search Music" tab on the tablet portal for browsing the background-music library separately from the karaoke catalog, and a Karaoke/Music toggle on the Custom Link tab.
 - **Current-Performer-Only Scaryoke Spin**: Once Scaryoke Mode is enabled, only the singer currently marked as performing can spin the wheel from their phone. Everyone else still watches it spin live, but the Spin button is hidden for them, and a spin attempt from anyone else is rejected server-side.
 - **Scaryoke Wheel Gated Behind DJ Toggle**: The mobile portal's Scaryoke tab and its underlying API endpoints are now hidden/blocked until the host enables Scaryoke Mode on the Karaoke page, instead of always being reachable to anyone connected.
 
 ### Fixed
+
 - **Approving a Karaoke Request Didn't Add the Singer to the Rotation**: Approving a pending request from the mobile portal only flipped its database status; it never added the singer to the show. Approving a Karaoke-type request now adds the singer and song straight into the active rotation, matching what KJs expect from the mobile "request" feature.
 - **Next Singer Didn't Follow the Current Singer**: The previous fix that preserved a manually-designated "Next" singer interacted badly with the "Set as Current Performer" star toggle — marking a new singer as Current could leave a stale Next flag pointing at whoever used to be next, since there's no actual UI to pick a Next singer independently of Current. Next Up now always recalculates sequentially from whoever is Current, on both the Karaoke page and the rotation billboard.
 - **Fill-In / Opening / End-Rotation "Play" Ignored the Highlighted Track**: Clicking Play on any of the three background-music playlists always started from the first track in the internal (possibly shuffled) playback order, regardless of which song was highlighted in the list. Play now starts at the highlighted track.
@@ -736,6 +791,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.7.10.0] - 2026-07-10
 
 ### Added
+
 - **Emoji Crowd Reactions**: Singers can tap 👏 🔥 ❤️ 🙌 🎉 👑 buttons on the tablet portal to fire floating, animated emoji reactions that drift and fade across both the Lyrics and Rotation projection screens in real time over SignalR.
 - **Live Server Log Viewer**: Added a "Logs" tab to the tablet web portal exposing the most recent app and error log entries via a new `/api/logs` endpoint, with a manual Refresh button.
 - **Rating Symbol & Score Sync to Tablet**: The tablet dashboard now shows the current performer's live average rating next to their name and labels the rating card with the host's chosen feedback icon instead of a hardcoded star, refreshing immediately after each new rating submission.
@@ -747,6 +803,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Queue Singer Without a Song Selected**: Adding a performer with no song/track chosen now creates a placeholder queue entry instead of silently doing nothing.
 
 ### Fixed
+
 - **Star Wars Crawl Resetting Every 10 Seconds**: The rotation billboard's crawl view restarted itself on every view-model property change, including an unrelated leaderboard-toggle timer that fires every 10 seconds — so the crawl never scrolled past its header before resetting. Narrowed the restart trigger to only the properties the crawl actually depends on.
 - **Tablet Rating & Reaction Buttons Unreachable**: The tablet portal's `submitRating` function and the rest of the client script (including the Scaryoke Wheel logic) had been accidentally nested inside another function's scope, making them unreachable from `onclick` handlers.
 - **Manually Designated Next Singer Ignored**: `KaraokeViewModel` and the rotation display previously always recalculated the next singer sequentially, ignoring a manually designated next singer; both now respect the manual designation.
@@ -756,6 +813,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.7.9.0] - 2026-07-09
 
 ### Added
+
 - **Performer XP, Levels & Progression**: Gamified singer progression using `XP = TotalSongsSung * 100 + Score`, automatically granting performance titles (e.g. *Shower Singer*, *Pub Regular*, *Vocal Powerhouse*, *Karaoke Legend*) and achievement badges (Debut, Legend, Rising Star, Crowd Pleaser, High Scorer) on both active queues and leaderboard displays.
 - **Projected Scaryoke Wheel**: Syncs category wheel spin animations onto the crowd billboard rotation screen with identical deceleration physics, rotation angles, sector colors, and ticking sound effects.
 - **Customizable Feedback Ratings**: Symmetrical DJ-side settings controls allowing hosts to curate a list of positive feedback rating symbols (e.g. ⭐, ❤️, 🔥, 🏆, 👑) with strict non-detrimental positive-only validation rules and regular emoji preset support.
@@ -768,6 +826,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Active Performance Key Transposition**: Real-time pitch transposition from `-6` to `+6` semitones. Hot-reloads and seeks under 150ms to apply FFmpeg-based pitch shifting (`asetrate` + `atempo`) dynamically during live performances.
 
 ### Changed
+
 - **Rebranded to Lyracist Pro**: Rebranded the entire application, assembly metadata, and documentation to *Lyracist Pro* to reflect its professional KJ feature set.
 
 ---
@@ -775,6 +834,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.7.7.0] - 2026-07-07
 
 ### Added
+
 - **Star Wars Crawl View Mode**: High-fidelity 3D projection view mode for the rotation billboard, rendering a starfield backdrop with rotating/twinkling stars, cool/warm color variance, and a 3D-angled text block crawling upward in perspective.
 - **Vegas Marquee View Mode**: Theatrical stage theme rendering the current performer's name in giant glowing letters inside a brass frame ringed by purple "marching ants" chasing lights (pulsing Lavender/Purple core), with an "Up Next" strip of next-performers badges below.
 - **Vinyl Turntable View Mode**: Warm DJ-booth theme featuring a dynamic rotating vinyl 45 record, static tonearm pivot, and center label showing current performer and song title details alongside an "On Deck" list.
@@ -786,6 +846,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **CPU Resource Saver**: Automated animation freeze hooks using the window's `IsVisibleChanged` state, pausing chaser timers and rotation animations when the screen is hidden.
 
 ### Changed
+
 - **Billboard Scrolling Perquee**: Upgraded the billboard performer marquee to a continuous scrolling canvas showing the active queue sequence starting from the current performer (yellow/bold highlighted) and the next 5 performers (cyan).
 - **Settings View Modes Dropdown**: Exposed all 4 view mode choices ("Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable").
 
@@ -794,6 +855,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.7.6.1] - 2026-07-06
 
 ### Added
+
 - **Settings Multi-Column Redesign**: Converted settings page into a 5-column independent scrolling configuration, stacking background music channels and special occasion channels vertically to optimize screenspace.
 - **Global ScrollBar Thumb Sizing**: Styled all scrollbar thumbs to enforce a minimum width/height of 45 pixels, preventing microscopic scroll bars on large library lists.
 - **Folder-Specific Directory Scans**: Exposed Scan and Rescan selected directory buttons next to the local library folders list.
@@ -803,6 +865,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Rescan Sync & Purge**: Rescanning directories now identifies renamed or deleted files on the drive, removing dead records from both the main SQL database and the FTS5 search index to maintain library integrity.
 
 ### Optimized
+
 - **4000x Faster Directory Scanner**: Eliminated process spawning (`ffprobe.exe`) and ZIP extraction disk operations during library scanning, resolving the 2TB drive scanning bottlenecks.
 - **Batch Database Ingestion**: Restructured the scan process to query existing records in a single in-memory dictionary lookup and batch insert/update SQLite database and FTS5 search indexes, reducing scan times from hours to seconds.
 - **Rescan Transaction Safety**: Refactored multi-directory rescans to execute sequentially in a single transaction on a background thread, preventing concurrent SQLite database locks.
@@ -816,6 +879,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.7.5.85] - 2026-07-05
 
 ### Added
+
 - **Split-Pane Help View & Settings Guides**: Redesigned the Help Page to feature a clean left-side navigation index with 11 dynamic categories detailing every single settings parameter (Audio EQ, API keys, tablet port server socket configuration, library scanner indexing rules, backup/restoration steps, Scaryoke spinner, background players) and their configuration instructions.
 - **Database Backup & Restore**: Live database backups (via SQLite-native `VACUUM INTO` command) and connection-closed database restorations (overwriting target, deleting temporary WAL/SHM files, and restarting application safely).
 - **Display "None" Option**: Support for selecting *None (Do not show)* in monitor dropdowns (Settings and main projection panels). Selecting this option immediately closes or hides the target projection window (Lyrics or Rotation).
@@ -831,6 +895,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Sunfly & Karaoke Version Metadata Scanning**: Scanner rules for parsing folder structures, extracting track numbers, and identifying karaoke backing tracks.
 
 ### Fixed & Changed
+
 - **Roslyn Warning Suppression & EF1002 Fix**: Added compiler pragma blocks to suppress `EF1002` (potential SQL injection warning on live backup path copy) and added localized rules inside `.editorconfig` to keep the project compile state clean at 0 warnings.
 - **ListBox Ambiguity Fixed**: Fully qualified the type `System.Windows.Controls.ListBox` in `KaraokePage.xaml.cs` to resolve naming conflict warnings (`CS0104`) with Windows Forms.
 - **Queue Click-to-Deselect**: Re-clicking the active singer in the queue deselects them immediately to allow KJs to easily correct accidental selection clicks.
@@ -845,6 +910,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.7.4.3] - 2026-07-04
 
 ### Added
+
 - **Base Control Panel & Windows**: Main presentation layer, standalone borderless projection windows, and multi-monitor movement logic.
 - **Singer History Database**: Created initial database schema for recording performer histories.
 - **Audio Processing Controls**: Initial implementation of 3-band EQ, Compressor, and Limiter.
