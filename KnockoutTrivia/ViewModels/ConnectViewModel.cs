@@ -1,4 +1,4 @@
-// Created on Aug 28, 2026 @ 09:20:00 -> ConnectViewModel for mobile QR codes, Wi-Fi configuration, and live player lobby management
+// Edited on Aug 28, 2026 @ 10:58:00 -> Update QR code colors to dark purple for Wi-Fi and dark green for Game Arena
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -113,14 +113,14 @@ public partial class ConnectViewModel : ViewModelBase
 
     public void GenerateQrCodes()
     {
-        // 1. Generate Game URL QR Code
+        // 1. Generate Game URL QR Code (Dark Green modules on White)
         try
         {
             ConnectUrl = _webServer.ConnectUrl;
             using var generator = new QRCoder.QRCodeGenerator();
             using var data = generator.CreateQrCode(ConnectUrl, QRCoder.QRCodeGenerator.ECCLevel.Q);
             using var qrCode = new QRCoder.PngByteQRCode(data);
-            byte[] bytes = qrCode.GetGraphic(20, [16, 185, 129, 255], [255, 255, 255, 255]); // Emerald green dark modules on white
+            byte[] bytes = qrCode.GetGraphic(20, [6, 78, 59, 255], [255, 255, 255, 255]); // Dark green (#064E3B) modules on white
 
             using var stream = new MemoryStream(bytes);
             var image = new BitmapImage();
@@ -137,7 +137,7 @@ public partial class ConnectViewModel : ViewModelBase
             QrCodeImage = null;
         }
 
-        // 2. Generate Wi-Fi QR Code
+        // 2. Generate Wi-Fi QR Code (Dark Purple modules on White)
         try
         {
             string payload = string.IsNullOrWhiteSpace(WifiPassword)
@@ -147,7 +147,7 @@ public partial class ConnectViewModel : ViewModelBase
             using var generator = new QRCoder.QRCodeGenerator();
             using var data = generator.CreateQrCode(payload, QRCoder.QRCodeGenerator.ECCLevel.Q);
             using var qrCode = new QRCoder.PngByteQRCode(data);
-            byte[] bytes = qrCode.GetGraphic(20, [139, 92, 246, 255], [255, 255, 255, 255]); // Purple dark modules on white
+            byte[] bytes = qrCode.GetGraphic(20, [76, 29, 149, 255], [255, 255, 255, 255]); // Dark purple (#4C1D95) modules on white
 
             using var stream = new MemoryStream(bytes);
             var image = new BitmapImage();

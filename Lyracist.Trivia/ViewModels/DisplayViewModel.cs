@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix CS8799 partial method accessors, RCS1163 unused handler params, and S2325
+// Edited on Aug 28, 2026 @ 10:58:45 -> Update QR code colors to dark purple for Wi-Fi and dark green for Game Arena
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -258,7 +258,7 @@ public partial class DisplayViewModel : ObservableObject, IDisposable
             using var qrGenerator = new QRCoder.QRCodeGenerator();
             using var qrCodeData = qrGenerator.CreateQrCode(payload, QRCoder.QRCodeGenerator.ECCLevel.Q);
             using var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
-            byte[] qrBytes = qrCode.GetGraphic(20);
+            byte[] qrBytes = qrCode.GetGraphic(20, [6, 78, 59, 255], [255, 255, 255, 255]);
 
             using var stream = new System.IO.MemoryStream(qrBytes);
             var image = new BitmapImage();
@@ -309,7 +309,7 @@ public partial class DisplayViewModel : ObservableObject, IDisposable
             using var qrGenerator = new QRCoder.QRCodeGenerator();
             using var qrCodeData = qrGenerator.CreateQrCode(payload, QRCoder.QRCodeGenerator.ECCLevel.Q);
             using var qrCode = new QRCoder.PngByteQRCode(qrCodeData);
-            byte[] qrBytes = qrCode.GetGraphic(20);
+            byte[] qrBytes = qrCode.GetGraphic(20, [76, 29, 149, 255], [255, 255, 255, 255]);
 
             using var stream = new System.IO.MemoryStream(qrBytes);
             var image = new BitmapImage();

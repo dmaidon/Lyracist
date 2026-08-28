@@ -1,5 +1,5 @@
-<!-- Edited on Aug 28, 2026 @ 09:32:00 -> Added Knockout Trivia phone/tablet connect screen, QR codes, web server, and automatic scoring engine -->
-Last Edit: Aug 28, 2026 - Knockout Trivia phone/tablet connect screen, QR codes, web server, and automatic internal scoring engine
+<!-- Edited on Aug 28, 2026 @ 10:59:50 -> Updated QR code modules to dark purple for Wi-Fi and dark green for Game Arena -->
+Last Edit: Aug 28, 2026 - Knockout Trivia phone/tablet connect screen with dark purple/green QR codes, web server, and automatic internal scoring engine
 
 # Changelog
 
@@ -11,8 +11,8 @@ All notable changes to the Lyracist project are documented here. The format is b
 
 - **Knockout Trivia Phone/Tablet Connect Screen & Mobile Companion (`KnockoutTrivia`)**:
   - **Dual QR Code Connect Screen (`ConnectView.xaml` / `ConnectViewModel.cs`)**:
-    - **Card 1: 📶 1. Connect Wi-Fi**: Automatically generates a high-resolution Wi-Fi QR code (`WIFI:S:...;T:...;P:...;;`) with SSID & Password display, allowing players to join venue Wi-Fi with one smartphone camera scan.
-    - **Card 2: 📱 2. Join Trivia Arena**: Generates a Game Join QR code pointing to `http://<local-ip>:<port>`, displaying the web address in large text for instant browser play with no app download required.
+    - **Card 1: 📶 1. Connect Wi-Fi**: Automatically generates a high-resolution dark purple QR code (`#4C1D95`, `[76, 29, 149]`) formatted as `WIFI:S:...;T:...;P:...;;` with SSID & Password display, allowing players to join venue Wi-Fi with one smartphone camera scan.
+    - **Card 2: 📱 2. Join Trivia Arena**: Generates a high-resolution dark green QR code (`#064E3B`, `[6, 78, 59]`) pointing to `http://<local-ip>:<port>`, displaying the web address in large text for instant browser play with no app download required.
     - **Live Connected Player Roster**: Real-time grid displaying connected players, strike status dots, shield token counts, and online pulse indicators.
     - **Host Quick Toolbar**: Actions for "Start Game Now ▶", "Copy URL 📋", "Refresh Connection 🔄", and "Push to Big Screen 📺".
     - **Top Navigation Tab Integration**: Added dedicated "📱 Player Connect" tab in `MainWindow.xaml` and wired projection synchronization to the secondary Audience Display (`AudienceWindow.xaml`).
