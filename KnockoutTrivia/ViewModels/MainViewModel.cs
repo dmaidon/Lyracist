@@ -96,13 +96,14 @@ public partial class MainViewModel : ViewModelBase
             StatusNotification = $"⚡ Super Streak triggered for {player.Name}!";
         };
 
+// Edited on Aug 28, 2026 @ 11:15:00 -> Added DeviceName routing and DPI-aware monitor positioning
         // Wire settings display events
-        SettingsVM.OpenAudienceDisplayRequested += (s, monitorIndex) => OpenAudienceDisplay(monitorIndex);
+        SettingsVM.OpenAudienceDisplayRequested += (s, args) => OpenAudienceDisplay(args.Index, args.Device);
         SettingsVM.CloseAudienceDisplayRequested += (s, e) => CloseAudienceDisplay();
-        SettingsVM.MoveHostWindowRequested += (s, monitorIndex) => MoveHostWindow(monitorIndex);
+        SettingsVM.MoveHostWindowRequested += (s, args) => MoveHostWindow(args.Index, args.Device);
     }
 
-    public void OpenAudienceDisplay(int monitorIndex)
+    public void OpenAudienceDisplay(int monitorIndex, string? deviceName = null)
     {
         if (_audienceWindow == null)
         {
@@ -119,7 +120,7 @@ public partial class MainViewModel : ViewModelBase
             };
         }
 
-        _displayService.PositionWindow(_audienceWindow, monitorIndex, maximize: true);
+        _displayService.PositionWindow(_audienceWindow, monitorIndex, deviceName, fillArea: true);
         _audienceWindow.Show();
         AudienceVM.IsWindowOpen = true;
         SettingsVM.IsAudienceDisplayActive = true;
@@ -149,15 +150,16 @@ public partial class MainViewModel : ViewModelBase
         else
         {
             int monitorIndex = SettingsVM.SelectedAudienceMonitor?.Index ?? 1;
-            OpenAudienceDisplay(monitorIndex);
+            string? targetDevice = SettingsVM.SelectedAudienceMonitor?.DeviceName;
+            OpenAudienceDisplay(monitorIndex, targetDevice);
         }
     }
 
-    public void MoveHostWindow(int monitorIndex)
+    public void MoveHostWindow(int monitorIndex, string? deviceName = null)
     {
         if (Application.Current.MainWindow != null)
         {
-            _displayService.PositionWindow(Application.Current.MainWindow, monitorIndex, maximize: false);
+            _displayService.PositionWindow(Application.Current.MainWindow, monitorIndex, deviceName, fillArea: false);
         }
     }
 

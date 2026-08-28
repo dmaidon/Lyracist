@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 09:13:00 -> Added Wi-Fi configuration, Web Server port, and Question Timer settings
+// Edited on Aug 28, 2026 @ 11:13:30 -> Added SelectedGameMonitorDevice and SelectedBannerMonitorDevice for persistent monitor binding
 using System;
 using System.Collections.Generic;
 
@@ -41,10 +41,13 @@ public class KnockoutSettings
 
     // Display Settings
     public int SelectedGameMonitorIndex { get; set; } = 0;
+    public string SelectedGameMonitorDevice { get; set; } = string.Empty;
     public int SelectedBannerMonitorIndex { get; set; } = 0;
+    public string SelectedBannerMonitorDevice { get; set; } = string.Empty;
     public bool DualMonitorEnabled { get; set; } = false;
 
     // Audio / Visual Settings
     public bool EnableSoundEffects { get; set; } = true;
     public bool EnableAnimations { get; set; } = true;
 }
+

@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 09:26:00 -> Added Wi-Fi auto-detection and companion configuration support
+// Edited on Aug 28, 2026 @ 11:14:30 -> Added persistent DeviceName monitor selection and display event payload
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -40,9 +40,9 @@ public partial class SettingsViewModel : ViewModelBase
     public ObservableCollection<DisplayMonitorOption> AvailableDisplayOptions { get; } = [];
     public ObservableCollection<SelectableTriviaSource> AvailableSources { get; } = [];
 
-    public event EventHandler<int>? OpenAudienceDisplayRequested;
+    public event EventHandler<(int Index, string? Device)>? OpenAudienceDisplayRequested;
     public event EventHandler? CloseAudienceDisplayRequested;
-    public event EventHandler<int>? MoveHostWindowRequested;
+    public event EventHandler<(int Index, string? Device)>? MoveHostWindowRequested;
 
     public SettingsViewModel(
         IConfigService configService,
@@ -145,13 +145,15 @@ public partial class SettingsViewModel : ViewModelBase
             AvailableDisplayOptions.Add(opt);
         }
 
-        // Resolve Host monitor selection
-        SelectedHostMonitor = AvailableDisplayOptions.FirstOrDefault(m => m.Index == Settings.SelectedGameMonitorIndex)
+        // Resolve Host monitor selection (device name first, then index, then primary)
+        SelectedHostMonitor = AvailableDisplayOptions.FirstOrDefault(m => !string.IsNullOrEmpty(Settings.SelectedGameMonitorDevice) && string.Equals(m.DeviceName, Settings.SelectedGameMonitorDevice, StringComparison.OrdinalIgnoreCase))
+                              ?? AvailableDisplayOptions.FirstOrDefault(m => m.Index == Settings.SelectedGameMonitorIndex)
                               ?? AvailableDisplayOptions.FirstOrDefault(m => m.IsPrimary)
                               ?? AvailableDisplayOptions.FirstOrDefault();
 
-        // Resolve Audience monitor selection (prefer secondary display if available)
-        SelectedAudienceMonitor = AvailableDisplayOptions.FirstOrDefault(m => m.Index == Settings.SelectedBannerMonitorIndex)
+        // Resolve Audience monitor selection (device name first, then index, then secondary display)
+        SelectedAudienceMonitor = AvailableDisplayOptions.FirstOrDefault(m => !string.IsNullOrEmpty(Settings.SelectedBannerMonitorDevice) && string.Equals(m.DeviceName, Settings.SelectedBannerMonitorDevice, StringComparison.OrdinalIgnoreCase))
+                                  ?? AvailableDisplayOptions.FirstOrDefault(m => m.Index == Settings.SelectedBannerMonitorIndex)
                                   ?? AvailableDisplayOptions.FirstOrDefault(m => !m.IsPrimary)
                                   ?? AvailableDisplayOptions.LastOrDefault();
     }
@@ -168,7 +170,8 @@ public partial class SettingsViewModel : ViewModelBase
         else
         {
             int targetIndex = SelectedAudienceMonitor?.Index ?? 1;
-            OpenAudienceDisplayRequested?.Invoke(this, targetIndex);
+            string? targetDevice = SelectedAudienceMonitor?.DeviceName;
+            OpenAudienceDisplayRequested?.Invoke(this, (targetIndex, targetDevice));
             IsAudienceDisplayActive = true;
             StatusMessage = $"Audience Display opened on {SelectedAudienceMonitor?.ShortLabel ?? "Screen"}.";
         }
@@ -179,7 +182,7 @@ public partial class SettingsViewModel : ViewModelBase
     {
         if (SelectedHostMonitor != null)
         {
-            MoveHostWindowRequested?.Invoke(this, SelectedHostMonitor.Index);
+            MoveHostWindowRequested?.Invoke(this, (SelectedHostMonitor.Index, SelectedHostMonitor.DeviceName));
             StatusMessage = $"Host window moved to {SelectedHostMonitor.ShortLabel}.";
         }
     }
@@ -190,11 +193,13 @@ public partial class SettingsViewModel : ViewModelBase
         if (SelectedHostMonitor != null)
         {
             Settings.SelectedGameMonitorIndex = SelectedHostMonitor.Index;
+            Settings.SelectedGameMonitorDevice = SelectedHostMonitor.DeviceName;
         }
 
         if (SelectedAudienceMonitor != null)
         {
             Settings.SelectedBannerMonitorIndex = SelectedAudienceMonitor.Index;
+            Settings.SelectedBannerMonitorDevice = SelectedAudienceMonitor.DeviceName;
         }
 
         if (!string.IsNullOrWhiteSpace(Settings.WifiSsid))
@@ -221,4 +226,5 @@ public partial class SettingsViewModel : ViewModelBase
         StatusMessage = "Restored default settings, monitors, and all databases.";
     }
 }
+
 

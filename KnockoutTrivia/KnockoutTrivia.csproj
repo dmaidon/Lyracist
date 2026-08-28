@@ -1,4 +1,4 @@
-<!-- Edited on Aug 28, 2026 @ 09:12:00 -> Added QRCoder, shared network/wifi helpers, and knockout.html mobile resource -->
+<!-- Edited on Aug 28, 2026 @ 11:13:00 -> Enabled UseWindowsForms and linked MonitorDpiHelper, MonitorEnumerator, WindowPositioner -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -7,12 +7,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <Title>Knockout Trivia</Title>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.8.28.4</AssemblyVersion>
-    <FileVersion>26.8.28.4</FileVersion>
+    <AssemblyVersion>26.8.28.5</AssemblyVersion>
+    <FileVersion>26.8.28.5</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
   </PropertyGroup>
 
@@ -42,6 +43,9 @@
   <ItemGroup>
     <Compile Include="..\Shared\Globals.cs" Link="Shared\Globals.cs" />
     <Compile Include="..\Shared\MonitorInfo.cs" Link="Shared\MonitorInfo.cs" />
+    <Compile Include="..\Shared\MonitorDpiHelper.cs" Link="Shared\MonitorDpiHelper.cs" />
+    <Compile Include="..\Shared\MonitorEnumerator.cs" Link="Shared\MonitorEnumerator.cs" />
+    <Compile Include="..\Shared\WindowPositioner.cs" Link="Shared\WindowPositioner.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="Shared\TextBoxSelectionHelper.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="Shared\NameFormatting.cs" />
     <Compile Include="..\Shared\LocalNetworkHelper.cs" Link="Shared\LocalNetworkHelper.cs" />
@@ -51,3 +55,4 @@
   </ItemGroup>
 
 </Project>
+

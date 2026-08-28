@@ -1,9 +1,9 @@
-// Edited on Aug 27, 2026 @ 15:26:35 -> Added multi-monitor option formatting and window positioning methods
+// Edited on Aug 28, 2026 @ 11:14:00 -> Fixed multi-monitor DPI scaling and window positioning using WindowPositioner and Screen.AllScreens
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Forms;
 using KnockoutTrivia.Models;
 using Lyracist.Shared;
 
@@ -11,92 +11,23 @@ namespace KnockoutTrivia.Services;
 
 public interface IDisplayService
 {
-    List<MonitorInfo> GetAvailableMonitors();
+    IReadOnlyList<MonitorInfo> GetAvailableMonitors();
     List<DisplayMonitorOption> GetDisplayOptions();
     MonitorInfo? GetMonitor(int index);
-    void PositionWindow(Window window, int monitorIndex, bool maximize = false);
+    bool PositionWindow(Window window, int monitorIndex, string? deviceName = null, bool fillArea = true);
 }
 
 public class DisplayService : IDisplayService
 {
-    private delegate bool MonitorEnumProc(IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct Rect
+    public IReadOnlyList<MonitorInfo> GetAvailableMonitors()
     {
-        public int Left;
-        public int Top;
-        public int Right;
-        public int Bottom;
-    }
-
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    private struct MonitorInfoEx
-    {
-        public int Size;
-        public Rect Monitor;
-        public Rect WorkArea;
-        public uint Flags;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        public string DeviceName;
-    }
-
-    [DllImport("user32.dll")]
-    private static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumProc lpfnEnum, IntPtr dwData);
-
-    [DllImport("user32.dll", CharSet = CharSet.Auto)]
-    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MonitorInfoEx lpmi);
-
-    private const uint MonitorInfoFlagsPrimary = 0x00000001;
-
-    public List<MonitorInfo> GetAvailableMonitors()
-    {
-        var monitors = new List<MonitorInfo>();
-        int index = 0;
-
-        EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, (IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData) =>
-        {
-            var mi = new MonitorInfoEx();
-            mi.Size = Marshal.SizeOf(typeof(MonitorInfoEx));
-            if (GetMonitorInfo(hMonitor, ref mi))
-            {
-                bool isPrimary = (mi.Flags & MonitorInfoFlagsPrimary) != 0;
-                int width = mi.Monitor.Right - mi.Monitor.Left;
-                int height = mi.Monitor.Bottom - mi.Monitor.Top;
-
-                monitors.Add(new MonitorInfo(
-                    Index: index++,
-                    DeviceName: string.IsNullOrWhiteSpace(mi.DeviceName) ? $"Display {index}" : mi.DeviceName,
-                    IsPrimary: isPrimary,
-                    X: mi.Monitor.Left,
-                    Y: mi.Monitor.Top,
-                    Width: width,
-                    Height: height
-                ));
-            }
-            return true;
-        }, IntPtr.Zero);
-
-        if (monitors.Count == 0)
-        {
-            // Fallback primary display
-            monitors.Add(new MonitorInfo(
-                Index: 0,
-                DeviceName: "Primary Display",
-                IsPrimary: true,
-                X: 0,
-                Y: 0,
-                Width: 1920,
-                Height: 1080
-            ));
-        }
-
-        return monitors;
+        return MonitorEnumerator.GetMonitors();
     }
 
     public List<DisplayMonitorOption> GetDisplayOptions()
     {
-        return GetAvailableMonitors().Select(m => new DisplayMonitorOption
+        var monitors = GetAvailableMonitors();
+        return monitors.Select(m => new DisplayMonitorOption
         {
             Index = m.Index,
             DeviceName = m.DeviceName,
@@ -118,27 +49,46 @@ public class DisplayService : IDisplayService
         return list.FirstOrDefault(m => m.IsPrimary) ?? list.FirstOrDefault();
     }
 
-    public void PositionWindow(Window window, int monitorIndex, bool maximize = false)
+    public bool PositionWindow(Window window, int monitorIndex, string? deviceName = null, bool fillArea = true)
     {
         ArgumentNullException.ThrowIfNull(window);
 
-        var monitors = GetAvailableMonitors();
-        if (monitors.Count == 0) return;
+        Screen[] screens = Screen.AllScreens;
+        if (screens.Length == 0) return false;
 
-        var target = (monitorIndex >= 0 && monitorIndex < monitors.Count)
-            ? monitors[monitorIndex]
-            : (monitors.FirstOrDefault(m => !m.IsPrimary) ?? monitors[0]);
+        // 1. Try matching by exact DeviceName first
+        Screen? target = null;
+        if (!string.IsNullOrWhiteSpace(deviceName))
+        {
+            target = screens.FirstOrDefault(s => string.Equals(s.DeviceName, deviceName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // 2. Fall back to monitorIndex
+        if (target == null && monitorIndex >= 0 && monitorIndex < screens.Length)
+        {
+            target = screens[monitorIndex];
+        }
+
+        // 3. Fall back to secondary monitor if available, else primary
+        target ??= screens.Length > 1 ? screens[1] : screens[0];
 
         window.WindowStartupLocation = WindowStartupLocation.Manual;
         window.WindowState = WindowState.Normal;
-        window.Left = target.X;
-        window.Top = target.Y;
-        window.Width = target.Width;
-        window.Height = target.Height;
 
-        if (maximize)
+        if (fillArea)
         {
-            window.WindowState = WindowState.Maximized;
+            // Position and scale to exact target monitor area in DPI-aware DIPs
+            WindowPositioner.FillArea(window, target.Bounds);
         }
+        else
+        {
+            // Position window centered in working area
+            double width = window.Width > 100 ? window.Width : 1280;
+            double height = window.Height > 100 ? window.Height : 720;
+            WindowPositioner.CenterInArea(window, target.WorkingArea, width, height);
+        }
+
+        return true;
     }
 }
+

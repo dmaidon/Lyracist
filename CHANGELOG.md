@@ -1,5 +1,5 @@
-<!-- Edited on Aug 28, 2026 @ 10:59:50 -> Updated QR code modules to dark purple for Wi-Fi and dark green for Game Arena -->
-Last Edit: Aug 28, 2026 - Knockout Trivia phone/tablet connect screen with dark purple/green QR codes, web server, and automatic internal scoring engine
+<!-- Edited on Aug 28, 2026 @ 11:15:00 -> Fixed multi-monitor DPI scaling and window positioning for Audience Screen -->
+Last Edit: Aug 28, 2026 - Fixed multi-monitor DPI scaling and window positioning for Audience Screen
 
 # Changelog
 
@@ -8,6 +8,12 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.28.1] - 2026-08-28
 
 ### Added & Enhanced
+
+- **Knockout Trivia Multi-Monitor Routing & Audience Screen Projection (`KnockoutTrivia`)**:
+  - **DPI-Aware Window Positioning (`DisplayService.cs` / `WindowPositioner.cs`)**:
+    - Replaced buggy Win32 pixel coordinates and `WindowState.Maximized` with `WindowPositioner.FillArea` and `Screen.AllScreens` matching `Lyracist` and `Lyracist.Trivia`.
+    - Eliminates the bug where WPF automatically redirected/snapped the Audience Window back onto Screen #1 (Primary display) when maximized.
+    - Added persistent monitor binding by hardware `DeviceName` (`SelectedGameMonitorDevice` & `SelectedBannerMonitorDevice`), ensuring window positioning remains locked to the selected screen across restarts and display reconnects.
 
 - **Knockout Trivia Phone/Tablet Connect Screen & Mobile Companion (`KnockoutTrivia`)**:
   - **Dual QR Code Connect Screen (`ConnectView.xaml` / `ConnectViewModel.cs`)**:
