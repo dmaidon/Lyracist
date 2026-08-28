@@ -18,7 +18,12 @@ namespace Lyracist.Trivia.Core.Services;
 public class TriviaWebServer : IDisposable
 {
     private const int MaxRequestBodyBytes = 2_097_152; // 2 MB
-    private const int MaxConcurrentConnections = 64;
+
+    // Connections are now kept alive across many requests (see HandleClientAsync) instead of one
+    // request per TCP connection, so this now bounds concurrently *connected* phones rather than
+    // concurrently *in-flight* requests - a much bigger number for the same crowd size. Sized for
+    // a busy venue (100+ phones each holding one open connection) with headroom.
+    private const int MaxConcurrentConnections = 200;
     private static readonly TimeSpan RequestReadTimeout = TimeSpan.FromSeconds(15);
 
     private readonly TriviaGameEngine _engine;
@@ -124,84 +129,127 @@ public class TriviaWebServer : IDisposable
     {
         using (client)
         await using (var stream = client.GetStream())
-        using (var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(serverToken))
         {
-            timeoutCts.CancelAfter(RequestReadTimeout);
             var readStream = new ChunkedReader(stream);
 
-            try
+            // Phones poll /api/trivia/state roughly once a second while connected. Serving each
+            // poll on its own TCP connection (the old behavior - every response sent
+            // "Connection: close") meant a fresh handshake per poll, which adds up fast with a
+            // venue full of phones. Reuse this connection for as many requests as the client
+            // keeps sending (HTTP/1.1's default), closing only when the client asks to
+            // (Connection: close), the read times out (RequestReadTimeout, same budget used for
+            // both the first request and every request after - a connected phone polling every
+            // second is comfortably inside that window), or something goes wrong.
+            while (!serverToken.IsCancellationRequested)
             {
-                string headers = await ReadHeadersAsync(readStream, timeoutCts.Token);
-                if (string.IsNullOrWhiteSpace(headers)) return;
+                using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(serverToken);
+                timeoutCts.CancelAfter(RequestReadTimeout);
+                bool keepAlive = false;
 
-                var headerLines = headers.Split("\r\n", StringSplitOptions.None);
-                string requestLine = headerLines[0];
-                var parts = requestLine.Split(' ');
-                if (parts.Length < 2) return;
-
-                string method = parts[0].ToUpperInvariant();
-                string rawPath = parts[1];
-                string path = rawPath;
-                string queryString = "";
-
-                int qIdx = rawPath.IndexOf('?');
-                if (qIdx >= 0)
-                {
-                    path = rawPath[..qIdx];
-                    queryString = rawPath[(qIdx + 1)..];
-                }
-
-                if (method == "OPTIONS")
-                {
-                    await SendCorsPreflightResponseAsync(stream);
-                    return;
-                }
-
-                int contentLength = ParseContentLength(headerLines);
-                if (contentLength > MaxRequestBodyBytes)
-                {
-                    await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Request body too large.\"}"));
-                    return;
-                }
-
-                string body = "";
-                if (contentLength > 0)
-                {
-                    byte[] bodyBuffer = new byte[contentLength];
-                    int readTotal = 0;
-                    while (readTotal < contentLength)
-                    {
-                        int read = await readStream.ReadAsync(bodyBuffer.AsMemory(readTotal, contentLength - readTotal), timeoutCts.Token);
-                        if (read == 0) break;
-                        readTotal += read;
-                    }
-                    body = Encoding.UTF8.GetString(bodyBuffer, 0, readTotal);
-                }
-
-                await RouteRequestAsync(stream, method, path, queryString, body);
-            }
-            catch (Exception ex) when (ex is OperationCanceledException || ex is IOException || ex is SocketException)
-            {
-                // Client disconnected or timed out
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"TriviaWebServer HandleClientAsync error: {ex.Message}");
                 try
                 {
-                    await SendResponseAsync(stream, 500, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Internal Server Error\"}"));
+                    string headers = await ReadHeadersAsync(readStream, timeoutCts.Token);
+                    if (string.IsNullOrWhiteSpace(headers)) return; // client closed the connection
+
+                    var headerLines = headers.Split("\r\n", StringSplitOptions.None);
+                    string requestLine = headerLines[0];
+                    var parts = requestLine.Split(' ');
+                    if (parts.Length < 2) return;
+
+                    string method = parts[0].ToUpperInvariant();
+                    string rawPath = parts[1];
+                    string path = rawPath;
+                    string queryString = "";
+
+                    int qIdx = rawPath.IndexOf('?');
+                    if (qIdx >= 0)
+                    {
+                        path = rawPath[..qIdx];
+                        queryString = rawPath[(qIdx + 1)..];
+                    }
+
+                    keepAlive = !RequestWantsClose(headerLines);
+
+                    if (method == "OPTIONS")
+                    {
+                        await SendCorsPreflightResponseAsync(stream, keepAlive);
+                        if (!keepAlive) return;
+                        continue;
+                    }
+
+                    int contentLength = ParseContentLength(headerLines);
+                    if (contentLength > MaxRequestBodyBytes)
+                    {
+                        await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Request body too large.\"}"), keepAlive: false);
+                        return;
+                    }
+
+                    string body = "";
+                    if (contentLength > 0)
+                    {
+                        byte[] bodyBuffer = new byte[contentLength];
+                        int readTotal = 0;
+                        while (readTotal < contentLength)
+                        {
+                            int read = await readStream.ReadAsync(bodyBuffer.AsMemory(readTotal, contentLength - readTotal), timeoutCts.Token);
+                            if (read == 0)
+                            {
+                                // Connection closed mid-body - too short to safely resume reading
+                                // a next request from this stream even if the client asked to
+                                // keep it alive.
+                                return;
+                            }
+                            readTotal += read;
+                        }
+                        body = Encoding.UTF8.GetString(bodyBuffer, 0, readTotal);
+                    }
+
+                    await RouteRequestAsync(stream, method, path, queryString, body, keepAlive);
+                    if (!keepAlive) return;
                 }
-                catch { }
+                catch (Exception ex) when (ex is OperationCanceledException || ex is IOException || ex is SocketException)
+                {
+                    // Client disconnected or timed out
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"TriviaWebServer HandleClientAsync error: {ex.Message}");
+                    try
+                    {
+                        await SendResponseAsync(stream, 500, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Internal Server Error\"}"), keepAlive: false);
+                    }
+                    catch { }
+                    return;
+                }
             }
         }
     }
 
-    private async Task RouteRequestAsync(NetworkStream stream, string method, string path, string queryString, string body)
+    /// True if the request explicitly asked to close the connection after this response.
+    /// HTTP/1.1 defaults to keep-alive otherwise (this server only ever speaks HTTP/1.1).
+    private static bool RequestWantsClose(string[] headerLines)
     {
+        foreach (var line in headerLines)
+        {
+            if (line.StartsWith("Connection:", StringComparison.OrdinalIgnoreCase))
+            {
+                return line["Connection:".Length..].Trim().Equals("close", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+        return false;
+    }
+
+    private async Task RouteRequestAsync(NetworkStream stream, string method, string path, string queryString, string body, bool keepAlive)
+    {
+        // Every branch below has already fully consumed any request body (HandleClientAsync reads
+        // exactly Content-Length bytes before calling this), so the stream is always correctly
+        // positioned for a next request regardless of which response we send - keepAlive can be
+        // honored on every path, including error responses.
         if (path == "/" || path.Equals("/trivia", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
         {
             byte[] htmlBytes = await GetHtmlBytesAsync();
-            await SendResponseAsync(stream, 200, "text/html; charset=utf-8", htmlBytes);
+            await SendResponseAsync(stream, 200, "text/html; charset=utf-8", htmlBytes, keepAlive);
             return;
         }
 
@@ -226,22 +274,22 @@ public class TriviaWebServer : IDisposable
                     if (existing?.IsConnected == true && !isSamePlayer)
                     {
                         await SendResponseAsync(stream, 409, "application/json; charset=utf-8",
-                            Encoding.UTF8.GetBytes("{\"error\":\"That name is already in use this game. Please choose a different name.\"}"));
+                            Encoding.UTF8.GetBytes("{\"error\":\"That name is already in use this game. Please choose a different name.\"}"), keepAlive);
                         return;
                     }
 
                     var player = _engine.RegisterPlayer(trimmedName, joinReq.TeamName?.Trim() ?? "");
                     var resp = new { success = true, playerId = player.PlayerId, name = player.Name };
-                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)));
+                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)), keepAlive);
                 }
                 else
                 {
-                    await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Name is required.\"}"));
+                    await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Name is required.\"}"), keepAlive);
                 }
             }
             catch
             {
-                await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Invalid JSON format.\"}"));
+                await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Invalid JSON format.\"}"), keepAlive);
             }
             return;
         }
@@ -262,29 +310,29 @@ public class TriviaWebServer : IDisposable
                     if (existing != null && !string.IsNullOrEmpty(subReq.PlayerId) &&
                         !string.Equals(existing.PlayerId, subReq.PlayerId, StringComparison.OrdinalIgnoreCase))
                     {
-                        await SendResponseAsync(stream, 409, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Player identity mismatch - please rejoin.\"}"));
+                        await SendResponseAsync(stream, 409, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Player identity mismatch - please rejoin.\"}"), keepAlive);
                         return;
                     }
 
                     int optionCount = _engine.CurrentSession.CurrentQuestion?.Options.Count ?? 4;
                     if (subReq.SelectedOptionIndex < 0 || subReq.SelectedOptionIndex >= optionCount)
                     {
-                        await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Invalid answer option.\"}"));
+                        await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Invalid answer option.\"}"), keepAlive);
                         return;
                     }
 
                     bool accepted = _engine.SubmitAnswer(trimmedName, subReq.SelectedOptionIndex, subReq.ResponseTimeMs);
                     var resp = new { success = accepted };
-                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)));
+                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)), keepAlive);
                 }
                 else
                 {
-                    await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Invalid submission payload.\"}"));
+                    await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Invalid submission payload.\"}"), keepAlive);
                 }
             }
             catch
             {
-                await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Invalid JSON format.\"}"));
+                await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Invalid JSON format.\"}"), keepAlive);
             }
             return;
         }
@@ -373,12 +421,12 @@ public class TriviaWebServer : IDisposable
                 })
             };
 
-            await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(statePayload)));
+            await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(statePayload)), keepAlive);
             return;
         }
 
         // 404 Not Found
-        await SendResponseAsync(stream, 404, "text/plain", Encoding.UTF8.GetBytes("404 Not Found"));
+        await SendResponseAsync(stream, 404, "text/plain", Encoding.UTF8.GetBytes("404 Not Found"), keepAlive);
     }
 
     private async Task<byte[]> GetHtmlBytesAsync()
@@ -408,20 +456,20 @@ public class TriviaWebServer : IDisposable
         return Encoding.UTF8.GetBytes(_cachedHtml);
     }
 
-    private static async Task SendCorsPreflightResponseAsync(NetworkStream stream)
+    private static async Task SendCorsPreflightResponseAsync(NetworkStream stream, bool keepAlive)
     {
-        const string response = "HTTP/1.1 204 No Content\r\n" +
-                                "Access-Control-Allow-Origin: *\r\n" +
-                                "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
-                                "Access-Control-Allow-Headers: Content-Type\r\n" +
-                                "Access-Control-Max-Age: 86400\r\n" +
-                                "Connection: close\r\n" +
-                                "Content-Length: 0\r\n\r\n";
+        string response = "HTTP/1.1 204 No Content\r\n" +
+                          "Access-Control-Allow-Origin: *\r\n" +
+                          "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
+                          "Access-Control-Allow-Headers: Content-Type\r\n" +
+                          "Access-Control-Max-Age: 86400\r\n" +
+                          (keepAlive ? "Connection: keep-alive\r\n" : "Connection: close\r\n") +
+                          "Content-Length: 0\r\n\r\n";
         byte[] bytes = Encoding.UTF8.GetBytes(response);
         await stream.WriteAsync(bytes);
     }
 
-    private static async Task SendResponseAsync(NetworkStream stream, int statusCode, string contentType, byte[] content)
+    private static async Task SendResponseAsync(NetworkStream stream, int statusCode, string contentType, byte[] content, bool keepAlive)
     {
         string statusText = statusCode switch
         {
@@ -439,7 +487,7 @@ public class TriviaWebServer : IDisposable
                         "Access-Control-Allow-Origin: *\r\n" +
                         "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
                         "Access-Control-Allow-Headers: Content-Type\r\n" +
-                        "Connection: close\r\n\r\n";
+                        (keepAlive ? "Connection: keep-alive\r\n\r\n" : "Connection: close\r\n\r\n");
 
         byte[] headerBytes = Encoding.UTF8.GetBytes(header);
         await stream.WriteAsync(headerBytes);

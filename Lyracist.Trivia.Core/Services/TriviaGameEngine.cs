@@ -549,6 +549,40 @@ public class TriviaGameEngine : IDisposable
         }
     }
 
+    /// <summary>
+    /// Jumps to the 1-based <paramref name="questionNumber"/> IF there's currently a live,
+    /// in-progress round to navigate within (not Lobby/GameComplete) and the target is a
+    /// different, in-range question - a no-op otherwise. This is the guard every game-master
+    /// UI's "jump to question N" control (a ComboBox bound to a 1-based question-number property)
+    /// needs before calling GoToQuestion: GoToQuestion itself has no idea whether the caller is a
+    /// player picking a live question or a ViewModel setting that property back to 1 while the
+    /// game master is just browsing packs for the *next* game - the latter used to silently
+    /// restart the just-finished game's Question 1. Single source of truth for that guard, shared
+    /// by every game-master ViewModel (Lyracist.Trivia, KSRotation) so it can't drift between them
+    /// the way it once did when each app reimplemented it independently.
+    /// </summary>
+    /// <returns>True if a navigation actually happened.</returns>
+    public bool TryNavigateToQuestionNumber(int questionNumber, bool startTimerImmediately)
+    {
+        if (CurrentSession?.CurrentRound == null || State == TriviaGameState.Lobby || State == TriviaGameState.GameComplete)
+        {
+            return false;
+        }
+
+        int targetIndex = questionNumber - 1;
+        if (targetIndex < 0 || targetIndex >= CurrentSession.CurrentRound.Questions.Count)
+        {
+            return false;
+        }
+
+        if (CurrentSession.CurrentQuestionIndex == targetIndex)
+        {
+            return false;
+        }
+
+        return GoToQuestion(targetIndex, startTimerImmediately: startTimerImmediately);
+    }
+
     public void VoidCurrentQuestion()
     {
         lock (_stateLock)

@@ -732,6 +732,80 @@ public class GameEngineTests
     }
 
     [Fact]
+    public void TryNavigateToQuestionNumber_NavigatesWhenSessionIsLive()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        Assert.Equal("Q1", engine.CurrentSession.CurrentQuestion?.Id);
+
+        bool navigated = engine.TryNavigateToQuestionNumber(2, startTimerImmediately: true);
+
+        Assert.True(navigated);
+        Assert.Equal("Q2", engine.CurrentSession.CurrentQuestion?.Id);
+    }
+
+    [Fact]
+    public void TryNavigateToQuestionNumber_NoOpsWhenAlreadyOnThatQuestion()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        bool navigated = engine.TryNavigateToQuestionNumber(1, startTimerImmediately: true);
+
+        Assert.False(navigated);
+        Assert.Equal("Q1", engine.CurrentSession.CurrentQuestion?.Id);
+    }
+
+    [Fact]
+    public void TryNavigateToQuestionNumber_NoOpsOnOutOfRangeNumber()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        bool navigated = engine.TryNavigateToQuestionNumber(99, startTimerImmediately: true);
+
+        Assert.False(navigated);
+        Assert.Equal("Q1", engine.CurrentSession.CurrentQuestion?.Id);
+    }
+
+    [Fact]
+    public void TryNavigateToQuestionNumber_NoOpsInLobbyState()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        // Still in Lobby - StartCurrentQuestion() was never called, so there's no live question
+        // to navigate to yet (this is the exact scenario that used to restart a just-finished
+        // game's Question 1 while the game master was browsing packs for the next one).
+
+        bool navigated = engine.TryNavigateToQuestionNumber(2, startTimerImmediately: true);
+
+        Assert.False(navigated);
+        Assert.Equal(TriviaGameState.Lobby, engine.State);
+        Assert.Equal(0, engine.CurrentSession.CurrentQuestionIndex);
+    }
+
+    [Fact]
+    public void TryNavigateToQuestionNumber_NoOpsInGameCompleteState()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        // CreateSampleRound has 2 questions in 1 round - two advances reaches GameComplete.
+        engine.AdvanceToNextQuestion();
+        engine.AdvanceToNextQuestion();
+        Assert.Equal(TriviaGameState.GameComplete, engine.State);
+
+        bool navigated = engine.TryNavigateToQuestionNumber(1, startTimerImmediately: true);
+
+        Assert.False(navigated);
+    }
+
+    [Fact]
     public void VoidCurrentQuestion_RollsBackPointsAndAdvances()
     {
         var settings = new TriviaSettings
