@@ -1,5 +1,6 @@
-// Created on Aug 27, 2026 @ 14:36:35 -> QuestionViewModel for big screen bar-friendly trivia display
+// Edited on Aug 28, 2026 @ 09:29:00 -> Synchronize real-time timer ticks and automatic answer reveal in QuestionViewModel
 using System.Collections.ObjectModel;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KnockoutTrivia.Models;
@@ -32,8 +33,30 @@ public partial class QuestionViewModel : ViewModelBase
     {
         _gameStateService = gameStateService;
         _gameStateService.QuestionChanged += OnQuestionChanged;
+        _gameStateService.TimerTicked += (s, sec) =>
+        {
+            if (Application.Current?.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
+            {
+                Application.Current.Dispatcher.Invoke(() => SecondsRemaining = sec);
+            }
+            else
+            {
+                SecondsRemaining = sec;
+            }
+        };
 
-        // Fallback sample question for immediate preview
+        if (_gameStateService is ObservableObject obs)
+        {
+            obs.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(IGameStateService.IsAnswerRevealed))
+                {
+                    IsAnswerRevealed = _gameStateService.IsAnswerRevealed;
+                }
+            };
+        }
+
+        // Initial question preview
         if (_gameStateService.CurrentQuestion != null)
         {
             UpdateFromQuestion(_gameStateService.CurrentQuestion);
@@ -68,7 +91,7 @@ public partial class QuestionViewModel : ViewModelBase
             {
                 Options.Add(opt);
             }
-            SecondsRemaining = q.TimeLimitSeconds;
+            SecondsRemaining = _gameStateService.SecondsRemaining > 0 ? _gameStateService.SecondsRemaining : q.TimeLimitSeconds;
         }
         CurrentQuestionNumber = _gameStateService.CurrentQuestionIndex + 1;
         TotalQuestions = _gameStateService.TotalQuestions > 0 ? _gameStateService.TotalQuestions : 20;
@@ -88,3 +111,4 @@ public partial class QuestionViewModel : ViewModelBase
         IsAnswerRevealed = true;
     }
 }
+

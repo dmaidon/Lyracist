@@ -1,0 +1,255 @@
+<!-- Created on Aug 28, 2026 @ 09:21:00 -> ConnectView.xaml presenting dual Wi-Fi/Game QR codes and real-time mobile player roster -->
+<UserControl x:Class="KnockoutTrivia.Views.ConnectView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:models="clr-namespace:KnockoutTrivia.Models"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1100"
+             Background="#0B0A0E">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <!-- Top Header & Actions -->
+            <RowDefinition Height="Auto" />
+            <!-- Main Content Area: Dual QR Codes + Player Roster -->
+            <RowDefinition Height="*" />
+            <!-- Bottom Status Notification -->
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Top Header & Action Controls -->
+        <Border Grid.Row="0" Background="#14121F" CornerRadius="12" Padding="16,12" Margin="0,0,0,16" BorderBrush="#262238" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="📱 PHONE &amp; TABLET CONNECT LOBBY" FontSize="18" FontWeight="Black" Foreground="#10B981" />
+                        <Border Background="#1E192E" CornerRadius="6" Padding="10,3" Margin="12,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ConnectedPlayersCount, StringFormat='{}{0} Players Connected'}" FontWeight="Bold" FontSize="12" Foreground="#38BDF8" />
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="Players can scan the QR codes below with their smartphone cameras to join the game directly."
+                               FontSize="11" Foreground="#9CA3AF" Margin="0,3,0,0" />
+                </StackPanel>
+
+                <!-- Quick Action Buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:Button Content="📋 Copy URL"
+                               Height="36"
+                               Margin="0,0,8,0"
+                               Command="{Binding CopyUrlCommand}"
+                               Cursor="Hand" />
+
+                    <ui:Button Content="🔄 Refresh"
+                               Height="36"
+                               Margin="0,0,8,0"
+                               Command="{Binding RefreshConnectionCommand}"
+                               Cursor="Hand" />
+
+                    <ui:Button Content="📺 Push to Big Screen"
+                               Height="36"
+                               Margin="0,0,8,0"
+                               Background="#1E293B"
+                               Foreground="#38BDF8"
+                               BorderBrush="#334155"
+                               Command="{Binding PushToAudienceCommand}"
+                               Cursor="Hand" />
+
+                    <ui:Button Content="▶ Start Game Now"
+                               Height="36"
+                               Appearance="Primary"
+                               Background="#10B981"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               Command="{Binding StartGameCommand}"
+                               Cursor="Hand" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area: 3-Column Layout -->
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <!-- Column 0: Wi-Fi Connect QR Card -->
+                <ColumnDefinition Width="*" />
+                <!-- Column 1: Game Join QR Card -->
+                <ColumnDefinition Width="*" />
+                <!-- Column 2: Live Connected Players Roster -->
+                <ColumnDefinition Width="1.15*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- CARD 1: Wi-Fi Scan-to-Connect -->
+            <Border Grid.Column="0" Background="#141124" CornerRadius="16" BorderBrush="#8B5CF6" BorderThickness="2" Padding="18,16" Margin="0,0,8,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,10">
+                        <TextBlock Text="📶 1. CONNECT TO WI-FI" FontSize="16" FontWeight="Black" Foreground="#FBBF24" TextAlignment="Center" />
+                        <TextBlock Text="Scan with smartphone camera to join network" FontSize="11" Foreground="#CBD5E1" TextAlignment="Center" Margin="0,2,0,0" />
+                    </StackPanel>
+
+                    <!-- QR Code Box -->
+                    <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="14" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#8B5CF6" BorderThickness="2.5">
+                        <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="210" MaxHeight="210">
+                            <Image Source="{Binding WifiQrCodeImage}" Width="200" Height="200" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                        </Viewbox>
+                    </Border>
+
+                    <!-- Wi-Fi Network & Password Display -->
+                    <StackPanel Grid.Row="2" Margin="0,12,0,0" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,3">
+                            <TextBlock Text="Wi-Fi Network: " FontWeight="Bold" FontSize="14" Foreground="#94A3B8" />
+                            <TextBlock Text="{Binding WifiSsid}" FontWeight="Black" FontSize="14" Foreground="#38BDF8" TextTrimming="CharacterEllipsis" MaxWidth="200" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Password: " FontWeight="Bold" FontSize="14" Foreground="#94A3B8" />
+                            <TextBlock Text="{Binding WifiPasswordDisplay}" FontWeight="ExtraBold" FontSize="14" Foreground="#FBBF24" TextTrimming="CharacterEllipsis" MaxWidth="200" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- CARD 2: Join Knockout Trivia Game QR -->
+            <Border Grid.Column="1" Background="#0A1D1A" CornerRadius="16" BorderBrush="#10B981" BorderThickness="2" Padding="18,16" Margin="4,0,8,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,10">
+                        <TextBlock Text="📱 2. JOIN TRIVIA ARENA" FontSize="16" FontWeight="Black" Foreground="#10B981" TextAlignment="Center" />
+                        <TextBlock Text="Scan to open mobile buzzer on phone or tablet" FontSize="11" Foreground="#CBD5E1" TextAlignment="Center" Margin="0,2,0,0" />
+                    </StackPanel>
+
+                    <!-- QR Code Box -->
+                    <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="14" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="#10B981" BorderThickness="2.5">
+                        <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="210" MaxHeight="210">
+                            <Image Source="{Binding QrCodeImage}" Width="200" Height="200" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                        </Viewbox>
+                    </Border>
+
+                    <!-- Web Address Display -->
+                    <StackPanel Grid.Row="2" Margin="0,12,0,0" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="🌐 " FontSize="14" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ConnectUrl}" FontWeight="Black" FontSize="14" Foreground="#34D399" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="240" />
+                        </StackPanel>
+                        <TextBlock Text="No app download required • Instant play" FontSize="10" Foreground="#9CA3AF" TextAlignment="Center" Margin="0,2,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- CARD 3: Connected Players Roster -->
+            <Border Grid.Column="2" Background="#14121F" CornerRadius="16" BorderBrush="#28233A" BorderThickness="1.5" Padding="16" Margin="4,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Roster Header -->
+                        <RowDefinition Height="Auto" />
+                        <!-- Roster Items List -->
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="👥 CONNECTED PLAYERS" FontSize="14" FontWeight="Black" Foreground="#38BDF8" />
+                            <TextBlock Text="Players appear here live as they connect" FontSize="11" Foreground="#9CA3AF" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="#1E192E" CornerRadius="6" Padding="8,2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Players.Count, StringFormat='{}{0} Total'}" FontSize="11" FontWeight="Bold" Foreground="#A78BFA" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Empty State / Player List -->
+                    <Grid Grid.Row="1">
+                        <!-- Empty State Notice -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Players.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="⏳" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,6" />
+                            <TextBlock Text="Waiting for first player to join..." FontSize="13" FontWeight="SemiBold" Foreground="#9CA3AF" HorizontalAlignment="Center" />
+                            <TextBlock Text="Scan the QR codes to test your connection" FontSize="11" Foreground="#6B7280" HorizontalAlignment="Center" Margin="0,3,0,0" />
+                        </StackPanel>
+
+                        <!-- Scrollable Players List -->
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding Players}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type models:KnockoutPlayer}">
+                                        <Border Margin="0,0,0,8" Background="#1B1728" CornerRadius="8" Padding="10,8" BorderBrush="#2D2640" BorderThickness="1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Online Pulse Dot -->
+                                                <Ellipse Grid.Column="0" Width="8" Height="8" Fill="#10B981" Margin="0,0,8,0" VerticalAlignment="Center" />
+
+                                                <!-- Player Name -->
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Bold" FontSize="13" Foreground="White" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+
+                                                <!-- Shields Badge -->
+                                                <Border Grid.Column="2" Background="#261E38" CornerRadius="4" Padding="6,2" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Tokens, StringFormat='🛡️ {0}'}" FontSize="11" FontWeight="Bold" Foreground="#FBBF24" />
+                                                </Border>
+
+                                                <!-- Strike Badge -->
+                                                <Border Grid.Column="3" Background="#1B281E" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding StatusText}" FontSize="10" FontWeight="Bold" Foreground="{Binding StrikeColorBrush}" />
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Bottom Status Bar -->
+        <Border Grid.Row="2" Background="#110F18" CornerRadius="8" Padding="12,6" Margin="0,6,0,0" BorderBrush="#201C2E" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="●" FontSize="10" Foreground="#10B981" Margin="0,0,6,0" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="#9CA3AF" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" Text="Local Mobile Server Active" FontSize="11" Foreground="#10B981" FontWeight="SemiBold" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 15:27:00 -> Added multi-monitor routing, audience display toggle, and display refresh
+// Edited on Aug 28, 2026 @ 09:26:00 -> Added Wi-Fi auto-detection and companion configuration support
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KnockoutTrivia.Models;
 using KnockoutTrivia.Services;
+using Lyracist.Shared;
 
 namespace KnockoutTrivia.ViewModels;
 
@@ -55,8 +56,37 @@ public partial class SettingsViewModel : ViewModelBase
         _gameStateService = gameStateService;
 
         _settings = _configService.LoadSettings();
+
+        // Auto-detect Wi-Fi if not configured
+        if (string.IsNullOrWhiteSpace(_settings.WifiSsid))
+        {
+            string? detected = WifiHelper.GetConnectedSsid();
+            if (!string.IsNullOrWhiteSpace(detected))
+            {
+                _settings.WifiSsid = detected;
+                _settings.WifiPassword = WifiPasswordStore.GetPasswordForSsid(detected);
+            }
+        }
+
         RefreshMonitors();
         _ = LoadSourcesAsync();
+    }
+
+    [RelayCommand]
+    public void DetectWifi()
+    {
+        string? ssid = WifiHelper.GetConnectedSsid();
+        if (!string.IsNullOrWhiteSpace(ssid))
+        {
+            Settings.WifiSsid = ssid;
+            Settings.WifiPassword = WifiPasswordStore.GetPasswordForSsid(ssid);
+            OnPropertyChanged(nameof(Settings));
+            StatusMessage = $"Detected Wi-Fi network: {ssid}";
+        }
+        else
+        {
+            StatusMessage = "No active Wi-Fi interface detected.";
+        }
     }
 
     [RelayCommand]
@@ -167,6 +197,11 @@ public partial class SettingsViewModel : ViewModelBase
             Settings.SelectedBannerMonitorIndex = SelectedAudienceMonitor.Index;
         }
 
+        if (!string.IsNullOrWhiteSpace(Settings.WifiSsid))
+        {
+            WifiPasswordStore.SetPasswordForSsid(Settings.WifiSsid, Settings.WifiPassword);
+        }
+
         Settings.SelectedSourcePaths = AvailableSources.Where(s => s.IsSelected).Select(s => s.FilePath).ToList();
         _configService.SaveSettings(Settings);
 
@@ -186,3 +221,4 @@ public partial class SettingsViewModel : ViewModelBase
         StatusMessage = "Restored default settings, monitors, and all databases.";
     }
 }
+

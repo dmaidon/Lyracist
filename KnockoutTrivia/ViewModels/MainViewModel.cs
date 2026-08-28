@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 15:27:10 -> Added Audience display management and multi-monitor projection synchronization
+// Edited on Aug 28, 2026 @ 09:23:00 -> Added ConnectViewModel, KnockoutWebServer lifecycle, and phone/tablet connect navigation
 using System;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,6 +13,7 @@ public partial class MainViewModel : ViewModelBase
 {
     private readonly IGameStateService _gameStateService;
     private readonly IDisplayService _displayService;
+    private readonly IKnockoutWebServer _webServer;
     private AudienceWindow? _audienceWindow;
 
     [ObservableProperty]
@@ -28,6 +29,7 @@ public partial class MainViewModel : ViewModelBase
     private bool _isAudienceDisplayOpen;
 
     public GameViewModel GameVM { get; }
+    public ConnectViewModel ConnectVM { get; }
     public ScoreboardViewModel ScoreboardVM { get; }
     public QuestionViewModel QuestionVM { get; }
     public WheelViewModel WheelVM { get; }
@@ -40,7 +42,9 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel(
         IGameStateService gameStateService,
         IDisplayService displayService,
+        IKnockoutWebServer webServer,
         GameViewModel gameVM,
+        ConnectViewModel connectVM,
         ScoreboardViewModel scoreboardVM,
         QuestionViewModel questionVM,
         WheelViewModel wheelVM,
@@ -52,7 +56,9 @@ public partial class MainViewModel : ViewModelBase
     {
         _gameStateService = gameStateService;
         _displayService = displayService;
+        _webServer = webServer;
         GameVM = gameVM;
+        ConnectVM = connectVM;
         ScoreboardVM = scoreboardVM;
         QuestionVM = questionVM;
         WheelVM = wheelVM;
@@ -62,8 +68,25 @@ public partial class MainViewModel : ViewModelBase
         AboutVM = aboutVM;
         AudienceVM = audienceVM;
 
-        _currentView = GameVM;
-        AudienceVM.UpdateView(QuestionVM);
+        _currentView = ConnectVM;
+        ActiveTabTitle = "Player Connect";
+        AudienceVM.UpdateView(ConnectVM);
+
+        // Start Web Server
+        _webServer.Start(_gameStateService.Settings.WebServerPort);
+
+        // Connect Screen action links
+        ConnectVM.PushToAudienceRequested += (s, e) =>
+        {
+            AudienceVM.UpdateView(ConnectVM);
+            StatusNotification = "Connect Screen sent to Audience Big Screen";
+        };
+
+        ConnectVM.GameStartRequested += (s, e) =>
+        {
+            NavigateToGame();
+            StatusNotification = "Game started with connected players!";
+        };
 
         // Super Streak Wheel trigger
         GameVM.SuperStreakRequested += (s, player) =>
@@ -157,6 +180,14 @@ public partial class MainViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    public void NavigateToConnect()
+    {
+        CurrentView = ConnectVM;
+        ActiveTabTitle = "Player Connect";
+        SyncAudienceView(ConnectVM);
+    }
+
+    [RelayCommand]
     public void NavigateToGame()
     {
         CurrentView = GameVM;
@@ -217,3 +248,4 @@ public partial class MainViewModel : ViewModelBase
         ActiveTabTitle = "About Knockout";
     }
 }
+

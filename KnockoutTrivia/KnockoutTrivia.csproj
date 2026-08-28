@@ -1,4 +1,4 @@
-<!-- Created on Aug 27, 2026 @ 14:35:00 -> KnockoutTrivia project configuration with WPF-UI, CommunityToolkit.Mvvm, and SQLite -->
+<!-- Edited on Aug 28, 2026 @ 09:12:00 -> Added QRCoder, shared network/wifi helpers, and knockout.html mobile resource -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <Title>Knockout Trivia</Title>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.8.27.14</AssemblyVersion>
-    <FileVersion>26.8.27.14</FileVersion>
+    <AssemblyVersion>26.8.28.2</AssemblyVersion>
+    <FileVersion>26.8.28.2</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
   </PropertyGroup>
 
@@ -21,11 +21,16 @@
     <PackageReference Include="WPF-UI" Version="4.3.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
+    <PackageReference Include="QRCoder" Version="1.8.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="KoTrivia\Assets\kotrv_logo.png" />
     <Resource Include="KoTrivia\Assets\kotrv_logo.webp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\knockout.html" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,6 +44,10 @@
     <Compile Include="..\Shared\MonitorInfo.cs" Link="Shared\MonitorInfo.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="Shared\TextBoxSelectionHelper.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="Shared\NameFormatting.cs" />
+    <Compile Include="..\Shared\LocalNetworkHelper.cs" Link="Shared\LocalNetworkHelper.cs" />
+    <Compile Include="..\Shared\WifiHelper.cs" Link="Shared\WifiHelper.cs" />
+    <Compile Include="..\Shared\WifiPasswordStore.cs" Link="Shared\WifiPasswordStore.cs" />
+    <Compile Include="..\Shared\AtomicJsonFile.cs" Link="Shared\AtomicJsonFile.cs" />
   </ItemGroup>
 
 </Project>

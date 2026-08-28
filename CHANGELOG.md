@@ -1,9 +1,42 @@
-<!-- Edited on Aug 27, 2026 @ 16:00:10 -> Added Knockout Trivia game module, multi-monitor routing, Help system, and 3-column settings -->
-Last Edit: Aug 27, 2026 - Knockout Trivia game module with multi-monitor routing, Help system, 3-column settings, and question randomization
+<!-- Edited on Aug 28, 2026 @ 09:32:00 -> Added Knockout Trivia phone/tablet connect screen, QR codes, web server, and automatic scoring engine -->
+Last Edit: Aug 28, 2026 - Knockout Trivia phone/tablet connect screen, QR codes, web server, and automatic internal scoring engine
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.8.28.1] - 2026-08-28
+
+### Added & Enhanced
+
+- **Knockout Trivia Phone/Tablet Connect Screen & Mobile Companion (`KnockoutTrivia`)**:
+  - **Dual QR Code Connect Screen (`ConnectView.xaml` / `ConnectViewModel.cs`)**:
+    - **Card 1: 📶 1. Connect Wi-Fi**: Automatically generates a high-resolution Wi-Fi QR code (`WIFI:S:...;T:...;P:...;;`) with SSID & Password display, allowing players to join venue Wi-Fi with one smartphone camera scan.
+    - **Card 2: 📱 2. Join Trivia Arena**: Generates a Game Join QR code pointing to `http://<local-ip>:<port>`, displaying the web address in large text for instant browser play with no app download required.
+    - **Live Connected Player Roster**: Real-time grid displaying connected players, strike status dots, shield token counts, and online pulse indicators.
+    - **Host Quick Toolbar**: Actions for "Start Game Now ▶", "Copy URL 📋", "Refresh Connection 🔄", and "Push to Big Screen 📺".
+    - **Top Navigation Tab Integration**: Added dedicated "📱 Player Connect" tab in `MainWindow.xaml` and wired projection synchronization to the secondary Audience Display (`AudienceWindow.xaml`).
+  - **Embedded Asynchronous Web Server (`IKnockoutWebServer` / `KnockoutWebServer.cs`)**:
+    - High-performance, non-blocking `TcpListener` server hosting REST endpoints:
+      * `GET /` & `GET /knockout`: Serves the responsive mobile player companion app (`knockout.html`).
+      * `POST /api/knockout/join`: Registers players or reconnects existing devices with preserved identity, scores, and shield tokens.
+      * `POST /api/knockout/submit`: Receives answer submissions and reaction times (in ms) from connected phones and tablets.
+      * `GET /api/knockout/state`: High-frequency polling endpoint returning real-time game state, countdown timer, question prompts, options, personal score/shield/strike statuses, and live standings.
+      * `OPTIONS`: CORS preflight handling for cross-origin browser requests.
+  - **Mobile Player Companion Web Application (`Resources/knockout.html`)**:
+    - Touch-first responsive HTML5/CSS3/Vanilla JS application tailored for smartphones and tablets.
+    - Knockout Trivia theme with Emerald Green (`#10B981`), Purple (`#8B5CF6`), Amber (`#F59E0B`), and Crimson (`#EF4444`).
+    - Synthesized Web Audio API sound effects (button clicks, correct chimes, wrong buzzers, shield block clangs, strike hits) and haptic vibration (`navigator.vibrate`).
+    - Multi-screen flow: Join Screen -> Waiting Lobby -> Active Question (4 large color-coded buttons) -> Answer Locked In -> Real-time Answer Reveal -> Knocked Out Spectator Mode -> Final Podium.
+  - **Internal Scoring & Autonomous Game Flow (`GameStateService.cs`)**:
+    - Real-time countdown timer per question with live tick synchronization across Host, Audience Big Screen, and mobile devices.
+    - Automated answer evaluation upon timer expiration or DJ reveal:
+      * Correct answers award points and increment streak counters (granting a Shield Token upon reaching 5).
+      * Incorrect answers or timeouts consume a Shield Token (0 strikes, "Shield Protected") if held; otherwise record 1 strike (3 strikes eliminates player).
+      * Automatic Super Streak wheel triggering (at 20 streak) and last-player-standing victory detection.
+    - **Automatic Game Mode (`GameAdvanceMode.Automatic`)**: Autonomously steps from Question Active -> Answer Reveal -> Auto-Advance Buffer -> Next Question with full DJ manual override controls at any time.
+  - **DJ Settings Configuration**:
+    - Added Wi-Fi SSID with auto-detect button, Wi-Fi password, and companion server port configuration in `SettingsView.xaml` / `SettingsViewModel.cs` with persistent `WifiPasswordStore`.
 
 ## [26.8.27.1] - 2026-08-27
 

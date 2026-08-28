@@ -101,26 +101,55 @@
                 </ScrollViewer>
             </Border>
 
-            <!-- COLUMN 1: Shield Tokens & Super Streak -->
+<!-- Edited on Aug 28, 2026 @ 09:27:00 -> Added Wi-Fi configuration, Web Server companion port, and auto timer settings to SettingsView.xaml -->
+            <!-- COLUMN 1: Shield Tokens & Mobile Companion -->
             <Border Grid.Column="1" Background="#14121F" CornerRadius="10" BorderBrush="#262238" BorderThickness="1" Padding="15" Margin="4,0,4,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="🛡️ Shields &amp; Super Streak" FontSize="15" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,12" />
+                        <!-- Mobile Companion & Wi-Fi Setup -->
+                        <TextBlock Text="📱 Mobile Companion &amp; Wi-Fi" FontSize="15" FontWeight="Bold" Foreground="#10B981" Margin="0,0,0,12" />
+
+                        <!-- Wi-Fi Network Name (SSID) -->
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Wi-Fi Network Name (SSID)" FontWeight="SemiBold" Foreground="White" FontSize="12" VerticalAlignment="Center" />
+                            <ui:Button Grid.Column="1" Content="📶 Detect" Height="24" Padding="6,0" FontSize="10" Command="{Binding DetectWifiCommand}" Cursor="Hand" />
+                        </Grid>
+                        <TextBlock Text="Venue network for phone QR connect." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding Settings.WifiSsid, UpdateSourceTrigger=PropertyChanged}" Height="32" Margin="0,0,0,10" />
+
+                        <!-- Wi-Fi Password -->
+                        <TextBlock Text="Wi-Fi Password" FontWeight="SemiBold" Foreground="White" FontSize="12" />
+                        <TextBlock Text="Leave empty if open network." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding Settings.WifiPassword, UpdateSourceTrigger=PropertyChanged}" Height="32" Margin="0,0,0,10" />
+
+                        <!-- Web Server Port -->
+                        <TextBlock Text="Companion Server Port" FontWeight="SemiBold" Foreground="White" FontSize="12" />
+                        <TextBlock Text="Local HTTP port for phone buzzer (Default: 8088)." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding Settings.WebServerPort, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left" Margin="0,0,0,14" />
+
+                        <Separator Background="#262238" Margin="0,0,0,12" />
+
+                        <!-- Shield Tokens & Super Streak -->
+                        <TextBlock Text="🛡️ Shields &amp; Super Streak" FontSize="14" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,0,10" />
 
                         <!-- Max Shield Tokens -->
                         <TextBlock Text="Max Shield Tokens (Cap)" FontWeight="SemiBold" Foreground="White" FontSize="12" />
                         <TextBlock Text="Maximum shields a player can hold." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
-                        <ui:TextBox Text="{Binding Settings.MaxTokens, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left" Margin="0,0,0,12" />
+                        <ui:TextBox Text="{Binding Settings.MaxTokens, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left" Margin="0,0,0,10" />
 
                         <!-- Streak Requirement -->
                         <TextBlock Text="Streak Requirement" FontWeight="SemiBold" Foreground="White" FontSize="12" />
                         <TextBlock Text="Correct answers to earn 1 shield (Default: 5)." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
-                        <ui:TextBox Text="{Binding Settings.StreakRequirement, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left"  Margin="0,0,0,12" />
+                        <ui:TextBox Text="{Binding Settings.StreakRequirement, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left"  Margin="0,0,0,10" />
 
                         <!-- Super Streak Threshold -->
                         <TextBlock Text="⚡ Super Streak Threshold" FontWeight="SemiBold" Foreground="#A78BFA" FontSize="12" />
                         <TextBlock Text="Streak to trigger Rotary Wheel (Default: 20)." FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,4" />
-                        <ui:TextBox Text="{Binding Settings.SuperStreakThreshold, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left"  Margin="0,0,0,12" />
+                        <ui:TextBox Text="{Binding Settings.SuperStreakThreshold, UpdateSourceTrigger=PropertyChanged}" Height="32" Width="100" HorizontalAlignment="Left"  Margin="0,0,0,10" />
 
                         <!-- Tokens Deducted Per Hit -->
                         <TextBlock Text="Shields Deducted Per Wheel Hit" FontWeight="SemiBold" Foreground="White" FontSize="12" />
@@ -147,8 +176,8 @@
                     <!-- Row 0: DB Header & Select All -->
                     <Grid Grid.Row="0" Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="2*" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="💾 Databases &amp; Packs" FontSize="15" FontWeight="Bold" Foreground="#10B981" />
@@ -156,13 +185,13 @@
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <ui:Button Content="All"
-                                       Height="26" Width="40"
+                                       Height="35" Width="61"
                                        Margin="0,0,4,0"
                                        Appearance="Secondary"
                                        Command="{Binding SelectAllSourcesCommand}"
                                        Cursor="Hand" />
                             <ui:Button Content="Clear"
-                                       Height="26" Width="45"
+                                       Height="35" Width="86"
                                        Appearance="Secondary"
                                        Command="{Binding DeselectAllSourcesCommand}"
                                        Cursor="Hand" />

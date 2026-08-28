@@ -1,0 +1,963 @@
+<!-- Edited on Aug 28, 2026 @ 09:18:00 -> Knockout Trivia responsive mobile companion web application for phones and tablets -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Knockout Trivia • Live Mobile Player</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #07060A;
+            --card-bg: rgba(20, 18, 31, 0.9);
+            --card-border: rgba(139, 92, 246, 0.25);
+            --primary: #10B981;
+            --primary-glow: rgba(16, 185, 129, 0.4);
+            --accent: #8B5CF6;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --opt-a: #8B5CF6;
+            --opt-b: #06B6D4;
+            --opt-c: #F59E0B;
+            --opt-d: #EC4899;
+            --text: #F8FAFC;
+            --text-dim: #94A3B8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 12px;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 40%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
+            min-height: 95vh;
+        }
+
+        /* Top Header Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+        }
+
+        .brand-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #10B981, #38BDF8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .player-pill {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #E2E8F0;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+        }
+
+        /* Player Stats Card */
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 13, 24, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 10px 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-dim);
+            font-weight: 700;
+        }
+
+        .stat-val {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #FFF;
+        }
+
+        .strikes-container {
+            display: flex;
+            gap: 5px;
+            margin-top: 2px;
+        }
+
+        .strike-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #1F2937;
+            border: 1.5px solid #374151;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .strike-dot.active-strike {
+            background: #EF4444;
+            border-color: #F87171;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+            transform: scale(1.15);
+        }
+
+        .strike-dot.safe {
+            background: #10B981;
+            border-color: #34D399;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Container */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Join Screen */
+        .input-group {
+            width: 100%;
+            margin: 16px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+
+        .input-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #CBD5E1;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 14px;
+            border: 1.5px solid #374151;
+            background: #110F1D;
+            color: #FFF;
+            font-size: 1.1rem;
+            font-weight: 700;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .text-input:focus {
+            border-color: #10B981;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: #FFF;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Timer Bar */
+        .timer-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            height: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 4px 0;
+            position: relative;
+        }
+
+        .timer-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #10B981, #F59E0B);
+            transition: width 1s linear, background-color 0.5s;
+        }
+
+        .timer-fill.danger {
+            background: #EF4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+        }
+
+        /* Question Box */
+        .question-category {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #A78BFA;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: rgba(139, 92, 246, 0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+
+        .question-prompt {
+            font-size: 1.15rem;
+            font-weight: 800;
+            line-height: 1.4;
+            color: #FFF;
+            margin-bottom: 8px;
+        }
+
+        /* Option Buttons Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        @media (min-width: 400px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            display: flex;
+            align-items: center;
+            padding: 16px 14px;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            background: #181528;
+            color: #FFF;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s ease;
+            position: relative;
+            min-height: 64px;
+        }
+
+        .option-btn:active {
+            transform: scale(0.96);
+        }
+
+        .option-btn.opt-0 { border-color: rgba(139, 92, 246, 0.4); }
+        .option-btn.opt-1 { border-color: rgba(6, 182, 212, 0.4); }
+        .option-btn.opt-2 { border-color: rgba(245, 158, 11, 0.4); }
+        .option-btn.opt-3 { border-color: rgba(236, 72, 153, 0.4); }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.95rem;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .opt-0 .option-letter { background: var(--opt-a); color: #FFF; }
+        .opt-1 .option-letter { background: var(--opt-b); color: #000; }
+        .opt-2 .option-letter { background: var(--opt-c); color: #000; }
+        .opt-3 .option-letter { background: var(--opt-d); color: #FFF; }
+
+        .option-btn.selected {
+            border-color: #10B981 !important;
+            background: rgba(16, 185, 129, 0.2) !important;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+            transform: scale(1.02);
+        }
+
+        .option-btn.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .option-btn.correct-reveal {
+            border-color: #10B981 !important;
+            background: #064E3B !important;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.7);
+        }
+
+        .option-btn.wrong-reveal {
+            border-color: #EF4444 !important;
+            background: #450A0A !important;
+            opacity: 0.6;
+        }
+
+        /* Locked In Badge */
+        .locked-badge {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #10B981;
+            color: #34D399;
+            padding: 10px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .locked-badge.show {
+            display: flex;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Result Splash */
+        .result-splash {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 14px;
+            border-radius: 16px;
+            width: 100%;
+        }
+
+        .result-splash.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10B981;
+            color: #34D399;
+        }
+
+        .result-splash.shield-saved {
+            background: rgba(56, 189, 248, 0.2);
+            border: 2px solid #38BDF8;
+            color: #38BDF8;
+        }
+
+        .result-splash.strike {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #EF4444;
+            color: #F87171;
+        }
+
+        /* Knockout Elimination Screen */
+        .ko-banner {
+            background: linear-gradient(135deg, #7F1D1D, #450A0A);
+            border: 2px solid #EF4444;
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Leaderboard Modal */
+        .leaderboard-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 280px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+
+        .lb-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #141222;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+        }
+
+        .lb-row.me {
+            border: 1px solid #10B981;
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .lb-row.ko {
+            opacity: 0.45;
+        }
+
+        /* Audio Toggle */
+        .audio-toggle {
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- TOP HEADER -->
+        <header class="top-bar">
+            <div class="brand-title">
+                <span>🥊</span> KNOCKOUT TRIVIA
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="audio-toggle" id="audio-btn" onclick="toggleAudio()" title="Sound FX">🔊</span>
+                <span class="player-pill" id="player-badge" onclick="toggleLeaderboard()">Join Game</span>
+            </div>
+        </header>
+
+        <!-- STATS BAR (VISIBLE ONCE JOINED) -->
+        <div class="stats-bar" id="stats-bar" style="display: none;">
+            <div class="stat-item">
+                <span class="stat-label">Score</span>
+                <span class="stat-val" id="stat-score" style="color: #38BDF8;">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Shields</span>
+                <span class="stat-val" id="stat-tokens" style="color: #FBBF24;">🛡️ 1</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Streak</span>
+                <span class="stat-val" id="stat-streak" style="color: #A78BFA;">🔥 0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Strikes</span>
+                <div class="strikes-container" id="strikes-container">
+                    <div class="strike-dot safe" id="dot-1"></div>
+                    <div class="strike-dot safe" id="dot-2"></div>
+                    <div class="strike-dot safe" id="dot-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 1: JOIN GAME -->
+        <div class="screen active" id="screen-join">
+            <div class="card">
+                <div style="font-size: 3.5rem; margin-bottom: 6px;">🥊</div>
+                <h1 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 900; color: #FFF;">Join Knockout Trivia</h1>
+                <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 4px;">Last player standing wins • 3 strikes and you're knocked out!</p>
+
+                <div class="input-group">
+                    <label class="input-label" for="player-name">Your Player / Team Name</label>
+                    <input type="text" id="player-name" class="text-input" placeholder="e.g. Trivia Champ" maxlength="24" autocomplete="off" autocorrect="off">
+                </div>
+
+                <button class="btn-primary" onclick="joinGame()">ENTER THE ARENA ▶</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: LOBBY / WAITING -->
+        <div class="screen" id="screen-lobby">
+            <div class="card">
+                <div style="font-size: 3rem; margin-bottom: 8px;">⏳</div>
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: #FFF;">Connected &amp; Ready</h2>
+                <p style="color: #10B981; font-weight: 700; font-size: 1rem; margin-top: 6px;" id="lobby-status">Waiting for host to start next question...</p>
+                <div style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; width: 100%;">
+                    <p style="font-size: 0.85rem; color: #CBD5E1;">💡 <strong>Pro Tip:</strong> 5 correct answers in a row earns a <strong>Shield Token</strong> to absorb strikes!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: ACTIVE QUESTION / BUZZER -->
+        <div class="screen" id="screen-question">
+            <!-- Question Card -->
+            <div class="card" style="padding: 16px;">
+                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 6px;">
+                    <span class="question-category" id="q-category">GENERAL</span>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #F59E0B;" id="q-num">Q #1</span>
+                </div>
+
+                <!-- Timer Bar -->
+                <div class="timer-container">
+                    <div class="timer-fill" id="timer-fill"></div>
+                </div>
+
+                <p class="question-prompt" id="q-prompt">Question loading...</p>
+            </div>
+
+            <!-- Answer Touch Grid -->
+            <div class="options-grid" id="options-grid">
+                <button class="option-btn opt-0" onclick="submitAnswer(0)">
+                    <span class="option-letter">A</span>
+                    <span id="opt-text-0">Option A</span>
+                </button>
+                <button class="option-btn opt-1" onclick="submitAnswer(1)">
+                    <span class="option-letter">B</span>
+                    <span id="opt-text-1">Option B</span>
+                </button>
+                <button class="option-btn opt-2" onclick="submitAnswer(2)">
+                    <span class="option-letter">C</span>
+                    <span id="opt-text-2">Option C</span>
+                </button>
+                <button class="option-btn opt-3" onclick="submitAnswer(3)">
+                    <span class="option-letter">D</span>
+                    <span id="opt-text-3">Option D</span>
+                </button>
+            </div>
+
+            <div class="locked-badge" id="locked-badge">
+                <span>🔒</span> ANSWER LOCKED IN • WAITING FOR REVEAL...
+            </div>
+        </div>
+
+        <!-- SCREEN 4: ANSWER REVEAL / RESULTS -->
+        <div class="screen" id="screen-reveal">
+            <div class="card">
+                <div class="result-splash" id="result-splash">
+                    <div style="font-size: 2.5rem;" id="result-icon">✅</div>
+                    <h2 style="font-size: 1.3rem; font-weight: 900;" id="result-title">CORRECT!</h2>
+                    <p style="font-size: 0.9rem;" id="result-detail">+10 Points earned!</p>
+                </div>
+
+                <div style="margin-top: 14px; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 12px; width: 100%; text-align: left;">
+                    <span style="font-size: 0.75rem; font-weight: 800; color: #9CA3AF; text-transform: uppercase;">Correct Answer:</span>
+                    <p style="font-size: 1rem; font-weight: 700; color: #34D399; margin-top: 2px;" id="reveal-correct-text"></p>
+                    <p style="font-size: 0.85rem; color: #CBD5E1; margin-top: 6px;" id="reveal-explanation"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: KNOCKED OUT SPECTATOR -->
+        <div class="screen" id="screen-knockout">
+            <div class="ko-banner">
+                <div style="font-size: 4rem; margin-bottom: 6px;">💥</div>
+                <h1 style="font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 900; color: #EF4444;">KNOCKED OUT!</h1>
+                <p style="color: #FCA5A5; font-size: 1rem; margin-top: 4px;">You have received 3 strikes and were eliminated from this round.</p>
+                <div style="margin-top: 16px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 12px;">
+                    <p style="font-size: 0.85rem; color: #CBD5E1;">👁️ Spectator mode active. You can still follow along and view live standings!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 6: GAME OVER / WINNER -->
+        <div class="screen" id="screen-gameover">
+            <div class="card" style="border-color: #F59E0B;">
+                <div style="font-size: 4rem; margin-bottom: 6px;">🏆</div>
+                <h1 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 900; color: #FBBF24;">ROUND COMPLETED!</h1>
+                <p style="color: var(--text-dim); font-size: 0.95rem; margin-top: 4px;" id="gameover-text">Final Standings</p>
+                <div class="leaderboard-list" id="final-leaderboard" style="max-height: 350px;"></div>
+            </div>
+        </div>
+
+        <!-- LEADERBOARD CARD -->
+        <div class="card" id="card-leaderboard" style="display: none; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; color: #F59E0B;">📊 LIVE STANDINGS</h3>
+                <span style="font-size: 0.75rem; color: #9CA3AF; cursor: pointer;" onclick="toggleLeaderboard()">✕ Close</span>
+            </div>
+            <div class="leaderboard-list" id="live-leaderboard"></div>
+        </div>
+    </div>
+
+    <script>
+        let playerId = localStorage.getItem('knockout_playerId') || '';
+        let playerName = localStorage.getItem('knockout_playerName') || '';
+        let currentQuestionId = '';
+        let questionStartTime = 0;
+        let hasSubmitted = false;
+        let selectedOption = -1;
+        let audioEnabled = true;
+        let audioCtx = null;
+        let pollTimer = null;
+        let lastPhase = '';
+        let lastStrikes = 0;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            document.getElementById('audio-btn').textContent = audioEnabled ? '🔊' : '🔇';
+        }
+
+        function playTone(type) {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(160, now);
+                    osc.frequency.setValueAtTime(110, now + 0.15);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'shield') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(300, now + 0.25);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+            } catch(e) {}
+        }
+
+        function vibrate(pattern) {
+            if (navigator.vibrate) {
+                try { navigator.vibrate(pattern); } catch(e) {}
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId);
+            if (target) target.classList.add('active');
+        }
+
+        function toggleLeaderboard() {
+            const card = document.getElementById('card-leaderboard');
+            card.style.display = card.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        async function joinGame() {
+            const nameInput = document.getElementById('player-name');
+            const name = nameInput.value.trim();
+            if (!name) {
+                alert('Please enter your name.');
+                return;
+            }
+
+            initAudio();
+            playTone('click');
+
+            try {
+                const res = await fetch('/api/knockout/join', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, playerId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    playerId = data.playerId;
+                    playerName = data.name;
+                    localStorage.setItem('knockout_playerId', playerId);
+                    localStorage.setItem('knockout_playerName', playerName);
+
+                    document.getElementById('player-badge').textContent = playerName;
+                    document.getElementById('stats-bar').style.display = 'flex';
+
+                    showScreen('screen-lobby');
+                    startPolling();
+                } else {
+                    alert(data.error || 'Failed to join.');
+                }
+            } catch (err) {
+                alert('Connection error. Please try again.');
+            }
+        }
+
+        async function submitAnswer(optionIndex) {
+            if (hasSubmitted) return;
+            hasSubmitted = true;
+            selectedOption = optionIndex;
+            playTone('click');
+            vibrate(50);
+
+            const elapsed = Date.now() - questionStartTime;
+
+            // Highlight selected button
+            document.querySelectorAll('.option-btn').forEach((btn, idx) => {
+                if (idx === optionIndex) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.add('disabled');
+                }
+            });
+
+            document.getElementById('locked-badge').classList.add('show');
+
+            try {
+                await fetch('/api/knockout/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        playerId,
+                        selectedOptionIndex: optionIndex,
+                        responseTimeMs: elapsed
+                    })
+                });
+            } catch(e) {}
+        }
+
+        async function pollState() {
+            if (!playerId) return;
+
+            try {
+                const res = await fetch(`/api/knockout/state?playerId=${encodeURIComponent(playerId)}`);
+                if (!res.ok) return;
+                const state = await res.json();
+                renderState(state);
+            } catch (e) {}
+        }
+
+        function renderState(state) {
+            const p = state.player;
+            if (p) {
+                document.getElementById('stat-score').textContent = p.score;
+                document.getElementById('stat-tokens').textContent = `🛡️ ${p.tokens}`;
+                document.getElementById('stat-streak').textContent = `🔥 ${p.streakCount}`;
+
+                // Update Strikes
+                const strikes = p.strikeCount;
+                for (let i = 1; i <= 3; i++) {
+                    const dot = document.getElementById(`dot-${i}`);
+                    if (i <= strikes) {
+                        dot.className = 'strike-dot active-strike';
+                    } else {
+                        dot.className = 'strike-dot safe';
+                    }
+                }
+
+                if (strikes > lastStrikes) {
+                    vibrate([100, 50, 100]);
+                    lastStrikes = strikes;
+                }
+
+                if (p.isEliminated && state.phase !== 'GameOver') {
+                    showScreen('screen-knockout');
+                    renderLeaderboard(state.leaderboard);
+                    return;
+                }
+            }
+
+            renderLeaderboard(state.leaderboard);
+
+            // Phase State Machine
+            if (state.phase === 'Lobby') {
+                showScreen('screen-lobby');
+            } else if (state.phase === 'QuestionActive') {
+                const q = state.question;
+                if (q) {
+                    if (q.id !== currentQuestionId) {
+                        currentQuestionId = q.id;
+                        questionStartTime = Date.now();
+                        hasSubmitted = false;
+                        selectedOption = -1;
+
+                        document.getElementById('q-category').textContent = q.category || 'GENERAL';
+                        document.getElementById('q-num').textContent = `Q #${state.questionNumber}`;
+                        document.getElementById('q-prompt').textContent = q.prompt;
+
+                        // Options
+                        const grid = document.getElementById('options-grid');
+                        const opts = q.options || [];
+                        for (let i = 0; i < 4; i++) {
+                            const btn = document.querySelector(`.opt-${i}`);
+                            const text = document.getElementById(`opt-text-${i}`);
+                            if (i < opts.length) {
+                                btn.style.display = 'flex';
+                                btn.className = `option-btn opt-${i}`;
+                                text.textContent = opts[i];
+                            } else {
+                                btn.style.display = 'none';
+                            }
+                        }
+
+                        document.getElementById('locked-badge').classList.remove('show');
+                        showScreen('screen-question');
+                    }
+
+                    // Update Timer
+                    const fill = document.getElementById('timer-fill');
+                    const percent = (state.secondsRemaining / (state.totalSeconds || 15)) * 100;
+                    fill.style.width = `${Math.max(0, percent)}%`;
+                    if (state.secondsRemaining <= 4) {
+                        fill.classList.add('danger');
+                    } else {
+                        fill.classList.remove('danger');
+                    }
+                }
+            } else if (state.phase === 'AnswerRevealed') {
+                const q = state.question;
+                const splash = document.getElementById('result-splash');
+                const title = document.getElementById('result-title');
+                const icon = document.getElementById('result-icon');
+                const detail = document.getElementById('result-detail');
+
+                document.getElementById('reveal-correct-text').textContent = (q && q.correctAnswerIndex >= 0 && q.options) ? q.options[q.correctAnswerIndex] : '';
+                document.getElementById('reveal-explanation').textContent = q ? q.explanation : '';
+
+                if (p) {
+                    if (p.isCorrect) {
+                        splash.className = 'result-splash correct';
+                        icon.textContent = '✅';
+                        title.textContent = 'CORRECT!';
+                        detail.textContent = `+${p.lastPointsEarned || 10} Points • Streak: ${p.streakCount}`;
+                        if (lastPhase !== 'AnswerRevealed') playTone('correct');
+                    } else if (p.wasShieldProtected) {
+                        splash.className = 'result-splash shield-saved';
+                        icon.textContent = '🛡️';
+                        title.textContent = 'SHIELD PROTECTED!';
+                        detail.textContent = 'Your shield token absorbed the strike!';
+                        if (lastPhase !== 'AnswerRevealed') playTone('shield');
+                    } else {
+                        splash.className = 'result-splash strike';
+                        icon.textContent = '❌';
+                        title.textContent = 'STRIKE!';
+                        detail.textContent = `Strike recorded (${p.strikeCount} of 3)`;
+                        if (lastPhase !== 'AnswerRevealed') playTone('wrong');
+                    }
+                }
+                showScreen('screen-reveal');
+            } else if (state.phase === 'GameOver') {
+                showScreen('screen-gameover');
+                renderFinalLeaderboard(state.leaderboard);
+            }
+
+            lastPhase = state.phase;
+        }
+
+        function renderLeaderboard(list) {
+            const container = document.getElementById('live-leaderboard');
+            if (!list || !container) return;
+
+            container.innerHTML = list.map(item => `
+                <div class="lb-row ${item.name === playerName ? 'me' : ''} ${item.isEliminated ? 'ko' : ''}">
+                    <span><strong>#${item.rank}</strong> ${escapeHtml(item.name)} ${item.isEliminated ? '💥' : ''}</span>
+                    <span style="font-weight: 800;">${item.score} pts • 🛡️${item.tokens}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderFinalLeaderboard(list) {
+            const container = document.getElementById('final-leaderboard');
+            if (!list || !container) return;
+
+            container.innerHTML = list.map(item => `
+                <div class="lb-row ${item.name === playerName ? 'me' : ''} ${item.isEliminated ? 'ko' : ''}">
+                    <span><strong>#${item.rank}</strong> ${escapeHtml(item.name)} ${item.isEliminated ? '💥' : '🏆'}</span>
+                    <span style="font-weight: 800; color: #F59E0B;">${item.score} pts</span>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            return (str || '').replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        function startPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            pollState();
+            pollTimer = setInterval(pollState, 1000);
+        }
+
+        // Auto-reconnect on load if credentials exist
+        window.addEventListener('load', () => {
+            if (playerId && playerName) {
+                document.getElementById('player-name').value = playerName;
+                document.getElementById('player-badge').textContent = playerName;
+                document.getElementById('stats-bar').style.display = 'flex';
+                showScreen('screen-lobby');
+                startPolling();
+            }
+        });
+    </script>
+</body>
+</html>

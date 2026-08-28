@@ -1,8 +1,8 @@
-<!-- Edited on Aug 27, 2026 @ 16:00:00 -> Added Knockout Trivia game module, multi-monitor routing, Help system, and 3-column settings -->
-Last Edit: Aug 27, 2026 - Knockout Trivia game module with multi-monitor routing, Help system, 3-column settings, and question randomization
+<!-- Edited on Aug 28, 2026 @ 09:33:00 -> Added Knockout Trivia phone/tablet connect screen, QR codes, web server, and automatic scoring engine -->
+Last Edit: Aug 28, 2026 - Knockout Trivia phone/tablet connect screen, QR codes, web server, and automatic internal scoring engine
 # Lyracist Pro
     
-Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module (`KnockoutTrivia.exe`), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
+Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect and automatic internal scoring (`KnockoutTrivia.exe`), and a dedicated Trivia Database Creator (`TriviaDbCreator.exe`).
 
 ---
     
@@ -12,6 +12,19 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Fast-Paced Bar-Friendly Elimination Game**:
   - Standalone MVVM WPF desktop app targeting .NET 10 with modern Fluent UI dark styling (`WPF-UI`).
   - Compatible with the shared `Lyracist.Trivia` SQLite databases (`KoTrivia/Data/trivia.db`) and JSON trivia packs (`KoTrivia/Packs/*.json`).
+- **📱 Phone & Tablet Connect Screen (`ConnectView.xaml` / `ConnectViewModel.cs`)**:
+  - **Dual QR Code Cards**:
+    * **📶 Wi-Fi Connect QR**: Automatically generates a standard Wi-Fi QR code (`WIFI:S:...`) for instant venue Wi-Fi connection.
+    * **📱 Game Arena QR**: Direct QR code link to `http://<local-ip>:<port>` for zero-install smartphone/tablet browser play.
+  - **Live Connected Player Roster**: Shows connected mobile players in real-time with strike dots, shield tokens, and online indicators.
+  - **Secondary Screen Projection**: Instant sync with `AudienceWindow` to display large QR codes on venue TVs and projectors.
+- **🌐 Embedded Asynchronous Web Server & Mobile Companion App (`knockout.html`)**:
+  - Built-in `TcpListener` server hosting REST endpoints (`/api/knockout/join`, `/api/knockout/submit`, `/api/knockout/state`).
+  - Mobile web app with touch buttons, haptics, Web Audio synthesized sounds, live strike counters (🟢🟢🟢 -> ❌ -> 💥), shield badges (🛡️), and spectator mode.
+- **⚡ Automatic Game Flow & Internal Scoring Engine**:
+  - Automated question timer with real-time countdown.
+  - Automatic answer evaluation upon timer expiry or DJ reveal (shield tokens absorb strikes; wrong answers without shields accumulate strikes).
+  - Autonomous advance cycling in Automatic Mode (`GameAdvanceMode.Automatic`).
 - **Horizontal Dynamic Scoreboard**:
   - Dynamic strike-tinted player status bars: Green (0 strikes), Yellow (1 strike), Orange (2 strikes), and dimmed Red (Knocked Out / 3 strikes).
   - **Shield Tokens**: Hold 0 to 3 shield tokens that absorb strikes when an incorrect answer is given.

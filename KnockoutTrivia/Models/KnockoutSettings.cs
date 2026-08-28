@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 15:07:00 -> Added SelectedSourcePaths for multi-database and pack selection
+// Edited on Aug 28, 2026 @ 09:13:00 -> Added Wi-Fi configuration, Web Server port, and Question Timer settings
 using System;
 using System.Collections.Generic;
 
@@ -18,6 +18,7 @@ public class KnockoutSettings
     public bool UnlimitedQuestions { get; set; } = false;
     public GameAdvanceMode GameMode { get; set; } = GameAdvanceMode.Manual;
     public int AutoAdvanceDelaySeconds { get; set; } = 5;
+    public int QuestionTimerSeconds { get; set; } = 15;
 
     // Token & Streak Settings
     public int MaxTokens { get; set; } = 3;
@@ -30,6 +31,13 @@ public class KnockoutSettings
 
     // Database & Question Pack Sources
     public List<string> SelectedSourcePaths { get; set; } = [];
+
+    // Wi-Fi & Web Server Companion Settings
+    public string WifiSsid { get; set; } = string.Empty;
+    public string WifiPassword { get; set; } = string.Empty;
+    public int WebServerPort { get; set; } = 8088;
+    public string VenueName { get; set; } = "Knockout Arena";
+    public string HostName { get; set; } = "DJ Host";
 
     // Display Settings
     public int SelectedGameMonitorIndex { get; set; } = 0;

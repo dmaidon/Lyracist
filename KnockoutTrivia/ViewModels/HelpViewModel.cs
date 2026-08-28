@@ -1,4 +1,4 @@
-// Created on Aug 27, 2026 @ 15:07:50 -> HelpViewModel providing complete DJ gameplay guide, rules, and settings reference
+// Edited on Aug 28, 2026 @ 09:32:30 -> Added Topic 9 for Phone/Tablet Connect and Mobile Buzzer to HelpViewModel
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KnockoutTrivia.Models;
@@ -80,9 +80,18 @@ public partial class HelpViewModel : ViewModelBase
                 AccentColor = "#10B981",
                 DescriptionHeader = "3-Column Settings Panel & Database Management",
                 DescriptionContent = "• 3-Column Layout: Organizes scoring, shields/streaks, and database sources side-by-side to eliminate unnecessary scrolling.\n\n• Database & Pack Selection ListBox: The DJ can check/uncheck active SQLite trivia databases (from KoTrivia/Data) and themed JSON packs (from KoTrivia/Packs) to mix categories (e.g. 80s Rock + Pop Culture + General Knowledge).\n\n• Display & Monitor Assignment: Choose which monitor displays the DJ Host Console and which monitor projects the big screen audience views.\n\n• Audio/Visual FX: Toggle sound effects (countdown beeps, strike chimes, wheel ticks) and smooth color transition animations."
+            },
+            new()
+            {
+                Title = "9. 📱 Phone/Tablet Connect & Buzzer",
+                Icon = "Phone24",
+                AccentColor = "#38BDF8",
+                DescriptionHeader = "Mobile Player Companion & Automatic Internal Scoring",
+                DescriptionContent = "• Dual QR Code Connect Screen: The DJ can navigate to the '📱 Player Connect' tab or push it to the Audience Big Screen. Players simply scan Card 1 (Wi-Fi QR) to connect to venue Wi-Fi, then scan Card 2 (Game QR) to open the mobile buzzer in their web browser with no app download required.\n\n• Mobile Player Companion: Connects players to the live game, allowing them to tap their answer (A, B, C, D / True-False), view their live strike count, shield tokens, and streak meters, receive real-time answer results, and listen to synthesized Web Audio sound FX and haptics.\n\n• Automatic Scoring: When the question timer expires or the DJ clicks 'Reveal Answer', the game engine automatically grades all submitted answers across connected phones, awards points, manages shields/strikes, and updates the scoreboard internally.\n\n• Automatic Mode: In Automatic Mode, the game autonomously runs the countdown timer, evaluates answers, waits for the configured buffer, and advances to the next question automatically."
             }
         ];
 
         _selectedTopic = _helpTopics[0];
     }
 }
+

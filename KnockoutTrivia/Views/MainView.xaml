@@ -34,6 +34,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
+<!-- Edited on Aug 28, 2026 @ 09:30:00 -> Added real-time countdown timer and mobile responses counter to Live Question Console -->
                 <Grid Grid.Row="0" Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -43,9 +44,20 @@
                         <TextBlock Text="LIVE QUESTION CONSOLE" FontSize="16" FontWeight="Black" Foreground="#10B981" />
                         <TextBlock Text="{Binding GameState.CurrentQuestion.Category, StringFormat='Category: {0}'}" FontSize="12" Foreground="#9CA3AF" />
                     </StackPanel>
-                    <Border Grid.Column="1" Background="#261E38" CornerRadius="6" Padding="10,4">
-                        <TextBlock Text="{Binding GameState.CurrentQuestionIndex, StringFormat='Q #{0}'}" FontWeight="Bold" Foreground="#F59E0B" />
-                    </Border>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Submissions Count Badge -->
+                        <Border Background="#1E192E" CornerRadius="6" Padding="8,4" Margin="0,0,6,0">
+                            <TextBlock Text="{Binding GameState.AnsweredCount, StringFormat='📱 {0} Locked In'}" FontWeight="Bold" FontSize="11" Foreground="#38BDF8" />
+                        </Border>
+                        <!-- Timer Badge -->
+                        <Border Background="#1E281F" CornerRadius="6" Padding="8,4" Margin="0,0,6,0">
+                            <TextBlock Text="{Binding GameState.SecondsRemaining, StringFormat='⏱️ {0}s'}" FontWeight="Bold" FontSize="11" Foreground="#34D399" />
+                        </Border>
+                        <!-- Question # Badge -->
+                        <Border Background="#261E38" CornerRadius="6" Padding="10,4">
+                            <TextBlock Text="{Binding GameState.CurrentQuestionIndex, StringFormat='Q #{0}'}" FontWeight="Bold" Foreground="#F59E0B" />
+                        </Border>
+                    </StackPanel>
                 </Grid>
 
                 <!-- Prompt Card -->

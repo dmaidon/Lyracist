@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 15:27:30 -> Bootstrapping AudienceViewModel and DisplayService projection
+// Edited on Aug 28, 2026 @ 09:28:00 -> Added KnockoutWebServer and ConnectViewModel startup bootstrapping
 using System.Windows;
 using KnockoutTrivia.Services;
 using KnockoutTrivia.ViewModels;
@@ -25,6 +25,9 @@ public partial class App : Application
         var settings = configService.LoadSettings();
         gameStateService.InitializeGame(settings);
 
+        // Initialize Web Server
+        var webServer = new KnockoutWebServer(gameStateService, settings.WebServerPort);
+
         // Preload questions from chosen databases/packs or default DB
         if (settings.SelectedSourcePaths != null && settings.SelectedSourcePaths.Count > 0)
         {
@@ -37,6 +40,7 @@ public partial class App : Application
 
         // Initialize ViewModels
         var gameVM = new GameViewModel(gameStateService, tokenService, streakService);
+        var connectVM = new ConnectViewModel(gameStateService, webServer);
         var scoreboardVM = new ScoreboardViewModel(gameStateService, tokenService);
         var questionVM = new QuestionViewModel(gameStateService);
         var wheelVM = new WheelViewModel(wheelService, gameStateService, tokenService);
@@ -49,7 +53,9 @@ public partial class App : Application
         var mainVM = new MainViewModel(
             gameStateService,
             displayService,
+            webServer,
             gameVM,
+            connectVM,
             scoreboardVM,
             questionVM,
             wheelVM,
@@ -67,3 +73,4 @@ public partial class App : Application
         mainWindow.Show();
     }
 }
+

@@ -1,4 +1,44 @@
-// Edited on Aug 27, 2026 @ 15:09:45 -> Document Knockout Trivia Help system and 3-column multi-database settings
+// Edited on Aug 28, 2026 @ 09:35:00 -> Document Knockout Trivia phone/tablet connect, dual QR codes, web server, and automatic scoring
+Knockout Trivia Phone/Tablet Connect & Automatic Scoring (`KnockoutTrivia.exe`) - (August 2026)
+
+Section: Standalone Games & Pub Trivia / Knockout Trivia Showdown / Mobile Companion & Automation
+
+[Phone & Tablet Connect Screen & Dual QR Codes]
+1. Dedicated "Player Connect" Screen (`ConnectView.xaml` / `ConnectViewModel.cs`):
+   - Accessible via the "📱 Player Connect" tab in the top navigation bar.
+   - Dual high-resolution QR code presentation:
+     * Card 1: 📶 1. CONNECT WI-FI: Displays Wi-Fi QR code (`WIFI:S:...;T:WPA;P:...;;`), SSID, and password so patrons can scan to connect directly to the venue's network.
+     * Card 2: 📱 2. JOIN TRIVIA ARENA: Displays Game Join QR code pointing to `http://<local-ip>:<port>` and web address for zero-install instant browser play on smartphones and tablets.
+   - Live Connected Player Roster: Displays connected players in real time with strike status dots, shield token badges, and online pulse indicators.
+   - Host Actions: Includes one-click buttons to Start Game, Push to Audience Big Screen (`AudienceWindow.xaml`), Copy URL to clipboard, and Refresh Connection.
+
+[Embedded Asynchronous Web Server & Mobile Companion Application]
+1. High-Performance Asynchronous Web Server (`IKnockoutWebServer` / `KnockoutWebServer.cs`):
+   - Embedded `TcpListener` server hosting REST endpoints (`/api/knockout/join`, `/api/knockout/submit`, `/api/knockout/state`) and serving `knockout.html`.
+   - Supports persistent player sessions, automatic reconnection with preserved scores and shields upon browser reload, and high-frequency real-time state polling.
+2. Mobile Companion Web App (`Resources/knockout.html`):
+   - Touch-first responsive interface with Knockout Trivia branding, vibrant touch answer buttons (A, B, C, D / True-False), real-time countdown progress bar, and instant answer lock-in confirmation.
+   - Synthesized Web Audio API sound effects (button clicks, correct chimes, wrong buzzers, shield block clang, strike drum) and tactile haptic vibration (`navigator.vibrate`).
+   - Real-time result feedback: Displays point awards, streak increments, shield absorption alerts, or strike accumulation.
+   - Knockout Spectator Mode: When a player receives 3 strikes, displays a dramatic knockout overlay and transitions to spectator mode to follow live questions and standings.
+   - Slide-over live leaderboard modal.
+
+[Automatic Game Flow & Internal Scoring Engine]
+1. Real-Time Countdown Timer:
+   - Synchronized 1-second countdown ticks across Host console, Audience big screen, and all mobile devices.
+   - Live responses counter badge on host console (`📱 X Locked In`).
+2. Autonomous Scoring:
+   - When question timer expires or DJ reveals answer, submitted answers are automatically evaluated against the correct index:
+     * Correct answers award points and increment streak counters (granting a Shield Token upon reaching 5 streak).
+     * Incorrect answers or timeouts consume a Shield Token if held (0 strikes recorded); otherwise increment strike count (3 strikes eliminates player).
+     * Automatically triggers Super Streak Wheel (at 20 streak) and detects last-player-standing victory.
+3. Automatic Game Mode (`GameAdvanceMode.Automatic`):
+   - Automatically steps from Question Active -> Answer Reveal -> Auto-Advance Buffer -> Next Question without host button presses, while retaining full DJ manual override controls at any time.
+
+[DJ Settings & Network Configuration]
+1. Wi-Fi Configuration (`SettingsView.xaml` / `SettingsViewModel.cs`):
+   - Added Wi-Fi SSID with auto-detect button, Wi-Fi password, and companion server port settings with persistent `WifiPasswordStore`.
+
 Knockout Trivia Standalone Game Module (`KnockoutTrivia.exe`) - (August 2026)
 
 Section: Standalone Games & Pub Trivia / Knockout Trivia Showdown

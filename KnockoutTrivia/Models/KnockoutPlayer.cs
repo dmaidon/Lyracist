@@ -1,4 +1,5 @@
-// Created on Aug 27, 2026 @ 14:35:05 -> KnockoutPlayer model with observable strike states, tokens, and streak counts
+// Edited on Aug 28, 2026 @ 09:14:00 -> Added companion connection tracking, answer submissions, and shield protection state
+using System;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -30,6 +31,27 @@ public partial class KnockoutPlayer : ObservableObject
 
     [ObservableProperty]
     private bool _isCurrentTurn;
+
+    [ObservableProperty]
+    private bool _isConnected = true;
+
+    [ObservableProperty]
+    private DateTime _lastSeenAt = DateTime.Now;
+
+    [ObservableProperty]
+    private int _lastAnswerIndex = -1;
+
+    [ObservableProperty]
+    private bool _hasAnsweredCurrentQuestion;
+
+    [ObservableProperty]
+    private int _lastPointsEarned;
+
+    [ObservableProperty]
+    private bool _wasShieldProtected;
+
+    [ObservableProperty]
+    private int _responseTimeMs;
 
     public bool IsEliminated => StrikeCount >= 3;
 

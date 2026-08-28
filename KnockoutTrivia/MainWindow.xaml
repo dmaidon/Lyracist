@@ -95,63 +95,71 @@
             </Grid>
         </Border>
 
+<!-- Edited on Aug 28, 2026 @ 09:24:00 -> Added Player Connect navigation tab to MainWindow.xaml -->
         <!-- ROW 1: Modern Navigation Tab Bar -->
         <Border Grid.Row="1" Background="#161421" BorderBrush="#252136" BorderThickness="0,0,0,1">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <RadioButton Content="📱 Player Connect"
+                             Style="{StaticResource {x:Type ToggleButton}}"
+                             Command="{Binding NavigateToConnectCommand}"
+                             IsChecked="True"
+                             Margin="4,0" Padding="14,8"
+                             FontWeight="SemiBold" FontSize="13"
+                             Cursor="Hand" />
+
                 <RadioButton Content="🎮 Game Host"
                              Style="{StaticResource {x:Type ToggleButton}}"
                              Command="{Binding NavigateToGameCommand}"
-                             IsChecked="True"
-                             Margin="4,0" Padding="16,8"
+                             Margin="4,0" Padding="14,8"
                              FontWeight="SemiBold" FontSize="13"
                              Cursor="Hand" />
 
                 <RadioButton Content="📊 Scoreboard"
                              Style="{StaticResource {x:Type ToggleButton}}"
                              Command="{Binding NavigateToScoreboardCommand}"
-                             Margin="4,0" Padding="16,8"
+                             Margin="4,0" Padding="14,8"
                              FontWeight="SemiBold" FontSize="13"
                              Cursor="Hand" />
 
                 <RadioButton Content="❓ Question Board"
                              Style="{StaticResource {x:Type ToggleButton}}"
                              Command="{Binding NavigateToQuestionCommand}"
-                             Margin="4,0" Padding="16,8"
+                             Margin="4,0" Padding="14,8"
                              FontWeight="SemiBold" FontSize="13"
                              Cursor="Hand" />
 
                 <RadioButton Content="⚡ Super Streak Wheel"
                              Style="{StaticResource {x:Type ToggleButton}}"
                              Command="{Binding NavigateToWheelCommand}"
-                             Margin="4,0" Padding="16,8"
+                             Margin="4,0" Padding="14,8"
                              FontWeight="SemiBold" FontSize="13"
                              Cursor="Hand" />
 
                 <RadioButton Content="📺 Banners &amp; Screens"
                              Style="{StaticResource {x:Type ToggleButton}}"
                              Command="{Binding NavigateToBannersCommand}"
-                             Margin="4,0" Padding="16,8"
+                             Margin="4,0" Padding="14,8"
                              FontWeight="SemiBold" FontSize="13"
                              Cursor="Hand" />
 
                 <RadioButton Content="⚙️ Settings"
                              Style="{StaticResource {x:Type ToggleButton}}"
                              Command="{Binding NavigateToSettingsCommand}"
-                             Margin="4,0" Padding="16,8"
+                             Margin="4,0" Padding="14,8"
                              FontWeight="SemiBold" FontSize="13"
                              Cursor="Hand" />
 
                 <RadioButton Content="❓ Help &amp; Rules"
                              Style="{StaticResource {x:Type ToggleButton}}"
                              Command="{Binding NavigateToHelpCommand}"
-                             Margin="4,0" Padding="16,8"
+                             Margin="4,0" Padding="14,8"
                              FontWeight="SemiBold" FontSize="13"
                              Cursor="Hand" />
 
                 <RadioButton Content="ℹ️ About"
                              Style="{StaticResource {x:Type ToggleButton}}"
                              Command="{Binding NavigateToAboutCommand}"
-                             Margin="4,0" Padding="16,8"
+                             Margin="4,0" Padding="14,8"
                              FontWeight="SemiBold" FontSize="13"
                              Cursor="Hand" />
             </StackPanel>
