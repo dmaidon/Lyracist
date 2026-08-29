@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 15:20:00 -> Ensured automatic full randomization and shuffling across all questions and databases
+// Edited on Aug 29, 2026 @ 10:34:30 -> Removed redundant data service shuffles to defer uniform randomization to GameStateService
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -140,9 +140,7 @@ public class TriviaDataService : ITriviaDataService
             allQuestions = await LoadQuestionsFromDatabaseAsync();
         }
 
-        // Fully randomize and shuffle questions across all loaded databases/packs
-        var random = new Random();
-        return [.. allQuestions.OrderBy(_ => random.Next())];
+        return allQuestions;
     }
 
     public async Task<List<KnockoutQuestion>> LoadQuestionsFromDatabaseAsync(string? dbPath = null)
@@ -193,9 +191,7 @@ public class TriviaDataService : ITriviaDataService
             questions.Add(q);
         }
 
-        // Shuffle questions randomly so they are never served in static database insertion order
-        var random = new Random();
-        return [.. questions.OrderBy(_ => random.Next())];
+        return questions;
     }
 
     public async Task<List<KnockoutQuestion>> LoadQuestionsFromPackAsync(string packFilePath)
@@ -212,8 +208,7 @@ public class TriviaDataService : ITriviaDataService
 
             if (parsed != null)
             {
-                var random = new Random();
-                return [.. parsed.OrderBy(_ => random.Next())];
+                return parsed;
             }
             return [];
         }

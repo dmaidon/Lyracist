@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 09:23:00 -> Added ConnectViewModel, KnockoutWebServer lifecycle, and phone/tablet connect navigation
+// Edited on Aug 29, 2026 @ 10:46:00 -> Added SimulatorViewModel navigation for in-app DJ bot simulation and testing
 using System;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -34,6 +34,7 @@ public partial class MainViewModel : ViewModelBase
     public QuestionViewModel QuestionVM { get; }
     public WheelViewModel WheelVM { get; }
     public BannerViewModel BannerVM { get; }
+    public SimulatorViewModel SimulatorVM { get; }
     public SettingsViewModel SettingsVM { get; }
     public HelpViewModel HelpVM { get; }
     public AboutViewModel AboutVM { get; }
@@ -49,6 +50,7 @@ public partial class MainViewModel : ViewModelBase
         QuestionViewModel questionVM,
         WheelViewModel wheelVM,
         BannerViewModel bannerVM,
+        SimulatorViewModel simulatorVM,
         SettingsViewModel settingsVM,
         HelpViewModel helpVM,
         AboutViewModel aboutVM,
@@ -63,6 +65,7 @@ public partial class MainViewModel : ViewModelBase
         QuestionVM = questionVM;
         WheelVM = wheelVM;
         BannerVM = bannerVM;
+        SimulatorVM = simulatorVM;
         SettingsVM = settingsVM;
         HelpVM = helpVM;
         AboutVM = aboutVM;
@@ -165,8 +168,8 @@ public partial class MainViewModel : ViewModelBase
 
     private void SyncAudienceView(object newView)
     {
-        // Don't show DJ internal tabs (Settings, Help, About) to the audience on the big screen
-        if (newView == SettingsVM || newView == HelpVM || newView == AboutVM)
+        // Don't show DJ internal tabs (Simulator, Settings, Help, About) to the audience on the big screen
+        if (newView == SimulatorVM || newView == SettingsVM || newView == HelpVM || newView == AboutVM)
         {
             return;
         }
@@ -227,6 +230,13 @@ public partial class MainViewModel : ViewModelBase
         CurrentView = BannerVM;
         ActiveTabTitle = "Banners & Screens";
         SyncAudienceView(BannerVM);
+    }
+
+    [RelayCommand]
+    public void NavigateToSimulator()
+    {
+        CurrentView = SimulatorVM;
+        ActiveTabTitle = "Bot Simulator & Tests";
     }
 
     [RelayCommand]

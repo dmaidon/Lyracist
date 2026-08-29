@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 09:15:00 -> Added companion player registration, answer submission, automatic question timer, and scoring engine
+// Edited on Aug 29, 2026 @ 10:35:00 -> Fixed UI dispatch for auto-reveal, eliminated deadlock hazard, hardened player registration and answers, and added Fisher-Yates shuffle
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -51,7 +51,7 @@ public interface IGameStateService
     KnockoutPlayer RegisterOrGetPlayer(string name, string? playerId = null);
     void AddPlayer(string name);
     void RemovePlayer(string playerId);
-    bool SubmitPlayerAnswer(string playerId, int answerIndex, int responseTimeMs);
+    bool SubmitPlayerAnswer(string playerId, int answerIndex, int responseTimeMs, string? sessionToken = null);
     void StartGame();
     void StartQuestionTimer(int? customSeconds = null);
     void PauseTimer();
@@ -69,7 +69,6 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
     private readonly ITriviaDataService _triviaDataService;
     private readonly ITokenService _tokenService;
     private readonly IStreakService _streakService;
-    private readonly object _syncLock = new();
 
     private List<KnockoutQuestion> _questions = [];
     private int _currentQuestionIndex;
@@ -217,15 +216,21 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
     {
         if (_questions.Count > 1)
         {
-            var random = new Random();
-            _questions = [.. _questions.OrderBy(_ => random.Next())];
+            var rng = Random.Shared;
+            for (int i = _questions.Count - 1; i > 0; i--)
+            {
+                int j = rng.Next(i + 1);
+                (_questions[i], _questions[j]) = (_questions[j], _questions[i]);
+            }
         }
     }
 
     public KnockoutPlayer RegisterOrGetPlayer(string name, string? playerId = null)
     {
         string trimmed = name.Trim();
-        lock (_syncLock)
+        KnockoutPlayer? result = null;
+
+        RunOnUI(() =>
         {
             KnockoutPlayer? existing = null;
             if (!string.IsNullOrEmpty(playerId))
@@ -233,19 +238,18 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                 existing = Players.FirstOrDefault(p => string.Equals(p.Id, playerId, StringComparison.OrdinalIgnoreCase));
             }
 
+            // Only reuse disconnected player records by name to avoid phone takeovers during live shows
             if (existing == null)
             {
-                existing = Players.FirstOrDefault(p => string.Equals(p.Name, trimmed, StringComparison.OrdinalIgnoreCase));
+                existing = Players.FirstOrDefault(p => string.Equals(p.Name, trimmed, StringComparison.OrdinalIgnoreCase) && !p.IsConnected);
             }
 
             if (existing != null)
             {
-                RunOnUI(() =>
-                {
-                    existing.IsConnected = true;
-                    existing.LastSeenAt = DateTime.Now;
-                });
-                return existing;
+                existing.IsConnected = true;
+                existing.LastSeenAt = DateTime.Now;
+                result = existing;
+                return;
             }
 
             var newPlayer = new KnockoutPlayer
@@ -256,9 +260,11 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                 LastSeenAt = DateTime.Now
             };
 
-            RunOnUI(() => Players.Add(newPlayer));
-            return newPlayer;
-        }
+            Players.Add(newPlayer);
+            result = newPlayer;
+        });
+
+        return result!;
     }
 
     public void AddPlayer(string name)
@@ -268,35 +274,46 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
 
     public void RemovePlayer(string playerId)
     {
-        lock (_syncLock)
+        RunOnUI(() =>
         {
             var p = Players.FirstOrDefault(x => x.Id == playerId);
             if (p != null)
             {
-                RunOnUI(() => Players.Remove(p));
+                Players.Remove(p);
             }
-        }
+        });
     }
 
-    public bool SubmitPlayerAnswer(string playerId, int answerIndex, int responseTimeMs)
+    public bool SubmitPlayerAnswer(string playerId, int answerIndex, int responseTimeMs, string? sessionToken = null)
     {
-        lock (_syncLock)
+        bool accepted = false;
+        RunOnUI(() =>
         {
             var player = Players.FirstOrDefault(p => string.Equals(p.Id, playerId, StringComparison.OrdinalIgnoreCase));
-            if (player == null || player.IsEliminated) return false;
+            if (player == null || player.IsEliminated) return;
+
+            // If session token is provided, verify match
+            if (!string.IsNullOrEmpty(sessionToken) && !string.Equals(player.SessionToken, sessionToken, StringComparison.Ordinal))
+            {
+                return;
+            }
 
             if (Phase != GameStatePhase.QuestionActive && (!IsGameActive || IsAnswerRevealed))
             {
-                return false;
+                return;
             }
 
-            RunOnUI(() =>
+            // Validate answer index against current question options count
+            if (answerIndex < -1 || answerIndex >= (CurrentQuestion?.Options.Count ?? 0))
             {
-                player.LastAnswerIndex = answerIndex;
-                player.HasAnsweredCurrentQuestion = true;
-                player.ResponseTimeMs = responseTimeMs;
-                player.LastSeenAt = DateTime.Now;
-            });
+                return;
+            }
+
+            player.LastAnswerIndex = answerIndex;
+            player.HasAnsweredCurrentQuestion = true;
+            player.ResponseTimeMs = responseTimeMs;
+            player.LastSeenAt = DateTime.Now;
+            accepted = true;
 
             OnPropertyChanged(nameof(AnsweredCount));
 
@@ -304,18 +321,21 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
             int active = ActivePlayerCount;
             if (active > 0 && AnsweredCount >= active && Settings.GameMode == GameAdvanceMode.Automatic)
             {
-                // Give a short 1s grace before auto-revealing
+                // Give a short 1s grace before auto-revealing on UI thread
                 Task.Delay(1000).ContinueWith(_ =>
                 {
-                    if (Phase == GameStatePhase.QuestionActive && !IsAnswerRevealed)
+                    RunOnUI(() =>
                     {
-                        RevealAnswer();
-                    }
+                        if (Phase == GameStatePhase.QuestionActive && !IsAnswerRevealed)
+                        {
+                            RevealAnswer();
+                        }
+                    });
                 });
             }
+        });
 
-            return true;
-        }
+        return accepted;
     }
 
     public void StartGame()
@@ -450,40 +470,37 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
 
         RunOnUI(() =>
         {
-            lock (_syncLock)
+            foreach (var player in Players)
             {
-                foreach (var player in Players)
+                if (player.IsEliminated) continue;
+
+                bool isCorrect = player.HasAnsweredCurrentQuestion && player.LastAnswerIndex == correctIndex;
+
+                if (isCorrect)
                 {
-                    if (player.IsEliminated) continue;
-
-                    bool isCorrect = player.HasAnsweredCurrentQuestion && player.LastAnswerIndex == correctIndex;
-
-                    if (isCorrect)
+                    player.Score += Settings.PointsPerCorrectAnswer;
+                    player.LastPointsEarned = Settings.PointsPerCorrectAnswer;
+                    player.WasShieldProtected = false;
+                    _streakService.RecordAnswer(player, true, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens);
+                }
+                else
+                {
+                    player.LastPointsEarned = 0;
+                    if (player.Tokens > 0)
                     {
-                        player.Score += Settings.PointsPerCorrectAnswer;
-                        player.LastPointsEarned = Settings.PointsPerCorrectAnswer;
-                        player.WasShieldProtected = false;
-                        _streakService.RecordAnswer(player, true, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens);
+                        _tokenService.DeductToken(player);
+                        player.WasShieldProtected = true;
                     }
                     else
                     {
-                        player.LastPointsEarned = 0;
-                        if (player.Tokens > 0)
+                        player.StrikeCount++;
+                        player.WasShieldProtected = false;
+                        if (player.StrikeCount >= 3)
                         {
-                            _tokenService.DeductToken(player);
-                            player.WasShieldProtected = true;
+                            PlayerEliminated?.Invoke(this, player);
                         }
-                        else
-                        {
-                            player.StrikeCount++;
-                            player.WasShieldProtected = false;
-                            if (player.StrikeCount >= 3)
-                            {
-                                PlayerEliminated?.Invoke(this, player);
-                            }
-                        }
-                        _streakService.RecordAnswer(player, false, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens);
                     }
+                    _streakService.RecordAnswer(player, false, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens);
                 }
             }
         });

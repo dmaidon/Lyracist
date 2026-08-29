@@ -988,3 +988,32 @@ Added a complete manual game flow control suite to `Lyracist.Trivia` enabling li
 6. Two-Line Wi-Fi Credentials Layout on Connect Screen:
    - On the Pre-Game Lobby & Connect Screen (`TriviaDisplayWindow.xaml`), `Wifi Network:` and `Password:` are stacked on individual lines with expanded max width, ensuring maximum legibility on big screen projectors and TVs.
 
+
+Section: Knockout Trivia Standalone Game / Super Streak & Server Resilience Updates (`KnockoutTrivia`)
+
+[Update Details]
+Major gameplay bug fixes and server resilience enhancements have been incorporated into Knockout Trivia (`KnockoutTrivia.exe`):
+
+1. Super Streak Milestone & Token Progression:
+   - Shield tokens are awarded on every multiple of the Streak Requirement (e.g. 5, 10, 15, 20 consecutive correct answers) without wiping the player's lifetime streak counter.
+   - Hitting the Super Streak Threshold (default: 20 consecutive correct answers) reliably triggers the Scaryoke-style rotary Super Streak target wheel.
+   - The 5-block streak meter on the Scoreboard view visualizes continuous 5-block progress cycles past 5 correct answers.
+
+2. Thread-Safe Automatic Answer Reveal:
+   - Fixed background thread dispatch during auto-reveal in Automatic Mode when all connected players submit answers before the countdown expires.
+   - All player mutations and UI transitions are executed on the UI dispatcher thread, eliminating deadlock risks and cross-thread exceptions.
+
+3. Global Fault Recovery:
+   - Registered application-wide exception handling to log errors and prevent unhandled background exceptions from abruptly terminating a live show.
+
+4. Multi-Device Identity & Session Security:
+   - Player reconnection by name now only claims inactive/disconnected records (`!p.IsConnected`), preventing duplicate player names on separate phones from taking over another player's score or strikes.
+   - Added GUID session tokens to authenticate answer submissions and state polling from the mobile companion app (`knockout.html`).
+
+5. Uniform Question Shuffling:
+   - Questions loaded from multiple SQLite databases and JSON packs are randomized once using an in-place Fisher-Yates shuffle algorithm.
+
+6. Testing Module & DJ Bot Load Simulator:
+   - Added automated test project `KnockoutTrivia.Tests` covering game rules, streaks, web server endpoints, and banner services.
+   - Added in-app "🧪 Bot Simulator" navigation tab to `MainWindow.xaml` allowing hosts to spawn virtual bot players (1 to 30), simulate mobile answers with configurable accuracy and human response delays, test auto-play mode, and rehearse Super Streak wheels without physical phones.
+

@@ -1,4 +1,4 @@
-<!-- Edited on Aug 28, 2026 @ 09:18:00 -> Knockout Trivia responsive mobile companion web application for phones and tablets -->
+<!-- Edited on Aug 29, 2026 @ 10:36:30 -> Added session token authentication support for player state and submissions -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -626,6 +626,7 @@
 
     <script>
         let playerId = localStorage.getItem('knockout_playerId') || '';
+        let sessionToken = localStorage.getItem('knockout_sessionToken') || '';
         let playerName = localStorage.getItem('knockout_playerName') || '';
         let currentQuestionId = '';
         let questionStartTime = 0;
@@ -734,8 +735,10 @@
                 const data = await res.json();
                 if (data.success) {
                     playerId = data.playerId;
+                    sessionToken = data.sessionToken || '';
                     playerName = data.name;
                     localStorage.setItem('knockout_playerId', playerId);
+                    localStorage.setItem('knockout_sessionToken', sessionToken);
                     localStorage.setItem('knockout_playerName', playerName);
 
                     document.getElementById('player-badge').textContent = playerName;
@@ -777,6 +780,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         playerId,
+                        sessionToken,
                         selectedOptionIndex: optionIndex,
                         responseTimeMs: elapsed
                     })
@@ -788,7 +792,7 @@
             if (!playerId) return;
 
             try {
-                const res = await fetch(`/api/knockout/state?playerId=${encodeURIComponent(playerId)}`);
+                const res = await fetch(`/api/knockout/state?playerId=${encodeURIComponent(playerId)}&sessionToken=${encodeURIComponent(sessionToken)}`);
                 if (!res.ok) return;
                 const state = await res.json();
                 renderState(state);

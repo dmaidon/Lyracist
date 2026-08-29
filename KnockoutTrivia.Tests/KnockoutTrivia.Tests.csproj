@@ -1,4 +1,4 @@
-<!-- Edited on Aug 29, 2026 @ 10:36:00 -> Added KnockoutTrivia project reference for automated unit tests -->
+<!-- Created on Aug 29, 2026 @ 10:40:00 -> KnockoutTrivia.Tests xUnit.v3 test project for automated test suite -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -12,8 +12,8 @@
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.8.27.31</AssemblyVersion>
-    <FileVersion>26.8.27.31</FileVersion>
+    <AssemblyVersion>26.8.29.1</AssemblyVersion>
+    <FileVersion>26.8.29.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,8 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Lyracist.Trivia.Core\Lyracist.Trivia.Core.csproj" />
-    <ProjectReference Include="..\Lyracist.Trivia\Lyracist.Trivia.csproj" />
     <ProjectReference Include="..\KnockoutTrivia\KnockoutTrivia.csproj" />
   </ItemGroup>
 

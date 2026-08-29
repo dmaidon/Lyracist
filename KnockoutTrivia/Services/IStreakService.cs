@@ -1,4 +1,4 @@
-// Created on Aug 27, 2026 @ 14:35:50 -> IStreakService and StreakService managing player streaks and Super Streak triggers
+// Edited on Aug 29, 2026 @ 10:33:00 -> Fixed Super Streak threshold milestone check without resetting StreakCount on token awards
 using System;
 using KnockoutTrivia.Models;
 
@@ -31,18 +31,17 @@ public class StreakService : IStreakService
         {
             player.StreakCount++;
 
-            // Check standard streak token reward (e.g. every 5)
-            if (player.StreakCount >= streakRequirement)
-            {
-                _tokenService.AwardToken(player, maxTokens);
-                TokenRewardEarned?.Invoke(this, player);
-                player.StreakCount = 0;
-            }
-
             // Check Super Streak milestone (e.g. 20 consecutive)
             if (player.StreakCount == superStreakThreshold)
             {
                 SuperStreakReached?.Invoke(this, player);
+            }
+
+            // Check standard streak token reward on each multiple of streakRequirement (e.g. 5, 10, 15, 20...)
+            if (streakRequirement > 0 && player.StreakCount >= streakRequirement && player.StreakCount % streakRequirement == 0)
+            {
+                _tokenService.AwardToken(player, maxTokens);
+                TokenRewardEarned?.Invoke(this, player);
             }
         }
         else

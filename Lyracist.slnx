@@ -15,4 +15,5 @@
   <Project Path="Lyracist.Trivia/Lyracist.Trivia.csproj" />
   <Project Path="TriviaDbCreator/TriviaDbCreator.csproj" />
   <Project Path="Lyracist.Trivia.Tests/Lyracist.Trivia.Tests.csproj" />
+  <Project Path="KnockoutTrivia.Tests/KnockoutTrivia.Tests.csproj" />
 </Solution>

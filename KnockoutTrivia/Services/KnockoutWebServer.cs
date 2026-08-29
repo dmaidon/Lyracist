@@ -1,4 +1,4 @@
-// Created on Aug 28, 2026 @ 09:17:00 -> KnockoutWebServer async TcpListener server for mobile companion connections and real-time state API
+// Edited on Aug 29, 2026 @ 10:36:00 -> Added session token authentication and payload validation for companion endpoints
 using System;
 using System.IO;
 using System.Linq;
@@ -238,6 +238,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                     {
                         success = true,
                         playerId = player.Id,
+                        sessionToken = player.SessionToken,
                         name = player.Name,
                         tokens = player.Tokens,
                         strikes = player.StrikeCount,
@@ -264,7 +265,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                 var subReq = JsonSerializer.Deserialize<SubmitRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 if (subReq != null && !string.IsNullOrWhiteSpace(subReq.PlayerId))
                 {
-                    bool accepted = _gameStateService.SubmitPlayerAnswer(subReq.PlayerId, subReq.SelectedOptionIndex, (int)subReq.ResponseTimeMs);
+                    bool accepted = _gameStateService.SubmitPlayerAnswer(subReq.PlayerId, subReq.SelectedOptionIndex, (int)subReq.ResponseTimeMs, subReq.SessionToken);
                     var resp = new { success = accepted };
                     await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)));
                 }
@@ -283,10 +284,12 @@ public class KnockoutWebServer : IKnockoutWebServer
         if (path.Equals("/api/knockout/state", StringComparison.OrdinalIgnoreCase) && method == "GET")
         {
             string playerId = "";
+            string sessionToken = "";
             if (!string.IsNullOrEmpty(queryString))
             {
                 var qParams = HttpUtility.ParseQueryString(queryString);
                 playerId = qParams["playerId"] ?? "";
+                sessionToken = qParams["sessionToken"] ?? "";
             }
 
             var allPlayers = _gameStateService.Players.ToList();
@@ -296,8 +299,16 @@ public class KnockoutWebServer : IKnockoutWebServer
 
             if (player != null)
             {
-                player.IsConnected = true;
-                player.LastSeenAt = DateTime.Now;
+                // Verify session token if provided
+                if (string.IsNullOrEmpty(sessionToken) || string.Equals(player.SessionToken, sessionToken, StringComparison.Ordinal))
+                {
+                    player.IsConnected = true;
+                    player.LastSeenAt = DateTime.Now;
+                }
+                else
+                {
+                    player = null;
+                }
             }
 
             var q = _gameStateService.CurrentQuestion;
@@ -513,5 +524,5 @@ public class KnockoutWebServer : IKnockoutWebServer
     }
 
     private record JoinRequest(string Name, string? PlayerId);
-    private record SubmitRequest(string PlayerId, int SelectedOptionIndex, double ResponseTimeMs);
+    private record SubmitRequest(string PlayerId, int SelectedOptionIndex, double ResponseTimeMs, string? SessionToken = null);
 }

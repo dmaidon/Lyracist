@@ -1,9 +1,34 @@
-<!-- Edited on Aug 28, 2026 @ 11:15:00 -> Fixed multi-monitor DPI scaling and window positioning for Audience Screen -->
-Last Edit: Aug 28, 2026 - Fixed multi-monitor DPI scaling and window positioning for Audience Screen
+<!-- Edited on Aug 29, 2026 @ 10:49:00 -> Added Knockout Trivia testing module (KnockoutTrivia.Tests & in-app DJ bot simulator) -->
+Last Edit: Aug 29, 2026 - Knockout Trivia testing module, automated test suite (KnockoutTrivia.Tests), and in-app DJ bot load simulator
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.8.29.1] - 2026-08-29
+
+### Added & Enhanced
+
+- **Knockout Trivia Testing Module & Automated Suite (`KnockoutTrivia.Tests`)**:
+  - **Dedicated xUnit v3 Test Suite (`KnockoutTrivia.Tests.csproj`)**: Built a complete test project covering `GameStateService`, `StreakService`, `TokenService`, `KnockoutWebServer`, `WheelService`, `BannerService`, and `SimulatorService`.
+  - **In-App DJ Bot Simulator & Diagnostics Panel (`ISimulatorService.cs` / `SimulatorView.xaml`)**:
+    - Interactive testing tab embedded directly in the host interface (`MainWindow.xaml`).
+    - Configurable virtual bot player spawner (1 to 30 bots) with distinct AI identities and avatars.
+    - Automated answer simulation with realistic human response delays (400ms - 2800ms) and customizable accuracy rate (0% - 100%).
+    - Auto-play mode enabling hands-free game flow testing and rehearsal.
+    - Rehearsal controls for instant Super Streak wheel triggering (setting bot streak to 20), phase stepping, and live activity log inspection.
+
+### Fixed & Enhanced
+
+- **Knockout Trivia Bug Fixes & Resilience Hardening (`KnockoutTrivia`)**:
+  - **Super Streak Milestone Fix (`StreakService.cs`)**: Fixed bug where resetting `StreakCount = 0` on token rewards prevented `StreakCount` from reaching the `SuperStreakThreshold` (20). Tokens are now awarded on multiples of `StreakRequirement` (5, 10, 15, 20) without wiping the streak progression, allowing the Super Streak Wheel to trigger as designed.
+  - **Cross-Thread UI Dispatch Fix (`GameStateService.cs`)**: Fixed crash in Automatic mode when all mobile players submitted answers early by wrapping the auto-reveal timeout callback in `RunOnUI(...)`.
+  - **Deadlock Hazard Elimination (`GameStateService.cs`)**: Removed nested `_syncLock` synchronization around `Dispatcher.Invoke` calls in `RegisterOrGetPlayer`, `RemovePlayer`, `SubmitPlayerAnswer`, and `EvaluateSubmittedAnswers`, moving mutations directly to UI thread dispatch.
+  - **Global Exception Handling & Fault Recovery (`App.xaml.cs`)**: Registered `DispatcherUnhandledException`, `AppDomain.CurrentDomain.UnhandledException`, and `TaskScheduler.UnobservedTaskException` with `Lyracist.Shared.Globals.LogError`. Added startup try/catch recovery dialog so host shows are protected from unexpected crashes.
+  - **Duplicate Player Name Disambiguation (`GameStateService.cs`)**: Reconnection by name now only claims inactive/disconnected records (`!p.IsConnected`), preventing duplicate player names from silently hijacking another connected device.
+  - **Uniform Fisher-Yates Shuffle Refactor (`TriviaDataService.cs` / `GameStateService.cs`)**: Removed redundant random shuffles from database and pack loaders; centralized single uniform Fisher-Yates in-place shuffle using `Random.Shared` in `GameStateService.ShuffleQuestions()`.
+  - **Answer Bounds Validation & Session Security (`KnockoutWebServer.cs` / `knockout.html`)**: Added boundary checks on incoming `SelectedOptionIndex` and added GUID session tokens (`SessionToken`) to authenticate mobile submissions and state polling.
+  - **Multi-Tier Streak Meter Visual Progression (`KnockoutPlayer.cs` / `ScoreboardView.xaml`)**: Added `StreakMeterProgress` calculated property so the 5-block meter visualizes continuous cycles past 5 without UI reset anomalies.
 
 ## [26.8.28.1] - 2026-08-28
 

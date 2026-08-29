@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 09:14:00 -> Added companion connection tracking, answer submissions, and shield protection state
+// Edited on Aug 29, 2026 @ 10:44:00 -> Added IsBot property for simulated player diagnostic testing
 using System;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,7 +11,13 @@ public partial class KnockoutPlayer : ObservableObject
     private string _id = Guid.NewGuid().ToString("N")[..8].ToUpperInvariant();
 
     [ObservableProperty]
+    private string _sessionToken = Guid.NewGuid().ToString("N");
+
+    [ObservableProperty]
     private string _name = string.Empty;
+
+    [ObservableProperty]
+    private bool _isBot;
 
     [ObservableProperty]
     private int _score;
@@ -27,6 +33,7 @@ public partial class KnockoutPlayer : ObservableObject
     private int _tokens;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StreakMeterProgress))]
     private int _streakCount;
 
     [ObservableProperty]
@@ -54,6 +61,8 @@ public partial class KnockoutPlayer : ObservableObject
     private int _responseTimeMs;
 
     public bool IsEliminated => StrikeCount >= 3;
+
+    public int StreakMeterProgress => StreakCount == 0 ? 0 : ((StreakCount - 1) % 5) + 1;
 
     public string StatusText => StrikeCount switch
     {

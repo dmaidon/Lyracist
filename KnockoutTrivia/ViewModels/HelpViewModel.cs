@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 09:32:30 -> Added Topic 9 for Phone/Tablet Connect and Mobile Buzzer to HelpViewModel
+// Edited on Aug 29, 2026 @ 10:50:00 -> Added Topic 10 for Bot Simulator and Load Testing Diagnostics to HelpViewModel
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KnockoutTrivia.Models;
@@ -88,6 +88,14 @@ public partial class HelpViewModel : ViewModelBase
                 AccentColor = "#38BDF8",
                 DescriptionHeader = "Mobile Player Companion & Automatic Internal Scoring",
                 DescriptionContent = "• Dual QR Code Connect Screen: The DJ can navigate to the '📱 Player Connect' tab or push it to the Audience Big Screen. Players simply scan Card 1 (Wi-Fi QR) to connect to venue Wi-Fi, then scan Card 2 (Game QR) to open the mobile buzzer in their web browser with no app download required.\n\n• Mobile Player Companion: Connects players to the live game, allowing them to tap their answer (A, B, C, D / True-False), view their live strike count, shield tokens, and streak meters, receive real-time answer results, and listen to synthesized Web Audio sound FX and haptics.\n\n• Automatic Scoring: When the question timer expires or the DJ clicks 'Reveal Answer', the game engine automatically grades all submitted answers across connected phones, awards points, manages shields/strikes, and updates the scoreboard internally.\n\n• Automatic Mode: In Automatic Mode, the game autonomously runs the countdown timer, evaluates answers, waits for the configured buffer, and advances to the next question automatically."
+            },
+            new()
+            {
+                Title = "10. 🧪 Bot Simulator & Diagnostics",
+                Icon = "Bot24",
+                AccentColor = "#8B5CF6",
+                DescriptionHeader = "In-App DJ Bot Simulation & Game Load Testing",
+                DescriptionContent = "• Virtual Bot Spawner: Spawn 1 to 30 simulated players into the game lobby with randomized avatar names, initial shield tokens, and live scoreboard presence.\n\n• Real-Time Answer Simulation: Simulate answers across all active bots with customizable accuracy percentage (0% to 100%) and realistic human delays (400ms to 2800ms).\n\n• Hands-Free Auto-Play: Enable auto-play to have bots automatically answer each question round as the game proceeds, allowing complete hands-free show rehearsal.\n\n• Rehearsal Triggers: Instantly set a player to 20 streak to test the Super Streak wheel, step game phases, and inspect real-time reaction times and answers in the live activity log."
             }
         ];
 
