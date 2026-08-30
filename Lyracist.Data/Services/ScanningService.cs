@@ -141,14 +141,14 @@ namespace Lyracist.Data.Services
             // 4. Default ParseFilename fallback
             if (artist == "Unknown Artist" || title == filename)
             {
-                var (Artist, Title) = ParseFilename(filePath);
-                if (artist == "Unknown Artist" && Artist != "Unknown Artist")
+                var (parsedArtist, parsedTitle) = ParseFilename(filePath);
+                if (artist == "Unknown Artist" && parsedArtist != "Unknown Artist")
                 {
-                    artist = Artist;
+                    artist = parsedArtist;
                 }
-                if (title == filename && Title != filename)
+                if (title == filename && parsedTitle != filename)
                 {
-                    title = Title;
+                    title = parsedTitle;
                 }
             }
 
@@ -157,17 +157,30 @@ namespace Lyracist.Data.Services
                 title = $"{title} [{catalogCode}]";
             }
 
-            if (isKaraoke)
+            if (ext == ".zip")
             {
-                if (ext == ".zip")
+                var (isZipKaraoke, _) = CheckZipKaraoke(filePath);
+                if (isZipKaraoke)
+                {
+                    isKaraoke = true;
                     karaokeType = "ZIPCDG";
-                else if (ext == ".mp4")
+                }
+            }
+            else if (ext == ".mp4")
+            {
+                if (IsMp4Karaoke(filePath))
+                {
+                    isKaraoke = true;
                     karaokeType = "MP4";
-                else
-                    karaokeType = "MP3G";
+                }
+            }
+            else if (isKaraoke)
+            {
+                karaokeType = "MP3G";
             }
 
-            return (artist, title, karaokeType, isKaraoke);
+            string typeLabel = isKaraoke ? (string.IsNullOrEmpty(karaokeType) ? "MP3G" : karaokeType) : "Audio";
+            return (artist, title, typeLabel, isKaraoke);
         }
 
         private static bool IsMp4Karaoke(string filePath)
@@ -242,11 +255,6 @@ namespace Lyracist.Data.Services
             int totalFiles = candidateFiles.Count;
             if (totalFiles == 0) return;
 
-            // Build a set of all CDG file paths for quick validation in MP3+G detection
-            var cdgFileSet = candidateFiles
-                .Where(f => f.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase))
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
             var searchService = new SearchService(_context);
             int processed = 0;
 
@@ -255,7 +263,6 @@ namespace Lyracist.Data.Services
                 .ToDictionaryAsync(s => s.FilePath, s => s, StringComparer.OrdinalIgnoreCase);
 
             // Clean up dead records for files that no longer exist under the scanned directory paths.
-            // Committed immediately (not batched with the scan below) since this list is normally small.
             var songsToRemove = existingSongsMap.Values
                 .Where(s => paths.Any(p => IsPathUnderDirectory(s.FilePath, p)) && !File.Exists(s.FilePath))
                 .ToList();
@@ -271,11 +278,6 @@ namespace Lyracist.Data.Services
                 }
             }
 
-            // Process and commit in batches rather than one giant transaction spanning the
-            // entire (potentially huge, multi-drive) scan. A large real-world library can take
-            // a very long time to probe (one external ffprobe process per file); batching means
-            // an interruption partway through (crash, closed app, one bad file) only loses the
-            // in-flight batch instead of rolling back every song found so far.
             const int batchSize = 200;
             var batch = new List<string>(batchSize);
 
@@ -286,35 +288,7 @@ namespace Lyracist.Data.Services
 
                 foreach (var file in filesBatch)
                 {
-                    string ext = Path.GetExtension(file).ToLowerInvariant();
-
-                    // Standalone CDGs are skipped since they are processed in tandem with MP3 files
-                    if (ext == ".cdg") continue;
-
                     var parsed = ParseStoreDownload(file);
-                    if (!parsed.IsKaraoke && ext == ".mp3")
-                    {
-                        string cdgPath = Path.ChangeExtension(file, ".cdg");
-                        if (cdgFileSet.Contains(cdgPath))
-                        {
-                            parsed = (parsed.Artist, parsed.Title, "MP3G", true);
-                        }
-                    }
-                    else if (!parsed.IsKaraoke && ext == ".mp4")
-                    {
-                        if (IsMp4Karaoke(file))
-                        {
-                            parsed = (parsed.Artist, parsed.Title, "MP4", true);
-                        }
-                    }
-                    else if (ext == ".zip")
-                    {
-                        var (isKaraoke, _) = CheckZipKaraoke(file);
-                        if (isKaraoke)
-                        {
-                            parsed = (parsed.Artist, parsed.Title, "ZIPCDG", true);
-                        }
-                    }
 
                     string typeLabel = parsed.IsKaraoke ? parsed.KaraokeType : "Audio";
 
@@ -328,9 +302,6 @@ namespace Lyracist.Data.Services
                     }
                     else
                     {
-                        // Duration/Genre are left at defaults here so the scan itself stays fast
-                        // (no external ffprobe process per file). ProbeMissingMetadataAsync fills
-                        // these in afterward as a separate low-priority background pass.
                         var newSong = new Song
                         {
                             Title = parsed.Title,
@@ -407,7 +378,7 @@ namespace Lyracist.Data.Services
         public async Task ProbeMissingMetadataAsync(IProgress<ScanProgress>? progress = null)
         {
             var songsNeedingProbe = await _context.Songs
-                .Where(s => s.Duration <= 0 || s.Tags == null || s.Tags == "")
+                .Where(s => s.Duration <= 0 || s.Tags == null || s.Tags == "" || s.Artist == "Unknown Artist" || s.Artist == null)
                 .ToListAsync();
 
             int totalFiles = songsNeedingProbe.Count;
@@ -455,6 +426,12 @@ namespace Lyracist.Data.Services
                     FilesProcessed = processed,
                     CurrentFile = batch.Count > 0 ? Path.GetFileName(batch[^1].FilePath) : string.Empty
                 });
+            }
+
+            int unknownArtistCount = await _context.Songs.CountAsync(s => s.Artist == "Unknown Artist" || s.Artist == null || s.Artist == "");
+            if (unknownArtistCount > 0)
+            {
+                Lyracist.Shared.Globals.LogInfo("Lyracist", $"Metadata scan complete. {unknownArtistCount:N0} track(s) remain with 'Unknown Artist' (resolvable in LyracistDbEditor).");
             }
         }
 
@@ -579,10 +556,18 @@ namespace Lyracist.Data.Services
                 }
             }
 
-            // 4. Mark Tags as completed with local genre or 'none' to prevent re-query loops
+            // 4. Mark Tags as completed with local genre or 'none' only if artist is resolved, 
+            // so unresolved Unknown Artists remain eligible for future metadata extraction.
             if (string.IsNullOrEmpty(song.Tags))
             {
-                song.Tags = !string.IsNullOrWhiteSpace(song.Genre) ? song.Genre : "none";
+                if (song.Artist != UnknownArtist && !string.IsNullOrEmpty(song.Artist))
+                {
+                    song.Tags = !string.IsNullOrWhiteSpace(song.Genre) ? song.Genre : "none";
+                }
+                else if (!string.IsNullOrWhiteSpace(song.Genre))
+                {
+                    song.Tags = song.Genre;
+                }
             }
         }
 

@@ -1,17 +1,18 @@
-// Edited on Aug 30, 2026 @ 09:44:00 -> Document High-Performance In-Memory Library Metadata Probing
-High-Performance In-Memory Library Metadata Probing (`Lyracist`, `LyracistDbEditor`) - (August 2026)
+// Edited on Aug 30, 2026 @ 11:02:00 -> Document Unknown Artist tracking, deploy script version control, and repo size optimization
+Library Metadata Probing & Deployment Synchronization (`Lyracist`, `LyracistDbEditor`, `Deploy`) - (August 2026)
 
-Section: Library Management & Audio Scanning / High-Speed In-Memory Probing
+Section: Library Management & Deployment / High-Speed In-Memory Probing & Laptop Sync
 
-[High-Speed In-Memory Probing Architecture]
+[High-Speed In-Memory Probing & Unresolved Metadata Reporting]
 1. In-Memory TagLib Metadata Extraction:
    - Replaced legacy per-file external `ffprobe.exe` child process spawning with pure in-memory `TagLibSharp` extraction on file headers (<0.1ms per file).
    - Direct In-Memory Stream Probing for ZIP-CDGs: Reads compressed audio entry streams directly from zip archives in RAM using `StreamFileAbstraction` without extracting temporary files to disk.
    - Local ID3/MP4 Metadata Recovery: Extracts track duration, genre, and resolves artist/title from embedded ID3/MP4 tags when filename parsing is missing artist information.
-   - Loop-Free Probed State Tracking: Probed tracks are populated with their genre or marked `Tags = "none"` to prevent endless re-probing on subsequent library scans.
+   - Loop-Free Probed State & Unknown Artist Tracking: Fully resolved tracks are marked with local genre or `Tags = "none"`, while tracks missing both filename and ID3 tags remain identified as `Unknown Artist` with a post-scan summary logged so DJs can easily resolve them in `LyracistDbEditor`.
 2. Parallel Batch Processing:
-   - Increased probing concurrency from 3 threads to `Math.Max(8, Environment.ProcessorCount * 2)` (16–32 parallel streams) with batch SQLite transactions and FTS5 search index synchronization.
-   - Reduces follow-up scan time for a 50,000-song library from 3+ hours down to under 1–2 minutes.
+   - Concurrency scales to `Math.Max(8, Environment.ProcessorCount * 2)` (16–32 parallel streams) with batch SQLite transactions and FTS5 search index synchronization, reducing 50,000-song follow-up scan times from 3+ hours down to under 1–2 minutes.
+3. Automated Laptop Show Synchronization (`Deploy/Deploy-Lyracist.ps1`):
+   - Version-controlled deployment script synchronizes binaries, assets, question packs (`Packs/`), and starter databases (`Data/trivia.db`) to the show laptop while strictly protecting live venue/DJ settings (`Settings/*_settings.json`, `ksrotation_venues.json`, `ksrotation_djs.json`), active rotation history (`Data/lyracist.db`, `ksrotation_night_db.json`, `ksrotation_singers.json`), and live announcement selection state (`selected_announcement.json`).
 
 Solution-Wide Directory & Asset Consolidation (`Lyracist`, `KSRotation`, `KnockoutTrivia`, `LyracistTrivia`, `TriviaDbCreator`, `ScaryokeWheel`, `LyracistDbEditor`, `LyracistKeyGen`) - (August 2026)
 

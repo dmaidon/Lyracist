@@ -1,9 +1,24 @@
-<!-- Edited on Aug 30, 2026 @ 09:44:00 -> Document High-Performance In-Memory Library Metadata Probing in CHANGELOG.md -->
-Last Edit: Aug 30, 2026 - High-Performance In-Memory Library Metadata Probing, Solution-Wide Directory Consolidation, and full test suite verification
+<!-- Edited on Aug 30, 2026 @ 11:01:00 -> Document 26.8.30.4 fixes for repo size optimization, deploy script tracking, and Unknown Artist handling in CHANGELOG.md -->
+Last Edit: Aug 30, 2026 - Repo size optimization, deploy script tracking, Unknown Artist handling, and full test suite verification
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.8.30.4] - 2026-08-30
+
+### Fixed & Enhanced
+
+- **Git Repository Size Optimization (`.gitignore`)**:
+  - Untracked and excluded runtime binary assets (`Banners/`, `Logs/`, and live databases `lyracist.db`, `ksrotation_night_db.json`, `wifi_passwords.json`, `keygen.db`), removing 336 MB of binary assets from the git index while keeping the master seed database (`Data/trivia.db`) and question packs (`Packs/`) tracked.
+- **Unknown Artist Retention & Unresolved Reporting (`ScanningService.cs`)**:
+  - Maintained `Artist == "Unknown Artist"` in the probing query and avoided falsely marking unresolved tracks as `Tags = "none"`, ensuring tracks missing both filename and ID3 artist metadata remain identified and resolvable in `LyracistDbEditor`.
+  - Added summary logging at the conclusion of library scans reporting the total count of unresolved "Unknown Artist" tracks.
+- **Tracked Deployment Script & Live State Protection (`Deploy/Deploy-Lyracist.ps1`)**:
+  - Version-controlled the laptop show deployment script in `Deploy/Deploy-Lyracist.ps1`.
+  - Added `selected_announcement.json` exclusion under `Banners` to ensure laptop live announcement selections are preserved across redeployments alongside settings and database protections.
+- **MAUI Cross-Platform Path Compatibility (`TriviaStorageHelper.cs`)**:
+  - Maintained `net10.0` compatibility in `Lyracist.Trivia.Core` for seamless MAUI Android and Windows compilation without dependency collisions.
 
 ## [26.8.30.3] - 2026-08-30
 

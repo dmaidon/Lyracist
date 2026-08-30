@@ -361,3 +361,12 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Application runtime assets, logs, & live gig data
+[Bb]anners/
+[Ll]ogs/
+Data/*.db
+!Data/trivia.db
+Data/*.json
+Settings/*.json
+!Settings/VenueGraphics/

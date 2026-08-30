@@ -1,4 +1,4 @@
-<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update Content links and link Globals.cs for consolidated Packs, Banners, and Data directories -->
+<!-- Edited on Aug 30, 2026 @ 10:58:00 -> Target net10.0 for cross-platform MAUI and Android compatibility -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -9,8 +9,8 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
-    <AssemblyVersion>26.8.30.60</AssemblyVersion>
-    <FileVersion>26.8.30.60</FileVersion>
+    <AssemblyVersion>26.8.30.61</AssemblyVersion>
+    <FileVersion>26.8.30.61</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
