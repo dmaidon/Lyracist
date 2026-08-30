@@ -1,4 +1,4 @@
-<!-- Edited on Aug 19, 2026 @ 09:16:30 -> Include TriviaData folder and contents with CopyToOutputDirectory=PreserveNewest -->
+<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update Content links and link Globals.cs for consolidated Packs, Banners, and Data directories -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -25,8 +25,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\TriviaData\**\*">
-      <Link>TriviaData\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <Content Include="..\Packs\**\*">
+      <Link>Packs\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Banners\**\*">
+      <Link>Banners\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Data\**\*">
+      <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

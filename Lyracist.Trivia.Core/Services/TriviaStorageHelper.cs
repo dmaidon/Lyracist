@@ -1,4 +1,4 @@
-// Edited on Aug 19, 2026 @ 09:42:00 -> Added GetBannerPathForPack helper method to TriviaStorageHelper
+// Edited on Aug 30, 2026 @ 08:33:00 -> Consolidated trivia paths to Data/trivia.db, Packs, Banners/LyracistTrivia/CategoryBanners, and Settings/lyracist_trivia_settings.json
 using System;
 using System.IO;
 
@@ -15,13 +15,7 @@ public static class TriviaStorageHelper
             return _cachedTriviaDataPath;
         }
 
-        // KSRotation, Lyracist and Lyracist.Trivia all build to the same BaseOutputPath, so the
-        // application startup folder is the same physical directory for every one of them - a
-        // single TriviaData folder next to the running EXE is automatically the one shared
-        // location for packs, banners, settings and the database across all three apps.
-        // (The Android/MAUI build is a separate case: it has no shared startup folder with the
-        // Windows apps, so its copy of TriviaData is synced onto the device separately.)
-        string dataDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TriviaData");
+        string dataDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
         if (!Directory.Exists(dataDir))
         {
             Directory.CreateDirectory(dataDir);
@@ -39,7 +33,7 @@ public static class TriviaStorageHelper
 
     public static string GetPacksDirectory()
     {
-        string dir = Path.Combine(GetTriviaDataDirectory(), "packs");
+        string dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Packs");
         if (!Directory.Exists(dir))
         {
             Directory.CreateDirectory(dir);
@@ -49,7 +43,7 @@ public static class TriviaStorageHelper
 
     public static string GetBannersDirectory()
     {
-        string dir = Path.Combine(GetTriviaDataDirectory(), "Banners");
+        string dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Banners", "LyracistTrivia", "CategoryBanners");
         if (!Directory.Exists(dir))
         {
             Directory.CreateDirectory(dir);
@@ -59,8 +53,12 @@ public static class TriviaStorageHelper
 
     public static string GetSettingsPath()
     {
-        string dir = GetTriviaDataDirectory();
-        return Path.Combine(dir, "trivia_settings.json");
+        string dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings");
+        if (!Directory.Exists(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+        return Path.Combine(dir, "lyracist_trivia_settings.json");
     }
 
     public static Models.TriviaSettings LoadSettings()
@@ -68,6 +66,31 @@ public static class TriviaStorageHelper
         try
         {
             string path = GetSettingsPath();
+            if (!File.Exists(path))
+            {
+                // Fallback migration: Check legacy TriviaData/trivia_settings.json or Settings/trivia_settings.json
+                string legacyInTriviaData = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TriviaData", "trivia_settings.json");
+                string settingsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings");
+                string legacyInSettings = Path.Combine(settingsDir, "trivia_settings.json");
+                if (File.Exists(legacyInTriviaData))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(settingsDir);
+                        File.Copy(legacyInTriviaData, path, true);
+                    }
+                    catch { }
+                }
+                else if (File.Exists(legacyInSettings))
+                {
+                    try
+                    {
+                        File.Copy(legacyInSettings, path, true);
+                    }
+                    catch { }
+                }
+            }
+
             if (File.Exists(path))
             {
                 string json = File.ReadAllText(path);

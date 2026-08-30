@@ -1,4 +1,4 @@
-// Edited on Aug 29, 2026 @ 10:34:30 -> Removed redundant data service shuffles to defer uniform randomization to GameStateService
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update BaseDataDir and BasePacksDir to point to shared Data and Packs directories
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,13 +7,14 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using KnockoutTrivia.Models;
+using Lyracist.Shared;
 
 namespace KnockoutTrivia.Services;
 
 public class TriviaDataService : ITriviaDataService
 {
-    private static readonly string BaseDataDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "KoTrivia", "Data");
-    private static readonly string BasePacksDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "KoTrivia", "Packs");
+    private static readonly string BaseDataDir = Globals.DataDir;
+    private static readonly string BasePacksDir = Globals.PacksDir;
 
     public TriviaDataService()
     {

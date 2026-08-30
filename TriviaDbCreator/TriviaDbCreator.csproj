@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 08:26:00 -> Include TextBoxSelectionHelper compile link -->
+<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update Content links for consolidated Packs, Banners, and Data directories -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -43,6 +43,21 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lyracist.Trivia.Core\Lyracist.Trivia.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\Packs\**\*">
+      <Link>Packs\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Banners\**\*">
+      <Link>Banners\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Data\**\*">
+      <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,9 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1037 trailing whitespace
+// Edited on Aug 30, 2026 @ 08:26:00 -> Relocate keygen database to Data/keygen.db
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Data.Sqlite;
+using Lyracist.Shared;
 
 namespace LyracistKeyGen
 {
@@ -10,11 +11,12 @@ namespace LyracistKeyGen
 
     public static class KeyGenDatabase
     {
-        private static string DbPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keygen.db");
+        private static string DbPath => Path.Combine(Globals.DataDir, "keygen.db");
         private static string ConnectionString => $"Data Source={DbPath}";
 
         public static void Initialize()
         {
+            Directory.CreateDirectory(Globals.DataDir);
             using var conn = new SqliteConnection(ConnectionString);
             conn.Open();
 

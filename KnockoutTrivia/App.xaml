@@ -1,4 +1,4 @@
-<!-- Edited on Aug 29, 2026 @ 10:47:00 -> Added SimulatorViewModel DataTemplate mapping to SimulatorView -->
+<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update KnockoutLogo resource URI to Assets/kotrv_logo.png -->
 <Application x:Class="KnockoutTrivia.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,7 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Official Knockout Trivia Logo Resource -->
-            <BitmapImage x:Key="KnockoutLogo" UriSource="pack://application:,,,/KoTrivia/Assets/kotrv_logo.png" />
+            <BitmapImage x:Key="KnockoutLogo" UriSource="pack://application:,,,/Assets/kotrv_logo.png" />
 
             <!-- MVVM ViewModel -> View DataTemplates -->
             <DataTemplate DataType="{x:Type vm:ConnectViewModel}">

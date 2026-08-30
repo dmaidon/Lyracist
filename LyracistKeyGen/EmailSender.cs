@@ -1,9 +1,10 @@
-// Edited on Jul 17, 2026 @ 09:00:00 -> SMTP connection credentials
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update settings path to Settings/keygen_settings.json with legacy fallback migration
 using System;
 using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Text.Json;
+using Lyracist.Shared;
 
 namespace LyracistKeyGen
 {
@@ -19,21 +20,32 @@ namespace LyracistKeyGen
 
     public static class EmailSender
     {
-        private static readonly string SettingsPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "LyracistKeyGen",
-            "smtp_settings.json"
-        );
+        private static readonly string SettingsPath = Path.Combine(Globals.SettingsDir, "keygen_settings.json");
 
         public static SmtpSettings LoadSettings()
         {
             try
             {
+                if (!File.Exists(SettingsPath))
+                {
+                    // Fallback migration: Check legacy path
+                    string legacyPath = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        "LyracistKeyGen",
+                        "smtp_settings.json"
+                    );
+                    if (File.Exists(legacyPath))
+                    {
+                        Directory.CreateDirectory(Globals.SettingsDir);
+                        File.Copy(legacyPath, SettingsPath, true);
+                    }
+                }
+
                 if (File.Exists(SettingsPath))
                 {
                     string json = File.ReadAllText(SettingsPath);
                     var settings = JsonSerializer.Deserialize<SmtpSettings>(json) ?? new SmtpSettings();
-                    settings.Password = Lyracist.Shared.EncryptionHelper.Decrypt(settings.Password);
+                    settings.Password = EncryptionHelper.Decrypt(settings.Password);
                     return settings;
                 }
             }

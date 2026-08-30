@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:34:00 -> Added Help Topic 9 Fast Editing & Textbox Auto-Selection
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update help topic path references to consolidated Packs, Data, Banners, and Settings directories
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -766,12 +766,11 @@ public partial class MainViewModel : ObservableObject
 This application allows you to:
 • **Author Custom Databases**: Create new category databases and write 4-choice trivia questions with rich explanations.
 • **Edit Existing Packs**: Modify questions, update category titles/descriptions, and add new questions.
-• **1-Click Option Balancing**: Automatically shuffle multiple-choice answers so that correct answers are evenly spread across choices A, B, C, and D (~25% each) with zero bias.
-• **16:9 Banner Studio**: Generate high-resolution category announcement banners for big-screen projection during the pre-game lobby.
-• **SQLite Database Sync**: Seamlessly sync your packs to `TriviaData/trivia.db` so `LyracistTrivia`, `Lyracist`, and `KSRotation` can host them immediately.
+• **1-Click Option Balancing**: Automatically shuffle multiple-choice answers so that correct answers are evenly spread across choices A, B, C, and D (~2• **16:9 Banner Studio**: Generate high-resolution category announcement banners for big-screen projection during the pre-game lobby.
+• **SQLite Database Sync**: Seamlessly sync your packs to `Data/trivia.db` so `LyracistTrivia`, `Lyracist`, and `KSRotation` can host them immediately.
 
 **Workspace Layout**:
-1. **Left Sidebar**: Browse, search, and manage category packs stored in `TriviaData/packs/`.
+1. **Left Sidebar**: Browse, search, and manage category packs stored in `Packs/`.
 2. **Center Panel**: Edit pack metadata (Title, ID, Category Tag, Description) and review the questions table.
 3. **Right Panel**: Real-time Question Editor form with colored option cards, difficulty rating, and answer selection."
         });
@@ -792,7 +791,7 @@ This application allows you to:
    • **Category Tag**: The broad genre group (e.g. *'Movies & Animation'* or *'General'*).
    • **Description & Themes**: Subtitle summary of topics covered in the pack (e.g. *'Animated classics, Pixar, theme songs, villains, and trivia lore'*).
 4. Add your questions (see Topic 3).
-5. Click **'💾 Save Pack'** in the top header bar. The file is saved directly to `TriviaData/packs/{slug}.json` and automatically indexed."
+5. Click **'💾 Save Pack'** in the top header bar. The file is saved directly to `Packs/{slug}.json` and automatically indexed."
         });
 
         HelpTopics.Add(new TriviaHelpTopic
@@ -848,13 +847,13 @@ In professional pub trivia, correct answers should be evenly distributed:
             DescriptionHeader = "Rendering High-Resolution Widescreen TV Banners",
             DescriptionContent = 
 @"### 16:9 Category Banners Studio:
-During the **70:30 Pre-Game Lobby** in `LyracistTrivia` and `KSRotation`, the left 70% of venue TVs displays a high-resolution 16:9 Category Announcement Graphic (`TriviaData/Banners/{pack}.png`).
+During the **70:30 Pre-Game Lobby** in `LyracistTrivia` and `KSRotation`, the left 70% of venue TVs displays a high-resolution 16:9 Category Announcement Graphic (`Banners/LyracistTrivia/CategoryBanners/{pack}.png`).
 
 ### Generating a Banner:
 1. Select your pack from the Left Sidebar.
 2. In the top metadata card, look at the **Banner Preview** box on the right.
 3. Click **'🎨 Generate 16:9 Banner'**.
-4. The application renders a 1920x1080 graphic with modern ambient illumination, pack title, and topic subtitle directly into `TriviaData/Banners/{slug}.png`.
+4. The application renders a 1920x1080 graphic with modern ambient illumination, pack title, and topic subtitle directly into `Banners/LyracistTrivia/CategoryBanners/{slug}.png`.
 5. When this pack is selected in `LyracistTrivia`, the big screen TV will immediately project the new graphic."
         });
 
@@ -866,12 +865,11 @@ During the **70:30 Pre-Game Lobby** in `LyracistTrivia` and `KSRotation`, the le
             DescriptionHeader = "Synchronizing Packs to SQLite trivia.db",
             DescriptionContent = 
 @"### How Lyracist Shares Trivia Data:
-All applications in the Lyracist suite share the centralized directory:
-`C:\VB26\Lyracist\TriviaData\`
-• `TriviaData/packs/*.json`: Raw human-readable question pack files.
-• `TriviaData/Banners/*.png`: 16:9 category showcase graphics.
-• `TriviaData/trivia.db`: High-performance SQLite database for fast queries and runtime indexing.
-• `TriviaData/trivia_settings.json`: Game Master timers and scoring preferences.
+All applications in the Lyracist suite share centralized folders:
+• `Packs/*.json`: Raw human-readable question pack files.
+• `Banners/LyracistTrivia/CategoryBanners/*.png`: 16:9 category showcase graphics.
+• `Data/trivia.db`: High-performance SQLite database for fast queries and runtime indexing.
+• `Settings/lyracist_trivia_settings.json`: Game Master timers and scoring preferences.
 
 ### Syncing to SQLite:
 • Whenever you save a pack, TriviaDbCreator automatically syncs changes quietly.
@@ -889,7 +887,7 @@ All applications in the Lyracist suite share the centralized directory:
 @"### Importing External Packs:
 1. Click the **'📂 Import JSON'** button in the top header bar.
 2. Select any valid `.json` trivia database file from your computer or a flash drive.
-3. The file is copied into `TriviaData/packs/`, indexed, and loaded into your sidebar immediately.
+3. The file is copied into `Packs/`, indexed, and loaded into your sidebar immediately.
 
 ### Exporting Databases:
 1. Select the pack you wish to export in the Left Sidebar.

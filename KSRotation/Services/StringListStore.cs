@@ -1,4 +1,4 @@
-// Last Edit: Jun 30, 2026 06:47 - Switched Settings directory resolution to shared AppPaths helper.
+// Edited on Aug 30, 2026 @ 08:26:00 -> Added legacy filename fallback support to StringListStore
 using Lyracist.Shared;
 using System.Collections.Generic;
 using System.IO;
@@ -20,9 +20,22 @@ namespace KSRotation.Services
 
         /// <summary>Loads a string list from <paramref name="fileName"/> in the Settings directory.
         /// Returns a single-element list containing <paramref name="defaultValue"/> when the file is absent or empty.</summary>
-        public static List<string> Load(string fileName, string defaultValue)
+        public static List<string> Load(string fileName, string defaultValue, string? legacyFileName = null)
         {
             string path = FilePath(fileName);
+            if (!File.Exists(path) && !string.IsNullOrEmpty(legacyFileName))
+            {
+                string legacyPath = FilePath(legacyFileName);
+                if (File.Exists(legacyPath))
+                {
+                    try
+                    {
+                        File.Copy(legacyPath, path, true);
+                    }
+                    catch { }
+                }
+            }
+
             if (!File.Exists(path))
                 return [defaultValue];
 

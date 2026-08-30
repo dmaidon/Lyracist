@@ -1,4 +1,4 @@
-// Last Edit: Jun 30, 2026 06:47 - Switched night DB path resolution to shared AppPaths helper.
+// Edited on Aug 30, 2026 @ 08:26:00 -> Relocated night database to Data/ksrotation_night_db.json with legacy migration
 using KSRotation.Models;
 using Lyracist.Shared;
 using System;
@@ -16,15 +16,39 @@ namespace KSRotation.Services
 
     public static class NightDatabaseService
     {
-        private const string DbFileName = "night_db.json";
+        private const string DbFileName = "ksrotation_night_db.json";
 
         private static readonly JsonSerializerOptions SerializerOptions = AppJsonContext.Default.Options;
 
-        private static string SettingsDirectoryPath => AppPaths.SettingsDirectoryPath;
-        private static string DbFilePath => Path.Combine(SettingsDirectoryPath, DbFileName);
+        private static string DataDirectoryPath => AppPaths.DataDirectoryPath;
+        private static string DbFilePath => Path.Combine(DataDirectoryPath, DbFileName);
 
         public static NightDbState Load()
         {
+            if (!File.Exists(DbFilePath))
+            {
+                // Fallback migration: Check legacy Settings/night_db.json or Data/night_db.json
+                string legacyInSettings = Path.Combine(AppPaths.SettingsDirectoryPath, "night_db.json");
+                string legacyInData = Path.Combine(DataDirectoryPath, "night_db.json");
+                if (File.Exists(legacyInSettings))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(DataDirectoryPath);
+                        File.Copy(legacyInSettings, DbFilePath, true);
+                    }
+                    catch { }
+                }
+                else if (File.Exists(legacyInData))
+                {
+                    try
+                    {
+                        File.Copy(legacyInData, DbFilePath, true);
+                    }
+                    catch { }
+                }
+            }
+
             if (!File.Exists(DbFilePath))
             {
                 return new NightDbState();

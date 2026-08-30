@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 19:12:10 -> Add EventBannersDir global setting
+// Edited on Aug 30, 2026 @ 08:26:00 -> Consolidated global directory structure (Settings, Data, Banners, Logs, Packs) and per-app log naming
 using System;
 using System.IO;
 
@@ -19,7 +19,6 @@ namespace Lyracist.Shared
             Microsoft.Maui.Storage.FileSystem.AppDataDirectory;
 #else
             AppDomain.CurrentDomain.BaseDirectory;
-
 #endif
 
         // 1. Logs directory (in Startup Path)
@@ -28,40 +27,53 @@ namespace Lyracist.Shared
         // 2. Data directory (in Startup Path)
         public static string DataDir => Path.Combine(StartupPath, "Data");
 
-        // 3. Settings directory (in Startup Path, for KSRotation app settings)
-        public static string KSRotationSettingsDir => Path.Combine(StartupPath, "Settings");
+        // 3. Settings directory (in Startup Path, unified for all applications)
+        public static string SettingsDir => Path.Combine(StartupPath, "Settings");
+
+        // Backward compatibility aliases
+        public static string KSRotationSettingsDir => SettingsDir;
+        public static string LyracistSettingsDir => SettingsDir;
+        public static string ScaryokeWheelSettingsDir => SettingsDir;
 
         // 4. Reports directory (in Startup Path, for KSRotation reports)
         public static string KSRotationReportsDir => Path.Combine(StartupPath, "Reports");
 
-        // 5. Lyracist app settings directory (in User AppData)
-        public static string LyracistSettingsDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Lyracist");
+        // 5. Packs directory (in Startup Path, shared by trivia applications)
+        public static string PacksDir => Path.Combine(StartupPath, "Packs");
 
-        // 6. ScaryokeWheel settings directory (in User LocalAppData)
-        public static string ScaryokeWheelSettingsDir => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "ParoleSoftware",
-            "ScaryokeWheel"
-        );
+        // 6. Banners directory (in Startup Path, structured per application)
+        public static string BannersDir => Path.Combine(StartupPath, "Banners");
 
-        // 7. DJ Banners directory (in Startup Path) - a single shared folder both KSRotation and
-        // Lyracist read banners from and save uploaded banners into, so a banner dropped in by
-        // hand is picked up by both apps and a banner uploaded from either app is visible to the other.
-        public static string DjBannersDir => Path.Combine(StartupPath, "DJBanners");
+        public static string GetBannersDir(string appName) => Path.Combine(BannersDir, appName);
+        public static string GetDjBannersDir(string appName) => Path.Combine(GetBannersDir(appName), "DJBanners");
+        public static string GetEventBannersDir(string appName) => Path.Combine(GetBannersDir(appName), "EventBanners");
+        public static string GetAnnouncementsDir(string appName) => Path.Combine(GetBannersDir(appName), "Announcements");
+        public static string GetCategoryBannersDir(string appName = "LyracistTrivia") => Path.Combine(GetBannersDir(appName), "CategoryBanners");
 
-        // 7b. Special Event Banners directory (in Startup Path)
-        public static string EventBannersDir => Path.Combine(StartupPath, "EventBanners");
+        // Default shared banner directories
+        public static string DjBannersDir => GetDjBannersDir("KSRotation");
+        public static string EventBannersDir => GetEventBannersDir("KSRotation");
 
-        // 8. Avatars directory (in Startup Path) - a folder for uploaded performer profile selfies.
+        // 7. Avatars directory (in Startup Path) - a folder for uploaded performer profile selfies.
         public static string AvatarsDir => Path.Combine(StartupPath, "Avatars");
 
-        // Centralized Logging Methods
+        private static string SanitizeAppName(string appName)
+        {
+            if (string.IsNullOrWhiteSpace(appName)) return "app";
+            return appName.Trim().ToLowerInvariant()
+                .Replace(" ", "_")
+                .Replace(".", "_")
+                .Replace("-", "_");
+        }
+
+        // Centralized Logging Methods with App-Distinguished Log Files
         public static void LogAppStart(string appName)
         {
             try
             {
                 Directory.CreateDirectory(LogDir);
-                string filename = $"app_{DateTime.Now:MMMdd}.log";
+                string prefix = SanitizeAppName(appName);
+                string filename = $"{prefix}_app_{DateTime.Now:MMMdd}.log";
                 string filepath = Path.Combine(LogDir, filename);
                 string logMessage = $"\"<{appName}\" started <{DateTime.Now:MMMM d}> @ \"{DateTime.Now:HH:mm:ss}>.\"{Environment.NewLine}";
                 File.AppendAllText(filepath, logMessage);
@@ -74,7 +86,8 @@ namespace Lyracist.Shared
             try
             {
                 Directory.CreateDirectory(LogDir);
-                string filename = $"app_{DateTime.Now:MMMdd}.log";
+                string prefix = SanitizeAppName(appName);
+                string filename = $"{prefix}_app_{DateTime.Now:MMMdd}.log";
                 string filepath = Path.Combine(LogDir, filename);
                 string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{appName}] [INFO] {message}{Environment.NewLine}";
                 File.AppendAllText(filepath, logMessage);
@@ -87,7 +100,8 @@ namespace Lyracist.Shared
             try
             {
                 Directory.CreateDirectory(LogDir);
-                string filename = $"err_{DateTime.Now:MMMdd}.log";
+                string prefix = SanitizeAppName(appName);
+                string filename = $"{prefix}_err_{DateTime.Now:MMMdd}.log";
                 string filepath = Path.Combine(LogDir, filename);
                 string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [{appName}] [{context}] {ex.GetType().Name}: {ex.Message}{Environment.NewLine}{ex.StackTrace}{Environment.NewLine}{Environment.NewLine}";
                 File.AppendAllText(filepath, logMessage);
@@ -100,7 +114,8 @@ namespace Lyracist.Shared
             try
             {
                 Directory.CreateDirectory(LogDir);
-                string filename = $"err_{DateTime.Now:MMMdd}.log";
+                string prefix = SanitizeAppName(appName);
+                string filename = $"{prefix}_err_{DateTime.Now:MMMdd}.log";
                 string filepath = Path.Combine(LogDir, filename);
                 string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{appName}]" + (string.IsNullOrEmpty(context) ? "" : $" [{context}]") + $" {message}{Environment.NewLine}{Environment.NewLine}";
                 File.AppendAllText(filepath, logMessage);

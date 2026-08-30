@@ -1,4 +1,4 @@
-// Last Edit: Jun 30, 2026 06:47 - Switched settings directory resolution to shared AppPaths helper.
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update settings filename to ksrotation_settings.json with legacy appsettings.json migration
 using KSRotation.Models;
 using Lyracist.Shared;
 using System.IO;
@@ -8,7 +8,7 @@ namespace KSRotation.Services
 {
     public static class SettingsService
     {
-        private const string SettingsFileName = "appsettings.json";
+        private const string SettingsFileName = "ksrotation_settings.json";
 
         private static readonly JsonSerializerOptions SerializerOptions = AppJsonContext.Default.Options;
 
@@ -23,7 +23,20 @@ namespace KSRotation.Services
         {
             if (!File.Exists(SettingsFilePath))
             {
-                return new AppSettings();
+                // Fallback migration: Check legacy appsettings.json
+                string legacyPath = Path.Combine(SettingsDirectoryPath, "appsettings.json");
+                if (File.Exists(legacyPath))
+                {
+                    try
+                    {
+                        File.Copy(legacyPath, SettingsFilePath, true);
+                    }
+                    catch { }
+                }
+                else
+                {
+                    return new AppSettings();
+                }
             }
 
             try

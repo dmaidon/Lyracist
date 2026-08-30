@@ -1,4 +1,26 @@
-// Edited on Aug 28, 2026 @ 09:35:00 -> Document Knockout Trivia phone/tablet connect, dual QR codes, web server, and automatic scoring
+// Edited on Aug 30, 2026 @ 08:38:00 -> Document Solution-Wide Directory & Asset Consolidation
+Solution-Wide Directory & Asset Consolidation (`Lyracist`, `KSRotation`, `KnockoutTrivia`, `LyracistTrivia`, `TriviaDbCreator`, `ScaryokeWheel`, `LyracistDbEditor`, `LyracistKeyGen`) - (August 2026)
+
+Section: Architecture & Centralized Asset Management / Solution Folder Taxonomy
+
+[Consolidated Solution Folder Architecture]
+1. Unified Folder Taxonomy:
+   - Centralized all application data, configuration, packs, banners, and logs next to the application executables (`StartupPath` / `C:\VB26\Release\Lyracist`):
+     * `Settings/`: Contains application configuration files with distinct per-app naming (`lyracist_settings.json`, `ksrotation_settings.json`, `knockout_trivia_settings.json`, `lyracist_trivia_settings.json`, `scaryoke_settings.json`, `dbeditor_settings.json`, `keygen_settings.json`, `ksrotation_venues.json`, `ksrotation_djs.json`, `VenueGraphics/`).
+     * `Data/`: Contains database and runtime persistence files (`lyracist.db`, `trivia.db`, `ksrotation_night_db.json`, `ksrotation_singers.json`, `wifi_passwords.json`, `keygen.db`).
+     * `Banners/`: Contains structured, dedicated per-app banner folders:
+       - `Banners/KSRotation/`: Contains `DJBanners/`, `Announcements/`, and `EventBanners/` (including 16:9 standard event banners `Birthday.png`, `Wedding.png`, `Engagement.png`, `Anniversary.png`, `LastSong.png`, `ConnectInstructions.png`).
+       - `Banners/Lyracist/`: Contains `DJBanners/`, `Announcements/`, and `EventBanners/` (including 16:9 standard event banners).
+       - `Banners/LyracistTrivia/`: Contains `CategoryBanners/` (15 themed 16:9 category PNGs) and `Announcements/` (pre-game announcement graphics).
+       - `Banners/KnockoutTrivia/`: Contains `Announcements/` and `CustomBanners/`.
+     * `Packs/`: Single, shared question packs folder containing the 16 curated JSON trivia packs used interchangeably across `KnockoutTrivia`, `Lyracist.Trivia`, `Lyracist`, and `TriviaDbCreator`.
+     * `Logs/`: Centralized log directory where all applications write sanitized, app-distinguished logs (e.g. `ksrotation_app_MMMdd.log`, `ksrotation_err_MMMdd.log`, `lyracist_app_MMMdd.log`, `knockouttrivia_app_MMMdd.log`).
+2. Automatic Legacy Migration & Fallback:
+   - All services across all applications automatically check for legacy configuration/data files in `%AppData%`, `%LocalAppData%`, or old subfolders on startup, transparently copying them forward to the consolidated directories without user intervention.
+3. Clean Build & Asset Deployment:
+   - Updated all `.csproj` files to copy `..\Packs\**\*`, `..\Banners\**\*`, and `..\Data\**\*` into the build output with `CopyToOutputDirectory=PreserveNewest`.
+   - Removed obsolete duplicate directories (`KnockoutTrivia/KoTrivia`, `TriviaData`, `EventBanners`, `Lyracist.Trivia/Announcements`).
+
 Knockout Trivia Phone/Tablet Connect & Automatic Scoring (`KnockoutTrivia.exe`) - (August 2026)
 
 Section: Standalone Games & Pub Trivia / Knockout Trivia Showdown / Mobile Companion & Automation

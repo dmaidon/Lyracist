@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:40:00 -> Fix RCS1123 parentheses, CA1859 BitmapImage type, and RCS1118 consts
+// Edited on Aug 30, 2026 @ 08:26:00 -> Support consolidated per-app banner folders
 using System;
 using System.Collections.Generic;
 using System.IO;

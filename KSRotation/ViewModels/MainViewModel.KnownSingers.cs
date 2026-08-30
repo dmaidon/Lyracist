@@ -1,4 +1,4 @@
-// Last Edit: Jun 30, 2026 08:40 - Split known-singer database/autocomplete members out of MainViewModel into this partial.
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update singers database filename to ksrotation_singers.json with legacy singers_db.json fallback
 using KSRotation.Services;
 
 namespace KSRotation.ViewModels
@@ -9,7 +9,7 @@ namespace KSRotation.ViewModels
         {
             try
             {
-                List<string> list = StringListStore.Load("singers_db.json", string.Empty);
+                List<string> list = StringListStore.Load("ksrotation_singers.json", string.Empty, "singers_db.json");
                 if (list.Count > 0)
                 {
                     KnownSingers.Clear();
@@ -51,7 +51,7 @@ namespace KSRotation.ViewModels
 
             try
             {
-                StringListStore.Save(KnownSingers, "singers_db.json");
+                StringListStore.Save(KnownSingers, "ksrotation_singers.json");
             }
             catch (Exception ex)
             {

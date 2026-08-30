@@ -1,4 +1,4 @@
-<!-- Edited on Aug 28, 2026 @ 11:13:00 -> Enabled UseWindowsForms and linked MonitorDpiHelper, MonitorEnumerator, WindowPositioner -->
+<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update Content links for consolidated Packs, Banners, and Data directories -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -29,8 +29,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="KoTrivia\Assets\kotrv_logo.png" />
-    <Resource Include="KoTrivia\Assets\kotrv_logo.webp" />
+    <Resource Include="Assets\kotrv_logo.png" />
+    <Resource Include="Assets\kotrv_logo.webp" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,7 +38,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="KoTrivia\**\*">
+    <Content Include="..\Packs\**\*">
+      <Link>Packs\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Banners\**\*">
+      <Link>Banners\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Data\**\*">
+      <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

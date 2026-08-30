@@ -1,14 +1,15 @@
-// Edited on Aug 25, 2026 @ 06:34:00 -> Add summary elements to documentation comments (RCS1139)
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update announcements directory to consolidated Banners/LyracistTrivia/Announcements
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using Lyracist.Shared;
 
 namespace Lyracist.Trivia.Services;
 
 /// <summary>
-/// Scans the Lyracist.Trivia-only Announcements folder for pre-game advertisement banners the
+/// Scans the LyracistTrivia Announcements folder for pre-game advertisement banners the
 /// game master can choose to display on the TV screen before the connect instructions screen.
 /// Deliberately lives only in this project (not Lyracist.Trivia.Core) since the feature is
 /// exclusive to the standalone Lyracist.Trivia app.
@@ -40,7 +41,7 @@ public static class AnnouncementHelper
 
     public static string GetAnnouncementsDirectory()
     {
-        string dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Announcements");
+        string dir = Path.Combine(Globals.StartupPath, "Banners", "LyracistTrivia", "Announcements");
         if (!Directory.Exists(dir))
         {
             Directory.CreateDirectory(dir);
@@ -61,7 +62,7 @@ public static class AnnouncementHelper
     }
 
     private static string GetSelectionPath() =>
-        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Announcements", "selected_announcement.json");
+        Path.Combine(Globals.SettingsDir, "lyracist_trivia_selected_announcement.json");
 
     /// <summary>
     /// Remembers the game master's last pick across app restarts. Stored inside the

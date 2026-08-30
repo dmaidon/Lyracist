@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1146 conditional access
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update settings path to Settings/scaryoke_settings.json with legacy fallback migration
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,9 +8,9 @@ namespace ScaryokeWheel;
 
 public class ScaryokeSettings
 {
-    private static readonly string SettingsFolder = Lyracist.Shared.Globals.ScaryokeWheelSettingsDir;
+    private static readonly string SettingsFolder = Lyracist.Shared.Globals.SettingsDir;
 
-    private static readonly string SettingsPath = Path.Combine(SettingsFolder, "settings.json");
+    private static readonly string SettingsPath = Path.Combine(SettingsFolder, "scaryoke_settings.json");
 
     public List<string> Categories { get; set; } =
     [
@@ -31,6 +31,26 @@ public class ScaryokeSettings
     {
         try
         {
+            if (!File.Exists(SettingsPath))
+            {
+                // Fallback migration: Check legacy LocalAppData path
+                string legacyPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "ParoleSoftware",
+                    "ScaryokeWheel",
+                    "settings.json"
+                );
+                if (File.Exists(legacyPath))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(SettingsFolder);
+                        File.Copy(legacyPath, SettingsPath, true);
+                    }
+                    catch { }
+                }
+            }
+
             if (File.Exists(SettingsPath))
             {
                 string json = File.ReadAllText(SettingsPath);

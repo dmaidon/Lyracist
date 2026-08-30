@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 08:26:00 -> Include TextBoxSelectionHelper compile link -->
+<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update Content links for consolidated Packs, Banners, and Data directories -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -43,8 +43,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\TriviaData\**\*">
-      <Link>TriviaData\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <Content Include="..\Packs\**\*">
+      <Link>Packs\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Banners\**\*">
+      <Link>Banners\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Data\**\*">
+      <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -56,20 +64,6 @@
     <None Include="LyracistTrivia_128.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Wildcard so any future banner dropped into Announcements/ copies to output automatically,
-         instead of requiring a new csproj entry per file. -->
-    <None Include="Announcements\**\*.png;Announcements\**\*.jpg;Announcements\**\*.jpeg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Announcements\planb_bikertrv.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

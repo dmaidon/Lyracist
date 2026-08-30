@@ -1,4 +1,4 @@
-<!-- Edited on Aug 22, 2026 @ 11:20:00 -> Added manual DJ flow controls, navigation bar, timer bump/trim buttons, and keyboard shortcuts in MainWindow.xaml -->
+<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update warning message to reference Packs directory -->
 <Window x:Class="Lyracist.Trivia.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -142,7 +142,7 @@
                                         </ListBox>
 
                                         <!-- Shown instead of a silently-empty box when no packs were found -->
-                                        <TextBlock Text="⚠ No question packs found.&#10;Check that the TriviaData\packs folder (with .json pack files) exists next to the app, or see the Logs folder for details." FontSize="11" Foreground="#F87171" TextWrapping="Wrap" TextAlignment="Center" Margin="14" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+                                        <TextBlock Text="⚠ No question packs found.&#10;Check that the Packs folder (with .json pack files) exists next to the app, or see the Logs folder for details." FontSize="11" Foreground="#F87171" TextWrapping="Wrap" TextAlignment="Center" Margin="14" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed" />

@@ -1,15 +1,16 @@
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update settings path to Settings/dbeditor_settings.json with legacy fallback migration
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using Lyracist.Shared;
 
 namespace LyracistDbEditor;
 
-// Persists the DB Editor's own list of scan directories independently of Lyracist's main
-// settings.json, so this tool can never clobber the live app's configuration.
+// Persists the DB Editor's own list of scan directories in Settings/dbeditor_settings.json
 internal static class LibraryDirectoryStore
 {
-    private static readonly string FilePath = Path.Combine(Lyracist.Shared.Globals.LyracistSettingsDir, "dbeditor_library_directories.json");
+    private static readonly string FilePath = Path.Combine(Globals.SettingsDir, "dbeditor_settings.json");
     private static readonly object Lock = new();
 
     public static List<string> Load()
@@ -18,6 +19,21 @@ internal static class LibraryDirectoryStore
         {
             try
             {
+                if (!File.Exists(FilePath))
+                {
+                    // Fallback migration: Check legacy path
+                    string legacyPath = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        "Lyracist",
+                        "dbeditor_library_directories.json"
+                    );
+                    if (File.Exists(legacyPath))
+                    {
+                        Directory.CreateDirectory(Globals.SettingsDir);
+                        File.Copy(legacyPath, FilePath, true);
+                    }
+                }
+
                 if (!File.Exists(FilePath)) return [];
                 string json = File.ReadAllText(FilePath);
                 return JsonSerializer.Deserialize<List<string>>(json) ?? [];

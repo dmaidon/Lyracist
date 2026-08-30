@@ -1,4 +1,4 @@
-// Created on Aug 6, 2026 @ 09:20:45 -> Unified metadata fetching client for MusicBrainz & Spotify
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update settings path to consolidated Settings/lyracist_settings.json
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,7 +37,12 @@ namespace Lyracist.Data.Services
         {
             try
             {
-                string settingsPath = Path.Combine(Globals.LyracistSettingsDir, "settings.json");
+                string settingsPath = Path.Combine(Globals.SettingsDir, "lyracist_settings.json");
+                if (!File.Exists(settingsPath))
+                {
+                    settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Lyracist", "settings.json");
+                }
+
                 if (File.Exists(settingsPath))
                 {
                     string json = File.ReadAllText(settingsPath);

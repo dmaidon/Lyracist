@@ -1,8 +1,9 @@
-// Created on Aug 27, 2026 @ 14:36:00 -> IBannerService and BannerService for dynamic and static 16:9 banner generation
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update BannersDir to consolidated Banners/KnockoutTrivia/CustomBanners directory
 using System;
 using System.Collections.Generic;
 using System.IO;
 using KnockoutTrivia.Models;
+using Lyracist.Shared;
 
 namespace KnockoutTrivia.Services;
 
@@ -18,7 +19,7 @@ public interface IBannerService
 
 public class BannerService : IBannerService
 {
-    private static readonly string BannersDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "KoTrivia", "Banners");
+    private static readonly string BannersDir = Path.Combine(Globals.GetBannersDir("KnockoutTrivia"), "CustomBanners");
 
     public BannerService()
     {

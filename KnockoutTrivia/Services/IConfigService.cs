@@ -1,8 +1,9 @@
-// Created on Aug 27, 2026 @ 14:36:10 -> IConfigService and ConfigService for persisting and loading game settings
+// Edited on Aug 30, 2026 @ 08:26:00 -> Update ConfigFile to Settings/knockout_trivia_settings.json with legacy game_settings.json migration
 using System;
 using System.IO;
 using System.Text.Json;
 using KnockoutTrivia.Models;
+using Lyracist.Shared;
 
 namespace KnockoutTrivia.Services;
 
@@ -14,8 +15,8 @@ public interface IConfigService
 
 public class ConfigService : IConfigService
 {
-    private static readonly string ConfigDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "KoTrivia", "Config");
-    private static readonly string ConfigFile = Path.Combine(ConfigDir, "game_settings.json");
+    private static readonly string ConfigDir = Globals.SettingsDir;
+    private static readonly string ConfigFile = Path.Combine(ConfigDir, "knockout_trivia_settings.json");
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -32,6 +33,22 @@ public class ConfigService : IConfigService
     {
         try
         {
+            if (!File.Exists(ConfigFile))
+            {
+                // Fallback migration: Check legacy KoTrivia/Config/game_settings.json or Settings/game_settings.json
+                string legacyInKoTrivia = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "KoTrivia", "Config", "game_settings.json");
+                string legacyInSettings = Path.Combine(ConfigDir, "game_settings.json");
+                if (File.Exists(legacyInKoTrivia))
+                {
+                    Directory.CreateDirectory(ConfigDir);
+                    File.Copy(legacyInKoTrivia, ConfigFile, true);
+                }
+                else if (File.Exists(legacyInSettings))
+                {
+                    File.Copy(legacyInSettings, ConfigFile, true);
+                }
+            }
+
             if (File.Exists(ConfigFile))
             {
                 string json = File.ReadAllText(ConfigFile);

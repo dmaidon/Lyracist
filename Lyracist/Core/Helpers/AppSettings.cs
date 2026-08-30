@@ -1,4 +1,5 @@
-// Edited on Aug 18, 2026 @ 13:24:00 -> Add FloatCurrentSingerToTop setting to AppSettings
+// Edited on Aug 30, 2026 @ 08:26:00 -> Consolidated settings path to Settings/lyracist_settings.json with legacy fallback migration
+using System;
 using System.IO;
 using System.Text.Json;
 
@@ -6,14 +7,14 @@ namespace Lyracist.Core.Helpers;
 
 /// <summary>
 /// Lightweight key/value application settings backed by a JSON file
-/// at %AppData%\Lyracist\settings.json.
+/// at Settings\lyracist_settings.json.
 /// </summary>
 public static class AppSettings
 {
-    private static readonly string _settingsDir = Lyracist.Shared.Globals.LyracistSettingsDir;
+    private static readonly string _settingsDir = Lyracist.Shared.Globals.SettingsDir;
 
     private static readonly string _settingsPath =
-        Path.Combine(_settingsDir, "settings.json");
+        Path.Combine(_settingsDir, "lyracist_settings.json");
 
     // Guards _data mutation and the settings.json read/write — this class is touched
     // from background scan threads (AddLibraryDirectory) as well as the UI thread,
@@ -27,6 +28,17 @@ public static class AppSettings
     {
         try
         {
+            if (!File.Exists(_settingsPath))
+            {
+                // Fallback migration: Check legacy %AppData%\Lyracist\settings.json
+                string legacyPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Lyracist", "settings.json");
+                if (File.Exists(legacyPath))
+                {
+                    Directory.CreateDirectory(_settingsDir);
+                    File.Copy(legacyPath, _settingsPath, true);
+                }
+            }
+
             if (File.Exists(_settingsPath))
             {
                 var json = File.ReadAllText(_settingsPath);

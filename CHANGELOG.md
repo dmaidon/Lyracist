@@ -1,9 +1,27 @@
-<!-- Edited on Aug 30, 2026 @ 08:12:00 -> Update solution versioning, Knockout Trivia packaging, and test suite verification -->
-Last Edit: Aug 30, 2026 - Solution version synchronization (26.8.30.x), Knockout Trivia application icon/packaging, and full test suite verification
+<!-- Edited on Aug 30, 2026 @ 08:38:00 -> Document Solution-Wide Directory & Asset Consolidation in CHANGELOG.md -->
+Last Edit: Aug 30, 2026 - Solution-Wide Directory & Asset Consolidation, version synchronization (26.8.30.x), and full test suite verification
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.8.30.2] - 2026-08-30
+
+### Added & Enhanced
+
+- **Solution-Wide Directory & Asset Consolidation (`Lyracist`, `KSRotation`, `KnockoutTrivia`, `LyracistTrivia`, `TriviaDbCreator`, `ScaryokeWheel`, `LyracistDbEditor`, `LyracistKeyGen`)**:
+  - **Unified Folder Architecture**:
+    * `Settings/`: Consolidated all application configuration into one directory with app-distinguishing names (`lyracist_settings.json`, `ksrotation_settings.json`, `knockout_trivia_settings.json`, `lyracist_trivia_settings.json`, `scaryoke_settings.json`, `dbeditor_settings.json`, `keygen_settings.json`, `ksrotation_venues.json`, `ksrotation_djs.json`, `VenueGraphics/`).
+    * `Data/`: Consolidated all databases and runtime persistence files (`lyracist.db`, `trivia.db`, `ksrotation_night_db.json`, `ksrotation_singers.json`, `wifi_passwords.json`, `keygen.db`).
+    * `Banners/`: Unified banners folder organized by app:
+      - `Banners/KSRotation/`: `DJBanners/`, `Announcements/`, `EventBanners/` (including 16:9 standard event banners).
+      - `Banners/Lyracist/`: `DJBanners/`, `Announcements/`, `EventBanners/` (including 16:9 standard event banners).
+      - `Banners/LyracistTrivia/`: `CategoryBanners/` (15 themed category graphics) and `Announcements/`.
+      - `Banners/KnockoutTrivia/`: `Announcements/` and `CustomBanners/`.
+    * `Packs/`: Single shared packs folder containing 16 curated JSON trivia packs used interchangeably across all trivia apps.
+    * `Logs/`: Centralized log directory with sanitized app-distinguished logs (`{app}_app_{date}.log` and `{app}_err_{date}.log`).
+  - **Transparent Legacy Migration**: Implemented startup fallback checks across all services to seamlessly migrate legacy config and data files forward from `%AppData%`, `%LocalAppData%`, or old subfolders to the consolidated architecture without user action.
+  - **Eliminated Duplicate Assets & Obsolete Folders**: Removed legacy redundant directories (`KnockoutTrivia/KoTrivia`, `TriviaData`, `EventBanners`, `Lyracist.Trivia/Announcements`) and configured `.csproj` content links to copy `..\Packs\**\*`, `..\Banners\**\*`, and `..\Data\**\*` to release outputs automatically.
 
 ## [26.8.30.1] - 2026-08-30
 
