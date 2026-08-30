@@ -1,9 +1,22 @@
-<!-- Edited on Aug 29, 2026 @ 10:49:00 -> Added Knockout Trivia testing module (KnockoutTrivia.Tests & in-app DJ bot simulator) -->
-Last Edit: Aug 29, 2026 - Knockout Trivia testing module, automated test suite (KnockoutTrivia.Tests), and in-app DJ bot load simulator
+<!-- Edited on Aug 30, 2026 @ 08:12:00 -> Update solution versioning, Knockout Trivia packaging, and test suite verification -->
+Last Edit: Aug 30, 2026 - Solution version synchronization (26.8.30.x), Knockout Trivia application icon/packaging, and full test suite verification
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.8.30.1] - 2026-08-30
+
+### Added & Enhanced
+
+- **Solution-Wide Version Synchronization (`26.8.30.x`)**:
+  - Synchronized build and assembly versioning across all solution projects and test suites (`Lyracist`, `KnockoutTrivia`, `KSRotation`, `KSRotation.Maui`, `Lyracist.Trivia`, `LyracistDbEditor`, `ScaryokeWheel`, `TriviaDbCreator`, `Lyracist.Data`, `Lyracist.Trivia.Core`, and test assemblies).
+- **Knockout Trivia Application Icon & Output Packaging (`KnockoutTrivia.csproj`)**:
+  - Embedded official high-resolution boxing glove application icon (`Google-Noto-Emoji-Activities-52746-boxing-glove.ico`) and package branding (`Glove-128.png`).
+  - Standardized release output routing to `C:\VB26\Release\Lyracist` across all desktop executables.
+  - Added standalone solution manifest `KnockoutTrivia.slnx` for isolated module development and rapid testing.
+- **Automated Test Suite Verification**:
+  - Verified 100% test pass rate across all 283 unit tests in the solution test projects (`KnockoutTrivia.Tests`, `Lyracist.Trivia.Tests`, `Lyracist.Tests`, and `KSRotation.Tests`).
 
 ## [26.8.29.1] - 2026-08-29
 

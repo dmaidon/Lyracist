@@ -12,9 +12,12 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <Title>Knockout Trivia</Title>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.8.28.6</AssemblyVersion>
-    <FileVersion>26.8.28.6</FileVersion>
+    <AssemblyVersion>26.8.30.8</AssemblyVersion>
+    <FileVersion>26.8.30.8</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
+    <ApplicationIcon>Google-Noto-Emoji-Activities-52746-boxing-glove.ico</ApplicationIcon>
+    <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
+    <PackageIcon>Glove-128.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -52,6 +55,17 @@
     <Compile Include="..\Shared\WifiHelper.cs" Link="Shared\WifiHelper.cs" />
     <Compile Include="..\Shared\WifiPasswordStore.cs" Link="Shared\WifiPasswordStore.cs" />
     <Compile Include="..\Shared\AtomicJsonFile.cs" Link="Shared\AtomicJsonFile.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Google-Noto-Emoji-Activities-52746-boxing-glove.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\Users\dmaid\Downloads\Glove-128.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
