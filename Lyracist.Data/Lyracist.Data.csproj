@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 09:39:00 -> Update AssemblyVersion and FileVersion build stamps -->
+<!-- Edited on Aug 30, 2026 @ 09:40:00 -> Add TagLibSharp package reference for high-performance in-memory metadata probing -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -7,8 +7,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>26.8.30.205</AssemblyVersion>
-    <FileVersion>26.8.30.205</FileVersion>
+    <AssemblyVersion>26.8.30.206</AssemblyVersion>
+    <FileVersion>26.8.30.206</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
@@ -26,6 +26,7 @@
     <PackageReference Include="PDFsharp" Version="6.2.4" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
     <PackageReference Include="Dapper" Version="2.1.79" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>

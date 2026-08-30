@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:35:00 -> Fix RCS1155 string comparison and RCS1075 catch block
+// Edited on Aug 30, 2026 @ 09:41:00 -> Replace external process probing and network throttling with high-speed in-memory TagLibSharp extraction and parallel batching
 using Lyracist.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -401,125 +401,35 @@ namespace Lyracist.Data.Services
         }
 
         // ==========================================
-        // BACKGROUND METADATA FILL-IN (DURATION / GENRE / ONLINE TAGS)
+        // BACKGROUND METADATA FILL-IN (HIGH-SPEED IN-MEMORY TAGLIB PROBING)
         // ==========================================
 
         public async Task ProbeMissingMetadataAsync(IProgress<ScanProgress>? progress = null)
         {
             var songsNeedingProbe = await _context.Songs
-                .Where(s => s.Duration <= 0 || s.Tags == null || s.Tags == "" || s.Artist == "Unknown Artist" || s.Artist == null)
+                .Where(s => s.Duration <= 0 || s.Tags == null || s.Tags == "")
                 .ToListAsync();
 
             int totalFiles = songsNeedingProbe.Count;
             if (totalFiles == 0) return;
 
-            const int batchSize = 100;
+            const int batchSize = 250;
             int processed = 0;
 
             var searchService = new SearchService(_context);
+            int maxConcurrency = Math.Max(8, Environment.ProcessorCount * 2);
 
             for (int i = 0; i < songsNeedingProbe.Count; i += batchSize)
             {
                 var batch = songsNeedingProbe.Skip(i).Take(batchSize).ToList();
 
-                var semaphore = new System.Threading.SemaphoreSlim(3);
+                var semaphore = new System.Threading.SemaphoreSlim(maxConcurrency);
                 var tasks = batch.Select(async song =>
                 {
                     await semaphore.WaitAsync();
                     try
                     {
-                        if (!File.Exists(song.FilePath)) return;
-
-                        // 1. Local FFprobe Duration/Genre Extraction (if missing duration)
-                        if (song.Duration <= 0)
-                        {
-                            if (song.KaraokeType == "ZIPCDG")
-                            {
-                                var (isKaraoke, audioEntryName) = CheckZipKaraoke(song.FilePath);
-                                if (isKaraoke && !string.IsNullOrEmpty(audioEntryName))
-                                {
-                                    string tempPath = string.Empty;
-                                    try
-                                    {
-                                        await using var archive = ZipFile.OpenRead(song.FilePath);
-                                        var entry = archive.GetEntry(audioEntryName);
-                                        if (entry != null)
-                                        {
-                                            tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(audioEntryName));
-                                            entry.ExtractToFile(tempPath);
-
-                                            var probeResult = await FFprobeRunner.ProbeFile(tempPath);
-                                            song.Duration = probeResult.Duration;
-                                            song.Genre = probeResult.GenreTag;
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Debug.WriteLine($"Failed to extract and probe zip entry {audioEntryName} in {song.FilePath}: {ex.Message}");
-                                    }
-                                    finally
-                                    {
-                                        if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
-                                        {
-                                            try { File.Delete(tempPath); } catch (Exception ex) { _ = ex; }
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
-                                song.Duration = probeResult.Duration;
-                                song.Genre = probeResult.GenreTag;
-                            }
-                        }
-
-                        // 2. Online API Tag & Artist Resolution (only for unresolved karaoke artists to keep scans fast)
-                        if (song.IsKaraoke && (song.Artist == "Unknown Artist" || string.IsNullOrEmpty(song.Artist) || song.Artist == null))
-                        {
-                            if (string.IsNullOrEmpty(song.Tags))
-                            {
-                                try
-                                {
-                                    var onlineMeta = await MetadataFetchService.FetchMetadataAsync(song.Title, song.Artist);
-                                    if (onlineMeta != null)
-                                    {
-                                        if ((song.Artist == "Unknown Artist" || string.IsNullOrEmpty(song.Artist)) && !string.IsNullOrEmpty(onlineMeta.Artist))
-                                        {
-                                            song.Artist = onlineMeta.Artist;
-                                            if (!string.IsNullOrEmpty(onlineMeta.Title))
-                                            {
-                                                song.Title = onlineMeta.Title;
-                                            }
-                                        }
-                                        if (onlineMeta.Tags.Count > 0)
-                                        {
-                                            song.Tags = string.Join(", ", onlineMeta.Tags);
-                                        }
-                                        else
-                                        {
-                                            song.Tags = "none";
-                                        }
-                                    }
-                                    else
-                                    {
-                                        song.Tags = "none";
-                                    }
-                                }
-                                catch
-                                {
-                                    // Offline or API rate-limited; preserve empty tags to try again in subsequent scans
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // Known artist or standard music track: Fall back to local file genre if tags are empty, avoiding network rate-limit delay
-                            if (string.IsNullOrEmpty(song.Tags))
-                            {
-                                song.Tags = !string.IsNullOrWhiteSpace(song.Genre) ? song.Genre : "none";
-                            }
-                        }
+                        await ProbeSongMetadataAsync(song);
                     }
                     catch (Exception ex)
                     {
@@ -535,7 +445,7 @@ namespace Lyracist.Data.Services
                 _context.Songs.UpdateRange(batch);
                 await _context.SaveChangesAsync();
 
-                // Re-index FTS5 index to support tag searching immediately
+                // Re-index FTS5 index to support tag and genre searching immediately
                 await searchService.IndexSongsBatch(batch);
 
                 processed += batch.Count;
@@ -545,6 +455,134 @@ namespace Lyracist.Data.Services
                     FilesProcessed = processed,
                     CurrentFile = batch.Count > 0 ? Path.GetFileName(batch[^1].FilePath) : string.Empty
                 });
+            }
+        }
+
+        private static async Task ProbeSongMetadataAsync(Song song)
+        {
+            if (!File.Exists(song.FilePath)) return;
+
+            bool probedSuccessfully = false;
+            string ext = Path.GetExtension(song.FilePath).ToLowerInvariant();
+
+            // 1. Direct TagLib in-memory probing for ZIP-CDG archives (reads audio entry stream without disk temp files)
+            if (song.KaraokeType == "ZIPCDG" || ext == ".zip")
+            {
+                try
+                {
+                    var (isKaraoke, audioEntryName) = CheckZipKaraoke(song.FilePath);
+                    if (isKaraoke && !string.IsNullOrEmpty(audioEntryName))
+                    {
+                        using var archive = ZipFile.OpenRead(song.FilePath);
+                        var entry = archive.GetEntry(audioEntryName);
+                        if (entry != null)
+                        {
+                            using var entryStream = entry.Open();
+                            using var memStream = new MemoryStream();
+                            await entryStream.CopyToAsync(memStream);
+                            memStream.Position = 0;
+
+                            var fileAbstraction = new StreamFileAbstraction(audioEntryName, memStream);
+                            using var tagFile = TagLib.File.Create(fileAbstraction);
+
+                            if (song.Duration <= 0 && tagFile.Properties != null && tagFile.Properties.Duration.TotalSeconds > 0)
+                            {
+                                song.Duration = tagFile.Properties.Duration.TotalSeconds;
+                            }
+
+                            if (tagFile.Tag != null)
+                            {
+                                if (string.IsNullOrWhiteSpace(song.Genre) && !string.IsNullOrWhiteSpace(tagFile.Tag.FirstGenre))
+                                {
+                                    song.Genre = tagFile.Tag.FirstGenre.Trim();
+                                }
+
+                                // If artist was unresolved from filename, check embedded ID3 tags
+                                if ((song.Artist == "Unknown Artist" || string.IsNullOrEmpty(song.Artist)) &&
+                                    (!string.IsNullOrWhiteSpace(tagFile.Tag.FirstPerformer) || !string.IsNullOrWhiteSpace(tagFile.Tag.FirstAlbumArtist)))
+                                {
+                                    song.Artist = (tagFile.Tag.FirstPerformer ?? tagFile.Tag.FirstAlbumArtist)!.Trim();
+                                }
+
+                                if ((string.IsNullOrEmpty(song.Title) || song.Title == Path.GetFileNameWithoutExtension(song.FilePath)) &&
+                                    !string.IsNullOrWhiteSpace(tagFile.Tag.Title))
+                                {
+                                    song.Title = tagFile.Tag.Title.Trim();
+                                }
+                            }
+                            probedSuccessfully = song.Duration > 0;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"TagLib zip probing failed for {song.FilePath}: {ex.Message}");
+                }
+            }
+            else
+            {
+                // 2. Direct TagLib in-memory probing for MP3, MP4, M4A, WAV, FLAC, WMA
+                try
+                {
+                    using var tagFile = TagLib.File.Create(song.FilePath);
+                    if (song.Duration <= 0 && tagFile.Properties != null && tagFile.Properties.Duration.TotalSeconds > 0)
+                    {
+                        song.Duration = tagFile.Properties.Duration.TotalSeconds;
+                    }
+
+                    if (tagFile.Tag != null)
+                    {
+                        if (string.IsNullOrWhiteSpace(song.Genre) && !string.IsNullOrWhiteSpace(tagFile.Tag.FirstGenre))
+                        {
+                            song.Genre = tagFile.Tag.FirstGenre.Trim();
+                        }
+
+                        // If artist was unresolved from filename, check embedded ID3 tags
+                        if ((song.Artist == "Unknown Artist" || string.IsNullOrEmpty(song.Artist)) &&
+                            (!string.IsNullOrWhiteSpace(tagFile.Tag.FirstPerformer) || !string.IsNullOrWhiteSpace(tagFile.Tag.FirstAlbumArtist)))
+                        {
+                            song.Artist = (tagFile.Tag.FirstPerformer ?? tagFile.Tag.FirstAlbumArtist)!.Trim();
+                        }
+
+                        if ((string.IsNullOrEmpty(song.Title) || song.Title == Path.GetFileNameWithoutExtension(song.FilePath)) &&
+                            !string.IsNullOrWhiteSpace(tagFile.Tag.Title))
+                        {
+                            song.Title = tagFile.Tag.Title.Trim();
+                        }
+                    }
+                    probedSuccessfully = song.Duration > 0;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"TagLib direct probing failed for {song.FilePath}: {ex.Message}");
+                }
+            }
+
+            // 3. Fall back to FFprobeRunner only if TagLib could not extract duration (e.g. rare video containers)
+            if (!probedSuccessfully && song.Duration <= 0)
+            {
+                try
+                {
+                    var probeResult = await FFprobeRunner.ProbeFile(song.FilePath);
+                    if (probeResult.Duration > 0)
+                    {
+                        song.Duration = probeResult.Duration;
+                        if (string.IsNullOrWhiteSpace(song.Genre) && !string.IsNullOrWhiteSpace(probeResult.GenreTag))
+                        {
+                            song.Genre = probeResult.GenreTag;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"FFprobe fallback failed for {song.FilePath}: {ex.Message}");
+                }
+            }
+
+            // 4. Mark Tags as completed with local genre or 'none' to prevent re-query loops
+            if (string.IsNullOrEmpty(song.Tags))
+            {
+                song.Tags = !string.IsNullOrWhiteSpace(song.Genre) ? song.Genre : "none";
             }
         }
 
