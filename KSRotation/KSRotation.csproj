@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.8.30.562</AssemblyVersion>
-    <FileVersion>26.8.30.562</FileVersion>
+    <AssemblyVersion>26.8.31.563</AssemblyVersion>
+    <FileVersion>26.8.31.563</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -146,8 +146,10 @@
       <Link>Packs\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Banners\**\*">
-      <Link>Banners\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <!-- Only EventBanners ships with the app; DJBanners/Announcements are per-venue,
+         user-supplied content that lives in the deployed output but isn't source content. -->
+    <Content Include="..\Banners\KSRotation\EventBanners\*">
+      <Link>Banners\KSRotation\EventBanners\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\Data\**\*">

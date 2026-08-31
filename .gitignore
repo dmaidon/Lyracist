@@ -363,7 +363,17 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Application runtime assets, logs, & live gig data
-[Bb]anners/
+# Banners: DJBanners and Announcements are per-venue, user-supplied content and stay
+# untracked. EventBanners (Lyracist/KSRotation) and LyracistTrivia's CategoryBanners are
+# the apps' own shipped starter/default art, so those are tracked. Negation has to
+# un-exclude every level of the path (git won't look inside an excluded parent dir).
+[Bb]anners/*
+![Bb]anners/*/
+[Bb]anners/*/*
+![Bb]anners/*/EventBanners
+![Bb]anners/*/EventBanners/**
+![Bb]anners/LyracistTrivia/CategoryBanners
+![Bb]anners/LyracistTrivia/CategoryBanners/**
 [Ll]ogs/
 Data/*.db
 !Data/trivia.db

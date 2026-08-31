@@ -15,8 +15,8 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
-    <AssemblyVersion>26.8.30.96</AssemblyVersion>
-    <FileVersion>26.8.30.96</FileVersion>
+    <AssemblyVersion>26.8.31.97</AssemblyVersion>
+    <FileVersion>26.8.31.97</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <PackageIcon>LyracistTrivia_128.png</PackageIcon>
     <ApplicationIcon>LyracistTrivia.ico</ApplicationIcon>
@@ -47,8 +47,10 @@
       <Link>Packs\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Banners\**\*">
-      <Link>Banners\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <!-- Only CategoryBanners ships with the app - it's the pre-built art for the 15 starter
+         packs (one PNG per Packs/*.json). Announcements is per-venue, user-supplied content. -->
+    <Content Include="..\Banners\LyracistTrivia\CategoryBanners\*">
+      <Link>Banners\LyracistTrivia\CategoryBanners\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\Data\**\*">
