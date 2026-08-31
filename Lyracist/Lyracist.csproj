@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.8.31.463</AssemblyVersion>
-    <FileVersion>26.8.31.463</FileVersion>
+    <AssemblyVersion>26.8.31.464</AssemblyVersion>
+    <FileVersion>26.8.31.464</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -138,10 +138,11 @@
       <Link>Packs\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <!-- Only EventBanners ships with the app; DJBanners/Announcements are per-venue,
-         user-supplied content that lives in the deployed output but isn't source content. -->
-    <Content Include="..\Banners\Lyracist\EventBanners\*">
-      <Link>Banners\Lyracist\EventBanners\%(Filename)%(Extension)</Link>
+    <!-- EventBanners is shared with KSRotation (see Globals.EventBannersDir /
+         Shared/DjBannerFileManager.cs) - one folder, not a per-app copy. DJBanners and
+         Announcements are per-venue, user-supplied content, not source content. -->
+    <Content Include="..\Banners\KSRotation\EventBanners\*">
+      <Link>Banners\KSRotation\EventBanners\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\Data\**\*">

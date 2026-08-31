@@ -44,9 +44,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.8.31.245</AssemblyVersion>
+		<AssemblyVersion>26.8.31.246</AssemblyVersion>
 
-		<FileVersion>26.8.31.245</FileVersion>
+		<FileVersion>26.8.31.246</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 
