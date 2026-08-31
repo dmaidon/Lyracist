@@ -378,6 +378,11 @@ FodyWeavers.xsd
 ![Bb]anners/KSRotation/EventBanners/**
 ![Bb]anners/LyracistTrivia/CategoryBanners
 ![Bb]anners/LyracistTrivia/CategoryBanners/**
+
+# LocalFiles: solution-root scratch space for content that must never be committed
+# (e.g. DJBanners/Announcements staged here and copied into place by a local script).
+/LocalFiles/
+
 [Ll]ogs/
 Data/*.db
 !Data/trivia.db
