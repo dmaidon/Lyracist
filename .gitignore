@@ -364,14 +364,19 @@ FodyWeavers.xsd
 
 # Application runtime assets, logs, & live gig data
 # Banners: DJBanners and Announcements are per-venue, user-supplied content and stay
-# untracked. EventBanners (Lyracist/KSRotation) and LyracistTrivia's CategoryBanners are
-# the apps' own shipped starter/default art, so those are tracked. Negation has to
-# un-exclude every level of the path (git won't look inside an excluded parent dir).
+# untracked everywhere. EventBanners only exists for the karaoke apps (Lyracist,
+# KSRotation) - trivia apps have no use for Birthday/Wedding/etc. banners, so it's
+# named explicitly per-app rather than a wildcard that could start tracking an
+# EventBanners folder under a trivia app by accident. LyracistTrivia's CategoryBanners
+# is its own shipped starter/default art. Negation has to un-exclude every level of the
+# path (git won't look inside an excluded parent dir).
 [Bb]anners/*
 ![Bb]anners/*/
 [Bb]anners/*/*
-![Bb]anners/*/EventBanners
-![Bb]anners/*/EventBanners/**
+![Bb]anners/Lyracist/EventBanners
+![Bb]anners/Lyracist/EventBanners/**
+![Bb]anners/KSRotation/EventBanners
+![Bb]anners/KSRotation/EventBanners/**
 ![Bb]anners/LyracistTrivia/CategoryBanners
 ![Bb]anners/LyracistTrivia/CategoryBanners/**
 [Ll]ogs/
