@@ -76,7 +76,10 @@ public partial class MainViewModel : ViewModelBase
         AudienceVM.UpdateView(ConnectVM);
 
         // Start Web Server
-        _webServer.Start(_gameStateService.Settings.WebServerPort);
+        if (!_webServer.Start(_gameStateService.Settings.WebServerPort))
+        {
+            StatusNotification = $"⚠ Could not start the player server on port {_gameStateService.Settings.WebServerPort} - it may already be in use. Change the port in Settings and try again.";
+        }
 
         // Connect Screen action links
         ConnectVM.PushToAudienceRequested += (s, e) =>

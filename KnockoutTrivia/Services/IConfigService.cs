@@ -10,7 +10,7 @@ namespace KnockoutTrivia.Services;
 public interface IConfigService
 {
     KnockoutSettings LoadSettings();
-    void SaveSettings(KnockoutSettings settings);
+    bool SaveSettings(KnockoutSettings settings);
 }
 
 public class ConfigService : IConfigService
@@ -65,17 +65,19 @@ public class ConfigService : IConfigService
         return defaults;
     }
 
-    public void SaveSettings(KnockoutSettings settings)
+    public bool SaveSettings(KnockoutSettings settings)
     {
         try
         {
             Directory.CreateDirectory(ConfigDir);
             string json = JsonSerializer.Serialize(settings, JsonOptions);
             File.WriteAllText(ConfigFile, json);
+            return true;
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore write errors in stub
+            Globals.LogError("KnockoutTrivia", "ConfigService.SaveSettings", ex);
+            return false;
         }
     }
 }

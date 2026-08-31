@@ -130,8 +130,19 @@
                     <ui:Button Content="Reset Game"
                                Height="40"
                                Width="105"
+                               Margin="0,0,10,0"
                                Appearance="Secondary"
                                Command="{Binding ResetGameCommand}"
+                               Cursor="Hand" />
+
+                    <ui:Button Content="🆕 New Event"
+                               Height="40"
+                               Width="115"
+                               Appearance="Secondary"
+                               Background="#EF4444"
+                               Foreground="White"
+                               Command="{Binding ClearAllPlayersCommand}"
+                               ToolTip="Clears every connected/past player - use when starting a brand new event, not between rounds of the same show."
                                Cursor="Hand" />
                 </StackPanel>
             </Grid>

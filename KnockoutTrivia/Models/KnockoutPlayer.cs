@@ -80,11 +80,23 @@ public partial class KnockoutPlayer : ObservableObject
         _ => "#EF4444"  // Knockout Red
     };
 
+    private static readonly Brush ActiveBrush = CreateFrozenBrush(16, 185, 129);
+    private static readonly Brush WarningBrush = CreateFrozenBrush(234, 179, 8);
+    private static readonly Brush DangerBrush = CreateFrozenBrush(249, 115, 22);
+    private static readonly Brush EliminatedBrush = CreateFrozenBrush(239, 68, 68);
+
+    private static Brush CreateFrozenBrush(byte r, byte g, byte b)
+    {
+        var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
+        brush.Freeze();
+        return brush;
+    }
+
     public Brush StrikeColorBrush => StrikeCount switch
     {
-        0 => new SolidColorBrush(Color.FromRgb(16, 185, 129)),
-        1 => new SolidColorBrush(Color.FromRgb(234, 179, 8)),
-        2 => new SolidColorBrush(Color.FromRgb(249, 115, 22)),
-        _ => new SolidColorBrush(Color.FromRgb(239, 68, 68))
+        0 => ActiveBrush,
+        1 => WarningBrush,
+        2 => DangerBrush,
+        _ => EliminatedBrush
     };
 }

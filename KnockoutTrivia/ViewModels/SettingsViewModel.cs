@@ -207,13 +207,26 @@ public partial class SettingsViewModel : ViewModelBase
             WifiPasswordStore.SetPasswordForSsid(Settings.WifiSsid, Settings.WifiPassword);
         }
 
-        Settings.SelectedSourcePaths = AvailableSources.Where(s => s.IsSelected).Select(s => s.FilePath).ToList();
-        _configService.SaveSettings(Settings);
+        // Only reload/reshuffle the question deck when the actual source selection changed -
+        // saving unrelated settings (Wi-Fi, monitors) mid-game must not discard game progress.
+        var previousSources = new HashSet<string>(Settings.SelectedSourcePaths ?? [], StringComparer.OrdinalIgnoreCase);
+        var newSources = AvailableSources.Where(s => s.IsSelected).Select(s => s.FilePath).ToList();
+        bool sourcesChanged = !previousSources.SetEquals(newSources);
 
-        // Reload active game questions with chosen databases and packs
-        await _gameStateService.LoadQuestionsFromSourcesAsync(Settings.SelectedSourcePaths);
+        Settings.SelectedSourcePaths = newSources;
+        bool saved = _configService.SaveSettings(Settings);
 
-        StatusMessage = $"Settings saved! {TotalSelectedQuestions} questions loaded across {AvailableSources.Count(s => s.IsSelected)} sources.";
+        if (sourcesChanged)
+        {
+            await _gameStateService.LoadQuestionsFromSourcesAsync(newSources);
+            StatusMessage = saved
+                ? $"Settings saved! {TotalSelectedQuestions} questions loaded across {AvailableSources.Count(s => s.IsSelected)} sources."
+                : "Question sources updated, but settings failed to save to disk.";
+        }
+        else
+        {
+            StatusMessage = saved ? "Settings saved!" : "Settings failed to save to disk.";
+        }
     }
 
     [RelayCommand]

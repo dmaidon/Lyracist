@@ -12,10 +12,10 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <Title>Knockout Trivia</Title>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.8.30.10</AssemblyVersion>
-    <FileVersion>26.8.30.10</FileVersion>
+    <AssemblyVersion>26.8.30.11</AssemblyVersion>
+    <FileVersion>26.8.30.11</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
-    <ApplicationIcon>Google-Noto-Emoji-Activities-52746-boxing-glove.ico</ApplicationIcon>
+    <ApplicationIcon>glove.ico</ApplicationIcon>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <PackageIcon>Glove-128.png</PackageIcon>
   </PropertyGroup>
@@ -67,7 +67,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Google-Noto-Emoji-Activities-52746-boxing-glove.ico" />
+    <Content Include="glove.ico" />
   </ItemGroup>
 
   <ItemGroup>

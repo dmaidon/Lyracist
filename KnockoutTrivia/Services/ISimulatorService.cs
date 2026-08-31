@@ -111,7 +111,7 @@ public class SimulatorService : ISimulatorService, IDisposable
         int correctIndex = q.CorrectAnswerIndex;
         int optCount = q.Options.Count > 0 ? q.Options.Count : 4;
 
-        var activeBots = _gameStateService.Players
+        var activeBots = _gameStateService.GetPlayersSnapshot()
             .Where(p => p.IsBot && !p.IsEliminated && !p.HasAnsweredCurrentQuestion)
             .ToList();
 

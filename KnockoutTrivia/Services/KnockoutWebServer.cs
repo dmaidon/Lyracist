@@ -47,7 +47,7 @@ public class KnockoutWebServer : IKnockoutWebServer
         Port = defaultPort;
     }
 
-    public void Start(int? port = null)
+    public bool Start(int? port = null)
     {
         if (IsRunning)
         {
@@ -57,7 +57,7 @@ public class KnockoutWebServer : IKnockoutWebServer
             }
             else
             {
-                return;
+                return true;
             }
         }
 
@@ -74,11 +74,14 @@ public class KnockoutWebServer : IKnockoutWebServer
             IsRunning = true;
 
             Task.Run(() => AcceptConnectionsAsync(_cts.Token));
+            return true;
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"KnockoutWebServer Start failed on port {Port}: {ex.Message}");
+            Globals.LogError("KnockoutTrivia", $"KnockoutWebServer.Start (port {Port})", ex);
             IsRunning = false;
+            return false;
         }
     }
 
@@ -292,7 +295,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                 sessionToken = qParams["sessionToken"] ?? "";
             }
 
-            var allPlayers = _gameStateService.Players.ToList();
+            var allPlayers = _gameStateService.GetPlayersSnapshot();
             var player = !string.IsNullOrEmpty(playerId)
                 ? allPlayers.FirstOrDefault(p => string.Equals(p.Id, playerId, StringComparison.OrdinalIgnoreCase))
                 : null;

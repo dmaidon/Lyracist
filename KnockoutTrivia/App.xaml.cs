@@ -10,6 +10,9 @@ namespace KnockoutTrivia;
 
 public partial class App : Application
 {
+    private GameStateService? _gameStateService;
+    private KnockoutWebServer? _webServer;
+
     public App()
     {
         TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
@@ -32,6 +35,7 @@ public partial class App : Application
             var tokenService = new TokenService();
             var streakService = new StreakService(tokenService);
             var gameStateService = new GameStateService(triviaDataService, tokenService, streakService);
+            _gameStateService = gameStateService;
             var wheelService = new WheelService();
             var bannerService = new BannerService();
             var simulatorService = new SimulatorService(gameStateService);
@@ -44,6 +48,7 @@ public partial class App : Application
 
             // Initialize Web Server
             var webServer = new KnockoutWebServer(gameStateService, settings.WebServerPort);
+            _webServer = webServer;
 
             // Preload questions from chosen databases/packs or default DB
             if (settings.SelectedSourcePaths != null && settings.SelectedSourcePaths.Count > 0)
@@ -101,6 +106,8 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         base.OnExit(e);
+        _webServer?.Dispose();
+        _gameStateService?.Dispose();
         Environment.Exit(0);
     }
 

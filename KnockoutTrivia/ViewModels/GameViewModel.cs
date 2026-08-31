@@ -88,4 +88,12 @@ public partial class GameViewModel : ViewModelBase
     {
         _gameStateService.ResetGame();
     }
+
+    [RelayCommand]
+    private void ClearAllPlayers()
+    {
+        // Distinct from Reset Game: this drops every roster entry, for starting a brand new
+        // event rather than just replaying the current one with the same connected players.
+        _gameStateService.ClearAllPlayers();
+    }
 }

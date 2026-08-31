@@ -23,6 +23,7 @@ public enum GameStatePhase
 public interface IGameStateService
 {
     ObservableCollection<KnockoutPlayer> Players { get; }
+    List<KnockoutPlayer> GetPlayersSnapshot();
     KnockoutQuestion? CurrentQuestion { get; }
     int CurrentQuestionIndex { get; }
     int TotalQuestions { get; }
@@ -52,6 +53,7 @@ public interface IGameStateService
     void AddPlayer(string name);
     void RemovePlayer(string playerId);
     bool SubmitPlayerAnswer(string playerId, int answerIndex, int responseTimeMs, string? sessionToken = null);
+    void ClearAllPlayers();
     void StartGame();
     void StartQuestionTimer(int? customSeconds = null);
     void PauseTimer();
@@ -85,6 +87,17 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
     private bool _disposed;
 
     public ObservableCollection<KnockoutPlayer> Players { get; } = [];
+
+    // Players is mutated on the UI thread (via RunOnUI) but is also polled by the web server's
+    // socket-handler threads and the bot simulator's background tasks. Enumerating an
+    // ObservableCollection while another thread mutates it is undefined behavior, so any
+    // non-UI-thread reader must go through this snapshot rather than touching Players directly.
+    public List<KnockoutPlayer> GetPlayersSnapshot()
+    {
+        List<KnockoutPlayer> snapshot = [];
+        RunOnUI(() => snapshot = [.. Players]);
+        return snapshot;
+    }
 
     public KnockoutQuestion? CurrentQuestion
     {
@@ -284,13 +297,22 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         });
     }
 
+    public void ClearAllPlayers()
+    {
+        // Distinct from ResetGame(), which only resets stats: without an explicit "new event"
+        // action, Players only ever grows (RegisterOrGetPlayer reuses disconnected records by
+        // name but never deletes them), so a venue that leaves the app running across multiple
+        // trivia nights would otherwise accumulate every past player forever.
+        RunOnUI(() => Players.Clear());
+    }
+
     public bool SubmitPlayerAnswer(string playerId, int answerIndex, int responseTimeMs, string? sessionToken = null)
     {
         bool accepted = false;
         RunOnUI(() =>
         {
             var player = Players.FirstOrDefault(p => string.Equals(p.Id, playerId, StringComparison.OrdinalIgnoreCase));
-            if (player == null || player.IsEliminated) return;
+            if (player == null || player.IsEliminated || player.HasAnsweredCurrentQuestion) return;
 
             // If session token is provided, verify match
             if (!string.IsNullOrEmpty(sessionToken) && !string.Equals(player.SessionToken, sessionToken, StringComparison.Ordinal))
@@ -385,16 +407,22 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
 
     private void OnTimerTick(object? state)
     {
-        if (!IsTimerRunning) return;
-
-        SecondsRemaining--;
-        TimerTicked?.Invoke(this, SecondsRemaining);
-
-        if (SecondsRemaining <= 0)
+        // Runs on the Timer's own ThreadPool thread. SecondsRemaining is bound directly in XAML
+        // (e.g. MainView's countdown), so mutating it and raising TimerTicked must happen on the
+        // UI thread like every other state change in this class - not just the RevealAnswer call.
+        RunOnUI(() =>
         {
-            StopTimer();
-            RunOnUI(RevealAnswer);
-        }
+            if (!IsTimerRunning) return;
+
+            SecondsRemaining--;
+            TimerTicked?.Invoke(this, SecondsRemaining);
+
+            if (SecondsRemaining <= 0)
+            {
+                StopTimer();
+                RevealAnswer();
+            }
+        });
     }
 
     public void PauseTimer()
