@@ -39,7 +39,7 @@ namespace Lyracist.Data.Services
 
             await using (var cmd = conn.CreateCommand())
             {
-                cmd.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
+                cmd.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;";
                 await cmd.ExecuteNonQueryAsync();
             }
 
@@ -50,6 +50,9 @@ namespace Lyracist.Data.Services
                     conn.Dispose();
                     return _sharedConnection;
                 }
+                // The old connection (if any) is dead/closed at this point - dispose it before
+                // dropping the reference so it doesn't leak its underlying handle.
+                _sharedConnection?.Dispose();
                 _sharedConnection = conn;
                 return _sharedConnection;
             }
@@ -115,70 +118,71 @@ namespace Lyracist.Data.Services
 
         public void EnsureFtsTableExists()
         {
+            // Held for the whole check-then-act sequence below, not just the flag read: releasing it
+            // between the check and the DROP/CREATE let two threads both pass the check and race each
+            // other (one dropping the table while the other queried it). See ScanningService callers
+            // and Search()/SearchSync(), all of which can call this concurrently on a cold start.
             lock (_verificationLock)
             {
                 if (_ftsTableVerified) return;
-            }
-
-            try
-            {
-                var connection = _context.Database.GetDbConnection();
-                bool wasOpen = connection.State == System.Data.ConnectionState.Open;
-                if (!wasOpen)
-                {
-                    connection.Open();
-                }
 
                 try
                 {
-                    string sqlSchema = "";
-                    using (var cmd = connection.CreateCommand())
-                    {
-                        cmd.CommandText = "SELECT sql FROM sqlite_master WHERE type='table' AND name='SongSearch';";
-                        var result = cmd.ExecuteScalar();
-                        if (result != null)
-                        {
-                            sqlSchema = result.ToString() ?? "";
-                        }
-                    }
-
-                    if (string.IsNullOrEmpty(sqlSchema) || !sqlSchema.Contains("fts5", StringComparison.OrdinalIgnoreCase))
-                    {
-                        using (var transaction = connection.BeginTransaction())
-                        {
-                            using (var cmd = connection.CreateCommand())
-                            {
-                                cmd.Transaction = transaction;
-                                cmd.CommandText = "DROP TABLE IF EXISTS SongSearch;";
-                                cmd.ExecuteNonQuery();
-
-                                cmd.CommandText = "CREATE VIRTUAL TABLE SongSearch USING fts5(SongId UNINDEXED, Title, Artist, NormalizedTitle, NormalizedArtist);";
-                                cmd.ExecuteNonQuery();
-                            }
-                            transaction.Commit();
-                        }
-
-                        // Reindex all songs
-                        var songs = _context.Songs.AsNoTracking().ToList();
-                        IndexSongsBatch(songs).GetAwaiter().GetResult();
-                    }
-
-                    lock (_verificationLock)
-                    {
-                        _ftsTableVerified = true;
-                    }
-                }
-                finally
-                {
+                    var connection = _context.Database.GetDbConnection();
+                    bool wasOpen = connection.State == System.Data.ConnectionState.Open;
                     if (!wasOpen)
                     {
-                        connection.Close();
+                        connection.Open();
+                    }
+
+                    try
+                    {
+                        string sqlSchema = "";
+                        using (var cmd = connection.CreateCommand())
+                        {
+                            cmd.CommandText = "SELECT sql FROM sqlite_master WHERE type='table' AND name='SongSearch';";
+                            var result = cmd.ExecuteScalar();
+                            if (result != null)
+                            {
+                                sqlSchema = result.ToString() ?? "";
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(sqlSchema) || !sqlSchema.Contains("fts5", StringComparison.OrdinalIgnoreCase))
+                        {
+                            using (var transaction = connection.BeginTransaction())
+                            {
+                                using (var cmd = connection.CreateCommand())
+                                {
+                                    cmd.Transaction = transaction;
+                                    cmd.CommandText = "DROP TABLE IF EXISTS SongSearch;";
+                                    cmd.ExecuteNonQuery();
+
+                                    cmd.CommandText = "CREATE VIRTUAL TABLE SongSearch USING fts5(SongId UNINDEXED, Title, Artist, NormalizedTitle, NormalizedArtist);";
+                                    cmd.ExecuteNonQuery();
+                                }
+                                transaction.Commit();
+                            }
+
+                            // Reindex all songs
+                            var songs = _context.Songs.AsNoTracking().ToList();
+                            IndexSongsBatch(songs).GetAwaiter().GetResult();
+                        }
+
+                        _ftsTableVerified = true;
+                    }
+                    finally
+                    {
+                        if (!wasOpen)
+                        {
+                            connection.Close();
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to ensure FTS table exists: {ex.Message}");
+                catch (Exception ex)
+                {
+                    Lyracist.Shared.Globals.LogError("Lyracist", "SearchService.EnsureFtsTableExists", ex);
+                }
             }
         }
 
@@ -227,7 +231,7 @@ namespace Lyracist.Data.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Dapper search execution failed: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Dapper search execution failed", ex);
                 // Fallback to standard EF Core query (clamped) in case of connection exceptions
                 return await _context.Songs
                     .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0})", ftsQuery)
@@ -248,8 +252,16 @@ namespace Lyracist.Data.Services
             if (string.IsNullOrWhiteSpace(query))
                 return string.Empty;
 
+            // Run the query through the same normalization used to build NormalizedTitle/
+            // NormalizedArtist at index time (lowercase, diacritics stripped) - otherwise a query
+            // that itself contains accented characters (typed via an IME, pasted, etc.) wouldn't
+            // match a library entry whose accent was stripped when it was indexed.
+            string normalizedQuery = Normalize(query);
+            if (string.IsNullOrWhiteSpace(normalizedQuery))
+                return string.Empty;
+
             // Remove special characters that have syntax meaning in SQLite FTS5 (e.g. *, :, AND, OR)
-            string cleaned = Regex.Replace(query, @"[^\w\s]", " ");
+            string cleaned = Regex.Replace(normalizedQuery, @"[^\w\s]", " ");
 
             // Split into words and append '*' to each word for prefix matching
             var words = cleaned.Split([' '], StringSplitOptions.RemoveEmptyEntries)
@@ -361,7 +373,7 @@ namespace Lyracist.Data.Services
 
                 using (var cmd = connection.CreateCommand())
                 {
-                    cmd.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
+                    cmd.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;";
                     cmd.ExecuteNonQuery();
                 }
 
@@ -389,7 +401,7 @@ namespace Lyracist.Data.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Dapper sync search execution failed: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Dapper sync search execution failed", ex);
                 return _context.Songs
                     .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0})", ftsQuery)
                     .AsNoTracking()

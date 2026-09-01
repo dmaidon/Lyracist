@@ -11,7 +11,7 @@ public interface IMediaEngine
     Task Play();
     Task Pause();
     Task Stop();
-    void Seek(double position);
+    void Seek(double positionSeconds);
     event Action<ImageSource>? FrameReady;
 
     /// <summary>Fires when a karaoke track transitions from stopped/paused into playing.</summary>
@@ -22,6 +22,16 @@ public interface IMediaEngine
 
     /// <summary>Fires when a song finishes naturally (EndReached from media backend).</summary>
     event Action? SongEnded;
+
+    /// <summary>Fires periodically while a song is loaded so a seek slider can track playback
+    /// progress; not raised for every frame, just enough to look smooth in the UI.</summary>
+    event Action? PositionChanged;
+
+    /// <summary>Current playback position of the loaded song, in seconds.</summary>
+    double Position { get; }
+
+    /// <summary>Total length of the loaded song, in seconds, or 0 if unknown/nothing loaded.</summary>
+    double Duration { get; }
 
     double Volume { get; set; }
     double Speed { get; set; }

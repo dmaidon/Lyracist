@@ -157,7 +157,7 @@ public partial class KaraokeViewModel
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed creating birthday banner: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", "Failed creating birthday banner", ex);
                 }
             }
 #endif

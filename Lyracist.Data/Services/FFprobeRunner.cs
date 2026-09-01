@@ -28,7 +28,7 @@ namespace Lyracist.Data.Services
 
             if (!File.Exists(filePath))
             {
-                Debug.WriteLine($"FFprobe failed: File does not exist: {filePath}");
+                Lyracist.Shared.Globals.LogError("Lyracist", $"FFprobe failed: file does not exist: {filePath}", "FFprobeRunner.ProbeFile");
                 return result;
             }
 
@@ -128,12 +128,12 @@ namespace Lyracist.Data.Services
                 }
                 else
                 {
-                    Debug.WriteLine($"FFprobe process exited with code {process.ExitCode}. Error: {error}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", $"FFprobe process exited with code {process.ExitCode}. Error: {error}", "FFprobeRunner.ProbeFile");
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception executing FFprobe for {filePath}: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Exception executing FFprobe for {filePath}", ex);
             }
 
             return result;

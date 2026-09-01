@@ -56,7 +56,7 @@ namespace Lyracist.Data.Services
         {
             if (!File.Exists(mp3Path) || !File.Exists(cdgPath))
             {
-                Debug.WriteLine($"Conversion failed: Missing input files: {mp3Path} or {cdgPath}");
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Conversion failed: missing input files: {mp3Path} or {cdgPath}", "FFmpegService.ConvertMp3GToMp4");
                 return false;
             }
 
@@ -111,13 +111,13 @@ namespace Lyracist.Data.Services
                 }
                 else
                 {
-                    Debug.WriteLine($"FFmpeg exit code: {process.ExitCode}. Error output: {error}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", $"FFmpeg exit code: {process.ExitCode}. Error output: {error}", "FFmpegService.ConvertMp3GToMp4");
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception converting MP3+G to MP4: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Exception converting MP3+G to MP4", ex);
                 return false;
             }
         }
@@ -130,7 +130,7 @@ namespace Lyracist.Data.Services
         {
             if (!File.Exists(zipPath))
             {
-                Debug.WriteLine($"Conversion failed: ZIP file not found: {zipPath}");
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Conversion failed: ZIP file not found: {zipPath}", "FFmpegService.ConvertZipToMp4");
                 return false;
             }
 
@@ -162,7 +162,7 @@ namespace Lyracist.Data.Services
 
                 if (string.IsNullOrEmpty(mp3Path) || string.IsNullOrEmpty(cdgPath))
                 {
-                    Debug.WriteLine($"Conversion failed: ZIP file does not contain matching CDG and audio: {zipPath}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", $"Conversion failed: ZIP file does not contain matching CDG and audio: {zipPath}", "FFmpegService.ConvertZipToMp4");
                     return false;
                 }
 
@@ -170,7 +170,7 @@ namespace Lyracist.Data.Services
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception converting ZIP to MP4: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Exception converting ZIP to MP4", ex);
                 return false;
             }
             finally
@@ -195,7 +195,7 @@ namespace Lyracist.Data.Services
         {
             if (!File.Exists(videoPath))
             {
-                Debug.WriteLine($"Thumbnail extraction failed: Video not found: {videoPath}");
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Thumbnail extraction failed: video not found: {videoPath}", "FFmpegService.ExtractThumbnail");
                 return false;
             }
 
@@ -244,7 +244,7 @@ namespace Lyracist.Data.Services
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception extracting thumbnail from {videoPath}: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Exception extracting thumbnail from {videoPath}", ex);
                 return false;
             }
         }

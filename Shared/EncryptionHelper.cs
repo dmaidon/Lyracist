@@ -20,7 +20,10 @@ namespace Lyracist.Shared
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"DPAPI Encryption failed: {ex.Message}");
+                // This file is linked into apps that don't all link Globals.cs (e.g. LyracistKeyGen),
+                // so it can't depend on Globals.LogError - Trace.TraceError still isn't Debug-only,
+                // unlike Debug.WriteLine.
+                System.Diagnostics.Trace.TraceError($"DPAPI Encryption failed: {ex}");
                 return plainText; // Fallback
             }
         }

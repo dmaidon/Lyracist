@@ -68,6 +68,9 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
     }
 
     public TimeSpan Position => _mediaPlayer != null ? TimeSpan.FromMilliseconds(_mediaPlayer.Time) : TimeSpan.Zero;
+    // Length is -1 while duration is still unknown (e.g. media not yet parsed) - clamp so callers
+    // never see a negative TimeSpan.
+    public TimeSpan Duration => _mediaPlayer != null ? TimeSpan.FromMilliseconds(Math.Max(0, _mediaPlayer.Length)) : TimeSpan.Zero;
     public bool IsPlaying => _mediaPlayer != null && _mediaPlayer.IsPlaying;
 
     public double Volume
@@ -388,7 +391,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"LibVLC custom rendering exception: {ex.Message}");
+                        Lyracist.Shared.Globals.LogError("Lyracist", "LibVLC custom rendering exception", ex);
                     }
                 }
                 finally
@@ -399,7 +402,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"LibVLC DisplayCallback dispatcher invocation exception: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "LibVLC DisplayCallback dispatcher invocation exception", ex);
             ArrayPool<byte>.Shared.Return(frameCopy);
         }
     }

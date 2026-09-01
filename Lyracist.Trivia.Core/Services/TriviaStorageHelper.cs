@@ -95,7 +95,9 @@ public static class TriviaStorageHelper
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error loading trivia settings: {ex.Message}");
+            // No per-app logger available here (this library is shared across several host apps
+            // with different names) - Trace.TraceError still isn't Debug-only, unlike Debug.WriteLine.
+            System.Diagnostics.Trace.TraceError($"Error loading trivia settings: {ex}");
         }
 
         return new Models.TriviaSettings();
@@ -114,7 +116,7 @@ public static class TriviaStorageHelper
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error saving trivia settings: {ex.Message}");
+            System.Diagnostics.Trace.TraceError($"Error saving trivia settings: {ex}");
         }
     }
 

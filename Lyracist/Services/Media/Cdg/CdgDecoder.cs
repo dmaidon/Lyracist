@@ -69,7 +69,7 @@ public class CdgDecoder : ICDGDecoder
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error loading CDG file: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error loading CDG file", ex);
         }
     }
 

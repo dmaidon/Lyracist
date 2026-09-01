@@ -106,7 +106,7 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to remove songs under directory {path}: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", $"Failed to remove songs under directory {path}", ex);
         }
     }
 
@@ -141,7 +141,7 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to search library: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to search library", ex);
             return [];
         }
     }
@@ -164,7 +164,7 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to search library: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to search library", ex);
             return [];
         }
     }
@@ -178,7 +178,7 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to get all library songs: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to get all library songs", ex);
             return [];
         }
     }
@@ -196,7 +196,7 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to get background music songs: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to get background music songs", ex);
             return [];
         }
     }
@@ -255,7 +255,7 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to get song audio settings: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to get song audio settings", ex);
             return new SongAudioSettings();
         }
     }
@@ -294,7 +294,7 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to save song audio settings: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to save song audio settings", ex);
         }
     }
 
@@ -332,7 +332,7 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to get singer audio settings: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to get singer audio settings", ex);
             return new SingerAudioSettings();
         }
     }
@@ -376,7 +376,7 @@ public class LibraryService : ILibraryService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to save singer audio settings: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to save singer audio settings", ex);
         }
     }
 }

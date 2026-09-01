@@ -105,7 +105,7 @@ namespace Lyracist.Services.Integration
                 catch (Exception ex)
                 {
                     // Fallback to mock search on network error
-                    System.Diagnostics.Debug.WriteLine($"YouTube search failed, falling back to mock results: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", "YouTube search failed, falling back to mock results", ex);
                 }
             }
 
@@ -138,7 +138,7 @@ namespace Lyracist.Services.Integration
                 }
                 catch (Exception ex) when (attempt < maxAttempts && (ex is System.Net.Http.HttpRequestException or TaskCanceledException))
                 {
-                    System.Diagnostics.Debug.WriteLine($"YouTube search attempt {attempt} failed, retrying: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", $"YouTube search attempt {attempt} failed, retrying", ex);
                     await Task.Delay(TimeSpan.FromSeconds(attempt));
                 }
             }

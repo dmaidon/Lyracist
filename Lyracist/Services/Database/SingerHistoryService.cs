@@ -48,7 +48,7 @@ namespace Lyracist.Services.Database
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error creating SingerHistory table: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Error creating SingerHistory table", ex);
             }
         }
 
@@ -101,7 +101,7 @@ namespace Lyracist.Services.Database
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error saving SingerHistory: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Error saving SingerHistory", ex);
             }
         }
 
@@ -141,7 +141,7 @@ namespace Lyracist.Services.Database
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading SingerHistory: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Error loading SingerHistory", ex);
             }
 
             return list;

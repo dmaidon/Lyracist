@@ -50,7 +50,9 @@ public static class MonitorDpiHelper
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"MonitorDpiHelper.GetScaleForMonitor failed: {ex}");
+            // No per-app logger available here (this file is linked into several host apps with
+            // different names) - Trace.TraceError still isn't Debug-only, unlike Debug.WriteLine.
+            System.Diagnostics.Trace.TraceError($"MonitorDpiHelper.GetScaleForMonitor failed: {ex}");
         }
 
         return (1.0, 1.0);

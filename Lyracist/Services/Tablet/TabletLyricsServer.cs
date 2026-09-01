@@ -199,13 +199,13 @@ public class TabletLyricsServer(
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Tablet Lyrics Kestrel Server error: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", "Tablet Lyrics Kestrel Server error", ex);
                 }
             }, token);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to initialize Tablet Lyrics Server: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to initialize Tablet Lyrics Server", ex);
         }
 
         return Task.CompletedTask;
@@ -810,7 +810,7 @@ public class TabletLyricsServer(
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error during Tablet Lyrics Server cleanup: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Error during Tablet Lyrics Server cleanup", ex);
             }
             finally
             {
@@ -905,7 +905,7 @@ public class TabletLyricsServer(
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error broadcasting scaryoke availability: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting scaryoke availability", ex);
         }
     }
 
@@ -919,7 +919,7 @@ public class TabletLyricsServer(
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error broadcasting queue: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting queue", ex);
         }
     }
 
@@ -948,7 +948,7 @@ public class TabletLyricsServer(
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error broadcasting active singer: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting active singer", ex);
         }
     }
 
@@ -966,7 +966,7 @@ public class TabletLyricsServer(
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error broadcasting next singer: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting next singer", ex);
         }
     }
 
@@ -991,7 +991,7 @@ public class TabletLyricsServer(
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error broadcasting lyrics: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting lyrics", ex);
         }
     }
 
@@ -1017,7 +1017,7 @@ public class TabletLyricsServer(
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error broadcasting scaryoke spin start: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting scaryoke spin start", ex);
         }
     }
 
@@ -1031,7 +1031,7 @@ public class TabletLyricsServer(
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error broadcasting scaryoke spin complete: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting scaryoke spin complete", ex);
         }
     }
 }

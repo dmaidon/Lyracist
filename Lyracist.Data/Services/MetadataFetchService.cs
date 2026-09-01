@@ -106,7 +106,7 @@ namespace Lyracist.Data.Services
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Spotify metadata fetch failed: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", "Spotify metadata fetch failed", ex);
                 }
             }
 
@@ -124,7 +124,7 @@ namespace Lyracist.Data.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"MusicBrainz metadata fetch failed: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "MusicBrainz metadata fetch failed", ex);
             }
 
             if (!hasFetchedAny) return null;

@@ -44,6 +44,28 @@ public partial class App : System.Windows.Application
         }
     }
 
+    private static void CleanUpOrphanedPlaybackTempDirs()
+    {
+        try
+        {
+            foreach (var dir in System.IO.Directory.EnumerateDirectories(System.IO.Path.GetTempPath(), "LyracistPlayback_*"))
+            {
+                try
+                {
+                    System.IO.Directory.Delete(dir, true);
+                }
+                catch
+                {
+                    // Best-effort - a directory locked by AV/another running instance is left for next time.
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLogger.LogError(ex, "CleanUpOrphanedPlaybackTempDirs");
+        }
+    }
+
     public App()
     {
         TextBoxSelectionHelper.EnableGlobalSelectAllOnFocus();
@@ -198,6 +220,12 @@ public partial class App : System.Windows.Application
             }
         };
 
+        // Best-effort cleanup of extraction temp dirs left behind by a previous session that
+        // crashed or was killed before MediaEngine.Stop()'s CleanUpTempFiles() could run - off
+        // the startup path since it has no bearing on how fast the app is ready to use, hence
+        // the deliberate fire-and-forget.
+        _ = Task.Run(CleanUpOrphanedPlaybackTempDirs);
+
         await Host!.StartAsync();
 
         // Apply any pending EF Core migrations so a fresh install gets a
@@ -283,8 +311,13 @@ public partial class App : System.Windows.Application
         base.OnStartup(e);
     }
 
-    protected override async void OnExit(ExitEventArgs e)
+    protected override void OnExit(ExitEventArgs e)
     {
+        // Settings writes are debounced (AppSettings.Save) - force out anything still pending
+        // so a change in the last moments before close (e.g. a slider released right before
+        // exiting) isn't lost when the process ends before the debounce timer fires.
+        AppSettings.Flush();
+
         foreach (var djBannerWindow in Windows.OfType<DjBannerWindow>())
         {
             djBannerWindow.IsShuttingDown = true;
@@ -292,14 +325,32 @@ public partial class App : System.Windows.Application
 
         if (Host != null)
         {
-            var server = Host.Services.GetService<ITabletLyricsServer>();
-            if (server != null)
-            {
-                await server.StopAsync();
-            }
+            var hostToShutDown = Host;
 
-            await Host.StopAsync();
-            Host.Dispose();
+            // WPF calls OnExit synchronously and tears the process down as soon as it returns -
+            // an "async void" override here raced the shutdown work below instead of waiting for
+            // it (the process could exit at the first await, before StopAsync/Dispose ran).
+            // Task.Run moves the work off this thread's SynchronizationContext so blocking on it
+            // here can't deadlock against the UI thread; the bounded timeout is a safety net
+            // against a stuck StopAsync, not something expected to trigger in normal shutdown.
+            try
+            {
+                Task.Run(async () =>
+                {
+                    var server = hostToShutDown.Services.GetService<ITabletLyricsServer>();
+                    if (server != null)
+                    {
+                        await server.StopAsync();
+                    }
+
+                    await hostToShutDown.StopAsync();
+                    hostToShutDown.Dispose();
+                }).Wait(TimeSpan.FromSeconds(5));
+            }
+            catch (Exception ex)
+            {
+                Globals.LogError("Lyracist", "App.OnExit shutdown", ex);
+            }
         }
 
         base.OnExit(e);

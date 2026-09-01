@@ -35,6 +35,12 @@ public partial class KaraokeViewModel : BaseViewModel
     private readonly System.Windows.Threading.DispatcherTimer _searchDebounceTimer;
     private int _searchRequestToken;
 
+    // Separate from _searchRequestToken above: local and external search are two independent
+    // async operations fired from the same debounce tick, each needing its own "only the latest
+    // request wins" guard - sharing one counter would let one flow's request invalidate the
+    // other's in-flight request.
+    private int _externalSearchRequestToken;
+
     public RotationViewModel Rotation { get; }
 
     private AutoAdvanceManager? _autoAdvance;
@@ -107,8 +113,62 @@ public partial class KaraokeViewModel : BaseViewModel
         }
     }
 
+    // Suppresses the seek-on-change side effect in OnSeekPositionChanged while SeekPosition is
+    // being updated FROM playback (OnMediaPositionChanged) rather than by the user dragging the
+    // slider - otherwise every periodic position refresh would issue a redundant seek.
+    private bool _suppressSeekPositionCallback;
+
+    // True while the user has the seek slider's thumb pressed (see KaraokePage's
+    // Thumb.DragStarted/DragCompleted handlers). Playback-driven position updates are skipped
+    // during a drag so they can't fight the user's own drag and make the slider jump around
+    // under their cursor.
+    private bool _isDraggingSeekSlider;
+
     [ObservableProperty]
     private double _seekPosition;
+
+    [ObservableProperty]
+    private double _duration;
+
+    public string SeekPositionText => FormatSeekTime(SeekPosition);
+    public string DurationText => FormatSeekTime(Duration);
+    public bool HasSeekableDuration => Duration > 0;
+
+    private static string FormatSeekTime(double seconds) =>
+        TimeSpan.FromSeconds(Math.Max(0, seconds)).ToString(seconds >= 3600 ? @"h\:mm\:ss" : @"m\:ss");
+
+    partial void OnSeekPositionChanged(double value)
+    {
+        OnPropertyChanged(nameof(SeekPositionText));
+        if (_suppressSeekPositionCallback) return;
+        _mediaEngine.Seek(value);
+    }
+
+    partial void OnDurationChanged(double value)
+    {
+        OnPropertyChanged(nameof(DurationText));
+        OnPropertyChanged(nameof(HasSeekableDuration));
+    }
+
+    /// <summary>Called from KaraokePage's Thumb.DragStarted handler on the seek slider.</summary>
+    public void BeginSeekDrag() => _isDraggingSeekSlider = true;
+
+    /// <summary>Called from KaraokePage's Thumb.DragCompleted handler on the seek slider.</summary>
+    public void EndSeekDrag()
+    {
+        _isDraggingSeekSlider = false;
+        _mediaEngine.Seek(SeekPosition);
+    }
+
+    private void OnMediaPositionChanged()
+    {
+        if (_isDraggingSeekSlider) return;
+
+        _suppressSeekPositionCallback = true;
+        SeekPosition = _mediaEngine.Position;
+        Duration = _mediaEngine.Duration;
+        _suppressSeekPositionCallback = false;
+    }
 
     [ObservableProperty]
     private string _selectedSongPath = string.Empty;
@@ -343,7 +403,7 @@ public partial class KaraokeViewModel : BaseViewModel
         }
         catch (System.Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to generate QR Code: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to generate QR Code", ex);
         }
     }
 
@@ -535,9 +595,11 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             _searchDebounceTimer.Stop();
             RefreshFilteredList();
+            SearchExternalCommand.Execute(null);
         };
 
         _mediaEngine.FrameReady += OnFrameReady;
+        _mediaEngine.PositionChanged += OnMediaPositionChanged;
         _libraryService.LibraryUpdated += OnLibraryUpdated;
         LoadSingerNames();
         RefreshQrCode();
@@ -621,10 +683,13 @@ public partial class KaraokeViewModel : BaseViewModel
 
     partial void OnSearchQueryChanged(string value)
     {
+        // Local library and external (YouTube/Spotify/Amazon) search both fire from the debounce
+        // tick now - previously external search ran on every keystroke with no debounce and no
+        // staleness guard (see SearchExternal's token check below), so typing a full query issued
+        // one external API call per character and whichever response arrived last won, not
+        // whichever was issued last.
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Start();
-
-        SearchExternalCommand.Execute(null);
     }
 
     private async void RefreshFilteredList()
@@ -866,7 +931,13 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             await _mediaEngine.Stop();
             IsPlaying = false;
+
+            // Reset the display only - do not route through the normal SeekPosition setter, which
+            // would issue a live Seek(0) call against a backend that Stop() just tore down.
+            _suppressSeekPositionCallback = true;
             SeekPosition = 0;
+            Duration = 0;
+            _suppressSeekPositionCallback = false;
         }
         else
         {

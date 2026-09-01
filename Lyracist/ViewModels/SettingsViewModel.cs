@@ -234,7 +234,7 @@ public partial class SettingsViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error enumerating LibVLC audio devices: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Error enumerating LibVLC audio devices", ex);
             devList.Add(new() { DeviceIdentifier = "Speakers", Description = "Speakers (Realtek High Definition Audio)" });
             devList.Add(new() { DeviceIdentifier = "Headphones", Description = "Headphones (USB Audio Device)" });
             devList.Add(new() { DeviceIdentifier = "HDMI", Description = "Digital Output (HDMI)" });

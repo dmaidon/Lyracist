@@ -93,6 +93,28 @@
                                FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     <TextBlock Text="{Binding Karaoke.CurrentSongName}"
                                FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Karaoke.SeekPositionText}"
+                                   FontSize="11" FontFamily="Consolas" VerticalAlignment="Center" Margin="0,0,8,0"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <Slider Grid.Column="1"
+                                Minimum="0" Maximum="{Binding Karaoke.Duration}"
+                                Value="{Binding Karaoke.SeekPosition, Mode=TwoWay}"
+                                IsEnabled="{Binding Karaoke.HasSeekableDuration}"
+                                IsMoveToPointEnabled="True"
+                                VerticalAlignment="Center"
+                                ToolTip="Seek"
+                                Thumb.DragStarted="SeekSlider_DragStarted"
+                                Thumb.DragCompleted="SeekSlider_DragCompleted" />
+                        <TextBlock Grid.Column="2" Text="{Binding Karaoke.DurationText}"
+                                   FontSize="11" FontFamily="Consolas" VerticalAlignment="Center" Margin="8,0,0,0"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </Grid>
                 </StackPanel>
 
                 <!-- Playback Controls -->

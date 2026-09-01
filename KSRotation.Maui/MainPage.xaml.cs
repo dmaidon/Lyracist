@@ -574,7 +574,6 @@ public partial class MainPage : ContentPage
             // attached - if this ever throws partway through (several sequential Grid mutations
             // per branch), the layout is left half-updated with zero diagnostic trail. LoggerService
             // writes to the same persistent, on-device log file the rest of the app already uses.
-            System.Diagnostics.Debug.WriteLine($"UpdateOrientationLayout error: {ex.Message}");
             KSRotation.Services.LoggerService.LogError("MainPage.UpdateOrientationLayout", ex);
         }
     }

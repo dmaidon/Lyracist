@@ -159,7 +159,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         }
         catch (System.Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to generate QR Code: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to generate QR Code", ex);
         }
     }
 

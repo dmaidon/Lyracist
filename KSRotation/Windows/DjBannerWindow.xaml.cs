@@ -57,7 +57,7 @@ namespace KSRotation.Windows
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed to load image banner: {ex.Message}");
+                    KSRotation.Services.LoggerService.LogError("DjBannerWindow.LoadBanner", ex);
                     BannerImage.Source = null;
                 }
             }

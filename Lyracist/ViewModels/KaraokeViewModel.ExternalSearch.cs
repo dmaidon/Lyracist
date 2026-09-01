@@ -72,10 +72,16 @@ public partial class KaraokeViewModel
     [RelayCommand]
     private async Task SearchExternal()
     {
+        int myToken = ++_externalSearchRequestToken;
         IsExternalLoading = true;
         try
         {
             var results = await _externalLinkService.SearchAsync(SearchQuery, SelectedExternalService);
+
+            // Discard results if a newer search has since been issued - otherwise whichever
+            // response happens to arrive last wins, not whichever request was issued last.
+            if (myToken != _externalSearchRequestToken) return;
+
             ExternalResults.Clear();
             foreach (var track in results)
             {
@@ -84,11 +90,14 @@ public partial class KaraokeViewModel
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"External search error: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "External search error", ex);
         }
         finally
         {
-            IsExternalLoading = false;
+            if (myToken == _externalSearchRequestToken)
+            {
+                IsExternalLoading = false;
+            }
         }
     }
 

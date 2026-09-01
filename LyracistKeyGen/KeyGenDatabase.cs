@@ -80,7 +80,7 @@ namespace LyracistKeyGen
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to read history from database: {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"Failed to read history from database: {ex}");
             }
             return list;
         }

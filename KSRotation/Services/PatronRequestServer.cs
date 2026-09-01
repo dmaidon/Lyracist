@@ -23,11 +23,12 @@ namespace KSRotation.Services
         Func<string> onGetRotationJson,
         Func<string, bool> onVerifyPin,
         Func<string> onGetRequestsJson,
-        Func<string, string, string, string, string, string, string, string> onHandleDjAction,
+        Func<string, string, string, string, string, string, string, Task<string>> onHandleDjAction,
         Func<string> onGetSpecialEventsJson,
         Func<string> onGetActiveSpecialEvent)
     {
         private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
+        private const int MaxAvatarImageBytes = 2_097_152; // 2 MB - a profile avatar has no business being larger
         private const int MaxConcurrentConnections = 64;
         private const int MaxPinAttemptsBeforeLockout = 5;
         // Caps how long a single connection may take to send its full headers+body. Without this, a client
@@ -43,11 +44,17 @@ namespace KSRotation.Services
         private readonly Func<string> _onGetRotationJson = onGetRotationJson;
         private readonly Func<string, bool> _onVerifyPin = onVerifyPin;
         private readonly Func<string> _onGetRequestsJson = onGetRequestsJson;
-        private readonly Func<string, string, string, string, string, string, string, string> _onHandleDjAction = onHandleDjAction;
+        private readonly Func<string, string, string, string, string, string, string, Task<string>> _onHandleDjAction = onHandleDjAction;
         private readonly Func<string> _onGetSpecialEventsJson = onGetSpecialEventsJson;
         private readonly Func<string> _onGetActiveSpecialEvent = onGetActiveSpecialEvent;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, PinAttemptState> _pinAttemptsByIp = new();
+
+        // Separate from _pinAttemptsByIp above: singer PINs (login/profile/avatar upload) get the
+        // same brute-force protection as the DJ PIN, but tracked independently so a patron
+        // mistyping their own singer PIN can't affect (or be affected by) DJ login attempts from
+        // a different device sharing the lockout state.
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, PinAttemptState> _singerPinAttemptsByIp = new();
 
         // Once distinct client IPs pile up (long event, many patron devices), sweep out entries that
         // haven't attempted in a while so the dictionary doesn't grow for the lifetime of the server.
@@ -59,6 +66,42 @@ namespace KSRotation.Services
             public int FailedCount;
             public DateTime LockedUntilUtc;
             public DateTime LastAttemptUtc;
+        }
+
+        // Caps how many brand-new singer profiles a single IP can auto-register (via
+        // /api/singer/login with a name that doesn't exist yet - see TryAllowRegistration).
+        // Without this, an unauthenticated script on the venue WiFi can insert an unbounded
+        // number of rows into the DJ's live singer table in a few minutes.
+        private const int MaxRegistrationsPerWindow = 5;
+        private static readonly TimeSpan RegistrationWindow = TimeSpan.FromMinutes(10);
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, RegistrationRateState> _registrationsByIp = new();
+
+        private sealed class RegistrationRateState
+        {
+            public int Count;
+            public DateTime WindowStartUtc;
+        }
+
+        private bool TryAllowRegistration(string clientIp)
+        {
+            var state = _registrationsByIp.GetOrAdd(clientIp, _ => new RegistrationRateState { WindowStartUtc = DateTime.UtcNow });
+
+            lock (state)
+            {
+                if (DateTime.UtcNow - state.WindowStartUtc > RegistrationWindow)
+                {
+                    state.WindowStartUtc = DateTime.UtcNow;
+                    state.Count = 0;
+                }
+
+                if (state.Count >= MaxRegistrationsPerWindow)
+                {
+                    return false;
+                }
+
+                state.Count++;
+                return true;
+            }
         }
 
         public void Start()
@@ -375,7 +418,7 @@ namespace KSRotation.Services
                         string song = root.TryGetProperty("song", out var songProp) ? (songProp.GetString() ?? "") : "";
                         string artist = root.TryGetProperty("artist", out var artProp) ? (artProp.GetString() ?? "") : "";
 
-                        string error = _onHandleDjAction(action, targetId, extraData, name, song, artist, duetPartner);
+                        string error = await _onHandleDjAction(action, targetId, extraData, name, song, artist, duetPartner);
                         if (string.IsNullOrEmpty(error))
                         {
                             await SendJsonResponseAsync(stream, "{\"success\":true}");
@@ -406,6 +449,12 @@ namespace KSRotation.Services
                         var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name);
                         if (dbSinger == null)
                         {
+                            if (!TryAllowRegistration(clientIp))
+                            {
+                                await SendTooManyRequestsAsync(stream);
+                                return;
+                            }
+
                             dbSinger = new Lyracist.Data.Models.Singer
                             {
                                 Name = name,
@@ -437,17 +486,25 @@ namespace KSRotation.Services
                                     singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
                                 }));
                             }
-                            else if (dbSinger.PinCode == singerPin)
-                            {
-                                await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new
-                                {
-                                    success = true,
-                                    singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
-                                }));
-                            }
                             else
                             {
-                                await SendBadRequestAsync(stream, "{\"error\":\"Incorrect PIN code for this singer name.\"}");
+                                bool authorized = TryAuthorizeSinger(clientIp, () => dbSinger.PinCode == singerPin, out bool singerLockedOut);
+                                if (singerLockedOut)
+                                {
+                                    await SendTooManyRequestsAsync(stream);
+                                }
+                                else if (authorized)
+                                {
+                                    await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new
+                                    {
+                                        success = true,
+                                        singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
+                                    }));
+                                }
+                                else
+                                {
+                                    await SendBadRequestAsync(stream, "{\"error\":\"Incorrect PIN code for this singer name.\"}");
+                                }
                             }
                         }
 #else
@@ -470,8 +527,14 @@ namespace KSRotation.Services
                         string customTitle = root.TryGetProperty("customTitle", out var ctProp) ? (ctProp.GetString() ?? "") : "";
 
                         await using var context = new Lyracist.Data.LyracistDbContext();
-                        var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name && s.PinCode == singerPin);
-                        if (dbSinger == null)
+                        var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name);
+                        bool profileAuthorized = TryAuthorizeSinger(clientIp, () => dbSinger != null && dbSinger.PinCode == singerPin, out bool profileLockedOut);
+                        if (profileLockedOut)
+                        {
+                            await SendTooManyRequestsAsync(stream);
+                            return;
+                        }
+                        if (!profileAuthorized || dbSinger == null)
                         {
                             await SendUnauthorizedAsync(stream);
                             return;
@@ -505,8 +568,14 @@ namespace KSRotation.Services
                         string imageBase64 = root.TryGetProperty("image", out var imgProp) ? (imgProp.GetString() ?? "") : "";
 
                         await using var context = new Lyracist.Data.LyracistDbContext();
-                        var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name && s.PinCode == singerPin);
-                        if (dbSinger == null)
+                        var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name);
+                        bool avatarAuthorized = TryAuthorizeSinger(clientIp, () => dbSinger != null && dbSinger.PinCode == singerPin, out bool avatarLockedOut);
+                        if (avatarLockedOut)
+                        {
+                            await SendTooManyRequestsAsync(stream);
+                            return;
+                        }
+                        if (!avatarAuthorized || dbSinger == null)
                         {
                             await SendUnauthorizedAsync(stream);
                             return;
@@ -519,6 +588,17 @@ namespace KSRotation.Services
                                 imageBase64 = imageBase64[(imageBase64.IndexOf(',') + 1)..];
                             }
                             byte[] imgBytes = Convert.FromBase64String(imageBase64);
+
+                            // The request body cap (MaxRequestBodyBytes) allows up to 4 MB overall,
+                            // but a single avatar image has no business being that large - and
+                            // without checking the actual bytes, anything decoded from the "image"
+                            // field would be written straight to disk under a .jpg extension
+                            // regardless of what it actually contains.
+                            if (imgBytes.Length > MaxAvatarImageBytes || !LooksLikeImage(imgBytes))
+                            {
+                                await SendBadRequestAsync(stream, "{\"error\":\"Invalid or oversized image.\"}");
+                                return;
+                            }
 
                             string avatarsDir = Lyracist.Shared.Globals.AvatarsDir;
                             Directory.CreateDirectory(avatarsDir);
@@ -771,6 +851,32 @@ namespace KSRotation.Services
             string jail = fullAvatarsDir.EndsWith(Path.DirectorySeparatorChar) ? fullAvatarsDir : fullAvatarsDir + Path.DirectorySeparatorChar;
             return fullPath.StartsWith(jail, StringComparison.OrdinalIgnoreCase) ? fullPath : null;
         }
+
+        /// <summary>
+        /// Cheap format sniff so an avatar upload can't write arbitrary patron-supplied bytes to
+        /// disk under a .jpg extension - checks for the magic bytes of the image formats a phone
+        /// camera or gallery picker would actually produce (JPEG, PNG, WEBP, GIF).
+        /// </summary>
+        private static bool LooksLikeImage(byte[] bytes)
+        {
+            if (bytes.Length < 12) return false;
+
+            // JPEG: FF D8 FF
+            if (bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF) return true;
+
+            // PNG: 89 50 4E 47 0D 0A 1A 0A
+            if (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47) return true;
+
+            // GIF: "GIF87a" or "GIF89a"
+            if (bytes[0] == 'G' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == '8'
+                && (bytes[4] == '7' || bytes[4] == '9') && bytes[5] == 'a') return true;
+
+            // WEBP: "RIFF"....."WEBP"
+            if (bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F'
+                && bytes[8] == 'W' && bytes[9] == 'E' && bytes[10] == 'B' && bytes[11] == 'P') return true;
+
+            return false;
+        }
 #endif
 
         /// <summary>
@@ -778,9 +884,24 @@ namespace KSRotation.Services
         /// locking that IP out for <see cref="PinLockoutDuration"/> after <see cref="MaxPinAttemptsBeforeLockout"/>
         /// consecutive failures. Guards against brute-forcing a short numeric PIN over the LAN.
         /// </summary>
-        private bool TryAuthorizeDj(string clientIp, string pin, out bool lockedOut)
+        private bool TryAuthorizeDj(string clientIp, string pin, out bool lockedOut) =>
+            TryAuthorizePin(_pinAttemptsByIp, clientIp, () => _onVerifyPin(pin), out lockedOut);
+
+        /// <summary>
+        /// Verifies a singer's own PIN (login/profile/avatar upload) for <paramref name="clientIp"/>,
+        /// with the same per-IP lockout policy as <see cref="TryAuthorizeDj"/> - a singer's PIN is
+        /// exactly as brute-forceable over the LAN as the DJ's.
+        /// </summary>
+        private bool TryAuthorizeSinger(string clientIp, Func<bool> verify, out bool lockedOut) =>
+            TryAuthorizePin(_singerPinAttemptsByIp, clientIp, verify, out lockedOut);
+
+        private bool TryAuthorizePin(
+            System.Collections.Concurrent.ConcurrentDictionary<string, PinAttemptState> attemptsByIp,
+            string clientIp,
+            Func<bool> verify,
+            out bool lockedOut)
         {
-            PinAttemptState state = _pinAttemptsByIp.GetOrAdd(clientIp, _ => new PinAttemptState());
+            PinAttemptState state = attemptsByIp.GetOrAdd(clientIp, _ => new PinAttemptState());
 
             bool result;
             lock (state)
@@ -793,7 +914,7 @@ namespace KSRotation.Services
                     return false;
                 }
 
-                if (_onVerifyPin(pin))
+                if (verify())
                 {
                     state.FailedCount = 0;
                     state.LockedUntilUtc = DateTime.MinValue;
@@ -814,22 +935,22 @@ namespace KSRotation.Services
                 }
             }
 
-            if (_pinAttemptsByIp.Count > PinAttemptSweepThreshold)
+            if (attemptsByIp.Count > PinAttemptSweepThreshold)
             {
-                SweepStalePinAttempts();
+                SweepStalePinAttempts(attemptsByIp);
             }
 
             return result;
         }
 
-        private void SweepStalePinAttempts()
+        private static void SweepStalePinAttempts(System.Collections.Concurrent.ConcurrentDictionary<string, PinAttemptState> attemptsByIp)
         {
             DateTime cutoff = DateTime.UtcNow - PinAttemptStaleThreshold;
-            foreach (KeyValuePair<string, PinAttemptState> entry in _pinAttemptsByIp)
+            foreach (KeyValuePair<string, PinAttemptState> entry in attemptsByIp)
             {
                 if (entry.Value.LastAttemptUtc < cutoff)
                 {
-                    _pinAttemptsByIp.TryRemove(entry.Key, out _);
+                    attemptsByIp.TryRemove(entry.Key, out _);
                 }
             }
         }

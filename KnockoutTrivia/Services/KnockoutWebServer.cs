@@ -21,6 +21,44 @@ public class KnockoutWebServer : IKnockoutWebServer
     private const int MaxConcurrentConnections = 64;
     private static readonly TimeSpan RequestReadTimeout = TimeSpan.FromSeconds(15);
 
+    // Caps how many brand-new players a single IP can register (via /api/knockout/join with a
+    // name that doesn't match an existing connected/reconnectable player - see RouteRequestAsync).
+    // Without this, an unauthenticated script on the venue WiFi can insert an unbounded number of
+    // rows into the live player/leaderboard list in a few minutes. A legitimate phone joins once
+    // per session, so 5 per 10 minutes comfortably covers a handful of real players sharing an IP
+    // while still blocking a scripted flood.
+    private const int MaxRegistrationsPerWindow = 5;
+    private static readonly TimeSpan RegistrationWindow = TimeSpan.FromMinutes(10);
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, RegistrationRateState> _registrationsByIp = new();
+
+    private sealed class RegistrationRateState
+    {
+        public int Count;
+        public DateTime WindowStartUtc;
+    }
+
+    private bool TryAllowRegistration(string clientIp)
+    {
+        var state = _registrationsByIp.GetOrAdd(clientIp, _ => new RegistrationRateState { WindowStartUtc = DateTime.UtcNow });
+
+        lock (state)
+        {
+            if (DateTime.UtcNow - state.WindowStartUtc > RegistrationWindow)
+            {
+                state.WindowStartUtc = DateTime.UtcNow;
+                state.Count = 0;
+            }
+
+            if (state.Count >= MaxRegistrationsPerWindow)
+            {
+                return false;
+            }
+
+            state.Count++;
+            return true;
+        }
+    }
+
     private readonly IGameStateService _gameStateService;
     private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
 
@@ -78,7 +116,6 @@ public class KnockoutWebServer : IKnockoutWebServer
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"KnockoutWebServer Start failed on port {Port}: {ex.Message}");
             Globals.LogError("KnockoutTrivia", $"KnockoutWebServer.Start (port {Port})", ex);
             IsRunning = false;
             return false;
@@ -138,7 +175,7 @@ public class KnockoutWebServer : IKnockoutWebServer
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"KnockoutWebServer Accept error: {ex.Message}");
+                Globals.LogError("KnockoutTrivia", "KnockoutWebServer.AcceptConnectionsAsync", ex);
                 try { await Task.Delay(250, token); } catch { break; }
             }
         }
@@ -146,6 +183,8 @@ public class KnockoutWebServer : IKnockoutWebServer
 
     private async Task HandleClientAsync(TcpClient client, CancellationToken serverToken)
     {
+        string clientIp = (client.Client.RemoteEndPoint as IPEndPoint)?.Address.ToString() ?? "unknown";
+
         using (client)
         await using (var stream = client.GetStream())
         using (var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(serverToken))
@@ -202,7 +241,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                     body = Encoding.UTF8.GetString(bodyBuffer, 0, readTotal);
                 }
 
-                await RouteRequestAsync(stream, method, path, queryString, body);
+                await RouteRequestAsync(stream, method, path, queryString, body, clientIp);
             }
             catch (Exception ex) when (ex is OperationCanceledException || ex is IOException || ex is SocketException)
             {
@@ -210,7 +249,7 @@ public class KnockoutWebServer : IKnockoutWebServer
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"KnockoutWebServer HandleClient error: {ex.Message}");
+                Globals.LogError("KnockoutTrivia", "KnockoutWebServer.HandleClientAsync", ex);
                 try
                 {
                     await SendResponseAsync(stream, 500, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Internal Server Error\"}"));
@@ -220,7 +259,7 @@ public class KnockoutWebServer : IKnockoutWebServer
         }
     }
 
-    private async Task RouteRequestAsync(NetworkStream stream, string method, string path, string queryString, string body)
+    private async Task RouteRequestAsync(NetworkStream stream, string method, string path, string queryString, string body, string clientIp)
     {
         if (path == "/" || path.Equals("/knockout", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
         {
@@ -236,6 +275,20 @@ public class KnockoutWebServer : IKnockoutWebServer
                 var joinReq = JsonSerializer.Deserialize<JoinRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 if (joinReq != null && !string.IsNullOrWhiteSpace(joinReq.Name))
                 {
+                    // Only rate-limit genuinely new registrations - a returning player (known
+                    // playerId, or a disconnected player rejoining by name) is never blocked,
+                    // mirroring exactly the lookup RegisterOrGetPlayer itself uses below.
+                    string trimmedName = joinReq.Name.Trim();
+                    var snapshot = _gameStateService.GetPlayersSnapshot();
+                    bool isReconnect = (!string.IsNullOrEmpty(joinReq.PlayerId) && snapshot.Any(p => string.Equals(p.Id, joinReq.PlayerId, StringComparison.OrdinalIgnoreCase)))
+                        || snapshot.Any(p => string.Equals(p.Name, trimmedName, StringComparison.OrdinalIgnoreCase) && !p.IsConnected);
+
+                    if (!isReconnect && !TryAllowRegistration(clientIp))
+                    {
+                        await SendResponseAsync(stream, 429, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Too many join attempts. Please try again later.\"}"));
+                        return;
+                    }
+
                     var player = _gameStateService.RegisterOrGetPlayer(joinReq.Name, joinReq.PlayerId);
                     var resp = new
                     {
@@ -427,6 +480,7 @@ public class KnockoutWebServer : IKnockoutWebServer
             204 => "No Content",
             400 => "Bad Request",
             404 => "Not Found",
+            429 => "Too Many Requests",
             500 => "Internal Server Error",
             _ => "OK"
         };

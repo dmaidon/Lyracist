@@ -1,9 +1,49 @@
-<!-- Edited on Aug 30, 2026 @ 11:01:00 -> Document 26.8.30.4 fixes for repo size optimization, deploy script tracking, and Unknown Artist handling in CHANGELOG.md -->
-Last Edit: Aug 30, 2026 - Repo size optimization, deploy script tracking, Unknown Artist handling, and full test suite verification
+<!-- Edited on Sep 1, 2026 @ 17:15:08 -> Document 26.9.1.1 solution-wide review fixes: silent logging, scan/settings performance, seek slider, and multi-server abuse-rate hardening -->
+Last Edit: Sep 1, 2026 - Solution-wide review pass: silent error logging, settings/scan performance, playback seek slider, shutdown reliability, and DJ/singer/trivia-join abuse-rate hardening
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.1.1] - 2026-09-01
+
+### Fixed & Enhanced
+
+- **Test Infrastructure (`global.json`)**:
+  - Added a `test` runner block so `dotnet test` works again under the .NET 10 SDK (xUnit v3's Microsoft.Testing.Platform had silently stopped running via the legacy VSTest entry point). All 283 tests across the four test projects verified passing.
+- **Silent Error Logging Eliminated (32+ files across `Lyracist`, `Lyracist.Data`, `KSRotation`, `KnockoutTrivia`, `Lyracist.Trivia.Core`, `LyracistDbEditor`, `LyracistKeyGen`, `Shared`)**:
+  - Replaced 86 `Debug.WriteLine`-only catch blocks (invisible in Release builds) with real persistent logging: `Globals.LogError`/`LoggerService.LogError` for app code, `Trace.TraceError` for shared libraries with no per-app logger.
+- **Library Scan & Settings Performance (`Lyracist.Data`, `Lyracist`)**:
+  - `ScanningService`: removed `UpdateRange` calls that force-marked every song Modified (and reindexed into FTS5) on every rescan regardless of whether anything actually changed; batches now run in one explicit transaction with `ChangeTracker.Clear()` between them.
+  - `LyracistDbContext`/`SearchService`: dropped `Cache=Shared` from the SQLite connection string (legacy/unneeded under WAL) and added `PRAGMA synchronous=NORMAL` everywhere WAL is set.
+  - `AppSettings.Save()` now debounces through a 400ms timer instead of a full fsync-and-rename on every property set (was firing on every slider drag tick); `Flush()` is called on app exit so nothing pending is lost.
+  - Fixed a race in `SearchService.EnsureFtsTableExists` where two threads could both pass the verification check and race the DROP/CREATE of the FTS table; also fixed a leaked `SqliteConnection` in `GetSharedConnectionAsync`.
+  - `PrepareFtsQuery` now runs the query through the same normalization used to build the FTS index, closing a mismatch for accented search terms.
+- **Playback (`Lyracist`)**:
+  - **New: seek slider.** `MediaEngine.Seek()` was a no-op; it now calls `IVideoBackend.SeekAsync` and re-syncs CDG rendering afterward. Added `Duration`/`Position`/`PositionChanged` to `IMediaEngine` and `IVideoBackend` (backed by FFME's `NaturalDuration` and LibVLC's `Length`), and a real seek slider with elapsed/total labels in `MainWindow.xaml`.
+  - ZIP-CDG extraction in `MediaEngine.LoadSong` moved off the UI thread (was blocking playback start on every zipped track).
+  - `.cdg` files are no longer catalogued as standalone songs during scanning (MP3+CDG pairs were being counted twice); added a one-time cleanup for existing duplicate rows.
+  - CDG render timer reduced from 60Hz to 30Hz (CDG delivers 300 packets/sec; the extra ticks were pure overhead).
+  - `MediaEngine` is now `IDisposable`, cleaning up its timers and pitch-change token on host shutdown; orphaned `%TEMP%\LyracistPlayback_*` directories from a crashed prior session are swept at startup.
+- **Shutdown Reliability (`Lyracist`)**:
+  - `App.OnExit` no longer races the process exit against its own cleanup (`Host.StopAsync`/`Dispose`) - it now blocks (bounded to 5s, off the UI thread's sync context to avoid deadlocking) until shutdown actually completes.
+- **External Search (`Lyracist`)**:
+  - External (YouTube/Spotify/Amazon) search is now debounced with the same 250ms timer as local search, and given its own staleness token - previously it fired on every keystroke with no guard against an older response overwriting a newer one.
+- **DJ Action Reliability (`KSRotation`)**:
+  - `HandleDjAction` now times out after 5 seconds instead of blocking the patron request server indefinitely if the UI dispatcher is busy (e.g. behind a stray modal), which could otherwise starve every connection slot.
+- **Abuse-Rate Hardening (`KSRotation`, `KnockoutTrivia`, `Lyracist.Trivia.Core`)**:
+  - Singer PIN endpoints (`/api/singer/login`, `/api/singer/profile`, `/api/singer/avatar/upload`) now share the DJ PIN's per-IP lockout protection, tracked independently so the two can't interfere with each other.
+  - Singer self-registration, and new-player registration on both trivia join endpoints (`/api/knockout/join` in `KnockoutWebServer`, `/api/trivia/join` in `TriviaWebServer`), are now capped at 5 new registrations per IP per 10 minutes - closing an unbounded-row-insertion gap in all three. Returning/reconnecting players are never blocked.
+  - Avatar uploads are now validated against real image magic bytes (JPEG/PNG/GIF/WEBP) and capped at 2 MB, instead of writing arbitrary decoded bytes to disk under a `.jpg` extension.
+- **Trivia Player Timeout Correctness (`Lyracist.Trivia.Core`)**:
+  - `TriviaPlayer.ConnectedAt`/`LastSeenAt` and the disconnect-timeout comparison in `TriviaGameEngine.GetPlayers()` switched from local time to UTC, fixing a DST-transition bug where every player would appear stale (or none would) for an hour around the clock change.
+- **Requests Cache Debounce (`KSRotation`)**:
+  - The patron-requests JSON cache now debounces the same way the rotation cache does, instead of re-serializing the whole list on every single incoming request.
+- **Settings Corruption Recovery (`Lyracist`)**:
+  - A corrupt `lyracist_settings.json` is now quarantined with a timestamped `.corrupt-*` suffix instead of being silently overwritten with defaults on the next save.
+- **LyracistKeyGen Build Fixes (`LyracistKeyGen`)**:
+  - Fixed a broken standalone build (`Globals.SettingsDir`/`Globals.DataDir` referenced without linking `Globals.cs`, masked because the solution's Debug configuration skips building this project).
+  - Aligned the SQLite native package to `SQLitePCLRaw.bundle_e_sqlite3` 3.0.5, matching every other project in the solution.
 
 ## [26.8.30.4] - 2026-08-30
 

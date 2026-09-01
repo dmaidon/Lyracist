@@ -21,6 +21,44 @@ public class TriviaWebServer : IDisposable
     private const int MaxConcurrentConnections = 64;
     private static readonly TimeSpan RequestReadTimeout = TimeSpan.FromSeconds(15);
 
+    // Caps how many brand-new players a single IP can register (via /api/trivia/join with a name
+    // TriviaGameEngine.RegisterPlayer has never seen - see RouteRequestAsync). Without this, an
+    // unauthenticated script on the venue WiFi can insert an unbounded number of entries into the
+    // live leaderboard in a few minutes. A legitimate phone joins once per session, so 5 per 10
+    // minutes comfortably covers a handful of real players sharing an IP while still blocking a
+    // scripted flood.
+    private const int MaxRegistrationsPerWindow = 5;
+    private static readonly TimeSpan RegistrationWindow = TimeSpan.FromMinutes(10);
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, RegistrationRateState> _registrationsByIp = new();
+
+    private sealed class RegistrationRateState
+    {
+        public int Count;
+        public DateTime WindowStartUtc;
+    }
+
+    private bool TryAllowRegistration(string clientIp)
+    {
+        var state = _registrationsByIp.GetOrAdd(clientIp, _ => new RegistrationRateState { WindowStartUtc = DateTime.UtcNow });
+
+        lock (state)
+        {
+            if (DateTime.UtcNow - state.WindowStartUtc > RegistrationWindow)
+            {
+                state.WindowStartUtc = DateTime.UtcNow;
+                state.Count = 0;
+            }
+
+            if (state.Count >= MaxRegistrationsPerWindow)
+            {
+                return false;
+            }
+
+            state.Count++;
+            return true;
+        }
+    }
+
     private readonly TriviaGameEngine _engine;
     private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
 
@@ -53,7 +91,9 @@ public class TriviaWebServer : IDisposable
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"TriviaWebServer Start failed on port {Port}: {ex.Message}");
+            // No per-app logger available here (this library is shared across several host apps
+            // with different names) - Trace.TraceError still isn't Debug-only, unlike Debug.WriteLine.
+            System.Diagnostics.Trace.TraceError($"TriviaWebServer Start failed on port {Port}: {ex}");
             IsRunning = false;
         }
     }
@@ -114,7 +154,7 @@ public class TriviaWebServer : IDisposable
                 // A single failed accept (e.g. transient SocketException from a flaky client)
                 // must not take down the whole listener - log and keep accepting. A short
                 // delay avoids a tight retry loop if the underlying socket is persistently faulted.
-                System.Diagnostics.Debug.WriteLine($"TriviaWebServer AcceptConnectionsAsync error: {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"TriviaWebServer AcceptConnectionsAsync error: {ex}");
                 try { await Task.Delay(250, token); } catch { break; }
             }
         }
@@ -122,6 +162,8 @@ public class TriviaWebServer : IDisposable
 
     private async Task HandleClientAsync(TcpClient client, CancellationToken serverToken)
     {
+        string clientIp = (client.Client.RemoteEndPoint as IPEndPoint)?.Address.ToString() ?? "unknown";
+
         using (client)
         await using (var stream = client.GetStream())
         using (var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(serverToken))
@@ -178,7 +220,7 @@ public class TriviaWebServer : IDisposable
                     body = Encoding.UTF8.GetString(bodyBuffer, 0, readTotal);
                 }
 
-                await RouteRequestAsync(stream, method, path, queryString, body);
+                await RouteRequestAsync(stream, method, path, queryString, body, clientIp);
             }
             catch (Exception ex) when (ex is OperationCanceledException || ex is IOException || ex is SocketException)
             {
@@ -186,7 +228,7 @@ public class TriviaWebServer : IDisposable
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"TriviaWebServer HandleClientAsync error: {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"TriviaWebServer HandleClientAsync error: {ex}");
                 try
                 {
                     await SendResponseAsync(stream, 500, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Internal Server Error\"}"));
@@ -196,7 +238,7 @@ public class TriviaWebServer : IDisposable
         }
     }
 
-    private async Task RouteRequestAsync(NetworkStream stream, string method, string path, string queryString, string body)
+    private async Task RouteRequestAsync(NetworkStream stream, string method, string path, string queryString, string body, string clientIp)
     {
         if (path == "/" || path.Equals("/trivia", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
         {
@@ -227,6 +269,15 @@ public class TriviaWebServer : IDisposable
                     {
                         await SendResponseAsync(stream, 409, "application/json; charset=utf-8",
                             Encoding.UTF8.GetBytes("{\"error\":\"That name is already in use this game. Please choose a different name.\"}"));
+                        return;
+                    }
+
+                    // RegisterPlayer only creates a new entry when no player under this name has
+                    // ever registered (existing == null) - anything else just re-marks an already-
+                    // known player connected, so only the genuinely-new case needs rate limiting.
+                    if (existing == null && !TryAllowRegistration(clientIp))
+                    {
+                        await SendResponseAsync(stream, 429, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Too many join attempts. Please try again later.\"}"));
                         return;
                     }
 
@@ -321,7 +372,7 @@ public class TriviaWebServer : IDisposable
             if (player != null)
             {
                 player.IsConnected = true;
-                player.LastSeenAt = DateTime.Now;
+                player.LastSeenAt = DateTime.UtcNow;
             }
 
             var q = _engine.CurrentSession.CurrentQuestion;
@@ -429,6 +480,8 @@ public class TriviaWebServer : IDisposable
             204 => "No Content",
             400 => "Bad Request",
             404 => "Not Found",
+            409 => "Conflict",
+            429 => "Too Many Requests",
             500 => "Internal Server Error",
             _ => "OK"
         };

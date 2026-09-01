@@ -120,6 +120,22 @@ public partial class MainWindow : FluentWindow, System.ComponentModel.INotifyPro
         StartDriveStatusMonitor();
     }
 
+    // The seek slider's Value is bound TwoWay to KaraokeViewModel.SeekPosition, which already
+    // applies live as it changes (matching Volume/Pitch/etc.) - these two just bracket a drag so
+    // playback-driven position updates don't fight the user mid-drag (see
+    // KaraokeViewModel.BeginSeekDrag/EndSeekDrag). Thumb.DragStarted/DragCompleted bubble up from
+    // the Slider's template Thumb to the Slider element itself, so handling them here needs no
+    // extra template access.
+    private void SeekSlider_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
+    {
+        _karaokeViewModel.BeginSeekDrag();
+    }
+
+    private void SeekSlider_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+    {
+        _karaokeViewModel.EndSeekDrag();
+    }
+
     private void OnMainWindowPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         // Bypass hotkeys if the user is typing in a text input control

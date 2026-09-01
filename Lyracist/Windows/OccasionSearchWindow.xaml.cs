@@ -83,7 +83,7 @@ public partial class OccasionSearchWindow : Window
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"External Occasion Search failed: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "External Occasion Search failed", ex);
         }
         finally
         {

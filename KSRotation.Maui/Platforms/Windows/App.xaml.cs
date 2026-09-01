@@ -24,10 +24,11 @@ public partial class App : MauiWinUIApplication
 
 	private static void OnUnhandledException(object? sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
 	{
-		System.Diagnostics.Debug.WriteLine("=== UNHANDLED EXCEPTION ===");
-		System.Diagnostics.Debug.WriteLine($"Message: {e.Message}");
-		System.Diagnostics.Debug.WriteLine(e.Exception?.ToString() ?? "(no Exception object available)");
-		System.Diagnostics.Debug.WriteLine("=== END UNHANDLED EXCEPTION ===");
+		// Debug.WriteLine alone is invisible on a DJ's tablet in the field with no debugger
+		// attached - this is the last chance to record why the app is about to go down, so it
+		// needs to land in the same persistent, on-device log file the rest of the app uses.
+		var exceptionToLog = e.Exception ?? new Exception($"Unhandled exception with no Exception object. Message: {e.Message}");
+		KSRotation.Services.LoggerService.LogError("KSRotation.Maui.WinUI.App.OnUnhandledException", exceptionToLog);
 	}
 
 	protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();

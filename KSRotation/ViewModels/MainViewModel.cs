@@ -20,6 +20,7 @@ namespace KSRotation.ViewModels
         private readonly DispatcherTimer _saveDebounceTimer;
         private readonly DispatcherTimer _dbDebounceTimer;
         private readonly DispatcherTimer _jsonCacheDebounceTimer;
+        private readonly DispatcherTimer _requestsJsonCacheDebounceTimer;
         private readonly DispatcherTimer _connectBannerDebounceTimer;
         private readonly List<SongPerformance> _performanceHistory = [];
         private readonly Lock _performanceHistoryLock = new();
@@ -722,6 +723,7 @@ namespace KSRotation.ViewModels
             _saveDebounceTimer = new DispatcherTimer();
             _dbDebounceTimer = new DispatcherTimer();
             _jsonCacheDebounceTimer = new DispatcherTimer();
+            _requestsJsonCacheDebounceTimer = new DispatcherTimer();
             _connectBannerDebounceTimer = new DispatcherTimer();
 
             if (IsInDesignMode)
@@ -761,6 +763,16 @@ namespace KSRotation.ViewModels
                 RebuildRotationJsonCacheNow();
             };
 
+            _requestsJsonCacheDebounceTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(250)
+            };
+            _requestsJsonCacheDebounceTimer.Tick += (s, e) =>
+            {
+                _requestsJsonCacheDebounceTimer.Stop();
+                RebuildRequestsJsonCacheNow();
+            };
+
             _connectBannerDebounceTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(600)
@@ -774,7 +786,14 @@ namespace KSRotation.ViewModels
             Singers.CollectionChanged += OnSingersCollectionChanged;
             // All IncomingRequests mutations happen on the UI thread (see HandleRequestReceived/HandleDjAction),
             // so rebuilding the cache here is thread-safe; GetRequestsJson then reads the cache lock-free.
-            IncomingRequests.CollectionChanged += (_, _) => RebuildRequestsJsonCacheNow();
+            // Debounced the same way as the rotation cache above - a burst of requests arriving in
+            // the same moment (e.g. several patrons submitting near-simultaneously) would otherwise
+            // re-serialize the whole list once per addition instead of once per burst.
+            IncomingRequests.CollectionChanged += (_, _) =>
+            {
+                _requestsJsonCacheDebounceTimer.Stop();
+                _requestsJsonCacheDebounceTimer.Start();
+            };
 
             foreach (string venue in VenueService.Load())
             {
@@ -2565,7 +2584,7 @@ namespace KSRotation.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Failed creating birthday banner: {ex.Message}");
+                        LoggerService.LogError("Failed creating birthday banner", ex);
                     }
                 }
 #endif

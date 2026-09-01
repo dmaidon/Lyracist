@@ -61,7 +61,7 @@ public static class TriviaPackManager
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading question pack {file}: {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"Error loading question pack {file}: {ex}");
             }
         }
 

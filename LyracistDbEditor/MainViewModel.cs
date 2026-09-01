@@ -135,7 +135,10 @@ public partial class MainViewModel : ObservableObject
             else
             {
                 var searchService = new SearchService(context);
-                songs = Task.Run(() => searchService.Search(SearchText)).Result;
+                // SearchSync does the same work as Search() without wrapping it in a Task.Run just
+                // to immediately block on it via .Result - that pattern added a threadpool
+                // round-trip for no benefit, since this method is synchronous either way.
+                songs = searchService.SearchSync(SearchText);
                 if (OnlyShowMissingArtist)
                 {
                     songs = songs.Where(s => s.Artist == "Unknown Artist" || string.IsNullOrEmpty(s.Artist)).ToList();
@@ -150,7 +153,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Search failed: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Search failed", ex);
         }
     }
 
@@ -405,7 +408,7 @@ public partial class MainViewModel : ObservableObject
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Failed to write unresolved artist list: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Failed to write unresolved artist list", ex);
                 }
             }
         }
@@ -484,7 +487,7 @@ public partial class MainViewModel : ObservableObject
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Failed to parse zip tags: {ex.Message}");
+                        Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Failed to parse zip tags", ex);
                     }
                 }
                 else
@@ -617,7 +620,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to query database stats: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor: Failed to query database stats", ex);
         }
     }
 

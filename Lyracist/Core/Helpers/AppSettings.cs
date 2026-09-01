@@ -22,6 +22,15 @@ public static class AppSettings
     // and concurrent check-then-add list mutations could race and duplicate entries.
     private static readonly Lock _lock = new();
 
+    // Every property setter calls Save(), and several settings (e.g. slider-bound volume/EQ
+    // values) fire on every UI value change, not just when the user finishes dragging. Writing
+    // straight to disk there was a full fsync-and-rename per pixel of slider movement — a plain
+    // System.Threading.Timer (not DispatcherTimer) is used because this class is also touched
+    // from background threads with no dispatcher. Coalesces bursts into one write.
+    private const int SaveDebounceMs = 400;
+    private static readonly System.Threading.Timer _saveTimer = new(_ => FlushIfDirty(), null, Timeout.Infinite, Timeout.Infinite);
+    private static bool _dirty;
+
     private static readonly SettingsData _data = Load();
 
     private static SettingsData Load()
@@ -42,7 +51,27 @@ public static class AppSettings
             if (File.Exists(_settingsPath))
             {
                 var json = File.ReadAllText(_settingsPath);
-                var data = JsonSerializer.Deserialize<SettingsData>(json) ?? new SettingsData();
+                SettingsData data;
+                try
+                {
+                    data = JsonSerializer.Deserialize<SettingsData>(json) ?? new SettingsData();
+                }
+                catch (JsonException ex)
+                {
+                    // Quarantine the corrupt file instead of silently falling through to defaults
+                    // - the next Save() would otherwise overwrite it with those defaults, and a DJ
+                    // whose settings.json got truncated (e.g. a crash mid-write, or hand-editing)
+                    // would lose every preference with no message and nothing left to recover.
+                    Lyracist.Shared.Globals.LogError("Lyracist", "AppSettings: settings file is corrupt, quarantining and using defaults", ex);
+                    try
+                    {
+                        string quarantinePath = _settingsPath + $".corrupt-{DateTime.UtcNow:yyyyMMddHHmmss}";
+                        File.Move(_settingsPath, quarantinePath, overwrite: true);
+                    }
+                    catch { /* Best-effort; the original file is left in place if the move fails */ }
+
+                    return new SettingsData();
+                }
 
                 // Clean up loaded categories to enforce the new 8-category limit
                 if (data.ScaryokeCategories != null)
@@ -57,7 +86,7 @@ public static class AppSettings
                 return data;
             }
         }
-        catch { /* Use defaults on any parse error */ }
+        catch { /* I/O error (permissions, locked file, etc.) - use defaults without touching the file */ }
         return new SettingsData();
     }
 
@@ -65,12 +94,33 @@ public static class AppSettings
     {
         lock (_lock)
         {
+            _dirty = true;
+        }
+        _saveTimer.Change(SaveDebounceMs, Timeout.Infinite);
+    }
+
+    private static void FlushIfDirty()
+    {
+        lock (_lock)
+        {
+            if (!_dirty) return;
             try
             {
                 Lyracist.Shared.AtomicJsonFile.Serialize(_settingsPath, _data, new JsonSerializerOptions { WriteIndented = true });
             }
             catch { /* Best-effort; non-critical */ }
+            _dirty = false;
         }
+    }
+
+    /// <summary>Forces any pending debounced save to write immediately. Call this on app shutdown -
+    /// otherwise a change made in the last &lt;<see cref="SaveDebounceMs"/>ms before exit (e.g. a
+    /// slider release right before closing the window) is lost when the process ends before the
+    /// debounce timer fires.</summary>
+    public static void Flush()
+    {
+        _saveTimer.Change(Timeout.Infinite, Timeout.Infinite);
+        FlushIfDirty();
     }
 
     // ─── Settings Properties ───────────────────────────────────────────────
@@ -504,7 +554,7 @@ public static class AppSettings
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to copy venue graphic: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to copy venue graphic", ex);
         }
     }
 
@@ -533,7 +583,7 @@ public static class AppSettings
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to delete venue graphic file: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to delete venue graphic file", ex);
         }
     }
 

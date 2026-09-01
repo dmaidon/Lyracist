@@ -33,13 +33,14 @@
   <ItemGroup>
     <PackageReference Include="WPF-UI" Version="4.3.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
 
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\Shared\EncryptionHelper.cs" Link="EncryptionHelper.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
+    <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
   </ItemGroup>
 
 </Project>

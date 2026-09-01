@@ -426,7 +426,7 @@ namespace KSRotation.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error initializing trivia: {ex.Message}");
+                KSRotation.Services.LoggerService.LogError("Error initializing trivia", ex);
             }
         }
 

@@ -15,16 +15,16 @@ using Lyracist.Services.Media.Cdg;
 
 namespace Lyracist.Services.Media;
 
-public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
+public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
 {
+    private bool _isDisposed;
     private readonly ICDGDecoder _cdgDecoder;
     private readonly ICdgFrameScheduler _scheduler;
     private readonly IVideoBackend _video;
     private readonly ILibraryService _libraryService;
     private DispatcherTimer? _timer;
-    private double _position;
+    private DispatcherTimer? _positionTimer;
     private bool _isPlaying;
-    private DateTime _lastTickTime;
     private bool _isMp4Mode;
     private string _currentSongPath = string.Empty;
     private string? _activeSingerName;
@@ -40,6 +40,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     public event Action? Started;
     public event Action? Stopped;
     public event Action? SongEnded;
+    public event Action? PositionChanged;
 
     public double Volume
     {
@@ -111,7 +112,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
                         catch (OperationCanceledException) { }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Debug.WriteLine($"Error during pitch hot-reload: {ex.Message}");
+                            Lyracist.Shared.Globals.LogError("Lyracist", "Error during pitch hot-reload", ex);
                         }
                     }, token);
                 }
@@ -216,15 +217,35 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
             }));
         };
         InitializePlaybackTimer();
+        InitializePositionTimer();
     }
 
     private void InitializePlaybackTimer()
     {
+        // CDG delivers 300 packets/second regardless of how often this fires - a decoded lyrics
+        // frame doesn't change meaningfully faster than a normal video frame rate, so 60 Hz here
+        // was just extra Task.Run + Dispatcher.BeginInvoke churn (see OnPlaybackTick) for no
+        // visible benefit over 30 Hz.
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromMilliseconds(16) // ~60 FPS
+            Interval = TimeSpan.FromMilliseconds(33) // ~30 FPS
         };
         _timer.Tick += OnPlaybackTick;
+    }
+
+    // Drives seek-slider updates. Deliberately separate from _timer above: _timer only runs in
+    // CDG mode (it drives lyrics graphics rendering), but a seek slider needs to track position
+    // in MP4 mode too. Runs for the lifetime of the app rather than being started/stopped with
+    // playback - the tick handler is a no-op cost when nothing is loaded, and MediaEngine (like
+    // the FrameReady subscribers on it) lives as long as the process does.
+    private void InitializePositionTimer()
+    {
+        _positionTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(250)
+        };
+        _positionTimer.Tick += (s, e) => PositionChanged?.Invoke();
+        _positionTimer.Start();
     }
 
     private void OnVideoFrameReady(object? sender, VideoFrame frame)
@@ -253,7 +274,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"CDG background render error: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "CDG background render error", ex);
             }
             finally
             {
@@ -283,7 +304,6 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
     {
         await Stop();
         CleanUpTempFiles();
-        _position = 0;
 
         if (string.IsNullOrEmpty(path)) return;
 
@@ -296,32 +316,39 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
 
         if (isZip)
         {
-            try
+            // Extraction is synchronous file I/O (ZipFile.OpenRead + ExtractToFile of a
+            // multi-MB entry) - LoadSong is awaited straight from a UI command, so without
+            // Task.Run this used to block the UI thread for however long the extraction took,
+            // visible as a hitch every time a zipped karaoke track loads mid-show.
+            await Task.Run(() =>
             {
-                _tempDir = Path.Combine(Path.GetTempPath(), "LyracistPlayback_" + Guid.NewGuid().ToString("N"));
-                Directory.CreateDirectory(_tempDir);
-
-                using var archive = ZipFile.OpenRead(path);
-                var cdgEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase));
-                var audioEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) || e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
-
-                if (cdgEntry != null && audioEntry != null)
+                try
                 {
-                    _tempAudioPath = Path.Combine(_tempDir, "audio" + Path.GetExtension(audioEntry.FullName));
-                    _tempCdgPath = Path.Combine(_tempDir, "lyrics.cdg");
+                    _tempDir = Path.Combine(Path.GetTempPath(), "LyracistPlayback_" + Guid.NewGuid().ToString("N"));
+                    Directory.CreateDirectory(_tempDir);
 
-                    audioEntry.ExtractToFile(_tempAudioPath, true);
-                    cdgEntry.ExtractToFile(_tempCdgPath, true);
+                    using var archive = ZipFile.OpenRead(path);
+                    var cdgEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase));
+                    var audioEntry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) || e.FullName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
 
-                    audioToLoad = _tempAudioPath;
-                    cdgToLoad = _tempCdgPath;
+                    if (cdgEntry != null && audioEntry != null)
+                    {
+                        _tempAudioPath = Path.Combine(_tempDir, "audio" + Path.GetExtension(audioEntry.FullName));
+                        _tempCdgPath = Path.Combine(_tempDir, "lyrics.cdg");
+
+                        audioEntry.ExtractToFile(_tempAudioPath, true);
+                        cdgEntry.ExtractToFile(_tempCdgPath, true);
+
+                        audioToLoad = _tempAudioPath;
+                        cdgToLoad = _tempCdgPath;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error extracting ZIP playback: {ex.Message}");
-                audioToLoad = path;
-            }
+                catch (Exception ex)
+                {
+                    Lyracist.Shared.Globals.LogError("Lyracist", "Error extracting ZIP playback", ex);
+                    audioToLoad = path;
+                }
+            });
         }
         else if (!_isMp4Mode)
         {
@@ -357,7 +384,6 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
 
         if (!_isMp4Mode)
         {
-            _lastTickTime = DateTime.UtcNow;
             _timer?.Start();
         }
 
@@ -384,7 +410,6 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
 
         bool wasPlaying = _isPlaying;
         _isPlaying = false;
-        _position = 0;
         _loadedAudioPath = null;
 
         await Task.Run(async () => await _video.StopAsync());
@@ -413,7 +438,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to delete temp audio file: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to delete temp audio file", ex);
         }
 
         try
@@ -425,7 +450,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to delete temp CDG file: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to delete temp CDG file", ex);
         }
 
         try
@@ -437,7 +462,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to delete temp directory: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to delete temp directory", ex);
         }
 
         _tempAudioPath = null;
@@ -445,12 +470,42 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
         _tempDir = null;
     }
 
-    public void Seek(double position)
+    public double Position => _video.Position.TotalSeconds;
+
+    public double Duration => _video.Duration.TotalSeconds;
+
+    public void Seek(double positionSeconds)
     {
-        _position = position;
-        if (!_isMp4Mode)
+        // Fire-and-forget: Seek() is called from slider drag events on the UI thread and must
+        // return immediately, but the backend seek is async (it may need to demux to the target
+        // position). Errors are logged rather than thrown since there's no caller left to observe
+        // a faulted Task here.
+        _ = SeekInternalAsync(positionSeconds);
+    }
+
+    private async Task SeekInternalAsync(double positionSeconds)
+    {
+        try
         {
-            _lastTickTime = DateTime.UtcNow;
+            await _video.SeekAsync(TimeSpan.FromSeconds(Math.Max(0, positionSeconds)));
+
+            // CDG frame rendering is driven by _scheduler's own notion of "how far into the audio
+            // are we", built up incrementally by OnPlaybackTick. A seek jumps the audio position
+            // without going through that incremental path, so the scheduler needs to be told
+            // directly or the lyrics graphics stay stuck at wherever they were before the seek.
+            if (!_isMp4Mode && _cdgDecoder is CdgDecoder cdg)
+            {
+                _scheduler.UpdateBackground(_video.Position, cdg);
+                var frame = _scheduler.GetFrame();
+                if (frame != null)
+                {
+                    FrameReady?.Invoke(frame);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "MediaEngine.Seek", ex);
         }
     }
 
@@ -558,5 +613,28 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine
             _video.Limiter = mergedLimiter;
             _video.EnableKillVocal = AppSettings.EnableKillVocal;
         }
+    }
+
+    // MediaEngine is registered AddSingleton<IMediaEngine, MediaEngine>() in App.xaml.cs, so this
+    // runs once, from Host.Dispose() during app shutdown - not from any explicit call site.
+    // IVideoBackend is its own separately-registered singleton and disposes itself; this only
+    // needs to clean up what MediaEngine itself owns.
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
+        _timer?.Stop();
+        _positionTimer?.Stop();
+
+        _pitchChangeCts?.Cancel();
+        _pitchChangeCts?.Dispose();
+
+        _video.FrameReady -= OnVideoFrameReady;
+        // The EndReached handler was registered as an anonymous lambda in the constructor and so
+        // can't be unsubscribed here directly - harmless to leave subscribed, since _video is
+        // disposed independently and won't raise further events once torn down.
+
+        GC.SuppressFinalize(this);
     }
 }

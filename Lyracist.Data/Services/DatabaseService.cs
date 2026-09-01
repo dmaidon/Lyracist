@@ -27,7 +27,7 @@ namespace Lyracist.Data.Services
             }
             catch (DbUpdateException ex)
             {
-                Debug.WriteLine($"Failed to add song '{song.FilePath}': it may already exist in the database. {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Failed to add song '{song.FilePath}': it may already exist in the database", ex);
                 return null;
             }
         }
@@ -43,7 +43,7 @@ namespace Lyracist.Data.Services
             }
             catch (DbUpdateException ex)
             {
-                Debug.WriteLine($"Failed to update song '{song.FilePath}': {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Failed to update song '{song.FilePath}'", ex);
                 return false;
             }
         }

@@ -26,8 +26,11 @@ public class TriviaPlayer
     public int StreakBeforeAnswer { get; set; } = 0;
     public int MaxStreakBeforeAnswer { get; set; } = 0;
     public bool IsConnected { get; set; } = true;
-    public DateTime ConnectedAt { get; set; } = DateTime.Now;
-    public DateTime LastSeenAt { get; set; } = DateTime.Now;
+    // UTC, not local time: TriviaGameEngine.GetPlayers() compares LastSeenAt against an elapsed
+    // timeout, and local time jumping at a DST transition would make every player look stale (or
+    // fresh) for an hour depending on which way the clocks moved.
+    public DateTime ConnectedAt { get; set; } = DateTime.UtcNow;
+    public DateTime LastSeenAt { get; set; } = DateTime.UtcNow;
 
     public string DisplayName => !string.IsNullOrWhiteSpace(TeamName) && TeamName != Name
         ? $"{Name} ({TeamName})"

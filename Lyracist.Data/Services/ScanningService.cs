@@ -222,7 +222,7 @@ namespace Lyracist.Data.Services
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to read zip archive {zipPath}: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Failed to read zip archive {zipPath}", ex);
                 return (false, string.Empty);
             }
         }
@@ -248,7 +248,7 @@ namespace Lyracist.Data.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Failed to crawl directory {path}: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", $"Failed to crawl directory {path}", ex);
                 }
             }
 
@@ -278,13 +278,40 @@ namespace Lyracist.Data.Services
                 }
             }
 
+            // One-time cleanup for libraries scanned before .cdg files stopped being catalogued
+            // on their own (see the extension filter in SafeEnumerateFiles): remove any existing
+            // .cdg row whose sibling .mp3 is already catalogued under the same name, since that
+            // .cdg row is an unplayable duplicate of the real song.
+            var duplicateCdgSongs = existingSongsMap.Values
+                .Where(s => s.FilePath.EndsWith(".cdg", StringComparison.OrdinalIgnoreCase)
+                    && paths.Any(p => IsPathUnderDirectory(s.FilePath, p))
+                    && existingSongsMap.ContainsKey(Path.ChangeExtension(s.FilePath, ".mp3")))
+                .ToList();
+
+            if (duplicateCdgSongs.Count > 0)
+            {
+                _context.Songs.RemoveRange(duplicateCdgSongs);
+                await _context.SaveChangesAsync();
+                foreach (var s in duplicateCdgSongs)
+                {
+                    await searchService.RemoveSongFromIndex(s.SongId);
+                    existingSongsMap.Remove(s.FilePath);
+                }
+            }
+
             const int batchSize = 200;
             var batch = new List<string>(batchSize);
 
             async Task ProcessBatchAsync(List<string> filesBatch)
             {
                 var songsToInsert = new List<Song>();
-                var songsToUpdate = new List<Song>();
+                // Only songs whose parsed fields actually differ from what's stored - existing
+                // came from the tracked ToDictionaryAsync above, so EF's own change detection
+                // already persists real edits on SaveChangesAsync. Previously every existing song
+                // in a batch was pushed through UpdateRange() (which force-marks all properties
+                // Modified regardless of whether they changed) and then reindexed into FTS,
+                // turning every rescan of an unchanged library into a full rewrite + full reindex.
+                var songsToReindex = new List<Song>();
 
                 foreach (var file in filesBatch)
                 {
@@ -294,11 +321,19 @@ namespace Lyracist.Data.Services
 
                     if (existingSongsMap.TryGetValue(file, out var existing))
                     {
-                        existing.Title = parsed.Title;
-                        existing.Artist = parsed.Artist;
-                        existing.IsKaraoke = parsed.IsKaraoke;
-                        existing.KaraokeType = typeLabel;
-                        songsToUpdate.Add(existing);
+                        bool changed = existing.Title != parsed.Title
+                            || existing.Artist != parsed.Artist
+                            || existing.IsKaraoke != parsed.IsKaraoke
+                            || existing.KaraokeType != typeLabel;
+
+                        if (changed)
+                        {
+                            existing.Title = parsed.Title;
+                            existing.Artist = parsed.Artist;
+                            existing.IsKaraoke = parsed.IsKaraoke;
+                            existing.KaraokeType = typeLabel;
+                            songsToReindex.Add(existing);
+                        }
                     }
                     else
                     {
@@ -315,6 +350,7 @@ namespace Lyracist.Data.Services
                             DateAdded = DateTime.UtcNow
                         };
                         songsToInsert.Add(newSong);
+                        songsToReindex.Add(newSong);
                         existingSongsMap[file] = newSong;
                     }
                 }
@@ -324,19 +360,23 @@ namespace Lyracist.Data.Services
                     _context.Songs.AddRange(songsToInsert);
                 }
 
-                if (songsToUpdate.Count > 0)
+                if (songsToReindex.Count > 0)
                 {
-                    _context.Songs.UpdateRange(songsToUpdate);
-                }
+                    // One transaction per batch covers both the EF SaveChanges and the FTS
+                    // upserts (IndexSongsBatch joins the ambient transaction when one exists),
+                    // instead of an implicit commit for every single row.
+                    await using var transaction = await _context.Database.BeginTransactionAsync();
 
-                if (songsToInsert.Count > 0 || songsToUpdate.Count > 0)
-                {
                     await _context.SaveChangesAsync();
+                    await searchService.IndexSongsBatch(songsToReindex);
 
-                    // Index into the FTS5 search table in batches
-                    var allChangedSongs = songsToInsert.Concat(songsToUpdate);
-                    await searchService.IndexSongsBatch(allChangedSongs);
+                    await transaction.CommitAsync();
                 }
+
+                // Nothing later in the scan needs this batch's entities tracked, and leaving them
+                // tracked would make every subsequent batch's SaveChangesAsync (and its internal
+                // DetectChanges pass) scan an ever-growing graph across the whole scan.
+                _context.ChangeTracker.Clear();
             }
 
             foreach (var file in candidateFiles)
@@ -404,7 +444,7 @@ namespace Lyracist.Data.Services
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Failed to probe file {song.FilePath}: {ex.Message}");
+                        Lyracist.Shared.Globals.LogError("Lyracist", $"Failed to probe file {song.FilePath}", ex);
                     }
                     finally
                     {
@@ -493,7 +533,7 @@ namespace Lyracist.Data.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"TagLib zip probing failed for {song.FilePath}: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", $"TagLib zip probing failed for {song.FilePath}", ex);
                 }
             }
             else
@@ -531,7 +571,7 @@ namespace Lyracist.Data.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"TagLib direct probing failed for {song.FilePath}: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", $"TagLib direct probing failed for {song.FilePath}", ex);
                 }
             }
 
@@ -552,7 +592,7 @@ namespace Lyracist.Data.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"FFprobe fallback failed for {song.FilePath}: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", $"FFprobe fallback failed for {song.FilePath}", ex);
                 }
             }
 
@@ -598,7 +638,13 @@ namespace Lyracist.Data.Services
                     foreach (var f in Directory.EnumerateFiles(currentDir))
                     {
                         string ext = Path.GetExtension(f).ToLowerInvariant();
-                        if (ext == ".mp3" || ext == ".cdg" || ext == ".mp4" || ext == ".zip")
+                        // .cdg is deliberately not catalogued on its own: a classic MP3+G pair is
+                        // one song (Song.mp3 + Song.cdg), and playback locates the .cdg graphics
+                        // file itself via Path.ChangeExtension(path, ".cdg") off the .mp3 path
+                        // (see MediaEngine.LoadSong) - it never needs its own database row.
+                        // Cataloguing it too used to create a second, unplayable "song" for every
+                        // unzipped karaoke track, roughly doubling the apparent library size.
+                        if (ext == ".mp3" || ext == ".mp4" || ext == ".zip")
                         {
                             files.Add(f);
                         }
@@ -633,7 +679,7 @@ namespace Lyracist.Data.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Failed to enumerate directory {currentDir}: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", $"Failed to enumerate directory {currentDir}", ex);
                 }
             }
 

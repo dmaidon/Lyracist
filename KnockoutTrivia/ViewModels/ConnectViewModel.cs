@@ -133,7 +133,7 @@ public partial class ConnectViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to generate Game QR: {ex.Message}");
+            Globals.LogError("KnockoutTrivia", "Failed to generate Game QR", ex);
             QrCodeImage = null;
         }
 
@@ -160,7 +160,7 @@ public partial class ConnectViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to generate Wi-Fi QR: {ex.Message}");
+            Globals.LogError("KnockoutTrivia", "Failed to generate Wi-Fi QR", ex);
             WifiQrCodeImage = null;
         }
     }

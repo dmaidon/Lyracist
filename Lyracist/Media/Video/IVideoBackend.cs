@@ -16,6 +16,7 @@ public interface IVideoBackend
     Task SeekAsync(TimeSpan position);
 
     TimeSpan Position { get; }
+    TimeSpan Duration { get; }
     bool IsPlaying { get; }
 
     double Volume { get; set; }

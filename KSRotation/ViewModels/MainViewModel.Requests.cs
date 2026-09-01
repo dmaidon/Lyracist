@@ -453,26 +453,48 @@ namespace KSRotation.ViewModels
 
         private string GetRequestsJson() => _cachedRequestsJson;
 
-        private string HandleDjAction(string action, string targetId, string extraData, string name, string song, string artist, string duetPartner)
-        {
-            var tcs = new TaskCompletionSource<string>();
+        // How long a DJ action request will wait for the UI thread before giving up. Without a bound,
+        // a stray modal (e.g. the app's own DispatcherUnhandledException message box) stalling the
+        // dispatcher would hang this call forever - and with MaxConcurrentConnections capped at 64,
+        // enough hung requests here starve the whole server, including patrons just trying to load
+        // the request page.
+        private static readonly TimeSpan DjActionTimeout = TimeSpan.FromSeconds(5);
 
-            // Marshal view updates safely onto the main UI thread using the shimmed Dispatcher
+        private async Task<string> HandleDjAction(string action, string targetId, string extraData, string name, string song, string artist, string duetPartner)
+        {
+            var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            // Marshal view updates safely onto the main UI thread using the shimmed Dispatcher.
+            // Deliberately not awaited here - completion is observed below via tcs.Task instead,
+            // with its own timeout, so this posts the work and returns immediately. WPF's real
+            // BeginInvoke returns an awaitable DispatcherOperation (hence the discard, needed now
+            // that this method is async); the MAUI shim's BeginInvoke returns void.
+#if !MAUI
+            _ = System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+#else
             System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+#endif
             {
                 try
                 {
                     string err = ExecuteDjActionOnUi(action, targetId, extraData, name, song, artist, duetPartner);
-                    tcs.SetResult(err);
+                    tcs.TrySetResult(err);
                 }
                 catch (Exception ex)
                 {
                     LoggerService.LogError("MainViewModel.HandleDjAction", ex);
-                    tcs.SetResult("Action failed.");
+                    tcs.TrySetResult("Action failed.");
                 }
             });
 
-            return tcs.Task.Result;
+            try
+            {
+                return await tcs.Task.WaitAsync(DjActionTimeout);
+            }
+            catch (TimeoutException)
+            {
+                return "DJ station is busy. Please try again.";
+            }
         }
 
         private string ExecuteDjActionOnUi(string action, string targetId, string extraData, string name, string song, string artist, string duetPartner)
@@ -731,7 +753,7 @@ namespace KSRotation.ViewModels
                             }
                             catch (Exception ex)
                             {
-                                System.Diagnostics.Debug.WriteLine($"Failed creating personalized birthday banner: {ex.Message}");
+                                LoggerService.LogError("Failed creating personalized birthday banner", ex);
                             }
                         }
                         ActiveSpecialEvent = targetId;

@@ -22,7 +22,7 @@ namespace KSRotation.Windows
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed to copy DJ URL: {ex.Message}");
+                    KSRotation.Services.LoggerService.LogError("Failed to copy DJ URL", ex);
                 }
             }
         }
@@ -37,7 +37,7 @@ namespace KSRotation.Windows
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed to copy DJ PIN: {ex.Message}");
+                    KSRotation.Services.LoggerService.LogError("Failed to copy DJ PIN", ex);
                 }
             }
         }

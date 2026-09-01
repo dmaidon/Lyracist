@@ -75,7 +75,7 @@ public class TriviaGameEngine : IDisposable
         // Phones poll /api/trivia/state roughly once a second while connected, refreshing
         // LastSeenAt. A player with no fresh poll in PlayerDisconnectTimeout has dropped off
         // WiFi/closed the tab - mark them disconnected so they no longer block early-reveal.
-        var cutoff = DateTime.Now - PlayerDisconnectTimeout;
+        var cutoff = DateTime.UtcNow - PlayerDisconnectTimeout;
         foreach (var p in _players.Values)
         {
             if (p.IsConnected && p.LastSeenAt < cutoff)
@@ -123,12 +123,12 @@ public class TriviaGameEngine : IDisposable
             Name = key,
             TeamName = cleanTeam,
             IsConnected = true,
-            ConnectedAt = DateTime.Now,
-            LastSeenAt = DateTime.Now
+            ConnectedAt = DateTime.UtcNow,
+            LastSeenAt = DateTime.UtcNow
         });
 
         player.IsConnected = true;
-        player.LastSeenAt = DateTime.Now;
+        player.LastSeenAt = DateTime.UtcNow;
         LeaderboardUpdated?.Invoke(this, GetPlayers());
         return player;
     }
@@ -249,7 +249,7 @@ public class TriviaGameEngine : IDisposable
             player.HasAnsweredCurrentQuestion = true;
             player.VisibleOptionsAtSubmission = Math.Max(1, q.Options.Count - EliminatedAnswerIndices.Count);
             player.RemainingSecondsAtSubmission = RemainingSeconds;
-            player.LastSeenAt = DateTime.Now;
+            player.LastSeenAt = DateTime.UtcNow;
 
             ScoreAnswer(player, q);
 

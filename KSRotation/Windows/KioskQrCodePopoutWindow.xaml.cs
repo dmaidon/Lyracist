@@ -22,7 +22,7 @@ namespace KSRotation.Windows
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed to copy Kiosk URL: {ex.Message}");
+                    KSRotation.Services.LoggerService.LogError("Failed to copy Kiosk URL", ex);
                 }
             }
         }

@@ -51,7 +51,7 @@ namespace LyracistKeyGen
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to load SMTP settings: {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"Failed to load SMTP settings: {ex}");
             }
             return new SmtpSettings();
         }
@@ -85,7 +85,7 @@ namespace LyracistKeyGen
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to save SMTP settings: {ex.Message}");
+                System.Diagnostics.Trace.TraceError($"Failed to save SMTP settings: {ex}");
             }
         }
 

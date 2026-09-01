@@ -28,7 +28,12 @@ namespace Lyracist.Data
             string dataDir = Lyracist.Shared.Globals.DataDir;
             System.IO.Directory.CreateDirectory(dataDir);
             string dbPath = System.IO.Path.Combine(dataDir, "lyracist.db");
-            return $"Data Source={dbPath};Cache=Shared";
+            // Cache=Shared is the legacy workaround for SQLite concurrency and is only really needed
+            // to share an in-memory database across connections - this is a real file, and WAL mode
+            // (below) plus normal connection pooling is Microsoft's recommended concurrency setup.
+            // Shared cache also introduces its own table-level SQLITE_LOCKED errors that busy_timeout
+            // does not cover (busy_timeout only retries SQLITE_BUSY).
+            return $"Data Source={dbPath}";
         }
 
         public LyracistDbContext()
@@ -156,7 +161,10 @@ namespace Lyracist.Data
         public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
         {
             using var command = connection.CreateCommand();
-            command.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
+            // synchronous=NORMAL: WAL mode alone still fsyncs on every commit (synchronous=FULL is
+            // the SQLite default). NORMAL is safe under WAL - a crash can only lose the most recent
+            // commit(s), never corrupt the database - and is the standard desktop pairing with WAL.
+            command.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;";
             command.ExecuteNonQuery();
         }
 
@@ -166,7 +174,10 @@ namespace Lyracist.Data
             CancellationToken cancellationToken = default)
         {
             await using var command = connection.CreateCommand();
-            command.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;";
+            // synchronous=NORMAL: WAL mode alone still fsyncs on every commit (synchronous=FULL is
+            // the SQLite default). NORMAL is safe under WAL - a crash can only lose the most recent
+            // commit(s), never corrupt the database - and is the standard desktop pairing with WAL.
+            command.CommandText = "PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;";
             await command.ExecuteNonQueryAsync(cancellationToken);
         }
     }

@@ -49,7 +49,7 @@ public partial class DjBannerWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to load DJ banner: {ex.Message}");
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to load DJ banner", ex);
             BannerImage = null;
         }
     }

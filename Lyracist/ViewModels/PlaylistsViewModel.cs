@@ -189,7 +189,7 @@ public partial class PlaylistsViewModel : BaseViewModel
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error during RefreshAll background load: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "Error during RefreshAll background load", ex);
             }
         });
     }

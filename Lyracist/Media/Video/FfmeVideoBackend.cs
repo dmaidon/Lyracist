@@ -24,6 +24,7 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
     public string? AudioDeviceId { get; set; }
 
     public TimeSpan Position => _mediaElement != null ? _mediaElement.Position : TimeSpan.Zero;
+    public TimeSpan Duration => _mediaElement?.NaturalDuration ?? TimeSpan.Zero;
     public bool IsPlaying => _mediaElement != null && _mediaElement.IsPlaying;
 
     public double Volume
@@ -112,7 +113,7 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed to apply FFmpeg audio filters: {ex.Message}");
+                    Lyracist.Shared.Globals.LogError("Lyracist", "Failed to apply FFmpeg audio filters", ex);
                 }
             };
             _mediaElement.RenderingVideo += OnRenderingVideo;
@@ -205,7 +206,7 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"FFME custom rendering exception: {ex.Message}");
+                Lyracist.Shared.Globals.LogError("Lyracist", "FFME custom rendering exception", ex);
             }
         });
     }
