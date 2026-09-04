@@ -1,4 +1,4 @@
-<!-- Edited on Sep 4, 2026 @ 07:38:00 -> Update Last Round to emerald green button across Lyracist, KSRotation, and KSRotation.Maui -->
+<!-- Edited on Sep 4, 2026 @ 09:15:00 -> Fix Last Round mode being silently ignored in several rotation-advance code paths -->
 Last Edit: Sep 4, 2026 - Last Round rotation option & audience billboard announcements across Lyracist, KSRotation, and KSRotation.Maui
 
 # Changelog
@@ -10,6 +10,12 @@ All notable changes to the Lyracist project are documented here. The format is b
 ### Added
 - **Lyracist, KSRotation (WPF), and KSRotation.Maui (Last Round Management)**:
   - **Host Control**: Added "Last Round" control across rotation host interfaces — styled as a standout emerald green button placed right after the Clear button in KSRotation (`MainWindow.xaml`), Lyracist (`RotationPage.xaml`), and KSRotation.Maui (`MainPage.xaml`), immediately synchronizing across the rotation lifecycle and display services.
+  - **Remote DJ Screen (`dj.html`)**:
+    * Added emerald green "Last Round" toggle buttons in both the `Current Rotation` header toolbar and the right sidebar quick actions card.
+    * Toggles in real-time between inactive emerald green (`#059669`) and active sapphire blue (`#2563EB`) with `✓ Last Round`, synchronizing with the desktop/tablet consoles via `/api/info` and `/api/dj/action`.
+    * Renders a crimson announcement banner (`★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★`) above the queue.
+    * Displays `DONE (LAST ROUND)` emerald badges and dimmed card styling for performers who have completed their performance in the last round.
+    * Implemented `toggle-last-round`, `set-last-round`, `next-singer`, and `previous-singer` action handling in `MainViewModel.Requests.cs`.
   - **Audience Display Announcement**: When activated, displays a prominent crimson announcement banner (`★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★`) across all audience views:
     * `Lyracist`: `RotationWindow.xaml`.
     * `KSRotation`: `SingerDisplayWindow.xaml` across all projection modes (Normal, Star Wars, Vinyl, Marquee).
@@ -19,7 +25,13 @@ All notable changes to the Lyracist project are documented here. The format is b
     * Added `HasSungInLastRound` property to `IRotationSinger`, `Singer`, and `SingerEntry`.
     * In the last round, after a performer finishes their song, `HasSungInLastRound` is set to true and they are automatically hidden from the audience rotation queue (current, next, and on deck).
     * The rotation automatically advances only through remaining unsung performers; when all singers have completed their song, the current singer clears.
-    * In the host queue, performers who have sung in the last round remain visible with a distinct `DONE (LAST ROUND)` indicator badge.
+    * In the host queue and Remote DJ screen, performers who have sung in the last round remain visible with a distinct `DONE (LAST ROUND)` indicator badge.
+
+### Fixed
+- **Lyracist & KSRotation (Last Round consistency)**: Several rotation-advance code paths were silently ignoring Last Round mode, so a performer who had already sung could be re-promoted to current or re-highlighted as next:
+  - `RotationHelpers.SetCurrentSinger` (`Shared/RotationHelpers.cs`) now accepts an `isLastRound` parameter and no longer resumes a displaced current singer as "next" if they've already performed this last round; threaded through every call site in both apps.
+  - The DJ web remote's `toggle-inactive`, `delete`, `restore`, and `complete-round`/`clear-round` handlers (`MainViewModel.Requests.cs`), and the equivalent native WPF commands (`ToggleSingerInactive`, `RemoveSinger` in KSRotation; `RemoveSinger`/`ToggleInactiveSinger` in Lyracist's `RotationViewModel`), now respect Last Round when searching for the next singer to promote.
+  - `KaraokeViewModel.UpdateNowNext` in Lyracist — the Now/Next reconciliation hooked to every rotation change — now excludes already-sung singers from its promotion fallback and no longer trusts a stale "current"/"next" designation for a singer who has already performed.
 
 ## [26.9.3.0] - 2026-09-03
 

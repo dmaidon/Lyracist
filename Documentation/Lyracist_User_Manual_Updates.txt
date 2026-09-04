@@ -1089,8 +1089,8 @@ Section: Lyracist, KSRotation, and KSRotation.Maui / Last Round Rotation Managem
 [Last Round Rotation Management]
 A unified "Last Round" mode has been introduced across Lyracist, KSRotation (WPF), and KSRotation.Maui:
 
-1. Host Activation Button:
-   - Positioned as a prominent emerald green button placed immediately after the Clear button in the active queue controls (Lyracist `RotationPage.xaml`, KSRotation `MainWindow.xaml`, and KSRotation.Maui `MainPage.xaml`).
+1. Host & Remote DJ Activation Buttons:
+   - Positioned as a prominent emerald green button placed immediately after the Clear button in the active queue controls (Lyracist `RotationPage.xaml`, KSRotation `MainWindow.xaml`, and KSRotation.Maui `MainPage.xaml`), and in the `Current Rotation` panel header and quick actions sidebar of the Remote DJ Control board (`dj.html`).
    - Toggles between inactive (emerald green `#059669`) and active (sapphire blue `#2563EB` with "✓ Last Round").
 
 2. Audience Screen & Billboard Announcement:
@@ -1098,11 +1098,12 @@ A unified "Last Round" mode has been introduced across Lyracist, KSRotation (WPF
      * Lyracist: `RotationWindow.xaml`.
      * KSRotation (WPF): `SingerDisplayWindow.xaml` across Normal, Star Wars, Vinyl, and Marquee projection modes.
      * KSRotation.Maui: `BillboardView.xaml` (on-device attractor and external HDMI presentations) and `billboard.html`.
+     * Remote DJ Board: `dj.html`.
 
 3. Automatic Performer Queue Pruning:
    - Once a performer finishes their performance in the last round, they are marked as having sung in the last round (`HasSungInLastRound = true`).
    - Completed performers are automatically hidden from all audience displays and web billboard queues.
    - The queue automatically advances through the remaining unsung performers until the round completes.
-   - On the DJ host screen, completed performers remain visible with an emerald `DONE (LAST ROUND)` indicator badge for verification.
+   - On the DJ host console and Remote DJ screen (`dj.html`), completed performers remain visible with an emerald `DONE (LAST ROUND)` indicator badge for verification.
 
 

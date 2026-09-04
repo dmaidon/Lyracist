@@ -1,4 +1,4 @@
-// Edited on Sep 3, 2026 @ 23:49:35 -> Serialize hasSungInLastRound and isLastRound in rotation and venue info JSON
+// Edited on Sep 4, 2026 @ 08:20:00 -> Add toggle-last-round, next-singer, and previous-singer actions to DJ action handler
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -569,7 +569,7 @@ namespace KSRotation.ViewModels
 
                         if (singer.IsPaused || singer.IsInactive) return "Singer is paused or inactive.";
 
-                        RotationHelpers.SetCurrentSinger(Singers, singer);
+                        RotationHelpers.SetCurrentSinger(Singers, singer, isLastRound: IsLastRound);
 
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();
@@ -627,7 +627,7 @@ namespace KSRotation.ViewModels
                         if (pausing)
                         {
                             // 1. Try the singer already flagged as Next (manual next-singer override)
-                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive && !s.IsPaused);
+                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
 
                             if (nextCurrent == null)
                             {
@@ -637,7 +637,7 @@ namespace KSRotation.ViewModels
                                 for (int i = 1; i < count; i++)
                                 {
                                     SingerEntry candidate = Singers[(currentIndex + i) % count];
-                                    if (candidate != singer && !candidate.IsInactive && !candidate.IsPaused)
+                                    if (candidate != singer && !candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
                                     {
                                         nextCurrent = candidate;
                                         break;
@@ -658,7 +658,7 @@ namespace KSRotation.ViewModels
                             nextCurrent.IsNext = false;
                         }
 
-                        RotationHelpers.UpdateNextSingerHighlight(Singers);
+                        RotationHelpers.UpdateNextSingerHighlight(Singers, isLastRound: IsLastRound);
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();
                         return "";
@@ -679,7 +679,7 @@ namespace KSRotation.ViewModels
                         if (wasCurrent)
                         {
                             // 1. Try the singer already flagged as Next (manual next-singer override)
-                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive && !s.IsPaused);
+                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
 
                             if (nextCurrent == null)
                             {
@@ -689,7 +689,7 @@ namespace KSRotation.ViewModels
                                 for (int i = 1; i < count; i++)
                                 {
                                     SingerEntry candidate = Singers[(currentIndex + i) % count];
-                                    if (candidate != singer && !candidate.IsInactive && !candidate.IsPaused)
+                                    if (candidate != singer && !candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
                                     {
                                         nextCurrent = candidate;
                                         break;
@@ -711,11 +711,11 @@ namespace KSRotation.ViewModels
 
                         if (wasCurrent && nextCurrent != null)
                         {
-                            RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop);
+                            RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop, isLastRound: IsLastRound);
                         }
 
                         RotationHelpers.EnsureRotationStartFlag(Singers);
-                        RotationHelpers.UpdateNextSingerHighlight(Singers);
+                        RotationHelpers.UpdateNextSingerHighlight(Singers, isLastRound: IsLastRound);
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();
                         return "";
@@ -741,7 +741,7 @@ namespace KSRotation.ViewModels
                                 }
                                 Singers.Move(oldIndex, activeCount);
                             }
-                            RotationHelpers.UpdateNextSingerHighlight(Singers);
+                            RotationHelpers.UpdateNextSingerHighlight(Singers, isLastRound: IsLastRound);
                             RebuildRotationJsonCacheNow();
                             QueueSaveDatabase();
                         }
@@ -781,7 +781,7 @@ namespace KSRotation.ViewModels
                             bool isCompleted = action.Equals("complete-round", StringComparison.OrdinalIgnoreCase);
                             singer.SetRoundCompleted(round, isCompleted);
 
-                            RotationHelpers.UpdateNextSingerHighlight(Singers);
+                            RotationHelpers.UpdateNextSingerHighlight(Singers, isLastRound: IsLastRound);
                             RebuildRotationJsonCacheNow();
                             QueueSaveDatabase();
                             return "";
@@ -806,6 +806,75 @@ namespace KSRotation.ViewModels
                         ActiveSpecialEvent = targetId;
                         UpdateDjBannerPath();
                         UpdateLastSongState();
+                        return "";
+                    }
+                case "toggle-last-round":
+                    {
+                        ToggleLastRound();
+                        QueueSaveDatabase();
+                        return "";
+                    }
+                case "set-last-round":
+                    {
+                        if (bool.TryParse(extraData, out bool lrVal))
+                        {
+                            IsLastRound = lrVal;
+                        }
+                        else
+                        {
+                            ToggleLastRound();
+                        }
+                        QueueSaveDatabase();
+                        return "";
+                    }
+                case "next-singer":
+                    {
+                        var current = RotationHelpers.GetCurrentSinger(Singers);
+                        if (current != null)
+                        {
+                            var next = RotationHelpers.GetNextActiveSingers(Singers, current, 1, isLastRound: IsLastRound).FirstOrDefault();
+                            if (next != null)
+                            {
+                                RotationHelpers.SetCurrentSinger(Singers, next, FloatCurrentSingerToTop, isLastRound: IsLastRound);
+                                RotationHelpers.UpdateNextSingerHighlight(Singers, isLastRound: IsLastRound);
+                                RebuildRotationJsonCacheNow();
+                                QueueSaveDatabase();
+                            }
+                        }
+                        else
+                        {
+                            var first = Singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
+                            if (first != null)
+                            {
+                                RotationHelpers.SetCurrentSinger(Singers, first, FloatCurrentSingerToTop, isLastRound: IsLastRound);
+                                RotationHelpers.UpdateNextSingerHighlight(Singers, isLastRound: IsLastRound);
+                                RebuildRotationJsonCacheNow();
+                                QueueSaveDatabase();
+                            }
+                        }
+                        return "";
+                    }
+                case "previous-singer":
+                    {
+                        var current = RotationHelpers.GetCurrentSinger(Singers);
+                        if (current != null)
+                        {
+                            int currentIndex = Singers.IndexOf(current);
+                            int count = Singers.Count;
+                            for (int i = 1; i < count; i++)
+                            {
+                                int prevIndex = (currentIndex - i + count) % count;
+                                var candidate = Singers[prevIndex];
+                                if (!candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
+                                {
+                                    RotationHelpers.SetCurrentSinger(Singers, candidate, FloatCurrentSingerToTop, isLastRound: IsLastRound);
+                                    RotationHelpers.UpdateNextSingerHighlight(Singers, isLastRound: IsLastRound);
+                                    RebuildRotationJsonCacheNow();
+                                    QueueSaveDatabase();
+                                    break;
+                                }
+                            }
+                        }
                         return "";
                     }
                 default:

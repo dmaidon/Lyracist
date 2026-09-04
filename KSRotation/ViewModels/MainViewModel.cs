@@ -129,7 +129,7 @@ namespace KSRotation.ViewModels
                                 ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
                     if (first != null)
                     {
-                        RotationHelpers.SetCurrentSinger(Singers, first, floatCurrentToTop: true);
+                        RotationHelpers.SetCurrentSinger(Singers, first, floatCurrentToTop: true, isLastRound: IsLastRound);
                     }
                 }
                 else
@@ -1041,7 +1041,7 @@ namespace KSRotation.ViewModels
                                 ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
                     if (first != null)
                     {
-                        RotationHelpers.SetCurrentSinger(Singers, first, floatCurrentToTop: true);
+                        RotationHelpers.SetCurrentSinger(Singers, first, floatCurrentToTop: true, isLastRound: IsLastRound);
                     }
                 }
                 else
@@ -1187,7 +1187,7 @@ namespace KSRotation.ViewModels
             if (entry.IsCurrent)
             {
                 // 1. Try the singer already flagged as Next (manual next-singer override)
-                SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused);
+                SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
 
                 if (nextCurrent == null)
                 {
@@ -1197,7 +1197,7 @@ namespace KSRotation.ViewModels
                     for (int i = 1; i < count; i++)
                     {
                         SingerEntry candidate = Singers[(currentIndex + i) % count];
-                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused)
+                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
                         {
                             nextCurrent = candidate;
                             break;
@@ -1208,7 +1208,7 @@ namespace KSRotation.ViewModels
                 entry.IsCurrent = false;
                 if (nextCurrent != null)
                 {
-                    RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop);
+                    RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop, isLastRound: IsLastRound);
                 }
             }
 
@@ -1582,7 +1582,7 @@ namespace KSRotation.ViewModels
                 if (wasCurrent)
                 {
                     // 1. Try the singer already flagged as Next (manual next-singer override)
-                    nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused);
+                    nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
 
                     if (nextCurrent == null)
                     {
@@ -1592,7 +1592,7 @@ namespace KSRotation.ViewModels
                         for (int i = 1; i < count; i++)
                         {
                             SingerEntry candidate = Singers[(currentIndex + i) % count];
-                            if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused)
+                            if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
                             {
                                 nextCurrent = candidate;
                                 break;
@@ -1610,7 +1610,7 @@ namespace KSRotation.ViewModels
 
                 if (wasCurrent && nextCurrent != null)
                 {
-                    RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop);
+                    RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop, isLastRound: IsLastRound);
                 }
 
                 EnforceActiveInactiveOrder(entry);
@@ -1756,7 +1756,7 @@ namespace KSRotation.ViewModels
             _isFinishingSong = true;
             try
             {
-                RotationHelpers.SetCurrentSinger(Singers, entry, FloatCurrentSingerToTop);
+                RotationHelpers.SetCurrentSinger(Singers, entry, FloatCurrentSingerToTop, isLastRound: IsLastRound);
             }
             finally
             {
@@ -1790,7 +1790,7 @@ namespace KSRotation.ViewModels
             RotationHelpers.ToggleRotationStartSinger(Singers, entry);
             if (!wasRotationStart && FloatCurrentSingerToTop)
             {
-                RotationHelpers.SetCurrentSinger(Singers, entry, floatCurrentToTop: true);
+                RotationHelpers.SetCurrentSinger(Singers, entry, floatCurrentToTop: true, isLastRound: IsLastRound);
             }
             RebuildRotationJsonCacheNow();
             QueueSaveDatabase();

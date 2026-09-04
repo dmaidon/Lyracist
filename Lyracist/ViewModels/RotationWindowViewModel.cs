@@ -312,7 +312,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         var currentMatch = Rotation.FirstOrDefault(s => s.Name == singer.Name);
         if (currentMatch != null)
         {
-            Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, currentMatch);
+            Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, currentMatch, isLastRound: IsLastRound);
             CurrentSinger = currentMatch.Name;
             CurrentSongTitle = currentMatch.SongTitle ?? string.Empty;
             CurrentSingerSong = string.IsNullOrEmpty(currentMatch.Artist) ? (currentMatch.SongTitle ?? string.Empty) : $"{currentMatch.SongTitle} - {currentMatch.Artist}";

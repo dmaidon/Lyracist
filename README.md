@@ -1,4 +1,4 @@
-<!-- Edited on Sep 4, 2026 @ 07:38:00 -> Update Last Round to emerald green button across all apps in README.md -->
+<!-- Edited on Sep 4, 2026 @ 08:22:00 -> Update Last Round across all apps and remote DJ screen (dj.html) -->
 Last Edit: Sep 4, 2026 - Last Round rotation option & audience billboard announcements across Lyracist, KSRotation, and KSRotation.Maui
 # Lyracist Pro
     
@@ -8,10 +8,10 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
     
 ## Key Features
 
-### 🛑 Last Round Rotation Management (`Lyracist`, `KSRotation`, `KSRotation.Maui`)
-- **One-Click Host Activation**: Standout emerald green "Last Round" button positioned directly after the Clear button across all host interfaces (`RotationPage.xaml`, `MainWindow.xaml`, `MainPage.xaml`), immediately synchronizing across the rotation lifecycle and display services.
-- **Audience Screen Announcement**: Bold crimson banner (`★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★`) displayed prominently on the Lyracist `RotationWindow`, KSRotation `SingerDisplayWindow` (across all display projection styles), KSRotation.Maui `BillboardView` (on-device attractor and external HDMI/Presentation displays), and the real-time web billboard (`billboard.html`).
-- **Dynamic Queue Pruning**: Once a performer has sung in the last round, they are automatically hidden from the audience rotation queue (now singing, next, on-deck), while remaining visible on the host screen with a distinct `DONE (LAST ROUND)` indicator badge.
+### 🛑 Last Round Rotation Management (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `dj.html`)
+- **One-Click Host & Remote Activation**: Standout emerald green "Last Round" button positioned directly after the Clear button across host interfaces (`RotationPage.xaml`, `MainWindow.xaml`, `MainPage.xaml`) and on the Remote DJ Board (`dj.html`), immediately synchronizing across the rotation lifecycle, embedded servers, and display services.
+- **Audience Screen Announcement**: Bold crimson banner (`★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★`) displayed prominently on the Lyracist `RotationWindow`, KSRotation `SingerDisplayWindow` (across all display projection styles), KSRotation.Maui `BillboardView` (on-device attractor and external HDMI/Presentation displays), Remote DJ Board (`dj.html`), and the real-time web billboard (`billboard.html`).
+- **Dynamic Queue Pruning**: Once a performer has sung in the last round, they are automatically hidden from the audience rotation queue (now singing, next, on-deck), while remaining visible on host and remote DJ screens with a distinct `DONE (LAST ROUND)` indicator badge.
 
 ### ⚡ High-Performance In-Memory Library Metadata Probing
 - **Microsecond In-Memory Header Extraction**:

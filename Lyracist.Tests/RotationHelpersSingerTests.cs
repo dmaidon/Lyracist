@@ -236,6 +236,39 @@ public class RotationHelpersSingerTests
     }
 
     [Fact]
+    public void SetCurrentSinger_LastRound_DoesNotResumePreviousCurrentIfTheyAlreadySang()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true, HasSungInLastRound = true };
+        var bob = new Singer { Name = "Bob" };
+        var carol = new Singer { Name = "Carol" };
+        var singers = new List<Singer> { alice, bob, carol };
+
+        // A KJ manually promotes Carol while Alice (the displaced current singer) has already
+        // performed her last-round song. Without isLastRound threaded through, SetCurrentSinger
+        // would resume Alice as Next even though she's done for the night.
+        RotationHelpers.SetCurrentSinger(singers, carol, isLastRound: true);
+
+        Assert.True(carol.IsCurrent);
+        Assert.False(alice.IsNext);
+        Assert.True(bob.IsNext);
+    }
+
+    [Fact]
+    public void SetCurrentSinger_LastRoundWithFloatCurrentToTop_NextHighlightSkipsSungSinger()
+    {
+        var alice = new Singer { Name = "Alice" };
+        var bob = new Singer { Name = "Bob", HasSungInLastRound = true };
+        var carol = new Singer { Name = "Carol" };
+        var singers = new List<Singer> { alice, bob, carol };
+
+        RotationHelpers.SetCurrentSinger(singers, alice, floatCurrentToTop: true, isLastRound: true);
+
+        Assert.True(alice.IsCurrent);
+        Assert.False(bob.IsNext);
+        Assert.True(carol.IsNext);
+    }
+
+    [Fact]
     public void AdvanceRotationAfterFinished_WithFloatCurrentToTop_AdvancesAndFloatsNextToTop()
     {
         var alice = new Singer { Name = "Alice", IsCurrent = true, IsRotationStart = true };

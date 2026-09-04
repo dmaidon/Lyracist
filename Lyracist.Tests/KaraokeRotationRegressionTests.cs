@@ -45,6 +45,19 @@ public class KaraokeRotationRegressionTests
         field.SetValue(vm, value);
     }
 
+    // UpdateNowNext is private and normally only runs off Rotation.Rotation.CollectionChanged /
+    // RotationStateChanged. Some Last Round scenarios below need to force a resync pass without an
+    // actual singer-completion event (e.g. simulating desynced state from an external data import),
+    // so invoke it directly via reflection.
+    private static void InvokeUpdateNowNext(KaraokeViewModel vm)
+    {
+        var method = typeof(KaraokeViewModel).GetMethod(
+            "UpdateNowNext",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?? throw new InvalidOperationException("KaraokeViewModel.UpdateNowNext method not found.");
+        method.Invoke(vm, null);
+    }
+
     private static KaraokeViewModel CreateKaraokeViewModel(RotationViewModel rotationVm, out Mock<IMediaEngine> mediaEngine)
     {
         var display = new Mock<IDisplayService>();
@@ -365,5 +378,90 @@ public class KaraokeRotationRegressionTests
         Assert.True(carol.IsCurrent);
         Assert.False(carol.IsNext);
         Assert.True(bob.IsNext);
+    }
+
+    // Regression coverage for KaraokeViewModel.UpdateNowNext ignoring Last Round mode: its
+    // activeSingers filter, its "current is stale" check, and its "existing Next is stale" check all
+    // used to omit HasSungInLastRound, and its UpdateNextSingerHighlight recompute never passed
+    // isLastRound — so this resync (hooked to every Rotation.Rotation.CollectionChanged and
+    // RotationStateChanged event) could silently re-promote or re-highlight a singer who already
+    // performed during the last round, right on the audience-facing Now/Next display.
+
+    [Fact]
+    public void UpdateNowNext_DuringLastRound_DoesNotResurrectSungSingerAsCurrentWhenNoneEligibleRemain()
+    {
+        var rotationVm = CreateRotationViewModel();
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+
+        var karaokeVm = CreateKaraokeViewModel(rotationVm, out _);
+        Assert.True(alice.IsCurrent);
+        Assert.True(bob.IsNext);
+
+        rotationVm.IsLastRound = true;
+        bob.HasSungInLastRound = true; // Bob already performed his last-round song
+        bob.IsNext = false;
+
+        // Alice (current) is removed with nobody eligible left but Bob, who is done for the night.
+        // This directly exercises UpdateNowNext's own activeSingers fallback (not
+        // RotationViewModel.RemoveSinger's promotion search, which is isolated from KaraokeViewModel here).
+        rotationVm.Rotation.Remove(alice);
+
+        Assert.False(bob.IsCurrent);
+        Assert.Equal("None", karaokeVm.NowSingingName);
+    }
+
+    [Fact]
+    public void UpdateNowNext_DuringLastRound_TreatsStaleCurrentSingerWhoAlreadySangAsNeedingPromotion()
+    {
+        var rotationVm = CreateRotationViewModel();
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        var carol = MakeSinger("Carol");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+        rotationVm.Rotation.Add(carol);
+
+        var karaokeVm = CreateKaraokeViewModel(rotationVm, out _);
+        Assert.True(alice.IsCurrent);
+
+        rotationVm.IsLastRound = true;
+        // Simulate desynced state (e.g. an imported KSRotationSyncService snapshot) where the
+        // designated current singer is also flagged as already having sung this last round.
+        alice.HasSungInLastRound = true;
+
+        InvokeUpdateNowNext(karaokeVm);
+
+        Assert.False(alice.IsCurrent);
+        Assert.True(bob.IsCurrent);
+        Assert.Equal("Bob", karaokeVm.NowSingingName);
+    }
+
+    [Fact]
+    public void UpdateNowNext_DuringLastRound_RecomputesNextSkippingSingerWhoAlreadySang()
+    {
+        var rotationVm = CreateRotationViewModel();
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        var carol = MakeSinger("Carol");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+        rotationVm.Rotation.Add(carol);
+
+        var karaokeVm = CreateKaraokeViewModel(rotationVm, out _);
+        Assert.True(alice.IsCurrent);
+        Assert.True(bob.IsNext);
+
+        rotationVm.IsLastRound = true;
+        // Bob finishes his last-round song but stays flagged Next (desynced state).
+        bob.HasSungInLastRound = true;
+
+        InvokeUpdateNowNext(karaokeVm);
+
+        Assert.False(bob.IsNext);
+        Assert.True(carol.IsNext);
+        Assert.Equal("Carol", karaokeVm.NextUpName);
     }
 }

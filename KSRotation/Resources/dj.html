@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 12:30:00 -> Move checkmark button first on singer cards and convert Add Performer to popup modal dialog -->
+<!-- Edited on Sep 4, 2026 @ 08:22:00 -> Add emerald green Last Round button, announcement banner, and status badges to remote DJ screen -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -628,6 +628,62 @@
             font-size: 0.8rem;
             border-radius: 4px;
         }
+
+        .btn-last-round {
+            background-color: #059669;
+            color: #FFFFFF;
+            border: 1px solid #047857;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+            .btn-last-round:hover {
+                background-color: #047857;
+                opacity: 0.95;
+            }
+
+            .btn-last-round.active {
+                background-color: #2563EB !important;
+                border-color: #1D4ED8 !important;
+                color: #FFFFFF !important;
+                box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+            }
+
+                .btn-last-round.active:hover {
+                    background-color: #1D4ED8 !important;
+                }
+
+        .last-round-banner {
+            background: linear-gradient(135deg, #DC2626, #991B1B);
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+            animation: lastRoundPulse 2s infinite ease-in-out;
+        }
+
+        @keyframes lastRoundPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+
+        .singer-card.sung-last-round {
+            opacity: 0.65;
+            border-left: 4px solid #059669;
+        }
     </style>
 </head>
 <body>
@@ -663,11 +719,15 @@
                 <div class="panel">
                     <div class="panel-title">
                         <span>Current Rotation</span>
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
                             <button class="btn-primary" style="font-size: 0.8rem; padding: 4px 10px;" onclick="openAddPerformerModal()">+ Add Performer</button>
+                            <button id="last-round-btn" class="btn-last-round" style="font-size: 0.8rem; padding: 4px 10px;" onclick="sendAction('toggle-last-round')">Last Round</button>
                             <button class="btn-outline" style="font-size: 0.8rem; padding: 4px 8px;" onclick="sendAction('previous-singer')">◀ Previous</button>
                             <button class="btn-primary" style="font-size: 0.8rem; padding: 4px 8px;" onclick="sendAction('next-singer')">Next Singer ▶</button>
                         </div>
+                    </div>
+                    <div id="last-round-banner" class="last-round-banner" style="display: none;">
+                        ★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★
                     </div>
                     <div id="queue-list" class="queue-list">
                         <div class="no-data">Loading rotation queue...</div>
@@ -677,10 +737,13 @@
                 <!-- Right Column: Controls, Add Singer, Events, Requests -->
                 <div style="display: flex; flex-direction: column; gap: 16px;">
 
-                    <!-- Quick Add Singer Button Card -->
+                    <!-- Quick Add Singer & Last Round Button Card -->
                     <div class="panel" style="display: flex; flex-direction: column; gap: 8px;">
                         <button type="button" class="btn-primary" onclick="openAddPerformerModal()" style="width: 100%; padding: 12px 16px; font-size: 1rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                             <span>🎤</span> + Add Performer to Rotation
+                        </button>
+                        <button type="button" id="last-round-quick-btn" class="btn-last-round" onclick="sendAction('toggle-last-round')" style="width: 100%; padding: 10px 16px; font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                            <span>🌙</span> <span class="last-round-label">Last Round</span>
                         </button>
                     </div>
 
@@ -862,8 +925,49 @@
                     renderSpecialEvents(data.specialEvents, data.activeSpecialEvent);
                 }
 
+                // Fetch Venue / Last Round Info
+                const infoResponse = await fetch(`/api/info${querySuffix}`, { headers });
+                if (infoResponse.ok) {
+                    const info = await infoResponse.json();
+                    updateLastRoundState(info.isLastRound);
+                }
+
             } catch (err) {
                 console.error("Connection error loading DJ data", err);
+            }
+        }
+
+        function updateLastRoundState(isLastRound) {
+            const isRoundActive = !!isLastRound;
+
+            const btn = document.getElementById("last-round-btn");
+            if (btn) {
+                if (isRoundActive) {
+                    btn.classList.add("active");
+                    btn.textContent = "✓ Last Round";
+                    btn.title = "Last Round is active. Tap to turn off.";
+                } else {
+                    btn.classList.remove("active");
+                    btn.textContent = "Last Round";
+                    btn.title = "Toggle Last Round for the night";
+                }
+            }
+
+            const quickBtn = document.getElementById("last-round-quick-btn");
+            if (quickBtn) {
+                const label = quickBtn.querySelector(".last-round-label");
+                if (isRoundActive) {
+                    quickBtn.classList.add("active");
+                    if (label) label.textContent = "✓ Last Round";
+                } else {
+                    quickBtn.classList.remove("active");
+                    if (label) label.textContent = "Last Round";
+                }
+            }
+
+            const banner = document.getElementById("last-round-banner");
+            if (banner) {
+                banner.style.display = isRoundActive ? "block" : "none";
             }
         }
 
@@ -993,6 +1097,10 @@
                 }
                 if (s.isPaused) {
                     cardClass += ' paused';
+                }
+                if (s.hasSungInLastRound) {
+                    cardClass += ' sung-last-round';
+                    badges += '<span class="badge" style="background-color: #059669; color: white; font-weight: bold; margin-left: 4px;">DONE (LAST ROUND)</span>';
                 }
 
                 // Render rounds checkboxes

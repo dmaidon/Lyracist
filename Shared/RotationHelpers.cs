@@ -370,8 +370,11 @@ namespace Lyracist.Shared
         /// that singer as IsNext so they resume right after. Falls back to standard rotation order when
         /// there was no previous current singer (or it was inactive).
         /// If <paramref name="floatCurrentToTop"/> is true, moves <paramref name="entry"/> to index 0.
+        /// If <paramref name="isLastRound"/> is true, a previous current singer who already performed
+        /// during the last round is never resumed as IsNext — the standard rotation-order fallback is
+        /// used instead, which itself skips other performers who have already sung.
         /// </summary>
-        public static void SetCurrentSinger<T>(IList<T> singers, T entry, bool floatCurrentToTop = false) where T : class, IRotationSinger
+        public static void SetCurrentSinger<T>(IList<T> singers, T entry, bool floatCurrentToTop = false, bool isLastRound = false) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(entry);
@@ -398,17 +401,18 @@ namespace Lyracist.Shared
                 {
                     MoveSingerInList(singers, index, 0);
                 }
-                UpdateNextSingerHighlight(singers);
+                UpdateNextSingerHighlight(singers, isLastRound);
             }
             else
             {
-                if (previousCurrent != null && previousCurrent != entry && !previousCurrent.IsInactive && !previousCurrent.IsPaused)
+                if (previousCurrent != null && previousCurrent != entry && !previousCurrent.IsInactive && !previousCurrent.IsPaused
+                    && (!isLastRound || !previousCurrent.HasSungInLastRound))
                 {
                     previousCurrent.IsNext = true;
                 }
                 else
                 {
-                    UpdateNextSingerHighlight(singers);
+                    UpdateNextSingerHighlight(singers, isLastRound);
                 }
             }
         }

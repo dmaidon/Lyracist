@@ -630,6 +630,14 @@ public class MainViewModelTests
         return (string)method.Invoke(vm, [action, targetId, "", "", "", "", ""])!;
     }
 
+    private static string InvokeDjAction(KSRotation.ViewModels.MainViewModel vm, string action, string targetId, string extraData)
+    {
+        var method = typeof(KSRotation.ViewModels.MainViewModel).GetMethod(
+            "ExecuteDjActionOnUi",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        return (string)method.Invoke(vm, [action, targetId, extraData, "", "", "", ""])!;
+    }
+
     [Fact]
     public void DjDeleteAction_DeletingCurrentSinger_PromotesFlaggedNextSinger()
     {
@@ -1315,6 +1323,115 @@ public class MainViewModelTests
         Assert.Equal(2, nextActive.Count);
         Assert.Equal("Charlie", nextActive[0].Name);
         Assert.Equal("Eve", nextActive[1].Name);
+    }
+
+    // Regression coverage for the DJ web remote's action dispatcher (ExecuteDjActionOnUi): unlike
+    // next-singer/previous-singer, the older toggle-inactive/delete/restore/complete-round handlers
+    // did not thread IsLastRound through to their own "who's next" candidate search or to the final
+    // RotationHelpers.UpdateNextSingerHighlight call, so a singer who already performed during the
+    // Last Round could be silently re-promoted to current or re-highlighted as next when a DJ used
+    // the remote console (but not the native WPF grid, whose equivalent commands already passed
+    // isLastRound to UpdateNextSingerHighlight).
+
+    [Fact]
+    public void DjToggleInactiveAction_DuringLastRound_SkipsSungSingerWhenPromotingNext()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var current = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var sungSinger = new SingerEntry { Name = "Bob" };
+        var eligible = new SingerEntry { Name = "Carol" };
+        vm.Singers.Add(current);
+        vm.Singers.Add(sungSinger);
+        vm.Singers.Add(eligible);
+
+        vm.IsLastRound = true; // resets HasSungInLastRound on everyone first
+        sungSinger.HasSungInLastRound = true; // Bob already performed his last-round song
+
+        // Act - pause the current singer (no one flagged IsNext, so this falls back to index order,
+        // which must skip Bob since he's done for the night)
+        string result = InvokeDjAction(vm, "toggle-inactive", current.Id.ToString());
+
+        Assert.Equal("", result);
+        Assert.True(current.IsPaused);
+        Assert.False(sungSinger.IsCurrent);
+        Assert.True(eligible.IsCurrent);
+    }
+
+    [Fact]
+    public void DjDeleteAction_DuringLastRound_SkipsSungSingerWhenPromotingNext()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var current = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var sungSinger = new SingerEntry { Name = "Bob" };
+        var eligible = new SingerEntry { Name = "Carol" };
+        vm.Singers.Add(current);
+        vm.Singers.Add(sungSinger);
+        vm.Singers.Add(eligible);
+
+        vm.IsLastRound = true;
+        sungSinger.HasSungInLastRound = true;
+
+        // Act - delete the current singer via the DJ web console (no one flagged IsNext)
+        string result = InvokeDjAction(vm, "delete", current.Id.ToString());
+
+        Assert.Equal("", result);
+        Assert.False(sungSinger.IsCurrent);
+        Assert.True(eligible.IsCurrent);
+    }
+
+    [Fact]
+    public void DjRestoreAction_DuringLastRound_NextHighlightSkipsSungSinger()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var current = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var sungSinger = new SingerEntry { Name = "Bob" };
+        var toRestore = new SingerEntry { Name = "Diana", IsInactive = true };
+        vm.Singers.Add(current);
+        vm.Singers.Add(sungSinger);
+        vm.Singers.Add(toRestore);
+
+        vm.IsLastRound = true;
+        sungSinger.HasSungInLastRound = true;
+
+        // Act - restoring Diana recomputes the Next highlight off Alice (current); it must skip Bob
+        // (already sung) and land on Diana, the only other eligible singer.
+        string result = InvokeDjAction(vm, "restore", toRestore.Id.ToString());
+
+        Assert.Equal("", result);
+        Assert.False(toRestore.IsInactive);
+        Assert.False(sungSinger.IsNext);
+        Assert.True(toRestore.IsNext);
+    }
+
+    [Fact]
+    public void DjCompleteRoundAction_DuringLastRound_NextHighlightSkipsSungSinger()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var current = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var sungSinger = new SingerEntry { Name = "Bob" };
+        var eligible = new SingerEntry { Name = "Carol" };
+        vm.Singers.Add(current);
+        vm.Singers.Add(sungSinger);
+        vm.Singers.Add(eligible);
+
+        vm.IsLastRound = true;
+        sungSinger.HasSungInLastRound = true;
+
+        // Act - marking a round complete for Carol recomputes the Next highlight off Alice; it must
+        // skip Bob (already sung) and land on Carol.
+        string result = InvokeDjAction(vm, "complete-round", eligible.Id.ToString(), "1");
+
+        Assert.Equal("", result);
+        Assert.False(sungSinger.IsNext);
+        Assert.True(eligible.IsNext);
     }
 }
 

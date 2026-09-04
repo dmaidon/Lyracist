@@ -122,7 +122,7 @@ public partial class RotationViewModel : BaseViewModel
                                 ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
                     if (first != null)
                     {
-                        Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, first, floatCurrentToTop: true);
+                        Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, first, floatCurrentToTop: true, isLastRound: IsLastRound);
                     }
                 }
                 else
@@ -611,7 +611,7 @@ public partial class RotationViewModel : BaseViewModel
             if (wasCurrent)
             {
                 // 1. Try the singer already flagged as Next (manual next-singer override)
-                nextCurrent = Rotation.FirstOrDefault(s => s != removed && s.IsNext && !s.IsInactive);
+                nextCurrent = Rotation.FirstOrDefault(s => s != removed && s.IsNext && !s.IsInactive && (!IsLastRound || !s.HasSungInLastRound));
 
                 if (nextCurrent == null)
                 {
@@ -621,7 +621,7 @@ public partial class RotationViewModel : BaseViewModel
                     for (int i = 1; i < count; i++)
                     {
                         var candidate = Rotation[(currentIndex + i) % count];
-                        if (candidate != removed && !candidate.IsInactive)
+                        if (candidate != removed && !candidate.IsInactive && (!IsLastRound || !candidate.HasSungInLastRound))
                         {
                             nextCurrent = candidate;
                             break;
@@ -643,7 +643,7 @@ public partial class RotationViewModel : BaseViewModel
             if (wasCurrent && nextCurrent != null)
             {
                 RunRotationOrderChange(() =>
-                    Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, nextCurrent, FloatCurrentSingerToTop));
+                    Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, nextCurrent, FloatCurrentSingerToTop, isLastRound: IsLastRound));
             }
 
             Rotation.Remove(removed);
@@ -808,7 +808,7 @@ public partial class RotationViewModel : BaseViewModel
             return;
 
         RunRotationOrderChange(() =>
-            Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, singer, FloatCurrentSingerToTop));
+            Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, singer, FloatCurrentSingerToTop, isLastRound: IsLastRound));
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
@@ -826,7 +826,7 @@ public partial class RotationViewModel : BaseViewModel
             Lyracist.Shared.RotationHelpers.ToggleRotationStartSinger(Rotation, singer);
             if (!wasRotationStart && FloatCurrentSingerToTop)
             {
-                Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, singer, floatCurrentToTop: true);
+                Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, singer, floatCurrentToTop: true, isLastRound: IsLastRound);
             }
         });
 
@@ -966,7 +966,7 @@ public partial class RotationViewModel : BaseViewModel
             if (wasCurrent)
             {
                 // 1. Try the singer already flagged as Next (manual next-singer override)
-                nextCurrent = Rotation.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive);
+                nextCurrent = Rotation.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive && (!IsLastRound || !s.HasSungInLastRound));
 
                 if (nextCurrent == null)
                 {
@@ -976,7 +976,7 @@ public partial class RotationViewModel : BaseViewModel
                     for (int i = 1; i < count; i++)
                     {
                         var candidate = Rotation[(currentIndex + i) % count];
-                        if (candidate != singer && !candidate.IsInactive)
+                        if (candidate != singer && !candidate.IsInactive && (!IsLastRound || !candidate.HasSungInLastRound))
                         {
                             nextCurrent = candidate;
                             break;
@@ -1000,7 +1000,7 @@ public partial class RotationViewModel : BaseViewModel
                 if (nextCurrent != null)
                 {
                     RunRotationOrderChange(() =>
-                        Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, nextCurrent, FloatCurrentSingerToTop));
+                        Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, nextCurrent, FloatCurrentSingerToTop, isLastRound: IsLastRound));
                 }
             }
 

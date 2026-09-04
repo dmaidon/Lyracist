@@ -738,7 +738,7 @@ public partial class KaraokeViewModel : BaseViewModel
         string oldSinger = NowSingingName;
 
         var rotationList = Rotation.Rotation.ToList();
-        var activeSingers = rotationList.Where(s => !s.IsPaused && !s.IsInactive).ToList();
+        var activeSingers = rotationList.Where(s => !s.IsPaused && !s.IsInactive && (!Rotation.IsLastRound || !s.HasSungInLastRound)).ToList();
 
         if (activeSingers.Count == 0)
         {
@@ -765,7 +765,8 @@ public partial class KaraokeViewModel : BaseViewModel
         Singer? current = rotationList.FirstOrDefault(s => s.IsCurrent);
 
         // Fallback if current is not set or is no longer active
-        bool needsPromotion = current == null || current.IsPaused || current.IsInactive || !rotationList.Contains(current);
+        bool needsPromotion = current == null || current.IsPaused || current.IsInactive || !rotationList.Contains(current)
+            || (Rotation.IsLastRound && current.HasSungInLastRound);
         if (needsPromotion)
         {
             current = activeSingers.FirstOrDefault();
@@ -777,7 +778,7 @@ public partial class KaraokeViewModel : BaseViewModel
             {
                 // No valid current singer was designated (e.g. first singer of the night, or the
                 // previous current singer became paused/inactive) — promote one and establish next.
-                Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation.Rotation, current);
+                Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation.Rotation, current, isLastRound: Rotation.IsLastRound);
             }
             else
             {
@@ -786,10 +787,11 @@ public partial class KaraokeViewModel : BaseViewModel
                 // existing designation is missing or stale — never clobber a deliberate "next"
                 // that was just set (e.g. a displaced current singer resuming their spot in line).
                 Singer? existingNext = Rotation.Rotation.FirstOrDefault(s => s.IsNext);
-                bool nextIsValid = existingNext != null && existingNext != current && !existingNext.IsPaused && !existingNext.IsInactive;
+                bool nextIsValid = existingNext != null && existingNext != current && !existingNext.IsPaused && !existingNext.IsInactive
+                    && (!Rotation.IsLastRound || !existingNext.HasSungInLastRound);
                 if (!nextIsValid)
                 {
-                    Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation.Rotation);
+                    Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation.Rotation, isLastRound: Rotation.IsLastRound);
                 }
             }
 
