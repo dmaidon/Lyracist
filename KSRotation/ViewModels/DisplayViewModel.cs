@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:37:00 -> Clean up whitespace (RCS1037)
+// Edited on Sep 3, 2026 @ 23:50:35 -> Add IsLastRound property and filter out completed singers in Last Round mode
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System.Collections.Generic;
@@ -9,6 +9,9 @@ namespace KSRotation.ViewModels
 {
     public partial class DisplayViewModel : ObservableObject
     {
+        [ObservableProperty]
+        public partial bool IsLastRound { get; set; }
+
         [ObservableProperty]
         public partial string CurrentSinger { get; set; } = "No singer selected";
 
@@ -103,9 +106,14 @@ namespace KSRotation.ViewModels
 
             // Find the explicitly-marked current singer; fall back to the first active one.
             SingerEntry? current = Lyracist.Shared.RotationHelpers.GetCurrentSinger(rotation)
-                                ?? rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+                                ?? rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
 
-            List<SingerEntry> activeRotation = [.. rotation.Where(s => !s.IsInactive && !s.IsPaused)];
+            if (current != null && IsLastRound && current.HasSungInLastRound)
+            {
+                current = null;
+            }
+
+            List<SingerEntry> activeRotation = [.. rotation.Where(s => !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound))];
 
             if (current == null)
             {
@@ -182,7 +190,7 @@ namespace KSRotation.ViewModels
             }
             else
             {
-                foreach (SingerEntry singer in rotation.Where(s => !s.IsInactive && !s.IsPaused).Take(5))
+                foreach (SingerEntry singer in activeRotation.Take(5))
                 {
                     if (singer.IsMusic)
                     {

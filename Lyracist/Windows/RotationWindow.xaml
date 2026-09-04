@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 09:50:00 -> Add LastSongBannerOverlay for priority display on rotation billboard -->
+<!-- Edited on Sep 3, 2026 @ 23:55:00 -> Add Last Round announcement banner to rotation billboard screen -->
 <Window x:Class="Lyracist.Windows.RotationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -60,28 +60,47 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Scrolling Marquee Performer Banner -->
-        <Border Grid.Row="0"
-                x:Name="BannerBorder"
-                Background="#1e183a"
-                BorderBrush="#FF8E53"
-                BorderThickness="1.5"
-                Padding="8"
-                Height="80"
-                CornerRadius="12"
-                ClipToBounds="True"
-                Margin="0,0,0,32"
-                Visibility="{Binding IsAnnouncementVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"
-                SizeChanged="BannerBorder_SizeChanged">
-            <Canvas x:Name="BannerCanvas" ClipToBounds="True">
-                <TextBlock x:Name="BannerTextBlock"
-                           FontSize="34"
-                           FontFamily="Montserrat"
-                           Foreground="White"
-                           Canvas.Top="6"
-                           TextOptions.TextFormattingMode="Display" />
-            </Canvas>
-        </Border>
+        <StackPanel Grid.Row="0" Orientation="Vertical">
+            <!-- Scrolling Marquee Performer Banner -->
+            <Border x:Name="BannerBorder"
+                    Background="#1e183a"
+                    BorderBrush="#FF8E53"
+                    BorderThickness="1.5"
+                    Padding="8"
+                    Height="80"
+                    CornerRadius="12"
+                    ClipToBounds="True"
+                    Margin="0,0,0,16"
+                    Visibility="{Binding IsAnnouncementVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"
+                    SizeChanged="BannerBorder_SizeChanged">
+                <Canvas x:Name="BannerCanvas" ClipToBounds="True">
+                    <TextBlock x:Name="BannerTextBlock"
+                               FontSize="34"
+                               FontFamily="Montserrat"
+                               Foreground="White"
+                               Canvas.Top="6"
+                               TextOptions.TextFormattingMode="Display" />
+                </Canvas>
+            </Border>
+
+            <!-- Last Round Announcement Banner -->
+            <Border x:Name="LastRoundBanner"
+                    Background="#5c1010"
+                    BorderBrush="#FF453A"
+                    BorderThickness="2"
+                    CornerRadius="12"
+                    Padding="16,10"
+                    Margin="0,0,0,24"
+                    Visibility="{Binding IsLastRound, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                <TextBlock Text="&#x2605;  THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY  &#x2605;"
+                           FontSize="24"
+                           FontWeight="Black"
+                           Foreground="#FFEBEB"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center" />
+            </Border>
+        </StackPanel>
 
         <!-- Public Auto-Advance Countdown Strip -->
         <Border Grid.Row="1" 

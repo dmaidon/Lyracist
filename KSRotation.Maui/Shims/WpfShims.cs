@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1163 parameter discards in WpfShims.cs
+// Edited on Sep 3, 2026 @ 23:56:00 -> Add SetLastRound shim to DisplayWindowService
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -136,6 +136,7 @@ namespace KSRotation.Services
         public void SetCrawlBannerText(string template, string venueName, string djName) { }
         public void SetSelectedMonitor(string deviceName) { }
         public void SetLastSongBanner(string? path) { }
+        public void SetLastRound(bool isLastRound) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
         public Task StopCastingAsync() => Task.CompletedTask;

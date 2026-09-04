@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:38:00 -> Fix RCS1187 const fields, RCS1235 AddRange, RCS1163 discards, and RCS1037
+// Edited on Sep 4, 2026 @ 00:07:00 -> Add ToggleLastRoundCommand
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -80,6 +80,37 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool IsTestMode { get; set; }
+
+        /// <summary>When true, indicates the final round of the night is underway.</summary>
+        [ObservableProperty]
+        public partial bool IsLastRound { get; set; }
+
+        partial void OnIsLastRoundChanged(bool value)
+        {
+            if (_isInitializing) return;
+
+            if (value)
+            {
+                foreach (var s in Singers)
+                {
+                    s.HasSungInLastRound = false;
+                }
+            }
+            UpdateNextSingerHighlight();
+            RefreshBillboardState();
+            RebuildRotationJsonCacheNow();
+            _displayWindowService.SetLastRound(value);
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
+            }
+        }
+
+        [RelayCommand]
+        public void ToggleLastRound()
+        {
+            IsLastRound = !IsLastRound;
+        }
 
         /// <summary>When true, the current singer always floats to index 0 of the active rotation list.</summary>
         [ObservableProperty]
@@ -186,7 +217,9 @@ namespace KSRotation.ViewModels
                         _displayWindowService.Hide();
                         CheckRestoreDjBanner();
                     }
+#if !MAUI
                     CheckAndSyncTriviaPause();
+#endif
                     QueueSaveSettings();
                     break;
 
@@ -212,7 +245,9 @@ namespace KSRotation.ViewModels
                     {
                         _displayWindowService.RepositionWindow();
                     }
+#if !MAUI
                     PositionTriviaDisplayWindow(SelectedMonitorDevice);
+#endif
                     QueueSaveSettings();
                     break;
 
@@ -258,7 +293,9 @@ namespace KSRotation.ViewModels
                         }
                         _djBannerWindowService.Hide();
                     }
+#if !MAUI
                     CheckAndSyncTriviaPause();
+#endif
                     QueueSaveSettings();
                     break;
 
@@ -293,7 +330,9 @@ namespace KSRotation.ViewModels
                     UpdateLastSongState();
                     QueueSaveSettings();
                     RebuildRotationJsonCacheNow();
+#if !MAUI
                     CheckAndSyncTriviaPause();
+#endif
                     break;
 
                 case nameof(SelectedProjectionView):
@@ -390,7 +429,9 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(WindowTitle))]
+#if !MAUI
         [NotifyPropertyChangedFor(nameof(TriviaVenueName))]
+#endif
         public partial string VenueName { get; set; } = "Karaoke Night";
 
         [ObservableProperty]
@@ -401,7 +442,9 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(WindowTitle))]
+#if !MAUI
         [NotifyPropertyChangedFor(nameof(TriviaHostName))]
+#endif
         public partial string DjName { get; set; } = "Guest DJ";
 
         [ObservableProperty]
@@ -555,6 +598,7 @@ namespace KSRotation.ViewModels
             return (1920, 1080);
         }
 
+#if !MAUI
         [RelayCommand]
         private void LaunchTrivia()
         {
@@ -587,6 +631,7 @@ namespace KSRotation.ViewModels
                 LoggerService.LogError("MainViewModel.LaunchTrivia", ex);
             }
         }
+#endif
 
         [RelayCommand]
         private void PreviewConnectInstructions()
@@ -612,6 +657,48 @@ namespace KSRotation.ViewModels
                 LoggerService.LogError("MainViewModel.PreviewConnectInstructions", ex);
             }
         }
+
+        #region Billboard View Properties
+        public SingerEntry? CurrentSinger => RotationHelpers.GetCurrentSinger(Singers);
+        public SingerEntry? NextSinger => Singers.FirstOrDefault(s => s.IsNext && (!IsLastRound || !s.HasSungInLastRound));
+        public List<SingerEntry> UpcomingSingers => Singers.Where(s => !s.IsInactive && !s.IsCurrent && !s.IsNext && (!IsLastRound || !s.HasSungInLastRound)).ToList();
+        public bool HasCurrentSinger => CurrentSinger != null;
+        public bool HasNextSinger => NextSinger != null;
+        public bool HasUpcomingSingers => UpcomingSingers.Count > 0;
+        public string ActiveSingerCountText => $"{Singers.Count(s => !s.IsInactive && (!IsLastRound || !s.HasSungInLastRound))} Singers";
+        public string CurrentTimeString => DateTime.Now.ToString("h:mm tt");
+        public string WifiSsidDisplay => !string.IsNullOrWhiteSpace(WifiHelper.GetConnectedSsid()) ? WifiHelper.GetConnectedSsid()! : "DJ Travel Router";
+        public string WifiPasswordDisplay => !string.IsNullOrWhiteSpace(WifiPasswordStore.GetPasswordForSsid(WifiSsidDisplay)) ? WifiPasswordStore.GetPasswordForSsid(WifiSsidDisplay) : "None";
+
+        public string CurrentSingerNameDisplay => CurrentSinger?.DisplayNameWithDuet ?? "No Singer Performing";
+        public string CurrentSingerSongDisplay => !string.IsNullOrWhiteSpace(CurrentSinger?.Song) ? CurrentSinger.Song : "Queue is Ready";
+        public string CurrentSingerArtistDisplay => !string.IsNullOrWhiteSpace(CurrentSinger?.Artist) ? CurrentSinger.Artist : string.Empty;
+
+        public string NextSingerNameDisplay => NextSinger?.DisplayNameWithDuet ?? "Next Singer TBA";
+        public string NextSingerSongDisplay => !string.IsNullOrWhiteSpace(NextSinger?.Song) ? NextSinger.Song : string.Empty;
+        public string NextSingerArtistDisplay => !string.IsNullOrWhiteSpace(NextSinger?.Artist) ? NextSinger.Artist : string.Empty;
+
+        public void RefreshBillboardState()
+        {
+            OnPropertyChanged(nameof(IsLastRound));
+            OnPropertyChanged(nameof(CurrentSinger));
+            OnPropertyChanged(nameof(NextSinger));
+            OnPropertyChanged(nameof(UpcomingSingers));
+            OnPropertyChanged(nameof(HasCurrentSinger));
+            OnPropertyChanged(nameof(HasNextSinger));
+            OnPropertyChanged(nameof(HasUpcomingSingers));
+            OnPropertyChanged(nameof(ActiveSingerCountText));
+            OnPropertyChanged(nameof(CurrentTimeString));
+            OnPropertyChanged(nameof(WifiSsidDisplay));
+            OnPropertyChanged(nameof(WifiPasswordDisplay));
+            OnPropertyChanged(nameof(CurrentSingerNameDisplay));
+            OnPropertyChanged(nameof(CurrentSingerSongDisplay));
+            OnPropertyChanged(nameof(CurrentSingerArtistDisplay));
+            OnPropertyChanged(nameof(NextSingerNameDisplay));
+            OnPropertyChanged(nameof(NextSingerSongDisplay));
+            OnPropertyChanged(nameof(NextSingerArtistDisplay));
+        }
+        #endregion
 
         public ObservableCollection<DjBannerItem> AvailableDjBanners { get; } = [];
 
@@ -965,7 +1052,9 @@ namespace KSRotation.ViewModels
             SaveSettings();
             StartRequestServer();
             RebuildRotationJsonCacheNow();
+#if !MAUI
             InitializeTrivia();
+#endif
         }
 
         [RelayCommand]
@@ -1429,8 +1518,13 @@ namespace KSRotation.ViewModels
                         entry.Artist = string.Empty;
                     }
 
+                    if (IsLastRound)
+                    {
+                        entry.HasSungInLastRound = true;
+                    }
+
                     // Advance rotation sequentially after entry (wraps around to top of rotation if last singer)
-                    RotationHelpers.AdvanceRotationAfterFinished(Singers, entry, FloatCurrentSingerToTop);
+                    RotationHelpers.AdvanceRotationAfterFinished(Singers, entry, FloatCurrentSingerToTop, isLastRound: IsLastRound);
 
                     // A music request with nothing left queued (and no further pending request merged in above)
                     // has been fully played — unlike a karaoke singer, it doesn't wait around in the rotation for
@@ -1454,6 +1548,7 @@ namespace KSRotation.ViewModels
                 RotationHelpers.EnsureRotationStartFlag(Singers);
 
                 // 3. Save state and notify displays
+                RefreshBillboardState();
                 RebuildRotationJsonCacheNow();
                 QueueSaveDatabase();
                 if (IsDisplayEnabled)
@@ -1706,10 +1801,10 @@ namespace KSRotation.ViewModels
         }
 
         /// <summary>Clears IsNext on all singers, then marks the first active singer after <paramref name="doneEntry"/> as next.</summary>
-        private void MarkNextSinger(SingerEntry doneEntry) => RotationHelpers.MarkNextSinger(Singers, doneEntry);
+        private void MarkNextSinger(SingerEntry doneEntry) => RotationHelpers.MarkNextSinger(Singers, doneEntry, isLastRound: IsLastRound);
 
         /// <summary>Recalculates the next active singer relative to the current singer and sets the green highlight.</summary>
-        private void UpdateNextSingerHighlight() => RotationHelpers.UpdateNextSingerHighlight(Singers);
+        private void UpdateNextSingerHighlight() => RotationHelpers.UpdateNextSingerHighlight(Singers, isLastRound: IsLastRound);
 
         /// <summary>Saves an end-of-night report and optionally emails it.</summary>
         [RelayCommand]
@@ -1839,6 +1934,7 @@ namespace KSRotation.ViewModels
             RebuildRotationJsonCacheNow();
             OnPropertyChanged(nameof(SingersInRotationCount));
             OnPropertyChanged(nameof(CanLoadTestData));
+            RefreshBillboardState();
         }
 
         private void OnSingerEntryPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -2056,6 +2152,7 @@ namespace KSRotation.ViewModels
             {
                 OnPropertyChanged(nameof(SingersInRotationCount));
             }
+            RefreshBillboardState();
         }
 
         private void UpdatePerformanceForSinger(SingerEntry entry)

@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:36:00 -> Fix CA1835 Memory stream overloads, RCS1213 unused MAUI methods, and RCS1261
+// Edited on Sep 3, 2026 @ 08:22:00 -> Add /billboard, /api/info, and /api/qr endpoints with Audience Billboard support
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using KSRotation.Models;
+using QRCoder;
 #if !MAUI
 using Microsoft.EntityFrameworkCore;
 #endif
@@ -25,7 +26,8 @@ namespace KSRotation.Services
         Func<string> onGetRequestsJson,
         Func<string, string, string, string, string, string, string, Task<string>> onHandleDjAction,
         Func<string> onGetSpecialEventsJson,
-        Func<string> onGetActiveSpecialEvent)
+        Func<string> onGetActiveSpecialEvent,
+        Func<string>? onGetVenueInfoJson = null)
     {
         private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
         private const int MaxAvatarImageBytes = 2_097_152; // 2 MB - a profile avatar has no business being larger
@@ -47,6 +49,7 @@ namespace KSRotation.Services
         private readonly Func<string, string, string, string, string, string, string, Task<string>> _onHandleDjAction = onHandleDjAction;
         private readonly Func<string> _onGetSpecialEventsJson = onGetSpecialEventsJson;
         private readonly Func<string> _onGetActiveSpecialEvent = onGetActiveSpecialEvent;
+        private readonly Func<string>? _onGetVenueInfoJson = onGetVenueInfoJson;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, PinAttemptState> _pinAttemptsByIp = new();
 
@@ -243,6 +246,31 @@ namespace KSRotation.Services
                         else if (path == "/dj" || path == "/dj.html")
                         {
                             await SendHtmlResponseAsync(stream, GetDjHtmlContent());
+                        }
+                        else if (path == "/billboard" || path == "/billboard.html")
+                        {
+                            await SendHtmlResponseAsync(stream, GetBillboardHtmlContent());
+                        }
+                        else if (path.StartsWith("/api/info", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string json = _onGetVenueInfoJson?.Invoke() ?? "{}";
+                            await SendJsonResponseAsync(stream, json);
+                        }
+                        else if (path.StartsWith("/api/qr", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string text = ParseQueryParam(path, "text");
+                            if (!string.IsNullOrEmpty(text))
+                            {
+                                using QRCodeGenerator qrGenerator = new();
+                                using QRCodeData qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.M);
+                                using PngByteQRCode pngQr = new(qrCodeData);
+                                byte[] qrBytes = pngQr.GetGraphic(12);
+                                await SendImageResponseAsync(stream, qrBytes, "image/png");
+                            }
+                            else
+                            {
+                                await SendBadRequestAsync(stream, "{\"error\":\"Missing 'text' query parameter.\"}");
+                            }
                         }
                         else if (path.StartsWith("/api/rotation", StringComparison.OrdinalIgnoreCase))
                         {
@@ -758,6 +786,35 @@ namespace KSRotation.Services
             await stream.WriteAsync(responseBytes);
         }
 
+        private static async Task SendImageResponseAsync(NetworkStream stream, byte[] imageBytes, string contentType = "image/png")
+        {
+            byte[] headerBytes = Encoding.UTF8.GetBytes(
+                "HTTP/1.1 200 OK\r\n" +
+                $"Content-Type: {contentType}\r\n" +
+                "Access-Control-Allow-Origin: *\r\n" +
+                $"Content-Length: {imageBytes.Length}\r\n" +
+                "Cache-Control: public, max-age=60\r\n" +
+                "Connection: close\r\n\r\n");
+            await stream.WriteAsync(headerBytes);
+            await stream.WriteAsync(imageBytes);
+        }
+
+        private static string ParseQueryParam(string url, string paramName)
+        {
+            int queryIdx = url.IndexOf('?');
+            if (queryIdx < 0 || queryIdx == url.Length - 1) return string.Empty;
+            string query = url[(queryIdx + 1)..];
+            foreach (string pair in query.Split('&'))
+            {
+                string[] kv = pair.Split('=', 2);
+                if (kv.Length == 2 && kv[0].Equals(paramName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return Uri.UnescapeDataString(kv[1]);
+                }
+            }
+            return string.Empty;
+        }
+
         private static async Task SendCorsPreflightResponseAsync(NetworkStream stream)
         {
             byte[] responseBytes = Encoding.UTF8.GetBytes(
@@ -997,14 +1054,16 @@ namespace KSRotation.Services
             return buffer;
         }
 
-        // The portal markup lives in Resources/PatronPortal.html, Resources/kiosk.html, and Resources/dj.html (embedded resources); loaded once on first request.
+        // The portal markup lives in Resources/PatronPortal.html, Resources/kiosk.html, Resources/dj.html, and Resources/billboard.html (embedded resources); loaded once on first request.
         private static readonly Lazy<string> CachedHtml = new(LoadHtmlContent);
         private static readonly Lazy<string> CachedDjHtml = new(LoadDjHtmlContent);
         private static readonly Lazy<string> CachedKioskHtml = new(LoadKioskHtmlContent);
+        private static readonly Lazy<string> CachedBillboardHtml = new(LoadBillboardHtmlContent);
 
         private static string GetHtmlContent() => CachedHtml.Value;
         private static string GetDjHtmlContent() => CachedDjHtml.Value;
         private static string GetKioskHtmlContent() => CachedKioskHtml.Value;
+        private static string GetBillboardHtmlContent() => CachedBillboardHtml.Value;
 
         private static string LoadHtmlContent()
         {
@@ -1073,6 +1132,29 @@ namespace KSRotation.Services
                 "PatronRequestServer.LoadKioskHtmlContent",
                 new InvalidOperationException("Embedded resource 'kiosk.html' was not found."));
             return "<!DOCTYPE html><html><body><h1>KSRotation</h1><p>Kiosk portal resource missing.</p></body></html>";
+        }
+
+        private static string LoadBillboardHtmlContent()
+        {
+            Assembly assembly = typeof(PatronRequestServer).Assembly;
+            string? resourceName = Array.Find(
+                assembly.GetManifestResourceNames(),
+                n => n.EndsWith("billboard.html", StringComparison.OrdinalIgnoreCase));
+
+            if (resourceName != null)
+            {
+                using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+                if (stream != null)
+                {
+                    using StreamReader reader = new(stream, Encoding.UTF8);
+                    return reader.ReadToEnd();
+                }
+            }
+
+            LoggerService.LogError(
+                "PatronRequestServer.LoadBillboardHtmlContent",
+                new InvalidOperationException("Embedded resource 'billboard.html' was not found."));
+            return "<!DOCTYPE html><html><body><h1>KSRotation</h1><p>Billboard portal resource missing.</p></body></html>";
         }
     }
 }

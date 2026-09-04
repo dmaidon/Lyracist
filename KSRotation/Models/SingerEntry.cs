@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 07:07:00 -> Delegate ProperCase to centralized Lyracist.Shared.NameFormatting
+// Edited on Sep 3, 2026 @ 23:48:45 -> Add HasSungInLastRound property for Last Round mode
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -37,10 +37,17 @@ namespace KSRotation.Models
             {
                 if (SetProperty(ref _duetPartnerName, ProperCase(value)))
                 {
+                    OnPropertyChanged(nameof(Partner));
                     OnPropertyChanged(nameof(IsDuet));
                     OnPropertyChanged(nameof(DisplayNameWithDuet));
                 }
             }
+        }
+
+        public string Partner
+        {
+            get => DuetPartnerName;
+            set => DuetPartnerName = value;
         }
 
         public bool IsDuet => !string.IsNullOrWhiteSpace(DuetPartnerName) && !DuetPartnerName.Equals("None", StringComparison.OrdinalIgnoreCase);
@@ -102,6 +109,10 @@ namespace KSRotation.Models
         /// <summary>True when this singer marks the start / 1st position of the rotation round.</summary>
         [ObservableProperty]
         public partial bool IsRotationStart { get; set; }
+
+        /// <summary>True when this singer has completed their turn in the final round of the night.</summary>
+        [ObservableProperty]
+        public partial bool HasSungInLastRound { get; set; }
 
         [ObservableProperty] public partial bool Song1Completed { get; set; }
         [ObservableProperty] public partial bool Song2Completed { get; set; }

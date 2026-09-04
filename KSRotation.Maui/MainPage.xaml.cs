@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 17:50:00 -> Add OnSelectPatronQrClicked, OnSelectKioskQrClicked, and OnSelectDjQrClicked handlers
+// Edited on Sep 3, 2026 @ 12:39:00 -> Set BindingContext before InitializeComponent to ensure safe early binding resolution
 using System;
 using System.Linq;
 using Microsoft.Maui.Controls;
@@ -11,8 +11,8 @@ public partial class MainPage : ContentPage
 
     public MainPage(KSRotation.ViewModels.MainViewModel vm)
     {
-        InitializeComponent();
         BindingContext = vm;
+        InitializeComponent();
 
         // The patron request server runs on this device for the whole session — keep the screen
         // awake so Android doesn't dim/lock and throttle it mid-show.
@@ -21,6 +21,15 @@ public partial class MainPage : ContentPage
         if (Application.Current != null)
         {
             ThemeBtn.Text = Application.Current.UserAppTheme == AppTheme.Light ? "🌙 Dark Mode" : "☀️ Light Mode";
+        }
+    }
+
+    protected override void OnHandlerChanged()
+    {
+        base.OnHandlerChanged();
+        if (Handler != null && BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            KSRotation.Maui.Services.SecondaryDisplayService.Instance.Initialize(vm, Handler.MauiContext!);
         }
     }
 
@@ -187,6 +196,31 @@ public partial class MainPage : ContentPage
             vm.EmailRecipient = EmailRecipientEntry.Text?.Trim() ?? string.Empty;
         }
         AboutOverlay.IsVisible = false;
+    }
+
+    private void OnShowLegendClicked(object? sender, EventArgs e)
+    {
+        LegendOverlay.IsVisible = true;
+    }
+
+    private void OnCloseLegendClicked(object? sender, EventArgs e)
+    {
+        LegendOverlay.IsVisible = false;
+    }
+
+    private void OnShowBillboardClicked(object? sender, EventArgs e)
+    {
+        BillboardOverlay.IsVisible = true;
+    }
+
+    private void OnCloseBillboardClicked(object? sender, EventArgs e)
+    {
+        BillboardOverlay.IsVisible = false;
+    }
+
+    private void OnToggleExternalDisplayClicked(object? sender, EventArgs e)
+    {
+        KSRotation.Maui.Services.SecondaryDisplayService.Instance.ToggleSecondaryBillboard();
     }
 
     private void OnPreferredHostIpUnfocused(object? sender, FocusEventArgs e)
@@ -422,6 +456,7 @@ public partial class MainPage : ContentPage
         var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
         vm.IsDjQrVisible = false;
         vm.IsKioskQrVisible = false;
+        vm.IsBillboardQrVisible = false;
     }
 
     private void OnSelectKioskQrClicked(object? sender, EventArgs e)
@@ -429,6 +464,15 @@ public partial class MainPage : ContentPage
         var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
         vm.IsDjQrVisible = false;
         vm.IsKioskQrVisible = true;
+        vm.IsBillboardQrVisible = false;
+    }
+
+    private void OnSelectBillboardQrClicked(object? sender, EventArgs e)
+    {
+        var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
+        vm.IsDjQrVisible = false;
+        vm.IsKioskQrVisible = false;
+        vm.IsBillboardQrVisible = true;
     }
 
     private void OnSelectDjQrClicked(object? sender, EventArgs e)
@@ -436,6 +480,7 @@ public partial class MainPage : ContentPage
         var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
         vm.IsDjQrVisible = true;
         vm.IsKioskQrVisible = false;
+        vm.IsBillboardQrVisible = false;
     }
 
     private void OnShowConnectQrClicked(object? sender, EventArgs e)
@@ -518,6 +563,10 @@ public partial class MainPage : ContentPage
                 Grid.SetColumnSpan(AddSingerOverlay, 1);
                 Grid.SetRowSpan(ConnectQrOverlay, 2);
                 Grid.SetColumnSpan(ConnectQrOverlay, 1);
+                Grid.SetRowSpan(LegendOverlay, 2);
+                Grid.SetColumnSpan(LegendOverlay, 1);
+                Grid.SetRowSpan(BillboardOverlay, 2);
+                Grid.SetColumnSpan(BillboardOverlay, 1);
             }
             else
             {
@@ -566,6 +615,10 @@ public partial class MainPage : ContentPage
                 Grid.SetColumnSpan(AddSingerOverlay, 2);
                 Grid.SetRowSpan(ConnectQrOverlay, 1);
                 Grid.SetColumnSpan(ConnectQrOverlay, 2);
+                Grid.SetRowSpan(LegendOverlay, 1);
+                Grid.SetColumnSpan(LegendOverlay, 2);
+                Grid.SetRowSpan(BillboardOverlay, 1);
+                Grid.SetColumnSpan(BillboardOverlay, 2);
             }
         }
         catch (Exception ex)

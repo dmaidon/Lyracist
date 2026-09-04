@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:37:00 -> Fix RCS1146 conditional access, RCS1196 extension calls, and RCS1037 whitespace
+// Edited on Sep 3, 2026 @ 23:49:35 -> Serialize hasSungInLastRound and isLastRound in rotation and venue info JSON
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -45,10 +45,22 @@ namespace KSRotation.ViewModels
         public partial ImageSource? KioskQrCodeImage { get; set; }
 
         [ObservableProperty]
+        public partial string BillboardConnectionUrl { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial ImageSource? BillboardQrCodeImage { get; set; }
+
+        [ObservableProperty]
+        public partial ImageSource? WifiQrCodeImage { get; set; }
+
+        [ObservableProperty]
         public partial bool IsDjQrVisible { get; set; }
 
         [ObservableProperty]
         public partial bool IsKioskQrVisible { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsBillboardQrVisible { get; set; }
 
         [ObservableProperty]
         public partial string DjPin { get; set; } = string.Empty;
@@ -191,7 +203,8 @@ namespace KSRotation.ViewModels
                         GetRequestsJson,
                         HandleDjAction,
                         GetSpecialEventsJson,
-                        () => ActiveSpecialEvent);
+                        () => ActiveSpecialEvent,
+                        GetVenueInfoJson);
                     _requestServer.Start();
                     activePort = p;
                     started = true;
@@ -226,11 +239,20 @@ namespace KSRotation.ViewModels
                 ? $"http://{host}:{activePort}/kiosk.html"
                 : "";
 
+            BillboardConnectionUrl = started
+                ? $"http://{host}:{activePort}/billboard.html"
+                : "";
+
             _activeServerPort = activePort;
  
             QrCodeImage = started ? GenerateQRCode(ConnectionUrl) : null;
             DjQrCodeImage = started ? GenerateQRCode(DjConnectionUrl) : null;
             KioskQrCodeImage = started ? GenerateQRCode(KioskConnectionUrl) : null;
+            BillboardQrCodeImage = started ? GenerateQRCode(BillboardConnectionUrl) : null;
+            string startSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
+            string startPass = !string.IsNullOrWhiteSpace(startSsid) ? WifiPasswordStore.GetPasswordForSsid(startSsid) : string.Empty;
+            string startWifiPayload = $"WIFI:S:{startSsid};T:{(string.IsNullOrWhiteSpace(startPass) ? "nopass" : "WPA")};P:{startPass};;";
+            WifiQrCodeImage = started && !string.IsNullOrWhiteSpace(startSsid) ? GenerateQRCode(startWifiPayload) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             RefreshConnectInstructionsBanner();
         }
@@ -246,9 +268,15 @@ namespace KSRotation.ViewModels
             ConnectionUrl = $"http://{host}:{_activeServerPort}";
             DjConnectionUrl = $"http://{host}:{_activeServerPort}/dj.html";
             KioskConnectionUrl = $"http://{host}:{_activeServerPort}/kiosk.html";
+            BillboardConnectionUrl = $"http://{host}:{_activeServerPort}/billboard.html";
             QrCodeImage = GenerateQRCode(ConnectionUrl);
             DjQrCodeImage = GenerateQRCode(DjConnectionUrl);
             KioskQrCodeImage = GenerateQRCode(KioskConnectionUrl);
+            BillboardQrCodeImage = GenerateQRCode(BillboardConnectionUrl);
+            string refreshSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
+            string refreshPass = !string.IsNullOrWhiteSpace(refreshSsid) ? WifiPasswordStore.GetPasswordForSsid(refreshSsid) : string.Empty;
+            string refreshWifiPayload = $"WIFI:S:{refreshSsid};T:{(string.IsNullOrWhiteSpace(refreshPass) ? "nopass" : "WPA")};P:{refreshPass};;";
+            WifiQrCodeImage = !string.IsNullOrWhiteSpace(refreshSsid) ? GenerateQRCode(refreshWifiPayload) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             // Debounced — this runs on every keystroke of PreferredHostIp (UpdateSourceTrigger=PropertyChanged),
             // and the banner regeneration underneath is a full QR render + PNG encode + disk write.
@@ -347,6 +375,7 @@ namespace KSRotation.ViewModels
             {
                 id = s.Id.ToString(),
                 name = s.Name,
+                partner = s.Partner,
                 song = s.Song,
                 artist = s.Artist,
                 isCurrent = s.IsCurrent,
@@ -355,6 +384,7 @@ namespace KSRotation.ViewModels
                 isPaused = s.IsPaused,
                 isMusic = s.IsMusic,
                 isRotationStart = s.IsRotationStart,
+                hasSungInLastRound = s.HasSungInLastRound,
                 vocalRange = s.VocalRange,
                 customTitle = s.CustomTitle,
                 queuedSongs = s.QueuedSongs.ConvertAll(q => new QueuedSongDto { song = q.Song, artist = q.Artist }),
@@ -373,6 +403,23 @@ namespace KSRotation.ViewModels
         }
 
         private string GetRotationJson() => _cachedRotationJson;
+
+        private string GetVenueInfoJson()
+        {
+            string ssid = WifiHelper.GetConnectedSsid() ?? string.Empty;
+            string pass = !string.IsNullOrWhiteSpace(ssid) ? WifiPasswordStore.GetPasswordForSsid(ssid) : string.Empty;
+            var dto = new VenueInfoResponseDto
+            {
+                venue = VenueName,
+                dj = DjName,
+                portalUrl = ConnectionUrl,
+                billboardUrl = BillboardConnectionUrl,
+                wifiSsid = ssid,
+                wifiPassword = pass,
+                isLastRound = IsLastRound
+            };
+            return JsonSerializer.Serialize(dto, AppJsonContext.Default.VenueInfoResponseDto);
+        }
 
         private static string GetLocalIPAddress()
         {

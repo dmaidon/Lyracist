@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 15:44:30 -> Added TriviaGameEngine registration and pause synchronization to DisplayService
+// Edited on Sep 3, 2026 @ 23:55:00 -> Add SetLastRound method to DisplayService
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
@@ -511,6 +511,15 @@ public class DisplayService : IDisplayService
         {
             vm.AnnouncementBanner = message;
             vm.IsAnnouncementVisible = visible;
+        }
+    }
+
+    public void SetLastRound(bool isLastRound)
+    {
+        var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+        if (vm != null)
+        {
+            vm.IsLastRound = isLastRound;
         }
     }
 

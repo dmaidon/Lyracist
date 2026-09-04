@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:36:00 -> Use concrete type for _casting (CA1859) and clean whitespace (RCS1037)
+// Edited on Sep 3, 2026 @ 23:50:55 -> Add SetLastRound method to DisplayWindowService
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using KSRotation.Windows;
@@ -21,6 +21,11 @@ namespace KSRotation.Services
         private ImageSource? _qrCodeImage;
         private string _selectedMonitorDevice = string.Empty;
         private string? _lastSongBannerPath;
+
+        public void SetLastRound(bool isLastRound)
+        {
+            _viewModel.IsLastRound = isLastRound;
+        }
 
         public void SetLastSongBanner(string? path)
         {

@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:24:00 -> Add isRotationStart property to RotationItemDto
+// Edited on Sep 3, 2026 @ 23:49:15 -> Add hasSungInLastRound property to RotationItemDto
 using System.Collections.Generic;
 
 namespace KSRotation.Models
@@ -15,6 +15,7 @@ namespace KSRotation.Models
     {
         public string id { get; set; } = string.Empty;
         public string name { get; set; } = string.Empty;
+        public string partner { get; set; } = string.Empty;
         public string song { get; set; } = string.Empty;
         public string artist { get; set; } = string.Empty;
         public bool isCurrent { get; set; }
@@ -23,6 +24,7 @@ namespace KSRotation.Models
         public bool isPaused { get; set; }
         public bool isMusic { get; set; }
         public bool isRotationStart { get; set; }
+        public bool hasSungInLastRound { get; set; }
         public string vocalRange { get; set; } = string.Empty;
         public string customTitle { get; set; } = string.Empty;
         public List<QueuedSongDto> queuedSongs { get; set; } = [];

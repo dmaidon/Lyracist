@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 09:50:00 -> Add LastSongBannerOverlay for priority display on rotation screen -->
+<!-- Edited on Sep 3, 2026 @ 23:52:30 -> Add Last Round announcement banner on rotation screen -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -29,21 +29,47 @@
             <!-- content: normal list OR crawl -->
         </Grid.RowDefinitions>
 
-        <!-- Row 0: Scrolling marquee (always visible) -->
-        <Border Grid.Row="0"
-                x:Name="BannerBorder"
-                Background="#222"
-                Padding="8"
-                Height="80"
-                ClipToBounds="True"
-                SizeChanged="BannerBorder_SizeChanged">
-            <Canvas x:Name="BannerCanvas" ClipToBounds="True">
-                <TextBlock x:Name="BannerTextBlock"
-                           FontSize="40"
-                           Foreground="Cyan"
+        <!-- Row 0: Scrolling marquee and Last Round banner -->
+        <StackPanel Grid.Row="0">
+            <Border x:Name="BannerBorder"
+                    Background="#222"
+                    Padding="8"
+                    Height="80"
+                    ClipToBounds="True"
+                    SizeChanged="BannerBorder_SizeChanged">
+                <Canvas x:Name="BannerCanvas" ClipToBounds="True">
+                    <TextBlock x:Name="BannerTextBlock"
+                               FontSize="40"
+                               Foreground="Cyan"
+                               TextOptions.TextFormattingMode="Display" />
+                </Canvas>
+            </Border>
+
+            <!-- Last Round Banner Strip -->
+            <Border x:Name="LastRoundBanner"
+                    Background="#D97706"
+                    BorderBrush="#F59E0B"
+                    BorderThickness="0,1,0,1"
+                    Padding="16,8">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsLastRound}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="★  THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY  ★"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
                            TextOptions.TextFormattingMode="Display" />
-            </Canvas>
-        </Border>
+            </Border>
+        </StackPanel>
 
         <!-- Row 1a: Normal singer list (hidden when crawl is active) -->
         <Grid Grid.Row="1" x:Name="NormalPanel" Margin="16">

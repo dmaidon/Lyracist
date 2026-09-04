@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:24:00 -> Add IsRotationStart property to Singer
+// Edited on Sep 3, 2026 @ 23:55:00 -> Add HasSungInLastRound property to Singer
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Lyracist.Models;
@@ -56,6 +56,9 @@ public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
 
     [ObservableProperty]
     private bool _isInactive = false;
+
+    [ObservableProperty]
+    private bool _hasSungInLastRound = false;
 
     [ObservableProperty]
     private bool _isRotationStart = false;

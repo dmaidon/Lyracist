@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:24:00 -> Add IsRotationStart property to IRotationSinger interface
+// Edited on Sep 3, 2026 @ 23:48:10 -> Add HasSungInLastRound property to IRotationSinger interface
 namespace Lyracist.Shared
 {
     public interface IRotationSinger
@@ -9,6 +9,7 @@ namespace Lyracist.Shared
         bool IsPaused { get; set; }
         bool IsMusic { get; set; }
         bool IsRotationStart { get; set; }
+        bool HasSungInLastRound { get; set; }
     }
 }
 

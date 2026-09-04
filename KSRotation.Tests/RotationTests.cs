@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:39:00 -> Fix RCS1118 const, RCS1215/S3981, and xUnit2033
+// Edited on Sep 3, 2026 @ 23:57:00 -> Add unit tests for Last Round rotation behavior
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -1264,6 +1264,57 @@ public class MainViewModelTests
         Assert.Equal(5, list.Count);
         Assert.Same(newSinger, list[3]);
         Assert.Same(inactive, list[4]);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_LastRound_SkipsSungSingers()
+    {
+        var s1 = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var s2 = new SingerEntry { Name = "Bob", HasSungInLastRound = true };
+        var s3 = new SingerEntry { Name = "Charlie" };
+
+        var list = new ObservableCollection<SingerEntry> { s1, s2, s3 };
+
+        s1.HasSungInLastRound = true;
+        RotationHelpers.AdvanceRotationAfterFinished(list, s1, floatCurrentToTop: false, isLastRound: true);
+
+        Assert.False(s1.IsCurrent);
+        Assert.False(s2.IsCurrent);
+        Assert.True(s3.IsCurrent);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_LastRound_WhenAllSingersHaveSung_SetsNoCurrent()
+    {
+        var s1 = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var s2 = new SingerEntry { Name = "Bob", HasSungInLastRound = true };
+
+        var list = new ObservableCollection<SingerEntry> { s1, s2 };
+
+        s1.HasSungInLastRound = true;
+        RotationHelpers.AdvanceRotationAfterFinished(list, s1, floatCurrentToTop: false, isLastRound: true);
+
+        Assert.False(s1.IsCurrent);
+        Assert.False(s2.IsCurrent);
+        Assert.Null(RotationHelpers.GetCurrentSinger(list));
+    }
+
+    [Fact]
+    public void GetNextActiveSingers_LastRound_ExcludesSungPerformers()
+    {
+        var s1 = new SingerEntry { Name = "Alice", IsCurrent = true };
+        var s2 = new SingerEntry { Name = "Bob", HasSungInLastRound = true };
+        var s3 = new SingerEntry { Name = "Charlie" };
+        var s4 = new SingerEntry { Name = "Diana", HasSungInLastRound = true };
+        var s5 = new SingerEntry { Name = "Eve" };
+
+        var list = new List<SingerEntry> { s1, s2, s3, s4, s5 };
+
+        var nextActive = RotationHelpers.GetNextActiveSingers(list, s1, 5, isLastRound: true);
+
+        Assert.Equal(2, nextActive.Count);
+        Assert.Equal("Charlie", nextActive[0].Name);
+        Assert.Equal("Eve", nextActive[1].Name);
     }
 }
 

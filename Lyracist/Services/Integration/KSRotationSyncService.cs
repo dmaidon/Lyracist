@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:24:00 -> Sync isRotationStart property from KSRotation API
+// Edited on Sep 3, 2026 @ 23:55:00 -> Sync hasSungInLastRound property from KSRotation API
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -201,6 +201,7 @@ namespace Lyracist.Services.Integration
                     singer.IsInactive = item.isInactive;
                     singer.IsMusic = item.isMusic;
                     singer.IsRotationStart = item.isRotationStart;
+                    singer.HasSungInLastRound = item.hasSungInLastRound;
 
                     newRotation.Add(singer);
                 }
@@ -249,7 +250,8 @@ namespace Lyracist.Services.Integration
                     s.isNext != c.IsNext ||
                     s.isInactive != c.IsInactive ||
                     s.isMusic != c.IsMusic ||
-                    s.isRotationStart != c.IsRotationStart)
+                    s.isRotationStart != c.IsRotationStart ||
+                    s.hasSungInLastRound != c.HasSungInLastRound)
                 {
                     return false;
                 }
@@ -267,6 +269,7 @@ namespace Lyracist.Services.Integration
             public bool isInactive { get; set; }
             public bool isMusic { get; set; }
             public bool isRotationStart { get; set; }
+            public bool hasSungInLastRound { get; set; }
         }
     }
 }

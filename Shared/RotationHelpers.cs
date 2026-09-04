@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 07:49:00 -> Add InsertNewSinger to place new singers at end of current rotation round
+// Edited on Sep 3, 2026 @ 23:48:30 -> Support Last Round mode in rotation advancement and next-singer highlights
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -315,7 +315,7 @@ namespace Lyracist.Shared
         /// Sets <see cref="IRotationSinger.IsNext"/> on the first active singer after <paramref name="currentEntry"/>,
         /// wrapping around the list. Clears any previous IsNext flag first.
         /// </summary>
-        public static void MarkNextSinger<T>(IList<T> singers, T currentEntry) where T : class, IRotationSinger
+        public static void MarkNextSinger<T>(IList<T> singers, T currentEntry, bool isLastRound = false) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(currentEntry);
@@ -332,7 +332,7 @@ namespace Lyracist.Shared
             for (int i = 1; i < count; i++)
             {
                 T candidate = singers[(startIndex + i) % count];
-                if (!candidate.IsInactive && !candidate.IsPaused)
+                if (!candidate.IsInactive && !candidate.IsPaused && (!isLastRound || !candidate.HasSungInLastRound))
                 {
                     candidate.IsNext = true;
                     return;
@@ -345,14 +345,14 @@ namespace Lyracist.Shared
         /// whichever entry currently has <see cref="IRotationSinger.IsCurrent"/> set.
         /// Clears all IsNext flags when there is no current singer.
         /// </summary>
-        public static void UpdateNextSingerHighlight<T>(IList<T> singers) where T : class, IRotationSinger
+        public static void UpdateNextSingerHighlight<T>(IList<T> singers, bool isLastRound = false) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
 
             T? current = GetCurrentSinger(singers);
             if (current != null)
             {
-                MarkNextSinger(singers, current);
+                MarkNextSinger(singers, current, isLastRound);
             }
             else
             {
@@ -421,7 +421,7 @@ namespace Lyracist.Shared
         /// If <paramref name="floatCurrentToTop"/> is true, moves <paramref name="finishedEntry"/> to the end of the active queue
         /// and ensures the next promoted singer is positioned at index 0.
         /// </summary>
-        public static T? AdvanceRotationAfterFinished<T>(IList<T> singers, T finishedEntry, bool floatCurrentToTop = false) where T : class, IRotationSinger
+        public static T? AdvanceRotationAfterFinished<T>(IList<T> singers, T finishedEntry, bool floatCurrentToTop = false, bool isLastRound = false) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(finishedEntry);
@@ -437,7 +437,7 @@ namespace Lyracist.Shared
                     for (int i = 1; i < count; i++)
                     {
                         T candidate = singers[(currentIndex + i) % count];
-                        if (candidate != finishedEntry && !candidate.IsInactive && !candidate.IsPaused)
+                        if (candidate != finishedEntry && !candidate.IsInactive && !candidate.IsPaused && (!isLastRound || !candidate.HasSungInLastRound))
                         {
                             nextCurrent = candidate;
                             break;
@@ -450,7 +450,7 @@ namespace Lyracist.Shared
                 if (nextCurrent != null)
                 {
                     nextCurrent.IsCurrent = true;
-                    MarkNextSinger(singers, nextCurrent);
+                    MarkNextSinger(singers, nextCurrent, isLastRound);
                 }
 
                 return nextCurrent;
@@ -485,7 +485,7 @@ namespace Lyracist.Shared
                 for (int i = 0; i < singers.Count; i++)
                 {
                     T candidate = singers[i];
-                    if (!candidate.IsInactive && !candidate.IsPaused)
+                    if (!candidate.IsInactive && !candidate.IsPaused && (!isLastRound || !candidate.HasSungInLastRound))
                     {
                         nextCurrent = candidate;
                         break;
@@ -500,7 +500,7 @@ namespace Lyracist.Shared
                         MoveSingerInList(singers, nextIdx, 0);
                     }
                     nextCurrent.IsCurrent = true;
-                    MarkNextSinger(singers, nextCurrent);
+                    MarkNextSinger(singers, nextCurrent, isLastRound);
                 }
 
                 return nextCurrent;
@@ -510,7 +510,7 @@ namespace Lyracist.Shared
         /// <summary>
         /// Gets up to <paramref name="maxCount"/> active, non-paused singers sequentially following <paramref name="currentEntry"/>.
         /// </summary>
-        public static List<T> GetNextActiveSingers<T>(IList<T> singers, T currentEntry, int maxCount) where T : class, IRotationSinger
+        public static List<T> GetNextActiveSingers<T>(IList<T> singers, T currentEntry, int maxCount, bool isLastRound = false) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(currentEntry);
@@ -525,7 +525,7 @@ namespace Lyracist.Shared
             for (int i = 1; i <= count && list.Count < maxCount; i++)
             {
                 T candidate = singers[(startIndex + i) % count];
-                if (candidate != currentEntry && !candidate.IsInactive && !candidate.IsPaused)
+                if (candidate != currentEntry && !candidate.IsInactive && !candidate.IsPaused && (!isLastRound || !candidate.HasSungInLastRound))
                 {
                     list.Add(candidate);
                 }

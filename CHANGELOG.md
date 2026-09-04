@@ -1,9 +1,62 @@
-<!-- Edited on Sep 1, 2026 @ 17:15:08 -> Document 26.9.1.1 solution-wide review fixes: silent logging, scan/settings performance, seek slider, and multi-server abuse-rate hardening -->
-Last Edit: Sep 1, 2026 - Solution-wide review pass: silent error logging, settings/scan performance, playback seek slider, shutdown reliability, and DJ/singer/trivia-join abuse-rate hardening
+<!-- Edited on Sep 4, 2026 @ 07:38:00 -> Update Last Round to emerald green button across Lyracist, KSRotation, and KSRotation.Maui -->
+Last Edit: Sep 4, 2026 - Last Round rotation option & audience billboard announcements across Lyracist, KSRotation, and KSRotation.Maui
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.4.0] - 2026-09-04
+
+### Added
+- **Lyracist, KSRotation (WPF), and KSRotation.Maui (Last Round Management)**:
+  - **Host Control**: Added "Last Round" control across rotation host interfaces — styled as a standout emerald green button placed right after the Clear button in KSRotation (`MainWindow.xaml`), Lyracist (`RotationPage.xaml`), and KSRotation.Maui (`MainPage.xaml`), immediately synchronizing across the rotation lifecycle and display services.
+  - **Audience Display Announcement**: When activated, displays a prominent crimson announcement banner (`★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★`) across all audience views:
+    * `Lyracist`: `RotationWindow.xaml`.
+    * `KSRotation`: `SingerDisplayWindow.xaml` across all projection modes (Normal, Star Wars, Vinyl, Marquee).
+    * `KSRotation.Maui`: `BillboardView.xaml` (on-device attractor and external HDMI/Presentation displays).
+    * Web Billboard: `billboard.html` served via embedded web server.
+  - **Performer Lifecycle**:
+    * Added `HasSungInLastRound` property to `IRotationSinger`, `Singer`, and `SingerEntry`.
+    * In the last round, after a performer finishes their song, `HasSungInLastRound` is set to true and they are automatically hidden from the audience rotation queue (current, next, and on deck).
+    * The rotation automatically advances only through remaining unsung performers; when all singers have completed their song, the current singer clears.
+    * In the host queue, performers who have sung in the last round remain visible with a distinct `DONE (LAST ROUND)` indicator badge.
+
+## [26.9.3.0] - 2026-09-03
+
+### Added
+- **KSRotation & KSRotation.Maui (3-in-1 Audience Billboard & Connect Screen System)**:
+  - **Option 2 (Wi-Fi Web Billboard — `billboard.html`)**:
+    - Embedded 16:9 high-contrast dark theme audience billboard web page served at `http://<ip>:5005/billboard` and `http://<ip>:5005/billboard.html`.
+    - Live rotation auto-syncing every 3s via `/api/rotation` and venue/DJ info syncing every 10s via `/api/info`.
+    - Real-time Stage Queue: Glowing amber "NOW PERFORMING" card with duet partner (`w/ Partner`), song, and artist; blue "UP NEXT" card; and scrollable upcoming rotation queue.
+    - Connect & Request QR Hub: Generates dynamic server-rendered QR codes via new `/api/qr?text=...` endpoint for Song Requests (`/`) and Venue Wi-Fi auto-join (`WIFI:S:...;P:...;;`).
+    - Complete support for any venue Smart TV, Fire TV Stick Silk browser, Chromecast with Google TV, or audience device connected to the DJ Travel Router.
+  - **Option 3 (On-Device Attractor & Intermission Mode — `BillboardOverlay` & `BillboardView`)**:
+    - Added dedicated `📺 Billboard` button in `PortalConnectionCard` on the DJ tablet console.
+    - Created reusable `BillboardView.xaml` ContentView in MAUI displaying the full-screen stage queue, live ticking clock, active singer count, request QR, and Wi-Fi QR.
+    - Added `BillboardOverlay` modal with floating dismiss and external display controls in `MainPage.xaml`, allowing the KJ to put the tablet on a table or stand in attractor mode during breaks and tap to return to DJ controls.
+  - **Option 1 (Hardware HDMI & Secondary Display Presentation — `SecondaryDisplayService`)**:
+    - Added cross-platform `SecondaryDisplayService` supporting native Android `Android.Hardware.Display.DisplayManager` and `Android.App.Presentation`.
+    - Automatically projects `BillboardPresentation` to external monitors or TVs plugged into the tablet via USB-C to HDMI adapters or wireless displays, keeping the DJ console private on the tablet touchscreen.
+    - Added Windows multi-window presentation support via `BillboardPage` for dual-monitor setups.
+  - **Models & Serialization**:
+    - Added `partner` field to `RotationItemDto` and `Partner` alias on `SingerEntry` to ensure duet partners are serialized and rendered across all billboard screens.
+  - **Decoupled Trivia from KSRotation.Maui**:
+    - Completely removed `Lyracist.Trivia.Core.csproj` and `MainViewModel.Trivia.cs` from `KSRotation.Maui.csproj` to keep the MAUI tablet app strictly focused on karaoke singer rotation.
+    - Added `#if !MAUI` guards on trivia property change triggers and commands in `MainViewModel.cs`.
+    - Reduced APK native AOT package assembly count from 116 to 108 assemblies.
+
+## [26.9.2.250] - 2026-09-02
+
+### Added
+- **KSRotation.Maui (Performer Row Legend & Guide)**:
+  - Added a dedicated "Legend" action button to the bottom control card (`PortalConnectionCard`) on Android tablets and desktops, positioned alongside `+ Add Performer` and `📱 Connect QR`.
+  - Added a full-featured `LegendOverlay` modal popup explaining all visual indicators, badges (`🚩 1ST`, `NOW PERFORMING`, `NEXT`, `MUSIC`), queue toolbar action buttons (`✓`, `✏`, `🎙`, `🚩`, `▲`, `▼`, `❚❚` / `▶ Resume`, `🗑` / `↺`), and the 10 multi-colored song round checkboxes.
+  - Fully integrated `LegendOverlay` with dynamic orientation handling (`UpdateOrientationLayout`) for seamless portrait and landscape scaling.
+
+### Fixed & Enhanced
+- **KSRotation.Maui (Android Build & Fast Deployment Stability)**:
+  - Enhanced the MSBuild pre-build target workaround for `XARLP7024` / `XARLP7000` to safely rename and move locked `.stamp` and `.flata` intermediate files when Visual Studio background design-time builds hold file locks during package extraction.
 
 ## [26.9.1.1] - 2026-09-01
 

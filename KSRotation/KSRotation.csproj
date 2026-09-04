@@ -1,4 +1,4 @@
-<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update Content links for consolidated Packs, Banners, and Data directories -->
+<!-- Edited on Sep 3, 2026 @ 08:22:00 -> Embed Resources\billboard.html for Audience Billboard web portal -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.9.1.566</AssemblyVersion>
-    <FileVersion>26.9.1.566</FileVersion>
+    <AssemblyVersion>26.9.4.567</AssemblyVersion>
+    <FileVersion>26.9.4.567</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -78,6 +78,7 @@
     <EmbeddedResource Include="Resources\PatronPortal.html" />
     <EmbeddedResource Include="Resources\dj.html" />
     <EmbeddedResource Include="Resources\kiosk.html" />
+    <EmbeddedResource Include="Resources\billboard.html" />
   </ItemGroup>
 
   <ItemGroup>

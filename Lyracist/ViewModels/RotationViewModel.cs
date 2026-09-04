@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 07:07:00 -> Use Lyracist.Shared.NameFormatting and proper-case title and artist
+// Edited on Sep 4, 2026 @ 07:25:00 -> Add ToggleLastRoundCommand
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -83,6 +83,30 @@ public partial class RotationViewModel : BaseViewModel
 
     [ObservableProperty]
     private bool _floatCurrentSingerToTop;
+
+    [ObservableProperty]
+    private bool _isLastRound;
+
+    partial void OnIsLastRoundChanged(bool value)
+    {
+        if (value)
+        {
+            foreach (var singer in Rotation)
+            {
+                singer.HasSungInLastRound = false;
+            }
+        }
+        Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation, isLastRound: value);
+        _display.SetLastRound(value);
+        _display.UpdateRotation([.. Rotation]);
+        RotationStateChanged?.Invoke();
+    }
+
+    [RelayCommand]
+    public void ToggleLastRound()
+    {
+        IsLastRound = !IsLastRound;
+    }
 
     partial void OnFloatCurrentSingerToTopChanged(bool value)
     {
@@ -628,7 +652,7 @@ public partial class RotationViewModel : BaseViewModel
 
             if (wasCurrent)
             {
-                Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation);
+                Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation, isLastRound: IsLastRound);
             }
 
             // If this performer is currently singing, stop playback
@@ -736,13 +760,13 @@ public partial class RotationViewModel : BaseViewModel
     public Singer? GetCurrentSinger()
     {
         return Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation) 
-               ?? Rotation.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused) 
-               ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+               ?? Rotation.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound)) 
+               ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
     }
 
     public Singer? GetNextSinger()
     {
-        var next = Rotation.FirstOrDefault(s => s.IsNext && !s.IsInactive && !s.IsPaused);
+        var next = Rotation.FirstOrDefault(s => s.IsNext && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
         if (next != null) return next;
 
         var current = GetCurrentSinger();
@@ -755,7 +779,7 @@ public partial class RotationViewModel : BaseViewModel
             for (int i = 1; i < count; i++)
             {
                 var candidate = Rotation[(currentIndex + i) % count];
-                if (candidate != current && !candidate.IsInactive && !candidate.IsPaused)
+                if (candidate != current && !candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
                 {
                     return candidate;
                 }
@@ -771,7 +795,7 @@ public partial class RotationViewModel : BaseViewModel
         if (current == null) return;
 
         RunRotationOrderChange(() =>
-            Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, current, FloatCurrentSingerToTop));
+            Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, current, FloatCurrentSingerToTop, isLastRound: IsLastRound));
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
@@ -818,7 +842,7 @@ public partial class RotationViewModel : BaseViewModel
         if (singer.IsMusic)
         {
             RunRotationOrderChange(() =>
-                Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop));
+                Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop, isLastRound: IsLastRound));
             Rotation.Remove(singer);
             RotationStateChanged?.Invoke();
             _display.UpdateRotation([.. Rotation]);
@@ -828,6 +852,11 @@ public partial class RotationViewModel : BaseViewModel
         string name = singer.Name;
         string title = singer.SongTitle;
         string artist = singer.Artist;
+
+        if (IsLastRound)
+        {
+            singer.HasSungInLastRound = true;
+        }
 
         // 1. Increment completed count (cap at 10) and total songs sung
         singer.CompletedCount = Math.Min(singer.CompletedCount + 1, 10);
@@ -842,7 +871,7 @@ public partial class RotationViewModel : BaseViewModel
 
         // Advance rotation to next active singer relative to singer
         RunRotationOrderChange(() =>
-            Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop));
+            Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop, isLastRound: IsLastRound));
 
         // 3. Check for pending songs
         if (_pendingSingerSongs.TryGetValue(name, out var list) && list.Count > 0)
@@ -987,7 +1016,7 @@ public partial class RotationViewModel : BaseViewModel
 
             if (wasCurrent)
             {
-                Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation);
+                Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation, isLastRound: IsLastRound);
             }
         }
 

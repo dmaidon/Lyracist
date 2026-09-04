@@ -1,4 +1,4 @@
-<!-- Edited on Aug 27, 2026 @ 07:20:00 -> Add smart name and artist proper-casing instructions to Help panel -->
+<!-- Edited on Sep 4, 2026 @ 00:07:00 -> Change Last Round option to a standout green/blue button after Clear Rotation -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -919,6 +919,34 @@
                             Width="130"
                             Margin="12,0,0,0"
                             ToolTip="Clear the entire rotation list" />
+                            <Button
+                            Command="{Binding ToggleLastRoundCommand}"
+                            Width="140"
+                            Margin="12,0,0,0"
+                            ToolTip="Toggle Last Round: announces that the last round of the night is underway and removes singers after they perform">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                        <Setter Property="Margin" Value="0,4" />
+                                        <Setter Property="FontSize" Value="14" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                        <Setter Property="Content" Value="Last Round" />
+                                        <Setter Property="Background" Value="#059669" />
+                                        <Setter Property="BorderBrush" Value="#047857" />
+                                        <Setter Property="Foreground" Value="White" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsLastRound}" Value="True">
+                                                <Setter Property="Content" Value="✓ Last Round" />
+                                                <Setter Property="Background" Value="#2563EB" />
+                                                <Setter Property="BorderBrush" Value="#1D4ED8" />
+                                                <Setter Property="Foreground" Value="White" />
+                                            </DataTrigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value="0.9" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
                         </StackPanel>
                     </Grid>
 

@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 15:44:00 -> Added TriviaGameEngine registration and pause synchronization to IDisplayService
+// Edited on Sep 3, 2026 @ 23:55:00 -> Add SetLastRound method to IDisplayService
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -48,6 +48,7 @@ public interface IDisplayService
     /// <summary>Flashes a temporary banner over the lyrics display (Scaryoke results, shout-outs).</summary>
     void ShowLyricsOverlay(string text, int seconds = 8);
     void SetRotationAnnouncement(string message, bool visible);
+    void SetLastRound(bool isLastRound);
     void SetRotationViewMode(string mode);
     void SetCrawlBannerText(string text);
     void UpdateDjBanner(string path);

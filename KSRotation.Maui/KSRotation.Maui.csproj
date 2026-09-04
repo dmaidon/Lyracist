@@ -1,4 +1,4 @@
-<!-- Edited on Aug 27, 2026 @ 07:07:00 -> Added NameFormatting linked compile reference -->
+<!-- Edited on Sep 3, 2026 @ 12:27:00 -> Remove Lyracist.Trivia.Core and MainViewModel.Trivia.cs as MAUI app does not handle trivia -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -44,9 +44,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.9.1.248</AssemblyVersion>
+		<AssemblyVersion>26.9.4.280</AssemblyVersion>
 
-		<FileVersion>26.9.1.248</FileVersion>
+		<FileVersion>26.9.4.280</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 
@@ -61,6 +61,8 @@
 		<NeutralLanguage>en-US</NeutralLanguage>
 
 		<Title>Karaoke Singer Rotation</Title>
+
+		<BaseOutputPath></BaseOutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -101,7 +103,6 @@
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.Requests.cs" Link="ViewModels\MainViewModel.Requests.cs" />
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.KnownSingers.cs" Link="ViewModels\MainViewModel.KnownSingers.cs" />
-		<Compile Include="..\KSRotation\ViewModels\MainViewModel.Trivia.cs" Link="ViewModels\MainViewModel.Trivia.cs" />
 	</ItemGroup>
 
 	<!-- Shared Embedded Resources (Patron Web Portal HTML) -->
@@ -109,6 +110,7 @@
 		<EmbeddedResource Include="..\KSRotation\Resources\PatronPortal.html" Link="Resources\PatronPortal.html" />
 		<EmbeddedResource Include="..\KSRotation\Resources\dj.html" Link="Resources\dj.html" />
 		<EmbeddedResource Include="..\KSRotation\Resources\kiosk.html" Link="Resources\kiosk.html" />
+		<EmbeddedResource Include="..\KSRotation\Resources\billboard.html" Link="Resources\billboard.html" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="..\Lyracist\Assets\rotation_m.png" Link="rotation_m.png">
@@ -161,9 +163,12 @@
 		<Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
 	</ItemGroup>
 
-	<!-- Project References -->
-	<ItemGroup>
-		<ProjectReference Include="..\Lyracist.Trivia.Core\Lyracist.Trivia.Core.csproj" />
+	<!-- Exclude platform-specific files from compiling on non-matching frameworks -->
+	<ItemGroup Condition="!$(TargetFramework.Contains('-android'))">
+		<Compile Remove="Platforms\Android\**\*.cs" />
+	</ItemGroup>
+	<ItemGroup Condition="!$(TargetFramework.Contains('-windows'))">
+		<Compile Remove="Platforms\Windows\**\*.cs" />
 	</ItemGroup>
 
 	<!-- Build Dependency: Force Lyracist.Data to build prior to KSRotation.Maui for Windows builds -->
@@ -171,11 +176,16 @@
 		<ProjectReference Include="..\Lyracist.Data\Lyracist.Data.csproj" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
-	<!-- Ensure resizetizer, designtime & android output directories exist before _ResolveLibraryProjectImports, ResizetizeImages, ProcessMauiSplashScreens, _CompileDex & _CompileToDalvik run across all target platforms (fixes MSB3371/MSB3374/CS7064/MAUIR0001/MAUIR0004/JAVA0000 DirectoryNotFoundExceptions) -->
-	<Target Name="EnsureMauiResizetizerDirectoriesExist" BeforeTargets="_ResolveLibraryProjectImports;ResizetizeImages;ProcessMauiSplashScreens;_CreateDesignTimeResourceDesigner;_CompileDex;_CompileToDalvik">
+	<!-- Ensure resizetizer, designtime & android output directories exist before _ResolveLibraryProjectImports, ResizetizeImages, ProcessMauiSplashScreens, _CreateDesignTimeResourceDesigner;_CompileDex;_CompileToDalvik run across all target platforms (fixes MSB3371/MSB3374/CS7064/MAUIR0001/MAUIR0004/JAVA0000 DirectoryNotFoundExceptions) -->
+	<Target Name="EnsureMauiResizetizerDirectoriesExist" BeforeTargets="_ResolveLibraryProjectImports;_ExtractLibraryProjectImports;ResolveLibraryProjectImports;ResizetizeImages;ProcessMauiSplashScreens;_CreateDesignTimeResourceDesigner;_CompileDex;_CompileToDalvik">
 		<MakeDir Directories="$(IntermediateOutputPath)designtime\stamp;$(IntermediateOutputPath)android\bin;$(IntermediateOutputPath)android\assets;$(IntermediateOutputPath)resizetizer\r;$(IntermediateOutputPath)resizetizer\sp;$(IntermediateOutputPath)resizetizer\sp\drawable-mdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-hdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xhdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xxhdpi;$(IntermediateOutputPath)resizetizer\sp\drawable-xxxhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-mdpi;$(IntermediateOutputPath)resizetizer\r\drawable-hdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xxhdpi;$(IntermediateOutputPath)resizetizer\r\drawable-xxxhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-mdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-hdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xxhdpi;$(IntermediateOutputPath)resizetizer\r\mipmap-xxxhdpi" />
 		<!-- Workaround for XARLP7000/XARLP7024: Safely move/delete locked lp stamp & tmp zip files in lp folder left behind by Visual Studio design-time builds -->
-		<Exec Command="powershell -Command &quot;if (Test-Path '$(IntermediateOutputPath)lp') { Get-ChildItem -Path '$(IntermediateOutputPath)lp' -Filter '*.stamp' -Recurse -ErrorAction SilentlyContinue | ForEach-Object { try { $stale = $_.FullName + '.stale_' + [Guid]::NewGuid().ToString('N'); Rename-Item -Path $_.FullName -NewName $stale -ErrorAction SilentlyContinue; Remove-Item -Path $stale -Force -ErrorAction SilentlyContinue } catch { } }; Get-ChildItem -Path '$(IntermediateOutputPath)' -Filter '*.tmp' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue; exit 0 }&quot;" ContinueOnError="true" Condition="Exists('$(IntermediateOutputPath)')" />
+		<Exec Command="powershell -Command &quot;if (Test-Path '$(IntermediateOutputPath)lp') { Get-ChildItem -Path '$(IntermediateOutputPath)lp' -Include '*.stamp','*.flata' -Recurse -ErrorAction SilentlyContinue | ForEach-Object { try { $stale = $_.Name + '_stale_' + [System.Guid]::NewGuid().ToString('N'); Rename-Item -LiteralPath $_.FullName -NewName $stale -ErrorAction SilentlyContinue; Remove-Item -LiteralPath ($_.DirectoryName + '\' + $stale) -Force -ErrorAction SilentlyContinue } catch { } }; Get-ChildItem -Path '$(IntermediateOutputPath)' -Filter '*.tmp' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue; Get-ChildItem -Path '$(IntermediateOutputPath)' -Filter '*_stale_*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue; exit 0 }&quot;" ContinueOnError="true" Condition="Exists('$(IntermediateOutputPath)')" />
+	</Target>
+
+	<!-- Workaround for XALNS7024: Safely rename locked assets dll files held by Visual Studio before LinkAssembliesNoShrink runs -->
+	<Target Name="AndroidSaveChangedAssembliesWorkaround" BeforeTargets="_LinkAssembliesNoShrink;_LinkAssembliesShrink;_SaveChangedAssemblies;SaveChangedAssemblies;_CompileDex" Condition="$(TargetFramework.Contains('-android')) and Exists('$(IntermediateOutputPath)android\assets')">
+		<Exec Command="powershell -Command &quot;Get-ChildItem -Path '$(IntermediateOutputPath)android\assets' -Filter '*.dll' -Recurse -ErrorAction SilentlyContinue | ForEach-Object { try { $stale = $_.Name + '_stale_' + [System.Guid]::NewGuid().ToString('N'); Rename-Item -LiteralPath $_.FullName -NewName $stale -ErrorAction SilentlyContinue; Remove-Item -LiteralPath ($_.DirectoryName + '\' + $stale) -Force -ErrorAction SilentlyContinue } catch { } }; exit 0&quot;" ContinueOnError="true" />
 	</Target>
 
 	<!-- Workaround for MSB3374: Handle Visual Studio background design-time file lock on __Microsoft.Android.Resource.Designer.cs -->

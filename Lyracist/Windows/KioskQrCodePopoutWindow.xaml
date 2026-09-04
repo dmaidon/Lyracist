@@ -100,8 +100,8 @@
 
         <!-- Setup Tips Box -->
         <Border Grid.Row="3"
-                Background="rgba(139, 92, 246, 0.08)"
-                BorderBrush="rgba(139, 92, 246, 0.25)"
+                Background="#148B5CF6"
+                BorderBrush="#408B5CF6"
                 BorderThickness="1"
                 CornerRadius="8"
                 Padding="10,8"

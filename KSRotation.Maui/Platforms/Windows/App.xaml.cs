@@ -1,4 +1,7 @@
-﻿using Microsoft.UI.Xaml;
+// Edited on Sep 3, 2026 @ 12:22:00 -> Guard with #if WINDOWS to prevent cross-framework active document analysis errors
+#if WINDOWS
+using Microsoft.UI.Xaml;
+using System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -33,4 +36,5 @@ public partial class App : MauiWinUIApplication
 
 	protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 }
+#endif
 

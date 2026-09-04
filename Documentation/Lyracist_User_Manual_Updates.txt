@@ -1054,3 +1054,55 @@ Major gameplay bug fixes and server resilience enhancements have been incorporat
    - Added automated test project `KnockoutTrivia.Tests` covering game rules, streaks, web server endpoints, and banner services.
    - Added in-app "🧪 Bot Simulator" navigation tab to `MainWindow.xaml` allowing hosts to spawn virtual bot players (1 to 30), simulate mobile answers with configurable accuracy and human response delays, test auto-play mode, and rehearse Super Streak wheels without physical phones.
 
+
+Section: KSRotation.Maui / 3-in-1 Audience Billboard & Connect Screen System
+
+[Audience Billboard & Connect Screen System]
+KSRotation.Maui now includes a comprehensive 3-in-1 Audience Billboard system to display the live queue and connection QR codes to venue patrons regardless of the venue's A/V setup:
+
+1. Option 2: Wi-Fi Web Billboard (`billboard.html`):
+   - Accessible from any Smart TV browser, Fire TV Stick Silk browser, Chromecast with Google TV, or mobile device connected to the DJ Travel Router.
+   - Hosted at `http://<tablet-ip>:5005/billboard` and `http://<tablet-ip>:5005/billboard.html`.
+   - Live Stage Spotlight: Displays a glowing gold "NOW PERFORMING" card with singer name, duet partner (`w/ Partner`), song title, and artist; a blue "UP NEXT" card; and a scrollable upcoming rotation queue.
+   - Dual Dynamic QR Codes: Automatically generates server-rendered QR codes via `/api/qr?text=...` for the Song Request Portal and Venue Wi-Fi auto-join (`WIFI:S:...;P:...;;`), requiring zero external internet or client JS libraries.
+   - Live Auto-Sync: Automatically syncs rotation state every 3 seconds from `/api/rotation` and venue/DJ branding every 10 seconds from `/api/info`.
+
+2. Option 3: On-Device Attractor & Break Mode (`BillboardOverlay` & `BillboardView`):
+   - Toggled via the dedicated "📺 Billboard" button on the bottom `PortalConnectionCard` of the tablet console.
+   - Switches the tablet into a full-screen, high-contrast dark theme audience display featuring the live stage spotlight, active singer counter, live ticking clock, and QR code hubs.
+   - Perfect for gig breaks and intermissions: the host can place the tablet on a table or stand for patrons to scan and browse the rotation.
+   - Tap "Exit Billboard" on the floating bottom bar to immediately return to the DJ rotation controls.
+
+3. Option 1: Hardware HDMI & External Screen Presentation (`SecondaryDisplayService`):
+   - Supports plugging a USB-C to HDMI adapter or wireless display directly into the tablet.
+   - Uses native Android `DisplayManager` and `Android.App.Presentation` to automatically project an independent audience billboard window on the TV or projector while preserving full private DJ controls on the tablet touchscreen.
+   - On Windows, opens a secondary borderless window (`BillboardPage`) for dual-monitor setups.
+   - Includes manual override buttons ("📺 Output To TV / HDMI") for direct control over external presentation.
+
+4. 4-Way QR Connect Switcher in `ConnectQrOverlay`:
+   - The "📱 Connect QR" popup now features a 4-way mode switcher (`📱 Patron`, `📟 Kiosk`, `📺 TV`, `🎧 DJ`).
+   - Tapping "📺 TV" displays the Billboard connection QR code and URL (`http://<ip>:5005/billboard.html`) with quick instructions for pointing venue TV browsers to the live display.
+
+
+Section: Lyracist, KSRotation, and KSRotation.Maui / Last Round Rotation Management
+
+[Last Round Rotation Management]
+A unified "Last Round" mode has been introduced across Lyracist, KSRotation (WPF), and KSRotation.Maui:
+
+1. Host Activation Button:
+   - Positioned as a prominent emerald green button placed immediately after the Clear button in the active queue controls (Lyracist `RotationPage.xaml`, KSRotation `MainWindow.xaml`, and KSRotation.Maui `MainPage.xaml`).
+   - Toggles between inactive (emerald green `#059669`) and active (sapphire blue `#2563EB` with "✓ Last Round").
+
+2. Audience Screen & Billboard Announcement:
+   - Displays a prominent red announcement banner (`★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★`) across all audience screens:
+     * Lyracist: `RotationWindow.xaml`.
+     * KSRotation (WPF): `SingerDisplayWindow.xaml` across Normal, Star Wars, Vinyl, and Marquee projection modes.
+     * KSRotation.Maui: `BillboardView.xaml` (on-device attractor and external HDMI presentations) and `billboard.html`.
+
+3. Automatic Performer Queue Pruning:
+   - Once a performer finishes their performance in the last round, they are marked as having sung in the last round (`HasSungInLastRound = true`).
+   - Completed performers are automatically hidden from all audience displays and web billboard queues.
+   - The queue automatically advances through the remaining unsung performers until the round completes.
+   - On the DJ host screen, completed performers remain visible with an emerald `DONE (LAST ROUND)` indicator badge for verification.
+
+

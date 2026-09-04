@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1251 empty braces formatting
+// Edited on Sep 3, 2026 @ 08:21:00 -> Add VenueInfoResponseDto to AppJsonContext
 using KSRotation.Models;
 using Lyracist.Shared;
 using System.Collections.Generic;
@@ -24,5 +24,6 @@ namespace KSRotation.Services
     [JsonSerializable(typeof(List<PatronRequest>))]
     [JsonSerializable(typeof(RequestedSong))]
     [JsonSerializable(typeof(List<RequestedSong>))]
+    [JsonSerializable(typeof(VenueInfoResponseDto))]
     public partial class AppJsonContext : JsonSerializerContext;
 }

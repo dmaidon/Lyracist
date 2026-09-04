@@ -1,8 +1,9 @@
-<!-- Edited on Aug 21, 2026 @ 17:50:00 -> Add 3-way portal mode switcher for Patron, Kiosk, and DJ QR in ConnectQrOverlay -->
+<!-- Edited on Sep 4, 2026 @ 07:25:00 -> Change Last Round option to standout emerald green button after Clear Queue -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
              xmlns:models="clr-namespace:KSRotation.Models"
+             xmlns:views="clr-namespace:KSRotation.Maui.Views"
              x:Class="KSRotation.Maui.MainPage"
              x:DataType="viewmodels:MainViewModel"
              Title="KSRotation Console (Master)"
@@ -22,7 +23,7 @@
                             <CheckBox IsChecked="{Binding FloatCurrentSingerToTop}" Color="#7C3AED" Scale="0.8" VerticalOptions="Center" />
                             <Label Text="Float to Top" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
                         </HorizontalStackLayout>
-                        <Button Text="Clear Queue" Clicked="OnClearQueueClicked" BackgroundColor="Transparent" TextColor="#F87171" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#F87171" VerticalOptions="Center" />
+
                         <Button x:Name="LoadTestDataBtn" Text="Load Test Data" Clicked="OnLoadTestDataClicked" IsEnabled="{Binding CanLoadTestData}" BackgroundColor="Transparent" TextColor="#3B82F6" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#3B82F6" VerticalOptions="Center">
                             <Button.Triggers>
                                 <DataTrigger TargetType="Button" Binding="{Binding CanLoadTestData}" Value="False">
@@ -32,6 +33,23 @@
                         </Button>
                         <Button x:Name="ThemeBtn" Text="☀️ Light Mode" Clicked="OnThemeToggled" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
                         <Button Text="🎃 Scaryoke" Clicked="OnScaryokeWheelClicked" BackgroundColor="Transparent" BorderColor="#F97316" TextColor="#F97316" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
+                        <Button Text="Clear Queue" Clicked="OnClearQueueClicked" BackgroundColor="Transparent" TextColor="#F87171" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" BorderColor="#F87171" VerticalOptions="Center" />
+                        <Button Text="Last Round"
+                                Command="{Binding ToggleLastRoundCommand}"
+                                BackgroundColor="#059669"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                FontSize="10"
+                                Padding="8,2"
+                                HeightRequest="26"
+                                VerticalOptions="Center">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsLastRound}" Value="True">
+                                    <Setter Property="Text" Value="✓ Last Round" />
+                                    <Setter Property="BackgroundColor" Value="#2563EB" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
                         <Button Text="ⓘ About" Clicked="OnAboutClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
                     </HorizontalStackLayout>
                 </ScrollView>
@@ -129,7 +147,7 @@
                                                     </Label.Triggers>
                                                 </Label>
 
-                                                <Label Text="{Binding Song}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#A78BFA}" FontSize="13" FontAttributes="Italic" VerticalOptions="Center">
+                                                <Label Text="{Binding Song}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#A78BFA}" FontSize="13"  FontAttributes="Bold,Italic" VerticalOptions="Center">
                                                     <Label.Triggers>
                                                         <DataTrigger TargetType="Label" Binding="{Binding Song}" Value="">
                                                             <Setter Property="IsVisible" Value="False" />
@@ -207,13 +225,13 @@
                                         <HorizontalStackLayout Spacing="4" Margin="0,2,8,0">
 
                                             <!-- Complete current round -->
-                                            <Button Text="✓" Clicked="OnFinishSingerSongClicked" CommandParameter="{Binding .}"  BackgroundColor="Transparent" BorderColor="#3B82F6" BorderWidth="1" TextColor="#3B82F6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Song Completed" />
+                                            <Button Text="✓" Clicked="OnFinishSingerSongClicked" CommandParameter="{Binding .}"  BackgroundColor="Transparent" BorderColor="#3B82F6" BorderWidth="1" TextColor="#3B82F6" FontSize="17" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Song Completed" />
 
                                             <!-- Edit Name/Song/Artist -->
-                                            <Button Text="✏" Clicked="OnEditSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#8B5CF6" BorderWidth="1" TextColor="#8B5CF6" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Edit Performer" />
+                                            <Button Text="✏" Clicked="OnEditSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#8B5CF6" BorderWidth="1" TextColor="#8B5CF6" FontSize="17" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Edit Performer" />
 
                                             <!-- Highlight as Current -->
-                                            <Button Text="🎙" Clicked="OnSetCurrentSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#10B981" BorderWidth="1" TextColor="#10B981" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Mark Current">
+                                            <Button Text="🎙" Clicked="OnSetCurrentSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#10B981" BorderWidth="1" TextColor="#10B981" FontSize="17" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Mark Current">
                                                 <Button.Triggers>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsPaused}" Value="True">
                                                         <Setter Property="IsEnabled" Value="False" />
@@ -227,7 +245,7 @@
                                             </Button>
 
                                             <!-- Set/Clear 1st Singer in rotation -->
-                                            <Button Text="🚩" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=SetRotationStartSingerCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#DC2626" BorderWidth="1" TextColor="#DC2626" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Set as 1st Singer (Round Start)">
+                                            <Button Text="🚩" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=SetRotationStartSingerCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#DC2626" BorderWidth="1" TextColor="#DC2626" FontSize="17" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Set as 1st Singer (Round Start)">
                                                 <Button.Triggers>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsRotationStart}" Value="True">
                                                         <Setter Property="BackgroundColor" Value="#DC2626" />
@@ -238,11 +256,11 @@
                                             </Button>
 
                                             <!-- Up/Down buttons -->
-                                            <Button Text="▲" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerUpCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
-                                            <Button Text="▼" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerDownCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
+                                            <Button Text="▲" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerUpCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="18" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
+                                            <Button Text="▼" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerDownCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="18" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
 
                                             <!-- Toggle Paused (Pause/Resume) -->
-                                            <Button Text="❚❚" Clicked="OnToggleSingerPausedClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#D97706" BorderWidth="1" TextColor="#D97706" FontSize="11" FontAttributes="Bold" HeightRequest="28" Padding="6,0">
+                                            <Button Text="❚❚" Clicked="OnToggleSingerPausedClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#D97706" BorderWidth="1" TextColor="#D97706" FontSize="17" FontAttributes="Bold" HeightRequest="28" Padding="6,0">
                                                 <Button.Triggers>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsPaused}" Value="True">
                                                         <Setter Property="Text" Value="▶ Resume" />
@@ -257,7 +275,7 @@
                                             </Button>
 
                                             <!-- Delete singer row -->
-                                            <Button Text="🗑" Clicked="OnDeleteSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#EF4444" BorderWidth="1" TextColor="#EF4444" FontSize="10" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Delete Performer">
+                                            <Button Text="🗑" Clicked="OnDeleteSingerClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#EF4444" BorderWidth="1" TextColor="#EF4444" FontSize="17" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Delete Performer">
                                                 <Button.Triggers>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsInactive}" Value="True">
                                                         <Setter Property="Text" Value="↺" />
@@ -286,6 +304,8 @@
                 <VerticalStackLayout Spacing="8" VerticalOptions="Center">
                     <Button Text="+ Add Performer" Clicked="OnAddPerformerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" FontSize="12" Padding="8,0" HeightRequest="40" HorizontalOptions="Fill" />
                     <Button Text="📱 Connect QR" Clicked="OnShowConnectQrClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" BorderWidth="1" FontAttributes="Bold" FontSize="12" Padding="8,0" HeightRequest="40" HorizontalOptions="Fill" />
+                    <Button Text="Legend" Clicked="OnShowLegendClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" BorderWidth="1" FontAttributes="Bold" FontSize="12" Padding="8,0" HeightRequest="40" HorizontalOptions="Fill" />
+                    <Button Text="📺 Billboard" Clicked="OnShowBillboardClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#D97706, Dark=#FBBF24}" TextColor="{AppThemeBinding Light=#D97706, Dark=#FBBF24}" BorderWidth="1" FontAttributes="Bold" FontSize="12" Padding="8,0" HeightRequest="40" HorizontalOptions="Fill" />
                 </VerticalStackLayout>
             </Border>
 
@@ -429,13 +449,15 @@
         <Grid x:Name="ConnectQrOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False">
             <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="300" HorizontalOptions="Center" VerticalOptions="Center">
                 <VerticalStackLayout Spacing="6">
-                    <!-- Mode Switcher Tabs (Patron / Kiosk / DJ) -->
-                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4" Margin="0,0,0,6">
-                        <Button Text="📱 Patron" Clicked="OnSelectPatronQrClicked" FontSize="11" HeightRequest="30" Padding="0" CornerRadius="6"
+                    <!-- Mode Switcher Tabs (Patron / Kiosk / TV / DJ) -->
+                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="4" Margin="0,0,0,6">
+                        <Button Text="📱 Patron" Clicked="OnSelectPatronQrClicked" FontSize="10" HeightRequest="30" Padding="0" CornerRadius="6"
                                 BackgroundColor="{AppThemeBinding Light=#EDE9FE, Dark=#312E81}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontAttributes="Bold" />
-                        <Button Text="📟 Kiosk" Clicked="OnSelectKioskQrClicked" FontSize="11" HeightRequest="30" Padding="0" CornerRadius="6"
+                        <Button Text="📟 Kiosk" Clicked="OnSelectKioskQrClicked" FontSize="10" HeightRequest="30" Padding="0" CornerRadius="6"
                                 BackgroundColor="{AppThemeBinding Light=#EDE9FE, Dark=#312E81}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontAttributes="Bold" />
-                        <Button Text="🎧 DJ" Clicked="OnSelectDjQrClicked" FontSize="11" HeightRequest="30" Padding="0" CornerRadius="6"
+                        <Button Text="📺 TV" Clicked="OnSelectBillboardQrClicked" FontSize="10" HeightRequest="30" Padding="0" CornerRadius="6"
+                                BackgroundColor="{AppThemeBinding Light=#FEF3C7, Dark=#78350F}" TextColor="{AppThemeBinding Light=#D97706, Dark=#FDE68A}" FontAttributes="Bold" />
+                        <Button Text="🎧 DJ" Clicked="OnSelectDjQrClicked" FontSize="10" HeightRequest="30" Padding="0" CornerRadius="6"
                                 BackgroundColor="{AppThemeBinding Light=#FEE2E2, Dark=#7F1D1D}" TextColor="{AppThemeBinding Light=#DC2626, Dark=#FCA5A5}" FontAttributes="Bold" />
                     </Grid>
 
@@ -445,6 +467,10 @@
                             <DataTrigger TargetType="Label" Binding="{Binding IsKioskQrVisible}" Value="True">
                                 <Setter Property="Text" Value="📟 TABLET KIOSK STATION" />
                                 <Setter Property="TextColor" Value="#8B5CF6" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsBillboardQrVisible}" Value="True">
+                                <Setter Property="Text" Value="📺 TV AUDIENCE BILLBOARD" />
+                                <Setter Property="TextColor" Value="#F59E0B" />
                             </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
                                 <Setter Property="Text" Value="⚠️ DJ CONTROL PORTAL" />
@@ -459,6 +485,9 @@
                                 <DataTrigger TargetType="Image" Binding="{Binding IsKioskQrVisible}" Value="True">
                                     <Setter Property="Source" Value="{Binding KioskQrCodeImage}" />
                                 </DataTrigger>
+                                <DataTrigger TargetType="Image" Binding="{Binding IsBillboardQrVisible}" Value="True">
+                                    <Setter Property="Source" Value="{Binding BillboardQrCodeImage}" />
+                                </DataTrigger>
                                 <DataTrigger TargetType="Image" Binding="{Binding IsDjQrVisible}" Value="True">
                                     <Setter Property="Source" Value="{Binding DjQrCodeImage}" />
                                 </DataTrigger>
@@ -472,6 +501,10 @@
                                 <Setter Property="Text" Value="{Binding KioskConnectionUrl}" />
                                 <Setter Property="TextColor" Value="#8B5CF6" />
                             </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsBillboardQrVisible}" Value="True">
+                                <Setter Property="Text" Value="{Binding BillboardConnectionUrl}" />
+                                <Setter Property="TextColor" Value="#F59E0B" />
+                            </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
                                 <Setter Property="Text" Value="{Binding DjConnectionUrl}" />
                                 <Setter Property="TextColor" Value="#EF4444" />
@@ -484,6 +517,10 @@
                             <DataTrigger TargetType="Label" Binding="{Binding IsKioskQrVisible}" Value="True">
                                 <Setter Property="Text" Value="Place tablet in landscape for self-service song requests" />
                                 <Setter Property="TextColor" Value="#8B5CF6" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsBillboardQrVisible}" Value="True">
+                                <Setter Property="Text" Value="Open on any Smart TV / Fire Stick browser on Travel Router" />
+                                <Setter Property="TextColor" Value="#F59E0B" />
                             </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding IsDjQrVisible}" Value="True">
                                 <Setter Property="Text" Value="DJ ONLY: Remote dashboard login URL" />
@@ -547,6 +584,266 @@
                     <Button Text="Cancel" Clicked="OnCancelEditSingerClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" HeightRequest="36" />
                 </VerticalStackLayout>
             </Border>
+        </Grid>
+
+        <!-- Legend overlay: explains what the various icons, badges, colors, and buttons mean in the singer block -->
+        <Grid x:Name="LegendOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False">
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E2230}" StrokeThickness="0" Padding="20" WidthRequest="360" MaximumHeightRequest="620" HorizontalOptions="Center" VerticalOptions="Center">
+                <Grid RowDefinitions="*,Auto" RowSpacing="12">
+                    <ScrollView Grid.Row="0">
+                        <VerticalStackLayout Spacing="14">
+                            <!-- Header -->
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="SINGER BLOCK LEGEND" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="15" FontAttributes="Bold" CharacterSpacing="1.2" HorizontalOptions="Center" />
+                                <Label Text="Visual guide to status indicators, buttons &amp; rounds" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+
+                            <!-- Section 1: Row Status & Colors -->
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="ROW COLORS &amp; BADGES" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="11" FontAttributes="Bold" CharacterSpacing="1.0" />
+
+                                <!-- 1st Singer -->
+                                <Border StrokeShape="RoundRectangle 6" BackgroundColor="{AppThemeBinding Light=#FEF2F2, Dark=#2D1414}" Stroke="#DC2626" StrokeThickness="1" Padding="8,6">
+                                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                        <Border StrokeShape="RoundRectangle 4" BackgroundColor="#DC2626" Padding="5,2" StrokeThickness="0" VerticalOptions="Center">
+                                            <Label Text="🚩 1ST" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                        </Border>
+                                        <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                            <Label Text="Rotation Start (1st Singer)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                            <Label Text="Marks the start of the rotation cycle / round" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <!-- Current Singer -->
+                                <Border StrokeShape="RoundRectangle 6" BackgroundColor="{AppThemeBinding Light=#FFF7ED, Dark=#2D1A10}" Stroke="#F97316" StrokeThickness="1" Padding="8,6">
+                                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                        <Border StrokeShape="RoundRectangle 4" BackgroundColor="#F97316" Padding="5,2" StrokeThickness="0" VerticalOptions="Center">
+                                            <Label Text="NOW" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                        </Border>
+                                        <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                            <Label Text="Now Performing (Orange)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                            <Label Text="The active performer currently on stage singing" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <!-- Next Singer -->
+                                <Border StrokeShape="RoundRectangle 6" BackgroundColor="{AppThemeBinding Light=#EFF6FF, Dark=#151F32}" Stroke="#3B82F6" StrokeThickness="1" Padding="8,6">
+                                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                        <Border StrokeShape="RoundRectangle 4" BackgroundColor="#3B82F6" Padding="5,2" StrokeThickness="0" VerticalOptions="Center">
+                                            <Label Text="NEXT" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                        </Border>
+                                        <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                            <Label Text="On Deck / Next Up (Blue)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                            <Label Text="The performer who sings next after current song" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <!-- Music Track -->
+                                <Border StrokeShape="RoundRectangle 6" BackgroundColor="{AppThemeBinding Light=#ECFDF5, Dark=#064E3B}" Stroke="#10B981" StrokeThickness="1" Padding="8,6">
+                                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                        <Border StrokeShape="RoundRectangle 4" BackgroundColor="#10B981" Padding="5,2" StrokeThickness="0" VerticalOptions="Center">
+                                            <Label Text="MUSIC" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                        </Border>
+                                        <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                            <Label Text="Background Music Track" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                            <Label Text="Scheduled DJ music break or intermission" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <!-- Paused / Inactive -->
+                                <Border StrokeShape="RoundRectangle 6" BackgroundColor="{AppThemeBinding Light=#E2E8F0, Dark=#151722}" StrokeThickness="0" Padding="8,6" Opacity="0.75">
+                                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                        <Border StrokeShape="RoundRectangle 4" BackgroundColor="#64748B" Padding="5,2" StrokeThickness="0" VerticalOptions="Center">
+                                            <Label Text="PAUSED" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                        </Border>
+                                        <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                            <Label Text="Paused / Dimmed Row" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                            <Label Text="Performer stepped out; skipped without deleting" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </VerticalStackLayout>
+
+                            <!-- Section 2: Action Buttons -->
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="ACTION BUTTONS" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="11" FontAttributes="Bold" CharacterSpacing="1.0" />
+
+                                <!-- Complete Song -->
+                                <Grid ColumnDefinitions="32,*" ColumnSpacing="10" VerticalOptions="Center">
+                                    <Border Grid.Column="0" StrokeShape="RoundRectangle 4" Stroke="#3B82F6" StrokeThickness="1" BackgroundColor="Transparent" WidthRequest="28" HeightRequest="28" Padding="0">
+                                        <Label Text="✓" TextColor="#3B82F6" FontSize="17" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="Complete Song" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                        <Label Text="Checks off round, logs history, and advances queue" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                    </VerticalStackLayout>
+                                </Grid>
+
+                                <!-- Edit Singer -->
+                                <Grid ColumnDefinitions="32,*" ColumnSpacing="10" VerticalOptions="Center">
+                                    <Border Grid.Column="0" StrokeShape="RoundRectangle 4" Stroke="#8B5CF6" StrokeThickness="1" BackgroundColor="Transparent" WidthRequest="28" HeightRequest="28" Padding="0">
+                                        <Label Text="✏" TextColor="#8B5CF6" FontSize="17" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="Edit Performer" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                        <Label Text="Edit name, duet partner, song title, or artist" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                    </VerticalStackLayout>
+                                </Grid>
+
+                                <!-- Mark Current -->
+                                <Grid ColumnDefinitions="32,*" ColumnSpacing="10" VerticalOptions="Center">
+                                    <Border Grid.Column="0" StrokeShape="RoundRectangle 4" Stroke="#10B981" StrokeThickness="1" BackgroundColor="Transparent" WidthRequest="28" HeightRequest="28" Padding="0">
+                                        <Label Text="🎙" TextColor="#10B981" FontSize="17" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="Mark Current (Now Performing)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                        <Label Text="Immediately sets performer as active singer on stage" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                    </VerticalStackLayout>
+                                </Grid>
+
+                                <!-- 1st Singer Flag -->
+                                <Grid ColumnDefinitions="32,*" ColumnSpacing="10" VerticalOptions="Center">
+                                    <Border Grid.Column="0" StrokeShape="RoundRectangle 4" Stroke="#DC2626" StrokeThickness="1" BackgroundColor="Transparent" WidthRequest="28" HeightRequest="28" Padding="0">
+                                        <Label Text="🚩" TextColor="#DC2626" FontSize="17" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="Set / Clear 1st Singer" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                        <Label Text="Sets anchor for round start (tap again to clear)" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                    </VerticalStackLayout>
+                                </Grid>
+
+                                <!-- Reorder Up / Down -->
+                                <Grid ColumnDefinitions="32,*" ColumnSpacing="10" VerticalOptions="Center">
+                                    <HorizontalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                        <Border StrokeShape="RoundRectangle 4" Stroke="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" StrokeThickness="1" BackgroundColor="Transparent" WidthRequest="13" HeightRequest="26" Padding="0">
+                                            <Label Text="▲" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="9" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                        <Border StrokeShape="RoundRectangle 4" Stroke="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" StrokeThickness="1" BackgroundColor="Transparent" WidthRequest="13" HeightRequest="26" Padding="0">
+                                            <Label Text="▼" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="9" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                    </HorizontalStackLayout>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="Move Up / Move Down" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                        <Label Text="Manually changes performer position in rotation" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                    </VerticalStackLayout>
+                                </Grid>
+
+                                <!-- Pause / Resume -->
+                                <Grid ColumnDefinitions="32,*" ColumnSpacing="10" VerticalOptions="Center">
+                                    <Border Grid.Column="0" StrokeShape="RoundRectangle 4" Stroke="#D97706" StrokeThickness="1" BackgroundColor="Transparent" WidthRequest="28" HeightRequest="28" Padding="0">
+                                        <Label Text="❚❚" TextColor="#D97706" FontSize="11" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="Pause / Resume" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                        <Label Text="Toggles pause state (displays ▶ Resume when paused)" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                    </VerticalStackLayout>
+                                </Grid>
+
+                                <!-- Delete / Restore -->
+                                <Grid ColumnDefinitions="32,*" ColumnSpacing="10" VerticalOptions="Center">
+                                    <Border Grid.Column="0" StrokeShape="RoundRectangle 4" Stroke="#EF4444" StrokeThickness="1" BackgroundColor="Transparent" WidthRequest="28" HeightRequest="28" Padding="0">
+                                        <Label Text="🗑" TextColor="#EF4444" FontSize="17" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                        <Label Text="Delete / Restore" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                        <Label Text="Deletes performer (turns into ↺ to restore if inactive)" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </VerticalStackLayout>
+
+                            <!-- Section 3: Song Round Checkboxes -->
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="ROUND CHECKBOXES (1 - 10)" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="11" FontAttributes="Bold" CharacterSpacing="1.0" />
+                                <HorizontalStackLayout Spacing="2" HorizontalOptions="Start">
+                                    <Border StrokeShape="RoundRectangle 3" BackgroundColor="#E74C3C" WidthRequest="18" HeightRequest="18" StrokeThickness="0">
+                                        <Label Text="1" TextColor="White" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 3" BackgroundColor="#E67E22" WidthRequest="18" HeightRequest="18" StrokeThickness="0">
+                                        <Label Text="2" TextColor="White" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 3" BackgroundColor="#F1C40F" WidthRequest="18" HeightRequest="18" StrokeThickness="0">
+                                        <Label Text="3" TextColor="White" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 3" BackgroundColor="#2ECC71" WidthRequest="18" HeightRequest="18" StrokeThickness="0">
+                                        <Label Text="4" TextColor="White" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 3" BackgroundColor="#1ABC9C" WidthRequest="18" HeightRequest="18" StrokeThickness="0">
+                                        <Label Text="5" TextColor="White" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 3" BackgroundColor="#3498DB" WidthRequest="18" HeightRequest="18" StrokeThickness="0">
+                                        <Label Text="6" TextColor="White" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 3" BackgroundColor="#9B59B6" WidthRequest="18" HeightRequest="18" StrokeThickness="0">
+                                        <Label Text="7" TextColor="White" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 3" BackgroundColor="#FF1493" WidthRequest="18" HeightRequest="18" StrokeThickness="0">
+                                        <Label Text="8" TextColor="White" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 3" BackgroundColor="#00E5FF" WidthRequest="18" HeightRequest="18" StrokeThickness="0">
+                                        <Label Text="9" TextColor="White" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 3" BackgroundColor="#E040FB" WidthRequest="18" HeightRequest="18" StrokeThickness="0">
+                                        <Label Text="10" TextColor="White" FontSize="9" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                </HorizontalStackLayout>
+                                <Label Text="Each colored box tracks a completed song for that round. Automatically checked when ✓ Complete is tapped." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </ScrollView>
+
+                    <Button Grid.Row="1" Text="Close" Clicked="OnCloseLegendClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- FULL-SCREEN AUDIENCE BILLBOARD OVERLAY (ATTRACTOR / BREAK MODE) -->
+        <Grid x:Name="BillboardOverlay"
+              Grid.Row="0" Grid.Column="0"
+              IsVisible="False"
+              BackgroundColor="#070B14"
+              ZIndex="100">
+            <Grid RowDefinitions="*,Auto">
+                <views:BillboardView Grid.Row="0" />
+
+                <!-- Bottom Floating Controls Bar -->
+                <Border Grid.Row="1"
+                        StrokeShape="RoundRectangle 24"
+                        BackgroundColor="#1E293B"
+                        Stroke="#334155"
+                        StrokeThickness="1"
+                        Padding="16,8"
+                        Margin="0,0,0,16"
+                        HorizontalOptions="Center"
+                        Shadow="{Shadow Brush=Black, Offset='0,4', Radius=12, Opacity=0.6}">
+                    <HorizontalStackLayout Spacing="16" VerticalOptions="Center">
+                        <Label Text="📺 Billboard / Attractor Mode Active"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="#FBBF24"
+                               VerticalOptions="Center" />
+                        <Button Text="📺 Output To TV / HDMI"
+                                Clicked="OnToggleExternalDisplayClicked"
+                                BackgroundColor="#2563EB"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                FontSize="12"
+                                HeightRequest="32"
+                                Padding="12,0" />
+                        <Button Text="Exit Billboard"
+                                Clicked="OnCloseBillboardClicked"
+                                BackgroundColor="#EF4444"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                FontSize="12"
+                                HeightRequest="32"
+                                Padding="12,0" />
+                    </HorizontalStackLayout>
+                </Border>
+            </Grid>
         </Grid>
     </Grid>
 </ContentPage>

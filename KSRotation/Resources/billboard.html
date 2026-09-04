@@ -1,0 +1,786 @@
+<!-- Edited on Sep 3, 2026 @ 23:51:15 -> Add Last Round banner and filter completed singers in billboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyracist - Singer Rotation Billboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #070B14;
+            --bg-panel: #0E1626;
+            --bg-card: #152238;
+            --bg-card-alt: #1A2A44;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --text-dim: #64748B;
+            --amber-glow: #F59E0B;
+            --blue-glow: #3B82F6;
+            --green-glow: #10B981;
+            --purple-glow: #8B5CF6;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-card: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+        }
+
+        /* Top Header Bar */
+        header.billboard-header {
+            height: 72px;
+            background: linear-gradient(90deg, #111827 0%, #0F172A 50%, #1E1B4B 100%);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 36px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.5));
+        }
+
+        .brand-titles {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .venue-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dj-badge {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #A78BFA;
+            letter-spacing: 0.5px;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .status-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 8px 18px;
+            border-radius: 9999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-pill strong {
+            color: var(--text-main);
+        }
+
+        .clock-display {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Grid (2-Column Layout) */
+        main.billboard-main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 24px;
+            padding: 24px 36px;
+            height: calc(100vh - 72px);
+            overflow: hidden;
+        }
+
+        /* Left Column: Stage & Queue */
+        .stage-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Spotlight: Now Performing */
+        .card-now-performing {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.18) 0%, rgba(20, 27, 45, 0.85) 100%);
+            border: 2px solid var(--amber-glow);
+            border-radius: 18px;
+            padding: 24px 28px;
+            box-shadow: 0 0 35px rgba(245, 158, 11, 0.22), inset 0 0 20px rgba(245, 158, 11, 0.08);
+            position: relative;
+            flex-shrink: 0;
+            animation: pulse-glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 25px rgba(245, 158, 11, 0.18); }
+            to { box-shadow: 0 0 45px rgba(245, 158, 11, 0.32); }
+        }
+
+        .spotlight-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .badge-now {
+            background: #D97706;
+            color: #FFFFFF;
+            box-shadow: 0 2px 10px rgba(217, 119, 6, 0.5);
+        }
+
+        .badge-next {
+            background: #2563EB;
+            color: #FFFFFF;
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.5);
+        }
+
+        .now-performer-name {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #FFFFFF;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        .now-duet-tag {
+            font-size: 1.25rem;
+            font-weight: 600;
+            font-style: italic;
+            color: #FBBF24;
+        }
+
+        .now-song-meta {
+            margin-top: 8px;
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #E2E8F0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .now-song-meta .artist-tag {
+            color: #94A3B8;
+            font-weight: 400;
+        }
+
+        /* Last Round Announcement Banner */
+        .last-round-banner {
+            background: linear-gradient(90deg, #92400E 0%, #D97706 50%, #92400E 100%);
+            color: #FFFFFF;
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: 1px;
+            text-align: center;
+            padding: 10px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(217, 119, 6, 0.45);
+            border: 1.5px solid rgba(251, 191, 36, 0.6);
+            flex-shrink: 0;
+            animation: pulseLastRound 2.5s infinite ease-in-out;
+        }
+
+        @keyframes pulseLastRound {
+            0%, 100% { opacity: 0.95; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.008); }
+        }
+
+        /* Spotlight: Up Next / On Deck */
+        .card-up-next {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.14) 0%, rgba(20, 27, 45, 0.8) 100%);
+            border: 1.5px solid var(--blue-glow);
+            border-radius: 14px;
+            padding: 16px 22px;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+            flex-shrink: 0;
+        }
+
+        .next-performer-name {
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            line-height: 1.2;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .next-song-meta {
+            margin-top: 4px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #CBD5E1;
+        }
+
+        /* Upcoming Queue Container */
+        .card-upcoming-queue {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-card);
+            border-radius: 14px;
+            padding: 18px 22px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .queue-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-dim);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .queue-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+        }
+
+        .queue-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .queue-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        .queue-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 10px 16px;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .queue-pos {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #64748B;
+            width: 24px;
+            text-align: center;
+        }
+
+        .queue-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .queue-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .queue-song {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Right Column: Connect & Request Hub */
+        .hub-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .hub-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-card);
+            border-radius: 18px;
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hub-card.primary-hub {
+            flex: 1.2;
+            background: linear-gradient(145deg, #131E32 0%, #1A2844 100%);
+            border: 1.5px solid rgba(139, 92, 246, 0.4);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
+        }
+
+        .hub-card.wifi-hub {
+            flex: 1;
+            background: linear-gradient(145deg, #0F172A 0%, #152033 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+        }
+
+        .hub-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .badge-request {
+            background: rgba(139, 92, 246, 0.25);
+            color: #C4B5FD;
+            border: 1px solid rgba(139, 92, 246, 0.5);
+        }
+
+        .badge-wifi {
+            background: rgba(16, 185, 129, 0.25);
+            color: #6EE7B7;
+            border: 1px solid rgba(16, 185, 129, 0.5);
+        }
+
+        .qr-container {
+            background: #FFFFFF;
+            padding: 12px;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .qr-image-lg {
+            width: 170px;
+            height: 170px;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .qr-image-sm {
+            width: 120px;
+            height: 120px;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .hub-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+        }
+
+        .hub-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            max-width: 320px;
+            line-height: 1.4;
+        }
+
+        .hub-link {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #A78BFA;
+            letter-spacing: 0.25px;
+            word-break: break-all;
+        }
+
+        .wifi-details {
+            margin-top: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 0.9rem;
+        }
+
+        .wifi-field {
+            color: var(--text-muted);
+        }
+
+        .wifi-field strong {
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        /* Empty State */
+        .empty-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 36px 20px;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        .empty-placeholder .icon {
+            font-size: 2.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header Bar -->
+    <header class="billboard-header">
+        <div class="header-brand">
+            <span class="brand-icon">🎤</span>
+            <div class="brand-titles">
+                <span class="venue-name" id="billboard-venue-name">Karaoke Night</span>
+                <span class="dj-badge" id="billboard-dj-name">Hosted by DJ</span>
+            </div>
+        </div>
+
+        <div class="header-status">
+            <div class="status-pill">
+                <span>Active Rotation:</span>
+                <strong id="billboard-singer-count">0 Singers</strong>
+            </div>
+            <div class="clock-display" id="billboard-clock">--:-- --</div>
+        </div>
+    </header>
+
+    <!-- Main Grid Content -->
+    <main class="billboard-main">
+        <!-- Left Column: Stage Queue -->
+        <section class="stage-column">
+            <!-- LAST ROUND BANNER -->
+            <div class="last-round-banner" id="last-round-banner" style="display: none;">
+                ★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★
+            </div>
+
+            <!-- NOW PERFORMING -->
+            <div class="card-now-performing" id="now-performing-card">
+                <div class="spotlight-badge badge-now">🎙️ Now Performing</div>
+                <div class="now-performer-name">
+                    <span id="now-singer-name">Stage is Open</span>
+                    <span class="now-duet-tag" id="now-duet-tag" style="display: none;"></span>
+                </div>
+                <div class="now-song-meta" id="now-song-meta">
+                    <span id="now-song-title">Get ready to sing!</span>
+                    <span class="artist-tag" id="now-song-artist"></span>
+                </div>
+            </div>
+
+            <!-- UP NEXT -->
+            <div class="card-up-next" id="up-next-card">
+                <div class="spotlight-badge badge-next">⏭️ Up Next</div>
+                <div class="next-performer-name">
+                    <span id="next-singer-name">Ready for singers</span>
+                    <span class="now-duet-tag" id="next-duet-tag" style="display: none;"></span>
+                </div>
+                <div class="next-song-meta" id="next-song-meta">
+                    <span id="next-song-title">Scan QR code to submit a song</span>
+                </div>
+            </div>
+
+            <!-- UPCOMING QUEUE -->
+            <div class="card-upcoming-queue">
+                <div class="queue-title">
+                    <span>Upcoming In Rotation</span>
+                    <span id="queue-count-label">Queue</span>
+                </div>
+                <div class="queue-list" id="billboard-queue-list">
+                    <div class="empty-placeholder">
+                        <span class="icon">📋</span>
+                        <span>Rotation is empty. Add a song to get on stage!</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Connect & Request Hub -->
+        <aside class="hub-column">
+            <!-- Portal Request Hub -->
+            <div class="hub-card primary-hub">
+                <div class="hub-badge badge-request">📱 Song Requests</div>
+                <div class="qr-container">
+                    <img id="portal-qr-image" class="qr-image-lg" src="/api/qr?text=http%3A%2F%2F127.0.0.1%3A5005" alt="Request Portal QR Code" />
+                </div>
+                <div class="hub-title">Scan To Pick Your Song</div>
+                <p class="hub-desc">Browse thousands of karaoke tracks and submit requests straight from your phone!</p>
+                <div class="hub-link" id="portal-url-display">http://...</div>
+            </div>
+
+            <!-- Wi-Fi Connect Hub -->
+            <div class="hub-card wifi-hub">
+                <div class="hub-badge badge-wifi">📶 Fast Wi-Fi Join</div>
+                <div class="qr-container">
+                    <img id="wifi-qr-image" class="qr-image-sm" src="/api/qr?text=WIFI%3AS%3A%3BT%3AWPA%3BP%3A%3B%3B" alt="Wi-Fi QR Code" />
+                </div>
+                <div class="hub-title">Connect To Venue Wi-Fi</div>
+                <div class="wifi-details">
+                    <div class="wifi-field">Network: <strong id="wifi-ssid-display">Auto-detecting...</strong></div>
+                    <div class="wifi-field" id="wifi-pass-container">Password: <strong id="wifi-pass-display">None</strong></div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        let previousRotationHash = "";
+        let previousInfoHash = "";
+
+        // Clock display
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const clockEl = document.getElementById('billboard-clock');
+            if (clockEl) {
+                clockEl.textContent = `${hours}:${minutes} ${ampm}`;
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Fetch Venue & Wi-Fi Info
+        async function fetchInfo() {
+            try {
+                const response = await fetch('/api/info');
+                if (!response.ok) return;
+                const data = await response.json();
+                const hash = JSON.stringify(data);
+                if (hash === previousInfoHash) return;
+                previousInfoHash = hash;
+
+                if (data.venue) {
+                    document.getElementById('billboard-venue-name').textContent = data.venue;
+                }
+                if (data.dj) {
+                    document.getElementById('billboard-dj-name').textContent = `Hosted by ${data.dj}`;
+                }
+
+                // Portal URL & QR
+                const portalUrl = data.portalUrl || window.location.origin;
+                document.getElementById('portal-url-display').textContent = portalUrl;
+                document.getElementById('portal-qr-image').src = `/api/qr?text=${encodeURIComponent(portalUrl)}`;
+
+                // Wi-Fi details & QR
+                const ssid = data.wifiSsid || "";
+                const pass = data.wifiPassword || "";
+                document.getElementById('wifi-ssid-display').textContent = ssid || "DJ Travel Router";
+                
+                const passContainer = document.getElementById('wifi-pass-container');
+                if (pass) {
+                    passContainer.style.display = "block";
+                    document.getElementById('wifi-pass-display').textContent = pass;
+                } else {
+                    document.getElementById('wifi-pass-display').textContent = "Open / No password";
+                }
+
+                const wifiPayload = `WIFI:S:${ssid};T:${pass ? 'WPA' : 'nopass'};P:${pass};;`;
+                document.getElementById('wifi-qr-image').src = `/api/qr?text=${encodeURIComponent(wifiPayload)}`;
+
+                const lastRoundBanner = document.getElementById('last-round-banner');
+                if (lastRoundBanner) {
+                    lastRoundBanner.style.display = data.isLastRound ? "block" : "none";
+                }
+            } catch (err) {
+                console.warn("Error fetching info", err);
+            }
+        }
+
+        // Fetch Rotation Queue
+        async function fetchRotation() {
+            try {
+                const response = await fetch('/api/rotation');
+                if (!response.ok) return;
+                const singers = await response.json();
+                const hash = JSON.stringify(singers);
+                if (hash === previousRotationHash) return;
+                previousRotationHash = hash;
+
+                renderRotation(singers || []);
+            } catch (err) {
+                console.warn("Error fetching rotation", err);
+            }
+        }
+
+        function renderRotation(singers) {
+            const activeSingers = singers.filter(s => !s.isInactive && !s.hasSungInLastRound);
+            document.getElementById('billboard-singer-count').textContent = `${activeSingers.length} Singers`;
+
+            // 1. Current Performer
+            const currentSinger = singers.find(s => s.isCurrent && !s.hasSungInLastRound);
+            const nowNameEl = document.getElementById('now-singer-name');
+            const nowDuetEl = document.getElementById('now-duet-tag');
+            const nowTitleEl = document.getElementById('now-song-title');
+            const nowArtistEl = document.getElementById('now-song-artist');
+
+            if (currentSinger) {
+                nowNameEl.textContent = currentSinger.name;
+                if (currentSinger.partner) {
+                    nowDuetEl.textContent = `w/ ${currentSinger.partner}`;
+                    nowDuetEl.style.display = "inline";
+                } else {
+                    nowDuetEl.style.display = "none";
+                }
+
+                if (currentSinger.isMusic) {
+                    nowTitleEl.textContent = "♪ Background Music Track";
+                    nowArtistEl.textContent = "";
+                } else {
+                    nowTitleEl.textContent = currentSinger.song ? `"${currentSinger.song}"` : "Song not selected";
+                    nowArtistEl.textContent = currentSinger.artist ? `by ${currentSinger.artist}` : "";
+                }
+            } else {
+                nowNameEl.textContent = "Stage is Open";
+                nowDuetEl.style.display = "none";
+                nowTitleEl.textContent = "Ready for the next singer!";
+                nowArtistEl.textContent = "";
+            }
+
+            // 2. Next Up Performer
+            const nextSinger = singers.find(s => s.isNext && !s.hasSungInLastRound);
+            const nextNameEl = document.getElementById('next-singer-name');
+            const nextDuetEl = document.getElementById('next-duet-tag');
+            const nextTitleEl = document.getElementById('next-song-title');
+
+            if (nextSinger) {
+                nextNameEl.textContent = nextSinger.name;
+                if (nextSinger.partner) {
+                    nextDuetEl.textContent = `w/ ${nextSinger.partner}`;
+                    nextDuetEl.style.display = "inline";
+                } else {
+                    nextDuetEl.style.display = "none";
+                }
+
+                if (nextSinger.isMusic) {
+                    nextTitleEl.textContent = "♪ Background Music Track";
+                } else {
+                    const song = nextSinger.song ? `"${nextSinger.song}"` : "Picking a song";
+                    const artist = nextSinger.artist ? ` by ${nextSinger.artist}` : "";
+                    nextTitleEl.textContent = `${song}${artist}`;
+                }
+            } else {
+                nextNameEl.textContent = "On Deck";
+                nextDuetEl.style.display = "none";
+                nextTitleEl.textContent = "Scan QR code to be up next!";
+            }
+
+            // 3. Upcoming Queue (all active singers after current & next)
+            const queueListEl = document.getElementById('billboard-queue-list');
+            const upcoming = activeSingers.filter(s => !s.isCurrent && !s.isNext);
+
+            if (upcoming.length === 0) {
+                queueListEl.innerHTML = `
+                    <div class="empty-placeholder">
+                        <span class="icon">📋</span>
+                        <span>${activeSingers.length > 0 ? "You're up next! Ready to sing?" : "Rotation is empty. Scan QR to get on stage!"}</span>
+                    </div>`;
+            } else {
+                let html = "";
+                upcoming.forEach((s, idx) => {
+                    const partnerText = s.partner ? ` <span style="font-size:0.8rem; font-style:italic; color:#A78BFA;">w/ ${escapeHtml(s.partner)}</span>` : "";
+                    const songDesc = s.isMusic ? "♪ Background Music" : (s.song ? `"${escapeHtml(s.song)}"${s.artist ? ' by ' + escapeHtml(s.artist) : ''}` : "Choosing a song");
+                    const pausedClass = s.isPaused ? ' style="opacity: 0.6;"' : '';
+                    const pausedBadge = s.isPaused ? ' <span style="font-size:0.7rem; background:#64748B; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">PAUSED</span>' : '';
+
+                    html += `
+                        <div class="queue-row"${pausedClass}>
+                            <span class="queue-pos">${idx + 1}</span>
+                            <div class="queue-info">
+                                <div class="queue-name">${escapeHtml(s.name)}${partnerText}${pausedBadge}</div>
+                                <div class="queue-song">${songDesc}</div>
+                            </div>
+                        </div>`;
+                });
+                queueListEl.innerHTML = html;
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Initialize polling loops
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchInfo();
+            fetchRotation();
+            setInterval(fetchInfo, 10000); // refresh venue/wifi info every 10s
+            setInterval(fetchRotation, 3000); // refresh queue every 3s
+        });
+    </script>
+</body>
+</html>

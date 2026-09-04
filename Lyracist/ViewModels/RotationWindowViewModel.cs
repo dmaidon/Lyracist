@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Log swallowed exception in RefreshLeaderboard; document singleton-lifetime timer/event subscriptions
+// Edited on Sep 3, 2026 @ 23:55:00 -> Add IsLastRound support and filter sung performers from rotation billboard
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,6 +10,9 @@ namespace Lyracist.ViewModels;
 
 public partial class RotationWindowViewModel : BaseViewModel
 {
+    [ObservableProperty]
+    private bool _isLastRound;
+
     [ObservableProperty]
     private string _joinUrl = string.Empty;
 
@@ -216,14 +219,16 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     public void UpdateRotation(List<Singer> singers)
     {
+        var visibleSingers = IsLastRound ? singers.Where(s => !s.HasSungInLastRound).ToList() : singers;
+
         Rotation.Clear();
-        foreach (var s in singers)
+        foreach (var s in visibleSingers)
         {
             Rotation.Add(s);
         }
 
         // Find current singer from the passed list (already computed by main VM)
-        var now = singers.FirstOrDefault(s => s.IsCurrent);
+        var now = visibleSingers.FirstOrDefault(s => s.IsCurrent);
         if (now != null)
         {
             CurrentSinger = now.Name;
@@ -245,7 +250,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerHasRatings = false;
         }
 
-        var next = singers.FirstOrDefault(s => s.IsNext);
+        var next = visibleSingers.FirstOrDefault(s => s.IsNext);
         if (next != null)
         {
             NextSinger = next.Name;
@@ -263,7 +268,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         NextSingers.Clear();
         if (now != null)
         {
-            var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(singers, now, 5);
+            var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(visibleSingers, now, 5, isLastRound: IsLastRound);
             foreach (var candidate in nextActiveSingers)
             {
                 string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
@@ -272,7 +277,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         }
         else
         {
-            var activeSingers = singers.Where(s => !s.IsPaused && !s.IsInactive).Take(5).ToList();
+            var activeSingers = visibleSingers.Where(s => !s.IsPaused && !s.IsInactive).Take(5).ToList();
             foreach (var singer in activeSingers)
             {
                 string display = string.IsNullOrEmpty(singer.SongTitle) ? singer.Name : $"{singer.Name} (\"{singer.SongTitle}\")";
@@ -282,11 +287,11 @@ public partial class RotationWindowViewModel : BaseViewModel
 
         // POPULATE FullRotation exactly like KSRotation does!
         FullRotation.Clear();
-        var activeRotation = singers.Where(s => !s.IsInactive && !s.IsPaused).ToList();
-        HasDesignatedCurrentSinger = Lyracist.Shared.RotationHelpers.HasActiveCurrentSinger(singers);
+        var activeRotation = visibleSingers.Where(s => !s.IsInactive && !s.IsPaused).ToList();
+        HasDesignatedCurrentSinger = Lyracist.Shared.RotationHelpers.HasActiveCurrentSinger(visibleSingers);
 
-        var currentSingerForCrawl = Lyracist.Shared.RotationHelpers.GetCurrentSinger(singers)
-                                  ?? singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+        var currentSingerForCrawl = Lyracist.Shared.RotationHelpers.GetCurrentSinger(visibleSingers)
+                                  ?? visibleSingers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
 
         if (currentSingerForCrawl != null && activeRotation.Count > 0)
         {
@@ -348,7 +353,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         NextSingers.Clear();
         if (currentMatch != null)
         {
-            var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(Rotation.ToList(), currentMatch, 5);
+            var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(Rotation.ToList(), currentMatch, 5, isLastRound: IsLastRound);
             foreach (var candidate in nextActiveSingers)
             {
                 string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
@@ -357,7 +362,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         }
         else
         {
-            var activeSingers = Rotation.Where(s => !s.IsPaused && !s.IsInactive).Take(5).ToList();
+            var activeSingers = Rotation.Where(s => !s.IsPaused && !s.IsInactive && (!IsLastRound || !s.HasSungInLastRound)).Take(5).ToList();
             foreach (var s in activeSingers)
             {
                 string display = string.IsNullOrEmpty(s.SongTitle) ? s.Name : $"{s.Name} (\"{s.SongTitle}\")";
@@ -366,7 +371,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         }
         // POPULATE FullRotation exactly like KSRotation does!
         FullRotation.Clear();
-        var activeRotation = Rotation.Where(s => !s.IsInactive && !s.IsPaused).ToList();
+        var activeRotation = Rotation.Where(s => !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound)).ToList();
         HasDesignatedCurrentSinger = Lyracist.Shared.RotationHelpers.HasActiveCurrentSinger(Rotation);
 
         var currentSingerForCrawl = Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation)

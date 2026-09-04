@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="KSRotation.Maui.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>
