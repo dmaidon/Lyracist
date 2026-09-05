@@ -512,6 +512,67 @@ namespace Lyracist.Shared
         }
 
         /// <summary>
+        /// Fallback estimated performance length (seconds) used for a queued singer whose song
+        /// duration is unknown/unresolved - keeps every app's wait-time math using the same default.
+        /// </summary>
+        public const double DefaultEstimatedPerformanceSeconds = 300.0; // 5 minutes
+
+        /// <summary>
+        /// Recalculates every singer's <see cref="IRotationSinger.EstimatedWaitMinutes"/>: the cumulative
+        /// estimated performance length (rounded to whole minutes) of everyone ahead of them in the
+        /// active rotation, starting with however long the current singer's own performance is
+        /// estimated to take (since they're already up and haven't finished yet). Walks the queue in
+        /// the same wrapped order as <see cref="MarkNextSinger{T}"/>/<see cref="GetNextActiveSingers{T}"/>.
+        /// An entry with no resolvable <see cref="IRotationSinger.EstimatedPerformanceSeconds"/> (&lt;= 0)
+        /// falls back to <see cref="DefaultEstimatedPerformanceSeconds"/> so an unknown song never
+        /// produces a wait estimate of 0 for anyone behind it. The current singer's own wait is set to
+        /// 0 (already up); inactive/paused singers - and, when <paramref name="isLastRound"/> is true,
+        /// anyone who already sang this round - are skipped and their wait cleared to 0, matching how
+        /// they're already excluded from "next" traversal elsewhere in this file. If there is no current
+        /// singer, every entry's wait is cleared to 0.
+        /// </summary>
+        public static void RecalculateEstimatedWaits<T>(IList<T> singers, bool isLastRound = false) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+
+            int count = singers.Count;
+            T? current = GetCurrentSinger(singers);
+
+            if (current == null)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    singers[i].EstimatedWaitMinutes = 0;
+                }
+                return;
+            }
+
+            current.EstimatedWaitMinutes = 0;
+            double cumulativeSeconds = ResolveEstimatedSeconds(current);
+
+            int startIndex = singers.IndexOf(current);
+            for (int i = 1; i < count; i++)
+            {
+                T candidate = singers[(startIndex + i) % count];
+                if (candidate == current) continue;
+
+                if (candidate.IsInactive || candidate.IsPaused || (isLastRound && candidate.HasSungInLastRound))
+                {
+                    candidate.EstimatedWaitMinutes = 0;
+                    continue;
+                }
+
+                candidate.EstimatedWaitMinutes = (int)Math.Round(cumulativeSeconds / 60.0, MidpointRounding.AwayFromZero);
+                cumulativeSeconds += ResolveEstimatedSeconds(candidate);
+            }
+        }
+
+        private static double ResolveEstimatedSeconds<T>(T singer) where T : class, IRotationSinger
+        {
+            return singer.EstimatedPerformanceSeconds > 0 ? singer.EstimatedPerformanceSeconds : DefaultEstimatedPerformanceSeconds;
+        }
+
+        /// <summary>
         /// Gets up to <paramref name="maxCount"/> active, non-paused singers sequentially following <paramref name="currentEntry"/>.
         /// </summary>
         public static List<T> GetNextActiveSingers<T>(IList<T> singers, T currentEntry, int maxCount, bool isLastRound = false) where T : class, IRotationSinger

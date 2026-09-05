@@ -224,6 +224,15 @@
                                                            FontAttributes="Bold"
                                                            TextColor="White"
                                                            LineBreakMode="TailTruncation" />
+                                                    <Border IsVisible="{Binding HasEstimatedWait}"
+                                                            StrokeShape="RoundRectangle 4"
+                                                            BackgroundColor="#1E3A5F"
+                                                            Stroke="#0EA5E9"
+                                                            StrokeThickness="1"
+                                                            Padding="4,1"
+                                                            VerticalOptions="Center">
+                                                        <Label Text="{Binding EstimatedWaitMinutes, StringFormat='{}{{{0}}}'}" FontSize="9" FontAttributes="Bold" TextColor="#0EA5E9" />
+                                                    </Border>
                                                 </HorizontalStackLayout>
                                                 <Label Text="{Binding Song}"
                                                        FontSize="11"

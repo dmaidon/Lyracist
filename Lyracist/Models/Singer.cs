@@ -73,6 +73,15 @@ public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
     private bool _isMusic = false;
 
     [ObservableProperty]
+    private double _estimatedPerformanceSeconds = 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasEstimatedWait))]
+    private int _estimatedWaitMinutes = 0;
+
+    public bool HasEstimatedWait => EstimatedWaitMinutes > 0;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(XP))]
     [NotifyPropertyChangedFor(nameof(Level))]
     [NotifyPropertyChangedFor(nameof(XPProgress))]

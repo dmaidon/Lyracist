@@ -844,6 +844,8 @@ public partial class RotationViewModel : BaseViewModel
             RunRotationOrderChange(() =>
                 Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop, isLastRound: IsLastRound));
             Rotation.Remove(singer);
+            ResolveEstimatedPerformanceSeconds();
+            Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound);
             RotationStateChanged?.Invoke();
             _display.UpdateRotation([.. Rotation]);
             return;
@@ -902,8 +904,57 @@ public partial class RotationViewModel : BaseViewModel
             RefreshSelectedSingerQueue();
         }
 
+        ResolveEstimatedPerformanceSeconds();
+        Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound);
+
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
+    }
+
+    /// <summary>
+    /// Resolves each queued singer's <see cref="Singer.EstimatedPerformanceSeconds"/> (known song
+    /// duration + 30s) from the library in a single batched lookup, so
+    /// <see cref="Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits{T}"/> has fresh data
+    /// every time it runs. A singer whose song isn't found in the library (or has no song queued)
+    /// is left at 0, which RecalculateEstimatedWaits treats as "unknown" and falls back on its
+    /// default per-song estimate for.
+    /// </summary>
+    private void ResolveEstimatedPerformanceSeconds()
+    {
+        var titles = Rotation
+            .Where(s => !string.IsNullOrWhiteSpace(s.SongTitle))
+            .Select(s => s.SongTitle)
+            .Distinct()
+            .ToList();
+
+        if (titles.Count == 0) return;
+
+        try
+        {
+            using var context = new Lyracist.Data.LyracistDbContext();
+            var durationLookup = context.Songs
+                .Where(s => titles.Contains(s.Title) && s.Duration > 0)
+                .Select(s => new { s.Title, s.Artist, s.Duration })
+                .ToList()
+                .GroupBy(s => (s.Title, s.Artist))
+                .ToDictionary(g => g.Key, g => g.First().Duration);
+
+            foreach (var singer in Rotation)
+            {
+                if (durationLookup.TryGetValue((singer.SongTitle, singer.Artist), out double duration))
+                {
+                    singer.EstimatedPerformanceSeconds = duration + 30.0;
+                }
+                else
+                {
+                    singer.EstimatedPerformanceSeconds = 0;
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            AppLogger.LogError(ex, "ResolveEstimatedPerformanceSeconds: failed to resolve song durations for wait-time estimate");
+        }
     }
 
     [RelayCommand]

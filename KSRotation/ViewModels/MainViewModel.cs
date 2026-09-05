@@ -1562,6 +1562,11 @@ namespace KSRotation.ViewModels
                 // reassigns it (unlike the RotationHelpers.HandleSingerRetiredOrRemoved calls elsewhere).
                 RotationHelpers.EnsureRotationStartFlag(Singers);
 
+                // Recalculate every waiting singer's estimated wait time now that the rotation
+                // order has settled - KSRotation has no song-duration library, so this always
+                // falls back to RotationHelpers.DefaultEstimatedPerformanceSeconds per song ahead.
+                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound);
+
                 // 3. Save state and notify displays
                 RefreshBillboardState();
                 RebuildRotationJsonCacheNow();

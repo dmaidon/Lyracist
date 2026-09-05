@@ -183,19 +183,21 @@ namespace KSRotation.ViewModels
                 {
                     SingerEntry singer = activeRotation[(currentIndex + offset) % count];
 
+                    string waitBadge = singer.EstimatedWaitMinutes > 0 ? $" {{{singer.EstimatedWaitMinutes}}}" : string.Empty;
+
                     if (singer.IsMusic)
                     {
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
                             ? singer.Song
                             : $"{singer.Song} – {singer.Artist}";
-                        NextSingers.Add(new NextSingerDisplay($"[MUSIC] {songText}", singer.IsRotationStart));
+                        NextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                         NextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
-                            ? sName
-                            : $"{sName} - {singer.Song}", singer.IsRotationStart));
+                            ? $"{sName}{waitBadge}"
+                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart));
                     }
                 }
             }
@@ -238,9 +240,10 @@ namespace KSRotation.ViewModels
                     FullRotation.Add(singer);
 
                     string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
+                    string waitBadge = singer.EstimatedWaitMinutes > 0 ? $" {{{singer.EstimatedWaitMinutes}}}" : string.Empty;
                     string prefixAndSinger = singer.IsMusic
-                        ? $"{(offset == 0 ? "★" : $"{offset + 1}")}. [MUSIC]"
-                        : $"{(offset == 0 ? "★" : $"{offset + 1}")}. {sName}";
+                        ? $"{(offset == 0 ? "★" : $"{offset + 1}")}. [MUSIC]{waitBadge}"
+                        : $"{(offset == 0 ? "★" : $"{offset + 1}")}. {sName}{waitBadge}";
 
                     string songSeparatorAndTitle = string.IsNullOrWhiteSpace(singer.Song)
                         ? string.Empty

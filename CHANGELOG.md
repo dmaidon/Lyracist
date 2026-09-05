@@ -1,11 +1,19 @@
-<!-- Edited on Sep 5, 2026 @ 15:40:00 -> Release 26.9.5.2: Fix Compressor/Limiter settings being silently no-ops in LibVlcVideoBackend -->
-Last Edit: Sep 5, 2026 - Lyracist Compressor/Limiter Fix (now wired to VLC's compressor audio filter)
+<!-- Edited on Sep 5, 2026 @ 17:10:00 -> Release 26.9.5.3: Add estimated wait-time badges to rotation screens across Lyracist, KSRotation, and KSRotation.Maui -->
+Last Edit: Sep 5, 2026 - Estimated Wait Time on Rotation Screens (Lyracist, KSRotation, KSRotation.Maui)
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [26.9.5.2] - 2026-09-05
+## [26.9.5.3] - 2026-09-05
+
+### Added
+- **Lyracist / KSRotation / KSRotation.Maui (Estimated Wait Time on Rotation Screens)**:
+  - Every waiting singer's name now shows an estimated wait-time badge on the audience-facing rotation/billboard displays, e.g. `Dennis {5} Only Make Believe` - `{5}` means roughly 5 minutes until they're up.
+  - Estimate = the cumulative estimated performance length of everyone ahead of them: each performance is the song's actual known duration + 30 seconds (Lyracist only, via a library lookup), or a 5-minute fallback per song when the duration isn't known (always the case in KSRotation/KSRotation.Maui, which have no song-duration library).
+  - Recalculated automatically every time a singer is marked finished/done, via a new shared `RotationHelpers.RecalculateEstimatedWaits<T>()` (`Shared/RotationHelpers.cs`) used identically by all three apps - `IRotationSinger` gained `EstimatedPerformanceSeconds`/`EstimatedWaitMinutes` members to support it.
+  - Wired into Lyracist's `RotationWindow` (plain queue list, Star Wars Crawl, and scrolling marquee banner), KSRotation's `SingerDisplayWindow` (Normal List, Marquee, and Vinyl views), and KSRotation.Maui's `BillboardView`.
+  - The currently-performing singer never shows a wait badge (they're already up); paused/inactive singers, and (in Last Round mode) singers who already performed this round, are excluded from both the badge and the running time total.
 
 ### Fixed
 - **Lyracist (Compressor/Limiter Settings Not Applied to Playback)**:

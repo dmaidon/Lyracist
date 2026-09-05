@@ -395,6 +395,69 @@ public class RotationHelpersTests
         Assert.False(alice.IsCurrent);
         Assert.False(alice.IsNext);
     }
+
+    [Fact]
+    public void RecalculateEstimatedWaits_UsesKnownDurationsAndFallsBackForUnknown_SingerEntryModel()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true, EstimatedPerformanceSeconds = 200 };
+        var bob = new SingerEntry { Name = "Bob", EstimatedPerformanceSeconds = 100 };
+        var charlie = new SingerEntry { Name = "Charlie" }; // unknown duration -> falls back to 300s
+
+        var singers = new ObservableCollection<SingerEntry> { alice, bob, charlie };
+
+        RotationHelpers.RecalculateEstimatedWaits(singers);
+
+        Assert.Equal(0, alice.EstimatedWaitMinutes);
+        // Bob's wait = Alice's 200s ahead of him, rounded to whole minutes (3.33 -> 3).
+        Assert.Equal(3, bob.EstimatedWaitMinutes);
+        // Charlie's wait = Alice's 200s + Bob's 100s = 300s = 5 minutes.
+        Assert.Equal(5, charlie.EstimatedWaitMinutes);
+    }
+
+    [Fact]
+    public void RecalculateEstimatedWaits_NoCurrentSinger_ClearsAllWaits_SingerEntryModel()
+    {
+        var alice = new SingerEntry { Name = "Alice", EstimatedWaitMinutes = 4 };
+        var bob = new SingerEntry { Name = "Bob", EstimatedWaitMinutes = 8 };
+        var singers = new ObservableCollection<SingerEntry> { alice, bob };
+
+        RotationHelpers.RecalculateEstimatedWaits(singers);
+
+        Assert.Equal(0, alice.EstimatedWaitMinutes);
+        Assert.Equal(0, bob.EstimatedWaitMinutes);
+    }
+
+    [Fact]
+    public void RecalculateEstimatedWaits_SkipsPausedSinger_AndDoesNotCountTheirTime_SingerEntryModel()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true, EstimatedPerformanceSeconds = 300 };
+        var bob = new SingerEntry { Name = "Bob", IsPaused = true, EstimatedWaitMinutes = 7 }; // stale value from before being paused
+        var charlie = new SingerEntry { Name = "Charlie", EstimatedPerformanceSeconds = 300 };
+
+        var singers = new ObservableCollection<SingerEntry> { alice, bob, charlie };
+
+        RotationHelpers.RecalculateEstimatedWaits(singers);
+
+        Assert.Equal(0, bob.EstimatedWaitMinutes);
+        // Only Alice's 300s counts ahead of Charlie - Bob is paused and skipped entirely.
+        Assert.Equal(5, charlie.EstimatedWaitMinutes);
+    }
+
+    [Fact]
+    public void RecalculateEstimatedWaits_LastRound_ExcludesSungPerformers_SingerEntryModel()
+    {
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true, EstimatedPerformanceSeconds = 300 };
+        var bob = new SingerEntry { Name = "Bob", HasSungInLastRound = true, EstimatedPerformanceSeconds = 300 };
+        var charlie = new SingerEntry { Name = "Charlie", EstimatedPerformanceSeconds = 300 };
+
+        var singers = new ObservableCollection<SingerEntry> { alice, bob, charlie };
+
+        RotationHelpers.RecalculateEstimatedWaits(singers, isLastRound: true);
+
+        Assert.Equal(0, bob.EstimatedWaitMinutes);
+        // Bob already sang this round and is skipped, so only Alice's 300s counts ahead of Charlie.
+        Assert.Equal(5, charlie.EstimatedWaitMinutes);
+    }
 }
 
 // ---------------------------------------------------------------------------

@@ -643,9 +643,15 @@ public partial class RotationWindow : Window, ICaptureSource
                 Margin = new Thickness(0, 0, 0, 6)
             });
 
+            string nameText = entry.IsRotationStart ? $"\U0001F6A9 {entry.Name}" : entry.Name;
+            if (entry.EstimatedWaitMinutes > 0)
+            {
+                nameText += $" {{{entry.EstimatedWaitMinutes}}}";
+            }
+
             panel.Children.Add(new TextBlock
             {
-                Text = entry.IsRotationStart ? $"\U0001F6A9 {entry.Name}" : entry.Name,
+                Text = nameText,
                 FontSize = isCurrent ? 52 : 36,
                 FontWeight = isCurrent ? FontWeights.Bold : FontWeights.Normal,
                 Foreground = isCurrent ? white : gold,
@@ -776,6 +782,10 @@ public partial class RotationWindow : Window, ICaptureSource
             var singer = activeSingers[(currentIndex + offset) % count];
             string label = offset <= ordinals.Length ? ordinals[offset - 1] : $"#{offset + 1}";
             string singerText = $"{label}: {singer.Name}";
+            if (singer.EstimatedWaitMinutes > 0)
+            {
+                singerText += $" {{{singer.EstimatedWaitMinutes}}}";
+            }
             if (!string.IsNullOrWhiteSpace(singer.SongTitle))
             {
                 singerText += $" (\"{singer.SongTitle}\")";

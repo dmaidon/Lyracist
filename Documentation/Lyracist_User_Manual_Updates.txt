@@ -1144,3 +1144,13 @@ Section: Lyracist / Compressor & Limiter Fix
    - Both are now wired to VLC's built-in compressor audio filter, applied per-track alongside the existing pitch/key transposition.
    - Limiter acts as a ceiling on the compression threshold (VLC has no separate limiter filter), so raising the Limiter setting now audibly caps peak loudness as expected.
 
+Section: Lyracist & KSRotation & KSRotation.Maui / Estimated Wait Time on Rotation Screens
+
+[How Long Until I'm Up?]
+1. Estimated Wait Time Badge:
+   - Every waiting singer's name on the audience-facing rotation/billboard screens now shows an estimated wait in minutes in braces, e.g. "Dennis {5} Only Make Believe" - about 5 minutes until Dennis is up.
+   - The estimate adds up the estimated performance length of everyone ahead of that singer: each song's actual known duration + 30 seconds where the song is recognized in the library, or a flat 5-minute estimate per song when it isn't.
+   - The singer currently at the mic never shows a wait badge - they're already up. Paused/inactive singers, and (during Last Round) anyone who already performed this round, are skipped and don't count toward anyone else's wait either.
+   - Recalculated automatically the instant a singer is marked finished, so the estimate for everyone still waiting stays current all night.
+   - Appears on Lyracist's Rotation Window (queue list, Star Wars Crawl, and scrolling banner), KSRotation's Singer Display Window (all three projection styles), and KSRotation.Maui's Billboard view.
+

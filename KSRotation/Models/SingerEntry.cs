@@ -106,6 +106,21 @@ namespace KSRotation.Models
         [ObservableProperty]
         public partial bool IsMusic { get; set; }
 
+        /// <summary>This entry's own estimated performance length in seconds (queued song's known
+        /// duration + 30s), or &lt;= 0 if unknown - KSRotation has no song-duration library, so this
+        /// stays 0 and <see cref="Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits{T}"/>
+        /// falls back to its default per-song estimate.</summary>
+        [ObservableProperty]
+        public partial double EstimatedPerformanceSeconds { get; set; }
+
+        /// <summary>Computed estimated wait, in whole minutes, until this singer is up - set by
+        /// <see cref="Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits{T}"/>.</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasEstimatedWait))]
+        public partial int EstimatedWaitMinutes { get; set; }
+
+        public bool HasEstimatedWait => EstimatedWaitMinutes > 0;
+
         /// <summary>True when this singer marks the start / 1st position of the rotation round.</summary>
         [ObservableProperty]
         public partial bool IsRotationStart { get; set; }
