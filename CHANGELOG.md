@@ -1,11 +1,19 @@
-<!-- Edited on Sep 5, 2026 @ 08:48:00 -> Release 26.9.5.0: KSRotation dark mode contrast fixes and Lyracist TriviaPage sizing enhancements -->
-Last Edit: Sep 5, 2026 - KSRotation dark mode text contrast fixes & Lyracist TriviaPage sizing enhancements
+<!-- Edited on Sep 5, 2026 @ 09:28:00 -> Release 26.9.5.0: Port full Live Question Controls and manual/auto flow to Lyracist TriviaPage -->
+Last Edit: Sep 5, 2026 - Lyracist Live Question Controls (Prev/Next/Jump/Timer/Void) & KSRotation contrast fixes
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [26.9.5.0] - 2026-09-05
+
+### Added
+- **Lyracist (Full Live Question Controls & Manual/Auto Flow in TriviaPage)**:
+  - Added Question Navigation Row to `TriviaPage.xaml` with `⏮ Prev`, `Jump to Question #` (drop-down `ComboBox` listing all question numbers in the round), and `Next ⏭` buttons.
+  - Added Timer Quick-Adjust Row with `-5s`, `+5s`, `+10s` dynamic bump adjustments and `🔄` timer reset.
+  - Added Option Elimination and Instant Reveal controls: `✂ Fade Option` (eliminates one wrong answer choice) and `⚡ Instant Reveal` (immediately locks answering and displays the correct answer).
+  - Added `❌ Void Question (No Penalty)` command to safely discard a faulty question without penalizing players or affecting answer streaks.
+  - Integrated `PrepareCurrentQuestion(startTimerImmediately: AutoAdvanceQuestions)` in `TriviaViewModel.cs`: when Auto-Run Game is disabled, questions open in reading/standby mode, allowing hosts to read the question to the crowd before clicking `▶ Start Question & Timer`.
 
 ### Changed
 - **Lyracist (Trivia Page UI Sizing)**:

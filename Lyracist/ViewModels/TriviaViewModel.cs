@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 12:10:30 -> Dismiss pre-game countdown and sync TV projection in StartGame
+// Edited on Sep 5, 2026 @ 09:15:00 -> Add manual question navigation (Prev, Next, Jump), timer adjustment, option elimination, and void commands
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -56,6 +56,40 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
     [ObservableProperty]
     private string _activeRoundTitle = "Round 1";
+
+    [ObservableProperty]
+    private int _currentQuestionNumber = 1;
+
+    partial void OnCurrentQuestionNumberChanged(int value)
+    {
+        if (_engine?.CurrentSession?.CurrentRound != null &&
+            _engine.State != TriviaGameState.Lobby &&
+            _engine.State != TriviaGameState.GameComplete)
+        {
+            int targetIdx = value - 1;
+            if (targetIdx >= 0 && targetIdx < _engine.CurrentSession.CurrentRound.Questions.Count)
+            {
+                if (_engine.CurrentSession.CurrentQuestionIndex != targetIdx)
+                {
+                    _engine.GoToQuestion(targetIdx, startTimerImmediately: AutoAdvanceQuestions);
+                }
+            }
+        }
+    }
+
+    [ObservableProperty]
+    private int _totalQuestionsInRound = 1;
+
+    public ObservableCollection<int> AvailableQuestionNumbers { get; } = [];
+
+    private void UpdateAvailableQuestionNumbers(int count)
+    {
+        AvailableQuestionNumbers.Clear();
+        for (int i = 1; i <= count; i++)
+        {
+            AvailableQuestionNumbers.Add(i);
+        }
+    }
 
     [ObservableProperty]
     private string _currentQuestionPrompt = "No question active. Load a pack and click 'Start Game'.";
@@ -257,6 +291,10 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
                 TotalCountdownSeconds = _engine.TotalCountdownSeconds;
                 RemainingSeconds = TotalCountdownSeconds;
                 AnswerDistribution.Clear();
+                if (_engine.CurrentSession?.CurrentRound != null)
+                {
+                    CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
+                }
             });
         };
 
@@ -529,7 +567,12 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
             _engine.StartGame([round], title);
             ActiveRoundTitle = round.Title;
-            _engine.StartCurrentQuestion();
+            TotalQuestionsInRound = gameQuestions.Count;
+            UpdateAvailableQuestionNumbers(TotalQuestionsInRound);
+            CurrentQuestionNumber = 1;
+
+            // Start 1st question (immediate timer if Auto-Run, or reading/standby state if manual)
+            _engine.PrepareCurrentQuestion(startTimerImmediately: AutoAdvanceQuestions);
 
             OpenTriviaDisplay();
         }
@@ -711,6 +754,64 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     }
 
     [RelayCommand]
+    private void PreviousQuestion()
+    {
+        bool hasPrev = _engine.PreviousQuestion(startTimerImmediately: AutoAdvanceQuestions);
+        if (hasPrev && _engine.CurrentSession?.CurrentQuestion != null)
+        {
+            CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
+        }
+    }
+
+    [RelayCommand]
+    private void NextQuestion()
+    {
+        bool hasNext = _engine.AdvanceToNextQuestion(startTimerImmediately: AutoAdvanceQuestions);
+        if (hasNext && _engine.CurrentSession?.CurrentQuestion != null)
+        {
+            CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
+        }
+    }
+
+    [RelayCommand]
+    private void AddTimerSeconds(object? parameter)
+    {
+        int seconds = 5;
+        if (parameter is int i) seconds = i;
+        else if (parameter is string s && int.TryParse(s, out int parsed)) seconds = parsed;
+
+        _engine.AdjustRemainingSeconds(seconds);
+    }
+
+    [RelayCommand]
+    private void ResetQuestionTimer()
+    {
+        _engine.ResetQuestionTimer();
+    }
+
+    [RelayCommand]
+    private void EliminateNextWrong()
+    {
+        _engine.EliminateNextWrongAnswer();
+    }
+
+    [RelayCommand]
+    private void InstantReveal()
+    {
+        _engine.InstantRevealAnswer();
+    }
+
+    [RelayCommand]
+    private void VoidCurrentQuestion()
+    {
+        _engine.VoidCurrentQuestion();
+        if (_engine.CurrentSession?.CurrentQuestion != null)
+        {
+            CurrentQuestionNumber = _engine.CurrentSession.CurrentQuestionIndex + 1;
+        }
+    }
+
+    [RelayCommand]
     private void TogglePause()
     {
         _engine.TogglePause("Host Manual Pause");
@@ -720,12 +821,6 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     private void LockAndReveal()
     {
         _engine.LockAndRevealAnswer();
-    }
-
-    [RelayCommand]
-    private void NextQuestion()
-    {
-        _engine.AdvanceToNextQuestion();
     }
 
     [RelayCommand]
@@ -742,6 +837,9 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         CurrentQuestionPrompt = "Game reset. Click 'Start Game' to begin.";
         OptionA = OptionB = OptionC = OptionD = "";
         CorrectAnswerIndex = -1;
+        CurrentQuestionNumber = 1;
+        TotalQuestionsInRound = 1;
+        AvailableQuestionNumbers.Clear();
         AnswerDistribution.Clear();
     }
 

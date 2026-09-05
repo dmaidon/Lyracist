@@ -1118,3 +1118,11 @@ Section: KSRotation & Lyracist / Dark Mode Contrast Fix & TriviaPage UI Sizing
 2. Lyracist Live Trivia Pack List Sizing:
    - Increased the visible height of the Category Pack(s) multi-selection ListBox on `TriviaPage.xaml` (MinHeight 160, MaxHeight 200) to allow viewing more loaded packs simultaneously without excessive scrolling.
    - Increased the height of the Patron Mobile Portal URL box for clearer touch targets and high-DPI display legibility.
+
+3. Lyracist Live Question Controls & Manual/Automatic Game Flow:
+   - Added full question navigation to `TriviaPage.xaml`: `⏮ Prev`, `Jump to Question #` dropdown ComboBox, and `Next ⏭`.
+   - Added `⏱ Timer Bump & Pacing` toolbar (`-5s`, `+5s`, `+10s`, `🔄 Reset`) for adjusting live question countdown timers on the fly.
+   - Added `✂ Fade Option` (manual wrong answer elimination) and `⚡ Instant Reveal` (immediate answer reveal and lock).
+   - Added `❌ Void Question (No Penalty)` button to cancel an erroneous question without penalizing player scores or streaks.
+   - Added standby reading mode when `⚡ Auto-Run Game` is turned off: questions open with the timer paused, allowing the host to read the question to the room before clicking `▶ Start Question & Timer`.
+
