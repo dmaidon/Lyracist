@@ -94,6 +94,38 @@ public partial class SettingsViewModel
         }
     }
 
+    public bool NormalizeVolumeEnabled
+    {
+        get => AppSettings.NormalizeVolumeEnabled;
+        set
+        {
+            if (AppSettings.NormalizeVolumeEnabled != value)
+            {
+                AppSettings.NormalizeVolumeEnabled = value;
+                OnPropertyChanged(nameof(NormalizeVolumeEnabled));
+
+                var mediaEngine = App.AppHost.Services.GetService(typeof(IMediaEngine)) as IMediaEngine;
+                mediaEngine?.UpdateAudioParameters();
+            }
+        }
+    }
+
+    public double TargetLoudnessLufs
+    {
+        get => AppSettings.TargetLoudnessLufs;
+        set
+        {
+            if (AppSettings.TargetLoudnessLufs != value)
+            {
+                AppSettings.TargetLoudnessLufs = value;
+                OnPropertyChanged(nameof(TargetLoudnessLufs));
+
+                var mediaEngine = App.AppHost.Services.GetService(typeof(IMediaEngine)) as IMediaEngine;
+                mediaEngine?.UpdateAudioParameters();
+            }
+        }
+    }
+
     partial void OnEnableHardwareAccelerationChanged(bool value) => AppSettings.EnableHardwareAcceleration = value;
     partial void OnEnableNoiseGateChanged(bool value) => AppSettings.EnableNoiseGate = value;
     partial void OnEnableReverbChanged(bool value) => AppSettings.EnableReverb = value;

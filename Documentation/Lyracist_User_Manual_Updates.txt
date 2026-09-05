@@ -1126,3 +1126,13 @@ Section: KSRotation & Lyracist / Dark Mode Contrast Fix & TriviaPage UI Sizing
    - Added `❌ Void Question (No Penalty)` button to cancel an erroneous question without penalizing player scores or streaks.
    - Added standby reading mode when `⚡ Auto-Run Game` is turned off: questions open with the timer paused, allowing the host to read the question to the room before clicking `▶ Start Question & Timer`.
 
+Section: Lyracist / Automatic Volume Normalization
+
+[Per-Track Loudness Leveling]
+1. Automatic Volume Normalization:
+   - Added a "Normalize Volume Across Tracks" toggle and a "Target Loudness (LUFS)" slider to Settings -> Audio & Engine, next to Hardware Mixer Mode.
+   - When enabled, each track's integrated loudness (LUFS) is measured once via an FFmpeg `loudnorm` (EBU R128) analysis pass the first time it's loaded for playback, then cached permanently so it's never re-measured.
+   - A corrective gain is then applied automatically alongside the existing Song/Singer/Duet Partner volume settings, so quiet and loud tracks land at roughly the same perceived loudness without the DJ needing to manually adjust volume between songs.
+   - Measurement runs in the background and never blocks or delays playback; a track plays at its normal volume the first time through and is leveled from the next play onward.
+   - Bypassed automatically when Hardware Mixer Mode is enabled, since an external mixer is expected to own volume levels.
+

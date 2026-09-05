@@ -49,6 +49,84 @@ namespace Lyracist.Data.Services
         }
 
         // ==========================================
+        // INTEGRATED LOUDNESS MEASUREMENT (EBU R128)
+        // ==========================================
+
+        /// <summary>
+        /// Runs a single-pass ffmpeg `loudnorm` analysis to measure a track's integrated loudness
+        /// (LUFS), for volume-normalization gain calculations. Decodes the whole file (no output is
+        /// written), so this is far heavier than <see cref="ProbeFile"/> and should never run inline
+        /// during a fast library scan - callers should measure lazily/in the background instead.
+        /// </summary>
+        public static async Task<double?> MeasureIntegratedLoudness(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Loudness measurement failed: file not found: {filePath}", "FFmpegService.MeasureIntegratedLoudness");
+                return null;
+            }
+
+            try
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = FFmpegPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                startInfo.ArgumentList.Add("-hide_banner");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(filePath);
+                startInfo.ArgumentList.Add("-af");
+                startInfo.ArgumentList.Add("loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json");
+                startInfo.ArgumentList.Add("-f");
+                startInfo.ArgumentList.Add("null");
+                startInfo.ArgumentList.Add("-");
+
+                using var process = new Process { StartInfo = startInfo };
+                process.Start();
+
+                // loudnorm's analysis JSON is written to stderr, not stdout - drain both
+                // concurrently so a full stdout pipe can't stall ffmpeg mid-decode.
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
+                await process.WaitForExitAsync();
+
+                string error = errorTask.Result;
+
+                int jsonStart = error.LastIndexOf('{');
+                int jsonEnd = error.LastIndexOf('}');
+                if (jsonStart < 0 || jsonEnd <= jsonStart)
+                {
+                    Lyracist.Shared.Globals.LogError("Lyracist", $"Loudness measurement produced no analysis block for {filePath}. FFmpeg output: {error}", "FFmpegService.MeasureIntegratedLoudness");
+                    return null;
+                }
+
+                string json = error.Substring(jsonStart, jsonEnd - jsonStart + 1);
+                using var doc = System.Text.Json.JsonDocument.Parse(json);
+
+                // "input_i" is the measured integrated loudness in LUFS, e.g. "-23.14". Silent or
+                // near-silent input reports "-inf" here, which is not a usable gain reference.
+                if (doc.RootElement.TryGetProperty("input_i", out var inputI) &&
+                    double.TryParse(inputI.GetString(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double lufs) &&
+                    !double.IsInfinity(lufs) && lufs < 0)
+                {
+                    return lufs;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Exception measuring loudness for {filePath}", ex);
+                return null;
+            }
+        }
+
+        // ==========================================
         // MP3+G TO MP4 CONVERSION
         // ==========================================
 

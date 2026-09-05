@@ -1,9 +1,18 @@
-<!-- Edited on Sep 5, 2026 @ 09:28:00 -> Release 26.9.5.0: Port full Live Question Controls and manual/auto flow to Lyracist TriviaPage -->
-Last Edit: Sep 5, 2026 - Lyracist Live Question Controls (Prev/Next/Jump/Timer/Void) & KSRotation contrast fixes
+<!-- Edited on Sep 5, 2026 @ 14:20:00 -> Release 26.9.5.1: Add automatic per-track volume normalization to Lyracist -->
+Last Edit: Sep 5, 2026 - Lyracist Automatic Volume Normalization (measured LUFS-based leveling)
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.1] - 2026-09-05
+
+### Added
+- **Lyracist (Automatic Volume Normalization)**:
+  - Added `FFmpegService.MeasureIntegratedLoudness()`: runs a single-pass ffmpeg `loudnorm` (EBU R128) analysis to measure a track's integrated loudness (LUFS).
+  - Tracks are measured lazily and in the background the first time they're loaded for playback (never during a library scan, since the analysis decodes the whole file), then cached permanently on `Song.MeasuredLoudnessLufs`.
+  - `MediaEngine.UpdateAudioParameters()` now applies a corrective gain factor - alongside the existing Song/Singer/Duet Partner gain merge - so every track lands near the same perceived loudness instead of the DJ needing to manually ride the volume between songs.
+  - Added **Normalize Volume Across Tracks** toggle and **Target Loudness (LUFS)** slider (`-23` to `-9`, default `-16`) to Settings → Audio & Engine, next to Hardware Mixer Mode (which continues to bypass normalization along with the rest of the software gain/EQ chain).
 
 ## [26.9.5.0] - 2026-09-05
 

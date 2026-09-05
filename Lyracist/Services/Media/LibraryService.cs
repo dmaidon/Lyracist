@@ -379,4 +379,55 @@ public class LibraryService : ILibraryService
             Lyracist.Shared.Globals.LogError("Lyracist", "Failed to save singer audio settings", ex);
         }
     }
+
+    // Guards against kicking off a duplicate ffmpeg loudness measurement for the same file if it's
+    // loaded again (e.g. the DJ replays a track) while an earlier measurement is still running.
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, byte> _loudnessMeasurementsInFlight = new(StringComparer.OrdinalIgnoreCase);
+
+    public double? GetMeasuredLoudness(string audioPath)
+    {
+        try
+        {
+            using var context = new LyracistDbContext();
+            return context.Songs
+                .AsNoTracking()
+                .Where(s => s.FilePath == audioPath)
+                .Select(s => s.MeasuredLoudnessLufs)
+                .FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", "Failed to get measured loudness", ex);
+            return null;
+        }
+    }
+
+    public async Task MeasureAndSaveLoudnessAsync(string audioPath)
+    {
+        if (string.IsNullOrEmpty(audioPath) || !_loudnessMeasurementsInFlight.TryAdd(audioPath, 0))
+        {
+            return;
+        }
+
+        try
+        {
+            double? lufs = await FFmpegService.MeasureIntegratedLoudness(audioPath);
+            if (!lufs.HasValue) return;
+
+            using var context = new LyracistDbContext();
+            var dbSong = context.Songs.FirstOrDefault(s => s.FilePath == audioPath);
+            if (dbSong == null) return;
+
+            dbSong.MeasuredLoudnessLufs = lufs.Value;
+            await context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Lyracist.Shared.Globals.LogError("Lyracist", $"Failed to measure/save loudness for {audioPath}", ex);
+        }
+        finally
+        {
+            _loudnessMeasurementsInFlight.TryRemove(audioPath, out _);
+        }
+    }
 }

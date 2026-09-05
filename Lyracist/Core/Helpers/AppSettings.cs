@@ -812,6 +812,18 @@ public static class AppSettings
         set { _data.IsHardwareMixerMode = value; Save(); }
     }
 
+    public static bool NormalizeVolumeEnabled
+    {
+        get => _data.NormalizeVolumeEnabled;
+        set { _data.NormalizeVolumeEnabled = value; Save(); }
+    }
+
+    public static double TargetLoudnessLufs
+    {
+        get => _data.TargetLoudnessLufs;
+        set { _data.TargetLoudnessLufs = value; Save(); }
+    }
+
     public static bool AutoPlayRotationMusic
     {
         get => _data.AutoPlayRotationMusic;
@@ -959,6 +971,8 @@ public static class AppSettings
         public string SelectedKaraokeAudioDevice { get; set; } = string.Empty;
         public string SelectedBgmAudioDevice { get; set; } = string.Empty;
         public bool IsHardwareMixerMode { get; set; } = false;
+        public bool NormalizeVolumeEnabled { get; set; } = true;
+        public double TargetLoudnessLufs { get; set; } = -16.0;
         public bool AutoPlayRotationMusic { get; set; } = true;
         public int RotationMusicDelaySeconds { get; set; } = 0;
         public List<Lyracist.Shared.SpecialEventConfig> SpecialEvents { get; set; } =

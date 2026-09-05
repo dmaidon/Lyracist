@@ -587,6 +587,26 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
             mergedLimiter = Math.Clamp(Math.Min(mergedLimiter, partnerSettings.Limiter), -20.0, 0.0);
         }
 
+        // Volume normalization: level perceived loudness across tracks using each track's measured
+        // integrated loudness (LUFS), applied as one more multiplicative factor alongside the
+        // Song/Singer/Duet gain above. Bypassed under hardware mixer mode, same as the EQ/
+        // compressor/limiter settings below, since an external mixer is expected to own levels.
+        if (!AppSettings.IsHardwareMixerMode && AppSettings.NormalizeVolumeEnabled)
+        {
+            double? measuredLufs = _libraryService.GetMeasuredLoudness(_currentSongPath);
+            if (measuredLufs.HasValue)
+            {
+                double normFactor = Math.Pow(10.0, (AppSettings.TargetLoudnessLufs - measuredLufs.Value) / 20.0);
+                mergedVolume = Math.Clamp(mergedVolume * normFactor, 0.0, 100.0);
+            }
+            else
+            {
+                // Not measured yet - measure it in the background (ffmpeg decodes the whole file,
+                // so this must never block playback) and cache the result for next time.
+                _ = _libraryService.MeasureAndSaveLoudnessAsync(_currentSongPath);
+            }
+        }
+
         // Apply merged results to the unmanaged player backend
         _video.AudioDeviceId = AppSettings.SelectedKaraokeAudioDevice;
         if (AppSettings.IsHardwareMixerMode)

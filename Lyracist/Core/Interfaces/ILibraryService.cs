@@ -27,4 +27,14 @@ public interface ILibraryService
 
     Lyracist.Data.Models.SingerAudioSettings GetSingerSettings(string singerName);
     void SaveSingerSettings(string singerName, Lyracist.Data.Models.SingerAudioSettings settings);
+
+    /// <summary>Previously-measured integrated loudness (LUFS) for a track, or null if it hasn't been measured yet.</summary>
+    double? GetMeasuredLoudness(string audioPath);
+
+    /// <summary>
+    /// Measures a track's integrated loudness via ffmpeg and persists it, so future playback can
+    /// read it back via <see cref="GetMeasuredLoudness"/>. Safe to call repeatedly for the same
+    /// path - a measurement already in flight for that path is not duplicated.
+    /// </summary>
+    Task MeasureAndSaveLoudnessAsync(string audioPath);
 }

@@ -17,6 +17,7 @@ namespace Lyracist.Data.Models
         public double Duration { get; set; }
         public int KeyDefault { get; set; }
         public double TempoDefault { get; set; }
+        public double? MeasuredLoudnessLufs { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
         public DateTime? LastPlayed { get; set; }
         public int PlayCount { get; set; }

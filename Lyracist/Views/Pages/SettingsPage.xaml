@@ -725,6 +725,16 @@
 
                                     <CheckBox Content="Enable Hardware Mixer Mode (Bypass Software EQ)" IsChecked="{Binding IsHardwareMixerMode, Mode=TwoWay}" Margin="0,0,0,12" />
 
+                                    <CheckBox Content="Normalize Volume Across Tracks" IsChecked="{Binding NormalizeVolumeEnabled, Mode=TwoWay}" Margin="0,0,0,4" ToolTip="Automatically level perceived loudness track-to-track using each song's measured loudness. Tracks are measured once in the background the first time they play." />
+                                    <Grid Margin="0,0,0,12" IsEnabled="{Binding NormalizeVolumeEnabled}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Grid.Column="0" Minimum="-23" Maximum="-9" Value="{Binding TargetLoudnessLufs, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" ToolTip="Target loudness (LUFS). -16 is a typical streaming-style target; lower is quieter, higher is louder." />
+                                        <TextBlock Grid.Column="1" Text="{Binding TargetLoudnessLufs, StringFormat='{}{0:0} LUFS'}" FontSize="12" FontWeight="Bold" Width="70" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0" />
+                                    </Grid>
+
                                     <TextBlock Text="Audio Latency / Buffer" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                     <ComboBox ItemsSource="{Binding BufferSizes}" SelectedItem="{Binding SelectedBufferSize, Mode=TwoWay}" Margin="0,0,0,12" />
                                     <CheckBox Content="Enable Vocal Noise Gate filter" IsChecked="{Binding EnableNoiseGate, Mode=TwoWay}" Margin="0,0,0,12" />
