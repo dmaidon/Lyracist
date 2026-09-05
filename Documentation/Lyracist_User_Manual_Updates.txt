@@ -1136,3 +1136,11 @@ Section: Lyracist / Automatic Volume Normalization
    - Measurement runs in the background and never blocks or delays playback; a track plays at its normal volume the first time through and is leveled from the next play onward.
    - Bypassed automatically when Hardware Mixer Mode is enabled, since an external mixer is expected to own volume levels.
 
+Section: Lyracist / Compressor & Limiter Fix
+
+[Audio Settings Now Actually Applied]
+1. Compressor & Limiter Playback Fix:
+   - Fixed the Compressor and Limiter sliders in Song and Singer Audio Settings having no audible effect - they were being saved correctly but never actually applied to sound during playback.
+   - Both are now wired to VLC's built-in compressor audio filter, applied per-track alongside the existing pitch/key transposition.
+   - Limiter acts as a ceiling on the compression threshold (VLC has no separate limiter filter), so raising the Limiter setting now audibly caps peak loudness as expected.
+

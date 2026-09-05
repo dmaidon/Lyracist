@@ -1,9 +1,17 @@
-<!-- Edited on Sep 5, 2026 @ 14:20:00 -> Release 26.9.5.1: Add automatic per-track volume normalization to Lyracist -->
-Last Edit: Sep 5, 2026 - Lyracist Automatic Volume Normalization (measured LUFS-based leveling)
+<!-- Edited on Sep 5, 2026 @ 15:40:00 -> Release 26.9.5.2: Fix Compressor/Limiter settings being silently no-ops in LibVlcVideoBackend -->
+Last Edit: Sep 5, 2026 - Lyracist Compressor/Limiter Fix (now wired to VLC's compressor audio filter)
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.2] - 2026-09-05
+
+### Fixed
+- **Lyracist (Compressor/Limiter Settings Not Applied to Playback)**:
+  - The Compressor and Limiter sliders (Song/Singer Audio Settings) were stored but never actually applied to sound - `LibVlcVideoBackend`, the actively-registered playback backend, only implemented `Compressor`/`Limiter` as inert stored properties with no effect on the audio signal.
+  - Wired both into VLC's native `compressor` dynamics-processing audio filter via per-track `:audio-filter=compressor` media options (`compressor-threshold`, `compressor-ratio`, `compressor-attack`, `compressor-release`, `compressor-makeup-gain`), applied in `LoadAsync` alongside the existing pitch-shift filter.
+  - Since VLC ships one dynamics filter and this app has two independent concepts (Compressor character, Limiter dB ceiling), Limiter is folded in as a floor on the compression threshold, with the ratio pushed toward the max when Limiter's ceiling is the more restrictive of the two - approximating a hard limit rather than a musical compressor.
 
 ## [26.9.5.1] - 2026-09-05
 

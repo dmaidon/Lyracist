@@ -1,6 +1,7 @@
-// Edited on Aug 20, 2026 @ 09:52:15 -> Add EndReached event implementation for LibVLC playback completion
+// Edited on Sep 5, 2026 @ 15:40:00 -> Wire up Compressor/Limiter to VLC's compressor audio filter (previously stored but never applied to playback)
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -215,11 +216,49 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         if (_mediaPlayer != null && _libVLC != null)
         {
             var media = new LibVLCSharp.Shared.Media(_libVLC, new Uri(path));
+
+            // VLC's audio-filter chain is set once per Media, not live-adjustable mid-playback
+            // (same constraint the existing pitch-shift option below already has) - so all active
+            // filter modules must be combined into a single ":audio-filter=" option here, since a
+            // second AddOption call for the same key would just override rather than append.
+            bool compressorActive = _compressor > 0 || _limiter < 0;
+            var filterModules = new List<string>();
+            if (compressorActive) filterModules.Add("compressor");
+            if (_pitchShift != 0) filterModules.Add("pitch");
+
+            if (filterModules.Count > 0)
+            {
+                media.AddOption($":audio-filter={string.Join(",", filterModules)}");
+            }
+
+            if (compressorActive)
+            {
+                // VLC ships one dynamics-processing filter ("compressor") - there is no separate
+                // limiter module - so Limiter is folded in as a floor on the compression
+                // threshold, with the ratio pushed toward the max whenever Limiter's dB ceiling
+                // is the more restrictive of the two (i.e. acting as a hard limit rather than a
+                // musical compressor). Threshold/ratio scaling mirrors FFmpegService.BuildAudioFilterString's
+                // ffmpeg-backend mapping so both playback engines behave consistently.
+                double compressorThresholdDb = -40.0 * Math.Clamp(_compressor / 100.0, 0.0, 1.0);
+                double threshold = Math.Clamp(_limiter < 0 ? Math.Min(compressorThresholdDb, _limiter) : compressorThresholdDb, -30.0, 0.0);
+                double ratio = _compressor > 0 ? Math.Clamp(1.0 + (_compressor / 100.0) * 19.0, 1.0, 20.0) : 4.0;
+                if (_limiter < 0 && _limiter <= compressorThresholdDb)
+                {
+                    ratio = 20.0;
+                }
+
+                media.AddOption($":compressor-threshold={threshold.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+                media.AddOption($":compressor-ratio={ratio.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+                media.AddOption(":compressor-attack=20");
+                media.AddOption(":compressor-release=250");
+                media.AddOption(":compressor-makeup-gain=0");
+            }
+
             if (_pitchShift != 0)
             {
-                media.AddOption($":audio-filter=pitch");
                 media.AddOption($":pitch-shift={_pitchShift}");
             }
+
             var oldMedia = _mediaPlayer.Media;
             _mediaPlayer.Media = media;
             oldMedia?.Dispose();
