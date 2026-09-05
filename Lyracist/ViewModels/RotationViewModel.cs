@@ -69,6 +69,11 @@ public partial class RotationViewModel : BaseViewModel
         {
             Lyracist.Shared.RotationHelpers.FloatCurrentSingerToTop(Rotation);
         }
+
+        // Keeps wait-time badges current after every rotation-order change (move, set current,
+        // skip, etc.), not just when a singer is marked done - otherwise a fresh rotation shows no
+        // badges at all until the first singer finishes, since nothing else recalculates them.
+        Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0);
     }
 
     public event Action? RotationStateChanged;
@@ -587,6 +592,7 @@ public partial class RotationViewModel : BaseViewModel
         RotationHelpers.InsertNewSinger(Rotation, newSinger);
         Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
         RefreshLinkedPartnerNames();
+        Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0);
 
         // Reset input properties
         NewSingerName = string.Empty;
@@ -695,6 +701,7 @@ public partial class RotationViewModel : BaseViewModel
                 RefreshSelectedSingerQueue();
             }
 
+            Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0);
             RotationStateChanged?.Invoke();
             _display.UpdateRotation([.. Rotation]);
         }
@@ -856,7 +863,7 @@ public partial class RotationViewModel : BaseViewModel
             Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
             RefreshLinkedPartnerNames();
             ResolveEstimatedPerformanceSeconds();
-            Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound);
+            Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0);
             RotationStateChanged?.Invoke();
             _display.UpdateRotation([.. Rotation]);
             return;
@@ -923,7 +930,7 @@ public partial class RotationViewModel : BaseViewModel
         RefreshLinkedPartnerNames();
 
         ResolveEstimatedPerformanceSeconds();
-        Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound);
+        Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0);
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
@@ -1172,6 +1179,7 @@ public partial class RotationViewModel : BaseViewModel
             }
         }
 
+        Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0);
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
     }

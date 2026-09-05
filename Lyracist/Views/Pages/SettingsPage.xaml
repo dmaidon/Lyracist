@@ -476,7 +476,17 @@
                                     <ComboBox ItemsSource="{Binding ProjectionViews}" SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}" Margin="0,0,0,12" />
 
                                     <CheckBox Content="Float Current Singer to Top of Rotation" IsChecked="{Binding FloatCurrentSingerToTop, Mode=TwoWay}" Margin="0,0,0,4" ToolTip="When enabled, the current active performer automatically floats to index 0 of the rotation queue." />
-                                    <CheckBox Content="Mirror Lyrics display on control view" IsChecked="{Binding IsLyricsMirrored, Mode=TwoWay}" Margin="0,4,0,4" />
+                                    <CheckBox Content="Mirror Lyrics display on control view" IsChecked="{Binding IsLyricsMirrored, Mode=TwoWay}" Margin="0,4,0,12" />
+
+                                    <TextBlock Text="Default Song Length (Estimated Wait Time)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" ToolTip="Used to estimate how long a queued singer's wait is on the rotation screen, whenever that singer's actual song length isn't known." />
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Grid.Column="0" Minimum="2" Maximum="8" TickFrequency="0.25" Value="{Binding DefaultSongLengthMinutes, Mode=TwoWay}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding DefaultSongLengthMinutes, StringFormat='{}{0:0.00} min'}" FontSize="12" FontWeight="Bold" Width="60" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0" />
+                                    </Grid>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>

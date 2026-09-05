@@ -513,9 +513,11 @@ namespace Lyracist.Shared
 
         /// <summary>
         /// Fallback estimated performance length (seconds) used for a queued singer whose song
-        /// duration is unknown/unresolved - keeps every app's wait-time math using the same default.
+        /// duration is unknown/unresolved, when a caller doesn't pass its own DJ-configured value to
+        /// <see cref="RecalculateEstimatedWaits{T}"/>. 4.75 minutes - closer to a typical song's
+        /// actual runtime than a flat 5.
         /// </summary>
-        public const double DefaultEstimatedPerformanceSeconds = 300.0; // 5 minutes
+        public const double DefaultEstimatedPerformanceSeconds = 285.0; // 4.75 minutes
 
         /// <summary>
         /// Recalculates every singer's <see cref="IRotationSinger.EstimatedWaitMinutes"/>: the cumulative
@@ -524,14 +526,16 @@ namespace Lyracist.Shared
         /// estimated to take (since they're already up and haven't finished yet). Walks the queue in
         /// the same wrapped order as <see cref="MarkNextSinger{T}"/>/<see cref="GetNextActiveSingers{T}"/>.
         /// An entry with no resolvable <see cref="IRotationSinger.EstimatedPerformanceSeconds"/> (&lt;= 0)
-        /// falls back to <see cref="DefaultEstimatedPerformanceSeconds"/> so an unknown song never
-        /// produces a wait estimate of 0 for anyone behind it. The current singer's own wait is set to
-        /// 0 (already up); inactive/paused singers - and, when <paramref name="isLastRound"/> is true,
-        /// anyone who already sang this round - are skipped and their wait cleared to 0, matching how
-        /// they're already excluded from "next" traversal elsewhere in this file. If there is no current
-        /// singer, every entry's wait is cleared to 0.
+        /// falls back to <paramref name="defaultEstimatedPerformanceSeconds"/> (a DJ-configurable
+        /// per-app setting; defaults to <see cref="DefaultEstimatedPerformanceSeconds"/> if the caller
+        /// doesn't have one) so an unknown song never produces a wait estimate of 0 for anyone behind
+        /// it. The current singer's own wait is set to 0 (already up); inactive/paused singers - and,
+        /// when <paramref name="isLastRound"/> is true, anyone who already sang this round - are
+        /// skipped and their wait cleared to 0, matching how they're already excluded from "next"
+        /// traversal elsewhere in this file. If there is no current singer, every entry's wait is
+        /// cleared to 0.
         /// </summary>
-        public static void RecalculateEstimatedWaits<T>(IList<T> singers, bool isLastRound = false) where T : class, IRotationSinger
+        public static void RecalculateEstimatedWaits<T>(IList<T> singers, bool isLastRound = false, double defaultEstimatedPerformanceSeconds = DefaultEstimatedPerformanceSeconds) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
 
@@ -548,7 +552,7 @@ namespace Lyracist.Shared
             }
 
             current.EstimatedWaitMinutes = 0;
-            double cumulativeSeconds = ResolveEstimatedSeconds(current);
+            double cumulativeSeconds = ResolveEstimatedSeconds(current, defaultEstimatedPerformanceSeconds);
 
             int startIndex = singers.IndexOf(current);
             for (int i = 1; i < count; i++)
@@ -563,13 +567,13 @@ namespace Lyracist.Shared
                 }
 
                 candidate.EstimatedWaitMinutes = (int)Math.Round(cumulativeSeconds / 60.0, MidpointRounding.AwayFromZero);
-                cumulativeSeconds += ResolveEstimatedSeconds(candidate);
+                cumulativeSeconds += ResolveEstimatedSeconds(candidate, defaultEstimatedPerformanceSeconds);
             }
         }
 
-        private static double ResolveEstimatedSeconds<T>(T singer) where T : class, IRotationSinger
+        private static double ResolveEstimatedSeconds<T>(T singer, double defaultEstimatedPerformanceSeconds) where T : class, IRotationSinger
         {
-            return singer.EstimatedPerformanceSeconds > 0 ? singer.EstimatedPerformanceSeconds : DefaultEstimatedPerformanceSeconds;
+            return singer.EstimatedPerformanceSeconds > 0 ? singer.EstimatedPerformanceSeconds : defaultEstimatedPerformanceSeconds;
         }
 
         /// <summary>

@@ -444,6 +444,30 @@ public class RotationHelpersTests
     }
 
     [Fact]
+    public void RecalculateEstimatedWaits_UsesDjConfiguredDefaultForUnknownDuration_SingerEntryModel()
+    {
+        // The DJ-configurable "default song length" (Settings tab) overrides the constant
+        // fallback used when a caller doesn't pass one - proven here with a value distinct from
+        // both the old (300s) and new (285s) built-in constants.
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true }; // unknown duration
+        var bob = new SingerEntry { Name = "Bob" };
+
+        var singers = new ObservableCollection<SingerEntry> { alice, bob };
+
+        RotationHelpers.RecalculateEstimatedWaits(singers, defaultEstimatedPerformanceSeconds: 240.0); // 4 min
+
+        Assert.Equal(0, alice.EstimatedWaitMinutes);
+        Assert.Equal(4, bob.EstimatedWaitMinutes);
+    }
+
+    [Fact]
+    public void RecalculateEstimatedWaits_DefaultConstant_Is285Seconds_SingerEntryModel()
+    {
+        // 4.75 minutes - closer to a typical song's actual runtime than the old flat 5 minutes.
+        Assert.Equal(285.0, RotationHelpers.DefaultEstimatedPerformanceSeconds);
+    }
+
+    [Fact]
     public void RecalculateEstimatedWaits_LastRound_ExcludesSungPerformers_SingerEntryModel()
     {
         var alice = new SingerEntry { Name = "Alice", IsCurrent = true, EstimatedPerformanceSeconds = 300 };

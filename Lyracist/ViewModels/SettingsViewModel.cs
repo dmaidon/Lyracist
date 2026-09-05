@@ -49,6 +49,15 @@ public partial class SettingsViewModel : BaseViewModel
         _rotation.FloatCurrentSingerToTop = value;
     }
 
+    /// <summary>Default estimated song length (minutes) the rotation-screen wait-time badge falls
+    /// back to when a queued song's actual duration isn't known - RotationViewModel reads
+    /// AppSettings.DefaultSongLengthMinutes fresh each time it recalculates, so no separate sync
+    /// back into it is needed here.</summary>
+    [ObservableProperty]
+    private double _defaultSongLengthMinutes = AppSettings.DefaultSongLengthMinutes;
+
+    partial void OnDefaultSongLengthMinutesChanged(double value) => AppSettings.DefaultSongLengthMinutes = value;
+
     // Audio
     [ObservableProperty]
     private List<AudioDeviceItem> _audioDevices = [];

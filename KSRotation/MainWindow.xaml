@@ -1701,6 +1701,29 @@
                                                Text="{Binding WatermarkOpacity, StringFormat={}{0:P0}}"
                                                VerticalAlignment="Center" />
                             </Grid>
+
+                            <!-- Default Song Length (Estimated Wait Time) -->
+                            <TextBlock Text="Default Song Length (Estimated Wait Time)" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}"
+                                       ToolTip="Used to estimate how long a queued singer's wait is on the rotation screen, whenever that singer's actual song length isn't known." />
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="52" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Short" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <Slider Grid.Column="1"
+                                            Minimum="2" Maximum="8"
+                                            SmallChange="0.25" LargeChange="1"
+                                            TickFrequency="0.25" TickPlacement="BottomRight"
+                                            Value="{Binding DefaultSongLengthMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                            VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="Long" VerticalAlignment="Center" Margin="8,0,8,0" />
+                                <TextBlock Grid.Column="3"
+                                               Text="{Binding DefaultSongLengthMinutes, StringFormat={}{0:F2} min}"
+                                               VerticalAlignment="Center" />
+                            </Grid>
                         </StackPanel>
                     </GroupBox>
 

@@ -1,9 +1,27 @@
-<!-- Edited on Sep 5, 2026 @ 22:40:00 -> Release 26.9.5.8: Rename "1st Singer"/🚩 round-start badge to "Rotation Anchor"/⚓ across all three apps and web surfaces -->
-Last Edit: Sep 5, 2026 - "Rotation Anchor" Rename (was "1st Singer"/🚩, now ⚓)
+<!-- Edited on Sep 5, 2026 @ 23:45:00 -> Release 26.9.5.10: Fix Estimated Wait Time badges not appearing until the first singer finished a song -->
+Last Edit: Sep 5, 2026 - Fix Estimated Wait Time Badges Not Appearing Until First Singer Finished
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.10] - 2026-09-05
+
+### Fixed
+- **Lyracist / KSRotation (Estimated Wait Time Badges Missing Entirely Until First Singer Finished)**:
+  - `RotationHelpers.RecalculateEstimatedWaits()` was only ever invoked when a singer was marked finished/done - so a freshly-built rotation with a singer marked current, but nobody finished yet, showed **no wait-time badges at all** on any rotation/billboard display, even though everything else about the feature was working correctly.
+  - Both apps now also recalculate wait times whenever a singer is added, set/toggled current or round-start-anchor, moved up/down, paused/reactivated, marked inactive/reactivated, or removed - not only on "done" - so badges appear as soon as there's a current singer, and stay accurate through every reorder in between.
+  - Lyracist: added to the shared `RunRotationOrderChange` chokepoint (covers move up/down, set current, skip, set rotation anchor) plus `AddSinger`, `RemoveSinger`, and `ToggleInactiveSinger`. KSRotation: added to `AddActiveSinger`, `SetCurrentSinger`, `SetRotationStartSinger`, `RemoveSinger`, `ToggleSingerInactive`, and all four move commands. KSRotation.Maui shares KSRotation's `MainViewModel` so it picks up the same fix automatically.
+  - Added ViewModel-level regression tests in `Lyracist.Tests` proving a waiting singer gets a nonzero estimate as soon as the first singer is marked current or a new singer joins an already-started rotation, without requiring anyone to finish a song first.
+
+## [26.9.5.9] - 2026-09-05
+
+### Added
+- **Lyracist / KSRotation (Configurable Default Song Length for Estimated Wait Time)**:
+  - The rotation-screen "estimated wait time" badge's fallback estimate (used whenever a queued song's actual duration isn't known) is now a DJ-configurable setting instead of a fixed 5 minutes - **default lowered to 4.75 minutes**, closer to a typical song's actual runtime.
+  - New "Default Song Length" slider (2-8 min, quarter-minute steps) on Lyracist's Settings page (Display tab, next to "Float Current Singer to Top") and KSRotation's Settings tab (next to Marquee Speed/Watermark Opacity), persisted the same way as every other setting in each app.
+  - `RotationHelpers.RecalculateEstimatedWaits()` (`Shared/RotationHelpers.cs`) gained an optional `defaultEstimatedPerformanceSeconds` parameter that both apps now pass their own configured value into; the built-in constant (unchanged call sites, other consumers) also moved from 300s to 285s to match the new default.
+  - KSRotation.Maui reads the same setting from its own local settings file (shares `MainViewModel`/`AppSettings` with KSRotation) but has no dedicated settings UI of its own for it yet - falls back to the 4.75-minute default until/unless a value is set.
 
 ## [26.9.5.8] - 2026-09-05
 

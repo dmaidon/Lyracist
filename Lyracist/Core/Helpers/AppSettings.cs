@@ -866,6 +866,14 @@ public static class AppSettings
         set { _data.FloatCurrentSingerToTop = value; Save(); }
     }
 
+    /// <summary>Default estimated song length in minutes, used by the rotation-screen "estimated
+    /// wait time" badge whenever a queued song's actual duration isn't known/resolvable.</summary>
+    public static double DefaultSongLengthMinutes
+    {
+        get => _data.DefaultSongLengthMinutes;
+        set { _data.DefaultSongLengthMinutes = value; Save(); }
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
@@ -876,6 +884,7 @@ public static class AppSettings
         public bool IsDjBannerQrCodeEnabled { get; set; } = true;
         public bool EnableKillVocal { get; set; } = false;
         public bool FloatCurrentSingerToTop { get; set; } = false;
+        public double DefaultSongLengthMinutes { get; set; } = 4.75;
 
         // Registration data
         public string RegFirstName { get; set; } = string.Empty;

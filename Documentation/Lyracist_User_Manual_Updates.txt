@@ -1149,9 +1149,10 @@ Section: Lyracist & KSRotation & KSRotation.Maui / Estimated Wait Time on Rotati
 [How Long Until I'm Up?]
 1. Estimated Wait Time Badge:
    - Every waiting singer's name on the audience-facing rotation/billboard screens now shows an estimated wait in minutes in braces, e.g. "Dennis {5} Only Make Believe" - about 5 minutes until Dennis is up.
-   - The estimate adds up the estimated performance length of everyone ahead of that singer: each song's actual known duration + 30 seconds where the song is recognized in the library, or a flat 5-minute estimate per song when it isn't.
+   - The estimate adds up the estimated performance length of everyone ahead of that singer: each song's actual known duration + 30 seconds where the song is recognized in the library, or the DJ's configured default song length per song when it isn't.
+   - The default song length used for that fallback is now DJ-configurable (Settings > Default Song Length, in Lyracist's Display tab and KSRotation's Settings tab) - defaults to 4.75 minutes, adjustable from 2 to 8 minutes in quarter-minute steps.
    - The singer currently at the mic never shows a wait badge - they're already up. Paused/inactive singers, and (during Last Round) anyone who already performed this round, are skipped and don't count toward anyone else's wait either.
-   - Recalculated automatically the instant a singer is marked finished, so the estimate for everyone still waiting stays current all night.
+   - Recalculated automatically every time the rotation changes - a singer added, marked current, moved, paused, made inactive/reactivated, or removed, not only when someone finishes - so badges appear as soon as a singer is marked current and stay accurate through every reorder in between.
    - Appears on Lyracist's Rotation Window (queue list, Star Wars Crawl, and scrolling banner), KSRotation's Singer Display Window (all three projection styles), and KSRotation.Maui's Billboard view.
 
 Section: Lyracist & KSRotation & KSRotation.Maui / Linked Singers

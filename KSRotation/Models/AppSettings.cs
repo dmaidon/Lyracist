@@ -81,6 +81,10 @@ namespace KSRotation.Models
 
         /// <summary>When true, the current singer always floats to the top of the rotation list.</summary>
         public bool FloatCurrentSingerToTop { get; init; } = false;
+
+        /// <summary>Default estimated song length in minutes, used by the rotation-screen
+        /// "estimated wait time" badge whenever a queued song's actual duration isn't known.</summary>
+        public double DefaultSongLengthMinutes { get; init; } = 4.75;
     }
 }
 
