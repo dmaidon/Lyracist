@@ -278,7 +278,8 @@
                                 BackgroundColor="White"
                                 StrokeThickness="0"
                                 Padding="8"
-                                HorizontalOptions="Center">
+                                HorizontalOptions="Center"
+                                IsVisible="{Binding ShowQrCodeOnRotationScreen}">
                             <Image Source="{Binding QrCodeImage}"
                                    WidthRequest="140"
                                    HeightRequest="140"
@@ -325,7 +326,8 @@
                                 BackgroundColor="White"
                                 StrokeThickness="0"
                                 Padding="6"
-                                HorizontalOptions="Center">
+                                HorizontalOptions="Center"
+                                IsVisible="{Binding ShowQrCodeOnRotationScreen}">
                             <Image Source="{Binding WifiQrCodeImage}"
                                    WidthRequest="95"
                                    HeightRequest="95"

@@ -27,6 +27,11 @@ namespace KSRotation.Services
             _viewModel.IsLastRound = isLastRound;
         }
 
+        public void SetShowQrCode(bool show)
+        {
+            _viewModel.ShowQrCode = show;
+        }
+
         public void SetLastSongBanner(string? path)
         {
             _lastSongBannerPath = path;

@@ -56,6 +56,7 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     public string RatingIconSymbol => Lyracist.Core.Helpers.AppSettings.ActiveRatingIconSymbol;
     public bool IsRatingSystemEnabled => Lyracist.Core.Helpers.AppSettings.IsRatingSystemEnabled;
+    public bool ShowQrCodeOnRotationScreen => Lyracist.Core.Helpers.AppSettings.ShowQrCodeOnRotationScreen;
 
     public RotationWindowViewModel()
     {
@@ -76,6 +77,7 @@ public partial class RotationWindowViewModel : BaseViewModel
                 }
                 OnPropertyChanged(nameof(RatingIconSymbol));
                 OnPropertyChanged(nameof(IsRatingSystemEnabled));
+                OnPropertyChanged(nameof(ShowQrCodeOnRotationScreen));
             });
         };
         _toggleTimer.Start();
@@ -317,6 +319,7 @@ public partial class RotationWindowViewModel : BaseViewModel
 
         OnPropertyChanged(nameof(RatingIconSymbol));
         OnPropertyChanged(nameof(IsRatingSystemEnabled));
+        OnPropertyChanged(nameof(ShowQrCodeOnRotationScreen));
     }
 
     public void HighlightSinger(Singer singer)
@@ -405,5 +408,6 @@ public partial class RotationWindowViewModel : BaseViewModel
 
         OnPropertyChanged(nameof(RatingIconSymbol));
         OnPropertyChanged(nameof(IsRatingSystemEnabled));
+        OnPropertyChanged(nameof(ShowQrCodeOnRotationScreen));
     }
 }

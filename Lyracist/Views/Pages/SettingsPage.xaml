@@ -465,7 +465,8 @@
 
                                     <CheckBox Content="Enable Singer Rotation Billboard Screen" IsChecked="{Binding IsRotationActive, Mode=TwoWay}" Margin="0,0,0,4" />
                                     <TextBlock Text="Singer Rotation Billboard Screen" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                                    <ComboBox ItemsSource="{Binding Screens}" SelectedItem="{Binding RotationScreen, Mode=TwoWay}" DisplayMemberPath="DisplayName" IsEnabled="{Binding IsRotationScreenSelectorEnabled}" Margin="0,0,0,12" />
+                                    <ComboBox ItemsSource="{Binding Screens}" SelectedItem="{Binding RotationScreen, Mode=TwoWay}" DisplayMemberPath="DisplayName" IsEnabled="{Binding IsRotationScreenSelectorEnabled}" Margin="0,0,0,4" />
+                                    <CheckBox Content="Show QR Code on Rotation Screen" IsChecked="{Binding ShowQrCodeOnRotationScreen, Mode=TwoWay}" Margin="0,0,0,12" ToolTip="Displays the song-request QR code badge in the corner of the Singer Rotation Billboard Screen." />
 
                                     <CheckBox Content="Enable DJ Banner Screen" IsChecked="{Binding IsDjBannerActive, Mode=TwoWay}" Margin="0,0,0,4" ToolTip="Toggle the DJ Banner projection screen on/off." />
                                     <TextBlock Text="DJ Banner Screen" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />

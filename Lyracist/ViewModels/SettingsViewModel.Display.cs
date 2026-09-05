@@ -68,6 +68,20 @@ public partial class SettingsViewModel
         }
     }
 
+    public bool ShowQrCodeOnRotationScreen
+    {
+        get => AppSettings.ShowQrCodeOnRotationScreen;
+        set
+        {
+            if (AppSettings.ShowQrCodeOnRotationScreen != value)
+            {
+                AppSettings.ShowQrCodeOnRotationScreen = value;
+                OnPropertyChanged();
+                _rotationWindowVm.NotifyPropertyChanged(nameof(RotationWindowViewModel.ShowQrCodeOnRotationScreen));
+            }
+        }
+    }
+
     private void OnScreenAssignmentsChanged()
     {
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>

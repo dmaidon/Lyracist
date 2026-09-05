@@ -1805,6 +1805,13 @@
                                                TextWrapping="Wrap"
                                                FontSize="12"
                                                Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <CheckBox
+                                        Content="Show QR Code on Rotation Screen"
+                                        IsChecked="{Binding ShowQrCodeOnRotationScreen, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource ModernCheckBoxStyle}"
+                                        Margin="0,10,0,4"
+                                        ToolTip="Displays the song-request QR code badge in the corner of the audience rotation display and billboard screens." />
                                 </StackPanel>
                             </GroupBox>
 

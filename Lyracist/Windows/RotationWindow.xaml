@@ -696,7 +696,8 @@
         <!-- Floating QR Code Badge (Always on top, bottom-right) -->
         <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="24"
                 Background="#D916161E" BorderBrush="#3B82F6" BorderThickness="1.5" CornerRadius="12" Padding="14"
-                Panel.ZIndex="100">
+                Panel.ZIndex="100"
+                Visibility="{Binding ShowQrCodeOnRotationScreen, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Visible}">
             <StackPanel Orientation="Horizontal">
                 <Border Background="White" Padding="4" CornerRadius="6" Width="120" Height="120" VerticalAlignment="Center">
                     <Image Source="{Binding QrCodeImage}" RenderOptions.BitmapScalingMode="NearestNeighbor"/>

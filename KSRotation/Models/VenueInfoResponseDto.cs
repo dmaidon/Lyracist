@@ -14,5 +14,6 @@ namespace KSRotation.Models
         public string wifiSsid { get; set; } = string.Empty;
         public string wifiPassword { get; set; } = string.Empty;
         public bool isLastRound { get; set; }
+        public bool showQrCode { get; set; } = true;
     }
 }

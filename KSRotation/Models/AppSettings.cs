@@ -57,6 +57,8 @@ namespace KSRotation.Models
 
         public bool IsDjBannerQrCodeEnabled { get; init; } = true;
 
+        public bool ShowQrCodeOnRotationScreen { get; init; } = true;
+
         public string WifiPassword { get; init; } = string.Empty;
 
         public string ActiveSpecialEvent { get; init; } = "None";

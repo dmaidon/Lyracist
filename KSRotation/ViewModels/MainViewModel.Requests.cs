@@ -416,7 +416,8 @@ namespace KSRotation.ViewModels
                 billboardUrl = BillboardConnectionUrl,
                 wifiSsid = ssid,
                 wifiPassword = pass,
-                isLastRound = IsLastRound
+                isLastRound = IsLastRound,
+                showQrCode = ShowQrCodeOnRotationScreen
             };
             return JsonSerializer.Serialize(dto, AppJsonContext.Default.VenueInfoResponseDto);
         }

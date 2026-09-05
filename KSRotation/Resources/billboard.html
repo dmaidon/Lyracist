@@ -585,7 +585,7 @@
             <!-- Portal Request Hub -->
             <div class="hub-card primary-hub">
                 <div class="hub-badge badge-request">📱 Song Requests</div>
-                <div class="qr-container">
+                <div class="qr-container" id="portal-qr-container">
                     <img id="portal-qr-image" class="qr-image-lg" src="/api/qr?text=http%3A%2F%2F127.0.0.1%3A5005" alt="Request Portal QR Code" />
                 </div>
                 <div class="hub-title">Scan To Pick Your Song</div>
@@ -596,7 +596,7 @@
             <!-- Wi-Fi Connect Hub -->
             <div class="hub-card wifi-hub">
                 <div class="hub-badge badge-wifi">📶 Fast Wi-Fi Join</div>
-                <div class="qr-container">
+                <div class="qr-container" id="wifi-qr-container">
                     <img id="wifi-qr-image" class="qr-image-sm" src="/api/qr?text=WIFI%3AS%3A%3BT%3AWPA%3BP%3A%3B%3B" alt="Wi-Fi QR Code" />
                 </div>
                 <div class="hub-title">Connect To Venue Wi-Fi</div>
@@ -670,6 +670,10 @@
                 if (lastRoundBanner) {
                     lastRoundBanner.style.display = data.isLastRound ? "block" : "none";
                 }
+
+                const showQrCode = data.showQrCode !== false;
+                document.getElementById('portal-qr-container').style.display = showQrCode ? "" : "none";
+                document.getElementById('wifi-qr-container').style.display = showQrCode ? "" : "none";
             } catch (err) {
                 console.warn("Error fetching info", err);
             }

@@ -605,6 +605,12 @@ public static class AppSettings
         set { _data.IsRatingSystemEnabled = value; Save(); }
     }
 
+    public static bool ShowQrCodeOnRotationScreen
+    {
+        get => _data.ShowQrCodeOnRotationScreen;
+        set { _data.ShowQrCodeOnRotationScreen = value; Save(); }
+    }
+
     public static string SelectedRatingIcon
     {
         get => _data.SelectedRatingIcon;
@@ -942,6 +948,7 @@ public static class AppSettings
         ];
 
         public bool IsRatingSystemEnabled { get; set; } = true;
+        public bool ShowQrCodeOnRotationScreen { get; set; } = true;
         public string SelectedRatingIcon { get; set; } = "⭐ Star";
         public List<string> AvailableRatingIcons { get; set; } = ["⭐ Star", "❤️ Heart", "🔥 Fire", "🎵 Note", "🏆 Trophy", "👑 Crown", "👍 Like"];
         public string CdgBackdropMode { get; set; } = "Original Color";

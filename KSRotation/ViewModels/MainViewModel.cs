@@ -255,6 +255,11 @@ namespace KSRotation.ViewModels
                     QueueSaveSettings();
                     break;
 
+                case nameof(ShowQrCodeOnRotationScreen):
+                    _displayWindowService.SetShowQrCode(ShowQrCodeOnRotationScreen);
+                    QueueSaveSettings();
+                    break;
+
                 case nameof(AutoAcceptRequests):
                     if (AutoAcceptRequests)
                     {
@@ -515,6 +520,9 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool IsDjBannerQrCodeEnabled { get; set; } = true;
+
+        [ObservableProperty]
+        public partial bool ShowQrCodeOnRotationScreen { get; set; } = true;
 
         [ObservableProperty]
         public partial string WifiPassword { get; set; } = string.Empty;
@@ -966,6 +974,8 @@ namespace KSRotation.ViewModels
                 : settings.ConnectInstructionsScreen;
             IsDjBannerEnabled = !System.Diagnostics.Debugger.IsAttached && settings.IsDjBannerEnabled;
             IsDjBannerQrCodeEnabled = settings.IsDjBannerQrCodeEnabled;
+            ShowQrCodeOnRotationScreen = settings.ShowQrCodeOnRotationScreen;
+            _displayWindowService.SetShowQrCode(ShowQrCodeOnRotationScreen);
             string? currentSsid = WifiHelper.GetConnectedSsid();
             string savedWifiPassword = !string.IsNullOrWhiteSpace(currentSsid) ? WifiPasswordStore.GetPasswordForSsid(currentSsid) : string.Empty;
             WifiPassword = System.Diagnostics.Debugger.IsAttached ? string.Empty : (!string.IsNullOrEmpty(savedWifiPassword) ? savedWifiPassword : (settings.WifiPassword ?? string.Empty));
@@ -2313,6 +2323,7 @@ namespace KSRotation.ViewModels
                 SelectedDjBannerPath = SelectedDjBannerPath,
                 IsDjBannerEnabled = IsDjBannerEnabled,
                 IsDjBannerQrCodeEnabled = IsDjBannerQrCodeEnabled,
+                ShowQrCodeOnRotationScreen = ShowQrCodeOnRotationScreen,
                 WifiPassword = WifiPassword,
                 ActiveSpecialEvent = ActiveSpecialEvent,
                 SpecialEvents = SpecialEvents.ToList(),

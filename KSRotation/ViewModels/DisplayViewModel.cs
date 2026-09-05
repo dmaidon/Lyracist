@@ -34,6 +34,9 @@ namespace KSRotation.ViewModels
         public partial System.Windows.Media.ImageSource? QrCodeImage { get; set; }
 
         [ObservableProperty]
+        public partial bool ShowQrCode { get; set; } = true;
+
+        [ObservableProperty]
         public partial bool ShowCrawl { get; set; }
 
         [ObservableProperty]
