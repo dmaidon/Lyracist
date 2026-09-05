@@ -2371,6 +2371,11 @@ namespace KSRotation.ViewModels
                 Singers.Add(singer);
             }
 
+            // Guarantees someone holds the "1st singer" (IsRotationStart) badge after a restore -
+            // a saved night whose flag holder is gone (or was never saved) would otherwise leave
+            // every singer without it, since this loop bypasses InsertNewSinger.
+            RotationHelpers.EnsureRotationStartFlag(Singers);
+
             lock (_performanceHistoryLock)
             {
                 _performanceHistory.Clear();
@@ -2660,6 +2665,10 @@ namespace KSRotation.ViewModels
                     Artist = artist,
                 });
             }
+
+            // Guarantees someone holds the "1st singer" (IsRotationStart) badge - defaults to
+            // whoever was entered first, since this loop bypasses InsertNewSinger.
+            RotationHelpers.EnsureRotationStartFlag(Singers);
         }
 
         /// <summary>

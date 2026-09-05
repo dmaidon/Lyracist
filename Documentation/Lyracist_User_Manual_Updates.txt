@@ -190,11 +190,11 @@ Section: Performance & Rotation Operations / Singer Queue Management & Trivia Li
    - **New Singer Addition Auto-Selection**:
      * Adding a new performer in `KSRotation` automatically scrolls the list to the new singer row, focuses the performer name text box, and highlights `"New Singer"` for 1-step editing.
 
-3. 1st Singer (Round Start Anchor) Remote DJ Tablet & Web Portal Synchronization (`KSRotation` & `Lyracist`):
+3. Rotation Anchor Remote DJ Tablet & Web Portal Synchronization (`KSRotation` & `Lyracist`):
    - **Remote Visual Highlighting**:
-     * The Remote DJ Board (`dj.html`) displays the `🚩 1ST` badge next to the anchor performer's name and applies a distinct red card background (`--row-start-bg`) and border outline.
-     * The DJ tablet features a dedicated `🚩` action button on each singer card to allow setting, shifting, or clearing the 1st singer round anchor with one tap.
-     * Synced across the mobile performer portal (`mobile.html`) and patron request portal (`PatronPortal.html`) with matching `🚩 1st` badges and red accents.
+     * The Remote DJ Board (`dj.html`) displays the `⚓ ANCHOR` badge next to the anchor performer's name and applies a distinct red card background (`--row-start-bg`) and border outline.
+     * The DJ tablet features a dedicated `⚓` action button on each singer card to allow setting, shifting, or clearing the Rotation Anchor with one tap.
+     * Synced across the mobile performer portal (`mobile.html`) and patron request portal (`PatronPortal.html`) with matching `⚓ ANCHOR` badges and red accents.
 
 2. High-DPI Singer Display Box & Button Border Rendering (`KSRotation`):
    - **Full Button Border Visibility**:
@@ -203,7 +203,7 @@ Section: Performance & Rotation Operations / Singer Queue Management & Trivia Li
 
 3. Smart End-of-Round Singer Insertion:
    - **End of Current Rotation Round Placement**:
-     * When new singers are added to an active rotation queue while other singers have already performed in the current round, the new singer is automatically inserted at the end of the *current active round* (immediately before the round start anchor holding the `🚩 1ST` badge at index > 0).
+     * When new singers are added to an active rotation queue while other singers have already performed in the current round, the new singer is automatically inserted at the end of the *current active round* (immediately before whoever holds the `⚓ ANCHOR` badge at index > 0).
      * This guarantees that new singers perform during the current rotation cycle before previous performers repeat in the next round.
      * If all performers are fresh at the start of a round (anchor at index 0), the new singer is placed at the end of the active queue before any inactive entries.
 
@@ -265,13 +265,13 @@ Section: Performance & Rotation Operations / Singer Queue Management
      * Upon song completion (`Done` / `✓`), the finished performer is moved to the back of the active queue and the next active performer automatically floats to the top (index 0).
      * Eliminates the need for the DJ/KJ to scroll down long lists during active shows.
 
-2. 1st Singer in Rotation (Round Start Anchor Flag):
+2. Rotation Anchor (formerly "1st Singer"):
    - **Visual Indicator**:
-     * A red `🚩 1ST` badge is displayed next to the singer designated as the first performer of the rotation round, and that singer's row is also highlighted with a red background (alongside the existing yellow "now performing" and blue "up next" row highlights), so the 1st singer stands out at a glance.
-     * When the 1st singer returns to index 0 / current status, the DJ knows a complete rotation cycle has been completed.
+     * A red `⚓ ANCHOR` badge is displayed next to the singer the rotation round is anchored to, and that singer's row is also highlighted with a red background (alongside the existing yellow "now performing" and blue "up next" row highlights), so the Rotation Anchor stands out at a glance.
+     * When the Rotation Anchor returns to index 0 / current status, the DJ knows a complete rotation cycle has been completed.
    - **Manual Re-anchoring & Clearing**:
-     * Right-clicking any singer and selecting `"Set as 1st Singer (Round Start)"` or clicking the `🚩` button reassigns the anchor to that singer, clearing it from previous holders.
-     * Clicking the same action again on the singer who already holds the flag (the button turns red / the menu item changes to `"Clear 1st Singer Badge"`) undoes the mistake — it hands the flag to the next active singer in rotation order rather than leaving nobody flagged, so an accidental click never needs a specific replacement singer picked.
+     * Right-clicking any singer and selecting `"Set as Rotation Anchor"` or clicking the `⚓` button reassigns the anchor to that singer, clearing it from previous holders.
+     * Clicking the same action again on the singer who already holds the flag (the button turns red / the menu item changes to `"Clear Rotation Anchor"`) undoes the mistake — it hands the flag to the next active singer in rotation order rather than leaving nobody flagged, so an accidental click never needs a specific replacement singer picked.
      * When new singers are added, the system automatically ensures exactly one active singer holds the start flag.
    - **Cross-App Sync**:
      * The `isRotationStart` flag is synchronized via the REST/WebSocket `/api/rotation` feed between `KSRotation` and `Lyracist`.

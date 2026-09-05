@@ -247,7 +247,7 @@ namespace KSRotation.Windows
             }
 
             string currentSingerLabel = _vm.HasDesignatedCurrentSinger ? "Current Singer" : "First Performer";
-            string currentSingerFlag = _vm.CurrentSingerIsRotationStart ? "\U0001F6A9 " : string.Empty;
+            string currentSingerFlag = _vm.CurrentSingerIsRotationStart ? "⚓ " : string.Empty;
 
             BannerTextBlock.Inlines.Add(new Run($"{currentSingerLabel}: {currentSingerFlag}{_vm.CurrentSinger}")
             {
@@ -260,7 +260,7 @@ namespace KSRotation.Windows
             foreach (var next in _vm.NextSingers.Take(5))
             {
                 BannerTextBlock.Inlines.Add(new Run(Separator));
-                string nextFlag = next.IsRotationStart ? "\U0001F6A9 " : string.Empty;
+                string nextFlag = next.IsRotationStart ? "⚓ " : string.Empty;
                 BannerTextBlock.Inlines.Add(new Run($"{ordinals[i]}: {nextFlag}{next.Text}"));
                 i++;
             }
@@ -807,7 +807,7 @@ namespace KSRotation.Windows
 
                     panel.Children.Add(new TextBlock
                     {
-                        Text = entry.IsRotationStart ? $"\U0001F6A9 {entry.Name}" : entry.Name,
+                        Text = entry.IsRotationStart ? $"⚓ {entry.Name}" : entry.Name,
                         FontSize = isCurrent ? 52 : 36,
                         FontWeight = isCurrent ? FontWeights.Bold : FontWeights.Normal,
                         Foreground = isCurrent ? white : gold,

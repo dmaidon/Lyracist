@@ -122,9 +122,9 @@
                                                     </Label.Triggers>
                                                 </Label>
 
-                                                <!-- Indicator badges (1st Singer [Red], Now Singing [Orange], Next [Blue], Music [Green], Linked [Blue]) -->
-                                                <Border StrokeShape="RoundRectangle 4" BackgroundColor="#DC2626" Padding="4,2" IsVisible="{Binding IsRotationStart}" StrokeThickness="0" ToolTipProperties.Text="1st Singer in Rotation (Round Start)">
-                                                    <Label Text="🚩 1ST" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                                                <!-- Indicator badges (Rotation Anchor [Red], Now Singing [Orange], Next [Blue], Music [Green], Linked [Blue]) -->
+                                                <Border StrokeShape="RoundRectangle 4" BackgroundColor="#DC2626" Padding="4,2" IsVisible="{Binding IsRotationStart}" StrokeThickness="0" ToolTipProperties.Text="Rotation Anchor (marks where a round begins)">
+                                                    <Label Text="⚓ ANCHOR" TextColor="White" FontSize="9" FontAttributes="Bold" />
                                                 </Border>
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#1E3A5F" Stroke="#0EA5E9" StrokeThickness="1" Padding="4,2" IsVisible="{Binding IsLinked}" ToolTipProperties.Text="{Binding LinkedPartnerName, StringFormat='Linked with {0} - always stays adjacent in the rotation'}">
                                                     <Label Text="{Binding LinkedPartnerName, StringFormat='🔗 {0}'}" TextColor="#0EA5E9" FontSize="9" FontAttributes="Bold" />
@@ -247,13 +247,13 @@
                                                 </Button.Triggers>
                                             </Button>
 
-                                            <!-- Set/Clear 1st Singer in rotation -->
-                                            <Button Text="🚩" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=SetRotationStartSingerCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#DC2626" BorderWidth="1" TextColor="#DC2626" FontSize="17" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Set as 1st Singer (Round Start)">
+                                            <!-- Set/Clear Rotation Anchor -->
+                                            <Button Text="⚓" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=SetRotationStartSingerCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#DC2626" BorderWidth="1" TextColor="#DC2626" FontSize="17" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Set as Rotation Anchor">
                                                 <Button.Triggers>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsRotationStart}" Value="True">
                                                         <Setter Property="BackgroundColor" Value="#DC2626" />
                                                         <Setter Property="TextColor" Value="White" />
-                                                        <Setter Property="ToolTipProperties.Text" Value="Clear 1st Singer badge (accidental flag? tap to remove)" />
+                                                        <Setter Property="ToolTipProperties.Text" Value="Clear Rotation Anchor (accidental flag? tap to remove)" />
                                                     </DataTrigger>
                                                 </Button.Triggers>
                                             </Button>
@@ -616,14 +616,14 @@
                             <VerticalStackLayout Spacing="8">
                                 <Label Text="ROW COLORS &amp; BADGES" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="11" FontAttributes="Bold" CharacterSpacing="1.0" />
 
-                                <!-- 1st Singer -->
+                                <!-- Rotation Anchor -->
                                 <Border StrokeShape="RoundRectangle 6" BackgroundColor="{AppThemeBinding Light=#FEF2F2, Dark=#2D1414}" Stroke="#DC2626" StrokeThickness="1" Padding="8,6">
                                     <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
                                         <Border StrokeShape="RoundRectangle 4" BackgroundColor="#DC2626" Padding="5,2" StrokeThickness="0" VerticalOptions="Center">
-                                            <Label Text="🚩 1ST" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                            <Label Text="⚓ ANCHOR" TextColor="White" FontSize="10" FontAttributes="Bold" />
                                         </Border>
                                         <VerticalStackLayout Spacing="1" VerticalOptions="Center">
-                                            <Label Text="Rotation Start (1st Singer)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                            <Label Text="Rotation Anchor" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
                                             <Label Text="Marks the start of the rotation cycle / round" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
                                         </VerticalStackLayout>
                                     </HorizontalStackLayout>
@@ -719,13 +719,13 @@
                                     </VerticalStackLayout>
                                 </Grid>
 
-                                <!-- 1st Singer Flag -->
+                                <!-- Rotation Anchor Flag -->
                                 <Grid ColumnDefinitions="32,*" ColumnSpacing="10" VerticalOptions="Center">
                                     <Border Grid.Column="0" StrokeShape="RoundRectangle 4" Stroke="#DC2626" StrokeThickness="1" BackgroundColor="Transparent" WidthRequest="28" HeightRequest="28" Padding="0">
-                                        <Label Text="🚩" TextColor="#DC2626" FontSize="17" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <Label Text="⚓" TextColor="#DC2626" FontSize="17" HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
-                                        <Label Text="Set / Clear 1st Singer" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                        <Label Text="Set / Clear Rotation Anchor" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
                                         <Label Text="Sets anchor for round start (tap again to clear)" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
                                     </VerticalStackLayout>
                                 </Grid>

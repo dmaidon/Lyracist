@@ -963,7 +963,7 @@
             let html = "";
             queue.forEach((item, idx) => {
                 const badgeClass = `badge badge-${(item.source || "local").toLowerCase().replace(/[^a-z0-9-]/g, "")}`;
-                const startBadge = item.isRotationStart ? `<span class="badge badge-1st" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>` : "";
+                const startBadge = item.isRotationStart ? `<span class="badge badge-1st" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>` : "";
                 const itemClass = item.isRotationStart ? "queue-item rotation-start" : "queue-item";
                 html += `
                             <div class="${itemClass}">

@@ -92,9 +92,9 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="12,4">
                                 <Border Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,8,0" VerticalAlignment="Center"
-                                        ToolTip="1st Singer in Rotation (Round Start)"
+                                        ToolTip="Rotation Anchor (marks where a round begins)"
                                         Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <TextBlock Text="🚩 1ST" FontSize="14" FontWeight="ExtraBold" Foreground="White"/>
+                                    <TextBlock Text="⚓ ANCHOR" FontSize="14" FontWeight="ExtraBold" Foreground="White"/>
                                 </Border>
                                 <TextBlock FontSize="34">
                                     <TextBlock.Style>
@@ -227,9 +227,9 @@
                     <!-- Current singer name + song (vertically centered) -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
-                                ToolTip="1st Singer in Rotation (Round Start)"
+                                ToolTip="Rotation Anchor (marks where a round begins)"
                                 Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="🚩 1ST" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                            <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
                         </Border>
                         <TextBlock x:Name="MarqueeSingerName" Text="{Binding CurrentSingerName}"
                                    HorizontalAlignment="Center"
@@ -280,9 +280,9 @@
                                             BorderThickness="1">
                                         <StackPanel Orientation="Horizontal">
                                             <Border Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,6,0" VerticalAlignment="Center"
-                                                    ToolTip="1st Singer in Rotation (Round Start)"
+                                                    ToolTip="Rotation Anchor (marks where a round begins)"
                                                     Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <TextBlock Text="🚩 1ST" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
+                                                <TextBlock Text="⚓ ANCHOR" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
                                             </Border>
                                             <TextBlock Text="{Binding Text}"
                                                        FontSize="20"
@@ -429,9 +429,9 @@
                                TextOptions.TextFormattingMode="Display" />
 
                     <Border Background="#DC2626" CornerRadius="6" Padding="8,3" Margin="0,0,0,8" HorizontalAlignment="Left"
-                            ToolTip="1st Singer in Rotation (Round Start)"
+                            ToolTip="Rotation Anchor (marks where a round begins)"
                             Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock Text="🚩 1ST" FontSize="18" FontWeight="ExtraBold" Foreground="White"/>
+                        <TextBlock Text="⚓ ANCHOR" FontSize="18" FontWeight="ExtraBold" Foreground="White"/>
                     </Border>
                     <TextBlock Text="{Binding CurrentSingerName}"
                                TextWrapping="Wrap"
@@ -463,9 +463,9 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="0,3">
                                     <Border Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,6,0" VerticalAlignment="Center"
-                                            ToolTip="1st Singer in Rotation (Round Start)"
+                                            ToolTip="Rotation Anchor (marks where a round begins)"
                                             Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <TextBlock Text="🚩 1ST" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
+                                        <TextBlock Text="⚓ ANCHOR" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
                                     </Border>
                                     <TextBlock Text="{Binding Text}"
                                                FontSize="22"

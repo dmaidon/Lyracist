@@ -1,9 +1,26 @@
-<!-- Edited on Sep 5, 2026 @ 21:35:00 -> Release 26.9.5.6: Fix Linked Singers dragging a finished singer back up, while keeping the pair linked all night via an IsCurrent exemption -->
-Last Edit: Sep 5, 2026 - Linked Singers Float-to-Bottom Fix (Lyracist & KSRotation)
+<!-- Edited on Sep 5, 2026 @ 22:40:00 -> Release 26.9.5.8: Rename "1st Singer"/🚩 round-start badge to "Rotation Anchor"/⚓ across all three apps and web surfaces -->
+Last Edit: Sep 5, 2026 - "Rotation Anchor" Rename (was "1st Singer"/🚩, now ⚓)
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.8] - 2026-09-05
+
+### Changed
+- **Lyracist / KSRotation / KSRotation.Maui (Terminology: "1st Singer" → "Rotation Anchor")**:
+  - The round-start marker (previously the 🚩 "1ST" badge/"1st Singer" label - easy to confuse with "whoever's physically first in the list" or "whoever's up next") is now called **Rotation Anchor**, shown as an **⚓ ANCHOR** badge. It marks the same thing it always did - the performer the rotation's full-round tracking is anchored to - and the DJ can still assign/clear it manually the same way (right-click menu, 🚩→⚓ toggle button); only the label and icon changed.
+  - Updated every user-facing surface: badges, tooltips, context-menu items, and button labels in Lyracist (`RotationPage`, `KaraokePage`, `RotationWindow` - list, Star Wars Crawl, and marquee banner), KSRotation (`MainWindow`, `SingerDisplayWindow` - all three projection styles), KSRotation.Maui (`MainPage`, `BillboardView`), the in-app Help pages, and the shared web surfaces (`kiosk.html`, `dj.html`, `billboard.html`, `PatronPortal.html`, `mobile.html`).
+  - Purely a display/wording change - the underlying `IsRotationStart` property, `RotationHelpers` method names, and command bindings are unchanged, so this carries no behavioral risk.
+
+## [26.9.5.7] - 2026-09-05
+
+### Fixed
+- **KSRotation ("1st Singer" Round-Start Badge Missing Entirely After Seeding/Restore)**:
+  - `LoadTestData()` (demo/test-mode seed data) and `LoadDatabaseNow()` (restoring a saved night from `ksrotation_night_db.json` on startup) both populate `Singers` via a raw `Add()` loop that bypasses `RotationHelpers.InsertNewSinger` - the normal path that guarantees someone always holds the "🚩 1ST" round-start badge. With nobody holding it, and `_isInitializing` suppressing the usual reactive fallback during construction, a freshly-loaded rotation could end up with **no one** marked 1st at all.
+  - Both methods now call `RotationHelpers.EnsureRotationStartFlag(Singers)` after populating the list, which defaults the badge to whoever was entered first - matching the expectation that a fresh rotation's first singer is automatically the 1st singer, with the DJ still free to reassign it via the existing 🚩 toggle.
+  - Lyracist's equivalent seeding path (`RotationViewModel.SeedSingers()`) was checked too, but turned out to already be covered by its own reactive `Rotation.CollectionChanged` handler (which has no `_isInitializing`-style suppression) - added a regression test confirming that, rather than an unneeded code change.
+  - Added a regression test in `KSRotation.Tests` that reproduces the exact construction-time timing (flips `_isInitializing` back on before invoking `LoadTestData` via reflection) so it can't be papered over by the reactive fallback running anyway when called from a test.
 
 ## [26.9.5.6] - 2026-09-05
 

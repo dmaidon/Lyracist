@@ -101,7 +101,7 @@
                                     BackgroundColor="#DC2626"
                                     StrokeThickness="0"
                                     Padding="8,2">
-                                <Label Text="🚩 1ST" FontSize="11" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                                <Label Text="⚓ ANCHOR" FontSize="11" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
                             </Border>
                         </HorizontalStackLayout>
 
@@ -153,7 +153,7 @@
                                     BackgroundColor="#DC2626"
                                     StrokeThickness="0"
                                     Padding="8,2">
-                                <Label Text="🚩 1ST" FontSize="10" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                                <Label Text="⚓ ANCHOR" FontSize="10" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
                             </Border>
                         </HorizontalStackLayout>
 
@@ -217,7 +217,7 @@
                                                             StrokeThickness="0"
                                                             Padding="4,1"
                                                             VerticalOptions="Center">
-                                                        <Label Text="🚩 1ST" FontSize="9" FontAttributes="Bold" TextColor="White" />
+                                                        <Label Text="⚓ ANCHOR" FontSize="9" FontAttributes="Bold" TextColor="White" />
                                                     </Border>
                                                     <Label Text="{Binding DisplayNameWithDuet}"
                                                            FontSize="13"

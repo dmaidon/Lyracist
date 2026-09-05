@@ -1540,7 +1540,7 @@
                     </div>
                     <div class="new-signup-slot">
                         <span class="slot-sparkle">✨</span>
-                        <span>➕ You will be <strong>#1 (Round Start)</strong> in the rotation!</span>
+                        <span>➕ You will be <strong>#1 (Rotation Anchor)</strong> in the rotation!</span>
                     </div>
                 `;
                 return;
@@ -1557,7 +1557,7 @@
                 if (singer.isRotationStart) rowClasses += ' rotation-start';
 
                 if (singer.isRotationStart) {
-                    badgesHtml += '<span class="badge-tag start" title="1st Singer in Round">🚩 1st</span> ';
+                    badgesHtml += '<span class="badge-tag start" title="Rotation Anchor">⚓ Anchor</span> ';
                 }
 
                 if (singer.isMusic) {

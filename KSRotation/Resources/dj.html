@@ -1076,7 +1076,7 @@
                 let badges = '';
                 if (s.isRotationStart) {
                     cardClass += ' rotation-start';
-                    badges += '<span class="badge rotation-start" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>';
+                    badges += '<span class="badge rotation-start" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>';
                 }
                 if (s.isCurrent) {
                     cardClass += ' current';
@@ -1148,7 +1148,7 @@
                 const setStyle = (s.isInactive || s.isPaused) ? 'style="opacity:0.4; cursor:not-allowed;"' : '';
 
                 const setStartClicked = (s.isInactive || s.isPaused) ? '' : `onclick="sendAction('set-rotation-start', '${s.id}')"`;
-                const startTitle = s.isRotationStart ? "1st Singer (Round Start Anchor)" : "Set as 1st Singer (Round Start)";
+                const startTitle = s.isRotationStart ? "Rotation Anchor (marks where a round begins)" : "Set as Rotation Anchor";
 
                 const deleteHtml = s.isInactive
                     ? `<button class="btn-text resume" title="Restore" onclick="sendAction('restore', '${s.id}')">↺ Restore</button>`
@@ -1174,7 +1174,7 @@
                             </div>
                             <div class="actions-container">
                                 <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
-                                <button class="btn-circle red" title="${startTitle}" ${setStartClicked} ${setStyle}>🚩</button>
+                                <button class="btn-circle red" title="${startTitle}" ${setStartClicked} ${setStyle}>⚓</button>
                                 <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
                                 <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
                                 <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>

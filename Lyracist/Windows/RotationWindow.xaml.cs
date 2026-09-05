@@ -643,7 +643,7 @@ public partial class RotationWindow : Window, ICaptureSource
                 Margin = new Thickness(0, 0, 0, 6)
             });
 
-            string nameText = entry.IsRotationStart ? $"\U0001F6A9 {entry.Name}" : entry.Name;
+            string nameText = entry.IsRotationStart ? $"⚓ {entry.Name}" : entry.Name;
             if (entry.EstimatedWaitMinutes > 0)
             {
                 nameText += $" {{{entry.EstimatedWaitMinutes}}}";

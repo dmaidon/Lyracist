@@ -1680,6 +1680,39 @@ public class MainViewModelTests
         Assert.False(sungSinger.IsNext);
         Assert.True(eligible.IsNext);
     }
+
+    [Fact]
+    public void LoadTestData_MarksFirstSeededSingerAsRotationStart()
+    {
+        // Regression test: LoadTestData used to populate Singers via a raw Add() loop with no
+        // RotationHelpers.EnsureRotationStartFlag call afterward, so nobody ended up holding the
+        // "1st singer" (IsRotationStart) badge at all — the same bug pattern LoadDatabaseNow (session
+        // restore) had. The DJ expects whoever was entered first to automatically be the 1st singer.
+        //
+        // LoadTestData genuinely runs from inside the constructor while _isInitializing is still
+        // true, which suppresses OnSingersCollectionChanged's own reactive EnsureRotationStartFlag
+        // call - so invoking LoadTestData via reflection *after* construction (when _isInitializing
+        // is already false) would let that reactive safety net paper over the bug and pass either
+        // way. Flip _isInitializing back to true first to reproduce the real timing.
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+
+        var isInitializingField = typeof(KSRotation.ViewModels.MainViewModel).GetField(
+            "_isInitializing",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        isInitializingField.SetValue(vm, true);
+
+        var method = typeof(KSRotation.ViewModels.MainViewModel).GetMethod(
+            "LoadTestData",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        method.Invoke(vm, null);
+
+        isInitializingField.SetValue(vm, false);
+
+        Assert.NotEmpty(vm.Singers);
+        Assert.Single(vm.Singers, s => s.IsRotationStart);
+        Assert.True(vm.Singers[0].IsRotationStart);
+    }
 }
 
 

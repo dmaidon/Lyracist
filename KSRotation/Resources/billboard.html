@@ -542,7 +542,7 @@
             <div class="card-now-performing" id="now-performing-card">
                 <div class="spotlight-badge badge-now">🎙️ Now Performing</div>
                 <div class="now-performer-name">
-                    <span class="rotation-start-badge" id="now-rotation-start-badge" style="display: none;" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>
+                    <span class="rotation-start-badge" id="now-rotation-start-badge" style="display: none;" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>
                     <span id="now-singer-name">Stage is Open</span>
                     <span class="now-duet-tag" id="now-duet-tag" style="display: none;"></span>
                 </div>
@@ -556,7 +556,7 @@
             <div class="card-up-next" id="up-next-card">
                 <div class="spotlight-badge badge-next">⏭️ Up Next</div>
                 <div class="next-performer-name">
-                    <span class="rotation-start-badge" id="next-rotation-start-badge" style="display: none;" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>
+                    <span class="rotation-start-badge" id="next-rotation-start-badge" style="display: none;" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>
                     <span id="next-singer-name">Ready for singers</span>
                     <span class="now-duet-tag" id="next-duet-tag" style="display: none;"></span>
                 </div>
@@ -780,7 +780,7 @@
                     const songDesc = s.isMusic ? "♪ Background Music" : (s.song ? `"${escapeHtml(s.song)}"${s.artist ? ' by ' + escapeHtml(s.artist) : ''}` : "Choosing a song");
                     const pausedClass = s.isPaused ? ' style="opacity: 0.6;"' : '';
                     const pausedBadge = s.isPaused ? ' <span style="font-size:0.7rem; background:#64748B; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">PAUSED</span>' : '';
-                    const rotationStartBadge = s.isRotationStart ? '<span class="rotation-start-badge" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>' : '';
+                    const rotationStartBadge = s.isRotationStart ? '<span class="rotation-start-badge" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>' : '';
 
                     html += `
                         <div class="queue-row"${pausedClass}>

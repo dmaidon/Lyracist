@@ -497,4 +497,21 @@ public class KaraokeRotationRegressionTests
         Assert.True(carol.IsNext);
         Assert.Equal("Carol", karaokeVm.NextUpName);
     }
+
+    [Fact]
+    public void SeedSingers_MarksFirstSeededSingerAsRotationStart()
+    {
+        // A fresh rotation should always have exactly one singer holding the "1st singer"
+        // (IsRotationStart) badge - defaulting to whoever was entered first, with the DJ free to
+        // change it afterward. SeedSingers populates Rotation via a raw Add() loop rather than
+        // RotationHelpers.InsertNewSinger (which enforces this itself), so this checks the
+        // invariant still holds for that path too.
+        var rotationVm = CreateRotationViewModel();
+
+        rotationVm.SeedSingers();
+
+        Assert.NotEmpty(rotationVm.Rotation);
+        Assert.Single(rotationVm.Rotation, s => s.IsRotationStart);
+        Assert.True(rotationVm.Rotation[0].IsRotationStart);
+    }
 }
