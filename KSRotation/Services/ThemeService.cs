@@ -1,4 +1,4 @@
-// Edited on Aug 12, 2026 @ 06:32:00 -> Set high-contrast LightBodyOverride and LightBodyLightOverride brushes in ThemeService for Light Mode legibility
+// Edited on Sep 4, 2026 @ 23:25:00 -> Set MaterialDesign.Brush.Foreground overrides in ThemeService for Dark and Light theme text visibility
 using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using System.Windows.Media;
@@ -15,6 +15,8 @@ namespace KSRotation.Services
         private const string MaterialDesignCardBackgroundKey = "MaterialDesignCardBackground";
         private const string MaterialDesignBodyKey = "MaterialDesignBody";
         private const string MaterialDesignBodyLightKey = "MaterialDesignBodyLight";
+        private const string MaterialDesignForegroundBrushKey = "MaterialDesign.Brush.Foreground";
+        private const string MaterialDesignForegroundLightBrushKey = "MaterialDesign.Brush.Foreground.Light";
         private const string AppContrastTextBrushKey = "AppContrastTextBrush";
         private const string AppHeaderBrushKey = "AppHeaderBrush";
         private const string AppSplitFlapBackgroundBrushKey = "AppSplitFlapBackgroundBrush";
@@ -135,6 +137,8 @@ namespace KSRotation.Services
                 resources[MaterialDesignCardBackgroundKey] = DarkCardOverride;
                 resources[MaterialDesignBodyKey] = DarkBodyOverride;
                 resources[MaterialDesignBodyLightKey] = DarkBodyLightOverride;
+                resources[MaterialDesignForegroundBrushKey] = DarkBodyOverride;
+                resources[MaterialDesignForegroundLightBrushKey] = DarkBodyLightOverride;
                 resources[AppContrastTextBrushKey] = DarkContrastTextOverride;
                 resources[AppHeaderBrushKey] = DarkHeaderOverride;
                 resources[AppSplitFlapBackgroundBrushKey] = DarkSplitFlapBackgroundOverride;
@@ -152,6 +156,8 @@ namespace KSRotation.Services
             resources.Remove(MaterialDesignCardBackgroundKey);
             resources[MaterialDesignBodyKey] = LightBodyOverride;
             resources[MaterialDesignBodyLightKey] = LightBodyLightOverride;
+            resources[MaterialDesignForegroundBrushKey] = LightBodyOverride;
+            resources[MaterialDesignForegroundLightBrushKey] = LightBodyLightOverride;
             resources[AppContrastTextBrushKey] = LightContrastTextOverride;
             resources[AppHeaderBrushKey] = LightHeaderOverride;
             resources[AppSplitFlapBackgroundBrushKey] = LightSplitFlapBackgroundOverride;

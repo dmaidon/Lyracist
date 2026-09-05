@@ -1,9 +1,24 @@
-<!-- Edited on Sep 4, 2026 @ 09:15:00 -> Fix Last Round mode being silently ignored in several rotation-advance code paths -->
-Last Edit: Sep 4, 2026 - Last Round rotation option & audience billboard announcements across Lyracist, KSRotation, and KSRotation.Maui
+<!-- Edited on Sep 5, 2026 @ 08:48:00 -> Release 26.9.5.0: KSRotation dark mode contrast fixes and Lyracist TriviaPage sizing enhancements -->
+Last Edit: Sep 5, 2026 - KSRotation dark mode text contrast fixes & Lyracist TriviaPage sizing enhancements
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.0] - 2026-09-05
+
+### Changed
+- **Lyracist (Trivia Page UI Sizing)**:
+  - Increased Category Pack(s) selection ListBox height (`MinHeight="160"`, `MaxHeight="200"`, `Height="160"`) on `TriviaPage.xaml` so more trivia packs are visible simultaneously without requiring tight scrolling.
+  - Increased the Patron Mobile Portal URL TextBox height (`Height="35"`) and label container for improved readability and touch target sizing.
+
+### Fixed
+- **KSRotation (Dark Mode Text Contrast on Trivia Settings & Trivia Pages)**:
+  - Fixed nearly illegible/black text when running in Dark Mode across the Trivia Settings tab and Live Trivia console (`MainWindow.xaml`).
+  - Switched Window root foreground, `GridTextBoxStyle`, `ModernTextBoxStyle`, `ModernCompactTextBoxStyle`, `ModernCheckBoxStyle`, and explicit CheckBox foregrounds from `MaterialDesignBody` to `AppContrastTextBrush` (`#EEF2F7` in dark mode, `#1E293B` in light mode).
+  - Added `TextElement.Foreground="{DynamicResource AppContrastTextBrush}"` to the Trivia Settings root grid.
+  - Added `MaterialDesign.Brush.Foreground` and `MaterialDesign.Brush.Foreground.Light` theme brush overrides in `ThemeService.cs` ensuring proper foreground resolution in dark mode.
+  - Styled Questions-Per-Game and question-jump ComboBoxes, and swapped Round Title and Patron Portal text from unthemed `PrimaryHueMidBrush` to `AppHeaderBrush` for uniform contrast.
 
 ## [26.9.4.0] - 2026-09-04
 

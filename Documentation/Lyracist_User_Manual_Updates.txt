@@ -1107,3 +1107,14 @@ A unified "Last Round" mode has been introduced across Lyracist, KSRotation (WPF
    - On the DJ host console and Remote DJ screen (`dj.html`), completed performers remain visible with an emerald `DONE (LAST ROUND)` indicator badge for verification.
 
 
+Section: KSRotation & Lyracist / Dark Mode Contrast Fix & TriviaPage UI Sizing
+
+[Dark Mode Text Contrast & Trivia Pack Sizing]
+1. KSRotation Dark Mode Text Contrast Fix:
+   - Fixed an issue where labels and field headers across the Trivia and Trivia Settings tabs appeared in black/illegible text against dark card backgrounds when operating in Dark Mode.
+   - Replaced unthemed and fallback body brushes with `AppContrastTextBrush` across root grids, text box styles, compact text box styles, check box styles, and explicit control headers in `MainWindow.xaml`.
+   - Enhanced `ThemeService.cs` with dynamic resource mappings for `MaterialDesign.Brush.Foreground` and `MaterialDesign.Brush.Foreground.Light` to maintain crisp, high-contrast readability across all theme selections (Light, Dark, System).
+
+2. Lyracist Live Trivia Pack List Sizing:
+   - Increased the visible height of the Category Pack(s) multi-selection ListBox on `TriviaPage.xaml` (MinHeight 160, MaxHeight 200) to allow viewing more loaded packs simultaneously without excessive scrolling.
+   - Increased the height of the Patron Mobile Portal URL box for clearer touch targets and high-DPI display legibility.

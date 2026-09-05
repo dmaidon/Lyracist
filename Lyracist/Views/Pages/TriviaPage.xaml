@@ -1,4 +1,4 @@
-<!-- Edited on Aug 20, 2026 @ 13:58:00 -> Bound Auto-Run timing summary to AutoRunTimingSummary -->
+<!-- Edited on Sep 5, 2026 @ 08:45:00 -> Increase question packs ListBox height and patron portal TextBox sizing for enhanced legibility -->
 <Page x:Class="Lyracist.Views.Pages.TriviaPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -103,7 +103,7 @@
                         <TextBlock Text="Select Category Pack(s) — check 2+ to mix:" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AppTextPrimaryBrush}" Margin="0,0,0,3" TextWrapping="Wrap" />
                         <Border Background="{DynamicResource AppBackgroundBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Margin="0,0,0,8">
                             <Grid>
-                                <ListBox ItemsSource="{Binding SelectablePacks}" MinHeight="90" MaxHeight="140" ScrollViewer.VerticalScrollBarVisibility="Auto" BorderThickness="0" Background="Transparent">
+                                <ListBox ItemsSource="{Binding SelectablePacks}" MinHeight="160" MaxHeight="200" ScrollViewer.VerticalScrollBarVisibility="Auto" BorderThickness="0" Background="Transparent" Height="160">
                                     <ListBox.ItemContainerStyle>
                                         <Style TargetType="ListBoxItem">
                                             <Setter Property="Focusable" Value="False" />
@@ -174,8 +174,8 @@
                         <!-- Patron Join URL & Server Info -->
                         <Border Background="{DynamicResource AppBackgroundBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8">
                             <StackPanel>
-                                <TextBlock Text="📱 Patron Mobile Portal" FontWeight="SemiBold" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,2" />
-                                <TextBox Text="{Binding PatronUrl}" IsReadOnly="True" FontSize="11" Foreground="#38BDF8" Height="26" Margin="0,0,0,3" />
+                                <TextBlock Text="📱 Patron Mobile Portal" FontWeight="SemiBold" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" Margin="0,0,0,2" Height="20" />
+                                <TextBox Text="{Binding PatronUrl}" IsReadOnly="True" FontSize="11" Foreground="#38BDF8" Height="35" Margin="0,0,0,3" />
                                 <TextBlock Text="{Binding ServerStatusText}" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" />
                                 <TextBlock Text="{Binding PauseReason, StringFormat='⏸ PAUSED: {0}'}" Foreground="#EF4444" FontWeight="Bold" FontSize="10" Margin="0,2,0,0"
                                            Visibility="{Binding IsPaused, Converter={StaticResource BoolToVis}}" />
