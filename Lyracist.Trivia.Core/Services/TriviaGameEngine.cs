@@ -209,7 +209,7 @@ public class TriviaGameEngine : IDisposable
             QuestionStarted?.Invoke(this, q);
 
             _tickTimer.Stop();
-            if (startTimerImmediately)
+            if (startTimerImmediately && !IsPaused)
             {
                 _tickTimer.Start();
             }
@@ -423,7 +423,10 @@ public class TriviaGameEngine : IDisposable
                 SetState(TriviaGameState.EliminatingAnswers);
                 AnswersEliminated?.Invoke(this, [.. EliminatedAnswerIndices]);
 
-                _tickTimer.Start();
+                if (!IsPaused)
+                {
+                    _tickTimer.Start();
+                }
             }
             else
             {
@@ -454,7 +457,10 @@ public class TriviaGameEngine : IDisposable
         AnswerRevealed?.Invoke(this, q);
         LeaderboardUpdated?.Invoke(this, GetPlayers());
 
-        _tickTimer.Start();
+        if (!IsPaused)
+        {
+            _tickTimer.Start();
+        }
     }
 
     public void ShowLeaderboard()
@@ -465,7 +471,10 @@ public class TriviaGameEngine : IDisposable
             _leaderboardCountdownSeconds = 8;
             SetState(TriviaGameState.RoundLeaderboard);
             LeaderboardUpdated?.Invoke(this, GetPlayers());
-            _tickTimer.Start();
+            if (!IsPaused)
+            {
+                _tickTimer.Start();
+            }
         }
     }
 
@@ -648,7 +657,10 @@ public class TriviaGameEngine : IDisposable
             SetState(TriviaGameState.QuestionActive);
             TimerTick?.Invoke(this, RemainingSeconds);
             AnswersEliminated?.Invoke(this, []);
-            _tickTimer.Start();
+            if (!IsPaused)
+            {
+                _tickTimer.Start();
+            }
         }
     }
 
@@ -670,7 +682,10 @@ public class TriviaGameEngine : IDisposable
         {
             IntermissionSecondsRemaining = Settings.NextGameDelayMinutes * 60;
             IntermissionTick?.Invoke(this, IntermissionSecondsRemaining);
-            _tickTimer.Start();
+            if (!IsPaused)
+            {
+                _tickTimer.Start();
+            }
         }
         else
         {

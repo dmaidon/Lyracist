@@ -444,6 +444,33 @@ public class GameEngineTests
     }
 
     [Fact]
+    public void PausedGame_ManualControlsDoNotSilentlyResumeCountdown()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        engine.PauseGame("DJ Break");
+        Assert.True(engine.IsPaused);
+
+        // These manual DJ controls all restart the internal question timer when NOT paused.
+        // While paused, none of them should silently resume ticking behind the "Resume" button.
+        engine.AdvanceToNextQuestion(startTimerImmediately: true);
+        engine.ResetQuestionTimer();
+        int remainingAfterCommands = engine.RemainingSeconds;
+
+        System.Threading.Thread.Sleep(1300);
+
+        Assert.True(engine.IsPaused);
+        Assert.Equal(remainingAfterCommands, engine.RemainingSeconds);
+
+        engine.ResumeGame();
+        System.Threading.Thread.Sleep(1300);
+
+        Assert.True(engine.RemainingSeconds < remainingAfterCommands);
+    }
+
+    [Fact]
     public void GameEngine_RespectsGameMasterCustomTimeLimit()
     {
         var settings = new TriviaSettings
