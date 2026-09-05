@@ -1,8 +1,23 @@
-// Edited on Sep 5, 2026 @ 16:20:00 -> Add EstimatedPerformanceSeconds/EstimatedWaitMinutes for rotation-screen wait-time badges
+// Edited on Sep 5, 2026 @ 18:30:00 -> Add Id/LinkedSingerId for Linked Singers (stay-adjacent rotation pairs)
+using System;
+
 namespace Lyracist.Shared
 {
     public interface IRotationSinger
     {
+        /// <summary>Stable identity, unique for the lifetime of this entry - used to reference a
+        /// linked partner reliably even if <c>Name</c> is edited later.</summary>
+        Guid Id { get; }
+
+        /// <summary>
+        /// When set, the <see cref="Id"/> of another entry this one is linked to - the pair always
+        /// stays adjacent in the rotation (see <see cref="RotationHelpers.EnforceLinkedAdjacency{T}"/>)
+        /// and no other singer can be inserted between them. A link is always mutual: if A is linked
+        /// to B, B.LinkedSingerId equals A.Id. Set/cleared via
+        /// <see cref="RotationHelpers.LinkSingers{T}"/>/<see cref="RotationHelpers.UnlinkSinger{T}"/>.
+        /// </summary>
+        Guid? LinkedSingerId { get; set; }
+
         bool IsCurrent { get; set; }
         bool IsNext { get; set; }
         bool IsInactive { get; set; }

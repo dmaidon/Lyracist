@@ -57,6 +57,21 @@ namespace KSRotation.Models
         /// Declared as <c>init</c> so JSON deserialization can round-trip it, while preventing accidental mutation in code.</summary>
         public Guid Id { get; init; } = Guid.NewGuid();
 
+        /// <summary>When set, the Id of another SingerEntry this one is linked to - the pair always
+        /// stays adjacent in the rotation and no other singer can be inserted between them. Set/cleared
+        /// via Lyracist.Shared.RotationHelpers.LinkSingers/UnlinkSinger.</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsLinked))]
+        public partial Guid? LinkedSingerId { get; set; }
+
+        public bool IsLinked => LinkedSingerId.HasValue;
+
+        /// <summary>Display-only convenience for the linked partner's current name - refreshed
+        /// whenever the rotation changes, since Name is mutable and isn't part of the shared
+        /// IRotationSinger interface.</summary>
+        [ObservableProperty]
+        public partial string LinkedPartnerName { get; set; } = string.Empty;
+
         public List<QueuedSong> QueuedSongs { get; set; } = [];
 
         private string _name = string.Empty;

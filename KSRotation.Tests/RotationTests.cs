@@ -458,6 +458,121 @@ public class RotationHelpersTests
         // Bob already sang this round and is skipped, so only Alice's 300s counts ahead of Charlie.
         Assert.Equal(5, charlie.EstimatedWaitMinutes);
     }
+
+    [Fact]
+    public void LinkSingers_SetsMutualLinkAndSnapsThemAdjacent_SingerEntryModel()
+    {
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, carol, bob };
+
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        Assert.Equal(bob.Id, alice.LinkedSingerId);
+        Assert.Equal(alice.Id, bob.LinkedSingerId);
+        Assert.True(alice.IsLinked);
+        Assert.True(bob.IsLinked);
+        Assert.Equal(1, list.IndexOf(bob));
+    }
+
+    [Fact]
+    public void LinkSingers_ReLinkingBreaksAnyPriorLinkOnEitherSide_SingerEntryModel()
+    {
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+
+        RotationHelpers.LinkSingers(list, alice, bob);
+        RotationHelpers.LinkSingers(list, alice, carol);
+
+        Assert.False(bob.IsLinked);
+        Assert.Equal(carol.Id, alice.LinkedSingerId);
+        Assert.Equal(alice.Id, carol.LinkedSingerId);
+    }
+
+    [Fact]
+    public void UnlinkSinger_ClearsBothSides_SingerEntryModel()
+    {
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob };
+
+        RotationHelpers.LinkSingers(list, alice, bob);
+        RotationHelpers.UnlinkSinger(list, alice);
+
+        Assert.False(alice.IsLinked);
+        Assert.False(bob.IsLinked);
+    }
+
+    [Fact]
+    public void EnforceLinkedAdjacency_PullsPartnerForwardWhenSingerLandsBetweenThem_SingerEntryModel()
+    {
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob };
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        var charlie = new SingerEntry { Name = "Charlie" };
+        list.Insert(1, charlie);
+        Assert.Equal(["Alice", "Charlie", "Bob"], list.Select(s => s.Name));
+
+        RotationHelpers.EnforceLinkedAdjacency(list);
+
+        Assert.Equal(["Alice", "Bob", "Charlie"], list.Select(s => s.Name));
+    }
+
+    [Fact]
+    public void EnforceLinkedAdjacency_NoOpWhenAlreadyAdjacent_SingerEntryModel()
+    {
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob, carol };
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        RotationHelpers.EnforceLinkedAdjacency(list);
+
+        Assert.Equal(["Alice", "Bob", "Carol"], list.Select(s => s.Name));
+    }
+
+    [Fact]
+    public void EnforceLinkedAdjacency_StillEnforcedWhenPartnerIsPaused_SingerEntryModel()
+    {
+        // A paused linked singer keeps its place and is just skipped over - it does NOT exempt the
+        // pair from staying adjacent.
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob", IsPaused = true };
+        var list = new ObservableCollection<SingerEntry> { alice, bob };
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        var charlie = new SingerEntry { Name = "Charlie" };
+        list.Insert(1, charlie);
+
+        RotationHelpers.EnforceLinkedAdjacency(list);
+
+        Assert.Equal(["Alice", "Bob", "Charlie"], list.Select(s => s.Name));
+    }
+
+    [Fact]
+    public void EnforceLinkedAdjacency_DoesNotPullAnInactivePartnerBack_SingerEntryModel()
+    {
+        // Marking one half of a pair inactive ("out for the night") is different from pausing -
+        // the still-active partner should NOT be forced to relocate next to a retired singer.
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var list = new ObservableCollection<SingerEntry> { alice, bob };
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        var charlie = new SingerEntry { Name = "Charlie" };
+        list.Insert(1, charlie);
+        bob.IsInactive = true;
+
+        RotationHelpers.EnforceLinkedAdjacency(list);
+
+        Assert.Equal(["Alice", "Charlie", "Bob"], list.Select(s => s.Name));
+    }
 }
 
 // ---------------------------------------------------------------------------

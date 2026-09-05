@@ -1154,3 +1154,20 @@ Section: Lyracist & KSRotation & KSRotation.Maui / Estimated Wait Time on Rotati
    - Recalculated automatically the instant a singer is marked finished, so the estimate for everyone still waiting stays current all night.
    - Appears on Lyracist's Rotation Window (queue list, Star Wars Crawl, and scrolling banner), KSRotation's Singer Display Window (all three projection styles), and KSRotation.Maui's Billboard view.
 
+Section: Lyracist & KSRotation & KSRotation.Maui / Linked Singers
+
+[Two Singers, One Slot in Line]
+1. Linking Two Singers:
+   - Click the 🔗 button on a singer, then click 🔗 on a second singer, to link them together - a blue "🔗 [partner name]" badge appears next to both names.
+   - Once linked, the two always stay adjacent in the rotation for the rest of the night: no other singer can land between them, whether from a new signup, a drag/drop reorder, the Move Up/Down buttons, or the rotation advancing after someone finishes their song.
+   - Click 🔗 again on either linked singer to unlink them. Linking a singer who is already linked to someone else automatically breaks that old link first - a singer can only be linked to one partner at a time.
+   - Clicking 🔗 on a singer, then clicking 🔗 on that SAME singer again (instead of a different one), cancels the pending link without linking anyone.
+2. Linked Singers and Pause/Inactive:
+   - Pausing one half of a linked pair does not break the link and does not move it out of place - a paused singer simply keeps its spot and is skipped over when its turn comes, exactly like any other paused singer, and its partner still stays right next to it.
+   - Marking one half of a pair Inactive ("out for the night") is different: the still-active partner is NOT forced to follow the retired singer down into the inactive section.
+3. Where to Link:
+   - Lyracist: a 🔗 button next to each singer's Pause/Inactive buttons on the Rotation page.
+   - KSRotation: right-click a singer in the rotation list for a "🔗 Link With Another Singer" / "🔗 Unlink Singer" menu option.
+   - KSRotation.Maui: a 🔗 button in each singer's action row on the main rotation screen.
+   - Not yet available: automatically linking two singers who sign up together from the patron/kiosk request app - for now, linking is a DJ action performed after both singers are already in the rotation.
+

@@ -132,6 +132,7 @@
             <Grid Grid.Column="1" Margin="6,0,6,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -182,7 +183,16 @@
                     </StackPanel>
                 </Grid>
 
-                <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="6">
+                <!-- Pending Link Banner -->
+                <Border Grid.Row="1" Background="#1E3A5F" BorderBrush="#0EA5E9" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,8"
+                        Visibility="{Binding HasPendingLinkSinger, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding PendingLinkSinger.Name, StringFormat='🔗 Click another singer to link with {0}, or click their 🔗 button again to cancel.'}" Foreground="#0EA5E9" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <ui:Button Content="Cancel" Command="{Binding CancelPendingLinkCommand}" Appearance="Secondary" Margin="12,0,0,0" Padding="8,2"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="2" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="6">
                     <ListBox ItemsSource="{Binding Rotation}" SelectedItem="{Binding SelectedSinger}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
@@ -261,6 +271,10 @@
                                                 </Border>
                                                 <Border Visibility="{Binding HasSungInLastRound, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#5C1010" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Singer has completed their song in the last round">
                                                     <TextBlock Text="DONE (LAST ROUND)" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                                                </Border>
+                                                <Border Visibility="{Binding IsLinked, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#1E3A5F" BorderBrush="#0EA5E9" BorderThickness="1" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center"
+                                                        ToolTip="{Binding LinkedPartnerName, StringFormat='Linked with {0} - always stays adjacent in the rotation'}">
+                                                    <TextBlock Text="{Binding LinkedPartnerName, StringFormat='🔗 {0}'}" FontSize="9" FontWeight="ExtraBold" Foreground="#0EA5E9"/>
                                                 </Border>
 
                                                 <!-- Separator and song info only if there is a song loaded -->
@@ -352,12 +366,32 @@
                                             </ui:Button>
                                             
                                             <!-- Inactive Button -->
-                                            <ui:Button Icon="{ui:SymbolIcon Dismiss20}" 
-                                                       Command="{Binding DataContext.ToggleInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
-                                                       CommandParameter="{Binding}" 
-                                                       Appearance="Secondary" 
+                                            <ui:Button Icon="{ui:SymbolIcon Dismiss20}"
+                                                       Command="{Binding DataContext.ToggleInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                       CommandParameter="{Binding}"
+                                                       Appearance="Secondary"
                                                        Padding="4"
+                                                       Margin="0,0,2,0"
                                                        ToolTip="Set performer inactive (removes from active rotation)"/>
+
+                                            <!-- Link/Unlink Button -->
+                                            <ui:Button Icon="{ui:SymbolIcon Link20}"
+                                                       Command="{Binding DataContext.ToggleLinkSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                       CommandParameter="{Binding}"
+                                                       Padding="4">
+                                                <ui:Button.Style>
+                                                    <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                                        <Setter Property="Appearance" Value="Secondary" />
+                                                        <Setter Property="ToolTip" Value="Link with another singer - they'll always stay adjacent in the rotation and can't be split apart" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsLinked}" Value="True">
+                                                                <Setter Property="Appearance" Value="Success" />
+                                                                <Setter Property="ToolTip" Value="{Binding LinkedPartnerName, StringFormat='Linked to {0} - click to unlink'}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ui:Button.Style>
+                                            </ui:Button>
                                         </StackPanel>
                                     </Grid>
                                 </Border>

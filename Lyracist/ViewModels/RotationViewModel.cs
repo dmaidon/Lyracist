@@ -564,6 +564,8 @@ public partial class RotationViewModel : BaseViewModel
             IsMusic = isMusic
         };
         RotationHelpers.InsertNewSinger(Rotation, newSinger);
+        Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+        RefreshLinkedPartnerNames();
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
@@ -583,6 +585,8 @@ public partial class RotationViewModel : BaseViewModel
             Key = NewSingerKey
         };
         RotationHelpers.InsertNewSinger(Rotation, newSinger);
+        Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+        RefreshLinkedPartnerNames();
 
         // Reset input properties
         NewSingerName = string.Empty;
@@ -647,6 +651,9 @@ public partial class RotationViewModel : BaseViewModel
             }
 
             Rotation.Remove(removed);
+            Lyracist.Shared.RotationHelpers.UnlinkSinger(Rotation, removed);
+            RefreshLinkedPartnerNames();
+            if (PendingLinkSinger == removed) PendingLinkSinger = null;
             Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
             SelectedSinger = null;
 
@@ -844,6 +851,10 @@ public partial class RotationViewModel : BaseViewModel
             RunRotationOrderChange(() =>
                 Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop, isLastRound: IsLastRound));
             Rotation.Remove(singer);
+            Lyracist.Shared.RotationHelpers.UnlinkSinger(Rotation, singer);
+            if (PendingLinkSinger == singer) PendingLinkSinger = null;
+            Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+            RefreshLinkedPartnerNames();
             ResolveEstimatedPerformanceSeconds();
             Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound);
             RotationStateChanged?.Invoke();
@@ -904,11 +915,93 @@ public partial class RotationViewModel : BaseViewModel
             RefreshSelectedSingerQueue();
         }
 
+        // The link itself persists across songs (linked singers stay paired for the night, not just
+        // one song) - just make sure floating the finished singer to the bottom (Last Round /
+        // float-to-top mode) didn't separate them from their partner.
+        Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+        RefreshLinkedPartnerNames();
+
         ResolveEstimatedPerformanceSeconds();
         Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound);
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
+    }
+
+    /// <summary>
+    /// Singer the DJ has clicked "Link" on, waiting for a second click on the singer to link them
+    /// with. Null when no link is pending.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPendingLinkSinger))]
+    private Singer? _pendingLinkSinger;
+
+    public bool HasPendingLinkSinger => PendingLinkSinger != null;
+
+    [RelayCommand]
+    private void CancelPendingLink() => PendingLinkSinger = null;
+
+    /// <summary>
+    /// Two-click linking: clicking "Link" on a singer with nothing pending arms it as the pending
+    /// half of a pair; clicking a second (different) singer completes the link. Clicking the pending
+    /// singer again cancels. Clicking an already-linked singer unlinks it instead. See
+    /// <see cref="Lyracist.Shared.RotationHelpers.LinkSingers{T}"/>/<see cref="Lyracist.Shared.RotationHelpers.UnlinkSinger{T}"/>.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleLinkSinger(Singer singer)
+    {
+        if (singer == null) return;
+
+        if (singer.IsLinked)
+        {
+            Lyracist.Shared.RotationHelpers.UnlinkSinger(Rotation, singer);
+            RefreshLinkedPartnerNames();
+            if (PendingLinkSinger == singer) PendingLinkSinger = null;
+            RotationStateChanged?.Invoke();
+            _display.UpdateRotation([.. Rotation]);
+            return;
+        }
+
+        if (PendingLinkSinger == null)
+        {
+            PendingLinkSinger = singer;
+            return;
+        }
+
+        if (PendingLinkSinger == singer)
+        {
+            PendingLinkSinger = null;
+            return;
+        }
+
+        Lyracist.Shared.RotationHelpers.LinkSingers(Rotation, PendingLinkSinger, singer);
+        RefreshLinkedPartnerNames();
+        PendingLinkSinger = null;
+
+        RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
+    }
+
+    /// <summary>
+    /// Refreshes every linked singer's <see cref="Singer.LinkedPartnerName"/> display convenience
+    /// from the current rotation. Name isn't part of the shared IRotationSinger interface, so this
+    /// lookup has to happen here rather than in RotationHelpers - call it after anything that could
+    /// change link state, rotation membership, or a linked singer's Name.
+    /// </summary>
+    private void RefreshLinkedPartnerNames()
+    {
+        foreach (var s in Rotation)
+        {
+            if (s.LinkedSingerId.HasValue)
+            {
+                var partner = Rotation.FirstOrDefault(p => p.Id == s.LinkedSingerId.Value);
+                s.LinkedPartnerName = partner?.Name ?? string.Empty;
+            }
+            else if (!string.IsNullOrEmpty(s.LinkedPartnerName))
+            {
+                s.LinkedPartnerName = string.Empty;
+            }
+        }
     }
 
     /// <summary>
@@ -976,6 +1069,13 @@ public partial class RotationViewModel : BaseViewModel
             && SelectedSinger != null && SelectedSinger.Name.Equals(oldName, StringComparison.OrdinalIgnoreCase))
         {
             RefreshSelectedSingerQueue();
+        }
+
+        // A renamed singer's partner (if any) displays LinkedPartnerName as a plain string
+        // snapshot, not a live lookup - refresh it so the partner's badge doesn't go stale.
+        if (!singer.Name.Equals(oldName, StringComparison.OrdinalIgnoreCase))
+        {
+            RefreshLinkedPartnerNames();
         }
 
         RotationStateChanged?.Invoke();
@@ -1133,6 +1233,11 @@ public partial class RotationViewModel : BaseViewModel
 
     public void NotifyRotationReordered()
     {
+        // A manual drag/drop reorder could have dropped a singer between a linked pair (or dragged
+        // one half of a pair away from the other) - snap the pair back adjacent before notifying.
+        Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+        RefreshLinkedPartnerNames();
+
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
     }

@@ -597,6 +597,117 @@ namespace Lyracist.Shared
             }
             return list;
         }
+
+        /// <summary>
+        /// Links <paramref name="a"/> and <paramref name="b"/> so they always stay adjacent in the
+        /// rotation (see <see cref="EnforceLinkedAdjacency{T}"/>) and no other singer can land
+        /// between them. Breaks any existing link either one already has first, so an entry is
+        /// never linked to more than one partner at a time. Immediately snaps the pair adjacent.
+        /// </summary>
+        public static void LinkSingers<T>(IList<T> singers, T a, T b) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            ArgumentNullException.ThrowIfNull(a);
+            ArgumentNullException.ThrowIfNull(b);
+            if (a == b) return;
+
+            UnlinkSinger(singers, a);
+            UnlinkSinger(singers, b);
+
+            a.LinkedSingerId = b.Id;
+            b.LinkedSingerId = a.Id;
+
+            EnforceLinkedAdjacency(singers);
+        }
+
+        /// <summary>
+        /// Clears <paramref name="entry"/>'s link, if any, and the reciprocal link on its partner
+        /// (found by <see cref="IRotationSinger.LinkedSingerId"/>) so no dangling one-sided link remains.
+        /// </summary>
+        public static void UnlinkSinger<T>(IList<T> singers, T entry) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            ArgumentNullException.ThrowIfNull(entry);
+
+            if (!entry.LinkedSingerId.HasValue) return;
+
+            Guid partnerId = entry.LinkedSingerId.Value;
+            entry.LinkedSingerId = null;
+
+            foreach (T s in singers)
+            {
+                if (s.Id == partnerId)
+                {
+                    s.LinkedSingerId = null;
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Restores adjacency for every linked pair in <paramref name="singers"/>: whenever a linked
+        /// entry's partner isn't sitting immediately next to it, moves the partner to close the gap
+        /// (preserving which of the two was ahead of the other). Call this after any operation that
+        /// can reorder the list - inserting a new singer, manual drag/drop reorder, move up/down, or
+        /// advancing the rotation - so a linked pair can never end up with another singer wedged
+        /// between them. A partner no longer present in <paramref name="singers"/> (removed/retired
+        /// for the night) is left alone; nothing to enforce. Pausing a linked singer does NOT exempt
+        /// it here - a paused singer keeps its place and is simply skipped over, same as any other
+        /// paused singer, so its partner still needs to stay adjacent to it. Marking one half
+        /// <see cref="IRotationSinger.IsInactive"/> ("out for the night") is different: that singer
+        /// is effectively leaving the rotation, so its still-active partner is NOT forced to follow
+        /// it - adjacency is only enforced while both halves of the pair are still active.
+        /// </summary>
+        public static void EnforceLinkedAdjacency<T>(IList<T> singers) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+
+            var handled = new HashSet<T>();
+            for (int i = 0; i < singers.Count; i++)
+            {
+                T entry = singers[i];
+                if (!entry.LinkedSingerId.HasValue || handled.Contains(entry) || entry.IsInactive) continue;
+
+                T? partner = null;
+                int partnerIndex = -1;
+                for (int j = 0; j < singers.Count; j++)
+                {
+                    if (j != i && singers[j].Id == entry.LinkedSingerId.Value)
+                    {
+                        partner = singers[j];
+                        partnerIndex = j;
+                        break;
+                    }
+                }
+
+                if (partner == null || partner.IsInactive)
+                {
+                    handled.Add(entry);
+                    continue;
+                }
+
+                int entryIndex = singers.IndexOf(entry);
+                if (Math.Abs(partnerIndex - entryIndex) != 1)
+                {
+                    // MoveSingerInList's newIndex must already be the post-removal index: when
+                    // partnerIndex < entryIndex the removal happens before entry's position, so
+                    // entry (and the "immediately before it" slot) shifts down by one; when
+                    // partnerIndex > entryIndex, removal happens after entry so its position is
+                    // unaffected and the "immediately after it" slot is entryIndex + 1 as-is.
+                    if (partnerIndex < entryIndex)
+                    {
+                        MoveSingerInList(singers, partnerIndex, entryIndex - 1);
+                    }
+                    else
+                    {
+                        MoveSingerInList(singers, partnerIndex, entryIndex + 1);
+                    }
+                }
+
+                handled.Add(entry);
+                handled.Add(partner);
+            }
+        }
     }
 }
 

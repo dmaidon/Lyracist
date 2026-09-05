@@ -1,10 +1,27 @@
-// Edited on Sep 3, 2026 @ 23:55:00 -> Add HasSungInLastRound property to Singer
+// Edited on Sep 5, 2026 @ 18:30:00 -> Add Id/LinkedSingerId for Linked Singers (stay-adjacent rotation pairs)
+using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Lyracist.Models;
 
 public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
 {
+    /// <summary>Stable identity assigned once at construction; never changes even when Name is
+    /// edited. Used to reference a linked partner reliably.</summary>
+    public Guid Id { get; init; } = Guid.NewGuid();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLinked))]
+    private Guid? _linkedSingerId;
+
+    public bool IsLinked => LinkedSingerId.HasValue;
+
+    /// <summary>Display-only convenience for the linked partner's current name - refreshed by
+    /// RotationViewModel.RefreshLinkedPartnerNames() whenever the rotation changes, since Name is
+    /// mutable and isn't part of the shared IRotationSinger interface.</summary>
+    [ObservableProperty]
+    private string _linkedPartnerName = string.Empty;
+
     [ObservableProperty]
     private string _email = string.Empty;
 

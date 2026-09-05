@@ -122,9 +122,12 @@
                                                     </Label.Triggers>
                                                 </Label>
 
-                                                <!-- Indicator badges (1st Singer [Red], Now Singing [Orange], Next [Blue], Music [Green]) -->
+                                                <!-- Indicator badges (1st Singer [Red], Now Singing [Orange], Next [Blue], Music [Green], Linked [Blue]) -->
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#DC2626" Padding="4,2" IsVisible="{Binding IsRotationStart}" StrokeThickness="0" ToolTipProperties.Text="1st Singer in Rotation (Round Start)">
                                                     <Label Text="🚩 1ST" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                                                </Border>
+                                                <Border StrokeShape="RoundRectangle 4" BackgroundColor="#1E3A5F" Stroke="#0EA5E9" StrokeThickness="1" Padding="4,2" IsVisible="{Binding IsLinked}" ToolTipProperties.Text="{Binding LinkedPartnerName, StringFormat='Linked with {0} - always stays adjacent in the rotation'}">
+                                                    <Label Text="{Binding LinkedPartnerName, StringFormat='🔗 {0}'}" TextColor="#0EA5E9" FontSize="9" FontAttributes="Bold" />
                                                 </Border>
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#F97316" Padding="4,2" IsVisible="{Binding IsCurrent}" StrokeThickness="0">
                                                     <Label Text="NOW PERFORMING" TextColor="White" FontSize="9" FontAttributes="Bold" />
@@ -258,6 +261,17 @@
                                             <!-- Up/Down buttons -->
                                             <Button Text="▲" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerUpCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="18" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
                                             <Button Text="▼" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=MoveSingerDownCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="18" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" />
+
+                                            <!-- Link/Unlink with another singer -->
+                                            <Button Text="🔗" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=ToggleLinkSingerCommand}" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#0EA5E9" BorderWidth="1" TextColor="#0EA5E9" FontSize="15" WidthRequest="28" HeightRequest="28" CornerRadius="4" Padding="0" ToolTipProperties.Text="Link with another singer - they'll always stay adjacent in the rotation">
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsLinked}" Value="True">
+                                                        <Setter Property="BackgroundColor" Value="#0EA5E9" />
+                                                        <Setter Property="TextColor" Value="White" />
+                                                        <Setter Property="ToolTipProperties.Text" Value="Linked - tap to unlink" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
 
                                             <!-- Toggle Paused (Pause/Resume) -->
                                             <Button Text="❚❚" Clicked="OnToggleSingerPausedClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#D97706" BorderWidth="1" TextColor="#D97706" FontSize="17" FontAttributes="Bold" HeightRequest="28" Padding="6,0">

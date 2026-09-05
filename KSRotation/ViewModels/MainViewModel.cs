@@ -1160,6 +1160,8 @@ namespace KSRotation.ViewModels
         private void AddActiveSinger(SingerEntry newSinger)
         {
             LastInsertedSinger = newSinger;
+            // Linked-adjacency enforcement runs off Singers.CollectionChanged (see
+            // OnSingersCollectionChanged) - InsertNewSinger's own Insert() already triggers it.
             RotationHelpers.InsertNewSinger(Singers, newSinger);
         }
 
@@ -1172,6 +1174,78 @@ namespace KSRotation.ViewModels
                 Song = string.Empty,
                 Artist = string.Empty,
             });
+        }
+
+        /// <summary>Singer the DJ has clicked "Link" on, waiting for a second click on another
+        /// singer to complete the link. Null when no link is pending.</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasPendingLinkSinger))]
+        public partial SingerEntry? PendingLinkSinger { get; set; }
+
+        public bool HasPendingLinkSinger => PendingLinkSinger != null;
+
+        [RelayCommand]
+        private void CancelPendingLink() => PendingLinkSinger = null;
+
+        /// <summary>
+        /// Two-click linking: clicking "Link" on a singer with nothing pending arms it as the
+        /// pending half of a pair; clicking a second (different) singer completes the link.
+        /// Clicking the pending singer again cancels. Clicking an already-linked singer unlinks it
+        /// instead. See <see cref="RotationHelpers.LinkSingers{T}"/>/<see cref="RotationHelpers.UnlinkSinger{T}"/>.
+        /// </summary>
+        [RelayCommand]
+        private void ToggleLinkSinger(SingerEntry entry)
+        {
+            if (entry == null) return;
+
+            if (entry.IsLinked)
+            {
+                RotationHelpers.UnlinkSinger(Singers, entry);
+                RefreshLinkedPartnerNames();
+                if (PendingLinkSinger == entry) PendingLinkSinger = null;
+                RefreshBillboardState();
+                return;
+            }
+
+            if (PendingLinkSinger == null)
+            {
+                PendingLinkSinger = entry;
+                return;
+            }
+
+            if (PendingLinkSinger == entry)
+            {
+                PendingLinkSinger = null;
+                return;
+            }
+
+            RotationHelpers.LinkSingers(Singers, PendingLinkSinger, entry);
+            RefreshLinkedPartnerNames();
+            PendingLinkSinger = null;
+
+            RefreshBillboardState();
+        }
+
+        /// <summary>
+        /// Refreshes every linked singer's <see cref="SingerEntry.LinkedPartnerName"/> display
+        /// convenience from the current rotation. Name isn't part of the shared IRotationSinger
+        /// interface, so this lookup has to happen here rather than in RotationHelpers - call it
+        /// after anything that could change link state, rotation membership, or a linked singer's Name.
+        /// </summary>
+        private void RefreshLinkedPartnerNames()
+        {
+            foreach (var s in Singers)
+            {
+                if (s.LinkedSingerId.HasValue)
+                {
+                    var partner = Singers.FirstOrDefault(p => p.Id == s.LinkedSingerId.Value);
+                    s.LinkedPartnerName = partner?.Name ?? string.Empty;
+                }
+                else if (!string.IsNullOrEmpty(s.LinkedPartnerName))
+                {
+                    s.LinkedPartnerName = string.Empty;
+                }
+            }
         }
 
         /// <summary>Permanently deletes a singer row from the rotation (unlike <see cref="ToggleSingerInactive"/>,
@@ -1228,6 +1302,9 @@ namespace KSRotation.ViewModels
             }
 
             Singers.Remove(entry);
+            RotationHelpers.UnlinkSinger(Singers, entry);
+            if (PendingLinkSinger == entry) PendingLinkSinger = null;
+            RefreshLinkedPartnerNames();
             RotationHelpers.EnsureRotationStartFlag(Singers);
             UpdateNextSingerHighlight();
             RebuildRotationJsonCacheNow();
@@ -1548,6 +1625,8 @@ namespace KSRotation.ViewModels
                     if (entry.IsMusic && string.IsNullOrWhiteSpace(entry.Song))
                     {
                         Singers.Remove(entry);
+                        RotationHelpers.UnlinkSinger(Singers, entry);
+                        if (PendingLinkSinger == entry) PendingLinkSinger = null;
                         UpdateNextSingerHighlight();
                     }
                 }
@@ -1561,6 +1640,12 @@ namespace KSRotation.ViewModels
                 // request holding the flag was just removed above, since nothing else in this method
                 // reassigns it (unlike the RotationHelpers.HandleSingerRetiredOrRemoved calls elsewhere).
                 RotationHelpers.EnsureRotationStartFlag(Singers);
+
+                // The link itself persists across songs (linked singers stay paired for the night,
+                // not just one song) - just make sure floating the finished singer (Last Round /
+                // float-to-top mode) didn't separate them from their partner.
+                RotationHelpers.EnforceLinkedAdjacency(Singers);
+                RefreshLinkedPartnerNames();
 
                 // Recalculate every waiting singer's estimated wait time now that the rotation
                 // order has settled - KSRotation has no song-duration library, so this always
@@ -1708,6 +1793,9 @@ namespace KSRotation.ViewModels
                     Singers.Move(oldIndex, activeCount);
                 }
             }
+
+            // Linked-adjacency enforcement runs off Singers.CollectionChanged (see
+            // OnSingersCollectionChanged) - the Move() calls above already triggered it.
         }
 
         [RelayCommand]
@@ -1734,6 +1822,8 @@ namespace KSRotation.ViewModels
                     // Active singer can always move up
                     Singers.Move(index, index - 1);
                 }
+                // Linked-adjacency enforcement runs off Singers.CollectionChanged (see
+                // OnSingersCollectionChanged) - the Move() call above already triggered it.
             }
         }
 
@@ -1761,6 +1851,8 @@ namespace KSRotation.ViewModels
                     // Inactive singer can always move down
                     Singers.Move(index, index + 1);
                 }
+                // Linked-adjacency enforcement runs off Singers.CollectionChanged (see
+                // OnSingersCollectionChanged) - the Move() call above already triggered it.
             }
         }
 
@@ -1823,7 +1915,11 @@ namespace KSRotation.ViewModels
         /// <summary>Clears IsNext on all singers, then marks the first active singer after <paramref name="doneEntry"/> as next.</summary>
         private void MarkNextSinger(SingerEntry doneEntry) => RotationHelpers.MarkNextSinger(Singers, doneEntry, isLastRound: IsLastRound);
 
-        /// <summary>Recalculates the next active singer relative to the current singer and sets the green highlight.</summary>
+        /// <summary>Recalculates the next active singer relative to the current singer and sets the green highlight.
+        /// Deliberately does NOT touch Linked Singers adjacency - this is called reentrantly from inside
+        /// OnSingersCollectionChanged's dispatch of Singers' own CollectionChanged event, and ObservableCollection
+        /// forbids mutating a collection while still inside that dispatch. Adjacency is enforced separately
+        /// there instead, deferred via Dispatcher.BeginInvoke so it runs once the dispatch has unwound.</summary>
         private void UpdateNextSingerHighlight() => RotationHelpers.UpdateNextSingerHighlight(Singers, isLastRound: IsLastRound);
 
         /// <summary>Saves an end-of-night report and optionally emails it.</summary>
@@ -1939,6 +2035,19 @@ namespace KSRotation.ViewModels
             {
                 RotationHelpers.EnsureRotationStartFlag(Singers);
                 UpdateNextSingerHighlight();
+
+                // EnforceLinkedAdjacency can itself Move/RemoveAt+Insert on Singers, which
+                // ObservableCollection forbids while still inside the dispatch of this very
+                // CollectionChanged event (throws "Cannot change ObservableCollection during a
+                // CollectionChanged event"). Defer it to run once the current dispatch has fully
+                // unwound - this single hook fires on every structural change to Singers, so it's
+                // the one place that gives full coverage without needing to chase every mutation
+                // call site individually.
+                System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    RotationHelpers.EnforceLinkedAdjacency(Singers);
+                    RefreshLinkedPartnerNames();
+                }));
             }
 
             if (IsDisplayEnabled)

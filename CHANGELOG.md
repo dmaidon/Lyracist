@@ -1,9 +1,29 @@
-<!-- Edited on Sep 5, 2026 @ 17:10:00 -> Release 26.9.5.3: Add estimated wait-time badges to rotation screens across Lyracist, KSRotation, and KSRotation.Maui -->
-Last Edit: Sep 5, 2026 - Estimated Wait Time on Rotation Screens (Lyracist, KSRotation, KSRotation.Maui)
+<!-- Edited on Sep 5, 2026 @ 20:20:00 -> Release 26.9.5.5: Fix KSRotation crash when Linked Singers needed realignment during a rotation reorder -->
+Last Edit: Sep 5, 2026 - KSRotation Linked Singers Reentrancy Fix
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.5] - 2026-09-05
+
+### Fixed
+- **KSRotation (Crash: "Cannot change ObservableCollection during a CollectionChanged event")**:
+  - Reordering the rotation (Move Up/Down, adding a singer, finishing a song, etc.) while a Linked Singers pair needed realignment could crash with this `InvalidOperationException`, shown as an "Unexpected Error" popup.
+  - Cause: `OnSingersCollectionChanged` fires synchronously on every structural change to `Singers` and was calling into the new Linked Singers adjacency enforcement, which can itself reorder `Singers` - `ObservableCollection` forbids mutating itself while still dispatching its own `CollectionChanged` event.
+  - Fix: adjacency enforcement is now deferred via `Dispatcher.BeginInvoke` so it always runs after the current dispatch has fully unwound, instead of reentrantly during it. Several now-redundant explicit enforcement calls scattered across `MainViewModel.cs` were removed in favor of this single, safe chokepoint.
+
+## [26.9.5.4] - 2026-09-05
+
+### Added
+- **Lyracist / KSRotation / KSRotation.Maui (Linked Singers)**:
+  - The DJ can now link two singers already in the rotation (two-click: click 🔗 on one, then click 🔗 on the other) so they always stay adjacent - no other singer can ever be inserted between them, whether by a new signup landing between them, a manual drag/drop or move up/down, or the rotation advancing after someone finishes.
+  - Clicking 🔗 on an already-linked singer unlinks it (and its partner); re-linking a singer that's already linked to someone else breaks the old link first, so an entry is never linked to more than one partner at a time.
+  - A linked singer can still be Paused - it keeps its place and is simply skipped over, exactly like any other paused singer; pausing does **not** exempt the pair from the adjacency rule. Marking a linked singer Inactive ("out for the night") is treated differently: its still-active partner is *not* forced to follow it to the retired section.
+  - The link persists across songs for the rest of the night (not just one performance) - it's only broken by an explicit unlink, or when one half is removed from the rotation entirely.
+  - New shared primitives in `Shared/RotationHelpers.cs` - `LinkSingers()`, `UnlinkSinger()`, `EnforceLinkedAdjacency()` - and two new `IRotationSinger` members (`Id`, `LinkedSingerId`) used identically by all three apps, the same mechanism already driving rotation-order and wait-time behavior across them.
+  - Shows as a "🔗 [partner name]" badge next to the singer's name in Lyracist's `RotationPage`, KSRotation's `MainWindow` (rotation list + right-click context menu), and KSRotation.Maui's `MainPage`.
+  - **Not yet included**: automatically linking two singers who sign up together on the patron/kiosk app - that touches the shared `kiosk.html` form plus two separate request-handling backends and their approval-queue timing, and is scoped as a separate follow-up.
 
 ## [26.9.5.3] - 2026-09-05
 
