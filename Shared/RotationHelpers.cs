@@ -650,13 +650,26 @@ namespace Lyracist.Shared
         /// (preserving which of the two was ahead of the other). Call this after any operation that
         /// can reorder the list - inserting a new singer, manual drag/drop reorder, move up/down, or
         /// advancing the rotation - so a linked pair can never end up with another singer wedged
-        /// between them. A partner no longer present in <paramref name="singers"/> (removed/retired
-        /// for the night) is left alone; nothing to enforce. Pausing a linked singer does NOT exempt
-        /// it here - a paused singer keeps its place and is simply skipped over, same as any other
-        /// paused singer, so its partner still needs to stay adjacent to it. Marking one half
+        /// between them. The link itself is never broken by this - "stay linked" persists all night
+        /// until the DJ explicitly unlinks - so a pair legitimately separated by one of them
+        /// performing and cycling to the bottom is re-united automatically once it's safe to do so
+        /// (see the IsCurrent exemption below), rather than needing to be manually re-linked.
+        ///
+        /// A partner no longer present in <paramref name="singers"/> (removed/retired for the
+        /// night) is left alone; nothing to enforce. Pausing a linked singer does NOT exempt it here
+        /// - a paused singer keeps its place and is simply skipped over, same as any other paused
+        /// singer, so its partner still needs to stay adjacent to it. Marking one half
         /// <see cref="IRotationSinger.IsInactive"/> ("out for the night") is different: that singer
         /// is effectively leaving the rotation, so its still-active partner is NOT forced to follow
         /// it - adjacency is only enforced while both halves of the pair are still active.
+        ///
+        /// A pair is also left alone (for now) while either half is <see cref="IRotationSinger.IsCurrent"/>:
+        /// that's exactly the moment a linked pair is *expected* to be apart - one just finished and
+        /// floated away while the other was promoted to perform next (back-to-back, the whole point
+        /// of linking them) - dragging the just-finished singer back up would undo that float and
+        /// prevent them from ever separating to take their turns. Once neither is current anymore
+        /// (both have had their turn), the next call finds no exemption and pulls them back together
+        /// for their next joint turn.
         /// </summary>
         public static void EnforceLinkedAdjacency<T>(IList<T> singers) where T : class, IRotationSinger
         {
@@ -666,7 +679,7 @@ namespace Lyracist.Shared
             for (int i = 0; i < singers.Count; i++)
             {
                 T entry = singers[i];
-                if (!entry.LinkedSingerId.HasValue || handled.Contains(entry) || entry.IsInactive) continue;
+                if (!entry.LinkedSingerId.HasValue || handled.Contains(entry) || entry.IsInactive || entry.IsCurrent) continue;
 
                 T? partner = null;
                 int partnerIndex = -1;
@@ -680,7 +693,7 @@ namespace Lyracist.Shared
                     }
                 }
 
-                if (partner == null || partner.IsInactive)
+                if (partner == null || partner.IsInactive || partner.IsCurrent)
                 {
                     handled.Add(entry);
                     continue;

@@ -568,5 +568,39 @@ public class RotationHelpersSingerTests
 
         Assert.Equal(["Alice", "Charlie", "Bob"], list.Select(s => s.Name));
     }
+
+    [Fact]
+    public void EnforceLinkedAdjacency_DoesNotPullBackWhilePartnerIsCurrent_SingerModel()
+    {
+        // A linked pair is *expected* to separate when one finishes and the other (promoted to
+        // perform next) is now IsCurrent - that's them performing back-to-back, the whole point of
+        // linking them. Dragging the finished singer back up would undo that.
+        var alice = new Singer { Name = "Alice" };
+        var bob = new Singer { Name = "Bob", IsCurrent = true };
+        var carol = new Singer { Name = "Carol" };
+        var list = new List<Singer> { bob, carol, alice }; // Alice floated to the bottom after finishing
+        RotationHelpers.LinkSingers(list, alice, bob); // still linked, just not adjacent right now
+
+        RotationHelpers.EnforceLinkedAdjacency(list);
+
+        Assert.Equal(["Bob", "Carol", "Alice"], list.Select(s => s.Name));
+    }
+
+    [Fact]
+    public void EnforceLinkedAdjacency_ReunitesPairOnceNeitherIsCurrentAnymore_SingerModel()
+    {
+        // Once both halves of a pair have had their turn (neither is current anymore), the pair is
+        // no longer exempt - Linked Singers stays linked all night, so they get pulled back together
+        // for their next joint turn instead of needing to be manually re-linked.
+        var alice = new Singer { Name = "Alice" };
+        var bob = new Singer { Name = "Bob" };
+        var carol = new Singer { Name = "Carol", IsCurrent = true };
+        var list = new List<Singer> { carol, bob, alice };
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        RotationHelpers.EnforceLinkedAdjacency(list);
+
+        Assert.Equal(1, Math.Abs(list.IndexOf(alice) - list.IndexOf(bob)));
+    }
 }
 

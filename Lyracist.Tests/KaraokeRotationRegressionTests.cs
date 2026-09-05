@@ -351,6 +351,39 @@ public class KaraokeRotationRegressionTests
     }
 
     [Fact]
+    public void DoneSinger_WithFloatCurrentSingerToTopAndLinkedPartner_StillMovesFinishedSingerToBottom()
+    {
+        // Regression test for a Linked Singers bug: DoneSinger used to call EnforceLinkedAdjacency
+        // right after AdvanceRotationAfterFinished, which — when Alice (current) and Bob (her linked
+        // partner, next in line) are adjacent — found the just-floated-to-the-bottom Alice no longer
+        // adjacent to the newly-promoted-to-top Bob and dragged Alice straight back up next to him,
+        // undoing the float-to-bottom entirely (Alice ended up in 2nd place instead of last). Linked
+        // Singers must never override the normal "finished singer moves to the bottom" behavior.
+        var rotationVm = CreateRotationViewModel();
+        SetFloatCurrentSingerToTop(rotationVm, true);
+
+        var alice = MakeSinger("Alice");
+        var bob = MakeSinger("Bob");
+        var carol = MakeSinger("Carol");
+        rotationVm.Rotation.Add(alice);
+        rotationVm.Rotation.Add(bob);
+        rotationVm.Rotation.Add(carol);
+
+        RotationHelpers.LinkSingers(rotationVm.Rotation, alice, bob);
+        RotationHelpers.SetCurrentSinger(rotationVm.Rotation, alice, floatCurrentToTop: true);
+        Assert.Equal(alice, rotationVm.Rotation[0]);
+
+        rotationVm.DoneSingerCommand.Execute(alice);
+
+        Assert.False(alice.IsCurrent);
+        Assert.True(bob.IsCurrent);
+        Assert.Equal(bob, rotationVm.Rotation[0]);
+        // The regression: Alice must end up at the bottom of the list, not dragged back to sit
+        // next to Bob (which would land her in 2nd place instead).
+        Assert.Equal(alice, rotationVm.Rotation[^1]);
+    }
+
+    [Fact]
     public async Task ToggleInactiveSinger_MarkingCurrentSingerAwayWithDesignatedNext_PromotesDesignatedNextSinger()
     {
         // With KaraokeViewModel wired up, its resync must not clobber the designated Next with a

@@ -1159,13 +1159,17 @@ Section: Lyracist & KSRotation & KSRotation.Maui / Linked Singers
 [Two Singers, One Slot in Line]
 1. Linking Two Singers:
    - Click the 🔗 button on a singer, then click 🔗 on a second singer, to link them together - a blue "🔗 [partner name]" badge appears next to both names.
-   - Once linked, the two always stay adjacent in the rotation for the rest of the night: no other singer can land between them, whether from a new signup, a drag/drop reorder, the Move Up/Down buttons, or the rotation advancing after someone finishes their song.
+   - Once linked, the two always stay adjacent in the rotation: no other singer can land between them, whether from a new signup, a drag/drop reorder, or the Move Up/Down buttons.
    - Click 🔗 again on either linked singer to unlink them. Linking a singer who is already linked to someone else automatically breaks that old link first - a singer can only be linked to one partner at a time.
    - Clicking 🔗 on a singer, then clicking 🔗 on that SAME singer again (instead of a different one), cancels the pending link without linking anyone.
-2. Linked Singers and Pause/Inactive:
+   - The link stays in effect all night until the DJ unlinks it - there is no automatic unlinking.
+2. Linked Singers and Finishing a Song:
+   - When one half of a linked pair finishes their song, they float to the bottom of the rotation (with "Float Current Singer to Top" on) exactly like any other singer, while their partner is promoted to sing next - performing back-to-back, which is the whole point of linking them. This is a brief, expected exception to the "always adjacent" rule, not a bug.
+   - Once BOTH halves of the pair have had their turn, they are automatically pulled back together to wait adjacently for their next joint turn - the DJ never needs to re-link them.
+3. Linked Singers and Pause/Inactive:
    - Pausing one half of a linked pair does not break the link and does not move it out of place - a paused singer simply keeps its spot and is skipped over when its turn comes, exactly like any other paused singer, and its partner still stays right next to it.
    - Marking one half of a pair Inactive ("out for the night") is different: the still-active partner is NOT forced to follow the retired singer down into the inactive section.
-3. Where to Link:
+4. Where to Link:
    - Lyracist: a 🔗 button next to each singer's Pause/Inactive buttons on the Rotation page.
    - KSRotation: right-click a singer in the rotation list for a "🔗 Link With Another Singer" / "🔗 Unlink Singer" menu option.
    - KSRotation.Maui: a 🔗 button in each singer's action row on the main rotation screen.

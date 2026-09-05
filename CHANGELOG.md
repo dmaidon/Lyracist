@@ -1,9 +1,17 @@
-<!-- Edited on Sep 5, 2026 @ 20:20:00 -> Release 26.9.5.5: Fix KSRotation crash when Linked Singers needed realignment during a rotation reorder -->
-Last Edit: Sep 5, 2026 - KSRotation Linked Singers Reentrancy Fix
+<!-- Edited on Sep 5, 2026 @ 21:35:00 -> Release 26.9.5.6: Fix Linked Singers dragging a finished singer back up, while keeping the pair linked all night via an IsCurrent exemption -->
+Last Edit: Sep 5, 2026 - Linked Singers Float-to-Bottom Fix (Lyracist & KSRotation)
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.6] - 2026-09-05
+
+### Fixed
+- **Lyracist / KSRotation (Linked Singers: Finished Singer Wasn't Dropping to the Bottom)**:
+  - With "Float Current Singer to Top" enabled, marking a linked singer's song finished was supposed to drop them to the bottom of the rotation like any other singer - instead they landed in 2nd place, with their linked partner promoted to 1st, because adjacency enforcement ran right after the rotation advanced and dragged the just-finished singer straight back up next to their partner (undoing the float-to-bottom).
+  - `RotationHelpers.EnforceLinkedAdjacency()` now exempts a linked pair while **either half is the current singer** - that's exactly the moment a pair is *expected* to separate (one just finished and floated away, the other was promoted to perform next - back-to-back, the whole point of linking them). Once neither half is current anymore (both have had their turn), the next call finds no exemption and pulls them back together for their next joint turn - so **the link still stays in effect all night, exactly as intended, without needing to be re-applied by the DJ**.
+  - Added unit tests for both the exemption and the reunion, plus ViewModel-level regression tests in `Lyracist.Tests` and `KSRotation.Tests` (mirroring an existing, unrelated float-to-top regression test) confirming the finished singer actually reaches the bottom of the list.
 
 ## [26.9.5.5] - 2026-09-05
 

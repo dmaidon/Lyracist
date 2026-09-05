@@ -573,6 +573,40 @@ public class RotationHelpersTests
 
         Assert.Equal(["Alice", "Charlie", "Bob"], list.Select(s => s.Name));
     }
+
+    [Fact]
+    public void EnforceLinkedAdjacency_DoesNotPullBackWhilePartnerIsCurrent_SingerEntryModel()
+    {
+        // A linked pair is *expected* to separate when one finishes and the other (promoted to
+        // perform next) is now IsCurrent - that's them performing back-to-back, the whole point of
+        // linking them. Dragging the finished singer back up would undo that.
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob", IsCurrent = true };
+        var carol = new SingerEntry { Name = "Carol" };
+        var list = new ObservableCollection<SingerEntry> { bob, carol, alice }; // Alice floated to the bottom after finishing
+        RotationHelpers.LinkSingers(list, alice, bob); // still linked, just not adjacent right now
+
+        RotationHelpers.EnforceLinkedAdjacency(list);
+
+        Assert.Equal(["Bob", "Carol", "Alice"], list.Select(s => s.Name));
+    }
+
+    [Fact]
+    public void EnforceLinkedAdjacency_ReunitesPairOnceNeitherIsCurrentAnymore_SingerEntryModel()
+    {
+        // Once both halves of a pair have had their turn (neither is current anymore), the pair is
+        // no longer exempt - Linked Singers stays linked all night, so they get pulled back together
+        // for their next joint turn instead of needing to be manually re-linked.
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol", IsCurrent = true };
+        var list = new ObservableCollection<SingerEntry> { carol, bob, alice };
+        RotationHelpers.LinkSingers(list, alice, bob);
+
+        RotationHelpers.EnforceLinkedAdjacency(list);
+
+        Assert.Equal(1, Math.Abs(list.IndexOf(alice) - list.IndexOf(bob)));
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1117,6 +1151,41 @@ public class MainViewModelTests
         Assert.False(alice.IsCurrent);
         Assert.True(bob.IsCurrent);
         Assert.Equal(bob, vm.Singers[0]);
+        Assert.Equal(alice, vm.Singers[^1]);
+    }
+
+    [Fact]
+    public void FinishSingerSong_WithFloatCurrentSingerToTopAndLinkedPartner_StillDropsFinishedSingerToBottom()
+    {
+        // Regression test for a Linked Singers bug: FinishSingerSong used to call
+        // EnforceLinkedAdjacency right after AdvanceRotationAfterFinished, which — when Alice
+        // (current) and Bob (her linked partner, next in line) are adjacent — found the
+        // just-floated-to-the-bottom Alice no longer adjacent to the newly-promoted-to-top Bob and
+        // dragged Alice straight back up next to him, undoing the float-to-bottom entirely (Alice
+        // ended up in 2nd place instead of last). Linked Singers must never override the normal
+        // "finished singer moves to the bottom" behavior.
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = false };
+        vm.Singers.Clear();
+        vm.FloatCurrentSingerToTop = true;
+
+        var alice = new SingerEntry { Name = "Alice" };
+        var bob = new SingerEntry { Name = "Bob" };
+        var carol = new SingerEntry { Name = "Carol" };
+        vm.Singers.Add(alice);
+        vm.Singers.Add(bob);
+        vm.Singers.Add(carol);
+
+        RotationHelpers.LinkSingers(vm.Singers, alice, bob);
+        RotationHelpers.SetCurrentSinger(vm.Singers, alice, floatCurrentToTop: true);
+        Assert.Equal(alice, vm.Singers[0]);
+
+        vm.FinishSingerSongCommand.Execute(alice);
+
+        Assert.False(alice.IsCurrent);
+        Assert.True(bob.IsCurrent);
+        Assert.Equal(bob, vm.Singers[0]);
+        // The regression: Alice must end up at the bottom of the list, not dragged back to sit
+        // next to Bob (which would land her in 2nd place instead).
         Assert.Equal(alice, vm.Singers[^1]);
     }
 

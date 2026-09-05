@@ -915,9 +915,10 @@ public partial class RotationViewModel : BaseViewModel
             RefreshSelectedSingerQueue();
         }
 
-        // The link itself persists across songs (linked singers stay paired for the night, not just
-        // one song) - just make sure floating the finished singer to the bottom (Last Round /
-        // float-to-top mode) didn't separate them from their partner.
+        // Linked Singers stays linked all night (no auto-unlink) - EnforceLinkedAdjacency exempts a
+        // pair while either half IsCurrent, so this won't drag the finished singer back up next to a
+        // partner who was just promoted to perform next; once neither is current anymore (both have
+        // had their turn), it re-unites them for their next joint turn.
         Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
         RefreshLinkedPartnerNames();
 
