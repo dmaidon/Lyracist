@@ -645,7 +645,7 @@ public partial class RotationWindow : Window, ICaptureSource
 
             panel.Children.Add(new TextBlock
             {
-                Text = entry.Name,
+                Text = entry.IsRotationStart ? $"\U0001F6A9 {entry.Name}" : entry.Name,
                 FontSize = isCurrent ? 52 : 36,
                 FontWeight = isCurrent ? FontWeights.Bold : FontWeights.Normal,
                 Foreground = isCurrent ? white : gold,

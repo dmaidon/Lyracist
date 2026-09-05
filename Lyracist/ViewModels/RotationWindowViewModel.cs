@@ -188,6 +188,12 @@ public partial class RotationWindowViewModel : BaseViewModel
     private string _nextSinger = string.Empty;
 
     [ObservableProperty]
+    private bool _currentSingerIsRotationStart;
+
+    [ObservableProperty]
+    private bool _nextSingerIsRotationStart;
+
+    [ObservableProperty]
     private string _announcementBanner = string.Empty;
 
     [ObservableProperty]
@@ -208,7 +214,9 @@ public partial class RotationWindowViewModel : BaseViewModel
     [ObservableProperty]
     private string _performerHeaderText = "NOW SINGING";
 
-    public ObservableCollection<string> NextSingers { get; } = [];
+    public record NextSingerDisplay(string Text, bool IsRotationStart);
+
+    public ObservableCollection<NextSingerDisplay> NextSingers { get; } = [];
 
     [ObservableProperty]
     private bool _hasDesignatedCurrentSinger;
@@ -238,6 +246,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerAverageRating = now.AverageRating;
             CurrentSingerRatingCount = now.RatingCount;
             CurrentSingerHasRatings = now.RatingCount > 0;
+            CurrentSingerIsRotationStart = now.IsRotationStart;
         }
         else
         {
@@ -248,16 +257,19 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerAverageRating = 0.0;
             CurrentSingerRatingCount = 0;
             CurrentSingerHasRatings = false;
+            CurrentSingerIsRotationStart = false;
         }
 
         var next = visibleSingers.FirstOrDefault(s => s.IsNext);
         if (next != null)
         {
             NextSinger = next.Name;
+            NextSingerIsRotationStart = next.IsRotationStart;
         }
         else
         {
             NextSinger = "None";
+            NextSingerIsRotationStart = false;
         }
 
         bool hasDesignated = now != null;
@@ -272,7 +284,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             foreach (var candidate in nextActiveSingers)
             {
                 string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
-                NextSingers.Add(display);
+                NextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart));
             }
         }
         else
@@ -281,7 +293,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             foreach (var singer in activeSingers)
             {
                 string display = string.IsNullOrEmpty(singer.SongTitle) ? singer.Name : $"{singer.Name} (\"{singer.SongTitle}\")";
-                NextSingers.Add(display);
+                NextSingers.Add(new NextSingerDisplay(display, singer.IsRotationStart));
             }
         }
 
@@ -320,6 +332,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerAverageRating = currentMatch.AverageRating;
             CurrentSingerRatingCount = currentMatch.RatingCount;
             CurrentSingerHasRatings = currentMatch.RatingCount > 0;
+            CurrentSingerIsRotationStart = currentMatch.IsRotationStart;
         }
         else
         {
@@ -335,16 +348,19 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerAverageRating = singer.AverageRating;
             CurrentSingerRatingCount = singer.RatingCount;
             CurrentSingerHasRatings = singer.RatingCount > 0;
+            CurrentSingerIsRotationStart = singer.IsRotationStart;
         }
 
         var next = Rotation.FirstOrDefault(s => s.IsNext);
         if (next != null)
         {
             NextSinger = next.Name;
+            NextSingerIsRotationStart = next.IsRotationStart;
         }
         else
         {
             NextSinger = "None";
+            NextSingerIsRotationStart = false;
         }
 
         PerformerHeaderText = "NOW SINGING";
@@ -357,7 +373,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             foreach (var candidate in nextActiveSingers)
             {
                 string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
-                NextSingers.Add(display);
+                NextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart));
             }
         }
         else
@@ -366,7 +382,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             foreach (var s in activeSingers)
             {
                 string display = string.IsNullOrEmpty(s.SongTitle) ? s.Name : $"{s.Name} (\"{s.SongTitle}\")";
-                NextSingers.Add(display);
+                NextSingers.Add(new NextSingerDisplay(display, s.IsRotationStart));
             }
         }
         // POPULATE FullRotation exactly like KSRotation does!

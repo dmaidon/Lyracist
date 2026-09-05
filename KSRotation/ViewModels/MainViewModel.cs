@@ -678,6 +678,9 @@ namespace KSRotation.ViewModels
         public string NextSingerSongDisplay => !string.IsNullOrWhiteSpace(NextSinger?.Song) ? NextSinger.Song : string.Empty;
         public string NextSingerArtistDisplay => !string.IsNullOrWhiteSpace(NextSinger?.Artist) ? NextSinger.Artist : string.Empty;
 
+        public bool CurrentSingerIsRotationStart => CurrentSinger?.IsRotationStart ?? false;
+        public bool NextSingerIsRotationStart => NextSinger?.IsRotationStart ?? false;
+
         public void RefreshBillboardState()
         {
             OnPropertyChanged(nameof(IsLastRound));
@@ -697,6 +700,8 @@ namespace KSRotation.ViewModels
             OnPropertyChanged(nameof(NextSingerNameDisplay));
             OnPropertyChanged(nameof(NextSingerSongDisplay));
             OnPropertyChanged(nameof(NextSingerArtistDisplay));
+            OnPropertyChanged(nameof(CurrentSingerIsRotationStart));
+            OnPropertyChanged(nameof(NextSingerIsRotationStart));
         }
         #endregion
 

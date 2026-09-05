@@ -21,6 +21,7 @@
             --purple-glow: #8B5CF6;
             --border-color: rgba(255, 255, 255, 0.08);
             --border-card: rgba(255, 255, 255, 0.12);
+            --red-flag: #DC2626;
         }
 
         * {
@@ -199,6 +200,23 @@
             font-weight: 600;
             font-style: italic;
             color: #FBBF24;
+        }
+
+        .rotation-start-badge {
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 5px;
+            background-color: var(--red-flag);
+            color: #FFF;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .queue-name .rotation-start-badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            margin-right: 6px;
         }
 
         .now-song-meta {
@@ -524,6 +542,7 @@
             <div class="card-now-performing" id="now-performing-card">
                 <div class="spotlight-badge badge-now">🎙️ Now Performing</div>
                 <div class="now-performer-name">
+                    <span class="rotation-start-badge" id="now-rotation-start-badge" style="display: none;" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>
                     <span id="now-singer-name">Stage is Open</span>
                     <span class="now-duet-tag" id="now-duet-tag" style="display: none;"></span>
                 </div>
@@ -537,6 +556,7 @@
             <div class="card-up-next" id="up-next-card">
                 <div class="spotlight-badge badge-next">⏭️ Up Next</div>
                 <div class="next-performer-name">
+                    <span class="rotation-start-badge" id="next-rotation-start-badge" style="display: none;" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>
                     <span id="next-singer-name">Ready for singers</span>
                     <span class="now-duet-tag" id="next-duet-tag" style="display: none;"></span>
                 </div>
@@ -681,8 +701,10 @@
             const nowDuetEl = document.getElementById('now-duet-tag');
             const nowTitleEl = document.getElementById('now-song-title');
             const nowArtistEl = document.getElementById('now-song-artist');
+            const nowRotationStartEl = document.getElementById('now-rotation-start-badge');
 
             if (currentSinger) {
+                nowRotationStartEl.style.display = currentSinger.isRotationStart ? "inline-block" : "none";
                 nowNameEl.textContent = currentSinger.name;
                 if (currentSinger.partner) {
                     nowDuetEl.textContent = `w/ ${currentSinger.partner}`;
@@ -699,6 +721,7 @@
                     nowArtistEl.textContent = currentSinger.artist ? `by ${currentSinger.artist}` : "";
                 }
             } else {
+                nowRotationStartEl.style.display = "none";
                 nowNameEl.textContent = "Stage is Open";
                 nowDuetEl.style.display = "none";
                 nowTitleEl.textContent = "Ready for the next singer!";
@@ -710,8 +733,10 @@
             const nextNameEl = document.getElementById('next-singer-name');
             const nextDuetEl = document.getElementById('next-duet-tag');
             const nextTitleEl = document.getElementById('next-song-title');
+            const nextRotationStartEl = document.getElementById('next-rotation-start-badge');
 
             if (nextSinger) {
+                nextRotationStartEl.style.display = nextSinger.isRotationStart ? "inline-block" : "none";
                 nextNameEl.textContent = nextSinger.name;
                 if (nextSinger.partner) {
                     nextDuetEl.textContent = `w/ ${nextSinger.partner}`;
@@ -728,6 +753,7 @@
                     nextTitleEl.textContent = `${song}${artist}`;
                 }
             } else {
+                nextRotationStartEl.style.display = "none";
                 nextNameEl.textContent = "On Deck";
                 nextDuetEl.style.display = "none";
                 nextTitleEl.textContent = "Scan QR code to be up next!";
@@ -750,12 +776,13 @@
                     const songDesc = s.isMusic ? "♪ Background Music" : (s.song ? `"${escapeHtml(s.song)}"${s.artist ? ' by ' + escapeHtml(s.artist) : ''}` : "Choosing a song");
                     const pausedClass = s.isPaused ? ' style="opacity: 0.6;"' : '';
                     const pausedBadge = s.isPaused ? ' <span style="font-size:0.7rem; background:#64748B; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">PAUSED</span>' : '';
+                    const rotationStartBadge = s.isRotationStart ? '<span class="rotation-start-badge" title="1st Singer in Rotation (Round Start)">🚩 1ST</span>' : '';
 
                     html += `
                         <div class="queue-row"${pausedClass}>
                             <span class="queue-pos">${idx + 1}</span>
                             <div class="queue-info">
-                                <div class="queue-name">${escapeHtml(s.name)}${partnerText}${pausedBadge}</div>
+                                <div class="queue-name">${rotationStartBadge}${escapeHtml(s.name)}${partnerText}${pausedBadge}</div>
                                 <div class="queue-song">${songDesc}</div>
                             </div>
                         </div>`;

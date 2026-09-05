@@ -83,17 +83,27 @@
                         Stroke="#F59E0B"
                         Padding="16">
                     <VerticalStackLayout Spacing="6">
-                        <Border HorizontalOptions="Start"
-                                StrokeShape="RoundRectangle 6"
-                                BackgroundColor="#D97706"
-                                StrokeThickness="0"
-                                Padding="8,2">
-                            <Label Text="🎙️ NOW PERFORMING"
-                                   FontSize="11"
-                                   FontAttributes="Bold"
-                                   TextColor="White"
-                                   CharacterSpacing="1" />
-                        </Border>
+                        <HorizontalStackLayout Spacing="6">
+                            <Border HorizontalOptions="Start"
+                                    StrokeShape="RoundRectangle 6"
+                                    BackgroundColor="#D97706"
+                                    StrokeThickness="0"
+                                    Padding="8,2">
+                                <Label Text="🎙️ NOW PERFORMING"
+                                       FontSize="11"
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       CharacterSpacing="1" />
+                            </Border>
+                            <Border HorizontalOptions="Start"
+                                    IsVisible="{Binding CurrentSingerIsRotationStart}"
+                                    StrokeShape="RoundRectangle 6"
+                                    BackgroundColor="#DC2626"
+                                    StrokeThickness="0"
+                                    Padding="8,2">
+                                <Label Text="🚩 1ST" FontSize="11" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                            </Border>
+                        </HorizontalStackLayout>
 
                         <!-- Singer Name -->
                         <Label Text="{Binding CurrentSingerNameDisplay}"
@@ -125,17 +135,27 @@
                         Stroke="#3B82F6"
                         Padding="14">
                     <VerticalStackLayout Spacing="4">
-                        <Border HorizontalOptions="Start"
-                                StrokeShape="RoundRectangle 6"
-                                BackgroundColor="#2563EB"
-                                StrokeThickness="0"
-                                Padding="8,2">
-                            <Label Text="⏭️ UP NEXT"
-                                   FontSize="10"
-                                   FontAttributes="Bold"
-                                   TextColor="White"
-                                   CharacterSpacing="1" />
-                        </Border>
+                        <HorizontalStackLayout Spacing="6">
+                            <Border HorizontalOptions="Start"
+                                    StrokeShape="RoundRectangle 6"
+                                    BackgroundColor="#2563EB"
+                                    StrokeThickness="0"
+                                    Padding="8,2">
+                                <Label Text="⏭️ UP NEXT"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       CharacterSpacing="1" />
+                            </Border>
+                            <Border HorizontalOptions="Start"
+                                    IsVisible="{Binding NextSingerIsRotationStart}"
+                                    StrokeShape="RoundRectangle 6"
+                                    BackgroundColor="#DC2626"
+                                    StrokeThickness="0"
+                                    Padding="8,2">
+                                <Label Text="🚩 1ST" FontSize="10" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                            </Border>
+                        </HorizontalStackLayout>
 
                         <Label Text="{Binding NextSingerNameDisplay}"
                                FontSize="18"
@@ -190,11 +210,21 @@
                                             Margin="0,0,0,6">
                                         <Grid ColumnDefinitions="*,Auto">
                                             <VerticalStackLayout Grid.Column="0" Spacing="1">
-                                                <Label Text="{Binding DisplayNameWithDuet}"
-                                                       FontSize="13"
-                                                       FontAttributes="Bold"
-                                                       TextColor="White"
-                                                       LineBreakMode="TailTruncation" />
+                                                <HorizontalStackLayout Spacing="6">
+                                                    <Border IsVisible="{Binding IsRotationStart}"
+                                                            StrokeShape="RoundRectangle 4"
+                                                            BackgroundColor="#DC2626"
+                                                            StrokeThickness="0"
+                                                            Padding="4,1"
+                                                            VerticalOptions="Center">
+                                                        <Label Text="🚩 1ST" FontSize="9" FontAttributes="Bold" TextColor="White" />
+                                                    </Border>
+                                                    <Label Text="{Binding DisplayNameWithDuet}"
+                                                           FontSize="13"
+                                                           FontAttributes="Bold"
+                                                           TextColor="White"
+                                                           LineBreakMode="TailTruncation" />
+                                                </HorizontalStackLayout>
                                                 <Label Text="{Binding Song}"
                                                        FontSize="11"
                                                        FontAttributes="Italic"

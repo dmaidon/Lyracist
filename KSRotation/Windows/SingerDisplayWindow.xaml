@@ -21,6 +21,10 @@
         <vm:DisplayViewModel />
     </Window.DataContext>
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -86,23 +90,30 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock FontSize="34" Margin="12,4">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
-                                        <Setter Property="FontWeight" Value="Normal" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                                <Setter Property="Foreground" Value="Crimson" />
-                                                <Setter Property="FontWeight" Value="Bold" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                                <Run Text="{Binding PrefixAndSinger, Mode=OneWay}" />
-                                <Run Text="{Binding SongSeparatorAndTitle, Mode=OneWay}" />
-                                <Run Text="{Binding ArtistInParentheses, Mode=OneWay}" FontStyle="Italic" />
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal" Margin="12,4">
+                                <Border Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,8,0" VerticalAlignment="Center"
+                                        ToolTip="1st Singer in Rotation (Round Start)"
+                                        Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="🚩 1ST" FontSize="14" FontWeight="ExtraBold" Foreground="White"/>
+                                </Border>
+                                <TextBlock FontSize="34">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+                                            <Setter Property="FontWeight" Value="Normal" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                    <Setter Property="Foreground" Value="Crimson" />
+                                                    <Setter Property="FontWeight" Value="Bold" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                    <Run Text="{Binding PrefixAndSinger, Mode=OneWay}" />
+                                    <Run Text="{Binding SongSeparatorAndTitle, Mode=OneWay}" />
+                                    <Run Text="{Binding ArtistInParentheses, Mode=OneWay}" FontStyle="Italic" />
+                                </TextBlock>
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -215,6 +226,11 @@
 
                     <!-- Current singer name + song (vertically centered) -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                ToolTip="1st Singer in Rotation (Round Start)"
+                                Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="🚩 1ST" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                        </Border>
                         <TextBlock x:Name="MarqueeSingerName" Text="{Binding CurrentSingerName}"
                                    HorizontalAlignment="Center"
                                    TextAlignment="Center"
@@ -262,9 +278,16 @@
                                             Background="#33E0A93B"
                                             BorderBrush="#66E0A93B"
                                             BorderThickness="1">
-                                        <TextBlock Text="{Binding}"
-                                                   FontSize="20"
-                                                   Foreground="#FFF7E8C8" />
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                    ToolTip="1st Singer in Rotation (Round Start)"
+                                                    Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <TextBlock Text="🚩 1ST" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding Text}"
+                                                       FontSize="20"
+                                                       Foreground="#FFF7E8C8" />
+                                        </StackPanel>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -405,6 +428,11 @@
                                Margin="0,0,0,10"
                                TextOptions.TextFormattingMode="Display" />
 
+                    <Border Background="#DC2626" CornerRadius="6" Padding="8,3" Margin="0,0,0,8" HorizontalAlignment="Left"
+                            ToolTip="1st Singer in Rotation (Round Start)"
+                            Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="🚩 1ST" FontSize="18" FontWeight="ExtraBold" Foreground="White"/>
+                    </Border>
                     <TextBlock Text="{Binding CurrentSingerName}"
                                TextWrapping="Wrap"
                                FontSize="78"
@@ -433,10 +461,16 @@
                     <ItemsControl ItemsSource="{Binding NextSingers}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding}"
-                                           FontSize="22"
-                                           Margin="0,3"
-                                           Foreground="#FFE6D6B8" />
+                                <StackPanel Orientation="Horizontal" Margin="0,3">
+                                    <Border Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,6,0" VerticalAlignment="Center"
+                                            ToolTip="1st Singer in Rotation (Round Start)"
+                                            Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="🚩 1ST" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding Text}"
+                                               FontSize="22"
+                                               Foreground="#FFE6D6B8" />
+                                </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

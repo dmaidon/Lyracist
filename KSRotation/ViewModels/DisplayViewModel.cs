@@ -39,7 +39,9 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial double MarqueeSpeed { get; set; } = 60;
 
-        public ObservableCollection<string> NextSingers { get; } = [];
+        public sealed record NextSingerDisplay(string Text, bool IsRotationStart);
+
+        public ObservableCollection<NextSingerDisplay> NextSingers { get; } = [];
 
         public ObservableCollection<DisplayRotationEntry> RotationEntries { get; } = [];
 
@@ -61,6 +63,9 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool HasDesignatedCurrentSinger { get; set; }
+
+        [ObservableProperty]
+        public partial bool CurrentSingerIsRotationStart { get; set; }
 
         [ObservableProperty]
         public partial bool IsCurrentMusic { get; set; }
@@ -96,6 +101,7 @@ namespace KSRotation.ViewModels
                 CurrentSingerSong = string.Empty;
                 CurrentSongTitle = string.Empty;
                 HasDesignatedCurrentSinger = false;
+                CurrentSingerIsRotationStart = false;
                 NextSingers.Clear();
                 RotationEntries.Clear();
                 FullRotation.Clear();
@@ -122,6 +128,7 @@ namespace KSRotation.ViewModels
                 CurrentSingerSong = string.Empty;
                 CurrentSongTitle = string.Empty;
                 HasDesignatedCurrentSinger = false;
+                CurrentSingerIsRotationStart = false;
                 IsCurrentMusic = false;
                 NextSingers.Clear();
                 FullRotation.Clear();
@@ -130,6 +137,7 @@ namespace KSRotation.ViewModels
             }
             else
             {
+                CurrentSingerIsRotationStart = current.IsRotationStart;
                 IsCurrentMusic = current.IsMusic;
                 if (current.IsMusic)
                 {
@@ -177,14 +185,14 @@ namespace KSRotation.ViewModels
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
                             ? singer.Song
                             : $"{singer.Song} – {singer.Artist}";
-                        NextSingers.Add($"[MUSIC] {songText}");
+                        NextSingers.Add(new NextSingerDisplay($"[MUSIC] {songText}", singer.IsRotationStart));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
-                        NextSingers.Add(string.IsNullOrWhiteSpace(singer.Song)
+                        NextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
                             ? sName
-                            : $"{sName} - {singer.Song}");
+                            : $"{sName} - {singer.Song}", singer.IsRotationStart));
                     }
                 }
             }
@@ -197,14 +205,14 @@ namespace KSRotation.ViewModels
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
                             ? singer.Song
                             : $"{singer.Song} – {singer.Artist}";
-                        NextSingers.Add($"[MUSIC] {songText}");
+                        NextSingers.Add(new NextSingerDisplay($"[MUSIC] {songText}", singer.IsRotationStart));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
-                        NextSingers.Add(string.IsNullOrWhiteSpace(singer.Song)
+                        NextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
                             ? sName
-                            : $"{sName} - {singer.Song}");
+                            : $"{sName} - {singer.Song}", singer.IsRotationStart));
                     }
                 }
             }
@@ -239,7 +247,7 @@ namespace KSRotation.ViewModels
                         ? string.Empty
                         : $" ({singer.Artist})";
 
-                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, offset == 0));
+                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, offset == 0, singer.IsRotationStart));
 
                 }
             }
@@ -263,7 +271,7 @@ namespace KSRotation.ViewModels
                         ? string.Empty
                         : $" ({singer.Artist})";
 
-                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, false));
+                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, false, singer.IsRotationStart));
 
                     index++;
                 }
@@ -301,7 +309,8 @@ namespace KSRotation.ViewModels
             string PrefixAndSinger,
             string SongSeparatorAndTitle,
             string ArtistInParentheses,
-            bool IsCurrent);
+            bool IsCurrent,
+            bool IsRotationStart);
     }
 
 }
