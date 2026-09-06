@@ -66,7 +66,8 @@ public class PurchasedTrackWatcherService : IDisposable
     private readonly ConcurrentDictionary<string, DateTime> _recentlyProcessed = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, byte> _inFlight = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentQueue<PurchasedImportLogItem> _recentLogs = new();
-    private static readonly ConcurrentBag<double> ProcessingTimesMs = [];
+    private static readonly ConcurrentQueue<double> ProcessingTimesMs = new();
+    private const int MaxProcessingTimeSamples = 500;
     private readonly Lock _watcherLock = new();
     private bool _isDisposed;
 
@@ -79,7 +80,14 @@ public class PurchasedTrackWatcherService : IDisposable
 
     public static void RecordProcessingTime(double ms)
     {
-        if (ms > 0) ProcessingTimesMs.Add(ms);
+        if (ms <= 0) return;
+
+        ProcessingTimesMs.Enqueue(ms);
+        // Cap at a rolling window so long-running sessions don't grow this unbounded.
+        while (ProcessingTimesMs.Count > MaxProcessingTimeSamples)
+        {
+            ProcessingTimesMs.TryDequeue(out _);
+        }
     }
 
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -210,14 +218,52 @@ public class PurchasedTrackWatcherService : IDisposable
         });
     }
 
+    /// <summary>
+    /// Records a completed import for debounce purposes and opportunistically sweeps entries
+    /// well past the debounce window so this dictionary doesn't grow unbounded over long sessions.
+    /// </summary>
+    private void MarkRecentlyProcessed(string importKey)
+    {
+        _recentlyProcessed[importKey] = DateTime.UtcNow;
+
+        var cutoff = DateTime.UtcNow - TimeSpan.FromMinutes(5);
+        foreach (var kvp in _recentlyProcessed)
+        {
+            if (kvp.Value < cutoff)
+            {
+                _recentlyProcessed.TryRemove(kvp.Key, out _);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Groups an MP3+CDG pair under one shared key (their common base name) so that the
+    /// FileSystemWatcher events for both files serialize onto a single in-flight import
+    /// instead of racing each other to import the same pair independently.
+    /// </summary>
+    private static string GetImportKey(string filePath)
+    {
+        string ext = Path.GetExtension(filePath);
+        if (string.Equals(ext, ".mp3", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(ext, ".cdg", StringComparison.OrdinalIgnoreCase))
+        {
+            string? dir = Path.GetDirectoryName(filePath);
+            string baseName = Path.GetFileNameWithoutExtension(filePath);
+            return string.IsNullOrEmpty(dir) ? baseName : Path.Combine(dir, baseName);
+        }
+
+        return filePath;
+    }
+
     private async Task ProcessFileWithRetryAsync(string filePath)
     {
-        if (!_inFlight.TryAdd(filePath, 0)) return;
+        string importKey = GetImportKey(filePath);
+        if (!_inFlight.TryAdd(importKey, 0)) return;
 
         try
         {
             // Debounce: ignore if processed within last 5 seconds
-            if (_recentlyProcessed.TryGetValue(filePath, out var lastTime) && (DateTime.UtcNow - lastTime).TotalSeconds < 5)
+            if (_recentlyProcessed.TryGetValue(importKey, out var lastTime) && (DateTime.UtcNow - lastTime).TotalSeconds < 5)
             {
                 return;
             }
@@ -245,8 +291,7 @@ public class PurchasedTrackWatcherService : IDisposable
                 if (File.Exists(partnerMp3))
                 {
                     await ImportTrackFilesAsync(partnerMp3, filePath);
-                    _recentlyProcessed[filePath] = DateTime.UtcNow;
-                    _recentlyProcessed[partnerMp3] = DateTime.UtcNow;
+                    MarkRecentlyProcessed(importKey);
                     return;
                 }
             }
@@ -266,8 +311,7 @@ public class PurchasedTrackWatcherService : IDisposable
                     if (cdgReady)
                     {
                         await ImportTrackFilesAsync(filePath, partnerCdg);
-                        _recentlyProcessed[filePath] = DateTime.UtcNow;
-                        _recentlyProcessed[partnerCdg] = DateTime.UtcNow;
+                        MarkRecentlyProcessed(importKey);
                         return;
                     }
                 }
@@ -275,7 +319,7 @@ public class PurchasedTrackWatcherService : IDisposable
 
             // Single file import (.zip, .mp4, or standalone .mp3)
             await ImportTrackFilesAsync(filePath, null);
-            _recentlyProcessed[filePath] = DateTime.UtcNow;
+            MarkRecentlyProcessed(importKey);
         }
         catch (Exception ex)
         {
@@ -283,7 +327,7 @@ public class PurchasedTrackWatcherService : IDisposable
         }
         finally
         {
-            _inFlight.TryRemove(filePath, out _);
+            _inFlight.TryRemove(importKey, out _);
         }
     }
 
