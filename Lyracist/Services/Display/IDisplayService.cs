@@ -51,6 +51,7 @@ public interface IDisplayService
     void SetLastRound(bool isLastRound);
     void SetRotationViewMode(string mode);
     void SetCrawlBannerText(string text);
+    void SetShowEstimatedWaitTime(bool show);
     void UpdateDjBanner(string path);
     void UpdateSpecialEvent(string eventName);
     void HideDjBannerWindow();

@@ -538,6 +538,12 @@ public class DisplayService : IDisplayService
         vm?.CrawlBannerText = text;
     }
 
+    public void SetShowEstimatedWaitTime(bool show)
+    {
+        var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+        vm?.ShowEstimatedWaitTime = show;
+    }
+
     public async Task<bool> MoveRotationTo(DisplayTarget target, ChromecastDevice? device = null)
     {
         _preferences.RotationTarget = target;

@@ -1,9 +1,28 @@
-<!-- Edited on Sep 5, 2026 @ 23:58:00 -> Release 26.9.5.11: Add DJ toggle to hide Estimated Wait Time badges entirely -->
-Last Edit: Sep 5, 2026 - Add "Show Estimated Wait Time" Toggle
+<!-- Edited on Sep 6, 2026 @ 00:45:00 -> Extend the {N}=Estimated wait time legend to Lyracist and KSRotation.Maui, and to the Normal List/Star Wars Crawl views in all 3 apps -->
+Last Edit: Sep 6, 2026 - Estimated Wait Time Legend Everywhere the Badge Appears
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.13] - 2026-09-06
+
+### Added
+- **Lyracist / KSRotation / KSRotation.Maui (Estimated Wait Time Legend on Every Display)**:
+  - The `{N} = Estimated wait time` explainer now appears everywhere the `{N}` badge itself can appear, not just KSRotation's Marquee/Vinyl views: Lyracist's Normal List (queue panel header) and Star Wars Crawl, KSRotation's Normal List (new header row - it had none before) and Star Wars Crawl (which, it turns out, never actually showed the `{N}` badge at all until now - only the legend was missing there, the badge itself was a gap too), and KSRotation.Maui's single Billboard view.
+  - Every instance hides along with the badges when the DJ turns "Show Estimated Wait Time" off, and reappears immediately when turned back on - no restart needed.
+  - Lyracist's `RotationWindowViewModel` gained a `ShowEstimatedWaitTime` property (it had none before this - only `RotationViewModel`/`AppSettings` did), pushed live via a new `IDisplayService.SetShowEstimatedWaitTime()` and triggering an immediate Star Wars Crawl rebuild through the existing `Vm_PropertyChanged` hook.
+  - Checked all patron-facing web pages (`kiosk.html`, `dj.html`, `billboard.html`, `PatronPortal.html`, Lyracist's `mobile.html`/`index.html`): none of them currently serialize or render `EstimatedWaitMinutes` to patrons at all, so there is nothing to gate there yet - adding the badge to the patron-facing web/JSON pipeline would be a separate, larger feature.
+
+### Fixed
+- **KSRotation.Maui (Broken Build Introduced by the Wait Time Toggle)**: the `26.9.5.11` toggle feature added `DisplayWindowService.SetShowEstimatedWaitTime()` to KSRotation's real service but missed the Maui-only no-op stand-in in `KSRotation.Maui/Shims/WpfShims.cs` - since KSRotation.Maui compiles KSRotation's `MainViewModel.cs` directly but substitutes its own WPF-free service shims, this broke KSRotation.Maui's build entirely (masked at the time by a `| tail` pipe that hid the real `dotnet build` exit code in verification output). Added the missing shim method; confirmed by reading the actual build output text this time, not just the wrapping shell command's exit code.
+
+## [26.9.5.12] - 2026-09-06
+
+### Fixed
+- **KSRotation (Wait Time Toggle Hid Too Much of the Marquee/Vinyl Queue Labels)**:
+  - Turning off "Show Estimated Wait Time" hid the entire "UP NEXT"/"ON DECK" queue section label on the Vegas/Broadway Marquee and Vinyl Record projection styles - it should only have hidden the part explaining what the `{N}` badge means, not the label itself.
+  - Each label is now split into an always-visible "UP NEXT"/"ON DECK" and a separately-bound ": # in {} = Estimated wait time" suffix, so the section header stays put and only the badge-format explainer hides with the toggle.
 
 ## [26.9.5.11] - 2026-09-05
 

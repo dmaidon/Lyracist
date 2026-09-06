@@ -48,6 +48,12 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     public int AutoAdvanceMaxSeconds => Lyracist.Core.Helpers.AppSettings.AutoAdvanceCountdownSeconds;
 
+    /// <summary>Whether the "{N} = Estimated wait time" legend and per-singer wait badges are
+    /// shown - mirrors AppSettings.ShowEstimatedWaitTime, pushed live by DisplayService whenever
+    /// the DJ flips the Settings toggle.</summary>
+    [ObservableProperty]
+    private bool _showEstimatedWaitTime = Lyracist.Core.Helpers.AppSettings.ShowEstimatedWaitTime;
+
     public ObservableCollection<SingerRank> Leaderboard { get; } = [];
 
     public record SingerRank(string Name, int Score, double AverageRating, int Rank, int Level, string LevelName, string Badges);

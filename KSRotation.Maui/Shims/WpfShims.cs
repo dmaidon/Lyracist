@@ -138,6 +138,7 @@ namespace KSRotation.Services
         public void SetLastSongBanner(string? path) { }
         public void SetLastRound(bool isLastRound) { }
         public void SetShowQrCode(bool show) { }
+        public void SetShowEstimatedWaitTime(bool show) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
         public Task StopCastingAsync() => Task.CompletedTask;

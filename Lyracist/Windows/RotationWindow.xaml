@@ -197,7 +197,13 @@
                                    FontSize="28"
                                    FontWeight="Bold"
                                    Foreground="{StaticResource StudioSteelBrush}"
-                                   Margin="0,0,0,24" />
+                                   Margin="0,0,0,4" />
+                        <TextBlock Text="{}{} = Estimated wait time"
+                                   FontSize="13"
+                                   FontStyle="Italic"
+                                   Foreground="{StaticResource UITextSecondaryBrush}"
+                                   Margin="0,0,0,20"
+                                   Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                         <!-- Display-only List of Rotation Queue -->
                         <ItemsControl ItemsSource="{Binding Rotation}">

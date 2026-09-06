@@ -239,6 +239,7 @@ public partial class RotationWindow : Window, ICaptureSource
 
             case nameof(RotationWindowViewModel.CrawlBannerText):
             case nameof(RotationWindowViewModel.HasDesignatedCurrentSinger):
+            case nameof(RotationWindowViewModel.ShowEstimatedWaitTime):
                 RestartCrawlIfActive();
                 break;
 
@@ -543,7 +544,7 @@ public partial class RotationWindow : Window, ICaptureSource
             RegenerateStars(starW, starH);
         }
 
-        StackPanel textPanel = BuildCrawlTextPanel([.. _vm.FullRotation], _vm.CrawlBannerText, _vm.HasDesignatedCurrentSinger);
+        StackPanel textPanel = BuildCrawlTextPanel([.. _vm.FullRotation], _vm.CrawlBannerText, _vm.HasDesignatedCurrentSinger, _vm.ShowEstimatedWaitTime);
         textPanel.Measure(new System.Windows.Size(PanelWidth, double.PositiveInfinity));
         textPanel.Arrange(new Rect(0, 0, PanelWidth, textPanel.DesiredSize.Height));
         double panelH = textPanel.DesiredSize.Height;
@@ -578,7 +579,7 @@ public partial class RotationWindow : Window, ICaptureSource
         tt.BeginAnimation(TranslateTransform.YProperty, anim);
     }
 
-    private static StackPanel BuildCrawlTextPanel(List<Singer> rotation, string bannerText, bool hasDesignatedCurrentSinger)
+    private static StackPanel BuildCrawlTextPanel(List<Singer> rotation, string bannerText, bool hasDesignatedCurrentSinger, bool showEstimatedWaitTime)
     {
         var gold = CrawlGold;
         var dimGold = CrawlDimGold;
@@ -612,6 +613,19 @@ public partial class RotationWindow : Window, ICaptureSource
                 Foreground = dimGold,
                 TextAlignment = TextAlignment.Center,
                 Margin = new Thickness(0, 0, 0, 60)
+            });
+        }
+
+        if (showEstimatedWaitTime)
+        {
+            panel.Children.Add(new TextBlock
+            {
+                Text = "{N} = Estimated wait time",
+                FontSize = 18,
+                FontStyle = FontStyles.Italic,
+                Foreground = dimGold,
+                TextAlignment = TextAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 40)
             });
         }
 

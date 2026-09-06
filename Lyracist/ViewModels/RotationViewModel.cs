@@ -82,6 +82,7 @@ public partial class RotationViewModel : BaseViewModel
     public void RefreshEstimatedWaitTimeVisibility()
     {
         Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0, enabled: AppSettings.ShowEstimatedWaitTime);
+        _display.SetShowEstimatedWaitTime(AppSettings.ShowEstimatedWaitTime);
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
     }

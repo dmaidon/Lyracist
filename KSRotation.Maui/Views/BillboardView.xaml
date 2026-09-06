@@ -179,12 +179,17 @@
                         Stroke="#1E293B"
                         Padding="14">
                     <Grid RowDefinitions="Auto,*" RowSpacing="8">
-                        <Label Grid.Row="0"
-                               Text="UPCOMING IN ROTATION"
-                               FontSize="11"
-                               FontAttributes="Bold"
-                               TextColor="#64748B"
-                               CharacterSpacing="1.5" />
+                        <HorizontalStackLayout Grid.Row="0" Spacing="4">
+                            <Label Text="UPCOMING IN ROTATION"
+                                   FontSize="11"
+                                   FontAttributes="Bold"
+                                   TextColor="#64748B"
+                                   CharacterSpacing="1.5" />
+                            <Label Text="( {N} = Estimated wait time )"
+                                   FontSize="11"
+                                   TextColor="#475569"
+                                   IsVisible="{Binding ShowEstimatedWaitTime}" />
+                        </HorizontalStackLayout>
 
                         <CollectionView Grid.Row="1"
                                         ItemsSource="{Binding UpcomingSingers}"

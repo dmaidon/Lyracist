@@ -657,7 +657,7 @@ namespace KSRotation.Windows
             }
 
             // Build text panel and host it in an in-tree off-screen canvas.
-            StackPanel textPanel = BuildCrawlTextPanel(_vm.FullRotation, _vm.CrawlBannerText, _vm.HasDesignatedCurrentSinger);
+            StackPanel textPanel = BuildCrawlTextPanel(_vm.FullRotation, _vm.CrawlBannerText, _vm.HasDesignatedCurrentSinger, _vm.ShowEstimatedWaitTime);
             textPanel.Measure(new System.Windows.Size(PanelWidth, double.PositiveInfinity));
             textPanel.Arrange(new Rect(0, 0, PanelWidth, textPanel.DesiredSize.Height));
             double panelH = textPanel.DesiredSize.Height;
@@ -701,7 +701,7 @@ namespace KSRotation.Windows
         }
 
         // ── Text panel builder ────────────────────────────────────────────────
-        private static StackPanel BuildCrawlTextPanel(List<SingerEntry> rotation, string bannerText, bool hasDesignatedCurrentSinger)
+        private static StackPanel BuildCrawlTextPanel(List<SingerEntry> rotation, string bannerText, bool hasDesignatedCurrentSinger, bool showEstimatedWaitTime)
         {
             var gold = CrawlGold;
             var dimGold = CrawlDimGold;
@@ -735,6 +735,19 @@ namespace KSRotation.Windows
                     Foreground = dimGold,
                     TextAlignment = TextAlignment.Center,
                     Margin = new Thickness(0, 0, 0, 60)
+                });
+            }
+
+            if (showEstimatedWaitTime)
+            {
+                panel.Children.Add(new TextBlock
+                {
+                    Text = "{N} = Estimated wait time",
+                    FontSize = 18,
+                    FontStyle = FontStyles.Italic,
+                    Foreground = dimGold,
+                    TextAlignment = TextAlignment.Center,
+                    Margin = new Thickness(0, 0, 0, 40)
                 });
             }
 
@@ -805,9 +818,15 @@ namespace KSRotation.Windows
                         Margin = new Thickness(0, 0, 0, 6)
                     });
 
+                    string crawlNameText = entry.IsRotationStart ? $"⚓ {entry.Name}" : entry.Name;
+                    if (showEstimatedWaitTime && entry.EstimatedWaitMinutes > 0)
+                    {
+                        crawlNameText += $" {{{entry.EstimatedWaitMinutes}}}";
+                    }
+
                     panel.Children.Add(new TextBlock
                     {
-                        Text = entry.IsRotationStart ? $"⚓ {entry.Name}" : entry.Name,
+                        Text = crawlNameText,
                         FontSize = isCurrent ? 52 : 36,
                         FontWeight = isCurrent ? FontWeights.Bold : FontWeights.Normal,
                         Foreground = isCurrent ? white : gold,
