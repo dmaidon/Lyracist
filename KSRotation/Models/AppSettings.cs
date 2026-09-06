@@ -91,7 +91,7 @@ namespace KSRotation.Models
         public bool ShowEstimatedWaitTime { get; init; } = true;
 
         /// <summary>When true, patrons cannot request songs via the portal that have already been performed or queued in the current session.</summary>
-        public bool BlockDuplicateSongsInSession { get; init; } = false;
+        public bool BlockDuplicateSongsInSession { get; init; } = true;
 
         /// <summary>When true, song requests from patron portal and kiosk are restricted to scheduled session hours.</summary>
         public bool EnableSessionSchedule { get; init; } = false;

@@ -55,6 +55,9 @@ public class SessionDuplicateAndUserTests
         Assert.True(vm.IsSongInCurrentSession("Bohemian Rhapsody", "Queen"));
         Assert.False(vm.IsSongInCurrentSession("Radio Ga Ga"));
 
+        // Same title, different (known) artist is not a duplicate
+        Assert.False(vm.IsSongInCurrentSession("Bohemian Rhapsody", "The Muppets"));
+
         // Test already performed list
         vm.SessionPerformedSongs.Add(new PerformedSong
         {

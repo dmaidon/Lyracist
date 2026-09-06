@@ -1057,7 +1057,7 @@ public static class AppSettings
         public bool FloatCurrentSingerToTop { get; set; } = false;
         public double DefaultSongLengthMinutes { get; set; } = 4.75;
         public bool ShowEstimatedWaitTime { get; set; } = true;
-        public bool BlockDuplicateSongsInSession { get; set; } = false;
+        public bool BlockDuplicateSongsInSession { get; set; } = true;
         public bool EnableSessionSchedule { get; set; } = false;
         public string SessionStartTime { get; set; } = "8:00 PM";
         public string SessionStopTime { get; set; } = "2:00 AM";

@@ -179,21 +179,43 @@ public partial class RotationViewModel : BaseViewModel
     }
 
     /// <summary>
+    /// True if the title matches and, when both sides have a known artist, the artist also matches.
+    /// An unknown (blank) artist on either side falls back to a title-only match, so callers that
+    /// don't yet know the artist (or requests with no artist attached) still get caught.
+    /// </summary>
+    private static bool IsSameSongForSession(string? candidateTitle, string? candidateArtist, string queryTitle, string queryArtist)
+    {
+        if (!string.Equals(candidateTitle?.Trim(), queryTitle, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        string cleanCandidateArtist = candidateArtist?.Trim() ?? string.Empty;
+        if (cleanCandidateArtist.Length == 0 || queryArtist.Length == 0)
+        {
+            return true;
+        }
+
+        return string.Equals(cleanCandidateArtist, queryArtist, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
     /// Checks whether a song has already been performed or is currently queued in the active rotation during this session.
     /// </summary>
     public bool IsSongInCurrentSession(string songTitle, string artist = "")
     {
         if (string.IsNullOrWhiteSpace(songTitle)) return false;
         string cleanTitle = songTitle.Trim();
+        string cleanArtist = artist?.Trim() ?? string.Empty;
 
         // 1. Check songs already performed this session
-        if (SessionPerformedSongs.Any(s => string.Equals(s.SongTitle?.Trim(), cleanTitle, StringComparison.OrdinalIgnoreCase)))
+        if (SessionPerformedSongs.Any(s => IsSameSongForSession(s.SongTitle, s.Artist, cleanTitle, cleanArtist)))
         {
             return true;
         }
 
         // 2. Check songs currently queued in active rotation
-        if (Rotation.Any(s => string.Equals(s.SongTitle?.Trim(), cleanTitle, StringComparison.OrdinalIgnoreCase)))
+        if (Rotation.Any(s => IsSameSongForSession(s.SongTitle, s.Artist, cleanTitle, cleanArtist)))
         {
             return true;
         }

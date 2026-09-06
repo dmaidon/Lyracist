@@ -113,20 +113,42 @@ namespace KSRotation.ViewModels
                 now);
         }
 
+        /// <summary>
+        /// True if the title matches and, when both sides have a known artist, the artist also matches.
+        /// An unknown (blank) artist on either side falls back to a title-only match, so callers that
+        /// don't yet know the artist (or requests with no artist attached) still get caught.
+        /// </summary>
+        private static bool IsSameSongForSession(string? candidateTitle, string? candidateArtist, string queryTitle, string queryArtist)
+        {
+            if (!string.Equals(candidateTitle?.Trim(), queryTitle, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            string cleanCandidateArtist = candidateArtist?.Trim() ?? string.Empty;
+            if (cleanCandidateArtist.Length == 0 || queryArtist.Length == 0)
+            {
+                return true;
+            }
+
+            return string.Equals(cleanCandidateArtist, queryArtist, StringComparison.OrdinalIgnoreCase);
+        }
+
         public bool IsSongInCurrentSession(string songTitle, string artist = "")
         {
             if (string.IsNullOrWhiteSpace(songTitle)) return false;
             string cleanTitle = songTitle.Trim();
+            string cleanArtist = artist?.Trim() ?? string.Empty;
 
             lock (_performanceHistoryLock)
             {
-                if (_performanceHistory.Any(p => string.Equals(p.SongTitle?.Trim(), cleanTitle, StringComparison.OrdinalIgnoreCase)))
+                if (_performanceHistory.Any(p => IsSameSongForSession(p.SongTitle, p.ArtistName, cleanTitle, cleanArtist)))
                 {
                     return true;
                 }
             }
 
-            if (Singers.Any(s => string.Equals(s.Song?.Trim(), cleanTitle, StringComparison.OrdinalIgnoreCase)))
+            if (Singers.Any(s => IsSameSongForSession(s.Song, s.Artist, cleanTitle, cleanArtist)))
             {
                 return true;
             }
