@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 13:05:00 -> Add unit tests for StoreNotificationService toast notifications and badges
+// Edited on Sep 6, 2026 @ 13:35:00 -> Update search URL assertions to match working provider endpoints
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -65,15 +65,15 @@ public class StoreImportTests
         string query = "Sweet Caroline (Neil Diamond)";
         string encoded = Uri.EscapeDataString(query.Trim());
 
-        string kvUrl = $"https://www.karaoke-version.com/search.html?q={encoded}";
-        string ptUrl = $"https://www.partytyme.net/search?q={encoded}";
+        string kvUrl = $"https://www.karaoke-version.com/custombackingtrack/search.html?query={encoded}";
+        string ptUrl = $"https://www.partytyme.net/songshop/cat/search.php?search_what=all&search_keyword={encoded}&submit=GO";
         string kcUrl = $"https://karaoke.com/search?type=product&q={encoded}";
-        string sfUrl = $"https://www.sunflykaraoke.com/catalogsearch/result/?q={encoded}";
+        string sfUrl = $"https://www.sunflykaraoke.com/?s={encoded}&post_type=product";
 
-        Assert.Equal("https://www.karaoke-version.com/search.html?q=Sweet%20Caroline%20%28Neil%20Diamond%29", kvUrl);
-        Assert.Equal("https://www.partytyme.net/search?q=Sweet%20Caroline%20%28Neil%20Diamond%29", ptUrl);
+        Assert.Equal("https://www.karaoke-version.com/custombackingtrack/search.html?query=Sweet%20Caroline%20%28Neil%20Diamond%29", kvUrl);
+        Assert.Equal("https://www.partytyme.net/songshop/cat/search.php?search_what=all&search_keyword=Sweet%20Caroline%20%28Neil%20Diamond%29&submit=GO", ptUrl);
         Assert.Equal("https://karaoke.com/search?type=product&q=Sweet%20Caroline%20%28Neil%20Diamond%29", kcUrl);
-        Assert.Equal("https://www.sunflykaraoke.com/catalogsearch/result/?q=Sweet%20Caroline%20%28Neil%20Diamond%29", sfUrl);
+        Assert.Equal("https://www.sunflykaraoke.com/?s=Sweet%20Caroline%20%28Neil%20Diamond%29&post_type=product", sfUrl);
     }
 
     [Fact]
@@ -977,11 +977,11 @@ public class StoreImportTests
 
     [Theory]
     [InlineData(ProviderSource.KaraokeVersion, "", "https://www.karaoke-version.com/")]
-    [InlineData(ProviderSource.KaraokeVersion, "Queen", "https://www.karaoke-version.com/search.html?q=Queen")]
+    [InlineData(ProviderSource.KaraokeVersion, "Queen", "https://www.karaoke-version.com/custombackingtrack/search.html?query=Queen")]
     [InlineData(ProviderSource.PartyTyme, "", "https://www.partytyme.net/")]
-    [InlineData(ProviderSource.PartyTyme, "Sweet Caroline", "https://www.partytyme.net/search?q=Sweet%20Caroline")]
+    [InlineData(ProviderSource.PartyTyme, "Sweet Caroline", "https://www.partytyme.net/songshop/cat/search.php?search_what=all&search_keyword=Sweet%20Caroline&submit=GO")]
     [InlineData(ProviderSource.Sunfly, "", "https://www.sunflykaraoke.com/")]
-    [InlineData(ProviderSource.Sunfly, "Abba", "https://www.sunflykaraoke.com/catalogsearch/result/?q=Abba")]
+    [InlineData(ProviderSource.Sunfly, "Abba", "https://www.sunflykaraoke.com/?s=Abba&post_type=product")]
     [InlineData(ProviderSource.KaraokeCom, "", "https://karaoke.com/")]
     [InlineData(ProviderSource.KaraokeCom, "Journey", "https://karaoke.com/search?type=product&q=Journey")]
     public void Provider_BuildSearchUri_ConstructsValidUris(ProviderSource source, string query, string expectedUrl)

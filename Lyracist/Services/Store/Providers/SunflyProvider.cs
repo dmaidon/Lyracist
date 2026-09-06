@@ -1,4 +1,4 @@
-// Created on Sep 6, 2026 @ 12:47:00 -> Implement SunflyProvider plugin for Sunfly Karaoke catalog
+// Edited on Sep 6, 2026 @ 13:35:00 -> Fix search URL to ?s={query}&post_type=product to prevent 410
 using System;
 using System.IO;
 using System.Linq;
@@ -8,7 +8,7 @@ using Lyracist.Data.Services;
 namespace Lyracist.Services.Store.Providers;
 
 /// <summary>
-/// Store plugin for Sunfly Karaoke backing tracks and video MP4s.
+/// Store plugin for Sunfly Karaoke commercial backing tracks.
 /// </summary>
 public sealed class SunflyProvider : BaseStoreProvider
 {
@@ -20,7 +20,7 @@ public sealed class SunflyProvider : BaseStoreProvider
         string trimmed = query?.Trim() ?? string.Empty;
         return string.IsNullOrWhiteSpace(trimmed)
             ? new Uri("https://www.sunflykaraoke.com/")
-            : new Uri($"https://www.sunflykaraoke.com/catalogsearch/result/?q={Uri.EscapeDataString(trimmed)}");
+            : new Uri($"https://www.sunflykaraoke.com/?s={Uri.EscapeDataString(trimmed)}&post_type=product");
     }
 
     public override bool DetectFromFilename(string filename)

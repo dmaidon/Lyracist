@@ -1,4 +1,4 @@
-// Created on Sep 6, 2026 @ 12:46:30 -> Implement KaraokeVersionProvider plugin for Karaoke Version store
+// Edited on Sep 6, 2026 @ 13:35:00 -> Fix search URL to custombackingtrack/search.html?query= to prevent 404
 using System;
 using System.IO;
 using System.Linq;
@@ -20,7 +20,7 @@ public sealed class KaraokeVersionProvider : BaseStoreProvider
         string trimmed = query?.Trim() ?? string.Empty;
         return string.IsNullOrWhiteSpace(trimmed)
             ? new Uri("https://www.karaoke-version.com/")
-            : new Uri($"https://www.karaoke-version.com/search.html?q={Uri.EscapeDataString(trimmed)}");
+            : new Uri($"https://www.karaoke-version.com/custombackingtrack/search.html?query={Uri.EscapeDataString(trimmed)}");
     }
 
     public override bool DetectFromFilename(string filename)

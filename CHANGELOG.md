@@ -1,9 +1,18 @@
-<!-- Edited on Sep 6, 2026 @ 13:07:00 -> Document Store Notifications: StoreNotificationService, ToastNotificationControl, and audio pipeline/sync/bulk triggers -->
-Last Edit: Sep 6, 2026 - Store Notifications: Toast Alerts, Progress Milestones & Auto-Dismissal Architecture
+<!-- Edited on Sep 6, 2026 @ 13:35:00 -> Document Store Search URL Endpoint Corrections for Karaoke Version, Party Tyme, and Sunfly -->
+Last Edit: Sep 6, 2026 - Store Search URL Endpoint Corrections (Karaoke Version, Party Tyme, Sunfly)
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.31] - 2026-09-06
+
+### Fixed
+- **Store Deep-Link Search URLs 404 / 410 Errors (`Karaoke Version`, `Party Tyme`, `Sunfly`) (`Lyracist` ONLY)**:
+  - **Karaoke Version**: Corrected search endpoint from legacy/broken `search.html?q=` (which returned HTTP 404) to the active search route `custombackingtrack/search.html?query={encodedQuery}`.
+  - **Party Tyme**: Corrected search endpoint from legacy `search?q=` (which returned HTTP 404) to the active product search route `songshop/cat/search.php?search_what=all&search_keyword={encodedQuery}&submit=GO`.
+  - **Sunfly Karaoke**: Corrected search endpoint from legacy Magento `catalogsearch/result/?q=` (which returned HTTP 410 Gone) to the active WooCommerce product search route `?s={encodedQuery}&post_type=product`.
+  - **Synchronized Implementations**: Updated `KaraokeVersionProvider.cs`, `PartyTymeProvider.cs`, `SunflyProvider.cs`, `providerRegistry.ts`, `deepLink.ts`, and unit test assertions in `StoreImportTests.cs`.
 
 ## [26.9.5.30] - 2026-09-06
 

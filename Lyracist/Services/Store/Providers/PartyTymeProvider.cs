@@ -1,4 +1,4 @@
-// Created on Sep 6, 2026 @ 12:46:45 -> Implement PartyTymeProvider plugin for Party Tyme Karaoke store
+// Edited on Sep 6, 2026 @ 13:35:00 -> Fix search URL to songshop/cat/search.php to prevent 404
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -19,7 +19,7 @@ public sealed class PartyTymeProvider : BaseStoreProvider
         string trimmed = query?.Trim() ?? string.Empty;
         return string.IsNullOrWhiteSpace(trimmed)
             ? new Uri("https://www.partytyme.net/")
-            : new Uri($"https://www.partytyme.net/search?q={Uri.EscapeDataString(trimmed)}");
+            : new Uri($"https://www.partytyme.net/songshop/cat/search.php?search_what=all&search_keyword={Uri.EscapeDataString(trimmed)}&submit=GO");
     }
 
     public override bool DetectFromFilename(string filename)

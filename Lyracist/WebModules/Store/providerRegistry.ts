@@ -1,4 +1,4 @@
-// Created on Sep 6, 2026 @ 12:50:00 -> Implement modular Store Plugin API and ProviderRegistry in WebModules
+// Edited on Sep 6, 2026 @ 13:35:00 -> Update provider search URLs to working endpoints preventing 404 and 410 errors
 import * as path from "path";
 import * as fs from "fs";
 import { ProviderSource, TrackSource } from "./types";
@@ -102,7 +102,7 @@ export class KaraokeVersionProvider extends BaseStoreProvider {
   public buildSearchUrl(query: string): string {
     const trimmed = query.trim();
     if (!trimmed) return "https://www.karaoke-version.com/";
-    return `https://www.karaoke-version.com/search.html?q=${encodeURIComponent(trimmed)}`;
+    return `https://www.karaoke-version.com/custombackingtrack/search.html?query=${encodeURIComponent(trimmed)}`;
   }
 
   public detectFromFilename(filename: string): boolean {
@@ -169,7 +169,7 @@ export class PartyTymeProvider extends BaseStoreProvider {
   public buildSearchUrl(query: string): string {
     const trimmed = query.trim();
     if (!trimmed) return "https://www.partytyme.net/";
-    return `https://www.partytyme.net/search?q=${encodeURIComponent(trimmed)}`;
+    return `https://www.partytyme.net/songshop/cat/search.php?search_what=all&search_keyword=${encodeURIComponent(trimmed)}&submit=GO`;
   }
 
   public detectFromFilename(filename: string): boolean {
@@ -239,7 +239,7 @@ export class SunflyProvider extends BaseStoreProvider {
   public buildSearchUrl(query: string): string {
     const trimmed = query.trim();
     if (!trimmed) return "https://www.sunflykaraoke.com/";
-    return `https://www.sunflykaraoke.com/catalogsearch/result/?q=${encodeURIComponent(trimmed)}`;
+    return `https://www.sunflykaraoke.com/?s=${encodeURIComponent(trimmed)}&post_type=product`;
   }
 
   public detectFromFilename(filename: string): boolean {
