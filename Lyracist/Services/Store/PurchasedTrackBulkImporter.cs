@@ -27,6 +27,7 @@ public class BulkImportCandidate
     public string Artist { get; set; } = string.Empty;
     public string Provider { get; set; } = "Local";
     public string FileType { get; set; } = "Audio"; // "MP3+G", "ZIPCDG", "MP4", "Audio"
+    public string? Genre { get; set; }
     public double Duration { get; set; }
     public string DurationText => Duration > 0 ? TimeSpan.FromSeconds(Duration).ToString(@"m\:ss") : "--:--";
     public string Key { get; set; } = "--";
@@ -205,6 +206,7 @@ public class PurchasedTrackBulkImporter
             }
 
             // Smart Import Tag analysis
+            string? detectedGenre = FFprobeRunner.DetectGenre(source, probe);
             string detectedDifficulty = FFprobeRunner.DetectDifficulty(probe);
             string? detectedKey = FFprobeRunner.DetectKey(probe);
             double? detectedBpm = FFprobeRunner.DetectBpm(probe);
@@ -220,6 +222,7 @@ public class PurchasedTrackBulkImporter
                 Artist = parsed.Artist,
                 Provider = source,
                 FileType = fileType,
+                Genre = detectedGenre,
                 Duration = probe.Duration,
                 Key = detectedKey ?? "--",
                 Bpm = detectedBpm,
@@ -392,67 +395,26 @@ public class PurchasedTrackBulkImporter
                 using var context = new LyracistDbContext();
                 var searchService = new SearchService(context);
 
-                var existing = await context.Songs.FirstOrDefaultAsync(s => s.FilePath == finalPrimary, cancellationToken);
-                int songId;
-
-                if (existing != null)
+                await PurchasedTrackWatcherService.UpsertSongRecordAsync(context, searchService, new SongUpsertRequest
                 {
-                    existing.Title = candidate.Title;
-                    existing.Artist = candidate.Artist;
-                    existing.IsKaraoke = isKaraoke;
-                    existing.KaraokeType = candidate.FileType;
-                    if (candidate.Duration > 0) existing.Duration = candidate.Duration;
-                    existing.Difficulty = candidate.Difficulty;
-                    if (candidate.Key != "--") existing.Key = candidate.Key;
-                    if (candidate.Bpm.HasValue)
-                    {
-                        existing.BPM = candidate.Bpm.Value;
-                        existing.TempoDefault = candidate.Bpm.Value;
-                    }
-                    existing.VocalPresence = candidate.VocalPresence;
-                    existing.Quality = candidate.Quality;
-
-                    await context.SaveChangesAsync(cancellationToken);
-                    await searchService.IndexSongsBatch([existing]);
-                    songId = existing.SongId;
-                }
-                else
-                {
-                    string tags = candidate.Provider;
-                    if (candidate.HasDualAudio) tags = AppendTag(tags, "Dual-Audio");
-                    if (normalized) tags = AppendTag(tags, "Normalized");
-                    if (silenceTrimmed) tags = AppendTag(tags, "SilenceTrimmed");
-                    if (waveformPath != null) tags = AppendTag(tags, "Waveform");
-                    if (candidate.Difficulty != "Medium") tags = AppendTag(tags, candidate.Difficulty);
-                    if (candidate.Key != "--") tags = AppendTag(tags, $"Key:{candidate.Key}");
-                    if (candidate.Bpm.HasValue) tags = AppendTag(tags, $"{candidate.Bpm}BPM");
-                    tags = AppendTag(tags, candidate.VocalPresence);
-                    tags = AppendTag(tags, $"Quality:{candidate.Quality}");
-
-                    var newSong = new Song
-                    {
-                        Title = candidate.Title,
-                        Artist = candidate.Artist,
-                        FilePath = finalPrimary,
-                        IsKaraoke = isKaraoke,
-                        KaraokeType = candidate.FileType,
-                        Difficulty = candidate.Difficulty,
-                        Key = candidate.Key != "--" ? candidate.Key : null,
-                        BPM = candidate.Bpm,
-                        VocalPresence = candidate.VocalPresence,
-                        Quality = candidate.Quality,
-                        Tags = tags,
-                        Duration = candidate.Duration,
-                        KeyDefault = 0,
-                        TempoDefault = candidate.Bpm ?? 1.0,
-                        DateAdded = DateTime.UtcNow
-                    };
-
-                    context.Songs.Add(newSong);
-                    await context.SaveChangesAsync(cancellationToken);
-                    await searchService.IndexSongsBatch([newSong]);
-                    songId = newSong.SongId;
-                }
+                    FilePath = finalPrimary,
+                    Title = candidate.Title,
+                    Artist = candidate.Artist,
+                    IsKaraoke = isKaraoke,
+                    KaraokeType = candidate.FileType,
+                    Genre = candidate.Genre,
+                    Difficulty = candidate.Difficulty,
+                    Key = candidate.Key != "--" ? candidate.Key : null,
+                    Bpm = candidate.Bpm,
+                    VocalPresence = candidate.VocalPresence,
+                    Quality = candidate.Quality,
+                    Duration = candidate.Duration,
+                    Provider = candidate.Provider,
+                    HasDualAudio = candidate.HasDualAudio,
+                    Normalized = normalized,
+                    SilenceTrimmed = silenceTrimmed,
+                    HasWaveform = waveformPath != null
+                }, cancellationToken);
 
                 _libraryService?.NotifyLibraryUpdated();
 
@@ -514,28 +476,10 @@ public class PurchasedTrackBulkImporter
         return summary;
     }
 
-    private static string AppendTag(string tags, string newTag)
-    {
-        if (string.IsNullOrWhiteSpace(tags)) return newTag;
-        if (tags.Contains(newTag, StringComparison.OrdinalIgnoreCase)) return tags;
-        return $"{tags};{newTag}";
-    }
-
+    /// <summary>
+    /// Retained as a public entry point (used by existing tests) but delegates to the watcher's
+    /// implementation so the two importers can't drift apart on collision-naming behavior.
+    /// </summary>
     public static string GetUniqueDestinationPath(string folder, string fileName)
-    {
-        string dest = Path.Combine(folder, fileName);
-        if (!File.Exists(dest)) return dest;
-
-        string nameOnly = Path.GetFileNameWithoutExtension(fileName);
-        string ext = Path.GetExtension(fileName);
-        int counter = 1;
-
-        while (File.Exists(dest))
-        {
-            dest = Path.Combine(folder, $"{nameOnly} ({counter}){ext}");
-            counter++;
-        }
-
-        return dest;
-    }
+        => PurchasedTrackWatcherService.GetUniqueDestinationPath(folder, fileName);
 }

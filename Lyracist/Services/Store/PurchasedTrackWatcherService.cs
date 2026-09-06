@@ -47,6 +47,33 @@ public class PurchasedTrackItem
     public string? Quality { get; set; }
 }
 
+/// <summary>
+/// Everything needed to insert or update a Song's catalog row and tags. Shared by the watcher's
+/// single-file import and the bulk importer's batch import so the two paths can't drift apart on
+/// which fields/tags get written (they previously did: bulk import never set Genre, and neither
+/// path's "update existing" branch applied the Normalized/SilenceTrimmed/Waveform tags).
+/// </summary>
+public class SongUpsertRequest
+{
+    public string FilePath { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Artist { get; set; } = string.Empty;
+    public bool IsKaraoke { get; set; }
+    public string KaraokeType { get; set; } = string.Empty;
+    public string? Genre { get; set; }
+    public string Difficulty { get; set; } = string.Empty;
+    public string? Key { get; set; }
+    public double? Bpm { get; set; }
+    public string VocalPresence { get; set; } = string.Empty;
+    public string Quality { get; set; } = string.Empty;
+    public double Duration { get; set; }
+    public string Provider { get; set; } = "Local";
+    public bool HasDualAudio { get; set; }
+    public bool Normalized { get; set; }
+    public bool SilenceTrimmed { get; set; }
+    public bool HasWaveform { get; set; }
+}
+
 public class PurchasedImportLogItem
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N")[..8];
@@ -168,7 +195,7 @@ public class PurchasedTrackWatcherService : IDisposable
             _watcher = new FileSystemWatcher(folder)
             {
                 NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size,
-                IncludeSubdirectories = false,
+                IncludeSubdirectories = true,
                 EnableRaisingEvents = true
             };
 
@@ -582,88 +609,32 @@ public class PurchasedTrackWatcherService : IDisposable
             using var context = new LyracistDbContext();
             var searchService = new SearchService(context);
 
-            var existing = await context.Songs.FirstOrDefaultAsync(s => s.FilePath == finalPrimaryPath);
-            int songId;
-
             string typeLabel = isKaraoke
                 ? (string.IsNullOrEmpty(parsed.KaraokeType) ? (finalPrimaryPath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ? "ZIPCDG" : "MP3G") : parsed.KaraokeType)
                 : "Audio";
 
             double duration = probe.Duration > 0 ? probe.Duration : 0;
 
-            if (existing != null)
+            int songId = await UpsertSongRecordAsync(context, searchService, new SongUpsertRequest
             {
-                existing.Title = parsed.Title;
-                existing.Artist = parsed.Artist;
-                existing.IsKaraoke = isKaraoke;
-                existing.KaraokeType = typeLabel;
-                if (duration > 0) existing.Duration = duration;
-                if (!string.IsNullOrWhiteSpace(detectedGenre)) existing.Genre = detectedGenre;
-                existing.Difficulty = detectedDifficulty;
-                if (!string.IsNullOrWhiteSpace(detectedKey)) existing.Key = detectedKey;
-                if (detectedBpm.HasValue)
-                {
-                    existing.BPM = detectedBpm.Value;
-                    existing.TempoDefault = detectedBpm.Value;
-                }
-                existing.VocalPresence = detectedVocalPresence;
-                existing.Quality = detectedQuality;
-
-                if (!string.IsNullOrWhiteSpace(source) && source != "Local")
-                {
-                    existing.Tags = AppendTag(existing.Tags, source);
-                }
-                if (probe.HasDualAudio)
-                {
-                    existing.Tags = AppendTag(existing.Tags, "Dual-Audio");
-                }
-                if (!string.IsNullOrWhiteSpace(detectedGenre)) existing.Tags = AppendTag(existing.Tags, detectedGenre);
-                existing.Tags = AppendTag(existing.Tags, detectedDifficulty);
-                if (!string.IsNullOrWhiteSpace(detectedKey)) existing.Tags = AppendTag(existing.Tags, $"Key:{detectedKey}");
-                if (detectedBpm.HasValue) existing.Tags = AppendTag(existing.Tags, $"{detectedBpm}BPM");
-                existing.Tags = AppendTag(existing.Tags, detectedVocalPresence);
-                existing.Tags = AppendTag(existing.Tags, $"Quality:{detectedQuality}");
-
-                await context.SaveChangesAsync();
-                await searchService.IndexSongsBatch([existing]);
-                songId = existing.SongId;
-            }
-            else
-            {
-                string tags = source;
-                if (probe.HasDualAudio) tags = AppendTag(tags, "Dual-Audio");
-                if (!string.IsNullOrWhiteSpace(detectedGenre)) tags = AppendTag(tags, detectedGenre);
-                tags = AppendTag(tags, detectedDifficulty);
-                if (!string.IsNullOrWhiteSpace(detectedKey)) tags = AppendTag(tags, $"Key:{detectedKey}");
-                if (detectedBpm.HasValue) tags = AppendTag(tags, $"{detectedBpm}BPM");
-                tags = AppendTag(tags, detectedVocalPresence);
-                tags = AppendTag(tags, $"Quality:{detectedQuality}");
-
-                var newSong = new Song
-                {
-                    Title = parsed.Title,
-                    Artist = parsed.Artist,
-                    FilePath = finalPrimaryPath,
-                    IsKaraoke = isKaraoke,
-                    KaraokeType = typeLabel,
-                    Genre = detectedGenre ?? string.Empty,
-                    Difficulty = detectedDifficulty,
-                    Key = detectedKey,
-                    BPM = detectedBpm,
-                    VocalPresence = detectedVocalPresence,
-                    Quality = detectedQuality,
-                    Tags = tags,
-                    Duration = duration,
-                    KeyDefault = 0,
-                    TempoDefault = detectedBpm ?? 1.0,
-                    DateAdded = DateTime.UtcNow
-                };
-
-                context.Songs.Add(newSong);
-                await context.SaveChangesAsync();
-                await searchService.IndexSongsBatch([newSong]);
-                songId = newSong.SongId;
-            }
+                FilePath = finalPrimaryPath,
+                Title = parsed.Title,
+                Artist = parsed.Artist,
+                IsKaraoke = isKaraoke,
+                KaraokeType = typeLabel,
+                Genre = detectedGenre,
+                Difficulty = detectedDifficulty,
+                Key = detectedKey,
+                Bpm = detectedBpm,
+                VocalPresence = detectedVocalPresence,
+                Quality = detectedQuality,
+                Duration = duration,
+                Provider = source,
+                HasDualAudio = probe.HasDualAudio,
+                Normalized = normalized,
+                SilenceTrimmed = silenceTrimmed,
+                HasWaveform = !string.IsNullOrEmpty(waveformPath)
+            });
 
             _libraryService.NotifyLibraryUpdated();
 
@@ -803,7 +774,91 @@ public class PurchasedTrackWatcherService : IDisposable
         return string.Join(", ", tags);
     }
 
-    private static string GetUniqueDestinationPath(string folder, string fileName)
+    /// <summary>
+    /// Inserts or updates the Song catalog row and its tags for an imported track. Used by both
+    /// the watcher's single-file import and the bulk importer's batch import (see SongUpsertRequest).
+    /// </summary>
+    public static async Task<int> UpsertSongRecordAsync(
+        LyracistDbContext context,
+        SearchService searchService,
+        SongUpsertRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var existing = await context.Songs.FirstOrDefaultAsync(s => s.FilePath == request.FilePath, cancellationToken);
+        int songId;
+
+        if (existing != null)
+        {
+            existing.Title = request.Title;
+            existing.Artist = request.Artist;
+            existing.IsKaraoke = request.IsKaraoke;
+            existing.KaraokeType = request.KaraokeType;
+            if (request.Duration > 0) existing.Duration = request.Duration;
+            if (!string.IsNullOrWhiteSpace(request.Genre)) existing.Genre = request.Genre;
+            existing.Difficulty = request.Difficulty;
+            if (!string.IsNullOrWhiteSpace(request.Key)) existing.Key = request.Key;
+            if (request.Bpm.HasValue)
+            {
+                existing.BPM = request.Bpm.Value;
+                existing.TempoDefault = request.Bpm.Value;
+            }
+            existing.VocalPresence = request.VocalPresence;
+            existing.Quality = request.Quality;
+            existing.Tags = BuildSongTags(existing.Tags, request);
+
+            await context.SaveChangesAsync(cancellationToken);
+            await searchService.IndexSongsBatch([existing]);
+            songId = existing.SongId;
+        }
+        else
+        {
+            var newSong = new Song
+            {
+                Title = request.Title,
+                Artist = request.Artist,
+                FilePath = request.FilePath,
+                IsKaraoke = request.IsKaraoke,
+                KaraokeType = request.KaraokeType,
+                Genre = request.Genre ?? string.Empty,
+                Difficulty = request.Difficulty,
+                Key = request.Key,
+                BPM = request.Bpm,
+                VocalPresence = request.VocalPresence,
+                Quality = request.Quality,
+                Tags = BuildSongTags(null, request),
+                Duration = request.Duration,
+                KeyDefault = 0,
+                TempoDefault = request.Bpm ?? 1.0,
+                DateAdded = DateTime.UtcNow
+            };
+
+            context.Songs.Add(newSong);
+            await context.SaveChangesAsync(cancellationToken);
+            await searchService.IndexSongsBatch([newSong]);
+            songId = newSong.SongId;
+        }
+
+        return songId;
+    }
+
+    private static string BuildSongTags(string? startingTags, SongUpsertRequest request)
+    {
+        string tags = startingTags ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(request.Provider) && request.Provider != "Local") tags = AppendTag(tags, request.Provider);
+        if (request.HasDualAudio) tags = AppendTag(tags, "Dual-Audio");
+        if (request.Normalized) tags = AppendTag(tags, "Normalized");
+        if (request.SilenceTrimmed) tags = AppendTag(tags, "SilenceTrimmed");
+        if (request.HasWaveform) tags = AppendTag(tags, "Waveform");
+        if (!string.IsNullOrWhiteSpace(request.Genre)) tags = AppendTag(tags, request.Genre);
+        tags = AppendTag(tags, request.Difficulty);
+        if (!string.IsNullOrWhiteSpace(request.Key)) tags = AppendTag(tags, $"Key:{request.Key}");
+        if (request.Bpm.HasValue) tags = AppendTag(tags, $"{request.Bpm}BPM");
+        tags = AppendTag(tags, request.VocalPresence);
+        tags = AppendTag(tags, $"Quality:{request.Quality}");
+        return tags;
+    }
+
+    public static string GetUniqueDestinationPath(string folder, string fileName)
     {
         string destination = Path.Combine(folder, fileName);
         if (!File.Exists(destination)) return destination;
@@ -925,6 +980,16 @@ public class PurchasedTrackWatcherService : IDisposable
             string newBaseName = $"{cleanArtist} - {cleanTitle} ({abbr})";
             string dir = Path.GetDirectoryName(primaryFilePath)!;
             string primaryExt = Path.GetExtension(primaryFilePath);
+
+            // If the generated name collides with an unrelated existing file, disambiguate with a
+            // numeric suffix instead of silently overwriting someone else's track. The companion
+            // and lyrics files below reuse this same (possibly suffixed) base name so the set stays paired.
+            string candidatePrimary = Path.Combine(dir, newBaseName + primaryExt);
+            if (File.Exists(candidatePrimary) && !candidatePrimary.Equals(primaryFilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                newBaseName = Path.GetFileNameWithoutExtension(GetUniqueDestinationPath(dir, newBaseName + primaryExt));
+            }
+
             string newPrimary = Path.Combine(dir, newBaseName + primaryExt);
 
             if (!primaryFilePath.Equals(newPrimary, StringComparison.OrdinalIgnoreCase))
