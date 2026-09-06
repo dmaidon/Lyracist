@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 09:02:30 -> Add Tags property
+// Edited on Sep 6, 2026 @ 11:22:00 -> Add Difficulty, Key, BPM, VocalPresence, and Quality properties
 using System;
 using System.Collections.Generic;
 
@@ -18,6 +18,11 @@ namespace Lyracist.Data.Models
         public int KeyDefault { get; set; }
         public double TempoDefault { get; set; }
         public double? MeasuredLoudnessLufs { get; set; }
+        public string? Difficulty { get; set; }
+        public string? Key { get; set; }
+        public double? BPM { get; set; }
+        public string? VocalPresence { get; set; }
+        public string? Quality { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
         public DateTime? LastPlayed { get; set; }
         public int PlayCount { get; set; }

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 6, 2026 @ 06:33:00 -> Wrap Test Mode and Save Current Rotation in Rotation Settings groupbox under Network IP Setup -->
+<!-- Edited on Sep 6, 2026 @ 10:15:00 -> Set high-contrast light text foreground across Users tab to prevent black text on dark background -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1056,8 +1056,8 @@
                                                 Click="OnKioskQrCodeButtonClicked"
                                                 ToolTip="Open Tablet Kiosk QR Code and Link">
                                             <StackPanel Orientation="Horizontal">
-                                                <materialDesign:PackIcon Kind="Tablet" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0"/>
-                                                <TextBlock Text="Kiosk" FontSize="10" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <materialDesign:PackIcon Kind="Tablet" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0" />
+                                                <TextBlock Text="Kiosk" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
                                             </StackPanel>
                                         </Button>
                                     </Grid>
@@ -1637,12 +1637,57 @@
                                          IsChecked="{Binding IsTestMode}"
                                          Style="{StaticResource ModernCheckBoxStyle}"
                                          Margin="0,0,0,10" />
+                                <CheckBox
+                                         Content="Block Duplicate Songs in Session"
+                                         IsChecked="{Binding BlockDuplicateSongsInSession}"
+                                         Style="{StaticResource ModernCheckBoxStyle}"
+                                         Margin="0,0,0,10"
+                                         ToolTip="When enabled, patrons cannot request a song via the patron portal that has already been performed or queued in the current session." />
                                 <Button
                                          Content="Save Current Rotation as Test List"
                                          Command="{Binding SaveCurrentAsTestListCommand}"
                                          HorizontalAlignment="Center"
                                          Width="260"
                                          Style="{StaticResource ModernButtonStyle}" />
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Session Schedule &amp; Request Cutoff"
+                                  Style="{StaticResource NavySettingsGroupBoxStyle}"
+                                  Padding="14,10,14,12"
+                                  Margin="0,0,0,12">
+                            <StackPanel Margin="0,4,0,0">
+                                <CheckBox
+                                         Content="Enable Session Schedule"
+                                         IsChecked="{Binding EnableSessionSchedule}"
+                                         Style="{StaticResource ModernCheckBoxStyle}"
+                                         Margin="0,0,0,8"
+                                         ToolTip="Restrict patron and kiosk requests to the scheduled session timeframe." />
+                                <Grid Margin="0,0,0,10" IsEnabled="{Binding EnableSessionSchedule}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Start Time" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <ComboBox ItemsSource="{Binding TimeOptions}" Width="100" HorizontalAlignment="Left" SelectedItem="{Binding SessionStartTime, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" Style="{StaticResource ModernComboBoxStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Stop Time" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <ComboBox ItemsSource="{Binding TimeOptions}" Width="100" HorizontalAlignment="Left" SelectedItem="{Binding SessionStopTime, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" Style="{StaticResource ModernComboBoxStyle}" />
+                                    </StackPanel>
+                                </Grid>
+                                <CheckBox
+                                         Content="Enable Last Request Cutoff"
+                                         IsChecked="{Binding EnableLastRequestTime}"
+                                         Style="{StaticResource ModernCheckBoxStyle}"
+                                         Margin="0,0,0,8"
+                                         ToolTip="Set a cutoff time after which patrons and kiosk users can no longer submit new song requests." />
+                                <StackPanel IsEnabled="{Binding EnableLastRequestTime}" Margin="0,0,0,4">
+                                    <TextBlock Text="Last Request Time" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                    <ComboBox ItemsSource="{Binding TimeOptions}" Width="100" HorizontalAlignment="Left" SelectedItem="{Binding LastRequestTime, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" Style="{StaticResource ModernComboBoxStyle}" />
+                                </StackPanel>
                             </StackPanel>
                         </GroupBox>
                     </StackPanel>
@@ -1755,7 +1800,6 @@
                             </Grid>
                         </StackPanel>
                     </GroupBox>
-
 
                     <!-- Email settings container panel with shaded background -->
                     <GroupBox Header="Email Settings"
@@ -2061,6 +2105,686 @@
                         </GroupBox>
                     </Grid>
                 </ScrollViewer>
+            </TabItem>
+
+            <!-- Users & Singers Management Tab -->
+            <TabItem Header="Users" Width="70" Height="45">
+                <Grid Margin="16" TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Top Banner Header -->
+                    <Border Grid.Row="0" Background="{DynamicResource MaterialDesignCardBackground}"
+                            BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="10" Padding="16,12" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🎤" FontSize="26" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                <StackPanel>
+                                    <TextBlock Text="Singer Profiles &amp; User Accounts" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" />
+                                    <TextBlock Text="Manage performer credentials, PINs, default vocal key &amp; audio profiles, duplicate account merging, and past song history."
+                                               FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,2,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Content="New Singer"
+                                        Command="{Binding AddNewUserCommand}"
+                                        Style="{StaticResource ModernButtonStyle}"
+                                        Height="34" Padding="14,0" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Main Two-Column Layout -->
+                    <Grid Grid.Row="1" TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="340" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left Pane: Singer Account List -->
+                        <Border Grid.Column="0"
+                                Background="{DynamicResource MaterialDesignCardBackground}"
+                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="12"
+                                TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Search Box -->
+                                <TextBox Grid.Row="0"
+                                         Text="{Binding UserSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource ModernTextBoxStyle}"
+                                         materialDesign:HintAssist.Hint="Search singers by name, email, or title..."
+                                         Margin="0,0,0,10"
+                                         Height="36" />
+
+                                <!-- Singer List -->
+                                <ListBox Grid.Row="1"
+                                         ItemsSource="{Binding FilteredUsers}"
+                                         SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         BorderThickness="0"
+                                         Background="Transparent">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="6,6" Margin="0,2" CornerRadius="6" Background="Transparent">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Avatar Thumbnail -->
+                                                    <Border Grid.Column="0" Width="38" Height="38" CornerRadius="19"
+                                                            BorderBrush="#0EA5E9" BorderThickness="1.5"
+                                                            Margin="0,0,10,0" Background="#222" ClipToBounds="True">
+                                                        <Grid>
+                                                            <TextBlock Text="👤" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#888" />
+                                                            <Image Source="{Binding AvatarImage}" Stretch="UniformToFill" />
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Name & Details -->
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"
+                                                                   TextTrimming="CharacterEllipsis" Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                        <TextBlock FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" TextTrimming="CharacterEllipsis">
+                                                            <Run Text="{Binding SongsText, Mode=OneWay}" />
+                                                            <Run Text=" · " />
+                                                            <Run Text="{Binding VocalRange, Mode=OneWay}" />
+                                                        </TextBlock>
+                                                    </StackPanel>
+
+                                                    <!-- Level Badge -->
+                                                    <Border Grid.Column="2" Background="#1E3A5F" BorderBrush="#0EA5E9" BorderThickness="1"
+                                                            CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding LevelText}" FontSize="11" FontWeight="Bold" Foreground="#38BDF8" />
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <!-- Bottom Left Actions -->
+                                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                    <Button Content="Delete Singer"
+                                            Command="{Binding DeleteUserCommand}"
+                                            IsEnabled="{Binding HasSelectedUser}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Height="32" Padding="12,0" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Right Pane: Singer Details & Settings Editor -->
+                        <Border Grid.Column="2"
+                                Background="{DynamicResource MaterialDesignCardBackground}"
+                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="16"
+                                TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                            <Grid>
+                                <!-- Empty State Placeholder -->
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Visibility="{Binding HasNoSelectedUser, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="👥" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                                    <TextBlock Text="No Performer Selected" FontSize="18" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Choose a performer from the list on the left or create a new one."
+                                               FontSize="13" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,4,0,0" />
+                                </StackPanel>
+
+                                <!-- Active Editor View -->
+                                <Grid Visibility="{Binding HasSelectedUser, Converter={StaticResource BoolToVis}}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Top Profile Header Card -->
+                                    <Border Grid.Row="0"
+                                            Background="{DynamicResource MaterialDesignPaper}"
+                                            BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Padding="14"
+                                            Margin="0,0,0,12">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Avatar Preview & Actions -->
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center">
+                                                <Border Width="68" Height="68" CornerRadius="34"
+                                                        BorderBrush="#0EA5E9" BorderThickness="2"
+                                                        Background="#181818" ClipToBounds="True">
+                                                    <Grid>
+                                                        <TextBlock Text="👤" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#666" />
+                                                        <Image Source="{Binding EditUserAvatarImage}" Stretch="UniformToFill" />
+                                                    </Grid>
+                                                </Border>
+                                                <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
+                                                    <Button Content="Take Photo"
+                                                            Command="{Binding OpenUserWebcamCaptureCommand}"
+                                                            Style="{StaticResource ModernButtonStyle}"
+                                                            Height="28" Padding="8,0" Margin="0,0,0,4"
+                                                            ToolTip="Take a live photo of the performer using a connected webcam" />
+                                                    <Button Content="Upload Photo"
+                                                            Command="{Binding UploadUserAvatarCommand}"
+                                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                            Height="28" Padding="8,0" Margin="0,0,0,4"
+                                                            ToolTip="Select a custom photo from your computer" />
+                                                    <Button Content="Clear Photo"
+                                                            Command="{Binding ClearUserAvatarCommand}"
+                                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                            Height="28" Padding="8,0" />
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <!-- Performer Name & Badges -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding SelectedUser.Name}" FontSize="22" FontWeight="Bold"
+                                                           Foreground="{DynamicResource AppContrastTextBrush}" TextTrimming="CharacterEllipsis" />
+                                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                                    <Border Background="#2A1E35" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                                        <TextBlock Text="{Binding SelectedUser.LevelText}" FontSize="11" FontWeight="Bold" Foreground="#FF8E53" />
+                                                    </Border>
+                                                    <Border Background="#1E3A5F" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
+                                                        <TextBlock Text="{Binding SelectedUser.Score, StringFormat='{}{0} XP'}" FontSize="11" FontWeight="SemiBold" Foreground="#38BDF8" />
+                                                    </Border>
+                                                    <Border Background="#1B382B" CornerRadius="4" Padding="6,2">
+                                                        <TextBlock Text="{Binding SelectedUser.SongsText}" FontSize="11" FontWeight="SemiBold" Foreground="#34D399" />
+                                                    </Border>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <!-- Merge Duplicate Button -->
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                <Button Content="Merge Duplicate..."
+                                                        Command="{Binding OpenUserMergePopupCommand}"
+                                                        Style="{StaticResource ModernButtonStyle}"
+                                                        Height="34" Padding="12,0" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Status Message Toast Banner -->
+                                    <Border Grid.Row="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,10"
+                                            Visibility="{Binding HasUserStatusMessage, Converter={StaticResource BoolToVis}}">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#1E3A5F" />
+                                                <Setter Property="BorderBrush" Value="#0EA5E9" />
+                                                <Setter Property="BorderThickness" Value="1" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsUserStatusSuccess}" Value="False">
+                                                        <Setter Property="Background" Value="#3D1A1A" />
+                                                        <Setter Property="BorderBrush" Value="#EF4444" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding UserStatusMessage}" FontWeight="SemiBold" FontSize="12" Foreground="White" />
+                                    </Border>
+
+                                    <!-- Sub-Tabs for Details, Defaults, and History -->
+                                    <TabControl Grid.Row="2" Background="Transparent" BorderThickness="0" Style="{StaticResource BorderedTabControlStyle}">
+                                        <!-- TAB 1: Profile & PIN -->
+                                        <TabItem Header="Profile &amp; PIN">
+                                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,10,0,0">
+                                                <StackPanel MaxWidth="620" HorizontalAlignment="Left">
+                                                    <!-- Performer Name -->
+                                                    <TextBlock Text="Singer Name" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                    <TextBox Text="{Binding EditUserName, UpdateSourceTrigger=PropertyChanged}"
+                                                             Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,0,12" Height="36" />
+
+                                                    <!-- PIN & Email -->
+                                                    <Grid Margin="0,0,0,12">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="14" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="Portal PIN Code" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                            <TextBox Text="{Binding EditUserPin, UpdateSourceTrigger=PropertyChanged}"
+                                                                     materialDesign:HintAssist.Hint="4-digit PIN for portal login"
+                                                                     Style="{StaticResource ModernTextBoxStyle}" Height="36" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2">
+                                                            <TextBlock Text="Email Address" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                            <TextBox Text="{Binding EditUserEmail, UpdateSourceTrigger=PropertyChanged}"
+                                                                     materialDesign:HintAssist.Hint="Optional patron email"
+                                                                     Style="{StaticResource ModernTextBoxStyle}" Height="36" />
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <!-- Vocal Range & Custom Title -->
+                                                    <Grid Margin="0,0,0,12">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="14" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="Vocal Range" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                            <ComboBox ItemsSource="{Binding VocalRangeOptions}"
+                                                                      SelectedItem="{Binding EditUserVocalRange, Mode=TwoWay}"
+                                                                      Style="{StaticResource ModernComboBoxStyle}" Height="36" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2">
+                                                            <TextBlock Text="Custom Title / Nickname" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                            <TextBox Text="{Binding EditUserCustomTitle, UpdateSourceTrigger=PropertyChanged}"
+                                                                     materialDesign:HintAssist.Hint="e.g. VIP Performer"
+                                                                     Style="{StaticResource ModernTextBoxStyle}" Height="36" />
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <!-- XP & Songs -->
+                                                    <Grid Margin="0,0,0,12">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="14" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="Experience Score (XP)" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                            <TextBox Text="{Binding EditUserScore, UpdateSourceTrigger=PropertyChanged}"
+                                                                     Style="{StaticResource ModernTextBoxStyle}" Height="36" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2">
+                                                            <TextBlock Text="Total Songs Sung" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                            <TextBox Text="{Binding EditUserTotalSongs, UpdateSourceTrigger=PropertyChanged}"
+                                                                     Style="{StaticResource ModernTextBoxStyle}" Height="36" />
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <!-- Notes -->
+                                                    <TextBlock Text="Performer Notes" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                    <TextBox Text="{Binding EditUserNotes, UpdateSourceTrigger=PropertyChanged}"
+                                                             Style="{StaticResource ModernTextBoxStyle}"
+                                                             AcceptsReturn="True" Height="70" TextWrapping="Wrap" Margin="0,0,0,12" />
+                                                </StackPanel>
+                                            </ScrollViewer>
+                                        </TabItem>
+
+                                        <!-- TAB 2: Audio & Voice Defaults -->
+                                        <TabItem Header="Audio Defaults">
+                                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,10,0,0">
+                                                <StackPanel MaxWidth="650" HorizontalAlignment="Left">
+                                                    <TextBlock Text="These audio settings automatically apply whenever this singer performs:"
+                                                               FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,16" />
+
+                                                    <!-- Mic Gain -->
+                                                    <Grid Margin="0,0,0,12">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="160" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="60" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="Microphone Gain" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" VerticalAlignment="Center" />
+                                                        <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding EditUserGain, Mode=TwoWay}" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="2" Text="{Binding EditUserGain, StringFormat='{}{0:0}%'}" TextAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                    </Grid>
+
+                                                    <!-- Key Transposition -->
+                                                    <Grid Margin="0,0,0,12">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="160" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="60" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="Key Transposition" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" VerticalAlignment="Center" />
+                                                        <Slider Grid.Column="1" Minimum="-12" Maximum="12" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                                Value="{Binding EditUserKey, Mode=TwoWay}" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="2" Text="{Binding EditUserKey, StringFormat='{}{0:+0;-0;0}'}" TextAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                    </Grid>
+
+                                                    <!-- Tempo -->
+                                                    <Grid Margin="0,0,0,12">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="160" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="60" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="Playback Speed" FontWeight="SemiBold" Foreground="{DynamicResource AppContrastTextBrush}" VerticalAlignment="Center" />
+                                                        <Slider Grid.Column="1" Minimum="0.8" Maximum="1.2" TickFrequency="0.05"
+                                                                Value="{Binding EditUserTempo, Mode=TwoWay}" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="2" Text="{Binding EditUserTempo, StringFormat='{}{0:0.0}x'}" TextAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                    </Grid>
+
+                                                    <!-- 3-Band EQ -->
+                                                    <GroupBox Header="3-Band EQ (Tone Controls)" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,10,0,12" Padding="10">
+                                                        <StackPanel>
+                                                            <Grid Margin="0,4,0,8">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="120" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="60" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Grid.Column="0" Text="Treble" Foreground="{DynamicResource AppContrastTextBrush}" VerticalAlignment="Center" />
+                                                                <Slider Grid.Column="1" Minimum="-15" Maximum="15" Value="{Binding EditUserTreble, Mode=TwoWay}" VerticalAlignment="Center" />
+                                                                <TextBlock Grid.Column="2" Text="{Binding EditUserTreble, StringFormat='{}{0:0.0} dB'}" TextAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                            </Grid>
+                                                            <Grid Margin="0,0,0,8">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="120" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="60" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Grid.Column="0" Text="Mid" Foreground="{DynamicResource AppContrastTextBrush}" VerticalAlignment="Center" />
+                                                                <Slider Grid.Column="1" Minimum="-15" Maximum="15" Value="{Binding EditUserMid, Mode=TwoWay}" VerticalAlignment="Center" />
+                                                                <TextBlock Grid.Column="2" Text="{Binding EditUserMid, StringFormat='{}{0:0.0} dB'}" TextAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                            </Grid>
+                                                            <Grid Margin="0,0,0,4">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="120" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="60" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Grid.Column="0" Text="Bass" Foreground="{DynamicResource AppContrastTextBrush}" VerticalAlignment="Center" />
+                                                                <Slider Grid.Column="1" Minimum="-15" Maximum="15" Value="{Binding EditUserBass, Mode=TwoWay}" VerticalAlignment="Center" />
+                                                                <TextBlock Grid.Column="2" Text="{Binding EditUserBass, StringFormat='{}{0:0.0} dB'}" TextAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                            </Grid>
+                                                        </StackPanel>
+                                                    </GroupBox>
+
+                                                    <!-- Dynamics -->
+                                                    <Grid Margin="0,0,0,14">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="14" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="Compressor Amount" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                            <Slider Minimum="0" Maximum="100" Value="{Binding EditUserCompressor, Mode=TwoWay}" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2">
+                                                            <TextBlock Text="Limiter Threshold" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                            <Slider Minimum="0" Maximum="100" Value="{Binding EditUserLimiter, Mode=TwoWay}" />
+                                                        </StackPanel>
+                                                    </Grid>
+
+                                                    <TextBlock Text="Audio Notes / Sound Check Remarks" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,4" />
+                                                    <TextBox Text="{Binding EditUserSoundCheck, UpdateSourceTrigger=PropertyChanged}"
+                                                             Style="{StaticResource ModernTextBoxStyle}"
+                                                             AcceptsReturn="True" Height="60" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </ScrollViewer>
+                                        </TabItem>
+
+                                        <!-- TAB 3: Song Performance History -->
+                                        <TabItem Header="Performance History">
+                                            <Grid Margin="0,10,0,0">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Text="All songs performed by this singer, with recalled key and speed settings:"
+                                                           FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8" />
+
+                                                <DataGrid Grid.Row="1"
+                                                          ItemsSource="{Binding UserPerformanceHistory}"
+                                                          AutoGenerateColumns="False"
+                                                          CanUserAddRows="False"
+                                                          CanUserDeleteRows="False"
+                                                          IsReadOnly="True"
+                                                          SelectionMode="Single"
+                                                          GridLinesVisibility="Horizontal"
+                                                          Background="Transparent"
+                                                          Foreground="{DynamicResource AppContrastTextBrush}"
+                                                          BorderThickness="1"
+                                                          BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                                          RowHeight="36">
+                                                    <DataGrid.Resources>
+                                                        <Style TargetType="DataGridColumnHeader">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                            <Setter Property="FontWeight" Value="SemiBold" />
+                                                        </Style>
+                                                        <Style TargetType="DataGridCell">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                        </Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
+                                                        </Style>
+                                                    </DataGrid.Resources>
+                                                    <DataGrid.Columns>
+                                                        <DataGridTextColumn Header="Song Title" Binding="{Binding SongTitle}" Width="*" />
+                                                        <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="150" />
+                                                        <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="60" />
+                                                        <DataGridTextColumn Header="Speed" Binding="{Binding Tempo, StringFormat='{}{0:0.0}x'}" Width="70" />
+                                                        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="80" />
+                                                        <DataGridTextColumn Header="Date &amp; Time" Binding="{Binding FormattedDate}" Width="160" />
+                                                        <DataGridTemplateColumn Header="Actions" Width="170">
+                                                            <DataGridTemplateColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                                        <Button Content="Queue"
+                                                                                Style="{StaticResource ModernButtonStyle}"
+                                                                                Height="26" Padding="8,0"
+                                                                                Margin="0,0,6,0"
+                                                                                Command="{Binding DataContext.QueueUserHistoricalSongCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                                CommandParameter="{Binding}"
+                                                                                ToolTip="Queue this song into the active rotation" />
+                                                                        <Button Content="Remove"
+                                                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                                                Height="26" Padding="8,0"
+                                                                                Command="{Binding DataContext.DeleteUserHistoricalSongCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                                CommandParameter="{Binding}"
+                                                                                ToolTip="Remove this record from history" />
+                                                                    </StackPanel>
+                                                                </DataTemplate>
+                                                            </DataGridTemplateColumn.CellTemplate>
+                                                        </DataGridTemplateColumn>
+                                                    </DataGrid.Columns>
+                                                </DataGrid>
+                                            </Grid>
+                                        </TabItem>
+                                    </TabControl>
+
+                                    <!-- Bottom Action Bar -->
+                                    <Border Grid.Row="3" Margin="0,14,0,0" Padding="0,12,0,0" BorderThickness="0,1,0,0"
+                                            BorderBrush="{DynamicResource MaterialDesignDivider}">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Content="Save Changes"
+                                                    Command="{Binding SaveUserCommand}"
+                                                    Style="{StaticResource ModernButtonStyle}"
+                                                    FontWeight="SemiBold"
+                                                    Height="36" Padding="20,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Merge Duplicate Accounts Modal / Overlay -->
+                    <Border Grid.Row="0" Grid.RowSpan="2"
+                            Background="#B0000000"
+                            Panel.ZIndex="1000"
+                            Visibility="{Binding IsUserMergeOpen, Converter={StaticResource BoolToVis}}">
+                        <Border Background="{DynamicResource MaterialDesignPaper}"
+                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="1.5"
+                                CornerRadius="12"
+                                Padding="24"
+                                Width="500"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                            <StackPanel>
+                                <TextBlock Text="Merge Duplicate Singer Account" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="Consolidate another performer profile into the currently selected account:" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8" />
+
+                                <!-- Target Account -->
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,14">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Target (Keep): " FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <TextBlock Text="{Binding SelectedUser.Name}" FontWeight="Bold" Foreground="#0EA5E9" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Duplicate Account Selector -->
+                                <TextBlock Text="Select Duplicate Account to Merge &amp; Remove:" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,0,6" />
+                                <ComboBox ItemsSource="{Binding UserMergeCandidates}"
+                                          SelectedItem="{Binding SelectedMergeUser, Mode=TwoWay}"
+                                          DisplayMemberPath="Name"
+                                          Style="{StaticResource ModernComboBoxStyle}"
+                                          Margin="0,0,0,14" Height="36" />
+
+                                <TextBlock Text="All historical song performances, requests, and XP points from the duplicate account will be transferred to the target account. The duplicate account will then be permanently deleted."
+                                           TextWrapping="Wrap" FontSize="12" Foreground="#F59E0B" Margin="0,0,0,18" />
+
+                                <!-- Dialog Buttons -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="Cancel"
+                                            Command="{Binding CancelUserMergeCommand}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Height="32" Padding="14,0" Margin="0,0,10,0" />
+                                    <Button Content="Confirm Merge"
+                                            Command="{Binding ExecuteUserMergeCommand}"
+                                            Style="{StaticResource ModernButtonStyle}"
+                                            FontWeight="SemiBold"
+                                            Height="32" Padding="14,0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Border>
+
+                    <!-- Webcam Photo Capture Modal / Overlay -->
+                    <Border Grid.Row="0" Grid.RowSpan="2"
+                            Background="#B0000000"
+                            Panel.ZIndex="1000"
+                            Visibility="{Binding IsUserWebcamOpen, Converter={StaticResource BoolToVis}}">
+                        <Border Background="{DynamicResource MaterialDesignPaper}"
+                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                BorderThickness="1.5"
+                                CornerRadius="12"
+                                Padding="24"
+                                Width="540"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                TextElement.Foreground="{DynamicResource AppContrastTextBrush}">
+                            <StackPanel>
+                                <!-- Title & Close -->
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Webcam Performer Snapshot" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBlock Text="Capture a live photo of the performer for their avatar profile and rotation billboard."
+                                                   FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="✕"
+                                            Command="{Binding CloseUserWebcamCaptureCommand}"
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Height="28" Width="28" Padding="0" VerticalAlignment="Top" />
+                                </Grid>
+
+                                <!-- Camera Selector (when cameras exist) -->
+                                <Grid Margin="0,0,0,12" Visibility="{Binding HasUserWebcamDevice, Converter={StaticResource BoolToVis}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Select Camera:" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource AppContrastTextBrush}" Margin="0,0,10,0" />
+                                    <ComboBox Grid.Column="1" ItemsSource="{Binding UserAvailableCameras}"
+                                              SelectedItem="{Binding SelectedUserCamera, Mode=TwoWay}"
+                                              DisplayMemberPath="Name"
+                                              Style="{StaticResource ModernComboBoxStyle}" Height="34" />
+                                </Grid>
+
+                                <!-- Live / Captured Viewport -->
+                                <Border Width="480" Height="360" Background="#111" CornerRadius="8"
+                                        BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1"
+                                        ClipToBounds="True" Margin="0,0,0,14">
+                                    <Grid>
+                                        <!-- No Camera Detected View -->
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                    Visibility="{Binding HasNoUserWebcamDevice, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="📷" FontSize="48" Foreground="#888" Margin="0,0,0,8" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{Binding UserWebcamStatusMessage}" Foreground="#AAA" FontSize="12"
+                                                       TextAlignment="Center" TextWrapping="Wrap" MaxWidth="380" />
+                                        </StackPanel>
+
+                                        <!-- Live Stream Image -->
+                                        <Image Source="{Binding UserWebcamLiveFrame}" Stretch="Uniform"
+                                               Visibility="{Binding IsUserWebcamStreaming, Converter={StaticResource BoolToVis}}" />
+
+                                        <!-- Captured Snapshot Image (Frozen) -->
+                                        <Image Source="{Binding UserWebcamCapturedFrame}" Stretch="Uniform"
+                                               Visibility="{Binding IsUserWebcamFrozen, Converter={StaticResource BoolToVis}}" />
+
+                                        <!-- Framing Guideline Circle for Performer Headshot -->
+                                        <Ellipse Width="260" Height="260" Stroke="#40FFFFFF" StrokeThickness="2" StrokeDashArray="3 3"
+                                                 IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                 Visibility="{Binding HasUserWebcamDevice, Converter={StaticResource BoolToVis}}" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Action Buttons -->
+                                <Grid>
+                                    <!-- When No Camera Detected -->
+                                    <Button Content="Close" Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            HorizontalAlignment="Right" Height="32" Padding="14,0"
+                                            Command="{Binding CloseUserWebcamCaptureCommand}"
+                                            Visibility="{Binding HasNoUserWebcamDevice, Converter={StaticResource BoolToVis}}" />
+
+                                    <!-- When Streaming Live: Capture Button -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                                Visibility="{Binding IsUserWebcamStreaming, Converter={StaticResource BoolToVis}}">
+                                        <Button Content="Cancel" Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Command="{Binding CloseUserWebcamCaptureCommand}"
+                                                Height="32" Padding="14,0" Margin="0,0,10,0" />
+                                        <Button Content="Capture Snapshot" Style="{StaticResource ModernButtonStyle}"
+                                                Command="{Binding CaptureUserWebcamSnapshotCommand}"
+                                                FontWeight="SemiBold" Height="32" Padding="16,0" />
+                                    </StackPanel>
+
+                                    <!-- When Frozen (Snapshot Taken): Retake / Save & Apply -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                                Visibility="{Binding IsUserWebcamFrozen, Converter={StaticResource BoolToVis}}">
+                                        <Button Content="Retake" Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Command="{Binding RetakeUserWebcamSnapshotCommand}"
+                                                Height="32" Padding="14,0" Margin="0,0,10,0" />
+                                        <Button Content="Save &amp; Apply Photo" Style="{StaticResource ModernButtonStyle}"
+                                                Command="{Binding ApplyUserWebcamSnapshotCommand}"
+                                                FontWeight="SemiBold" Height="32" Padding="16,0" />
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </Border>
+                </Grid>
             </TabItem>
 
             <!-- 5. Live Trivia Host Console Tab -->

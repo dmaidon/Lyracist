@@ -1,4 +1,4 @@
-// Edited on Sep 3, 2026 @ 23:55:00 -> Add IsLastRound support and filter sung performers from rotation billboard
+// Edited on Sep 6, 2026 @ 08:37:45 -> Support performer selfie avatar on Vegas billboard and vinyl rotation banners
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -30,6 +30,12 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     [ObservableProperty]
     private int _currentSingerRatingCount = 0;
+
+    [ObservableProperty]
+    private System.Windows.Media.ImageSource? _currentSingerAvatar;
+
+    [ObservableProperty]
+    private bool _hasCurrentSingerAvatar;
 
     [ObservableProperty]
     private bool _currentSingerHasRatings = false;
@@ -255,6 +261,26 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerRatingCount = now.RatingCount;
             CurrentSingerHasRatings = now.RatingCount > 0;
             CurrentSingerIsRotationStart = now.IsRotationStart;
+
+            var avatar = SingerAvatarConverter.ResolveSingerAvatar(now);
+            if (avatar == null && !string.IsNullOrEmpty(now.Name))
+            {
+                try
+                {
+                    using var db = new Lyracist.Data.LyracistDbContext();
+                    var dbSinger = db.Singers.FirstOrDefault(s => s.Name == now.Name);
+                    if (dbSinger != null)
+                    {
+                        avatar = SingerAvatarConverter.ResolveAvatarImage(dbSinger.AvatarType, dbSinger.AvatarSource);
+                    }
+                }
+                catch
+                {
+                    // Ignored
+                }
+            }
+            CurrentSingerAvatar = avatar;
+            HasCurrentSingerAvatar = avatar != null;
         }
         else
         {
@@ -266,6 +292,8 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerRatingCount = 0;
             CurrentSingerHasRatings = false;
             CurrentSingerIsRotationStart = false;
+            CurrentSingerAvatar = null;
+            HasCurrentSingerAvatar = false;
         }
 
         var next = visibleSingers.FirstOrDefault(s => s.IsNext);

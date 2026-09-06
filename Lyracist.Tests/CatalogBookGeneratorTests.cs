@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 07:51:00 -> Include WAL and SHM files in test database staging
+// Edited on Sep 6, 2026 @ 10:08:00 -> Checkpoint WAL before test database staging and isolate per-file copies
 using System;
 using System.IO;
 using Xunit;
@@ -31,7 +31,26 @@ namespace Lyracist.Tests
                         Directory.CreateDirectory(targetDir);
                         try
                         {
-                            foreach (var ext in new[] { "", "-wal", "-shm" })
+                            using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={sourceDb};Pooling=False"))
+                            {
+                                conn.Open();
+                                using var cmd = conn.CreateCommand();
+                                cmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        catch
+                        {
+                            // Ignore if busy or cannot checkpoint
+                        }
+                        finally
+                        {
+                            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+                        }
+
+                        foreach (var ext in new[] { "", "-wal", "-shm" })
+                        {
+                            try
                             {
                                 string s = sourceDb + ext;
                                 string t = targetDb + ext;
@@ -44,11 +63,15 @@ namespace Lyracist.Tests
                                     File.Copy(s, t, overwrite: true);
                                     File.SetAttributes(t, FileAttributes.Normal);
                                 }
+                                else if (File.Exists(t))
+                                {
+                                    File.Delete(t);
+                                }
                             }
-                        }
-                        catch
-                        {
-                            // Ignore if file is in use or copy fails
+                            catch
+                            {
+                                // Ignore individual copy failures
+                            }
                         }
                     }
 

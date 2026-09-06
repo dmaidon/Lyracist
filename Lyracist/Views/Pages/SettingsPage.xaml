@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 17:54:00 -> Add Open Tablet Kiosk QR button under Tablet Server Settings -->
+<!-- Edited on Sep 6, 2026 @ 08:57:00 -> Add Session Schedule and Request Cutoff settings groupbox -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -476,6 +476,7 @@
                                     <ComboBox ItemsSource="{Binding ProjectionViews}" SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}" Margin="0,0,0,12" />
 
                                     <CheckBox Content="Float Current Singer to Top of Rotation" IsChecked="{Binding FloatCurrentSingerToTop, Mode=TwoWay}" Margin="0,0,0,4" ToolTip="When enabled, the current active performer automatically floats to index 0 of the rotation queue." />
+                                    <CheckBox Content="Block Duplicate Songs in Session" IsChecked="{Binding BlockDuplicateSongsInSession, Mode=TwoWay}" Margin="0,0,0,4" ToolTip="When enabled, patrons cannot request a song via the patron portal that has already been performed or queued in the current session." />
                                     <CheckBox Content="Mirror Lyrics display on control view" IsChecked="{Binding IsLyricsMirrored, Mode=TwoWay}" Margin="0,4,0,12" />
 
                                     <CheckBox Content="Show Estimated Wait Time on Rotation Screens" IsChecked="{Binding ShowEstimatedWaitTime, Mode=TwoWay}" Margin="0,0,0,4" ToolTip="Shows/hides the {N} minute wait-time badge next to each waiting singer's name on the audience-facing rotation displays." />
@@ -489,6 +490,32 @@
                                         <Slider Grid.Column="0" Minimum="2" Maximum="8" TickFrequency="0.25" Value="{Binding DefaultSongLengthMinutes, Mode=TwoWay}" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{Binding DefaultSongLengthMinutes, StringFormat='{}{0:0.00} min'}" FontSize="12" FontWeight="Bold" Width="60" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0" />
                                     </Grid>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Session Schedule &amp; Request Cutoff" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,12,0,0">
+                                <StackPanel>
+                                    <CheckBox Content="Enable Session Schedule" IsChecked="{Binding EnableSessionSchedule, Mode=TwoWay}" Margin="0,0,0,8" ToolTip="Restrict patron portal and kiosk requests to the scheduled session timeframe." />
+                                    <Grid Margin="0,0,0,10" IsEnabled="{Binding EnableSessionSchedule}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Start Time" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                            <ComboBox ItemsSource="{Binding TimeOptions}" SelectedItem="{Binding SessionStartTime, Mode=TwoWay}" IsEditable="True" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Stop Time" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                            <ComboBox ItemsSource="{Binding TimeOptions}" SelectedItem="{Binding SessionStopTime, Mode=TwoWay}" IsEditable="True" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <CheckBox Content="Enable Last Request Cutoff" IsChecked="{Binding EnableLastRequestTime, Mode=TwoWay}" Margin="0,0,0,8" ToolTip="Set a cutoff time after which patrons and kiosk users can no longer submit song requests." />
+                                    <StackPanel IsEnabled="{Binding EnableLastRequestTime}" Margin="0,0,0,4">
+                                        <TextBlock Text="Last Request Time" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <ComboBox ItemsSource="{Binding TimeOptions}" SelectedItem="{Binding LastRequestTime, Mode=TwoWay}" IsEditable="True" />
+                                    </StackPanel>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>

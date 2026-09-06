@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:24:00 -> Add FloatCurrentSingerToTop setting to AppSettings
+// Edited on Sep 6, 2026 @ 08:54:50 -> Add Session Schedule and Last Request Cutoff properties
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -89,6 +89,24 @@ namespace KSRotation.Models
         /// <summary>Whether the rotation-screen "estimated wait time" badge is shown at all. Some
         /// DJs prefer not to display wait estimates to the audience; defaults on.</summary>
         public bool ShowEstimatedWaitTime { get; init; } = true;
+
+        /// <summary>When true, patrons cannot request songs via the portal that have already been performed or queued in the current session.</summary>
+        public bool BlockDuplicateSongsInSession { get; init; } = false;
+
+        /// <summary>When true, song requests from patron portal and kiosk are restricted to scheduled session hours.</summary>
+        public bool EnableSessionSchedule { get; init; } = false;
+
+        /// <summary>Start time of the scheduled session (e.g. "8:00 PM" or "20:00").</summary>
+        public string SessionStartTime { get; init; } = "8:00 PM";
+
+        /// <summary>Stop time of the scheduled session (e.g. "2:00 AM" or "02:00").</summary>
+        public string SessionStopTime { get; init; } = "2:00 AM";
+
+        /// <summary>When true, song requests from patron portal and kiosk are cut off at the specified last request time.</summary>
+        public bool EnableLastRequestTime { get; init; } = false;
+
+        /// <summary>Cutoff time for receiving new song requests (e.g. "1:30 AM" or "01:30").</summary>
+        public string LastRequestTime { get; init; } = "1:30 AM";
     }
 }
 

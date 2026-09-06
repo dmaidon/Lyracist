@@ -1,4 +1,4 @@
-<!-- Edited on Sep 6, 2026 @ 07:47:00 -> Bump version to 26.9.5.478 for per-singer key/tempo and mic level/EQ recall -->
+<!-- Edited on Sep 6, 2026 @ 09:25:00 -> Add FlashCap package reference for webcam photo capture -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.9.5.478</AssemblyVersion>
-    <FileVersion>26.9.5.478</FileVersion>
+    <AssemblyVersion>26.9.6.481</AssemblyVersion>
+    <FileVersion>26.9.6.481</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -55,6 +55,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="FlashCap" Version="1.12.0" />
     <PackageReference Include="Emoji.Wpf" Version="0.3.4" />
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
     <PackageReference Include="LibVLCSharp" Version="3.10.1" />
@@ -119,6 +120,8 @@
     <Compile Include="..\Shared\TriviaDisplayViewModel.cs" Link="TriviaDisplayViewModel.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
+    <Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
+    <Compile Include="..\Shared\WebcamCaptureService.cs" Link="WebcamCaptureService.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />
   </ItemGroup>
 

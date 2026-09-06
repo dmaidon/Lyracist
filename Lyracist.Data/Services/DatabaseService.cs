@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Catch DbUpdateException in AddSong/UpdateSong (e.g. duplicate FilePath, which is uniquely indexed) instead of letting it crash the caller
+// Edited on Sep 6, 2026 @ 08:48:00 -> Add GetAllSingers, DeleteSinger, and MergeSingers
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -86,6 +86,108 @@ namespace Lyracist.Data.Services
                 .Include(s => s.RotationEntries)
                 .Include(s => s.MusicRequests)
                 .FirstOrDefaultAsync(s => s.SingerId == singerId);
+        }
+
+        public async Task<List<Singer>> GetAllSingers()
+        {
+            return await _context.Singers
+                .Include(s => s.AudioSettings)
+                .OrderBy(s => s.Name)
+                .ToListAsync();
+        }
+
+        public async Task<bool> DeleteSinger(int singerId)
+        {
+            var singer = await _context.Singers.FindAsync(singerId);
+            if (singer == null) return false;
+            _context.Singers.Remove(singer);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> MergeSingers(int targetSingerId, int duplicateSingerId)
+        {
+            if (targetSingerId == duplicateSingerId) return false;
+
+            var target = await _context.Singers
+                .Include(s => s.AudioSettings)
+                .FirstOrDefaultAsync(s => s.SingerId == targetSingerId);
+            var duplicate = await _context.Singers
+                .Include(s => s.AudioSettings)
+                .FirstOrDefaultAsync(s => s.SingerId == duplicateSingerId);
+
+            if (target == null || duplicate == null) return false;
+
+            // 1. Reassign rotation entries
+            var rotationEntries = await _context.RotationEntries
+                .Where(r => r.SingerId == duplicateSingerId)
+                .ToListAsync();
+            foreach (var r in rotationEntries)
+            {
+                r.SingerId = targetSingerId;
+            }
+
+            // 2. Reassign music requests
+            var requests = await _context.MusicRequests
+                .Where(m => m.SingerId == duplicateSingerId)
+                .ToListAsync();
+            foreach (var req in requests)
+            {
+                req.SingerId = targetSingerId;
+            }
+
+            // 3. Consolidate score / XP and total songs sung
+            target.Score += duplicate.Score;
+            target.TotalSongsSung += duplicate.TotalSongsSung;
+
+            // 4. Fill in missing details on target from duplicate
+            if (string.IsNullOrWhiteSpace(target.Email) && !string.IsNullOrWhiteSpace(duplicate.Email))
+                target.Email = duplicate.Email;
+            if (string.IsNullOrWhiteSpace(target.PinCode) && !string.IsNullOrWhiteSpace(duplicate.PinCode))
+                target.PinCode = duplicate.PinCode;
+            if (string.IsNullOrWhiteSpace(target.VocalRange) && !string.IsNullOrWhiteSpace(duplicate.VocalRange))
+                target.VocalRange = duplicate.VocalRange;
+            if (string.IsNullOrWhiteSpace(target.CustomTitle) && !string.IsNullOrWhiteSpace(duplicate.CustomTitle))
+                target.CustomTitle = duplicate.CustomTitle;
+            if (!string.IsNullOrWhiteSpace(duplicate.Notes))
+            {
+                if (string.IsNullOrWhiteSpace(target.Notes))
+                    target.Notes = duplicate.Notes;
+                else if (!target.Notes.Contains(duplicate.Notes))
+                    target.Notes += "\n" + duplicate.Notes;
+            }
+            if ((target.AvatarType == "None" || string.IsNullOrWhiteSpace(target.AvatarSource)) && duplicate.AvatarType != "None")
+            {
+                target.AvatarType = duplicate.AvatarType;
+                target.AvatarSource = duplicate.AvatarSource;
+            }
+
+            // 5. If target has no audio settings but duplicate does, copy them
+            if (target.AudioSettings == null && duplicate.AudioSettings != null)
+            {
+                target.AudioSettings = new SingerAudioSettings
+                {
+                    SingerId = targetSingerId,
+                    Gain = duplicate.AudioSettings.Gain,
+                    Key = duplicate.AudioSettings.Key,
+                    Tempo = duplicate.AudioSettings.Tempo,
+                    Treble = duplicate.AudioSettings.Treble,
+                    Mid = duplicate.AudioSettings.Mid,
+                    Bass = duplicate.AudioSettings.Bass,
+                    Compressor = duplicate.AudioSettings.Compressor,
+                    Limiter = duplicate.AudioSettings.Limiter,
+                    Notes = duplicate.AudioSettings.Notes
+                };
+            }
+
+            string duplicateName = duplicate.Name;
+            string targetName = target.Name;
+
+            // 6. Delete duplicate singer entity
+            _context.Singers.Remove(duplicate);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         // ==========================================

@@ -1,4 +1,4 @@
-<!-- Edited on Aug 17, 2026 @ 15:48:30 -> Added Trivia and Trivia Settings to MainWindow navigation tabs -->
+<!-- Edited on Sep 6, 2026 @ 10:38:00 -> Add Store navigation tab to MainWindow -->
 <ui:FluentWindow x:Class="Lyracist.Windows.MainWindow"
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -66,6 +66,8 @@
                 <ui:NavigationViewItem Content="Trivia" Icon="{ui:SymbolIcon BrainCircuit24}" TargetPageType="{x:Type pages:TriviaPage}" />
                 <ui:NavigationViewItem Content="Playlists" Icon="{ui:SymbolIcon MusicNote2Play20}" TargetPageType="{x:Type pages:PlaylistsPage}" />
                 <ui:NavigationViewItem Content="Requests" Icon="{ui:SymbolIcon MailInboxArrowDown20}" TargetPageType="{x:Type pages:RequestsPage}" />
+                <ui:NavigationViewItem Content="Store" Icon="{ui:SymbolIcon ShoppingBag24}" TargetPageType="{x:Type pages:StorePage}" />
+                <ui:NavigationViewItem Content="Users" Icon="{ui:SymbolIcon Person24}" TargetPageType="{x:Type pages:UsersPage}" />
                 <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}" TargetPageType="{x:Type pages:SettingsPage}" />
                 <ui:NavigationViewItem Content="Trivia Settings" Icon="{ui:SymbolIcon Settings24}" TargetPageType="{x:Type pages:TriviaSettingsPage}" />
                 <ui:NavigationViewItem Content="Casting" Icon="{ui:SymbolIcon Cast24}" TargetPageType="{x:Type pages:CastingPage}" />

@@ -1,8 +1,10 @@
-// Edited on Sep 3, 2026 @ 23:50:35 -> Add IsLastRound property and filter out completed singers in Last Round mode
+// Edited on Sep 6, 2026 @ 08:38:20 -> Support performer selfie avatar on Vegas marquee and vinyl turntable displays
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 
 namespace KSRotation.ViewModels
@@ -14,6 +16,12 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial string CurrentSinger { get; set; } = "No singer selected";
+
+        [ObservableProperty]
+        public partial System.Windows.Media.ImageSource? CurrentSingerAvatar { get; set; }
+
+        [ObservableProperty]
+        public partial bool HasCurrentSingerAvatar { get; set; }
 
         // Split name/song for the Marquee view's large, two-line layout.
         [ObservableProperty]
@@ -111,6 +119,8 @@ namespace KSRotation.ViewModels
                 CurrentSongTitle = string.Empty;
                 HasDesignatedCurrentSinger = false;
                 CurrentSingerIsRotationStart = false;
+                CurrentSingerAvatar = null;
+                HasCurrentSingerAvatar = false;
                 NextSingers.Clear();
                 RotationEntries.Clear();
                 FullRotation.Clear();
@@ -139,6 +149,8 @@ namespace KSRotation.ViewModels
                 HasDesignatedCurrentSinger = false;
                 CurrentSingerIsRotationStart = false;
                 IsCurrentMusic = false;
+                CurrentSingerAvatar = null;
+                HasCurrentSingerAvatar = false;
                 NextSingers.Clear();
                 FullRotation.Clear();
                 RotationEntries.Clear();
@@ -158,6 +170,8 @@ namespace KSRotation.ViewModels
                         : (string.IsNullOrWhiteSpace(current.Artist)
                             ? current.Song
                             : $"{current.Song} – {current.Artist}");
+                    CurrentSingerAvatar = null;
+                    HasCurrentSingerAvatar = false;
                 }
                 else
                 {
@@ -173,6 +187,66 @@ namespace KSRotation.ViewModels
                         : (string.IsNullOrWhiteSpace(current.Artist)
                             ? current.Song
                             : $"{current.Song} – {current.Artist}");
+
+                    System.Windows.Media.ImageSource? avatar = null;
+                    string? avType = current.AvatarType;
+                    string? avSource = current.AvatarSource;
+
+                    if ((string.IsNullOrEmpty(avSource) || avType == "None") && !string.IsNullOrEmpty(current.Name))
+                    {
+                        try
+                        {
+                            using var db = new Lyracist.Data.LyracistDbContext();
+                            var dbSinger = db.Singers.FirstOrDefault(s => s.Name == current.Name);
+                            if (dbSinger != null)
+                            {
+                                avType = dbSinger.AvatarType;
+                                avSource = dbSinger.AvatarSource;
+                            }
+                        }
+                        catch
+                        {
+                            // Ignored
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(avSource))
+                    {
+                        if (avType == "Gravatar")
+                        {
+                            try
+                            {
+                                var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                                bitmap.BeginInit();
+                                bitmap.UriSource = new Uri($"https://www.gravatar.com/avatar/{avSource}?d=identicon&s=150", UriKind.Absolute);
+                                bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                                bitmap.EndInit();
+                                avatar = bitmap;
+                            }
+                            catch { }
+                        }
+                        else if (avType == "Uploaded")
+                        {
+                            try
+                            {
+                                string fullPath = Path.Combine(Lyracist.Shared.Globals.AvatarsDir, avSource);
+                                if (File.Exists(fullPath))
+                                {
+                                    var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                                    bitmap.BeginInit();
+                                    bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                                    bitmap.StreamSource = new MemoryStream(File.ReadAllBytes(fullPath));
+                                    bitmap.EndInit();
+                                    bitmap.Freeze();
+                                    avatar = bitmap;
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+
+                    CurrentSingerAvatar = avatar;
+                    HasCurrentSingerAvatar = avatar != null;
                 }
             }
 

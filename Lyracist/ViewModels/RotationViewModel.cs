@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 07:31:30 -> Support per-singer key/tempo recall, pending song tempo, and performance history persistence
+// Edited on Sep 6, 2026 @ 08:36:00 -> Add IsSongInCurrentSession to check for duplicate songs
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -176,6 +176,29 @@ public partial class RotationViewModel : BaseViewModel
 
         SessionPerformedSongs.Add(performed);
         OnPropertyChanged(nameof(SessionPerformedSongsText));
+    }
+
+    /// <summary>
+    /// Checks whether a song has already been performed or is currently queued in the active rotation during this session.
+    /// </summary>
+    public bool IsSongInCurrentSession(string songTitle, string artist = "")
+    {
+        if (string.IsNullOrWhiteSpace(songTitle)) return false;
+        string cleanTitle = songTitle.Trim();
+
+        // 1. Check songs already performed this session
+        if (SessionPerformedSongs.Any(s => string.Equals(s.SongTitle?.Trim(), cleanTitle, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        // 2. Check songs currently queued in active rotation
+        if (Rotation.Any(s => string.Equals(s.SongTitle?.Trim(), cleanTitle, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     [RelayCommand]

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 6, 2026 @ 06:33:00 -> Increase font size for estimated wait time legend on rotation display -->
+<!-- Edited on Sep 6, 2026 @ 08:38:40 -> Display performer selfie avatar on Vegas marquee and vinyl turntable displays -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -230,6 +230,18 @@
 
                     <!-- Current singer name + song (vertically centered) -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <!-- Performer Selfie / Avatar -->
+                        <Border Width="130" Height="130" CornerRadius="65" BorderThickness="4" BorderBrush="#FFFFD86B"
+                                HorizontalAlignment="Center" Margin="0,0,0,16"
+                                Visibility="{Binding HasCurrentSingerAvatar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#FFB9822A" BlurRadius="24" ShadowDepth="0" Opacity="0.85" />
+                            </Border.Effect>
+                            <Border CornerRadius="65" ClipToBounds="True">
+                                <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                            </Border>
+                        </Border>
+
                         <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                                 ToolTip="Rotation Anchor (marks where a round begins)"
                                 Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -436,6 +448,18 @@
                                Foreground="#FFE0A93B"
                                Margin="0,0,0,10"
                                TextOptions.TextFormattingMode="Display" />
+
+                    <!-- Performer Selfie / Avatar -->
+                    <Border Width="110" Height="110" CornerRadius="55" BorderThickness="3.5" BorderBrush="#FFE0A93B"
+                            HorizontalAlignment="Left" Margin="0,0,0,14"
+                            Visibility="{Binding HasCurrentSingerAvatar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#FFE0A93B" BlurRadius="18" ShadowDepth="0" Opacity="0.75" />
+                        </Border.Effect>
+                        <Border CornerRadius="55" ClipToBounds="True">
+                            <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                        </Border>
+                    </Border>
 
                     <Border Background="#DC2626" CornerRadius="6" Padding="8,3" Margin="0,0,0,8" HorizontalAlignment="Left"
                             ToolTip="Rotation Anchor (marks where a round begins)"

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 6, 2026 @ 08:01:00 -> Version bump to 26.9.6.593 -->
+<!-- Edited on Sep 6, 2026 @ 09:25:30 -> Add FlashCap package reference for webcam photo capture -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.9.6.593</AssemblyVersion>
-    <FileVersion>26.9.6.593</FileVersion>
+    <AssemblyVersion>26.9.6.597</AssemblyVersion>
+    <FileVersion>26.9.6.597</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -63,6 +63,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="FlashCap" Version="1.12.0" />
     <PackageReference Include="MaterialDesignThemes" Version="5.3.2" />
     <PackageReference Include="PDFsharp" Version="6.2.4" />
     <PackageReference Include="QRCoder" Version="1.8.0" />
@@ -136,6 +137,10 @@
     <Compile Include="..\Shared\TriviaDisplayViewModel.cs" Link="TriviaDisplayViewModel.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
+    <Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
+    <Compile Include="..\Shared\WebcamCaptureService.cs" Link="WebcamCaptureService.cs" />
+    <Compile Include="..\Lyracist\Core\Helpers\SingerXpHelper.cs" Link="Helpers\SingerXpHelper.cs" />
+    <Compile Include="..\Lyracist\Services\Database\SingerHistoryService.cs" Link="Services\SingerHistoryService.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-// Edited on Aug 18, 2026 @ 13:24:00 -> Add FloatCurrentSingerToTop setting property
+// Edited on Sep 6, 2026 @ 08:56:30 -> Add Session Schedule and Last Request Cutoff properties
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -68,6 +68,38 @@ public partial class SettingsViewModel : BaseViewModel
         AppSettings.ShowEstimatedWaitTime = value;
         _rotation.RefreshEstimatedWaitTimeVisibility();
     }
+
+    [ObservableProperty]
+    private bool _blockDuplicateSongsInSession = AppSettings.BlockDuplicateSongsInSession;
+
+    partial void OnBlockDuplicateSongsInSessionChanged(bool value) => AppSettings.BlockDuplicateSongsInSession = value;
+
+    [ObservableProperty]
+    private bool _enableSessionSchedule = AppSettings.EnableSessionSchedule;
+
+    partial void OnEnableSessionScheduleChanged(bool value) => AppSettings.EnableSessionSchedule = value;
+
+    [ObservableProperty]
+    private string _sessionStartTime = AppSettings.SessionStartTime;
+
+    partial void OnSessionStartTimeChanged(string value) => AppSettings.SessionStartTime = value;
+
+    [ObservableProperty]
+    private string _sessionStopTime = AppSettings.SessionStopTime;
+
+    partial void OnSessionStopTimeChanged(string value) => AppSettings.SessionStopTime = value;
+
+    [ObservableProperty]
+    private bool _enableLastRequestTime = AppSettings.EnableLastRequestTime;
+
+    partial void OnEnableLastRequestTimeChanged(bool value) => AppSettings.EnableLastRequestTime = value;
+
+    [ObservableProperty]
+    private string _lastRequestTime = AppSettings.LastRequestTime;
+
+    partial void OnLastRequestTimeChanged(string value) => AppSettings.LastRequestTime = value;
+
+    public IReadOnlyList<string> TimeOptions => SessionScheduleHelper.StandardTimeOptions;
 
     // Audio
     [ObservableProperty]

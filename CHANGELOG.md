@@ -1,9 +1,248 @@
-<!-- Edited on Sep 6, 2026 @ 07:44:00 -> Update ChangeLog for per-singer key/tempo recall and mic/EQ save and recall -->
-Last Edit: Sep 6, 2026 - Per-Singer Key/Tempo Recall & Mic Level/EQ Save and Recall
+<!-- Edited on Sep 6, 2026 @ 11:54:00 -> Document Bulk Import Wizard for batch purchasing ingestion, previewing, parallel FFmpeg execution, and summary reporting -->
+Last Edit: Sep 6, 2026 - Bulk Import Wizard: Folder Scanning, MP3+G Pairing, Provider Intelligence Preview, Batch Audio Pipelines, Throttled Execution, and Summary Dialog
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.25] - 2026-09-06
+
+### Added
+- **Bulk Import Wizard (Batch Ingestion, Preview Table, Parallel Audio Pipeline & Summary Dialog) (`Lyracist` ONLY)**:
+  - **Bulk Import Modal Window (`BulkImportWindow.xaml`, `BulkImportWindow.xaml.cs`)**:
+    - Modern WPF modal wizard dialog accessible via the new "Bulk Import..." button on the Store page (`StorePage.xaml`).
+    - Styled with acrylic dark surfaces, header icon branding, folder scan toolbar, preview candidate DataGrid, progress tracking bar, and post-import summary report card.
+  - **Folder Selection & Multi-Format Scanner (`PurchasedTrackBulkImporter.cs`, `BulkImportViewModel.cs`)**:
+    - Allows users to select any folder containing purchased karaoke files.
+    - Scans for MP3, CDG, ZIP (MP3+G), MP4, and LRC/TXT lyrics files.
+    - Automatically identifies and pairs MP3 audio and CDG graphics files into single candidate items, preventing duplicate entries.
+    - Previews ZIP archive entries, MP4 multiplexed dual audio streams, and resolves matching lyrics files (.lrc/.txt).
+  - **Provider Intelligence & Metadata Preview Table**:
+    - Leverages Provider Intelligence to automatically detect provider origin (Karaoke Version, Party Tyme, Sunfly, Karaoke.com, Local) from ID3 headers, CDG tags, and file naming conventions.
+    - Preview DataGrid displays: Filename, Provider, File Type, Duration, Key, BPM, Quality, Difficulty, Vocal Presence, and per-item toggle checkboxes (Will Normalize, Will Trim Silence, Will Generate Waveform).
+  - **Batch Processing Options & Combined FFmpeg Audio Pipelines (`FFmpegService.cs`)**:
+    - Global option switches: "Normalize all", "Trim silence for all", "Generate waveform for all", and "Move files to target folders".
+    - Added batch-friendly `ProcessAudioPipelineBatchAsync` wrapper to `FFmpegService` executing silence trimming and EBU R128 loudness normalization in a single combined FFmpeg pass when both options are selected.
+  - **Throttled Parallel Execution & Progress UI**:
+    - Background task throttling using `SemaphoreSlim(3)` running a maximum of 3 concurrent FFmpeg operations to keep the UI smooth and avoid disk thrashing.
+    - Applies Smart Import Rules auto-renaming (`Artist - Title (Provider).ext`), metadata extraction, destination routing, SQLite catalog insertion, and Store Analytics updates.
+    - Live progress reporting: progress bar, current file indicator, success/failure item counters, and graceful cancellation support.
+  - **Bulk Import Completion Summary Dialog**:
+    - Displays final statistics upon batch completion: total imported, total skipped, total errors, list of providers involved, average processing time per track, and total elapsed duration.
+    - Automatically triggers a refresh of Store Analytics dashboards and Library search indices upon closing.
+  - **Unit Test Coverage (`StoreImportTests.cs`)**:
+    - Added comprehensive unit test suites covering folder scanning, MP3+G pairing deduplication, companion lyrics discovery, global batch toggle inheritance, per-item override persistence, and target file destination collision resolution.
+
+## [26.9.5.24] - 2026-09-06
+
+### Added
+- **Store Analytics Panel (Statistical Insights, Audio Benchmarks & Heatmap Dashboards) (`Lyracist` ONLY)**:
+  - **Collapsible Store Analytics Panel (`StorePage.xaml`, `StorePage.xaml.cs`)**:
+    - Added a responsive, modern collapsible section beneath the Import Activity Log panel in the Store tab.
+    - Features manual "Refresh Analytics" command and toggle collapse/expand state for optimal screen space usage.
+    - Bound to `AnalyticsViewModel` exposed via `StoreViewModel.Analytics`.
+  - **Provider Statistics**:
+    - Tracks total cataloged tracks, individual counts, percentage breakdown, and visual branded pills for Karaoke Version (KV), Party Tyme (PT), Sunfly (SF), Karaoke.com (KC), and Local/Custom collections.
+    - Highlights the top/most-frequently used provider.
+  - **File Type & Container Statistics**:
+    - Displays distribution breakdown across media container and package formats: MP3+G pairs, MP4 videos, ZIPCDG archives, Audio-Only (.mp3) backing tracks, and attached synchronized lyrics (.lrc/.txt).
+  - **FFmpeg Processing Benchmarks**:
+    - Displays total tracks processed through audio optimization pipelines: EBU R128 loudness normalized, silence trimmed below -50dB, and waveform previews generated.
+    - Real-time stopwatch instrumentation measuring average processing time, longest (max), and shortest (min) turnaround times.
+  - **Quality & Difficulty Distributions**:
+    - Displays 3-tier quality distribution (Low, Medium, High) based on audio bitrate, channels, and video resolution.
+    - Displays 3-tier vocal difficulty distribution (Easy, Medium, Hard) derived from tempo, duration, and dynamic range.
+  - **Musical Key & BPM Distributions**:
+    - Custom pure-WPF horizontal bar chart visualizing the top 8 musical key signatures with track counts and relative proportions.
+    - 5-bucket tempo distribution histogram (<80 BPM, 80-100 BPM, 100-120 BPM, 120-140 BPM, 140+ BPM).
+  - **Import Activity Timeline & 24-Hour Heatmap**:
+    - Highlights busiest import date and busiest hour of the day.
+    - 14-day daily acquisition timeline bar chart.
+    - 24-hour import activity heatmap matrix with dynamic intensity color shading (0 to 4) and informational tooltips.
+  - **Database Queries & ViewModels (`LyracistDbContext.cs`, `StoreAnalyticsData.cs`, `AnalyticsViewModel.cs`)**:
+    - Implemented `GetStoreAnalyticsAsync()` performing lightweight, null-safe aggregation queries across the `Songs` table without modifying schema.
+    - Automated refresh logic in `StoreViewModel` triggered on view load and upon each successful track import.
+
+## [26.9.5.23] - 2026-09-06
+
+### Added
+- **Smart Import Rules (Auto-Rename, Tagging, Classification & Enrichment) (`Lyracist` ONLY)**:
+  - **Auto-Rename Imported Files (`renameImportedFiles` / `RenameImportedFiles`)**:
+    - Automatically renames primary audio/video files and all associated companion files (CDG graphic streams, LRC/TXT synchronized lyrics, and waveforms) to canonical format: `Artist - Title (Provider).ext` (e.g. `Adele - Hello (KV).mp3`, `Bon Jovi - Wanted Dead or Alive (PT).cdg`, `Queen - Don't Stop Me Now (SF).mp4`).
+    - Standardizes publisher abbreviation tags: Karaoke Version $\rightarrow$ `KV`, Party Tyme $\rightarrow$ `PT`, Sunfly $\rightarrow$ `SF`, Karaoke.com $\rightarrow$ `KCOM`.
+  - **Auto-Tag Genres (`detectGenre` / `DetectGenre`)**:
+    - Automatically categorizes imported tracks into catalog genres (Pop, Rock, Country, Soul, R&B, Jazz, Hip-Hop, Gospel, Dance, Standards) using FFprobe tags and provider catalog classifications.
+  - **Auto-Tag Difficulty (`detectDifficulty` / `DetectDifficulty`)**:
+    - Classifies performance difficulty into `Easy`, `Medium`, and `Hard` levels using tempo (BPM), track duration, dynamic range, and vocal range/stamina heuristics.
+  - **Auto-Tag Musical Key (`detectKey` / `DetectKey`)**:
+    - Extracts and normalizes musical key signatures from ID3 frames (`TKEY`, `initialkey`), container tags, and title/comment annotations (e.g. `Am`, `C#m`, `G`).
+  - **Auto-Tag BPM (`detectBpm` / `DetectBpm`)**:
+    - Extracts and parses track tempo from ID3 tags (`TBPM`, `bpm`, `tempo`) and comment descriptors into numeric beats-per-minute.
+  - **Auto-Tag Vocal Presence (`detectVocalPresence` / `DetectVocalPresence`)**:
+    - Classifies vocal presence into `guide vocals`, `background vocals`, or `no vocals` based on dual audio streams, channel layouts, and audio/comment tags.
+  - **Auto-Tag File Quality (`detectQuality` / `DetectQuality`)**:
+    - Classifies audio/video stream quality into `High`, `Medium`, and `Low` tiers based on audio bitrate, sample rate, channels, codec, and video resolution.
+  - **Track & Database Schema Extensions**:
+    - Extended TypeScript `Track` in `types.ts`, `PurchasedTrackItem` in `PurchasedTrackWatcherService.cs`, and `Song` entity in `Song.cs` with optional `Genre`, `Difficulty`, `Key`, `BPM`, `VocalPresence`, and `Quality` fields.
+    - Added EF Core migration `20260906152500_AddSmartImportFieldsToSong` and updated `LyracistDbContextModelSnapshot.cs`.
+    - Enriched SQLite FTS5 search index and library tag badges with smart classification metadata.
+
+## [26.9.5.22] - 2026-09-06
+
+### Added
+- **Advanced Store Provider Intelligence ("Provider Fingerprinting") (`Lyracist` ONLY)**:
+  - **ZIP Internal Signatures (`inspectZipForProvider` / `InspectZipForProvider`)**:
+    - **Karaoke Version**: Identifies internal `/custom_backing_track/` directory hierarchies, exact `track.mp3` + `track.cdg` generic pairs, and "KV" or "Karaoke Version" catalog entries.
+    - **Party Tyme**: Inspects `/karaoke/` folders, `_pt.` or `- pt.` file suffixes, and PT catalog tags.
+    - **Sunfly**: Detects entries prefixed with `SF` and Sunfly catalog codes.
+    - **Karaoke.com**: Identifies `KCOM` / `KARAOKECOM` filenames and internal descriptors.
+  - **CDG Magic Header Fingerprinting (`detectProviderFromCdgHeader` / `DetectProviderFromCdgHeader`)**:
+    - Reads the initial 24-byte header of CDG graphics streams to detect publisher encoding signatures:
+      - `0x01 0x0F` $\rightarrow$ **Karaoke Version**
+      - `0x02 0x0A` $\rightarrow$ **Party Tyme**
+      - `0x03 0x0C` $\rightarrow$ **Sunfly**
+  - **MP3 ID3 Tag Fingerprinting (`detectProviderFromId3` / `DetectProviderFromId3`)**:
+    - Leverages FFprobe tag extraction to detect user-defined text frames and publisher tags:
+      - `TXXX:KV` or `KV` $\rightarrow$ **Karaoke Version**
+      - `TXXX:PT` or `PT` / `Sybersound` $\rightarrow$ **Party Tyme**
+      - `TXXX:SF` or `SF` $\rightarrow$ **Sunfly**
+      - `TXXX:KCOM` or `KCOM` / `KARAOKECOM` $\rightarrow$ **Karaoke.com**
+  - **MP4 Container Metadata Fingerprinting (`detectProviderFromMp4` / `DetectProviderFromMp4`)**:
+    - Scans video container metadata (`title`, `artist`, `comment`, and stream tags) for licensed publisher watermarks: "Sunfly", "Party Tyme", "Karaoke Version", and "Karaoke.com".
+  - **In-Memory Referrer Hints (`setReferrerHint` / `PurchasedTrackWatcherService.ReferrerHint`)**:
+    - Records the last provider clicked from the Store search bar ("Search Karaoke Version", "Search Party Tyme", "Search Karaoke.com", "Search Sunfly") and uses it as an intelligent fallback hint when files lack internal metadata signatures.
+  - **Unified Pipeline Hierarchy**:
+    - Watchers in both desktop WPF (`PurchasedTrackWatcherService.cs`) and Web reference (`purchasedWatcher.ts`) now execute the full fingerprinting cascade (ZIP $\rightarrow$ CDG Header $\rightarrow$ ID3 Tag $\rightarrow$ MP4 Metadata $\rightarrow$ Filename Heuristics $\rightarrow$ Referrer Hint) before library insertion.
+
+## [26.9.5.21] - 2026-09-06
+
+### Added
+- **Extended "Store" Tab & Advanced Import Pipeline (`Lyracist` ONLY)**:
+  - **Additional Search Providers (Deep-Linking)**:
+    - Added collapsible "Search Additional Providers" panel featuring direct deep-link buttons for **Karaoke.com** (`https://karaoke.com/search?type=product&q={encodedQuery}`) and **Sunfly Karaoke** (`https://www.sunflykaraoke.com/catalogsearch/result/?q={encodedQuery}`).
+    - Fully integrated into both desktop WPF UI (`StorePage.xaml`) and Web reference UI (`storeSearch.tsx`).
+  - **FFmpeg-Powered Audio Processing Pipeline**:
+    - **Loudness Normalization**: Optional audio normalization to EBU R128 broadcast standard (-16 LUFS target, -1.5 dB TP, 11 LRA) via `FFmpegService.NormalizeAudioAsync` / `ffmpegUtils.ts`.
+    - **Silence Trimming**: Optional leading and trailing silence elimination below -50dB via `FFmpegService.TrimSilenceAsync`.
+    - **Waveform Preview Generation**: High-contrast PNG audio waveform preview image rendering via `FFmpegService.GenerateWaveformPreviewAsync` (`showwavespic=s=800x120:colors=#3B82F6`).
+  - **MP4 Dual-Audio Stream Detection**:
+    - Automatic identification of MP4 karaoke video tracks containing multiple audio streams (e.g. guide vocals on stream 1, backing music on stream 2).
+    - Detected tracks are tagged with a `Dual-Audio` badge in the library and recent imports table.
+  - **Asynchronous Separate-Arrival MP3+G Pairing**:
+    - Enhanced watcher logic to gracefully handle browsers downloading paired `.mp3` and `.cdg` files at slightly different times, holding individual arrivals in a debounce queue and consolidating into a unified track.
+  - **Deep Media Probing & Metadata Extraction (FFprobe)**:
+    - Integrated `FFprobeRunner.ProbeMediaFileAsync` extracting precise duration, audio bitrate, codec, sample rate, audio channels, stream count, and video stream specs.
+    - Automatic detection and pairing of `.lrc` and `.txt` lyric files sharing the same base filename, tagging songs with a `Lyrics` badge and lyrics file path.
+  - **Store UI Refinements & Import Log Activity Panel**:
+    - Added three new pipeline configuration toggles in Settings & Store page: "Normalize Audio on Import", "Trim Silence on Import", and "Generate Waveform Preview".
+    - Added collapsible **Import Activity Log** panel maintaining a live 20-event rolling log of file detections, conversions, and imports with status badges (`Success`, `Info`, `Warning`, `Error`) and "Clear Log" action.
+    - Updated Recent Imports DataGrid with technical badges displaying format, lyric association, dual-audio streams, normalization status, and waveform availability.
+- **Dedicated "Store" Tab & Licensed Track Import Workflow (`Lyracist` ONLY)**:
+  - Added a dedicated top-level "Store" navigation tab exclusively in the Lyracist desktop application (`MainWindow.xaml` and `StorePage.xaml`). This tab is strictly omitted from companion applications (Lyracist Trivia, Bar Trivia, KSRotation, etc.).
+  - **Deep-Link Store Search**:
+    - Branded direct deep-link search buttons for **Karaoke Version** (`https://www.karaoke-version.com/search.html?q={encodedQuery}`) and **Party Tyme** (`https://www.partytyme.net/search?q={encodedQuery}`).
+    - User query encoding with external browser launching via `Process.Start`.
+    - Complies with zero-scraping, zero-audio-proxying architecture for licensed commercial platforms.
+  - **Purchased Tracks Folder & Auto-Import Watcher (`PurchasedTrackWatcherService`)**:
+    - Configurable download folder watcher (defaults to user's `Downloads` folder).
+    - Asynchronous `FileSystemWatcher` detecting new `.mp3`, `.cdg`, `.zip`, and `.mp4` downloads.
+    - File lock checking and debounce logic to wait for web browser downloads to finish before importing.
+    - MP3+G pair detection coalescing matching `.mp3` and `.cdg` files into a single unified track.
+  - **Target Folder Organization**:
+    - Configurable target folders for **Karaoke tracks** (`.zip`, `.cdg`+`.mp3`, `.mp4`) and **Music / Audio tracks** (standalone `.mp3`).
+    - Move toggle automatically organizes imported files from Downloads into designated library directories.
+  - **Automated Metadata & Database Integration**:
+    - Automatic title and artist parsing via `ScanningService.ParseStoreDownload` and store pattern heuristics.
+    - Provider source tagging (`"Karaoke Version"`, `"Party Tyme"`, or `"Local"`).
+    - Direct insertion into `LyracistDbContext` and SQLite FTS5 search index (`SearchService.IndexSongsBatch`).
+    - Event-driven library updates via `ILibraryService.NotifyLibraryUpdated()`.
+  - **Manual Import & Recent Activity View**:
+    - "Import Purchased Track..." multi-file picker button for on-demand manual imports.
+    - Real-time recent imports data table with source badges, title, artist, format, file path, and timestamps.
+  - **Full Web / TypeScript Reference Module (`Lyracist/WebModules/Store`)**:
+    - Created React/TypeScript UI components (`storeTab.tsx`, `storeSearch.tsx`, `settingsStore.tsx`) and Node.js backend modules (`purchasedWatcher.ts`, `importMetadata.ts`, `deepLink.ts`, `types.ts`, `index.ts`).
+
+### Added
+- **Live DJ Webcam Performer Photo Capture (`Lyracist` & `KSRotation`)**:
+  - Added a dedicated "Take Photo" button on the Users tab next to "Upload Photo" and "Clear Photo" in both Lyracist (`UsersPage.xaml`) and KSRotation (`MainWindow.xaml`).
+  - **FlashCap Camera Integration**: Integrated pure managed DirectShow/MediaFoundation capture via `FlashCap` (v1.12.0) with zero external native DLL dependencies, full .NET 10 compatibility, and asynchronous background frame processing.
+  - **Shared Camera Engine (`WebcamCaptureService.cs`)**: Shared helper supporting video device enumeration, dynamic camera selection, live frame callback decoding to `BitmapSource`, background thread dispatching, and camera lifecycle disposal.
+  - **Live Viewfinder & Headshot Guide**: Modal overlay featuring real-time camera selection dropdown, 480x360 live preview, and a circular headshot framing guide assisting the DJ in centering the performer's face for audience rotation billboards, vinyl turntable graphics, and patron portal profiles.
+  - **Snapshot Review & Retake**: Ability to freeze the camera feed upon snapshot capture, review the picture with the performer, and either retake immediately or confirm.
+  - **Automatic Center-Crop, Scaling & Avatar Assignment**: `SaveSquarePhoto()` automatically crops the captured frame to a 1:1 square centered on the frame, scales the image to 400x400 pixels, encodes to JPEG, saves to `Data/Avatars/{guid}.jpg`, and assigns the path to the performer's account in `Data/lyracist.db`.
+
+### Fixed
+- **High-Contrast Light Text Foreground on Users Tab / Edit Page (`Lyracist` & `KSRotation`)**:
+  - Eliminated dark/black text rendering on dark backgrounds across the Users tab and performer editor views.
+  - Applied `TextElement.Foreground="{DynamicResource AppContrastTextBrush}"` across the root Grid, two-column layout, left pane, and right pane editor borders in `KSRotation\MainWindow.xaml`.
+  - Added explicit high-contrast foreground brushes (`AppContrastTextBrush` in KSRotation, `AppTextPrimaryBrush` in Lyracist) to all input field labels ("Singer Name", "Portal PIN Code", "Email Address", "Vocal Range", "Custom Title / Nickname", "Experience Score (XP)", "Total Songs Sung", "Performer Notes", "Microphone Gain", "Key Transposition", "Playback Speed", "Treble", "Mid", "Bass", "Compressor Amount", "Limiter Threshold", "Audio Notes / Sound Check Remarks").
+  - Styled the 3-Band EQ GroupBox with `BlueSettingsGroupBoxStyle` (KSRotation) and `UsersSettingsGroupBoxStyle` (Lyracist) featuring crisp gradient headers and high-contrast light labels.
+  - Configured high-contrast foreground styling and cell/row resources on the "Performance History" DataGrid (`UserPerformanceHistory` / `PerformanceHistory`).
+  - Set explicit light foregrounds on the "Merge Duplicate Singer Account" and "Webcam Performer Snapshot" modal overlays.
+- **Run.Text Read-Only Binding XamlParseException in Users View (`Lyracist` & `KSRotation`)**:
+  - Resolved `System.Windows.Markup.XamlParseException` (`InvalidOperationException: A TwoWay or OneWayToSource binding cannot work on the read-only property 'SongsText' of type 'SingerUserItem'`) caused by WPF's default `BindsTwoWayByDefault` metadata on the `Run.Text` dependency property.
+  - Added explicit `Mode=OneWay` to `<Run Text="{Binding SongsText, Mode=OneWay}" />` and `<Run Text="{Binding VocalRange, Mode=OneWay}" />` in both `KSRotation\MainWindow.xaml` and `Lyracist\Views\Pages\UsersPage.xaml`.
+  - Added defensive empty setters `set { }` to `SongsText` and `LevelText` on both `SingerUserItem` (`MainViewModel.Users.cs`) and `SingerItem` (`UsersViewModel.cs`) to ensure full binding resilience.
+
+## [26.9.5.18] - 2026-09-06
+
+### Fixed
+- **SymbolRegular Parsing Exception in UsersPage (Lyracist)**:
+  - Resolved `System.Windows.Markup.XamlParseException` (`ArgumentException: Requested value 'ArrowMerge20' was not found`) on line 225 of `UsersPage.xaml` caused by an invalid WPF-UI symbol name.
+  - Replaced `ArrowMerge20` with the valid, semantically intuitive `People24` symbol icon for the "Merge Duplicate..." button.
+
+### Added
+- **Dedicated "Users" Tab & Singer Account Management (KSRotation)**:
+  - Implemented full feature parity with Lyracist by adding a top-level "Users" TabItem into KSRotation's main window (`MainWindow.xaml`), positioned cleanly between Settings and Trivia.
+  - **Performer Master-Detail Directory**: Searchable list of all registered performers with real-time text query filtering across name, email, and custom title, complete with circular avatar thumbnails, level badges, XP scores, and song counts.
+  - **Account Lifecycle Actions**: Added "New Singer" and "Delete Singer" actions backed by `AddNewUserCommand` and `DeleteUserCommand`.
+  - **Performer Profile & PIN Credentials**: Sub-tab for editing Singer Name, 4-digit patron portal PIN code, email address, vocal range dropdown, custom stage titles / nicknames, experience score (XP), and DJ performer notes, saved directly to the shared `Data/lyracist.db` database.
+  - **Vocal & Audio Profile Defaults**: Sub-tab for editing preloaded audio defaults (Microphone Gain, Key Transposition, Playback Speed, Treble/Mid/Bass 3-Band EQ, Compressor, Limiter, and Sound Check Remarks) that automatically apply whenever the performer takes the stage.
+  - **Performance History & 1-Click Rotation Queuing**: Sub-tab displaying all past songs sung by the performer, with a direct "Queue" button to insert a past favorite track immediately into the active rotation round, and a "Remove" button to delete individual records.
+  - **Duplicate Account Merging**: Added "Merge Duplicate..." modal overlay (`OpenUserMergePopupCommand`, `ExecuteUserMergeCommand`, `CancelUserMergeCommand`) consolidating duplicate performer profiles by transferring performance history, queued requests, and XP into the primary account, followed by safe deletion of the duplicate.
+  - **Performer Photo & Avatar Management**: Support for uploading custom selfies and photos (`UploadUserAvatarCommand`) or clearing back to default avatars (`ClearUserAvatarCommand`), saved directly in `Data/Avatars/`.
+  - Added `MainViewModel.Users.cs` partial class to `KSRotation` and linked `SingerXpHelper.cs` and `SingerHistoryService.cs` in `KSRotation.csproj`.
+
+## [26.9.5.17] - 2026-09-06
+
+### Added
+- **Session Start & Stop Scheduling (Lyracist & KSRotation)**:
+  - Allowed DJs to configure exact start and stop times for the active karaoke session via a dedicated "Session Schedule & Request Cutoff" GroupBox in both Lyracist (`SettingsPage.xaml`) and KSRotation (`MainWindow.xaml`).
+  - Dropdown options in 30-minute intervals across the 24-hour cycle, plus freeform editable text for custom times (supporting both 12-hour AM/PM and 24-hour formats).
+  - Robust overnight schedule support handling windows crossing midnight (e.g., 8:00 PM to 2:00 AM).
+  - Configured `EnableSessionSchedule`, `SessionStartTime`, and `SessionStopTime` properties in `AppSettings` with persistence across app sessions.
+  - When enabled, requests submitted through the patron portal (`/api/requests` and `/api/request`) or kiosk before the session starts or after it finishes are blocked with an informative message notifying patrons of the scheduled session hours.
+- **Last Request Cutoff Time via Patron & Kiosk Portals**:
+  - Added configurable "Enable Last Request Cutoff" toggle (`EnableLastRequestTime`) and "Last Request Time" (`LastRequestTime`, default "1:30 AM") in both Lyracist and KSRotation.
+  - When enabled, patron and kiosk request endpoints reject submissions attempted after the cutoff time with a polite, clear message: "Song requests are now closed for tonight. The cutoff time for requests was [Time]."
+  - Supports operating in conjunction with the session schedule or independently for open-ended shows.
+- **Shared Session Schedule Logic**:
+  - Implemented `SessionScheduleHelper.cs` in `Shared`, providing time interval generation, format-agnostic time parsing, window comparison including midnight spanning, and request eligibility evaluation.
+  - Linked `SessionScheduleHelper.cs` across `Lyracist`, `KSRotation`, `KSRotation.Maui`, and test projects.
+- **Automated Tests**:
+  - Added unit test suite in `SessionDuplicateAndUserTests.cs` validating `TryParseTime`, daytime and overnight `IsTimeInWindow`, session schedule enforcement, last request cutoff enforcement, and default bypass behavior.
+
+## [26.9.5.16] - 2026-09-06
+
+### Added
+- **Session Duplicate Song Blocking (Lyracist & KSRotation)**:
+  - Added `BlockDuplicateSongsInSession` setting with persistence in `AppSettings` across both Lyracist and KSRotation, complete with UI checkboxes in Settings > Rotation Settings.
+  - Implemented `IsSongInCurrentSession(string songTitle, string artist)` in both `RotationViewModel` and `MainViewModel`, validating incoming requests against both active queued singers and songs already performed in the current session.
+  - Enforced duplicate song blocking in patron web portal endpoints (`/api/request` and `/api/requests`), rejecting duplicates with a polite notification that the song has already been performed or queued during the current session.
+- **New "Users" Navigation Tab & Singer Management (Lyracist)**:
+  - Added a dedicated "Users" navigation item to the Lyracist sidebar navigation menu (`MainWindow.xaml`) backed by `UsersPage.xaml` and `UsersViewModel.cs`.
+  - **Performer Directory**: Searchable list of all registered performers with real-time filtering, level badges, XP scores, and song counts.
+  - **Account Details Editor**: Edit Singer Name, 4-digit Patron Portal PIN code, Email, Vocal Range (dropdown), Custom Title / Nickname, XP (Experience Score), and DJ Notes.
+  - **Vocal & Audio Defaults**: Configure per-singer default Microphone Gain (Volume), Key Transposition (-12 to +12 semitones), Playback Speed (Tempo), 3-Band Parametric EQ (Treble, Mid, Bass), Dynamics (Compressor, Limiter), and Sound Check remarks.
+  - **Performance History Record**: Displays full historical log of songs performed by the singer with Song Title, Artist, Key Transposition, Playback Speed, Source, and Date/Time stamp, with direct "Queue" (instantly re-queues the past performance back into rotation preserving key and tempo) and "Remove" actions.
+  - **Merge Duplicate Accounts**: Added "Merge Duplicate..." modal dialog and backing services (`DatabaseService.MergeSingers()` and `SingerHistoryService.MergeHistory()`), consolidating duplicate performer accounts by transferring performance history, requests, rotation entries, audio profile defaults, and XP points to the primary account, followed by permanent deletion of the duplicate.
+- **Performer Selfie / Photo Uploads via Patron Portal**:
+  - Implemented `/api/singer/login`, `/api/singer/profile`, `/api/singer/avatar/upload`, and `/api/singer/avatar` in `TabletLyricsServer.cs` with payload signature verification, base64 decoding, and secure file saving in `Data/Avatars/`.
+  - DJs can also view, upload, or clear photos directly within the "Users" tab in Lyracist.
+- **Performer Selfie Display on "Vegas Billboard" & "Vinyl Record" Rotation Banners**:
+  - Updated `RotationWindow.xaml` / `RotationWindowViewModel.cs` (Lyracist) and `SingerDisplayWindow.xaml` / `DisplayViewModel.cs` (KSRotation) to display the performer's photo in a circular gold-framed badge on the Vegas Marquee ("Vegas Billboard") and alongside the "NOW SPINNING" header on the Vinyl Record ("Vinyl Record") turntable banner.
+- **Automated Tests**:
+  - Added `SessionDuplicateAndUserTests.cs` in `Lyracist.Tests` validating session duplicate song detection, history consolidation, and database singer account merging.
 
 ## [26.9.5.15] - 2026-09-06
 

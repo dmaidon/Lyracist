@@ -1,5 +1,5 @@
-<!-- Edited on Sep 6, 2026 @ 08:18:00 -> Update README with Per-Singer Key/Tempo and Mic Level/EQ Recall features -->
-Last Edit: Sep 6, 2026 - Per-Singer Key/Tempo Recall & Mic Level/EQ Save and Recall
+<!-- Edited on Sep 6, 2026 @ 11:55:00 -> Document Bulk Import Wizard with folder scanning, preview grid, batch FFmpeg pipeline, and summary reporting -->
+Last Edit: Sep 6, 2026 - Bulk Import Wizard: Folder Scanning, MP3+G Pairing, Provider Intelligence Preview, Batch Audio Pipelines, Throttled Execution, and Summary Dialog
 # Lyracist Pro
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -7,6 +7,93 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### 🛍️ Dedicated "Store" Tab & Licensed Track Import Pipeline (`Lyracist` ONLY)
+- **Store Tab Placement**:
+  - Exclusively available in the Lyracist desktop application navigation bar. This tab is strictly isolated and does not appear in any other apps (KSRotation, Lyracist Trivia, Knockout Trivia, etc.).
+- **Bulk Import Wizard (`BulkImportWindow`, `BulkImportViewModel`, `PurchasedTrackBulkImporter`)**:
+  - **Batch Folder Ingestion**: Select any folder containing downloaded karaoke files (MP3, CDG, ZIP MP3+G, MP4, LRC/TXT).
+  - **Automatic Media Pairing & Lyrics Linking**: Automatically pairs `.mp3` and `.cdg` companion files into unified candidate entries and binds companion lyrics files without creating duplicates.
+  - **Provider Intelligence Preview Grid**: Live candidate inspection displaying detected provider origins (Karaoke Version, Party Tyme, Sunfly, Karaoke.com, Local), technical audio/video specs, duration, musical key, BPM, quality tier, vocal difficulty, and vocal presence.
+  - **Global & Granular Audio Processing Toggles**: Global batch toggles for EBU R128 loudness normalization, silence trimming, waveform peak rendering, and target folder routing, with individual per-track override toggles.
+  - **Throttled Multi-Threaded Execution**: Parallel FFmpeg batch execution throttled via `SemaphoreSlim(3)` to a maximum of 3 concurrent worker processes to guarantee UI responsiveness and avoid disk thrashing.
+  - **Combined Audio Pipeline Pass**: Chains silence trimming and volume normalization into a single FFmpeg pass when both options are enabled for 2x faster batch processing.
+  - **Bulk Import Completion Summary**: Comprehensive summary modal reporting total tracks imported, skipped, errors, providers involved, and average processing time per track.
+- **Smart Import Rules (Auto-Rename, Tagging, Classification & Enrichment)**:
+  - **Auto-Rename Imported Files**: Renames incoming tracks and all companion files (.cdg, .lrc, .txt, waveforms) into canonical naming format: `Artist - Title (Provider).ext` (e.g. `Adele - Hello (KV).mp3`, `Bon Jovi - Wanted Dead or Alive (PT).cdg`, `Queen - Don't Stop Me Now (SF).mp4`). Standardizes publisher abbreviations: Karaoke Version $\rightarrow$ `KV`, Party Tyme $\rightarrow$ `PT`, Sunfly $\rightarrow$ `SF`, Karaoke.com $\rightarrow$ `KCOM`.
+  - **Auto-Tag Genres**: Detects and maps provider-specific genres (Pop, Rock, Country, Soul, R&B, Jazz, Hip-Hop, Gospel, Dance, Standards) using FFprobe tags and catalog heuristics.
+  - **Auto-Tag Difficulty**: Classifies tracks into `Easy`, `Medium`, and `Hard` based on tempo (BPM), duration, dynamic range, and vocal range/stamina indicators.
+  - **Auto-Tag Musical Key**: Identifies and normalizes key signatures (e.g. `Am`, `C#m`, `G`) from ID3 frames (`TKEY`, `initialkey`) and metadata tags.
+  - **Auto-Tag BPM**: Detects track tempo and parses numeric BPM values from ID3 tags (`TBPM`, `bpm`, `tempo`) and comment notations.
+  - **Auto-Tag Vocal Presence**: Classifies tracks into `guide vocals`, `background vocals`, or `no vocals` using multi-stream container inspection and tags.
+  - **Auto-Tag Quality**: Evaluates bitrates, sample rates, channels, codecs, and video resolutions into `High`, `Medium`, and `Low` tiers.
+  - **Extended Schema**: Stores smart attributes in SQLite `Songs` database table, `PurchasedTrackItem`, and FTS5 search index tags.
+- **Multi-Provider Licensed Store Deep Links**:
+  - Direct search buttons for **Karaoke Version** (`https://www.karaoke-version.com/search.html?q={query}`), **Party Tyme** (`https://www.partytyme.net/search?q={query}`), **Karaoke.com** (`https://karaoke.com/search?type=product&q={query}`), and **Sunfly Karaoke** (`https://www.sunflykaraoke.com/catalogsearch/result/?q={query}`).
+  - Opens store catalogs directly in the user's default browser, adhering strictly to zero-scraping and zero-audio-proxying architecture.
+- **Provider Intelligence ("Advanced Fingerprinting")**:
+  - **ZIP Internal Signatures**: Automatically scans archive table of contents for publisher patterns: `/custom_backing_track/` and `track.mp3`+`track.cdg` pairs (Karaoke Version), `/karaoke/` folders and `_PT` suffixes (Party Tyme), `SF` catalog codes (Sunfly), and `KCOM` descriptors (Karaoke.com).
+  - **CDG Magic Header Detection**: Inspects initial 24 bytes of CDG streams for publisher magic bytes (`0x01 0x0F` for KV, `0x02 0x0A` for PT, `0x03 0x0C` for SF).
+  - **MP3 ID3 Tag Fingerprinting**: Inspects `TXXX:KV`, `TXXX:PT`, `TXXX:SF`, and `TXXX:KCOM` frames via FFprobe.
+  - **MP4 Container Watermark Detection**: Probes container title, artist, and comment metadata for publisher watermarks.
+  - **Referrer Hints**: In-memory tracking of the last store provider clicked from the search bar as an intelligent fallback.
+- **Purchased Tracks Folder Watcher (`PurchasedTrackWatcherService`)**:
+  - Background folder watcher on the user's download directory (defaulting to the user's Downloads folder).
+  - Automatically captures new `.mp3`, `.cdg`, `.zip`, and `.mp4` downloads, debounces write events, and verifies file lock completion before importing.
+  - Asynchronously reconciles separately arriving `.mp3` and `.cdg` files into unified MP3+G entries.
+- **FFmpeg-Powered Audio & Video Processing Pipeline**:
+  - **Loudness Normalization**: EBU R128 (-16 LUFS) broadcast audio normalization via `loudnorm`.
+  - **Silence Trimming**: Automatic removal of leading and trailing dead air below -50dB via `silenceremove`.
+  - **Waveform Previews**: Automated high-contrast PNG visual waveform previews via `showwavespic`.
+  - **MP4 Dual-Audio Detection**: Inspects container streams via FFprobe and tags multi-channel/dual-stream tracks (guide vocal vs. instrumental backing).
+  - **Automated Lyric Pairing**: Automatically discovers matching `.lrc` and `.txt` files in the download folder and associates synchronized lyrics.
+- **Target Folder Routing**:
+  - Allows designating separate destination directories for **Karaoke tracks** (`.zip`, `.cdg`+`.mp3`, `.mp4`) and **Music / Audio tracks** (standalone `.mp3`).
+  - Automatically moves files into their target folders upon download.
+- **Library & FTS5 Database Integration**:
+  - Parses titles, artists, and formats; tags provider source as `"Karaoke Version"`, `"Party Tyme"`, `"Karaoke.com"`, `"Sunfly"`, or `"Local"`; saves to `LyracistDbContext`; updates the SQLite FTS5 index; and refreshes library search in real time.
+- **Manual Import & Activity Tracker**:
+  - "Import Purchased Track..." button opens a multi-file picker to ingest downloaded tracks on demand.
+  - Live activity table logs recent imports with technical badges: Format, Lyric file indicator, Dual-Audio streams, Normalization status, and Waveform preview indicator.
+  - Collapsible **Import Activity Log** showing the last 20 file processing events with status codes and full event details.
+- **Store Analytics & Library Insights**:
+  - Collapsible **Store Analytics** dashboard displaying provider breakdown (KV, PT, SF, KC, Local), file format distribution (MP3+G, MP4, ZIPCDG, Audio-only, Lyrics), FFmpeg audio benchmarks (normalization, silence trimming, waveforms, average/min/max processing times), quality and difficulty distributions, top musical keys bar chart, BPM tempo histogram, and 14-day timeline & 24-hour activity heatmaps.
+- **Web Reference Modules**:
+  - Reusable React/TypeScript components (`storeTab.tsx`, `storeSearch.tsx`, `settingsStore.tsx`) and Node.js watcher (`purchasedWatcher.ts`, `importMetadata.ts`, `deepLink.ts`, `ffmpegUtils.ts`, `types.ts`) included under `Lyracist/WebModules/Store`.
+
+### 👤 Dedicated "Users" Management Tab & Account Merging (`Lyracist` & `KSRotation`)
+- **Performer Directory & Account Browser**:
+  - Dedicated primary "Users" navigation tab in both Lyracist (sidebar) and KSRotation (top navigation bar between Settings and Trivia).
+  - 2-pane master-detail interface featuring a searchable list of registered singers, search filter by name, email, or custom title, level badges, XP points, and total song performance tallies.
+  - Account lifecycle actions to instantly create new singer accounts or delete obsolete accounts.
+- **Performer Profile & Credentials Editor**:
+  - Edit Singer Name, 4-digit Patron Portal PIN code, Email, Vocal Range (Soprano, Mezzo-Soprano, Contralto, Countertenor, Tenor, Baritone, Bass), Custom Title / Stage Nickname, Experience Score (XP), and DJ Notes.
+  - Synchronized in real-time with the unified SQLite database (`Data/lyracist.db`) shared across both applications.
+- **Per-Singer Vocal & Audio Defaults**:
+  - Dedicated tab for audio preferences: Microphone Gain (Volume), Key Transposition (-12 to +12 semitones), Playback Speed (0.8x to 1.2x), 3-Band Parametric EQ (Treble, Mid, Bass), Dynamics (Compressor, Limiter), and Sound Check Remarks.
+  - Settings automatically preload whenever the performer is queued or takes the stage.
+- **Comprehensive Performance History Record**:
+  - "Performance History" tab displaying a complete historical record of every song sung by the performer.
+  - Columns for Song Title, Artist, Key Transposition, Playback Speed (Tempo), Source (Local, YouTube, etc.), and Date/Time stamp.
+  - Direct Actions: "Queue" button instantly re-queues the past performance back into the live rotation preserving the performer's exact key and tempo settings; "Remove" button purges individual entries.
+- **Merge Duplicate Singer Accounts**:
+  - Dedicated "Merge Duplicate..." consolidation modal tool.
+  - Allows the DJ to select a secondary/duplicate singer account to merge into the primary account.
+  - Consolidates performance history, past requests, active rotation entries, audio profile defaults, and XP points into the primary account, then permanently deletes the duplicate account.
+
+### 📸 Performer Webcam Capture, Selfie Uploads & Rotation Banner Displays (`Lyracist` & `KSRotation`)
+- **Live DJ Webcam Photo Capture**:
+  - Dedicated "Take Photo" button on the "Users" tab in both Lyracist and KSRotation allowing DJs to snap a headshot of the performer on the spot using any connected USB or integrated webcam.
+  - Powered by `FlashCap` with zero native dependency overhead.
+  - Includes real-time camera selection, live video preview with circular headshot framing guide, snapshot freeze/review, retake option, and automatic center-square cropping to 400x400 JPEG saved to `Data/Avatars/{guid}.jpg`.
+- **Patron Portal Selfie Uploads**:
+  - Patrons can upload a selfie or profile image directly through the smartphone patron portal (`/api/singer/avatar/upload`).
+  - Safe validation and storage in `Data/Avatars/` with database record linking.
+  - DJs can view, upload, take webcam photos, or clear photos in the desktop "Users" tab.
+- **Vegas Billboard ("Vegas Marquee") Display**:
+  - On the Broadway/Vegas marquee rotation screen, a high-resolution circular framed photo with gold neon glow effect is prominently rendered right above the singer's name on the big screen.
+- **Vinyl Record ("Now Spinning") Turntable Display**:
+  - On the turntable rotation screen, the circular framed photo is showcased beside the "♪ NOW SPINNING" banner and singer title while the vinyl record spins.
 
 ### 🎤 Per-Singer Key/Tempo Recall & Mic Level/EQ Recall (`Lyracist`)
 - **Dual-Tier Key & Playback Speed Memory**:

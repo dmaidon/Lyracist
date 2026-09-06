@@ -1,4 +1,4 @@
-// Edited on Sep 4, 2026 @ 08:20:00 -> Add toggle-last-round, next-singer, and previous-singer actions to DJ action handler
+// Edited on Sep 6, 2026 @ 08:56:00 -> Wire session schedule and last request cutoff check to PatronRequestServer
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -204,7 +204,9 @@ namespace KSRotation.ViewModels
                         HandleDjAction,
                         GetSpecialEventsJson,
                         () => ActiveSpecialEvent,
-                        GetVenueInfoJson);
+                        GetVenueInfoJson,
+                        (song, artist) => BlockDuplicateSongsInSession && IsSongInCurrentSession(song, artist),
+                        () => IsRequestSubmissionAllowed(out string r) ? null : r);
                     _requestServer.Start();
                     activePort = p;
                     started = true;

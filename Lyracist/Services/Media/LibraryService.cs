@@ -1,4 +1,4 @@
-// Edited on Jul 28, 2026 @ 19:04:00 -> Support isMusic search filter in Search and SearchAsync
+// Edited on Sep 6, 2026 @ 10:33:30 -> Implement NotifyLibraryUpdated method
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,6 +21,8 @@ public class LibraryService : ILibraryService
     public event EventHandler<string>? ScanFailed;
     public event EventHandler<ScanProgress>? MetadataProbeProgressChanged;
     public event EventHandler? MetadataProbeCompleted;
+
+    public void NotifyLibraryUpdated() => LibraryUpdated?.Invoke(this, EventArgs.Empty);
 
     public void ScanDirectory(string path)
     {

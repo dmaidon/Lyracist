@@ -1,4 +1,4 @@
-// Edited on Aug 15, 2026 @ 10:56:00 -> Fix TypeInitializationException in SingerAvatarConverter by using safe lazy initialization for DefaultAvatar
+// Edited on Sep 6, 2026 @ 08:37:30 -> Add static ResolveAvatarImage and ResolveSingerAvatar helpers
 using System;
 using System.Globalization;
 using System.IO;
@@ -15,7 +15,7 @@ public class SingerAvatarConverter : IValueConverter
     private static bool _defaultAvatarAttempted;
     private static readonly object _lock = new();
 
-    private static BitmapImage? DefaultAvatar
+    public static BitmapImage? DefaultAvatar
     {
         get
         {
@@ -52,48 +52,61 @@ public class SingerAvatarConverter : IValueConverter
         }
     }
 
+    public static BitmapImage? ResolveAvatarImage(string? avatarType, string? avatarSource, bool fallbackToDefault = false)
+    {
+        if (avatarType == "Gravatar" && !string.IsNullOrEmpty(avatarSource))
+        {
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri($"https://www.gravatar.com/avatar/{avatarSource}?d=identicon&s=150", UriKind.Absolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                // Do not freeze remote images as they load asynchronously and cannot be frozen synchronously.
+                return bitmap;
+            }
+            catch
+            {
+                return fallbackToDefault ? DefaultAvatar : null;
+            }
+        }
+        else if (avatarType == "Uploaded" && !string.IsNullOrEmpty(avatarSource))
+        {
+            try
+            {
+                string fullPath = Path.Combine(Globals.AvatarsDir, avatarSource);
+                if (File.Exists(fullPath))
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.StreamSource = new MemoryStream(File.ReadAllBytes(fullPath));
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+                    return bitmap;
+                }
+            }
+            catch
+            {
+                return fallbackToDefault ? DefaultAvatar : null;
+            }
+        }
+
+        return fallbackToDefault ? DefaultAvatar : null;
+    }
+
+    public static BitmapImage? ResolveSingerAvatar(Singer? singer, bool fallbackToDefault = false)
+    {
+        if (singer == null) return fallbackToDefault ? DefaultAvatar : null;
+        return ResolveAvatarImage(singer.AvatarType, singer.AvatarSource, fallbackToDefault);
+    }
+
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is Singer singer)
         {
-            if (singer.AvatarType == "Gravatar" && !string.IsNullOrEmpty(singer.AvatarSource))
-            {
-                try
-                {
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.UriSource = new Uri($"https://www.gravatar.com/avatar/{singer.AvatarSource}?d=identicon&s=150", UriKind.Absolute);
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
-                    // Do not freeze remote images as they load asynchronously and cannot be frozen synchronously.
-                    return bitmap;
-                }
-                catch
-                {
-                    return DefaultAvatar;
-                }
-            }
-            else if (singer.AvatarType == "Uploaded" && !string.IsNullOrEmpty(singer.AvatarSource))
-            {
-                try
-                {
-                    string fullPath = Path.Combine(Globals.AvatarsDir, singer.AvatarSource);
-                    if (File.Exists(fullPath))
-                    {
-                        var bitmap = new BitmapImage();
-                        bitmap.BeginInit();
-                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmap.StreamSource = new MemoryStream(File.ReadAllBytes(fullPath));
-                        bitmap.EndInit();
-                        bitmap.Freeze();
-                        return bitmap;
-                    }
-                }
-                catch
-                {
-                    return DefaultAvatar;
-                }
-            }
+            return ResolveSingerAvatar(singer, fallbackToDefault: true);
         }
         return DefaultAvatar;
     }

@@ -1,4 +1,330 @@
-// Edited on Sep 6, 2026 @ 07:46:00 -> Document Per-Singer Key, Tempo, Mic Level & Vocal EQ Recall and Audio Controls actions
+// Edited on Sep 6, 2026 @ 11:38:00 -> Document Store Analytics Panel: Provider stats, File type stats, FFmpeg processing metrics, Quality & Difficulty distribution, Key & BPM histograms, and 14-day / 24-hour activity heatmaps
+Store Tab Analytics Panel: Statistical Insights, Audio Processing Metrics & Import Activity (`Lyracist` ONLY) - (September 2026)
+
+Section: Lyracist / Karaoke Store & Licensed Track Import / Store Analytics (Lyracist ONLY)
+
+[Overview & Purpose]
+The Store Analytics panel provides real-time statistical insights and visual dashboards summarizing library composition, provider distribution, file packaging characteristics, FFmpeg processing performance, and temporal import patterns. Integrated directly at the bottom of the Store tab, this collapsible panel empowers host DJs and venue managers to monitor library growth, analyze store acquisition trends, and track audio optimization benchmarks without needing external reporting tools.
+
+[Panel Layout & Controls]
+1. Collapsible Section Container:
+   - Located in the Store tab below the Import Activity Log panel.
+   - Expand / Collapse Button: Collapses the entire analytics dashboard to save vertical screen space or expands it for detailed inspection. State persists across view navigation.
+   - Refresh Analytics Button: Instant manual refresh of all LINQ database queries and watcher benchmark metrics.
+   - Automatic Auto-Refresh: Triggers automatically when the Store tab is navigated to or whenever a new track import event successfully completes.
+
+[Analytics Dashboard Cards]
+1. Provider Statistics:
+   - Total Tracks Imported: Comprehensive count of all cataloged store and library tracks.
+   - Top Provider Badge: Highlights the most frequently used music provider (e.g. "Karaoke Version (145)").
+   - Granular Breakdown: Individual track counts and percentage shares for Karaoke Version (KV), Party Tyme (PT), Sunfly (SF), Karaoke.com (KC), and Local/Custom collections.
+   - Visual Indicators: Color-coded provider markers matching official store branding.
+
+2. File Type & Container Statistics:
+   - Media Packaging Breakdown: Quantifies track distribution across container formats:
+     • MP3+G Pairs: Discrete audio and graphic file pairs.
+     • MP4 Video: Self-contained MPEG-4 video karaoke tracks.
+     • ZIPCDG Archives: Compressed zip container archives.
+     • Audio-Only (.mp3): Standalone backing tracks and non-karaoke audio files.
+     • Lyrics Files Attached: Counts tracks enriched with external `.lrc` or `.txt` synchronized lyric files.
+
+3. FFmpeg Processing & Audio Benchmarks:
+   - Pipeline Enhancement Metrics:
+     • EBU R128 Normalized: Count of tracks loudness-normalized to -16 LUFS broadcast target.
+     • Silence-Trimmed: Count of tracks with leading and trailing silence removed below -50dB.
+     • Waveform Previews: Count of tracks with visual PNG waveform previews rendered.
+   - Hardware Performance Benchmarks:
+     • Average Processing Time: Mean FFmpeg pipeline execution time per imported file.
+     • Longest Processing Time (Max): Peak duration recorded for complex video or normalization jobs.
+     • Shortest Processing Time (Min): Fastest turnaround recorded for lightweight audio imports.
+
+4. Quality & Difficulty Distributions:
+   - Stream Quality Distribution: Categorizes library into Low, Medium, and High fidelity tiers based on audio bitrate (>=256k for High, >=160k for Medium) and video resolution.
+   - Vocal Performance Difficulty: Categorizes tracks into Easy, Medium, and Hard tiers based on tempo, length, vocal range spans, and dynamic variance.
+
+5. Musical Key & BPM Distribution:
+   - Top Musical Keys Bar Chart: Visual horizontal bar chart illustrating the top 8 musical key signatures (e.g. C, G, Am, Em) with track counts and relative proportions for rapid KJ transposition planning.
+   - BPM Tempo Histogram: 5-bucket tempo distribution histogram (<80 BPM, 80-100 BPM, 100-120 BPM, 120-140 BPM, 140+ BPM) showing energy and pacing distribution across the repertoire.
+
+6. Import Activity Timeline & 24-Hour Heatmap:
+   - Key Activity Summaries: Highlights the busiest calendar date and busiest hour of the day for track acquisitions.
+   - 14-Day Import Activity Timeline: Daily bar chart displaying acquisition volume over the preceding two weeks.
+   - 24-Hour Heatmap Grid: 24-hour time block matrix color-shaded by import frequency (Level 0: Dim/Idle, Level 1: 1-2 tracks, Level 2: 3-5 tracks, Level 3: 6-9 tracks, Level 4: 10+ tracks) with interactive tooltips showing exact hourly metrics.
+
+Store Tab Smart Import Rules: Auto-Rename, Auto-Tagging & Enrichment (`Lyracist` ONLY) - (September 2026)
+
+Section: Lyracist / Karaoke Store & Licensed Track Import / Smart Import Rules (Lyracist ONLY)
+
+[Overview & Purpose]
+Smart Import Rules provide automated post-download curation, file organization, musical classification, and metadata enrichment for imported tracks. Once provider fingerprinting and initial audio probing complete, Lyracist automatically renames files into a canonical standard, classifies genre, estimates vocal performance difficulty, identifies musical key and tempo, detects vocal track configurations, and rates stream quality.
+
+[Auto-Rename Imported Files]
+1. Standardized Naming Convention:
+   - Primary audio/video files and all companion assets are automatically renamed to:
+     "Artist - Title (Provider).ext"
+   - Examples:
+     • Karaoke Version: "Adele - Hello (KV).mp3"
+     • Party Tyme: "Bon Jovi - Wanted Dead or Alive (PT).cdg"
+     • Sunfly: "Queen - Don't Stop Me Now (SF).mp4"
+     • Karaoke.com: "Frank Sinatra - My Way (KCOM).mp3"
+2. Companion File Cohesion:
+   - Automatically synchronizes base filenames for all paired assets: `.cdg` graphics, `.lrc`/`.txt` lyric files, and `.png` waveform preview images.
+   - Eliminates catalog discrepancies and orphaned companion files.
+
+[Auto-Tagging & Technical Classification]
+1. Genre Classification:
+   - Automatically detects and assigns genres based on provider catalog mappings:
+     • Karaoke Version: Pop, Rock, Country, Soul, R&B, Jazz
+     • Party Tyme: Pop, Rock, Hip-Hop, Gospel
+     • Sunfly: Pop, Rock, Dance
+     • Karaoke.com: Pop, Rock, Country, R&B, Standards
+2. Vocal Performance Difficulty:
+   - Evaluates performance demand into Easy, Medium, and Hard tiers using tempo (BPM), track length, vocal range spans, and dynamic range.
+3. Musical Key Signature Detection:
+   - Detects standard ID3 frames (TKEY, initialkey) and metadata tags, normalizing keys (e.g. Am, C#m, G) for instant KJ transposer cueing.
+4. Tempo (BPM) Detection:
+   - Identifies and records numeric beats-per-minute (TBPM / tempo) for rotation pacing and DJ transitions.
+5. Vocal Presence Classification:
+   - Identifies audio stream configuration:
+     • "guide vocals": Multi-stream dual-audio containers or guide/lead vocal tags.
+     • "background vocals": Backing vocal (BGV) and harmony tags.
+     • "no vocals": Clean instrumental backing tracks.
+6. File Quality Classification:
+   - Rates media streams into High, Medium, and Low tiers based on audio bitrate (>=256k for High, >=160k for Medium), sample rate, stereo channels, and video resolution (1080p/720p).
+
+[Database & Schema Integration]
+- Persisted to SQLite Songs database table (`Genre`, `Difficulty`, `Key`, `BPM`, `VocalPresence`, `Quality`).
+- Added to SQLite FTS5 search index tags for instant filtering in the library.
+- Reported in real-time within Recent Imports and the Live Import Event Log.
+
+Store Tab Provider Intelligence & Advanced Fingerprinting (`Lyracist` ONLY) - (September 2026)
+
+Section: Lyracist / Karaoke Store & Licensed Track Import / Provider Intelligence (Lyracist ONLY)
+
+[Overview & Purpose]
+Provider Intelligence introduces multi-tier forensic fingerprinting into the Lyracist Store import pipeline. When karaoke tracks are imported (via folder watcher or manual import), Lyracist inspects the physical file contents, container structures, and metadata tags to accurately determine the source provider—specifically Karaoke Version, Party Tyme, Sunfly, and Karaoke.com—without relying solely on basic filename patterns.
+
+[Fingerprinting Methodology Hierarchy]
+The import pipeline evaluates incoming media through a prioritized 6-tier detection hierarchy:
+1. ZIP Internal Signatures (ZIP Inspection):
+   - Scans central directory and local headers of .zip archives without extracting to disk.
+   - Karaoke Version: Detected by presence of `/custom_backing_track/` directory, exact `track.mp3` + `track.cdg` pair, or "KV" / "Karaoke Version" tokens.
+   - Party Tyme: Detected by `/karaoke/` folder structure, `_PT` / `- PT` filename suffixes, or "party tyme" markers.
+   - Sunfly: Detected by `SF` prefixed CDG filenames or "sunfly" folder/filename markers.
+   - Karaoke.com: Detected by `KCOM`, `KARAOKECOM`, or `karaoke.com` filename/folder indicators.
+2. CDG Binary Header Fingerprinting:
+   - Reads the first 24 bytes of standalone or unzipped `.cdg` graphic stream files.
+   - Karaoke Version: Signature bytes `0x01 0x0F`.
+   - Party Tyme: Signature bytes `0x02 0x0A`.
+   - Sunfly: Signature bytes `0x03 0x0C`.
+3. MP3 ID3 Tag Fingerprinting:
+   - Uses FFprobe to inspect ID3v2 user-defined text frames (TXXX) and comment frames.
+   - TXXX:KV / TXXX:KaraokeVersion -> Karaoke Version.
+   - TXXX:PT / TXXX:PartyTyme -> Party Tyme.
+   - TXXX:SF / TXXX:Sunfly -> Sunfly.
+   - TXXX:KCOM / TXXX:Karaoke.com -> Karaoke.com.
+4. MP4 Container Metadata Fingerprinting:
+   - Inspects container-level metadata (title, artist, comment, publisher, copyright, and custom tags) via FFprobe.
+   - Detects brand watermarks and provider names: "Sunfly", "Party Tyme", "Karaoke Version", and "Karaoke.com".
+5. Filename Pattern Heuristics (Fallback):
+   - Evaluates standard naming conventions (e.g. `KV*`, `*Party Tyme*`, `SF*`, `KCOM*`).
+6. Provider Referrer Hint (Fallback):
+   - Remembers the last provider search button clicked in the Store tab during the current session, attributing downloads to that provider if all internal file signatures are neutral.
+
+Store Tab Extensions: Additional Providers, FFmpeg Audio Pipeline, MP4 Dual Audio, Lyric Detection & Import Event Log (`Lyracist` ONLY) - (September 2026)
+
+Section: Lyracist / Karaoke Store & Licensed Track Import Extensions (Lyracist ONLY)
+
+[Additional Search Providers]
+In addition to Karaoke Version and Party Tyme, Lyracist supports expanded licensed karaoke catalogs via direct external deep links:
+1. "Search Karaoke.com": Direct catalog search for commercial karaoke tracks, MP3+G downloads, and hardware tracks.
+2. "Search Sunfly": Deep-link search directly targeting Sunfly Karaoke's professional backing track catalog.
+3. Collapsible UI: The "Search Additional Providers" expander keeps the search interface neat while offering instant access to multiple licensed stores.
+
+[FFmpeg Audio & Video Processing Pipeline]
+When tracks are imported via the Store watcher or manual import, optional FFmpeg-powered post-processing stages can be activated:
+1. Loudness Normalization:
+   - "Normalize Audio on Import" toggle applies EBU R128 loudness normalization via FFmpeg's loudnorm filter (Target: -16 LUFS, Max Peak: -1.5 dB TP, LRA: 11).
+   - Eliminates volume jumps between different publishers and track eras.
+2. Silence Trimming:
+   - "Trim Silence on Import" toggle removes leading and trailing silence below -50dB via FFmpeg's silenceremove filter, ensuring immediate music start when playback begins.
+3. Preview Waveform Rendering:
+   - "Generate Waveform Preview" renders a high-contrast PNG visual waveform (showwavespic) for the track, assisting DJs in visual cueing and volume monitoring.
+
+[MP4 Dual-Audio Stream Detection & Lyrics Association]
+1. Dual-Audio Stream Detection:
+   - FFprobe probes MP4 video containers for multiple audio streams (e.g. guide vocal on stream 1, backing music on stream 2).
+   - Automatically tags tracks as "Dual-Audio" in the library and recent imports table.
+2. Automatic Lyric File Pairing:
+   - Discovers synchronized .lrc and .txt lyric files sharing the same base filename as the audio/video track.
+   - Automatically pairs the lyric file with the track in the library database.
+3. Separate-Arrival MP3+G Reconciliation:
+   - If a web browser finishes downloading a track's .mp3 and .cdg files a few seconds apart, the watcher buffers and reconciles both files into a single unified MP3+G track.
+
+[Recent Imports & Live Import Event Log]
+1. Technical Feature Badges:
+   - Recent Imports table displays real-time badges indicating active features: Format (MP3G, ZIPCDG, MP4, Audio), Lyrics (paired LRC/TXT), Dual-Audio, Normalization status, and Waveform preview.
+2. Import Activity Log:
+   - Collapsible panel displaying the last 20 import and processing events with timestamps, provider source, status codes (Success, Info, Warning, Error), and processing remarks.
+   - Includes a "Clear Log" action to reset the audit history.
+
+Dedicated "Store" Tab & Licensed Track Import Workflow (`Lyracist` ONLY) - (September 2026)
+
+Section: Lyracist / Karaoke Store & Licensed Track Import (Lyracist ONLY)
+
+[Overview & Purpose]
+The "Store" tab is a dedicated, top-level navigation view exclusive to the main Lyracist application. It provides a seamless search, purchase, and automatic import workflow for licensed karaoke tracks from commercial providers (such as Karaoke Version and Party Tyme) without web scraping or unauthorized audio proxying.
+
+[Deep-Link Store Search]
+1. Search Bar & Provider Querying:
+   - Enter any song title, artist, or keywords in the search box.
+   - "Search Karaoke Version": Opens your default web browser directly to Karaoke-Version.com search results for your query.
+   - "Search Party Tyme": Opens your default web browser directly to PartyTyme.net search results for your query.
+   - Pressing Enter inside the search box automatically launches Karaoke Version search.
+2. Legitimate Purchasing:
+   - Hosts purchase licensed tracks directly on the manufacturer's secure website and download their files (MP3+G, CDG, MP3, ZIP, or MP4) locally.
+
+[Purchased Tracks Folder Watcher & Auto-Import]
+1. Purchased Tracks Folder:
+   - Specifies the directory monitored for new track downloads (defaults to the user's Downloads folder).
+   - "Browse..." and "Open in Explorer" buttons provide quick path selection and direct file access.
+2. Automatic Background Watcher:
+   - "Automatically import new files from Purchased Tracks folder" toggle switch enables an asynchronous FileSystemWatcher.
+   - Automatically detects incoming .mp3, .cdg, .zip, and .mp4 files.
+   - Includes intelligent write debouncing and file-lock verification to ensure browser downloads are 100% complete before import begins.
+   - Coalesces matching .mp3 and .cdg pairs into a single MP3+G track.
+
+[Destination Folder Routing]
+1. Target Karaoke Folder:
+   - Dedicated folder where imported karaoke tracks (.zip, .cdg/.mp3 pairs, and .mp4 video files) are organized.
+2. Target Music Folder:
+   - Dedicated folder where imported background and intermission music (standalone .mp3 files) are organized.
+3. Move Files Toggle:
+   - "Move imported files to destination folders (Karaoke / Music)" automatically moves downloaded files out of Downloads into the designated destination directories upon import.
+
+[Metadata Extraction & Database Indexing]
+1. Smart Tagging & Source Identification:
+   - Analyzes filename, catalog codes (KV / PT / SF), and metadata tags.
+   - Categorizes track source as "Karaoke Version", "Party Tyme", or "Local".
+2. Instant Library Availability:
+   - Immediately creates or updates the track record in the SQLite database and indexes the song in the SQLite FTS5 search engine.
+   - Automatically triggers a live library refresh across Karaoke, Rotation, and Playlists views.
+
+[Manual Import & Recent Imports Tracker]
+1. "Import Purchased Track..." Button:
+   - Opens a multi-select file dialog allowing instant manual import of downloaded tracks at any time.
+2. Recent Imports Table:
+   - Real-time audit log showing Source badges, Song Title, Artist, Karaoke Format (MP3G, ZIPCDG, MP4, Audio), File Path, Added Time, and Import Status.
+   - Includes a "Clear List" button to reset the session view.
+
+Webcam Performer Photo Capture & Avatar Attachment (`Lyracist`, `KSRotation`) - (September 2026)
+
+Section: Performer & User Management / Webcam Photo Capture & Avatar Attachment
+
+[Webcam Performer Photo Capture & Avatar Attachment]
+1. Live DJ Webcam Capture for Performers:
+   - On the "Users" tab in both Lyracist and KSRotation, DJs now have a dedicated "Take Photo" button alongside the existing "Upload Photo" and "Clear Photo" controls.
+   - Clicking "Take Photo" opens a modal capture dialog with live webcam streaming powered by `FlashCap` (using Windows DirectShow / Media Foundation without native dependency overhead).
+2. Camera Device Selection & Status:
+   - Automatically detects and populates all connected USB webcams, integrated laptop cameras, and virtual video devices in a dropdown selector.
+   - Real-time status reporting alerts the DJ if no camera is detected or when the device stream successfully starts.
+3. Live Video Framing with Circular Guide:
+   - Displays a high-resolution live video viewfinder with a subtle golden circular framing overlay.
+   - Ensures the DJ can effortlessly align and center headshots matching the circular display format used on audience billboards, vinyl turntable graphics, and patron mobile portals.
+4. Snapshot Freezing & Retake:
+   - Clicking "Capture Snapshot" freezes the video feed, allowing the DJ and performer to review the headshot.
+   - A "Retake" button immediately unfreezes the preview if adjustments or a second shot are required.
+5. Automatic Center-Cropping, Scaling & Storage:
+   - Clicking "Apply Photo" processes the frozen frame: automatically center-crops the image to a perfect 1:1 square aspect ratio, scales it to 400x400 pixels, and encodes it as a high-quality JPEG.
+   - The file is saved directly into `Data/Avatars/{guid}.jpg` and linked to the performer's profile in `Data/lyracist.db`.
+   - The webcam stream safely shuts down, and the performer's avatar is updated immediately across both the host UI, audience displays, and web patron portal.
+
+KSRotation Dedicated "Users" Tab & Singer Account Management (`KSRotation`) - (September 2026)
+
+Section: KSRotation / Dedicated Users & Singer Account Management Tab
+
+[KSRotation Users Tab & Singer Account Management]
+1. Dedicated "Users" Navigation Tab in KSRotation:
+   - KSRotation now features a dedicated top-level "Users" tab (located directly between Settings and Trivia) providing full feature parity with Lyracist for performer account administration.
+   - Master-detail interface: Left pane features real-time search filtering across singer names, emails, and custom titles, complete with circular avatar thumbnails, singer song counts, vocal ranges, and level badges.
+   - Performer lifecycle: Instant "New Singer" creation and "Delete Singer" options directly from the master list.
+2. Performer Profile & PIN Credentials Editor:
+   - Full editing of singer name, 4-digit patron portal PIN code, email address, vocal range dropdown selection, custom stage titles / nicknames, experience score (XP), and DJ performer notes.
+   - Automatic synchronization with the shared SQLite database (`Data/lyracist.db`), ensuring logins, kiosk access, and performer credentials remain identical across both applications.
+3. Vocal & Audio Profile Defaults:
+   - Dedicated "Audio Defaults" sub-tab to configure preloaded settings: Microphone Gain, Key Transposition, Playback Speed (tempo), 3-Band Parametric EQ (Treble, Mid, Bass), Compressor Amount, Limiter Threshold, and Sound Check Remarks.
+   - Settings persist per performer and are automatically recalled whenever the performer sings.
+4. Performance History & One-Click Rotation Queuing:
+   - Dedicated "Performance History" sub-tab logs all historical songs performed by the singer.
+   - Displays Song Title, Artist, Key Transposition, Playback Speed, Source, and Timestamp.
+   - Includes one-click "Queue" action to immediately insert a past favorite song into the active rotation round, and a "Remove" button to delete outdated records.
+5. Duplicate Performer Account Consolidation:
+   - "Merge Duplicate..." button opens a dedicated modal overlay.
+   - Selects any duplicate performer profile from a dropdown list to consolidate into the currently selected primary account.
+   - Automatically transfers all song performance history, active queue items, and accumulated XP points to the primary account, then permanently removes the duplicate profile.
+6. Performer Photo & Avatar Management:
+   - Dedicated avatar controls with "Upload Photo" and "Clear Photo" actions.
+   - Uploaded photos are stored in `Data/Avatars/` and immediately reflected in rotation billboards, marquee screens, and the patron portal.
+
+Session Start/Stop Scheduling & Last Request Cutoff (`Lyracist`, `KSRotation`) - (September 2026)
+
+Section: Session & Venue Management / Session Schedule & Request Cutoff
+
+[Session Start/Stop Scheduling & Request Cutoff]
+1. Session Schedule Management:
+   - DJs can configure exact start and stop times for the active karaoke session via a dedicated "Session Schedule & Request Cutoff" settings groupbox in both Lyracist and KSRotation.
+   - Supports 30-minute dropdown interval selection or custom freeform time entry with full 12-hour AM/PM and 24-hour military format compatibility.
+   - Full overnight support crossing midnight (e.g., 8:00 PM to 2:00 AM, 9:00 PM to 1:30 AM).
+   - "Enable Session Schedule" toggle enforces session boundaries: patron portal and kiosk submissions attempted before the session starts or after it concludes are blocked with an informative message informing patrons of the scheduled hours.
+2. Last Request Cutoff Time:
+   - Configurable "Enable Last Request Cutoff" toggle and "Last Request Time" picker (default 1:30 AM).
+   - Once the cutoff time is reached, patrons and kiosk users can no longer submit new song requests for the remainder of the night.
+   - Patrons receive an immediate, polite notice: "Song requests are now closed for tonight. The cutoff time for requests was [Time]."
+   - Works seamlessly alongside session start/stop scheduling or independently for open-ended shows.
+
+Session Duplicate Blocking, Singer Account Management & Performer Selfie Displays (`Lyracist`, `KSRotation`) - (September 2026)
+
+Section: Rotation & Performer Management / Session Song Tracking & User Administration
+
+[Session Song Tracking & Duplicate Song Blocking]
+1. Session-Wide Song History Tracking:
+   - Tracks all songs performed and queued during the active show session in both Lyracist and KSRotation.
+   - Dedicated "Session Performed Songs" list on the Rotation tab displays order of performance, singer, duet partner, song title, artist, key transposition, and speed multiplier.
+   - Actions to copy the session song list to clipboard or clear the session history when beginning a new night.
+2. DJ Setting - Block Duplicate Songs in Session:
+   - Configurable checkbox in Settings > Rotation Settings in both Lyracist and KSRotation (`BlockDuplicateSongsInSession`).
+   - When enabled, patrons submitting song requests via the web patron portal (`/api/request` and `/api/requests`) cannot request a song that has already been sung or is currently queued in rotation during that session.
+   - Patrons receive an immediate, polite notice: "[Song Title] has already been performed or queued in this session. Duplicate songs are blocked by the DJ."
+
+[Dedicated "Users" Navigation Tab & Singer Management]
+1. Full Performer Directory & Editor ("Users" Tab):
+   - New primary navigation tab in Lyracist sidebar with Person icon.
+   - 2-pane master-detail interface: searchable list of all registered performers with instant filter by name or email, level badges, XP scores, and song counts.
+   - Create new singer accounts or delete obsolete accounts.
+2. Performer Profile & Credentials Editor:
+   - Edit Singer Name, 4-digit Patron Portal PIN code, Email, Vocal Range (Soprano, Mezzo-Soprano, Contralto, Countertenor, Tenor, Baritone, Bass), Custom Title / Stage Nickname, Experience Score (XP), and DJ Notes.
+3. Per-Singer Vocal & Audio Defaults:
+   - Dedicated tab for audio preferences: Microphone Gain (Volume), Key Transposition (-12 to +12 semitones), Playback Speed (0.8x to 1.2x), 3-Band Parametric EQ (Treble, Mid, Bass), Dynamics (Compressor, Limiter), and Sound Check Remarks.
+   - Settings automatically preload whenever the performer is queued or takes the stage.
+4. Comprehensive Performance History Record:
+   - "Performance History" tab displaying a complete historical record of every song sung by the performer.
+   - Columns for Song Title, Artist, Key Transposition, Playback Speed (Tempo), Source (Local, YouTube, etc.), and Date/Time stamp.
+   - Direct Actions: "Queue" button instantly re-queues the past performance back into the live rotation preserving the performer's exact key and tempo settings; "Remove" button purges individual entries.
+5. Merge Duplicate Singer Accounts:
+   - "Merge Duplicate..." button opens a dedicated consolidation modal.
+   - Selects another singer profile from a dropdown list to consolidate into the primary account.
+   - Transfers all historical song performances, past requests, active rotation entries, audio profile defaults, and XP points to the target account, then permanently removes the duplicate account.
+
+[Performer Selfie / Photo Uploads & Billboard/Turntable Display]
+1. Patron Portal Selfie & Photo Uploads:
+   - Patrons can upload a selfie or profile image directly through the smartphone patron portal (`/api/singer/avatar/upload`).
+   - Safe validation and storage in `Data/Avatars/` with database record linking.
+   - DJs can view, upload, or clear photos in the desktop "Users" tab.
+2. Vegas Billboard ("Vegas Marquee") Display:
+   - On the Broadway/Vegas marquee rotation screen, a high-resolution circular framed photo with gold neon glow effect is prominently rendered right above the singer's name on the big screen.
+3. Vinyl Record ("Now Spinning") Turntable Display:
+   - On the turntable rotation screen, the circular framed photo is showcased beside the "♪ NOW SPINNING" banner and singer title while the vinyl record spins.
+
 Library Metadata Probing & Deployment Synchronization (`Lyracist`, `LyracistDbEditor`, `Deploy`) - (August 2026)
 
 Section: Library Management & Deployment / High-Speed In-Memory Probing & Laptop Sync
@@ -1199,3 +1525,39 @@ Section: Lyracist / Per-Singer Key, Tempo, Mic Level & Vocal EQ Recall
 4. Singer History Key & Speed Tracking:
    - The Singer History table in the Karaoke tab now includes dedicated "Key" and "Speed" columns displaying past transposition and tempo settings for every completed performance.
    - Re-adding a song from Singer History back into the rotation queue preserves and applies the historical Key and Tempo settings seamlessly.
+
+Section: Lyracist / Bulk Import Wizard
+
+[Batch Media Ingestion & Processing Pipeline]
+1. Multi-Format Folder Scanning & Audio Pairing:
+   - Accessible via the new "Bulk Import..." button on the Store page next to the manual import controls.
+   - Allows users to select any folder containing purchased karaoke tracks and immediately scans for supported media formats: MP3, CDG, ZIP (MP3+G), MP4, and LRC/TXT lyrics files.
+   - Automatically detects and pairs corresponding MP3 audio and CDG graphics files into single cohesive track entries.
+   - Previews ZIP archive contents and dual-audio track configurations in MP4 video files.
+   - Automatically searches for and binds matching lyrics files (.lrc, .txt).
+
+2. Provider Intelligence & Metadata Preview:
+   - Integrates the Provider Intelligence engine during scanning to identify provider origins (KaraFun, Party Tyme, Sunfly, Karaoke Version, Karaoke.com, or Local) from ID3 headers, CDG tags, and file naming conventions.
+   - Displays a comprehensive Preview Table with columns for Filename, Provider, File Type, Duration, Key, BPM, Quality, Difficulty, Vocal Presence, and per-item processing toggles.
+
+3. Global Batch Options & Individual Overrides:
+   - Provides global toggles to enable or disable operations across all candidate tracks:
+     * "Normalize all": Level perceived loudness across tracks using EBU R128 Loudness Normalization.
+     * "Trim silence for all": Strip lead-in and trailing dead air silence automatically.
+     * "Generate waveform for all": Pre-render waveform peak previews for instantaneous display in the live deck.
+     * "Move files to target folders": Automatically route processed media into organized destination directories based on Smart Import Rules.
+   - Each item in the preview table retains its own toggle switches, allowing granular overrides before launching the batch.
+
+4. Concurrent Execution & Progress Tracking:
+   - Runs FFmpeg conversion and audio processing pipeline jobs concurrently, throttled to a maximum of 3 simultaneous background operations via `SemaphoreSlim(3)` to ensure UI responsiveness and system stability.
+   - Displays real-time progress indicators: overall percentage progress bar, current file being processed, and success/failure counters.
+   - Includes full cancellation support, allowing users to stop ongoing batch jobs cleanly.
+
+5. Bulk Import Completion Summary:
+   - Upon completion, displays a detailed summary dialog presenting:
+     * Total tracks imported successfully
+     * Total tracks skipped or conflicted
+     * Total errors encountered
+     * Karaoke providers involved across the batch
+     * Average processing time per track and total elapsed duration
+   - Automatically triggers a refresh of Store Analytics and Library indices upon window closure.

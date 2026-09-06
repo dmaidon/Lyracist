@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 07:28:45 -> Add Key and Tempo columns to SingerHistory and support per-song key/tempo save and recall
+// Edited on Sep 6, 2026 @ 08:35:00 -> Add MergeHistory and DeleteHistoryEntry support
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -217,6 +217,62 @@ namespace Lyracist.Services.Database
             }
 
             return null;
+        }
+
+        public static void MergeHistory(string sourceSingerName, string targetSingerName)
+        {
+            if (string.IsNullOrWhiteSpace(sourceSingerName) || string.IsNullOrWhiteSpace(targetSingerName)) return;
+            if (string.Equals(sourceSingerName.Trim(), targetSingerName.Trim(), StringComparison.OrdinalIgnoreCase)) return;
+
+            sourceSingerName = Lyracist.Shared.NameFormatting.ProperCase(sourceSingerName.Trim());
+            targetSingerName = Lyracist.Shared.NameFormatting.ProperCase(targetSingerName.Trim());
+
+            try
+            {
+                using var connection = new SqliteConnection(GetConnectionString());
+                connection.Open();
+
+                // 1. Reassign non-overlapping song history from source singer to target singer
+                using var updateCmd = connection.CreateCommand();
+                updateCmd.CommandText = @"
+                    UPDATE SingerHistory
+                    SET SingerName = $targetSingerName
+                    WHERE SingerName = $sourceSingerName COLLATE NOCASE
+                      AND SongTitle NOT IN (
+                          SELECT SongTitle FROM SingerHistory WHERE SingerName = $targetSingerName COLLATE NOCASE
+                      );
+                ";
+                updateCmd.Parameters.AddWithValue("$targetSingerName", targetSingerName);
+                updateCmd.Parameters.AddWithValue("$sourceSingerName", sourceSingerName);
+                updateCmd.ExecuteNonQuery();
+
+                // 2. Remove remaining overlapping entries for the source singer
+                using var deleteCmd = connection.CreateCommand();
+                deleteCmd.CommandText = "DELETE FROM SingerHistory WHERE SingerName = $sourceSingerName COLLATE NOCASE;";
+                deleteCmd.Parameters.AddWithValue("$sourceSingerName", sourceSingerName);
+                deleteCmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Error merging SingerHistory from '{sourceSingerName}' to '{targetSingerName}'", ex);
+            }
+        }
+
+        public static void DeleteHistoryEntry(int singerHistoryId)
+        {
+            try
+            {
+                using var connection = new SqliteConnection(GetConnectionString());
+                connection.Open();
+                using var command = connection.CreateCommand();
+                command.CommandText = "DELETE FROM SingerHistory WHERE SingerHistoryId = $id;";
+                command.Parameters.AddWithValue("$id", singerHistoryId);
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"Error deleting SingerHistory entry #{singerHistoryId}", ex);
+            }
         }
     }
 }

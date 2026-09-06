@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 08:18:00 -> Document Per-Singer Key/Tempo Recall and Audio Controls in Help Topic 1
+// Edited on Sep 6, 2026 @ 11:57:00 -> Add Help topics for Users Management, Karaoke Store, Store Analytics, and Bulk Import Wizard
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -165,9 +165,38 @@ public partial class HelpViewModel : BaseViewModel
                 AccentColor = "#EF4444",
                 DescriptionHeader = "Rotation Cycle Visual Highlighting & Remote DJ Tablet Actions",
                 DescriptionContent = "• Visual Red Badge & Outline: The performer who marks where the rotation round begins is highlighted with a '⚓ ANCHOR' badge, red background outline, and distinct card styling across desktop consoles, Remote DJ Tablet (dj.html), and Patron Portals.\n\n• 1-Click Remote Anchor Control: The DJ Tablet features a dedicated '⚓' action button to assign or clear the Rotation Anchor with one tap from anywhere in the venue.\n\n• First-Button Checkmark (✓): In the Remote DJ Board (dj.html), the finished song checkmark ('✓') is positioned first in the action buttons bar for fast, immediate 1-tap song completion.\n\n• Popup Modal Performer Entry: Adding a performer from the DJ tablet opens a focused popup modal dialog with auto-focused name input, keyboard shortcuts (Enter to add, Escape to cancel), and instant queue synchronization."
+            },
+            new() {
+                Title = "21. Performer Directory & Users Management",
+                Icon = "Person24",
+                AccentColor = "#8B5CF6",
+                DescriptionHeader = "Singer Directory, Audio Profiles, Performance History & Account Merging",
+                DescriptionContent = "• Performer Directory: Master-detail interface in the primary 'Users' tab displaying all registered performers, level badges, XP scores, and song counts.\n\n• Profile & Credentials Editor: Edit Singer Name, 4-digit Patron Portal PIN code, Email, Vocal Range (Soprano to Bass), Custom Stage Title, and DJ Notes.\n\n• Audio Preferences: Save per-singer defaults for Microphone Gain (Volume), Key Transposition (-12 to +12 semitones), Playback Speed (0.8x to 1.2x), 3-Band Parametric EQ (Treble, Mid, Bass), Compressor, and Limiter.\n\n• Performance History: Review complete historical logs of songs sung by each performer with instant 'Queue' and 'Remove' actions.\n\n• Merge Duplicate Accounts: Consolidate duplicate singer profiles into a single primary account, merging all performances, requests, audio profiles, and XP points seamlessly."
+            },
+            new() {
+                Title = "22. Licensed Karaoke Store & Provider Intelligence",
+                Icon = "ShoppingBag24",
+                AccentColor = "#EC4899",
+                DescriptionHeader = "Multi-Store Deep Links, Downloads Folder Watcher & Provider Fingerprinting",
+                DescriptionContent = "• Licensed Store Deep Links: Direct search integration for Karaoke Version, Party Tyme, Sunfly Karaoke, and Karaoke.com with zero audio proxying.\n\n• Background Downloads Watcher: Automatically detects new .mp3, .cdg, .zip, and .mp4 purchases in your download folder, pairs companion files, and imports them seamlessly.\n\n• Provider Intelligence: Fingerprints track origins from ZIP internal layouts, CDG magic header bytes, ID3 tags, and MP4 watermarks (KV, PT, SF, KC, Local).\n\n• Smart Import Rules: Automatically renames files to canonical format 'Artist - Title (Provider).ext' and classifies genre, difficulty, musical key, BPM, and vocal presence.\n\n• FFmpeg Audio Processing: Applies EBU R128 loudness normalization (-16 LUFS), silence trimming below -50dB, and peak waveform preview generation."
+            },
+            new() {
+                Title = "23. Store Analytics & Benchmarks",
+                Icon = "DataTrending24",
+                AccentColor = "#14B8A6",
+                DescriptionHeader = "Library Distribution, Audio Benchmarks, Musical Keys & Activity Heatmaps",
+                DescriptionContent = "• Provider Breakdown: Statistical track counts, percentage shares, and top provider highlights across all cataloged stores.\n\n• File Packaging Stats: Tracks distribution across MP3+G pairs, MP4 video, ZIPCDG archives, standalone MP3s, and attached lyrics (.lrc/.txt).\n\n• Processing Benchmarks: Tracks normalized count, silence-trimmed count, waveform previews, and live stopwatch timing (average, min, max processing speed).\n\n• Musical Keys & BPM Charts: Top 8 musical keys horizontal bar chart for transposition cueing and 5-bucket BPM tempo distribution histogram.\n\n• Activity Timeline & 24-Hour Heatmap: 14-day daily acquisition bar chart and 24-hour import intensity heatmap matrix."
+            },
+            new() {
+                Title = "24. Bulk Import Wizard",
+                Icon = "FolderZip24",
+                AccentColor = "#3B82F6",
+                DescriptionHeader = "Batch Folder Ingestion, MP3+G Pairing, Parallel FFmpeg & Completion Report",
+                DescriptionContent = "• Batch Folder Scanning: Select any folder to scan MP3, CDG, ZIP, MP4, and LRC/TXT files with automated MP3+G pairing and companion lyrics binding.\n\n• Candidate Preview Table: Inspects file type, provider source, duration, musical key, BPM, quality tier, difficulty, and vocal presence.\n\n• Global & Granular Audio Toggles: Global options to Normalize all, Trim silence for all, Generate waveforms for all, and Move to target folders, with individual per-track override toggles.\n\n• Throttled Parallel Execution: Runs batch operations concurrently throttled to max 3 simultaneous FFmpeg tasks via SemaphoreSlim(3) with combined single-pass audio filter execution.\n\n• Progress UI & Completion Summary: Live progress bar, current file indicator, success/error counters, cancellation support, and post-import summary report."
             }
         ];
 
         _selectedTopic = _helpTopics[0];
     }
 }
+

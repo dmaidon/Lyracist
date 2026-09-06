@@ -1,4 +1,4 @@
-// Edited on Sep 4, 2026 @ 00:07:00 -> Add ToggleLastRoundCommand
+// Edited on Sep 6, 2026 @ 09:10:00 -> Initialize singer users loading in MainViewModel constructor
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -80,6 +80,59 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool IsTestMode { get; set; }
+
+        [ObservableProperty]
+        public partial bool BlockDuplicateSongsInSession { get; set; }
+
+        [ObservableProperty]
+        public partial bool EnableSessionSchedule { get; set; }
+
+        [ObservableProperty]
+        public partial string SessionStartTime { get; set; } = "8:00 PM";
+
+        [ObservableProperty]
+        public partial string SessionStopTime { get; set; } = "2:00 AM";
+
+        [ObservableProperty]
+        public partial bool EnableLastRequestTime { get; set; }
+
+        [ObservableProperty]
+        public partial string LastRequestTime { get; set; } = "1:30 AM";
+
+        public IReadOnlyList<string> TimeOptions => SessionScheduleHelper.StandardTimeOptions;
+
+        public bool IsRequestSubmissionAllowed(out string reason, DateTime? now = null)
+        {
+            return SessionScheduleHelper.IsRequestSubmissionAllowed(
+                EnableSessionSchedule,
+                SessionStartTime,
+                SessionStopTime,
+                EnableLastRequestTime,
+                LastRequestTime,
+                out reason,
+                now);
+        }
+
+        public bool IsSongInCurrentSession(string songTitle, string artist = "")
+        {
+            if (string.IsNullOrWhiteSpace(songTitle)) return false;
+            string cleanTitle = songTitle.Trim();
+
+            lock (_performanceHistoryLock)
+            {
+                if (_performanceHistory.Any(p => string.Equals(p.SongTitle?.Trim(), cleanTitle, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+
+            if (Singers.Any(s => string.Equals(s.Song?.Trim(), cleanTitle, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         /// <summary>When true, indicates the final round of the night is underway.</summary>
         [ObservableProperty]
@@ -424,6 +477,15 @@ namespace KSRotation.ViewModels
                     break;
 
                 case nameof(DefaultSongLengthMinutes):
+                    QueueSaveSettings();
+                    break;
+
+                case nameof(BlockDuplicateSongsInSession):
+                case nameof(EnableSessionSchedule):
+                case nameof(SessionStartTime):
+                case nameof(SessionStopTime):
+                case nameof(EnableLastRequestTime):
+                case nameof(LastRequestTime):
                     QueueSaveSettings();
                     break;
 
@@ -976,6 +1038,12 @@ namespace KSRotation.ViewModels
             FloatCurrentSingerToTop = settings.FloatCurrentSingerToTop;
             DefaultSongLengthMinutes = Math.Clamp(settings.DefaultSongLengthMinutes > 0 ? settings.DefaultSongLengthMinutes : 4.75, 1, 20);
             ShowEstimatedWaitTime = settings.ShowEstimatedWaitTime;
+            BlockDuplicateSongsInSession = settings.BlockDuplicateSongsInSession;
+            EnableSessionSchedule = settings.EnableSessionSchedule;
+            SessionStartTime = string.IsNullOrWhiteSpace(settings.SessionStartTime) ? "8:00 PM" : settings.SessionStartTime;
+            SessionStopTime = string.IsNullOrWhiteSpace(settings.SessionStopTime) ? "2:00 AM" : settings.SessionStopTime;
+            EnableLastRequestTime = settings.EnableLastRequestTime;
+            LastRequestTime = string.IsNullOrWhiteSpace(settings.LastRequestTime) ? "1:30 AM" : settings.LastRequestTime;
             _displayWindowService.SetShowEstimatedWaitTime(ShowEstimatedWaitTime);
             _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
             SelectedProjectionView = "Normal List";
@@ -1100,6 +1168,7 @@ namespace KSRotation.ViewModels
             RebuildRotationJsonCacheNow();
 #if !MAUI
             InitializeTrivia();
+            _ = LoadAllUsersAsync();
 #endif
         }
 
@@ -2498,7 +2567,13 @@ namespace KSRotation.ViewModels
                 AutoAcceptRequests = AutoAcceptRequests,
                 FloatCurrentSingerToTop = FloatCurrentSingerToTop,
                 DefaultSongLengthMinutes = Math.Clamp(DefaultSongLengthMinutes, 1, 20),
-                ShowEstimatedWaitTime = ShowEstimatedWaitTime
+                ShowEstimatedWaitTime = ShowEstimatedWaitTime,
+                BlockDuplicateSongsInSession = BlockDuplicateSongsInSession,
+                EnableSessionSchedule = EnableSessionSchedule,
+                SessionStartTime = SessionStartTime,
+                SessionStopTime = SessionStopTime,
+                EnableLastRequestTime = EnableLastRequestTime,
+                LastRequestTime = LastRequestTime
             };
 
             try

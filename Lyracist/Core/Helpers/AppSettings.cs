@@ -1,7 +1,8 @@
-// Edited on Aug 30, 2026 @ 08:26:00 -> Consolidated settings path to Settings/lyracist_settings.json with legacy fallback migration
+// Edited on Sep 6, 2026 @ 10:57:00 -> Add FFmpeg import processing settings for normalization, silence trimming, and waveform generation
 using System;
 using System.IO;
 using System.Text.Json;
+using Lyracist.Shared;
 
 namespace Lyracist.Core.Helpers;
 
@@ -882,6 +883,119 @@ public static class AppSettings
         set { _data.ShowEstimatedWaitTime = value; Save(); }
     }
 
+    /// <summary>When true, patrons cannot request songs via the portal that have already been performed or queued in the current session.</summary>
+    public static bool BlockDuplicateSongsInSession
+    {
+        get => _data.BlockDuplicateSongsInSession;
+        set { _data.BlockDuplicateSongsInSession = value; Save(); }
+    }
+
+    /// <summary>When true, song requests from patron portal and kiosk are restricted to scheduled session hours.</summary>
+    public static bool EnableSessionSchedule
+    {
+        get => _data.EnableSessionSchedule;
+        set { _data.EnableSessionSchedule = value; Save(); }
+    }
+
+    /// <summary>Start time of the scheduled session (e.g. "8:00 PM" or "20:00").</summary>
+    public static string SessionStartTime
+    {
+        get => _data.SessionStartTime;
+        set { _data.SessionStartTime = value; Save(); }
+    }
+
+    /// <summary>Stop time of the scheduled session (e.g. "2:00 AM" or "02:00").</summary>
+    public static string SessionStopTime
+    {
+        get => _data.SessionStopTime;
+        set { _data.SessionStopTime = value; Save(); }
+    }
+
+    /// <summary>When true, song requests from patron portal and kiosk are cut off at the specified last request time.</summary>
+    public static bool EnableLastRequestTime
+    {
+        get => _data.EnableLastRequestTime;
+        set { _data.EnableLastRequestTime = value; Save(); }
+    }
+
+    /// <summary>Cutoff time for receiving new song requests (e.g. "1:30 AM" or "01:30").</summary>
+    public static string LastRequestTime
+    {
+        get => _data.LastRequestTime;
+        set { _data.LastRequestTime = value; Save(); }
+    }
+
+    /// <summary>Evaluates whether request submissions are currently permitted based on schedule and cutoff settings.</summary>
+    public static bool IsRequestSubmissionAllowed(out string reason, DateTime? now = null)
+    {
+        return SessionScheduleHelper.IsRequestSubmissionAllowed(
+            EnableSessionSchedule,
+            SessionStartTime,
+            SessionStopTime,
+            EnableLastRequestTime,
+            LastRequestTime,
+            out reason,
+            now);
+    }
+
+    /// <summary>Folder to monitor for newly downloaded/purchased tracks (defaults to user's Downloads folder).</summary>
+    public static string StorePurchasedTracksFolder
+    {
+        get => string.IsNullOrWhiteSpace(_data.StorePurchasedTracksFolder)
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")
+            : _data.StorePurchasedTracksFolder;
+        set { _data.StorePurchasedTracksFolder = value; Save(); }
+    }
+
+    /// <summary>Target folder where purchased karaoke tracks (.zip, .cdg/.mp3, .mp4) should be routed.</summary>
+    public static string StoreTargetKaraokeFolder
+    {
+        get => _data.StoreTargetKaraokeFolder;
+        set { _data.StoreTargetKaraokeFolder = value; Save(); }
+    }
+
+    /// <summary>Target folder where purchased music tracks (standalone .mp3) should be routed.</summary>
+    public static string StoreTargetMusicFolder
+    {
+        get => _data.StoreTargetMusicFolder;
+        set { _data.StoreTargetMusicFolder = value; Save(); }
+    }
+
+    /// <summary>When true, files detected in the purchased tracks folder are automatically imported into the library.</summary>
+    public static bool StoreAutoImportEnabled
+    {
+        get => _data.StoreAutoImportEnabled;
+        set { _data.StoreAutoImportEnabled = value; Save(); }
+    }
+
+    /// <summary>When true and target folders are specified, imported files are moved to their target folder instead of kept in downloads.</summary>
+    public static bool StoreMoveFilesToTarget
+    {
+        get => _data.StoreMoveFilesToTarget;
+        set { _data.StoreMoveFilesToTarget = value; Save(); }
+    }
+
+    /// <summary>When true, imported audio files are loudness-normalized to -16 LUFS via FFmpeg loudnorm.</summary>
+    public static bool StoreNormalizeAudioOnImport
+    {
+        get => _data.StoreNormalizeAudioOnImport;
+        set { _data.StoreNormalizeAudioOnImport = value; Save(); }
+    }
+
+    /// <summary>When true, leading and trailing silence below -50dB is trimmed from imported audio via FFmpeg.</summary>
+    public static bool StoreTrimSilenceOnImport
+    {
+        get => _data.StoreTrimSilenceOnImport;
+        set { _data.StoreTrimSilenceOnImport = value; Save(); }
+    }
+
+    /// <summary>When true, a visual PNG waveform preview is rendered on import via FFmpeg showwavespic.</summary>
+    public static bool StoreGenerateWaveformOnImport
+    {
+        get => _data.StoreGenerateWaveformOnImport;
+        set { _data.StoreGenerateWaveformOnImport = value; Save(); }
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
@@ -894,6 +1008,20 @@ public static class AppSettings
         public bool FloatCurrentSingerToTop { get; set; } = false;
         public double DefaultSongLengthMinutes { get; set; } = 4.75;
         public bool ShowEstimatedWaitTime { get; set; } = true;
+        public bool BlockDuplicateSongsInSession { get; set; } = false;
+        public bool EnableSessionSchedule { get; set; } = false;
+        public string SessionStartTime { get; set; } = "8:00 PM";
+        public string SessionStopTime { get; set; } = "2:00 AM";
+        public bool EnableLastRequestTime { get; set; } = false;
+        public string LastRequestTime { get; set; } = "1:30 AM";
+        public string StorePurchasedTracksFolder { get; set; } = string.Empty;
+        public string StoreTargetKaraokeFolder { get; set; } = string.Empty;
+        public string StoreTargetMusicFolder { get; set; } = string.Empty;
+        public bool StoreAutoImportEnabled { get; set; } = false;
+        public bool StoreMoveFilesToTarget { get; set; } = true;
+        public bool StoreNormalizeAudioOnImport { get; set; } = false;
+        public bool StoreTrimSilenceOnImport { get; set; } = false;
+        public bool StoreGenerateWaveformOnImport { get; set; } = false;
 
         // Registration data
         public string RegFirstName { get; set; } = string.Empty;

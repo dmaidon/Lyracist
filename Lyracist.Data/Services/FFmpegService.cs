@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:34:00 -> Fix RCS1155 string comparisons and RCS1261 async disposal
+// Edited on Sep 6, 2026 @ 11:45:00 -> Add batch-friendly audio pipeline wrapper for Bulk Import Wizard
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -490,6 +490,236 @@ namespace Lyracist.Data.Services
 
             // Join the audio filters sequentially with commas
             return string.Join(",", filters);
+        }
+
+        // ==========================================
+        // STORE IMPORT AUDIO PROCESSING PIPELINE
+        // ==========================================
+
+        public static async Task<bool> NormalizeAudioAsync(string inputPath, string outputPath)
+        {
+            if (!File.Exists(inputPath)) return false;
+
+            try
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = FFmpegPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                startInfo.ArgumentList.Add("-y");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(inputPath);
+                startInfo.ArgumentList.Add("-af");
+                startInfo.ArgumentList.Add("loudnorm=I=-16:TP=-1.5:LRA=11");
+                startInfo.ArgumentList.Add("-c:a");
+                startInfo.ArgumentList.Add("libmp3lame");
+                startInfo.ArgumentList.Add("-b:a");
+                startInfo.ArgumentList.Add("320k");
+                startInfo.ArgumentList.Add(outputPath);
+
+                using var process = new Process { StartInfo = startInfo };
+                process.Start();
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
+                await process.WaitForExitAsync();
+
+                return process.ExitCode == 0 && File.Exists(outputPath);
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"FFmpeg normalization failed for {inputPath}", ex);
+                return false;
+            }
+        }
+
+        public static async Task<bool> TrimSilenceAsync(string inputPath, string outputPath)
+        {
+            if (!File.Exists(inputPath)) return false;
+
+            try
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = FFmpegPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                startInfo.ArgumentList.Add("-y");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(inputPath);
+                startInfo.ArgumentList.Add("-af");
+                startInfo.ArgumentList.Add("silenceremove=start_periods=1:start_duration=0.1:start_threshold=-50dB:detection=peak,areverse,silenceremove=start_periods=1:start_duration=0.1:start_threshold=-50dB:detection=peak,areverse");
+                startInfo.ArgumentList.Add("-c:a");
+                startInfo.ArgumentList.Add("libmp3lame");
+                startInfo.ArgumentList.Add("-b:a");
+                startInfo.ArgumentList.Add("320k");
+                startInfo.ArgumentList.Add(outputPath);
+
+                using var process = new Process { StartInfo = startInfo };
+                process.Start();
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
+                await process.WaitForExitAsync();
+
+                return process.ExitCode == 0 && File.Exists(outputPath);
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"FFmpeg silence trimming failed for {inputPath}", ex);
+                return false;
+            }
+        }
+
+        public static async Task<bool> GenerateWaveformPreviewAsync(string inputPath, string outputPngPath)
+        {
+            if (!File.Exists(inputPath)) return false;
+
+            try
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = FFmpegPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                startInfo.ArgumentList.Add("-y");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(inputPath);
+                startInfo.ArgumentList.Add("-filter_complex");
+                startInfo.ArgumentList.Add("aformat=channel_layouts=mono,showwavespic=s=800x160:colors=#00C9FF|#8E2DE2");
+                startInfo.ArgumentList.Add("-frames:v");
+                startInfo.ArgumentList.Add("1");
+                startInfo.ArgumentList.Add(outputPngPath);
+
+                using var process = new Process { StartInfo = startInfo };
+                process.Start();
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
+                await process.WaitForExitAsync();
+
+                return process.ExitCode == 0 && File.Exists(outputPngPath);
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"FFmpeg waveform generation failed for {inputPath}", ex);
+                return false;
+            }
+        }
+
+        // ==========================================
+        // SMART IMPORT HELPERS & ANALYSIS
+        // ==========================================
+
+        public static string? DetectGenre(string provider, FFprobeResult metadata) =>
+            FFprobeRunner.DetectGenre(provider, metadata);
+
+        public static string DetectDifficulty(FFprobeResult metadata) =>
+            FFprobeRunner.DetectDifficulty(metadata);
+
+        public static string? DetectKey(FFprobeResult metadata) =>
+            FFprobeRunner.DetectKey(metadata);
+
+        public static double? DetectBpm(FFprobeResult metadata) =>
+            FFprobeRunner.DetectBpm(metadata);
+
+        public static string DetectVocalPresence(FFprobeResult metadata) =>
+            FFprobeRunner.DetectVocalPresence(metadata);
+
+        public static string DetectQuality(FFprobeResult metadata) =>
+            FFprobeRunner.DetectQuality(metadata);
+
+        public static async Task<string?> DetectKeyAsync(string filePath)
+        {
+            var probe = await ProbeFile(filePath);
+            return DetectKey(probe);
+        }
+
+        public static async Task<double?> DetectBpmAsync(string filePath)
+        {
+            var probe = await ProbeFile(filePath);
+            return DetectBpm(probe);
+        }
+
+        // ==========================================
+        // BATCH-FRIENDLY AUDIO PIPELINE WRAPPER
+        // ==========================================
+
+        public static async Task<bool> ProcessAudioPipelineBatchAsync(
+            string inputAudioPath,
+            string outputAudioPath,
+            bool normalize,
+            bool trimSilence)
+        {
+            if (!File.Exists(inputAudioPath)) return false;
+            if (!normalize && !trimSilence)
+            {
+                if (!string.Equals(inputAudioPath, outputAudioPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    File.Copy(inputAudioPath, outputAudioPath, true);
+                }
+                return true;
+            }
+
+            try
+            {
+                var filters = new List<string>();
+                if (trimSilence)
+                {
+                    filters.Add("silenceremove=start_periods=1:start_duration=0.1:start_threshold=-50dB:detection=peak,areverse,silenceremove=start_periods=1:start_duration=0.1:start_threshold=-50dB:detection=peak,areverse");
+                }
+                if (normalize)
+                {
+                    filters.Add("loudnorm=I=-16:TP=-1.5:LRA=11");
+                }
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = FFmpegPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                startInfo.ArgumentList.Add("-y");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(inputAudioPath);
+                startInfo.ArgumentList.Add("-af");
+                startInfo.ArgumentList.Add(string.Join(",", filters));
+                startInfo.ArgumentList.Add("-c:a");
+                startInfo.ArgumentList.Add("libmp3lame");
+                startInfo.ArgumentList.Add("-b:a");
+                startInfo.ArgumentList.Add("320k");
+                startInfo.ArgumentList.Add(outputAudioPath);
+
+                using var process = new Process { StartInfo = startInfo };
+                process.Start();
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
+                await process.WaitForExitAsync();
+
+                return process.ExitCode == 0 && File.Exists(outputAudioPath);
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"ProcessAudioPipelineBatchAsync failed for {inputAudioPath}", ex);
+                return false;
+            }
         }
     }
 }

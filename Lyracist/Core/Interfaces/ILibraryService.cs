@@ -1,4 +1,4 @@
-// Edited on Jul 28, 2026 @ 19:04:00 -> Add isMusic parameter to Search and SearchAsync methods
+// Edited on Sep 6, 2026 @ 10:33:00 -> Add NotifyLibraryUpdated method
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,6 +16,7 @@ public interface ILibraryService
     Task<IEnumerable<KaraokeSong>> SearchAsync(string query, bool isMusic = false);
     IEnumerable<KaraokeSong> GetAllSongs();
     IEnumerable<KaraokeSong> GetBackgroundMusicSongs();
+    void NotifyLibraryUpdated();
     event EventHandler? LibraryUpdated;
     event EventHandler<Lyracist.Data.Services.ScanProgress>? ScanProgressChanged;
     event EventHandler<string>? ScanFailed;

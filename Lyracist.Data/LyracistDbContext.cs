@@ -1,5 +1,8 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1261 async disposal on DbCommand
+// Edited on Sep 6, 2026 @ 11:35:00 -> Add GetStoreAnalyticsAsync query method with null-safe provider and format counters
+using System;
+using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Lyracist.Data.Models;
@@ -42,6 +45,183 @@ namespace Lyracist.Data
 
         public LyracistDbContext(DbContextOptions<LyracistDbContext> options) : base(options)
         {
+        }
+
+        public async Task<StoreAnalyticsData> GetStoreAnalyticsAsync()
+        {
+            var data = new StoreAnalyticsData();
+            var songs = await Songs.AsNoTracking().ToListAsync();
+            data.TotalTracks = songs.Count;
+
+            if (data.TotalTracks == 0) return data;
+
+            static bool HasSub(string? val, string sub) => val != null && val.Contains(sub, StringComparison.OrdinalIgnoreCase);
+            static bool HasEnd(string? val, string end) => val != null && val.EndsWith(end, StringComparison.OrdinalIgnoreCase);
+
+            // A) Provider Statistics
+            data.KvCount = songs.Count(s => HasSub(s.Tags, "Karaoke Version") || HasSub(s.FilePath, "(KV)") || HasSub(s.Tags, "KV"));
+            data.PtCount = songs.Count(s => HasSub(s.Tags, "Party Tyme") || HasSub(s.FilePath, "(PT)") || HasSub(s.Tags, "PT"));
+            data.SfCount = songs.Count(s => HasSub(s.Tags, "Sunfly") || HasSub(s.FilePath, "(SF)") || HasSub(s.Tags, "SF"));
+            data.KcCount = songs.Count(s => HasSub(s.Tags, "Karaoke.com") || HasSub(s.FilePath, "(KCOM)") || HasSub(s.Tags, "KCOM"));
+            data.LocalCount = songs.Count(s => !HasSub(s.Tags, "Karaoke Version") && !HasSub(s.Tags, "Party Tyme") &&
+                                               !HasSub(s.Tags, "Sunfly") && !HasSub(s.Tags, "Karaoke.com") &&
+                                               !HasSub(s.FilePath, "(KV)") && !HasSub(s.FilePath, "(PT)") &&
+                                               !HasSub(s.FilePath, "(SF)") && !HasSub(s.FilePath, "(KCOM)"));
+
+            data.KvPercent = Math.Round((data.KvCount / (double)data.TotalTracks) * 100.0, 1);
+            data.PtPercent = Math.Round((data.PtCount / (double)data.TotalTracks) * 100.0, 1);
+            data.SfPercent = Math.Round((data.SfCount / (double)data.TotalTracks) * 100.0, 1);
+            data.KcPercent = Math.Round((data.KcCount / (double)data.TotalTracks) * 100.0, 1);
+            data.LocalPercent = Math.Round((data.LocalCount / (double)data.TotalTracks) * 100.0, 1);
+
+            var providerCounts = new (string name, int count)[]
+            {
+                ("Karaoke Version", data.KvCount),
+                ("Party Tyme", data.PtCount),
+                ("Sunfly", data.SfCount),
+                ("Karaoke.com", data.KcCount),
+                ("Local", data.LocalCount)
+            };
+            var topProvider = providerCounts.OrderByDescending(p => p.count).FirstOrDefault();
+            data.MostFrequentProvider = topProvider.count > 0 ? $"{topProvider.name} ({topProvider.count})" : "None";
+
+            // B) File Type Statistics
+            data.ZipCdgCount = songs.Count(s => string.Equals(s.KaraokeType, "ZIPCDG", StringComparison.OrdinalIgnoreCase) || HasEnd(s.FilePath, ".zip"));
+            data.Mp4Count = songs.Count(s => string.Equals(s.KaraokeType, "MP4", StringComparison.OrdinalIgnoreCase) || HasEnd(s.FilePath, ".mp4"));
+            data.Mp3gCount = songs.Count(s => string.Equals(s.KaraokeType, "MP3G", StringComparison.OrdinalIgnoreCase) || (s.IsKaraoke && !HasEnd(s.FilePath, ".zip") && !HasEnd(s.FilePath, ".mp4")));
+            data.AudioOnlyCount = songs.Count(s => !s.IsKaraoke);
+            data.LyricsCount = songs.Count(s => HasSub(s.Tags, "Lyrics"));
+
+            // C) FFmpeg Processing Statistics
+            data.NormalizedCount = songs.Count(s => s.MeasuredLoudnessLufs != null || HasSub(s.Tags, "Normalized"));
+            data.SilenceTrimmedCount = songs.Count(s => HasSub(s.Tags, "SilenceTrimmed") || HasSub(s.Tags, "silenceremove"));
+            data.WaveformCount = songs.Count(s => HasSub(s.Tags, "Waveform"));
+
+            // D) Quality & Difficulty Statistics
+            data.QualityLowCount = songs.Count(s => string.Equals(s.Quality, "Low", StringComparison.OrdinalIgnoreCase) || HasSub(s.Tags, "Quality:Low"));
+            data.QualityMediumCount = songs.Count(s => string.Equals(s.Quality, "Medium", StringComparison.OrdinalIgnoreCase) || HasSub(s.Tags, "Quality:Medium"));
+            data.QualityHighCount = songs.Count(s => string.Equals(s.Quality, "High", StringComparison.OrdinalIgnoreCase) || HasSub(s.Tags, "Quality:High"));
+
+            data.DifficultyEasyCount = songs.Count(s => string.Equals(s.Difficulty, "Easy", StringComparison.OrdinalIgnoreCase) || HasSub(s.Tags, "Easy"));
+            data.DifficultyMediumCount = songs.Count(s => string.Equals(s.Difficulty, "Medium", StringComparison.OrdinalIgnoreCase) || HasSub(s.Tags, "Medium"));
+            data.DifficultyHardCount = songs.Count(s => string.Equals(s.Difficulty, "Hard", StringComparison.OrdinalIgnoreCase) || HasSub(s.Tags, "Hard"));
+
+            // Key Distribution (Top 8 keys)
+            var keyGroups = songs
+                .Where(s => !string.IsNullOrWhiteSpace(s.Key))
+                .GroupBy(s => s.Key!.Trim())
+                .Select(g => new { Key = g.Key, Count = g.Count() })
+                .OrderByDescending(g => g.Count)
+                .Take(8)
+                .ToList();
+
+            int maxKeyCount = keyGroups.Count > 0 ? keyGroups.Max(k => k.Count) : 1;
+            foreach (var k in keyGroups)
+            {
+                data.KeyDistribution.Add(new KeyDistributionItem
+                {
+                    Key = k.Key,
+                    Count = k.Count,
+                    Percentage = Math.Round((k.Count / (double)data.TotalTracks) * 100.0, 1),
+                    BarWidth = Math.Max(12, Math.Round((k.Count / (double)maxKeyCount) * 120.0))
+                });
+            }
+
+            // BPM Histogram (5 standard tempo buckets)
+            var bpmBuckets = new (string label, Func<Song, bool> predicate)[]
+            {
+                ("< 80 BPM", s => s.BPM.HasValue && s.BPM.Value < 80),
+                ("80 - 100", s => s.BPM.HasValue && s.BPM.Value >= 80 && s.BPM.Value < 100),
+                ("100 - 120", s => s.BPM.HasValue && s.BPM.Value >= 100 && s.BPM.Value < 120),
+                ("120 - 140", s => s.BPM.HasValue && s.BPM.Value >= 120 && s.BPM.Value < 140),
+                ("140+ BPM", s => s.BPM.HasValue && s.BPM.Value >= 140)
+            };
+
+            int maxBpmCount = 1;
+            var bucketResults = new List<(string label, int count)>();
+            foreach (var b in bpmBuckets)
+            {
+                int count = songs.Count(b.predicate);
+                bucketResults.Add((b.label, count));
+                if (count > maxBpmCount) maxBpmCount = count;
+            }
+
+            foreach (var b in bucketResults)
+            {
+                data.BpmHistogram.Add(new BpmBucketItem
+                {
+                    RangeLabel = b.label,
+                    Count = b.count,
+                    Percentage = Math.Round((b.count / (double)data.TotalTracks) * 100.0, 1),
+                    BarHeight = Math.Max(4, Math.Round((b.count / (double)maxBpmCount) * 60.0))
+                });
+            }
+
+            // E) Import Activity Summary (Last 14 days)
+            var now = DateTime.UtcNow.Date;
+            int maxDailyCount = 1;
+            var dailyList = new List<DayActivityItem>();
+
+            for (int i = 13; i >= 0; i--)
+            {
+                var targetDay = now.AddDays(-i);
+                int dayCount = songs.Count(s => s.DateAdded.Date == targetDay);
+                if (dayCount > maxDailyCount) maxDailyCount = dayCount;
+
+                dailyList.Add(new DayActivityItem
+                {
+                    Date = targetDay,
+                    DateLabel = targetDay.ToString("M/d"),
+                    DayOfWeek = targetDay.ToString("ddd"),
+                    Count = dayCount
+                });
+            }
+
+            foreach (var item in dailyList)
+            {
+                item.BarHeight = Math.Max(3, Math.Round((item.Count / (double)maxDailyCount) * 55.0));
+                data.DailyActivity.Add(item);
+            }
+
+            var busiestDayItem = dailyList.OrderByDescending(d => d.Count).FirstOrDefault();
+            data.BusiestDay = busiestDayItem != null && busiestDayItem.Count > 0
+                ? $"{busiestDayItem.DayOfWeek} {busiestDayItem.DateLabel} ({busiestDayItem.Count} tracks)"
+                : "No recent activity";
+
+            // Hourly Activity (24 hours heatmap)
+            int maxHourCount = 1;
+            var hourlyList = new List<HourActivityItem>();
+            for (int h = 0; h < 24; h++)
+            {
+                int hCount = songs.Count(s => s.DateAdded.Hour == h);
+                if (hCount > maxHourCount) maxHourCount = hCount;
+
+                hourlyList.Add(new HourActivityItem
+                {
+                    Hour = h,
+                    HourLabel = $"{h:00}",
+                    Count = hCount,
+                    Tooltip = $"{h:00}:00 - {h:00}:59: {hCount} track{(hCount == 1 ? "" : "s")}"
+                });
+            }
+
+            foreach (var item in hourlyList)
+            {
+                if (item.Count == 0) item.IntensityLevel = 0;
+                else if (item.Count <= Math.Max(1, maxHourCount * 0.25)) item.IntensityLevel = 1;
+                else if (item.Count <= Math.Max(2, maxHourCount * 0.50)) item.IntensityLevel = 2;
+                else if (item.Count <= Math.Max(3, maxHourCount * 0.75)) item.IntensityLevel = 3;
+                else item.IntensityLevel = 4;
+
+                data.HourlyActivity.Add(item);
+            }
+
+            var busiestHourItem = hourlyList.OrderByDescending(h => h.Count).FirstOrDefault();
+            data.BusiestHour = busiestHourItem != null && busiestHourItem.Count > 0
+                ? $"{busiestHourItem.Hour:00}:00 - {busiestHourItem.Hour:00}:59 ({busiestHourItem.Count} tracks)"
+                : "No recent activity";
+
+            return data;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

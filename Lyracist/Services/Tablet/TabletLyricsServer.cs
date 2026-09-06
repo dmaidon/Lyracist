@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 17:51:00 -> Add /kiosk endpoint, /api/rotation, and /api/request kiosk handling
+// Edited on Sep 6, 2026 @ 08:55:00 -> Enforce session schedule and last request cutoff on portal and kiosk endpoints
 using System;
 using System.IO;
 using System.Linq;
@@ -155,6 +155,12 @@ public class TabletLyricsServer(
     public record MobileJoinDto(string? SingerName);
 
     public record KioskRequestDto(string? Name, string? Song, string? Artist, string? RequestType, string? DuetPartner, string? Key, string? Notes);
+
+    public record SingerLoginDto(string? Name, string? Pin);
+
+    public record SingerProfileDto(string? Name, string? Pin, string? Email, string? AvatarType, string? VocalRange, string? CustomTitle);
+
+    public record SingerAvatarUploadDto(string? Name, string? Pin, string? Image);
 
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
@@ -351,9 +357,22 @@ public class TabletLyricsServer(
                 return Results.BadRequest(new { error = "One or more fields exceed the maximum allowed length." });
             }
 
+            if (!Lyracist.Core.Helpers.AppSettings.IsRequestSubmissionAllowed(out string scheduleReason))
+            {
+                return Results.BadRequest(new { error = scheduleReason });
+            }
+
+            if (Lyracist.Core.Helpers.AppSettings.BlockDuplicateSongsInSession)
+            {
+                if (_rotation.IsSongInCurrentSession(dto.Title ?? string.Empty, dto.Artist ?? string.Empty))
+                {
+                    return Results.BadRequest(new { error = $"\"{dto.Title}\" has already been performed or queued in this session. Duplicate songs are blocked by the DJ." });
+                }
+            }
+
             var request = _requests.AddRequest(
                 dto.SingerName ?? "Anonymous",
-                dto.Title,
+                dto.Title ?? string.Empty,
                 dto.Artist ?? string.Empty,
                 dto.Source ?? "Portal",
                 dto.RequestType ?? "Karaoke",
@@ -435,9 +454,22 @@ public class TabletLyricsServer(
                 ? $"Duet with {dto.DuetPartner}"
                 : (dto.Notes ?? string.Empty);
 
+            if (!Lyracist.Core.Helpers.AppSettings.IsRequestSubmissionAllowed(out string scheduleReason))
+            {
+                return Results.BadRequest(new { error = scheduleReason });
+            }
+
+            if (Lyracist.Core.Helpers.AppSettings.BlockDuplicateSongsInSession)
+            {
+                if (_rotation.IsSongInCurrentSession(dto.Song ?? string.Empty, dto.Artist ?? string.Empty))
+                {
+                    return Results.BadRequest(new { error = $"\"{dto.Song}\" has already been performed or queued in this session. Duplicate songs are blocked by the DJ." });
+                }
+            }
+
             var request = _requests.AddRequest(
                 dto.Name,
-                dto.Song,
+                dto.Song ?? string.Empty,
                 dto.Artist ?? string.Empty,
                 "Kiosk",
                 dto.RequestType ?? "Karaoke",
@@ -716,6 +748,185 @@ public class TabletLyricsServer(
 
         app.MapGet("/api/queue", () => Results.Json(BuildQueuePayload()));
         app.MapGet("/api/rotation", () => Results.Json(BuildQueuePayload()));
+
+        // Singer Profile & Avatar Endpoints
+        app.MapPost("/api/singer/login", async (SingerLoginDto dto) =>
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return Results.BadRequest(new { error = "Singer name is required." });
+            }
+
+            string name = Lyracist.Shared.NameFormatting.ProperCase(dto.Name.Trim());
+            string pin = dto.Pin?.Trim() ?? string.Empty;
+
+            await using var context = new Lyracist.Data.LyracistDbContext();
+            var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name.ToLower() == name.ToLower());
+            if (dbSinger == null)
+            {
+                dbSinger = new Lyracist.Data.Models.Singer
+                {
+                    Name = name,
+                    PinCode = pin,
+                    AvatarType = "None",
+                    AvatarSource = string.Empty
+                };
+                context.Singers.Add(dbSinger);
+                await context.SaveChangesAsync();
+
+                return Results.Ok(new
+                {
+                    success = true,
+                    registered = true,
+                    singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
+                });
+            }
+
+            if (string.IsNullOrEmpty(dbSinger.PinCode))
+            {
+                dbSinger.PinCode = pin;
+                await context.SaveChangesAsync();
+
+                return Results.Ok(new
+                {
+                    success = true,
+                    claimed = true,
+                    singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
+                });
+            }
+
+            if (dbSinger.PinCode != pin)
+            {
+                return Results.Json(new { error = "Invalid PIN for this singer profile." }, statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            return Results.Ok(new
+            {
+                success = true,
+                singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
+            });
+        });
+
+        app.MapPost("/api/singer/profile", async (SingerProfileDto dto) =>
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return Results.BadRequest(new { error = "Singer name is required." });
+            }
+
+            string name = Lyracist.Shared.NameFormatting.ProperCase(dto.Name.Trim());
+            string pin = dto.Pin?.Trim() ?? string.Empty;
+
+            await using var context = new Lyracist.Data.LyracistDbContext();
+            var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name.ToLower() == name.ToLower());
+            if (dbSinger == null || dbSinger.PinCode != pin)
+            {
+                return Results.Json(new { error = "Unauthorized profile update." }, statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            dbSinger.Email = dto.Email?.Trim() ?? string.Empty;
+            dbSinger.AvatarType = string.IsNullOrWhiteSpace(dto.AvatarType) ? "None" : dto.AvatarType.Trim();
+            dbSinger.VocalRange = dto.VocalRange?.Trim() ?? string.Empty;
+            dbSinger.CustomTitle = dto.CustomTitle?.Trim() ?? string.Empty;
+            if (dbSinger.AvatarType == "Gravatar")
+            {
+                byte[] inputBytes = System.Text.Encoding.UTF8.GetBytes(dbSinger.Email.ToLowerInvariant());
+                byte[] hashBytes = System.Security.Cryptography.MD5.HashData(inputBytes);
+                dbSinger.AvatarSource = Convert.ToHexStringLower(hashBytes);
+            }
+
+            await context.SaveChangesAsync();
+            return Results.Ok(new { success = true });
+        });
+
+        app.MapPost("/api/singer/avatar/upload", async (SingerAvatarUploadDto dto) =>
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return Results.BadRequest(new { error = "Singer name is required." });
+            }
+
+            string name = Lyracist.Shared.NameFormatting.ProperCase(dto.Name.Trim());
+            string pin = dto.Pin?.Trim() ?? string.Empty;
+            string imageBase64 = dto.Image ?? string.Empty;
+
+            await using var context = new Lyracist.Data.LyracistDbContext();
+            var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name.ToLower() == name.ToLower());
+            if (dbSinger == null || dbSinger.PinCode != pin)
+            {
+                return Results.Json(new { error = "Unauthorized avatar upload." }, statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            if (string.IsNullOrEmpty(imageBase64))
+            {
+                return Results.BadRequest(new { error = "No image data provided." });
+            }
+
+            if (imageBase64.Contains(','))
+            {
+                imageBase64 = imageBase64[(imageBase64.IndexOf(',') + 1)..];
+            }
+
+            byte[] imgBytes;
+            try
+            {
+                imgBytes = Convert.FromBase64String(imageBase64);
+            }
+            catch
+            {
+                return Results.BadRequest(new { error = "Invalid base64 image data." });
+            }
+
+            if (imgBytes.Length > 2 * 1024 * 1024 || !LooksLikeImage(imgBytes))
+            {
+                return Results.BadRequest(new { error = "Invalid or oversized image (max 2MB)." });
+            }
+
+            string avatarsDir = Lyracist.Shared.Globals.AvatarsDir;
+            Directory.CreateDirectory(avatarsDir);
+            string fileName = $"avatar_{Guid.NewGuid():N}.jpg";
+            string filePath = Path.Combine(avatarsDir, fileName);
+            await File.WriteAllBytesAsync(filePath, imgBytes);
+
+            dbSinger.AvatarType = "Uploaded";
+            dbSinger.AvatarSource = fileName;
+            await context.SaveChangesAsync();
+
+            return Results.Ok(new { success = true, avatarSource = fileName });
+        });
+
+        app.MapGet("/api/singer/avatar", async (string? name) =>
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return Results.NotFound();
+            }
+
+            string singerName = name.Trim();
+            await using var context = new Lyracist.Data.LyracistDbContext();
+            var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name.ToLower() == singerName.ToLower());
+            if (dbSinger == null)
+            {
+                return Results.NotFound();
+            }
+
+            if (dbSinger.AvatarType == "Uploaded" && !string.IsNullOrEmpty(dbSinger.AvatarSource))
+            {
+                string avatarsDir = Lyracist.Shared.Globals.AvatarsDir;
+                string? safePath = ResolveAvatarPath(avatarsDir, dbSinger.AvatarSource);
+                if (safePath != null && File.Exists(safePath))
+                {
+                    byte[] bytes = await File.ReadAllBytesAsync(safePath);
+                    return Results.File(bytes, "image/jpeg");
+                }
+            }
+            else if (dbSinger.AvatarType == "Gravatar" && !string.IsNullOrEmpty(dbSinger.AvatarSource))
+            {
+                return Results.Redirect($"https://www.gravatar.com/avatar/{dbSinger.AvatarSource}?d=mp&s=150");
+            }
+
+            return Results.NotFound();
+        });
 
         app.MapGet("/api/catalog", async (string? query, string? scope, ILibraryService library, IOccasionService occasions) =>
         {
@@ -1033,5 +1244,30 @@ public class TabletLyricsServer(
         {
             Lyracist.Shared.Globals.LogError("Lyracist", "Error broadcasting scaryoke spin complete", ex);
         }
+    }
+
+    private static bool LooksLikeImage(byte[] bytes)
+    {
+        if (bytes.Length < 4) return false;
+        // JPEG (FF D8)
+        if (bytes[0] == 0xFF && bytes[1] == 0xD8) return true;
+        // PNG (89 50 4E 47)
+        if (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47) return true;
+        // GIF (GIF8)
+        if (bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46) return true;
+        // WebP (RIFF....WEBP)
+        if (bytes.Length >= 12 && bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46 &&
+            bytes[8] == 0x57 && bytes[9] == 0x45 && bytes[10] == 0x42 && bytes[11] == 0x50) return true;
+        return false;
+    }
+
+    private static string? ResolveAvatarPath(string avatarsDir, string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName) || Path.IsPathRooted(fileName)) return null;
+        if (fileName.Contains("..") || fileName.Contains('/') || fileName.Contains('\\')) return null;
+        string fullPath = Path.GetFullPath(Path.Combine(avatarsDir, fileName));
+        string fullAvatarsDir = Path.GetFullPath(avatarsDir);
+        if (!fullPath.StartsWith(fullAvatarsDir, StringComparison.OrdinalIgnoreCase)) return null;
+        return fullPath;
     }
 }

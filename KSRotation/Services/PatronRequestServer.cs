@@ -1,4 +1,4 @@
-// Edited on Sep 3, 2026 @ 08:22:00 -> Add /billboard, /api/info, and /api/qr endpoints with Audience Billboard support
+// Edited on Sep 6, 2026 @ 08:55:30 -> Add onCheckRequestAllowed callback for session schedule and cutoff
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,7 +27,9 @@ namespace KSRotation.Services
         Func<string, string, string, string, string, string, string, Task<string>> onHandleDjAction,
         Func<string> onGetSpecialEventsJson,
         Func<string> onGetActiveSpecialEvent,
-        Func<string>? onGetVenueInfoJson = null)
+        Func<string>? onGetVenueInfoJson = null,
+        Func<string, string, bool>? onCheckDuplicateSong = null,
+        Func<string?>? onCheckRequestAllowed = null)
     {
         private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
         private const int MaxAvatarImageBytes = 2_097_152; // 2 MB - a profile avatar has no business being larger
@@ -50,6 +52,8 @@ namespace KSRotation.Services
         private readonly Func<string> _onGetSpecialEventsJson = onGetSpecialEventsJson;
         private readonly Func<string> _onGetActiveSpecialEvent = onGetActiveSpecialEvent;
         private readonly Func<string>? _onGetVenueInfoJson = onGetVenueInfoJson;
+        private readonly Func<string, string, bool>? _onCheckDuplicateSong = onCheckDuplicateSong;
+        private readonly Func<string?>? _onCheckRequestAllowed = onCheckRequestAllowed;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, PinAttemptState> _pinAttemptsByIp = new();
 
@@ -409,6 +413,28 @@ namespace KSRotation.Services
 
                         if (!string.IsNullOrWhiteSpace(name) && songs.Count > 0)
                         {
+                            if (_onCheckRequestAllowed != null)
+                            {
+                                string? blockedReason = _onCheckRequestAllowed();
+                                if (!string.IsNullOrEmpty(blockedReason))
+                                {
+                                    await SendBadRequestAsync(stream, $"{{\"error\":\"{JsonEncodedText.Encode(blockedReason)}\"}}");
+                                    return;
+                                }
+                            }
+
+                            if (_onCheckDuplicateSong != null)
+                            {
+                                foreach (var reqSong in songs)
+                                {
+                                    if (_onCheckDuplicateSong(reqSong.Song, reqSong.Artist))
+                                    {
+                                        await SendBadRequestAsync(stream, $"{{\"error\":\"'{reqSong.Song}' has already been performed or queued in this session. Duplicate songs are blocked by the DJ.\"}}");
+                                        return;
+                                    }
+                                }
+                            }
+
                             _onRequestReceived(name.Trim(), songs, requestType, duetPartner.Trim());
                             await SendJsonResponseAsync(stream, "{\"success\":true}");
                         }

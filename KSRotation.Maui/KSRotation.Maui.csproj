@@ -1,4 +1,4 @@
-<!-- Edited on Sep 3, 2026 @ 12:27:00 -> Remove Lyracist.Trivia.Core and MainViewModel.Trivia.cs as MAUI app does not handle trivia -->
+<!-- Edited on Sep 6, 2026 @ 08:58:30 -> Link SessionScheduleHelper.cs in project -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -161,6 +161,7 @@
 		<Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />
 		<Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
 		<Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
+		<Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
 	</ItemGroup>
 
 	<!-- Exclude platform-specific files from compiling on non-matching frameworks -->

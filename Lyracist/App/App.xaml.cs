@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:26:00 -> Enable global select-all on focus for all TextBoxes and numeric boxes
+// Edited on Sep 6, 2026 @ 11:54:00 -> Register BulkImportViewModel and BulkImportWindow in DI container
 using System;
 using System.Linq;
 using System.Windows;
@@ -14,6 +14,7 @@ using Lyracist.Services.Media;
 using Lyracist.Services.Media.Cdg;
 using Lyracist.Services.Display;
 using Lyracist.Services.Tablet;
+using Lyracist.Services.Store;
 using Lyracist.ViewModels;
 using Lyracist.Views.Pages;
 using Lyracist.Windows;
@@ -130,6 +131,7 @@ public partial class App : System.Windows.Application
                 services.AddKeyedSingleton("Occasion", (_, _) => new BackgroundMusicPlayer { Loop = false });
                 services.AddSingleton<IShowFlowService, ShowFlowService>();
                 services.AddSingleton<IKSRotationSyncService, KSRotationSyncService>();
+                services.AddSingleton<PurchasedTrackWatcherService>();
                 services.AddSingleton<PlaybackEngine>();
                 services.AddSingleton<RotationEngine>();
                 services.AddSingleton<AutoAdvanceManager>(sp => new AutoAdvanceManager(
@@ -164,6 +166,9 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<CastStatusViewModel>();
                 services.AddSingleton<MultiTvSelectorViewModel>();
                 services.AddSingleton<CastingSettingsPageViewModel>();
+                services.AddSingleton<UsersViewModel>();
+                services.AddSingleton<StoreViewModel>();
+                services.AddTransient<BulkImportViewModel>();
                 services.AddTransient<SongSettingsViewModel>();
                 services.AddTransient<SingerSettingsViewModel>();
                 services.AddTransient<EditSingerViewModel>();
@@ -179,6 +184,7 @@ public partial class App : System.Windows.Application
                 services.AddTransient<SingerSettingsWindow>();
                 services.AddTransient<AboutWindow>();
                 services.AddTransient<EditSingerWindow>();
+                services.AddTransient<BulkImportWindow>();
 
                 // Pages
                 services.AddSingleton<KaraokePage>();
@@ -190,6 +196,8 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<CastingPage>();
                 services.AddSingleton<PlaylistsPage>();
                 services.AddSingleton<RequestsPage>();
+                services.AddSingleton<UsersPage>();
+                services.AddSingleton<StorePage>();
                 services.AddSingleton<HelpPage>();
                 services.AddSingleton<AboutPage>();
             })
