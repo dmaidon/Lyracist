@@ -1,9 +1,20 @@
-<!-- Edited on Sep 5, 2026 @ 20:45:00 -> Update ChangeLog for billboard styling and wait time legend updates -->
-Last Edit: Sep 5, 2026 - Estimated Wait Time Legend Everywhere and Billboard Formatting
+<!-- Edited on Sep 6, 2026 @ 06:33:00 -> Update ChangeLog for Rotation Settings groupbox in KSRotation -->
+Last Edit: Sep 6, 2026 - KSRotation Settings Tab Layout, Compact Email Settings & Rotation Settings GroupBox
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.14] - 2026-09-06
+
+### Changed
+- **KSRotation (Settings Tab Layout, Compact Email Settings & Rotation Settings)**:
+  - Moved the "Save Settings" button to Column 2 directly underneath the "DJ Names" groupbox for balanced alignment and intuitive access.
+  - Compacted the "Email Settings" groupbox in Column 0 by removing the fixed `Height="121"` constraint on its child StackPanel, setting `VerticalAlignment="Top"` and `Margin="0,0,0,12"`, tightening control margins, and adjusting `SlateSettingsGroupBoxStyle` body padding to eliminate excessive whitespace above the first hint textblock and below the auto-send checkbox.
+  - Made the "Network IP Setup" groupbox more concise and compact by setting `VerticalAlignment="Top"`, updating `NavySettingsGroupBoxStyle` body padding to compact `12,6,12,6`, tightening control margins, and condensing the explanatory text to a clean, direct sentence.
+  - Placed the "Test Mode" checkbox and "Save Current Rotation as Test List" button into a dedicated "Rotation Settings" groupbox in Column 3 positioned directly beneath "Network IP Setup".
+  - Enlarged the estimated wait time legend text font size on KSRotation's display projection window (SingerDisplayWindow.xaml) for enhanced audience legibility.
+  - Cleaned up the Settings tab grid row definitions to eliminate leftover designer overrides and fixed fractional row heights.
 
 ## [26.9.5.13] - 2026-09-06
 

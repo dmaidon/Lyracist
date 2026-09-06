@@ -1,4 +1,4 @@
-<!-- Edited on Sep 3, 2026 @ 23:52:30 -> Add Last Round announcement banner on rotation screen -->
+<!-- Edited on Sep 6, 2026 @ 06:33:00 -> Increase font size for estimated wait time legend on rotation display -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -84,7 +84,7 @@
 
             <TextBlock Grid.Row="0" Margin="4,0,0,6"
                        Text="{}{} = Estimated wait time"
-                       FontSize="14"
+                       FontSize="20"
                        FontStyle="Italic"
                        Foreground="{DynamicResource MaterialDesignBodyLight}"
                        Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 5, 2026 @ 08:20:00 -> Fix remaining Trivia tab contrast: styled the Questions-Per-Game/question-jump ComboBoxes and swapped Round Title/Patron Portal text from unthemed PrimaryHueMidBrush to AppHeaderBrush -->
+<!-- Edited on Sep 6, 2026 @ 06:33:00 -> Wrap Test Mode and Save Current Rotation in Rotation Settings groupbox under Network IP Setup -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -281,6 +281,7 @@
 
         <Style x:Key="PurpleSettingsGroupBoxStyle" TargetType="GroupBox">
             <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Padding" Value="14" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GroupBox">
@@ -304,7 +305,7 @@
                                 </Border>
                                 <Border Grid.Row="1"
                                         Background="{StaticResource PurpleGroupBoxBodyBrush}"
-                                        Padding="14"
+                                        Padding="{TemplateBinding Padding}"
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
@@ -413,6 +414,7 @@
 
         <Style x:Key="NavySettingsGroupBoxStyle" TargetType="GroupBox">
             <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Padding" Value="12,6,12,6" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GroupBox">
@@ -428,7 +430,7 @@
                                 <Border Grid.Row="0"
                                         Background="{StaticResource NavyGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
-                                        Padding="14,9">
+                                        Padding="12,6">
                                     <TextBlock Text="{TemplateBinding Header}"
                                                Foreground="White"
                                                FontWeight="SemiBold"
@@ -436,7 +438,7 @@
                                 </Border>
                                 <Border Grid.Row="1"
                                         Background="{StaticResource NavyGroupBoxBodyBrush}"
-                                        Padding="14"
+                                        Padding="{TemplateBinding Padding}"
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
@@ -457,6 +459,7 @@
 
         <Style x:Key="SlateSettingsGroupBoxStyle" TargetType="GroupBox">
             <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="Padding" Value="12,6,12,6" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GroupBox">
@@ -472,7 +475,7 @@
                                 <Border Grid.Row="0"
                                         Background="{StaticResource SlateGroupBoxHeaderBrush}"
                                         CornerRadius="7,7,0,0"
-                                        Padding="14,9">
+                                        Padding="12,6">
                                     <TextBlock Text="{TemplateBinding Header}"
                                                Foreground="White"
                                                FontWeight="SemiBold"
@@ -480,7 +483,7 @@
                                 </Border>
                                 <Border Grid.Row="1"
                                         Background="{StaticResource SlateGroupBoxBodyBrush}"
-                                        Padding="14"
+                                        Padding="{TemplateBinding Padding}"
                                         CornerRadius="0,0,7,7">
                                     <ContentPresenter />
                                 </Border>
@@ -1329,10 +1332,8 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="222" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="148.736" />
-                        <RowDefinition Height="75" />
-                        <RowDefinition Height="Auto" MinHeight="134" />
-                        <RowDefinition Height="0*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
                     <!-- Venue Names in the 1st column -->
@@ -1476,7 +1477,7 @@
                                   Grid.Column="2"
                                   Grid.Row="1"
                                   Grid.RowSpan="2"
-                                  Margin="15,0,0,12" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
+                                  Margin="15,0,0,12">
                         <Grid Margin="0,4,0,0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -1607,24 +1608,44 @@
                         </Grid>
                     </GroupBox>
 
-                    <GroupBox Header="Network IP Setup"
+                    <!-- Column 3: Network IP Setup & Rotation Settings -->
+                    <StackPanel Grid.Column="3" Grid.Row="1" Grid.RowSpan="3" VerticalAlignment="Top" Margin="15,0,0,0">
+                        <GroupBox Header="Network IP Setup"
                                   Style="{StaticResource NavySettingsGroupBoxStyle}"
-                                  Grid.Column="3"
-                                  Grid.Row="1"
-                                  Margin="15,0,0,2" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin">
-                        <StackPanel Margin="0,4,0,0">
-                            <TextBlock Text="Manual Portal IPv4 (Optional)" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                            <TextBox
-                                    Text="{Binding PreferredHostIp, UpdateSourceTrigger=PropertyChanged}"
-                                    Margin="0,0,0,8"
-                                    ToolTip="Example: 192.168.50.20"
-                                    Style="{StaticResource ModernTextBoxStyle}" />
-                            <TextBlock Text="Leave blank to auto-detect the local IPv4 address. Use this field when you want a fixed travel-router IP in the displayed URL and QR code."
+                                  Margin="0,0,0,12">
+                            <StackPanel>
+                                <TextBlock Text="Manual Portal IPv4 (Optional)" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <TextBox
+                                        Text="{Binding PreferredHostIp, UpdateSourceTrigger=PropertyChanged}"
+                                        Margin="0,0,0,6"
+                                        ToolTip="Example: 192.168.50.20"
+                                        Style="{StaticResource ModernTextBoxStyle}" />
+                                <TextBlock Text="Leave blank to auto-detect. Set for travel routers or fixed portal IP."
                                            TextWrapping="Wrap"
-                                           FontSize="12"
+                                           FontSize="11"
                                            Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                        </StackPanel>
-                    </GroupBox>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="Rotation Settings"
+                                  Style="{StaticResource PurpleSettingsGroupBoxStyle}"
+                                  Padding="14,10,14,12"
+                                  Margin="0,0,0,12">
+                            <StackPanel Margin="0,4,0,0">
+                                <CheckBox
+                                         Content="Test Mode (loads sample singers on next startup)"
+                                         IsChecked="{Binding IsTestMode}"
+                                         Style="{StaticResource ModernCheckBoxStyle}"
+                                         Margin="0,0,0,10" />
+                                <Button
+                                         Content="Save Current Rotation as Test List"
+                                         Command="{Binding SaveCurrentAsTestListCommand}"
+                                         HorizontalAlignment="Center"
+                                         Width="260"
+                                         Style="{StaticResource ModernButtonStyle}" />
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
 
                     <!-- Appearance Settings in the 2nd column -->
                     <GroupBox Header="Appearance"
@@ -1735,45 +1756,38 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <StackPanel Grid.Column="3" Grid.Row="2" Margin="15,12,0,12">
-                        <CheckBox
-                                 Content="Test Mode (loads sample singers on next startup)"
-                                 IsChecked="{Binding IsTestMode}"
-                                 Style="{StaticResource ModernCheckBoxStyle}"
-                                 Margin="0,0,0,8" />
-                        <Button
-                                 Content="Save Current Rotation as Test List"
-                                 Command="{Binding SaveCurrentAsTestListCommand}"
-                                 HorizontalAlignment="Center"
-                                 Width="260"
-                                 Style="{StaticResource ModernButtonStyle}" />
-                    </StackPanel>
 
                     <!-- Email settings container panel with shaded background -->
                     <GroupBox Header="Email Settings"
-                                  Style="{StaticResource SlateSettingsGroupBoxStyle}" Grid.Row="3"
-                                  Margin="15,10,0,14" d:LayoutOverrides="LeftMargin, RightMargin, TopMargin, BottomMargin" Grid.RowSpan="2">
-                        <StackPanel Height="131">
-                            <TextBlock Text="Separate multiple addresses with  ,  or  ;" FontSize="11" Margin="0,0,0,6"
-                                           Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                              Style="{StaticResource SlateSettingsGroupBoxStyle}"
+                              Grid.Row="3"
+                              VerticalAlignment="Top"
+                              Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Separate multiple addresses with  ,  or  ;" FontSize="11" Margin="0,0,0,4"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}" />
                             <TextBox
                                     Text="{Binding EmailRecipient, UpdateSourceTrigger=PropertyChanged}"
-                                    Margin="0,0,0,12"
+                                    Margin="0,0,0,6"
                                     ToolTip="One or more email addresses separated by comma or semicolon"
                                     Style="{StaticResource ModernTextBoxStyle}" />
                             <CheckBox
                                     Content="Send email automatically when saving rotation"
                                     IsChecked="{Binding SendEmailOnSave}"
                                     Style="{StaticResource ModernCheckBoxStyle}"
-                                    Margin="0,4,0,4" />
+                                    Margin="0,2,0,0" />
                         </StackPanel>
                     </GroupBox>
 
                     <Button
-                            Grid.Row="4"
+                            Grid.Column="2"
+                            Grid.Row="3"
                             Content="Save Settings"
-                            Command="{Binding SaveSettingsCommand}" Margin="20,15,19,28"
-                            Style="{StaticResource ModernButtonStyle}" Grid.Column="1" />
+                            Command="{Binding SaveSettingsCommand}"
+                            Margin="15,0,0,0"
+                            VerticalAlignment="Top"
+                            Height="38"
+                            Style="{StaticResource ModernButtonStyle}" />
                 </Grid>
             </TabItem>
 
