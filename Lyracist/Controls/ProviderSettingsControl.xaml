@@ -1,0 +1,197 @@
+<!-- Created on Sep 6, 2026 @ 12:37:30 -> ProviderSettingsControl for Store tab provider preferences, defaults, and target routing -->
+<UserControl x:Class="Lyracist.Controls.ProviderSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Border Background="{DynamicResource ControlFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Padding="18,16">
+        <StackPanel>
+            <!-- Header -->
+            <Grid Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Settings24" FontSize="18" Foreground="#38BDF8" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Store Provider &amp; Import Preferences" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="Configure default store selection, preferred packaging formats, target library routing, and baseline FFmpeg audio processing defaults."
+                               FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <!-- Status Feedback Badge -->
+                <Border Grid.Column="1"
+                        Visibility="{Binding HasStatusMessage, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Background="#065F46" BorderBrush="#059669" BorderThickness="1"
+                        CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Checkmark24" Foreground="#34D399" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding StatusMessage}" Foreground="#D1FAE5" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Settings Grid: 2 Columns -->
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column: Provider & Packaging Preferences -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Provider &amp; Packaging Preferences" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,10"/>
+
+                    <!-- Preferred Provider -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Preferred Provider (Default Search &amp; Highlights):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                        <ComboBox Grid.Row="1"
+                                  ItemsSource="{Binding AvailableProviders}"
+                                  SelectedItem="{Binding PreferredProvider, Mode=TwoWay}"
+                                  ToolTip="Default commercial store used for search queries and button highlights (KV, PT, Sunfly, Karaoke.com)"
+                                  HorizontalAlignment="Stretch"/>
+                    </Grid>
+
+                    <!-- Preferred File Type -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Preferred File Type (Bulk Import &amp; Smart Hints):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                        <ComboBox Grid.Row="1"
+                                  ItemsSource="{Binding AvailableFileTypes}"
+                                  SelectedItem="{Binding PreferredFileType, Mode=TwoWay}"
+                                  ToolTip="Preferred format (MP3+G, MP4, Audio-only) used for bulk candidate prioritization and smart hints"
+                                  HorizontalAlignment="Stretch"/>
+                    </Grid>
+
+                    <!-- Preferred Target Folder -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Preferred Target Folder (Routing Category):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                        <ComboBox Grid.Row="1"
+                                  ItemsSource="{Binding AvailableTargetFolders}"
+                                  SelectedItem="{Binding PreferredTargetFolder, Mode=TwoWay}"
+                                  ToolTip="Target destination directory category (Karaoke or Music)"
+                                  HorizontalAlignment="Stretch"/>
+                    </Grid>
+
+                    <!-- Preferred Lyrics Format -->
+                    <Grid Margin="0,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Preferred Lyrics Format (.lrc vs .txt):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                        <ComboBox Grid.Row="1"
+                                  ItemsSource="{Binding AvailableLyricsFormats}"
+                                  SelectedItem="{Binding PreferredLyricsFormat, Mode=TwoWay}"
+                                  ToolTip="Preferred synchronized lyric file format when multiple candidates are detected (LRC or TXT)"
+                                  HorizontalAlignment="Stretch"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Right Column: Default Audio Processing Toggles -->
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Baseline Audio Enhancement Defaults" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,0,10"/>
+
+                    <!-- Normalize Audio by Default -->
+                    <Border Background="{DynamicResource AppSurfaceBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Normalize Audio by Default" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                <TextBlock Text="Apply EBU R128 loudness normalization (-16 LUFS) to downloaded and imported tracks"
+                                           FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <ui:ToggleSwitch Grid.Column="1"
+                                             IsChecked="{Binding DefaultNormalizeAudio, Mode=TwoWay}"
+                                             VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Trim Silence by Default -->
+                    <Border Background="{DynamicResource AppSurfaceBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Trim Silence by Default" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                <TextBlock Text="Automatically strip lead-in and trailing dead air silence below -50dB"
+                                           FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <ui:ToggleSwitch Grid.Column="1"
+                                             IsChecked="{Binding DefaultTrimSilence, Mode=TwoWay}"
+                                             VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Generate Waveform by Default -->
+                    <Border Background="{DynamicResource AppSurfaceBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Generate Waveform by Default" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                <TextBlock Text="Pre-render high-contrast visual PNG waveform previews for track review"
+                                           FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <ui:ToggleSwitch Grid.Column="1"
+                                             IsChecked="{Binding DefaultGenerateWaveform, Mode=TwoWay}"
+                                             VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- Footer Toolbar with Save & Reset Buttons -->
+            <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <ui:Button Command="{Binding ResetToDefaultsCommand}"
+                               Appearance="Secondary"
+                               Icon="{ui:SymbolIcon ArrowReset24}"
+                               Content="Reset Defaults"
+                               ToolTip="Reset provider preferences to initial defaults (KV, MP3+G, Karaoke, LRC)"
+                               Margin="0,0,10,0"/>
+
+                    <ui:Button Command="{Binding SaveSettingsCommand}"
+                               Appearance="Primary"
+                               Icon="{ui:SymbolIcon Checkmark24}"
+                               Content="Save Settings"
+                               ToolTip="Save and apply provider preferences across Store, Bulk Import, and Watcher"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

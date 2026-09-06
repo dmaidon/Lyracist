@@ -1,9 +1,133 @@
-<!-- Edited on Sep 6, 2026 @ 11:54:00 -> Document Bulk Import Wizard for batch purchasing ingestion, previewing, parallel FFmpeg execution, and summary reporting -->
-Last Edit: Sep 6, 2026 - Bulk Import Wizard: Folder Scanning, MP3+G Pairing, Provider Intelligence Preview, Batch Audio Pipelines, Throttled Execution, and Summary Dialog
+<!-- Edited on Sep 6, 2026 @ 13:07:00 -> Document Store Notifications: StoreNotificationService, ToastNotificationControl, and audio pipeline/sync/bulk triggers -->
+Last Edit: Sep 6, 2026 - Store Notifications: Toast Alerts, Progress Milestones & Auto-Dismissal Architecture
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.30] - 2026-09-06
+
+### Added
+- **Store Notifications & Real-Time Ingestion Toast Alerts (`Lyracist` ONLY)**:
+  - **Store Notification Service (`StoreNotificationService.cs`)**:
+    - Centralized thread-safe notification manager providing toast queuing, auto-dismiss timers, and UI event dispatching via `ActiveNotifications`.
+    - Dedicated alert dispatchers: `ShowTrackImported`, `ShowNormalizationComplete`, `ShowSilenceTrimmed`, `ShowWaveformGenerated`, `ShowSyncCompleted`, and `ShowBulkImportCompleted`.
+    - Built-in 5-second auto-dismissal timers and maximum 5-toast vertical stack limiting to prevent UI clutter.
+  - **WPF Toast Notification Control (`ToastNotificationControl.xaml`, `ToastNotificationControl.xaml.cs`)**:
+    - High-DPI dark acrylic toast cards (`#23273A`) with category accent badge colors (Purple for imports, Emerald for normalization, Cyan for trimming, Sky Blue for waveforms, Indigo for sync).
+    - Features smooth cubic slide-in entry animation (`TranslateTransform.X` 320 to 0) and fade-in (`Opacity` 0 to 1).
+    - Displays format badge (`MP3+G`, `MP4`, `ZIP`) and audio processing status badges (`NORM`, `TRIM`, `WAVE`).
+    - Includes interactive manual close button.
+  - **Store Page & Bulk Import Overlay Hosts (`StorePage.xaml`, `BulkImportWindow.xaml`)**:
+    - Embedded `NotificationHost` overlay in the bottom-right corner of `StorePage.xaml`, floating above scrollable content.
+    - Embedded `NotificationHost` overlay in the bottom-right corner of `BulkImportWindow.xaml` for live batch processing feedback.
+  - **Pipeline Triggers (`PurchasedTrackWatcherService.cs`, `PurchasedTrackSyncService.cs`, `BulkImportViewModel.cs`)**:
+    - `PurchasedTrackWatcherService` dispatches toast notifications immediately upon track import success, audio normalization, silence trimming, and waveform rendering.
+    - `PurchasedTrackSyncService` triggers sync completion summary toast upon completing directory evaluation.
+    - `BulkImportViewModel` triggers batch completion summary toast upon finishing batch import jobs.
+  - **Help System Integration (`HelpViewModel.cs`)**:
+    - Added Topic 25: "Store Notifications & Toast Alerts" detailing slide-in animation, lifecycle alerts, pill badges, and auto-dismiss timing.
+  - **Unit Test Coverage (`StoreImportTests.cs`)**:
+    - Added unit test suite covering `StoreNotificationService` queueing, dismissal, track imported badge configuration, and batch alert message formatting.
+
+## [26.9.5.29] - 2026-09-06
+
+### Added
+- **Store Plugin API & Modular Provider Architecture (`Lyracist` ONLY)**:
+  - **Provider Plugin Contracts (`IStoreProvider.cs`, `BaseStoreProvider.cs`)**:
+    - Created `IStoreProvider` interface establishing standardized provider metadata (`Name`, `Source`) and multi-vector detection methods (`BuildSearchUri`, `DetectFromFilename`, `DetectFromId3`, `DetectFromZip`, `DetectFromCdgHeader`, `DetectFromMp4`).
+    - Created `BaseStoreProvider` abstract class offering default `false` detection fallbacks and thread-safe inspection helpers for ZIP entries (`MatchesZipEntries`), ID3 tag scanning (`MatchesId3Tags`), and MP4 metadata inspection (`MatchesMp4Metadata`).
+    - Added `ProviderSource` enumeration (`Local`, `KaraokeVersion`, `PartyTyme`, `Sunfly`, `KaraokeCom`).
+  - **Concrete Provider Plugins (`Lyracist/Services/Store/Providers/`)**:
+    - `KaraokeVersionProvider`: Implements search URL generation for karaoke-version.com, detection of `/custom_backing_track/` or generic `track.mp3`+`track.cdg` pairs, `KV` filename/tag patterns, and CDG magic header bytes `0x01 0x0F`.
+    - `PartyTymeProvider`: Implements search URL for partytyme.net, detection of `/karaoke/` folders, `_pt.` naming, `PT` tags, and CDG magic header bytes `0x02 0x0A`.
+    - `SunflyProvider`: Implements search URL for sunflykaraoke.com, detection of `sf` filename/entry prefixes, `SF` tags, and CDG magic header bytes `0x03 0x0C`.
+    - `KaraokeComProvider`: Implements search URL for karaoke.com, detection of `kcom` signatures, and ID3/MP4 metadata watermarks.
+  - **Central Provider Registry (`ProviderRegistry.cs`)**:
+    - Thread-safe singleton registry holding default commercial karaoke providers with dynamic registration support (`RegisterProvider(IStoreProvider)`).
+    - Unified multi-vector discovery methods: `DetectProviderFromFilename`, `DetectProviderFromZip`, `DetectProviderFromCdg`, `DetectProviderFromId3`, `DetectProviderFromMp4`, and `DetectProviderFromMetadata`.
+  - **Store Ingestion & ViewModel Integration (`PurchasedTrackWatcherService.cs`, `StoreViewModel.cs`)**:
+    - Refactored `PurchasedTrackWatcherService` detection pipeline to delegate ZIP, CDG, ID3, MP4, and filename heuristics directly to `ProviderRegistry.Instance`.
+    - Updated `StoreViewModel` search actions (`SearchKaraokeVersion`, `SearchPartyTyme`, `SearchKaraokeDotCom`, `SearchSunfly`, and `SearchPreferredProvider`) to resolve and build search URLs through `ProviderRegistry`.
+    - Exposed `RegisteredProviders` collection for dynamic UI provider listing and binding.
+  - **WebModules Reference Modules (`providerRegistry.ts`, `deepLink.ts`, `importMetadata.ts`, `purchasedWatcher.ts`)**:
+    - Implemented TypeScript `IStoreProvider`, `BaseStoreProvider`, concrete provider classes, and singleton `providerRegistry`.
+    - Extended `deepLink.ts`, `importMetadata.ts`, and `purchasedWatcher.ts` to route search URL generation and file fingerprinting through `providerRegistry`.
+  - **Unit Test Coverage (`StoreImportTests.cs`)**:
+    - Added comprehensive test suite verifying `ProviderRegistry` initialization, URI construction across all providers, filename heuristic resolution, and custom provider plugin registration.
+
+## [26.9.5.28] - 2026-09-06
+
+### Added
+- **Store Tab Provider Settings Panel (Provider Preferences, Format Defaults & Audio Automation) (`Lyracist` ONLY)**:
+  - **WPF Provider Settings UserControl (`ProviderSettingsControl.xaml`, `ProviderSettingsControl.xaml.cs`)**:
+    - Embedded as a collapsible configuration panel in Section 3 of `StorePage.xaml`, toggled via the new "Provider Settings..." action button.
+    - Features dropdown selectors for Preferred Provider (`KV`, `PT`, `Sunfly`, `Karaoke.com`), Preferred File Type (`MP3+G`, `MP4`, `Audio-only`), Preferred Target Folder (`Karaoke`, `Music`), and Preferred Lyrics Format (`LRC`, `TXT`).
+    - Features toggle switches for baseline audio automation flags: Normalize audio by default, Trim silence by default, and Generate waveform by default.
+    - Includes "Save Settings" button with status badge indicator and "Reset Defaults" button.
+  - **Provider Settings MVVM ViewModel (`ProviderSettingsViewModel.cs`)**:
+    - Manages configuration properties, collections for available providers, formats, and folders, and persistent storage via `AppSettings`.
+    - Dispatches `SettingsSaved` event notifying `StoreViewModel` and refreshing search toolbar highlights and processing defaults in real time.
+  - **Application Settings Expansion (`AppSettings.cs`)**:
+    - Added static configuration properties and backing fields: `PreferredProvider`, `PreferredFileType`, `DefaultNormalizeAudio`, `DefaultTrimSilence`, `DefaultGenerateWaveform`, `PreferredTargetFolder`, and `PreferredLyricsFormat`.
+  - **Store Page & Search Toolbar Integration (`StorePage.xaml`, `StoreViewModel.cs`)**:
+    - Added dynamic gold "★ PREFERRED" badge highlighting over the preferred provider button (Karaoke Version, Party Tyme, Karaoke.com, or Sunfly) based on `PreferredProvider`.
+    - Routed Enter key press in the Store search box to execute the query against the host's preferred provider via `SearchPreferredProviderCommand`.
+  - **Bulk Import Wizard & Store Sync Integration (`BulkImportViewModel.cs`, `PurchasedTrackSyncService.cs`, `PurchasedTrackWatcherService.cs`)**:
+    - Bulk Import Wizard defaults now initialize from `AppSettings.DefaultNormalizeAudio`, `DefaultTrimSilence`, and `DefaultGenerateWaveform`.
+    - Bulk Import candidate scanning prioritizes and sorts items matching `PreferredFileType` to the top of the review grid.
+    - Store Sync and Smart Import Rules use `PreferredProvider` as an attribution fallback hint when physical file inspection is unbranded.
+    - Lyrics companion discovery prioritizes `.lrc` or `.txt` matching `PreferredLyricsFormat`.
+  - **WebModules Reference Component (`settingsStore.tsx`, `types.ts`)**:
+    - Extended `StoreSettings` interface with provider settings properties.
+    - Added Provider Preferences & Import Defaults card in `settingsStore.tsx` with dropdowns, toggles, and Save action.
+  - **Unit Test Coverage (`StoreImportTests.cs`)**:
+    - Added unit test suite covering `ProviderSettingsViewModel` save/reset persistence, `StoreViewModel` provider highlighting calculation, lyrics format prioritization, and provider abbreviation fallback.
+
+## [26.9.5.27] - 2026-09-06
+
+### Added
+- **Track Preview Player (Acoustic Inspection, Waveform/Spectrogram Visualizations & Dual-Audio Selector) (`Lyracist` ONLY)**:
+  - **WPF Track Preview Control (`TrackPreviewControl.xaml`, `TrackPreviewControl.xaml.cs`)**:
+    - Dedicated inspection UserControl embedded directly below the Recent Imports table in `StorePage.xaml` and in the candidate review grid in `BulkImportWindow.xaml`.
+    - Styled with dark acrylic surfaces, cyan header accents, metadata badge bar (Filename, Provider, Format, Duration, Musical Key, BPM, Quality, Difficulty, Vocal Presence), and visual switcher tabs (Waveform, Spectrogram, 5s Video Preview).
+    - Features a 5-second audio transport bar with 1-click Play/Pause, scrub slider, and dual-audio channel selector (Channel A Guide Vocals / Channel B Instrumental).
+  - **Track Preview MVVM ViewModel (`TrackPreviewViewModel.cs`)**:
+    - Manages audio extraction, image rendering, and playback state using `System.Windows.Media.MediaPlayer` and a high-resolution `DispatcherTimer`.
+    - Supports dynamic loading from both `PurchasedTrackItem` (Recent Imports) and `BulkImportCandidate` (Bulk Import Wizard).
+    - Coordinates asynchronous extraction for audio previews, waveforms, spectrograms, and MP4 video clips, with safe cleanup of temporary preview files upon disposal.
+  - **FFmpeg Preview Extraction Extensions (`FFmpegService.cs`)**:
+    - `GenerateAudioPreviewAsync(inputPath, outputPath, channelIndex)`: Extracts opening 5 seconds (`-ss 0 -t 5`) with optional audio channel routing (`pan=mono|c0=c0` for Ch A, `pan=mono|c0=c1` for Ch B).
+    - `GenerateSpectrogramAsync(inputPath, outputPath)`: Renders high-resolution acoustic frequency density maps using the `showspectrum=s=800x300:color=intensity` filter.
+    - `GenerateVideoPreviewAsync(inputPath, outputPath)`: Generates opening 5-second video clips (`-ss 0 -t 5 -c:v libx264 -preset ultrafast -c:a aac`) for embedded WPF `MediaElement` playback.
+  - **Store Page & Bulk Import Window Integration (`StorePage.xaml`, `StoreViewModel.cs`, `BulkImportWindow.xaml`, `BulkImportViewModel.cs`)**:
+    - Added `SelectedItem="{Binding SelectedRecentImport}"` and dedicated "Preview" button action column to Recent Imports DataGrid.
+    - Embedded `TrackPreviewControl` visible whenever a track or candidate is selected.
+  - **WebModules Reference Component (`storeTab.tsx`)**:
+    - Added interactive Track Preview Player card to the React reference implementation with visual switcher tabs, simulated waveforms, 5-second playback bar, and dual-audio toggle.
+  - **Unit Test Coverage (`StoreImportTests.cs`)**:
+    - Added test suites covering audio preview, spectrogram, and video preview handling with non-existent or corrupted files, as well as property mapping from `PurchasedTrackItem` and `BulkImportCandidate`.
+
+## [26.9.5.26] - 2026-09-06
+
+### Added
+- **Store Sync (1-Click Purchased Tracks Ingestion & Modal Summary Dialog) (`Lyracist` ONLY)**:
+  - **Purchased Track Sync Service (`PurchasedTrackSyncService.cs`)**:
+    - High-level on-demand ingestion service scanning the configured purchase folder (`AppSettings.StorePurchasedTracksFolder`), user Downloads folder, or standard Music folder.
+    - Scans for ZIP archives (MP3+G), separate MP3+G companion pairs, MP4 video tracks, and accompanying lyrics files (.lrc, .txt).
+    - Intelligent browser temp file exclusion filtering out partial/active downloads (`.crdownload`, `.part`, `.tmp`, `~$*`).
+    - Companion file reconciliation automatically pairing `.mp3` and `.cdg` companion files with matching base names.
+    - Master catalog deduplication checking SQLite database records to identify existing tracks and mark them as skipped (`TotalSkipped++`), preventing redundant reprocessing.
+    - Invokes `PurchasedTrackWatcherService.ImportFileAsync` to route new tracks through Provider Intelligence, Smart Import auto-renaming, FFmpeg loudness normalization (-16 LUFS) and silence trimming (-50dB), peak waveform generation, and database insertion.
+    - Dispatches `ImportLogged` events for the live Recent Imports table and tracks per-track processing duration.
+  - **Store Sync Summary Dialog (`StoreSyncSummaryWindow.xaml`, `StoreSyncSummaryWindow.xaml.cs`)**:
+    - Modal dialog styled with dark acrylic surfaces, cyan/emerald gradient header, animated `ArrowSync24` branding, stat cards (Scanned, Imported, Skipped, Errors), and technical details card (Scanned Folder, Providers Involved, Avg Processing Time, Total Duration).
+  - **Store Page & ViewModel Integration (`StorePage.xaml`, `StoreViewModel.cs`)**:
+    - Added "Sync Purchased Tracks" primary action button with sync icon in Section 4 toolbar grid.
+    - Added `SyncPurchasedTracksCommand` with `IsSyncing` state tracking to prevent overlapping executions and show a responsive loading spinner.
+    - Triggers `Analytics.RefreshAnalyticsAsync()` and UI library updates immediately upon sync completion.
+  - **Unit Test Coverage (`StoreImportTests.cs`)**:
+    - Added test suite for folder resolution, empty folder execution, result calculations, and zero-warning execution.
 
 ## [26.9.5.25] - 2026-09-06
 

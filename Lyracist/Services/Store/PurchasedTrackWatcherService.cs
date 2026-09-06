@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:46:00 -> Expose Current instance and FindMatchingLyricsFile for Bulk Import Wizard
+// Edited on Sep 6, 2026 @ 13:03:00 -> Trigger StoreNotificationService toast notifications for imports and audio processing
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -399,6 +399,24 @@ public class PurchasedTrackWatcherService : IDisposable
             detectedSource = ReferrerHint;
         }
 
+        // G) Preferred Provider setting hint fallback
+        if (string.IsNullOrEmpty(detectedSource) || detectedSource == "Local")
+        {
+            string pref = AppSettings.PreferredProvider;
+            if (!string.IsNullOrWhiteSpace(pref))
+            {
+                string resolved = pref switch
+                {
+                    "KV" => "Karaoke Version",
+                    "PT" => "Party Tyme",
+                    "SF" or "Sunfly" => "Sunfly",
+                    "KC" or "Karaoke.com" => "Karaoke.com",
+                    _ => pref
+                };
+                detectedSource ??= resolved;
+            }
+        }
+
         string source = detectedSource ?? "Local";
 
         // ==========================================
@@ -485,6 +503,7 @@ public class PurchasedTrackWatcherService : IDisposable
                 File.Move(normDest, finalPrimaryPath, true);
                 normalized = true;
                 LogImport(parsed.Title, parsed.Artist, source, "Processing", "Audio normalized to -16 LUFS via FFmpeg loudnorm");
+                StoreNotificationService.Instance.ShowNormalizationComplete(parsed.Title, parsed.Artist);
             }
         }
 
@@ -497,6 +516,7 @@ public class PurchasedTrackWatcherService : IDisposable
                 File.Move(trimDest, finalPrimaryPath, true);
                 silenceTrimmed = true;
                 LogImport(parsed.Title, parsed.Artist, source, "Processing", "Silence trimmed via FFmpeg silenceremove");
+                StoreNotificationService.Instance.ShowSilenceTrimmed(parsed.Title, parsed.Artist);
             }
         }
 
@@ -508,6 +528,7 @@ public class PurchasedTrackWatcherService : IDisposable
             {
                 waveformPath = waveDest;
                 LogImport(parsed.Title, parsed.Artist, source, "Processing", "Waveform preview generated via FFmpeg");
+                StoreNotificationService.Instance.ShowWaveformGenerated(parsed.Title, parsed.Artist);
             }
         }
 
@@ -632,6 +653,15 @@ public class PurchasedTrackWatcherService : IDisposable
 
             TrackImported?.Invoke(this, trackItem);
 
+            StoreNotificationService.Instance.ShowTrackImported(
+                parsed.Title,
+                parsed.Artist,
+                source,
+                typeLabel,
+                normalized,
+                silenceTrimmed,
+                !string.IsNullOrEmpty(waveformPath));
+
             string dualMsg = probe.HasDualAudio ? " [Dual Audio Streams]" : "";
             string smartTagRemarks = $" [Genre: {detectedGenre ?? "N/A"}, Diff: {detectedDifficulty}, Key: {detectedKey ?? "N/A"}, BPM: {detectedBpm?.ToString() ?? "N/A"}, Vocals: {detectedVocalPresence}, Quality: {detectedQuality}]";
             LogImport(parsed.Title, parsed.Artist, source, "Success", $"Imported successfully ({typeLabel}){dualMsg}{smartTagRemarks}", Path.GetFileName(finalPrimaryPath));
@@ -657,11 +687,15 @@ public class PurchasedTrackWatcherService : IDisposable
             string dir = Path.GetDirectoryName(filePath)!;
             string baseName = Path.GetFileNameWithoutExtension(filePath);
 
-            string lrc = Path.Combine(dir, baseName + ".lrc");
-            if (File.Exists(lrc)) return lrc;
+            bool preferTxt = string.Equals(AppSettings.PreferredLyricsFormat, "TXT", StringComparison.OrdinalIgnoreCase);
+            string firstExt = preferTxt ? ".txt" : ".lrc";
+            string secondExt = preferTxt ? ".lrc" : ".txt";
 
-            string txt = Path.Combine(dir, baseName + ".txt");
-            if (File.Exists(txt)) return txt;
+            string first = Path.Combine(dir, baseName + firstExt);
+            if (File.Exists(first)) return first;
+
+            string second = Path.Combine(dir, baseName + secondExt);
+            if (File.Exists(second)) return second;
         }
         catch { }
 
@@ -678,44 +712,7 @@ public class PurchasedTrackWatcherService : IDisposable
     /// </summary>
     public static string? InspectZipForProvider(string zipPath)
     {
-        try
-        {
-            if (!File.Exists(zipPath)) return null;
-
-            using var archive = ZipFile.OpenRead(zipPath);
-            var entries = archive.Entries.Select(e => e.FullName.Replace('\\', '/').ToLowerInvariant()).ToList();
-
-            // 1. Karaoke Version: /custom_backing_track/, track.mp3 + track.cdg, or contains "KV" / "Karaoke Version"
-            bool hasCustomBackingTrack = entries.Any(e => e.Contains("custom_backing_track/"));
-            bool hasKvName = entries.Any(e => e.Contains("karaoke version") || Regex.IsMatch(e, @"\bkv[-\s]?\d+"));
-            bool hasGenericTrackPair = entries.Any(e => Path.GetFileName(e).Equals("track.mp3", StringComparison.OrdinalIgnoreCase)) &&
-                                       entries.Any(e => Path.GetFileName(e).Equals("track.cdg", StringComparison.OrdinalIgnoreCase));
-
-            if (hasCustomBackingTrack || hasKvName || hasGenericTrackPair)
-                return "Karaoke Version";
-
-            // 2. Party Tyme: /karaoke/, _pt. / - pt., or contains "Party Tyme"
-            bool hasKaraokeFolder = entries.Any(e => e.Contains("karaoke/"));
-            bool hasPtName = entries.Any(e => e.Contains("_pt.") || e.Contains("- pt.") || e.Contains("party tyme") || Regex.IsMatch(e, @"\bpt[-\s]?\d+"));
-            if (hasKaraokeFolder || hasPtName)
-                return "Party Tyme";
-
-            // 3. Sunfly: entries starting with "SF" or containing "Sunfly"
-            bool hasSfName = entries.Any(e => Path.GetFileName(e).StartsWith("sf", StringComparison.OrdinalIgnoreCase) || e.Contains("sunfly"));
-            if (hasSfName)
-                return "Sunfly";
-
-            // 4. Karaoke.com: entries containing "KCOM" or "KARAOKECOM" or "Karaoke.com"
-            bool hasKcomName = entries.Any(e => e.Contains("kcom") || e.Contains("karaokecom") || e.Contains("karaoke.com"));
-            if (hasKcomName)
-                return "Karaoke.com";
-        }
-        catch (Exception ex)
-        {
-            Globals.LogError("Lyracist", $"Failed to inspect ZIP archive {zipPath} for provider signatures", ex);
-        }
-
-        return null;
+        return ProviderRegistry.Instance.DetectProviderFromZip(zipPath)?.Name;
     }
 
     /// <summary>
@@ -726,25 +723,7 @@ public class PurchasedTrackWatcherService : IDisposable
     /// </summary>
     public static string? DetectProviderFromCdgHeader(string cdgPath)
     {
-        try
-        {
-            if (!File.Exists(cdgPath)) return null;
-
-            using var stream = new FileStream(cdgPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            byte[] header = new byte[24];
-            int read = stream.Read(header, 0, 24);
-            if (read < 2) return null;
-
-            byte b0 = header[0];
-            byte b1 = header[1];
-
-            if (b0 == 0x01 && b1 == 0x0F) return "Karaoke Version";
-            if (b0 == 0x02 && b1 == 0x0A) return "Party Tyme";
-            if (b0 == 0x03 && b1 == 0x0C) return "Sunfly";
-        }
-        catch { }
-
-        return null;
+        return ProviderRegistry.Instance.DetectProviderFromCdg(cdgPath)?.Name;
     }
 
     /// <summary>
@@ -752,27 +731,7 @@ public class PurchasedTrackWatcherService : IDisposable
     /// </summary>
     public static string? DetectProviderFromId3(FFprobeResult metadata)
     {
-        if (metadata?.Tags == null || metadata.Tags.Count == 0) return null;
-
-        foreach (var (key, val) in metadata.Tags)
-        {
-            string upperKey = key.ToUpperInvariant();
-            string upperVal = (val ?? string.Empty).ToUpperInvariant();
-
-            if (upperKey.Contains("TXXX:KV") || upperKey == "KV" || upperVal.Contains("KARAOKE VERSION") || upperVal == "KV")
-                return "Karaoke Version";
-
-            if (upperKey.Contains("TXXX:PT") || upperKey == "PT" || upperVal.Contains("PARTY TYME") || upperVal == "PT" || upperVal.Contains("SYBERSOUND"))
-                return "Party Tyme";
-
-            if (upperKey.Contains("TXXX:SF") || upperKey == "SF" || upperVal.Contains("SUNFLY") || upperVal == "SF")
-                return "Sunfly";
-
-            if (upperKey.Contains("TXXX:KCOM") || upperKey == "KCOM" || upperKey == "KARAOKECOM" || upperVal.Contains("KARAOKE.COM") || upperVal.Contains("KCOM"))
-                return "Karaoke.com";
-        }
-
-        return null;
+        return ProviderRegistry.Instance.DetectProviderFromId3(metadata)?.Name;
     }
 
     /// <summary>
@@ -780,48 +739,13 @@ public class PurchasedTrackWatcherService : IDisposable
     /// </summary>
     public static string? DetectProviderFromMp4(FFprobeResult metadata)
     {
-        if (metadata == null) return null;
-
-        string combined = $"{metadata.TitleTag} {metadata.ArtistTag} {metadata.CommentTag} {string.Join(" ", metadata.Tags.Values)}".ToUpperInvariant();
-
-        if (combined.Contains("SUNFLY")) return "Sunfly";
-        if (combined.Contains("PARTY TYME") || combined.Contains("PARTYTYME") || combined.Contains("SYBERSOUND")) return "Party Tyme";
-        if (combined.Contains("KARAOKE VERSION") || combined.Contains("KARAOKE-VERSION")) return "Karaoke Version";
-        if (combined.Contains("KARAOKE.COM") || combined.Contains("KARAOKEDOTCOM")) return "Karaoke.com";
-
-        return null;
+        return ProviderRegistry.Instance.DetectProviderFromMp4(metadata)?.Name;
     }
 
     public static string DetectSource(string filePath, string title, string artist)
     {
-        string combined = $"{filePath} {title} {artist}".ToLowerInvariant();
-
-        if (combined.Contains("karaoke version") ||
-            combined.Contains("karaoke-version") ||
-            Regex.IsMatch(combined, @"\bkv[-\s]?\d+"))
-        {
-            return "Karaoke Version";
-        }
-
-        if (combined.Contains("party tyme") ||
-            combined.Contains("partytyme") ||
-            combined.Contains("sybersound") ||
-            Regex.IsMatch(combined, @"\bpt[-\s]?\d+"))
-        {
-            return "Party Tyme";
-        }
-
-        if (combined.Contains("karaoke.com") || combined.Contains("karaokedotcom"))
-        {
-            return "Karaoke.com";
-        }
-
-        if (combined.Contains("sunfly") || Regex.IsMatch(combined, @"\bsf[-\s]?\d+"))
-        {
-            return "Sunfly";
-        }
-
-        return "Local";
+        string combined = $"{filePath} {title} {artist}";
+        return ProviderRegistry.Instance.DetectProviderFromFilename(combined)?.Name ?? "Local";
     }
 
     private static string AppendTag(string? existingTags, string newTag)
@@ -900,6 +824,22 @@ public class PurchasedTrackWatcherService : IDisposable
 
     public static string GetProviderAbbreviation(string provider)
     {
+        if (string.IsNullOrWhiteSpace(provider) || provider == "Local")
+        {
+            string pref = AppSettings.PreferredProvider;
+            if (!string.IsNullOrWhiteSpace(pref))
+            {
+                return pref switch
+                {
+                    "KV" or "Karaoke Version" => "KV",
+                    "PT" or "Party Tyme" => "PT",
+                    "Sunfly" or "SF" => "SF",
+                    "Karaoke.com" or "KC" or "KCOM" => "KCOM",
+                    _ => pref
+                };
+            }
+        }
+
         return provider switch
         {
             "Karaoke Version" => "KV",

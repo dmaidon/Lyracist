@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:16:00 -> Extend Track schema with Smart Import fields: Genre, Difficulty, Key, BPM, VocalPresence, Quality
+// Edited on Sep 6, 2026 @ 12:46:00 -> Add Provider Settings fields to StoreSettings interface
 
 export type TrackSource = "Local" | "Karaoke Version" | "Party Tyme" | "Karaoke.com" | "Sunfly";
 export type ProviderSource = TrackSource;
@@ -45,6 +45,13 @@ export interface StoreSettings {
   normalizeAudioOnImport: boolean;
   trimSilenceOnImport: boolean;
   generateWaveformOnImport: boolean;
+  preferredProvider?: "KV" | "PT" | "Sunfly" | "Karaoke.com";
+  preferredFileType?: "MP3+G" | "MP4" | "Audio-only";
+  defaultNormalizeAudio?: boolean;
+  defaultTrimSilence?: boolean;
+  defaultGenerateWaveform?: boolean;
+  preferredTargetFolder?: "Karaoke" | "Music";
+  preferredLyricsFormat?: "LRC" | "TXT";
 }
 
 export interface ImportLogEvent {

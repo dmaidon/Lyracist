@@ -1,4 +1,4 @@
-// Created on Sep 6, 2026 @ 11:48:00 -> MVVM ViewModel for Bulk Import Wizard
+// Edited on Sep 6, 2026 @ 13:04:00 -> Trigger ShowBulkImportCompleted toast notification and expose Notifications collection
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -65,6 +65,21 @@ public partial class BulkImportViewModel : BaseViewModel
 
     public event Action? RequestClose;
 
+    public TrackPreviewViewModel TrackPreview { get; } = new();
+    public StoreNotificationService NotificationService => StoreNotificationService.Instance;
+    public ObservableCollection<StoreNotificationItem> Notifications => NotificationService.ActiveNotifications;
+
+    [ObservableProperty]
+    private BulkImportItemViewModel? _selectedCandidate;
+
+    partial void OnSelectedCandidateChanged(BulkImportItemViewModel? value)
+    {
+        if (value != null)
+        {
+            _ = TrackPreview.LoadFromBulkCandidateAsync(value.Model);
+        }
+    }
+
     [ObservableProperty]
     private string _selectedFolder = string.Empty;
 
@@ -125,9 +140,9 @@ public partial class BulkImportViewModel : BaseViewModel
     {
         _importer = new PurchasedTrackBulkImporter(libraryService);
         _selectedFolder = AppSettings.StorePurchasedTracksFolder;
-        _normalizeAll = AppSettings.StoreNormalizeAudioOnImport;
-        _trimSilenceAll = AppSettings.StoreTrimSilenceOnImport;
-        _generateWaveformAll = AppSettings.StoreGenerateWaveformOnImport;
+        _normalizeAll = AppSettings.DefaultNormalizeAudio;
+        _trimSilenceAll = AppSettings.DefaultTrimSilence;
+        _generateWaveformAll = AppSettings.DefaultGenerateWaveform;
         _moveFilesToTarget = AppSettings.StoreMoveFilesToTarget;
         _targetKaraokeFolder = AppSettings.StoreTargetKaraokeFolder;
         _targetMusicFolder = AppSettings.StoreTargetMusicFolder;
@@ -199,7 +214,12 @@ public partial class BulkImportViewModel : BaseViewModel
 
             var candidates = await PurchasedTrackBulkImporter.ScanFolderAsync(SelectedFolder, progress, _cts.Token);
 
-            foreach (var c in candidates)
+            string preferredType = AppSettings.PreferredFileType;
+            var orderedCandidates = candidates.OrderByDescending(c =>
+                string.Equals(c.FileType, preferredType, StringComparison.OrdinalIgnoreCase) ||
+                (preferredType == "Audio-only" && c.FileType == "Audio")).ToList();
+
+            foreach (var c in orderedCandidates)
             {
                 c.WillNormalize = NormalizeAll;
                 c.WillTrimSilence = TrimSilenceAll;
@@ -264,6 +284,7 @@ public partial class BulkImportViewModel : BaseViewModel
 
             IsComplete = true;
             StatusText = $"Bulk import complete! {SummaryReport.TotalImported} imported, {SummaryReport.TotalSkipped} skipped, {SummaryReport.TotalErrors} error(s).";
+            StoreNotificationService.Instance.ShowBulkImportCompleted(SummaryReport.TotalImported);
         }
         catch (OperationCanceledException)
         {

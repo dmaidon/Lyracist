@@ -1,8 +1,9 @@
-// Edited on Sep 6, 2026 @ 11:18:00 -> Add Smart Import Rules: renameImportedFiles, detectGenre, detectDifficulty, detectKey, detectBpm, detectVocalPresence, and detectQuality
+// Edited on Sep 6, 2026 @ 12:51:00 -> Route provider detection through providerRegistry
 import * as path from "path";
 import * as fs from "fs";
 import { Track, TrackSource, ProviderSource, KaraokeFormat, ParsedTrackMetadata, DifficultyLevel, VocalPresence, QualityLevel } from "./types";
 import { probeMediaFile, ProbeMediaInfo, detectProviderFromId3, detectProviderFromMp4, FFprobeResult } from "./ffmpegUtils";
+import { providerRegistry } from "./providerRegistry";
 
 export { detectProviderFromId3, detectProviderFromMp4 };
 
@@ -70,64 +71,7 @@ export function readZipEntryNames(zipPath: string): string[] {
  * Inspects a ZIP archive's internal folder hierarchy and file names for provider fingerprints.
  */
 export function inspectZipForProvider(zipPath: string): TrackSource | null {
-  const entries = readZipEntryNames(zipPath);
-  if (entries.length === 0) return null;
-
-  const normalizedEntries = entries.map((e) => e.replace(/\\/g, "/").toLowerCase());
-
-  // 1. Karaoke Version
-  // • folders: /custom_backing_track/
-  // • MP3+G pairs: track.mp3 + track.cdg
-  // • ID3 tags or entries containing "KV" or "Karaoke Version"
-  const hasCustomBackingTrack = normalizedEntries.some(
-    (e) => e.includes("custom_backing_track/") || e.startsWith("custom_backing_track/")
-  );
-  const hasKvName = normalizedEntries.some(
-    (e) => e.includes("karaoke version") || /\bkv[-\s]?\d+/i.test(e)
-  );
-  const hasGenericTrackPair =
-    normalizedEntries.some((e) => path.basename(e) === "track.mp3") &&
-    normalizedEntries.some((e) => path.basename(e) === "track.cdg");
-
-  if (hasCustomBackingTrack || hasKvName || hasGenericTrackPair) {
-    return "Karaoke Version";
-  }
-
-  // 2. Party Tyme
-  // • folders: /karaoke/
-  // • MP4 files with PT watermark metadata
-  // • MP3+G pairs often include "_PT"
-  const hasKaraokeFolder = normalizedEntries.some(
-    (e) => e.includes("/karaoke/") || e.startsWith("karaoke/")
-  );
-  const hasPtName = normalizedEntries.some(
-    (e) => e.includes("_pt.") || e.includes("- pt.") || e.includes("party tyme") || /\bpt[-\s]?\d+/i.test(e)
-  );
-  if (hasKaraokeFolder || hasPtName) {
-    return "Party Tyme";
-  }
-
-  // 3. Sunfly
-  // • MP4 metadata contains "Sunfly"
-  // • CDG filenames often start with "SF"
-  const hasSfName = normalizedEntries.some((e) => {
-    const base = path.basename(e);
-    return base.toUpperCase().startsWith("SF") || e.includes("sunfly");
-  });
-  if (hasSfName) {
-    return "Sunfly";
-  }
-
-  // 4. Karaoke.com
-  // • MP3+G pairs contain "KCOM" or "KARAOKECOM" in ID3 tags or filenames
-  const hasKcomName = normalizedEntries.some(
-    (e) => e.includes("kcom") || e.includes("karaokecom") || e.includes("karaoke.com")
-  );
-  if (hasKcomName) {
-    return "Karaoke.com";
-  }
-
-  return null;
+  return (providerRegistry.detectProviderFromZip(zipPath)?.source as TrackSource) ?? null;
 }
 
 /**
@@ -137,31 +81,7 @@ export function inspectZipForProvider(zipPath: string): TrackSource | null {
  * SF -> 0x03 0x0C
  */
 export function detectProviderFromCdgHeader(cdgPath: string): TrackSource | null {
-  try {
-    if (!fs.existsSync(cdgPath)) return null;
-    const fd = fs.openSync(cdgPath, "r");
-    const buffer = Buffer.alloc(24);
-    const bytesRead = fs.readSync(fd, buffer, 0, 24, 0);
-    fs.closeSync(fd);
-
-    if (bytesRead < 2) return null;
-
-    const b0 = buffer[0];
-    const b1 = buffer[1];
-
-    if (b0 === 0x01 && b1 === 0x0f) {
-      return "Karaoke Version";
-    }
-    if (b0 === 0x02 && b1 === 0x0a) {
-      return "Party Tyme";
-    }
-    if (b0 === 0x03 && b1 === 0x0c) {
-      return "Sunfly";
-    }
-  } catch {
-    // If running in environment without filesystem access
-  }
-  return null;
+  return (providerRegistry.detectProviderFromCdg(cdgPath)?.source as TrackSource) ?? null;
 }
 
 /**
@@ -175,17 +95,7 @@ export function parseTrackMetadata(filePath: string): ParsedTrackMetadata {
   const nameWithoutExt = lastDot !== -1 ? fileName.substring(0, lastDot) : fileName;
 
   const lowerName = fileName.toLowerCase();
-  let source: TrackSource = "Local";
-
-  if (lowerName.includes("karaoke version") || lowerName.includes("karaoke-version") || /\bkv[-\s]?\d+/i.test(fileName)) {
-    source = "Karaoke Version";
-  } else if (lowerName.includes("party tyme") || lowerName.includes("partytyme") || lowerName.includes("sybersound") || /\bpt[-\s]?\d+/i.test(fileName)) {
-    source = "Party Tyme";
-  } else if (lowerName.includes("karaoke.com") || lowerName.includes("karaokedotcom")) {
-    source = "Karaoke.com";
-  } else if (lowerName.includes("sunfly") || /\bsf[-\s]?\d+/i.test(fileName)) {
-    source = "Sunfly";
-  }
+  let source: TrackSource = (providerRegistry.detectProviderFromFilename(fileName)?.source as TrackSource) ?? "Local";
 
   let isKaraoke = false;
   let karaokeType: KaraokeFormat = "Audio";

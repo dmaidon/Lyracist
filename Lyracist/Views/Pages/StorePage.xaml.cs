@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:45:00 -> Expose AnalyticsViewModel and hook page Loaded refresh
+// Edited on Sep 6, 2026 @ 12:41:00 -> Route search box Enter to SearchPreferredProviderCommand
 using System.Windows.Controls;
 using System.Windows.Input;
 using Lyracist.ViewModels;
@@ -26,7 +26,7 @@ public partial class StorePage : Page
     {
         if (e.Key == System.Windows.Input.Key.Enter)
         {
-            ViewModel.SearchKaraokeVersionCommand.Execute(null);
+            ViewModel.SearchPreferredProviderCommand.Execute(null);
         }
     }
 }

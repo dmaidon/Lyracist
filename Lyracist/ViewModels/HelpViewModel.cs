@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:57:00 -> Add Help topics for Users Management, Karaoke Store, Store Analytics, and Bulk Import Wizard
+// Edited on Sep 6, 2026 @ 13:16:00 -> Add Store Notifications help topic
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -177,8 +177,8 @@ public partial class HelpViewModel : BaseViewModel
                 Title = "22. Licensed Karaoke Store & Provider Intelligence",
                 Icon = "ShoppingBag24",
                 AccentColor = "#EC4899",
-                DescriptionHeader = "Multi-Store Deep Links, Downloads Folder Watcher & Provider Fingerprinting",
-                DescriptionContent = "• Licensed Store Deep Links: Direct search integration for Karaoke Version, Party Tyme, Sunfly Karaoke, and Karaoke.com with zero audio proxying.\n\n• Background Downloads Watcher: Automatically detects new .mp3, .cdg, .zip, and .mp4 purchases in your download folder, pairs companion files, and imports them seamlessly.\n\n• Provider Intelligence: Fingerprints track origins from ZIP internal layouts, CDG magic header bytes, ID3 tags, and MP4 watermarks (KV, PT, SF, KC, Local).\n\n• Smart Import Rules: Automatically renames files to canonical format 'Artist - Title (Provider).ext' and classifies genre, difficulty, musical key, BPM, and vocal presence.\n\n• FFmpeg Audio Processing: Applies EBU R128 loudness normalization (-16 LUFS), silence trimming below -50dB, and peak waveform preview generation."
+                DescriptionHeader = "Multi-Store Deep Links, Downloads Folder Watcher, Store Sync & Fingerprinting",
+                DescriptionContent = "• Licensed Store Deep Links: Direct search integration for Karaoke Version, Party Tyme, Sunfly Karaoke, and Karaoke.com with zero audio proxying.\n\n• 1-Click Store Sync: Dedicated 'Sync Purchased Tracks' button triggers an immediate on-demand scan of your Downloads or configured purchase folder, importing newly purchased tracks and displaying a comprehensive modal summary.\n\n• Background Downloads Watcher: Automatically detects new .mp3, .cdg, .zip, and .mp4 purchases in your download folder, pairs companion files, and imports them seamlessly.\n\n• Provider Intelligence: Fingerprints track origins from ZIP internal layouts, CDG magic header bytes, ID3 tags, and MP4 watermarks (KV, PT, SF, KC, Local).\n\n• Smart Import Rules: Automatically renames files to canonical format 'Artist - Title (Provider).ext' and classifies genre, difficulty, musical key, BPM, and vocal presence.\n\n• FFmpeg Audio Processing: Applies EBU R128 loudness normalization (-16 LUFS), silence trimming below -50dB, and peak waveform preview generation."
             },
             new() {
                 Title = "23. Store Analytics & Benchmarks",
@@ -193,10 +193,16 @@ public partial class HelpViewModel : BaseViewModel
                 AccentColor = "#3B82F6",
                 DescriptionHeader = "Batch Folder Ingestion, MP3+G Pairing, Parallel FFmpeg & Completion Report",
                 DescriptionContent = "• Batch Folder Scanning: Select any folder to scan MP3, CDG, ZIP, MP4, and LRC/TXT files with automated MP3+G pairing and companion lyrics binding.\n\n• Candidate Preview Table: Inspects file type, provider source, duration, musical key, BPM, quality tier, difficulty, and vocal presence.\n\n• Global & Granular Audio Toggles: Global options to Normalize all, Trim silence for all, Generate waveforms for all, and Move to target folders, with individual per-track override toggles.\n\n• Throttled Parallel Execution: Runs batch operations concurrently throttled to max 3 simultaneous FFmpeg tasks via SemaphoreSlim(3) with combined single-pass audio filter execution.\n\n• Progress UI & Completion Summary: Live progress bar, current file indicator, success/error counters, cancellation support, and post-import summary report."
+            },
+            new() {
+                Title = "25. Store Notifications & Toast Alerts",
+                Icon = "AlertBadge24",
+                AccentColor = "#F59E0B",
+                DescriptionHeader = "Real-Time Slide-In Toast Alerts for Ingestion, DSP Pipelines & Batch Sync",
+                DescriptionContent = "• Automated Slide-In Toasts: Real-time non-intrusive notification cards animate smoothly in the bottom-right corner of the Store Page and Bulk Import Wizard.\n\n• Track Imported Alerts: Displays 'Imported: Artist - Title (Provider)' accompanied by visual pill badges for file packaging (MP3+G, MP4, ZIPCDG) and applied enhancements (Normalized, Trimmed, Waveform).\n\n• Audio DSP Feedback: Instant toasts alert the host when EBU R128 audio normalization completes, when lead/tail silence is trimmed below -50dB, or when visual peak waveform data is ready.\n\n• Sync & Batch Completion: Clear summary toasts pop up upon Store Sync ('Store Sync Complete — X tracks imported') and Bulk Import completion ('Bulk Import Complete — X tracks processed').\n\n• Auto-Dismiss & Manual Dismissal: Toasts automatically fade out after 5 seconds or can be dismissed immediately via the top-right close button. Up to 5 toasts stack cleanly without obstructing background navigation."
             }
         ];
 
         _selectedTopic = _helpTopics[0];
     }
 }
-

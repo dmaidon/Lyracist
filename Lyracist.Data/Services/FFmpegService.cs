@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:45:00 -> Add batch-friendly audio pipeline wrapper for Bulk Import Wizard
+// Edited on Sep 6, 2026 @ 12:14:00 -> Add 5s audio preview, spectrogram, and video preview generation for Track Preview Player
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -718,6 +718,170 @@ namespace Lyracist.Data.Services
             catch (Exception ex)
             {
                 Lyracist.Shared.Globals.LogError("Lyracist", $"ProcessAudioPipelineBatchAsync failed for {inputAudioPath}", ex);
+                return false;
+            }
+        }
+
+        // ==========================================
+        // TRACK PREVIEW EXTRACTION HELPERS
+        // ==========================================
+
+        public static async Task<bool> GenerateAudioPreviewAsync(
+            string inputPath,
+            string outputPath,
+            int? channelIndex = null)
+        {
+            if (!File.Exists(inputPath)) return false;
+
+            try
+            {
+                string? outDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outDir)) Directory.CreateDirectory(outDir);
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = FFmpegPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                startInfo.ArgumentList.Add("-y");
+                startInfo.ArgumentList.Add("-ss");
+                startInfo.ArgumentList.Add("0");
+                startInfo.ArgumentList.Add("-t");
+                startInfo.ArgumentList.Add("5");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(inputPath);
+
+                if (channelIndex == 0)
+                {
+                    // Channel A: Guide Vocals (Left channel / Channel 0)
+                    startInfo.ArgumentList.Add("-af");
+                    startInfo.ArgumentList.Add("pan=mono|c0=c0");
+                }
+                else if (channelIndex == 1)
+                {
+                    // Channel B: Instrumental (Right channel / Channel 1)
+                    startInfo.ArgumentList.Add("-af");
+                    startInfo.ArgumentList.Add("pan=mono|c0=c1");
+                }
+
+                startInfo.ArgumentList.Add("-c:a");
+                startInfo.ArgumentList.Add("libmp3lame");
+                startInfo.ArgumentList.Add("-b:a");
+                startInfo.ArgumentList.Add("192k");
+                startInfo.ArgumentList.Add(outputPath);
+
+                using var process = new Process { StartInfo = startInfo };
+                process.Start();
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
+                await process.WaitForExitAsync();
+
+                return process.ExitCode == 0 && File.Exists(outputPath);
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"GenerateAudioPreviewAsync failed for {inputPath}", ex);
+                return false;
+            }
+        }
+
+        public static async Task<bool> GenerateSpectrogramAsync(
+            string inputPath,
+            string outputPath)
+        {
+            if (!File.Exists(inputPath)) return false;
+
+            try
+            {
+                string? outDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outDir)) Directory.CreateDirectory(outDir);
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = FFmpegPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                startInfo.ArgumentList.Add("-y");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(inputPath);
+                startInfo.ArgumentList.Add("-filter_complex");
+                startInfo.ArgumentList.Add("showspectrum=s=800x300:color=intensity");
+                startInfo.ArgumentList.Add("-frames:v");
+                startInfo.ArgumentList.Add("1");
+                startInfo.ArgumentList.Add(outputPath);
+
+                using var process = new Process { StartInfo = startInfo };
+                process.Start();
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
+                await process.WaitForExitAsync();
+
+                return process.ExitCode == 0 && File.Exists(outputPath);
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"GenerateSpectrogramAsync failed for {inputPath}", ex);
+                return false;
+            }
+        }
+
+        public static async Task<bool> GenerateVideoPreviewAsync(
+            string inputPath,
+            string outputPath)
+        {
+            if (!File.Exists(inputPath)) return false;
+
+            try
+            {
+                string? outDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outDir)) Directory.CreateDirectory(outDir);
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = FFmpegPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                startInfo.ArgumentList.Add("-y");
+                startInfo.ArgumentList.Add("-ss");
+                startInfo.ArgumentList.Add("0");
+                startInfo.ArgumentList.Add("-t");
+                startInfo.ArgumentList.Add("5");
+                startInfo.ArgumentList.Add("-i");
+                startInfo.ArgumentList.Add(inputPath);
+                startInfo.ArgumentList.Add("-c:v");
+                startInfo.ArgumentList.Add("libx264");
+                startInfo.ArgumentList.Add("-preset");
+                startInfo.ArgumentList.Add("ultrafast");
+                startInfo.ArgumentList.Add("-c:a");
+                startInfo.ArgumentList.Add("aac");
+                startInfo.ArgumentList.Add(outputPath);
+
+                using var process = new Process { StartInfo = startInfo };
+                process.Start();
+                Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+                Task<string> errorTask = process.StandardError.ReadToEndAsync();
+                await Task.WhenAll(outputTask, errorTask);
+                await process.WaitForExitAsync();
+
+                return process.ExitCode == 0 && File.Exists(outputPath);
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("Lyracist", $"GenerateVideoPreviewAsync failed for {inputPath}", ex);
                 return false;
             }
         }

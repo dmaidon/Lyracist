@@ -1,0 +1,352 @@
+<!-- Created on Sep 6, 2026 @ 12:16:00 -> Track Preview Player control with waveform, spectrogram, 5s audio transport, video, and dual-audio channels -->
+<UserControl x:Class="Lyracist.Controls.TrackPreviewControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:vm="clr-namespace:Lyracist.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:TrackPreviewViewModel}"
+             d:DesignWidth="900">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="10"
+            Padding="18,16"
+            Margin="0,8,0,8">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- 0: Header & Close -->
+                <RowDefinition Height="Auto"/> <!-- 1: Metadata Badges -->
+                <RowDefinition Height="Auto"/> <!-- 2: Visual Switcher Tabs -->
+                <RowDefinition Height="Auto"/> <!-- 3: Visual Display (Waveform / Spectrogram / Video) -->
+                <RowDefinition Height="Auto"/> <!-- 4: 5s Audio Transport & Dual Channel Bar -->
+            </Grid.RowDefinitions>
+
+            <!-- 0. Header & Dismiss -->
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                        Background="#0284C7"
+                        CornerRadius="8"
+                        Width="36" Height="36"
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center">
+                    <ui:SymbolIcon Symbol="Speaker224" FontSize="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"/>
+                        <!-- Provider Pill -->
+                        <Border Background="{DynamicResource ControlFillColorDefaultBrush}"
+                                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="8,2"
+                                Margin="10,0,0,0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Provider}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,2,0,0">
+                        <Run Text="by "/><Run Text="{Binding Artist, Mode=OneWay}" FontWeight="SemiBold"/><Run Text=" • "/><Run Text="{Binding Filename, Mode=OneWay}"/>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- Close Button -->
+                <ui:Button Grid.Column="2"
+                           Command="{Binding ClosePreviewCommand}"
+                           Appearance="Transparent"
+                           Icon="{ui:SymbolIcon Dismiss24}"
+                           ToolTip="Close Preview"
+                           Padding="6"
+                           VerticalAlignment="Center"/>
+            </Grid>
+
+            <!-- 1. Technical Metadata Pills -->
+            <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+                <!-- Format -->
+                <Border Background="#1E293B" CornerRadius="4" Padding="8,3" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📦 " FontSize="11"/>
+                        <TextBlock Text="{Binding FileType}" FontSize="11" FontWeight="SemiBold" Foreground="#38BDF8"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Duration -->
+                <Border Background="#1E293B" CornerRadius="4" Padding="8,3" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⏱️ " FontSize="11"/>
+                        <TextBlock Text="{Binding DurationText}" FontSize="11" FontWeight="SemiBold" Foreground="#CBD5E1"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Musical Key -->
+                <Border Background="#1E293B" CornerRadius="4" Padding="8,3" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🎵 Key: " FontSize="11" Foreground="#94A3B8"/>
+                        <TextBlock Text="{Binding MusicalKey}" FontSize="11" FontWeight="SemiBold" Foreground="#F59E0B"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- BPM -->
+                <Border Background="#1E293B" CornerRadius="4" Padding="8,3" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚡ BPM: " FontSize="11" Foreground="#94A3B8"/>
+                        <TextBlock Text="{Binding BpmText}" FontSize="11" FontWeight="SemiBold" Foreground="#10B981"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Quality -->
+                <Border Background="#1E293B" CornerRadius="4" Padding="8,3" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="💎 " FontSize="11"/>
+                        <TextBlock Text="{Binding Quality}" FontSize="11" FontWeight="SemiBold" Foreground="#A855F7"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Difficulty -->
+                <Border Background="#1E293B" CornerRadius="4" Padding="8,3" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🎯 " FontSize="11"/>
+                        <TextBlock Text="{Binding Difficulty}" FontSize="11" FontWeight="SemiBold" Foreground="#EC4899"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Vocal Presence -->
+                <Border Background="#1E293B" CornerRadius="4" Padding="8,3" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🎤 " FontSize="11"/>
+                        <TextBlock Text="{Binding VocalPresence}" FontSize="11" FontWeight="SemiBold" Foreground="#E2E8F0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Dual-Audio Badge -->
+                <Border Visibility="{Binding HasDualAudio, Converter={StaticResource BoolToVis}}"
+                        Background="#581C87" CornerRadius="4" Padding="8,3" Margin="0,0,6,6">
+                    <TextBlock Text="🎧 Dual-Audio" FontSize="11" FontWeight="Bold" Foreground="#F3E8FF"/>
+                </Border>
+            </WrapPanel>
+
+            <!-- 2. Visual Selector Tabs -->
+            <Grid Grid.Row="2" Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <RadioButton x:Name="TabWaveform"
+                                 Content="📊 Waveform Peak"
+                                 IsChecked="True"
+                                 GroupName="VisualTab"
+                                 Checked="OnVisualTabChanged"
+                                 Margin="0,0,8,0"
+                                 FontSize="12"/>
+                    <RadioButton x:Name="TabSpectrogram"
+                                 Content="🌈 Spectrogram"
+                                 GroupName="VisualTab"
+                                 Checked="OnVisualTabChanged"
+                                 Margin="0,0,8,0"
+                                 FontSize="12"/>
+                    <RadioButton x:Name="TabVideo"
+                                 Content="🎬 5s Video Preview"
+                                 GroupName="VisualTab"
+                                 Checked="OnVisualTabChanged"
+                                 Visibility="{Binding IsVideo, Converter={StaticResource BoolToVis}}"
+                                 FontSize="12"/>
+                </StackPanel>
+
+                <!-- Loading Spinner / Status -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:ProgressRing IsIndeterminate="True" Width="16" Height="16" Margin="0,0,8,0"
+                                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
+                    <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- 3. Visual Display Area -->
+            <Border Grid.Row="3"
+                    Background="#0F172A"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    MinHeight="140"
+                    MaxHeight="260"
+                    ClipToBounds="True"
+                    Margin="0,0,0,12">
+                <Grid>
+                    <!-- View A: Waveform Image -->
+                    <Grid x:Name="ViewWaveform" Visibility="Visible">
+                        <Image Source="{Binding WaveformImagePath}"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <TextBlock Text="Generating waveform..."
+                                   Foreground="#64748B"
+                                   FontSize="12"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding WaveformImagePath, Converter={x:Null}}"/>
+                    </Grid>
+
+                    <!-- View B: Spectrogram Image -->
+                    <Grid x:Name="ViewSpectrogram" Visibility="Collapsed">
+                        <Image Source="{Binding SpectrogramImagePath}"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <TextBlock Text="Generating spectrogram..."
+                                   Foreground="#64748B"
+                                   FontSize="12"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding SpectrogramImagePath, Converter={x:Null}}"/>
+                    </Grid>
+
+                    <!-- View C: MP4 Video Preview (MediaElement) -->
+                    <Grid x:Name="ViewVideo" Visibility="Collapsed">
+                        <MediaElement x:Name="PreviewVideoPlayer"
+                                      LoadedBehavior="Manual"
+                                      UnloadedBehavior="Stop"
+                                      Stretch="Uniform"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      MediaEnded="PreviewVideoPlayer_MediaEnded"/>
+                        
+                        <!-- Video Controls Overlay -->
+                        <Border Background="#99000000" CornerRadius="6" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10" Padding="8,4">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:Button x:Name="BtnPlayVideo" Click="BtnPlayVideo_Click" Icon="{ui:SymbolIcon Play24}" Content="Play Video" Appearance="Primary" Margin="0,0,6,0" Padding="8,4"/>
+                                <ui:Button x:Name="BtnPauseVideo" Click="BtnPauseVideo_Click" Icon="{ui:SymbolIcon Pause24}" Content="Pause" Appearance="Secondary" Margin="0,0,6,0" Padding="8,4"/>
+                                <ui:Button x:Name="BtnStopVideo" Click="BtnStopVideo_Click" Icon="{ui:SymbolIcon Stop24}" Content="Stop" Appearance="Secondary" Padding="8,4"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- 4. 5-Second Audio Transport & Dual-Channel Bar -->
+            <Border Grid.Row="4"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}"
+                    CornerRadius="8"
+                    Padding="14,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/> <!-- Play/Pause/Stop -->
+                        <ColumnDefinition Width="*"/>    <!-- Progress & Time -->
+                        <ColumnDefinition Width="Auto"/> <!-- Dual Channel Switcher -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Play / Pause / Stop -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,14,0">
+                        <ui:Button Command="{Binding TogglePlayAudioCommand}"
+                                   Appearance="Primary"
+                                   Icon="{Binding IsPlayingAudio, Converter={x:Null}}"
+                                   Content="{Binding IsPlayingAudio, Converter={x:Null}}"
+                                   Width="40" Height="36"
+                                   ToolTip="Play / Pause 5-second Preview"
+                                   Margin="0,0,6,0">
+                            <ui:Button.Style>
+                                <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                    <Setter Property="Icon" Value="{ui:SymbolIcon Play24}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsPlayingAudio}" Value="True">
+                                            <Setter Property="Icon" Value="{ui:SymbolIcon Pause24}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ui:Button.Style>
+                        </ui:Button>
+
+                        <ui:Button Command="{Binding StopAudioCommand}"
+                                   Appearance="Secondary"
+                                   Icon="{ui:SymbolIcon Stop24}"
+                                   Width="36" Height="36"
+                                   ToolTip="Stop Audio Preview"/>
+                    </StackPanel>
+
+                    <!-- Scrub/Progress Bar & Time -->
+                    <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <ProgressBar Grid.Row="0"
+                                     Value="{Binding CurrentTimeSec, Mode=OneWay}"
+                                     Minimum="0"
+                                     Maximum="{Binding TotalTimeSec, Mode=OneWay}"
+                                     Height="6"
+                                     Margin="0,0,0,4"/>
+
+                        <Grid Grid.Row="1">
+                            <TextBlock Text="5-Second Audio Preview" FontSize="10" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalAlignment="Left"/>
+                            <TextBlock Text="{Binding TimeDisplayText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" HorizontalAlignment="Right"/>
+                        </Grid>
+                    </Grid>
+
+                    <!-- Dual-Audio Channel Selector -->
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding HasDualAudio, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="Channel: " FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+
+                        <!-- Channel A: Guide Vocals -->
+                        <ui:Button Command="{Binding SelectDualChannelCommand}"
+                                   CommandParameter="0"
+                                   Content="🎤 Guide (A)"
+                                   FontSize="11"
+                                   Margin="0,0,4,0"
+                                   Padding="8,4">
+                            <ui:Button.Style>
+                                <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                    <Setter Property="Appearance" Value="Secondary"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedDualChannel}" Value="0">
+                                            <Setter Property="Appearance" Value="Primary"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ui:Button.Style>
+                        </ui:Button>
+
+                        <!-- Channel B: Instrumental -->
+                        <ui:Button Command="{Binding SelectDualChannelCommand}"
+                                   CommandParameter="1"
+                                   Content="🎵 Music (B)"
+                                   FontSize="11"
+                                   Padding="8,4">
+                            <ui:Button.Style>
+                                <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                    <Setter Property="Appearance" Value="Secondary"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedDualChannel}" Value="1">
+                                            <Setter Property="Appearance" Value="Primary"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ui:Button.Style>
+                        </ui:Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

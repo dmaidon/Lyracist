@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:54:00 -> Register BulkImportViewModel and BulkImportWindow in DI container
+// Edited on Sep 6, 2026 @ 12:08:00 -> Register PurchasedTrackSyncService and StoreSyncSummaryWindow in DI
 using System;
 using System.Linq;
 using System.Windows;
@@ -132,6 +132,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<IShowFlowService, ShowFlowService>();
                 services.AddSingleton<IKSRotationSyncService, KSRotationSyncService>();
                 services.AddSingleton<PurchasedTrackWatcherService>();
+                services.AddSingleton<PurchasedTrackSyncService>();
                 services.AddSingleton<PlaybackEngine>();
                 services.AddSingleton<RotationEngine>();
                 services.AddSingleton<AutoAdvanceManager>(sp => new AutoAdvanceManager(
@@ -185,6 +186,7 @@ public partial class App : System.Windows.Application
                 services.AddTransient<AboutWindow>();
                 services.AddTransient<EditSingerWindow>();
                 services.AddTransient<BulkImportWindow>();
+                services.AddTransient<StoreSyncSummaryWindow>();
 
                 // Pages
                 services.AddSingleton<KaraokePage>();

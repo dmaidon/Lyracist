@@ -1,51 +1,45 @@
-// Edited on Sep 6, 2026 @ 10:46:00 -> Add Karaoke.com and Sunfly deep link search providers
+// Edited on Sep 6, 2026 @ 12:50:30 -> Extend deepLink to use providerRegistry for search URLs and provider actions
+import { providerRegistry } from "./providerRegistry";
+import { ProviderSource } from "./types";
 
 /**
- * Builds the deep search URL for Karaoke Version.
- * @param query Song title, artist, or keywords.
+ * Builds the deep search URL for Karaoke Version using providerRegistry.
  */
 export function getKaraokeVersionSearchUrl(query: string): string {
-  const trimmed = query.trim();
-  if (!trimmed) {
-    return "https://www.karaoke-version.com/";
-  }
-  return `https://www.karaoke-version.com/search.html?q=${encodeURIComponent(trimmed)}`;
+  return providerRegistry.getProviderBySource("Karaoke Version")?.buildSearchUrl(query) ??
+    "https://www.karaoke-version.com/";
 }
 
 /**
- * Builds the deep search URL for Party Tyme Karaoke.
- * @param query Song title, artist, or keywords.
+ * Builds the deep search URL for Party Tyme Karaoke using providerRegistry.
  */
 export function getPartyTymeSearchUrl(query: string): string {
-  const trimmed = query.trim();
-  if (!trimmed) {
-    return "https://www.partytyme.net/";
-  }
-  return `https://www.partytyme.net/search?q=${encodeURIComponent(trimmed)}`;
+  return providerRegistry.getProviderBySource("Party Tyme")?.buildSearchUrl(query) ??
+    "https://www.partytyme.net/";
 }
 
 /**
- * Builds the deep search URL for Karaoke.com.
- * @param query Song title, artist, or keywords.
+ * Builds the deep search URL for Karaoke.com using providerRegistry.
  */
 export function getKaraokeDotComSearchUrl(query: string): string {
-  const trimmed = query.trim();
-  if (!trimmed) {
-    return "https://karaoke.com/";
-  }
-  return `https://karaoke.com/search?type=product&q=${encodeURIComponent(trimmed)}`;
+  return providerRegistry.getProviderBySource("Karaoke.com")?.buildSearchUrl(query) ??
+    "https://karaoke.com/";
 }
 
 /**
- * Builds the deep search URL for Sunfly Karaoke.
- * @param query Song title, artist, or keywords.
+ * Builds the deep search URL for Sunfly Karaoke using providerRegistry.
  */
 export function getSunflySearchUrl(query: string): string {
-  const trimmed = query.trim();
-  if (!trimmed) {
-    return "https://www.sunflykaraoke.com/";
-  }
-  return `https://www.sunflykaraoke.com/catalogsearch/result/?q=${encodeURIComponent(trimmed)}`;
+  return providerRegistry.getProviderBySource("Sunfly")?.buildSearchUrl(query) ??
+    "https://www.sunflykaraoke.com/";
+}
+
+/**
+ * Builds search URL for any registered provider source.
+ */
+export function getProviderSearchUrl(source: ProviderSource, query: string): string {
+  const provider = providerRegistry.getProviderBySource(source);
+  return provider ? provider.buildSearchUrl(query) : "";
 }
 
 /**
@@ -53,6 +47,8 @@ export function getSunflySearchUrl(query: string): string {
  * Supports web browser environment (window.open) and Node.js desktop environment (child_process).
  */
 export function openExternalUrl(url: string): void {
+  if (!url) return;
+
   if (typeof window !== "undefined" && window.open) {
     window.open(url, "_blank", "noopener,noreferrer");
     return;
@@ -70,5 +66,15 @@ export function openExternalUrl(url: string): void {
     exec(cmd);
   } catch (err) {
     console.error("Failed to open external URL:", url, err);
+  }
+}
+
+/**
+ * Directly executes a search for a given provider source and query string.
+ */
+export function searchProvider(source: ProviderSource, query: string): void {
+  const url = getProviderSearchUrl(source, query);
+  if (url) {
+    openExternalUrl(url);
   }
 }

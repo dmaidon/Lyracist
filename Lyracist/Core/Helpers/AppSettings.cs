@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 10:57:00 -> Add FFmpeg import processing settings for normalization, silence trimming, and waveform generation
+// Edited on Sep 6, 2026 @ 12:35:00 -> Add Provider Settings: PreferredProvider, PreferredFileType, DefaultNormalizeAudio, DefaultTrimSilence, DefaultGenerateWaveform, PreferredTargetFolder, and PreferredLyricsFormat
 using System;
 using System.IO;
 using System.Text.Json;
@@ -996,6 +996,55 @@ public static class AppSettings
         set { _data.StoreGenerateWaveformOnImport = value; Save(); }
     }
 
+    /// <summary>Preferred commercial karaoke provider (KV, PT, Sunfly, Karaoke.com).</summary>
+    public static string PreferredProvider
+    {
+        get => string.IsNullOrWhiteSpace(_data.PreferredProvider) ? "KV" : _data.PreferredProvider;
+        set { _data.PreferredProvider = value; Save(); }
+    }
+
+    /// <summary>Preferred karaoke file packaging type (MP3+G, MP4, Audio-only).</summary>
+    public static string PreferredFileType
+    {
+        get => string.IsNullOrWhiteSpace(_data.PreferredFileType) ? "MP3+G" : _data.PreferredFileType;
+        set { _data.PreferredFileType = value; Save(); }
+    }
+
+    /// <summary>Default setting for loudness normalization on import.</summary>
+    public static bool DefaultNormalizeAudio
+    {
+        get => _data.DefaultNormalizeAudio;
+        set { _data.DefaultNormalizeAudio = value; Save(); }
+    }
+
+    /// <summary>Default setting for silence trimming on import.</summary>
+    public static bool DefaultTrimSilence
+    {
+        get => _data.DefaultTrimSilence;
+        set { _data.DefaultTrimSilence = value; Save(); }
+    }
+
+    /// <summary>Default setting for waveform preview generation on import.</summary>
+    public static bool DefaultGenerateWaveform
+    {
+        get => _data.DefaultGenerateWaveform;
+        set { _data.DefaultGenerateWaveform = value; Save(); }
+    }
+
+    /// <summary>Preferred target folder category for downloaded purchases (Karaoke or Music).</summary>
+    public static string PreferredTargetFolder
+    {
+        get => string.IsNullOrWhiteSpace(_data.PreferredTargetFolder) ? "Karaoke" : _data.PreferredTargetFolder;
+        set { _data.PreferredTargetFolder = value; Save(); }
+    }
+
+    /// <summary>Preferred lyrics companion format (LRC or TXT).</summary>
+    public static string PreferredLyricsFormat
+    {
+        get => string.IsNullOrWhiteSpace(_data.PreferredLyricsFormat) ? "LRC" : _data.PreferredLyricsFormat;
+        set { _data.PreferredLyricsFormat = value; Save(); }
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
@@ -1022,6 +1071,13 @@ public static class AppSettings
         public bool StoreNormalizeAudioOnImport { get; set; } = false;
         public bool StoreTrimSilenceOnImport { get; set; } = false;
         public bool StoreGenerateWaveformOnImport { get; set; } = false;
+        public string PreferredProvider { get; set; } = "KV";
+        public string PreferredFileType { get; set; } = "MP3+G";
+        public bool DefaultNormalizeAudio { get; set; } = true;
+        public bool DefaultTrimSilence { get; set; } = true;
+        public bool DefaultGenerateWaveform { get; set; } = true;
+        public string PreferredTargetFolder { get; set; } = "Karaoke";
+        public string PreferredLyricsFormat { get; set; } = "LRC";
 
         // Registration data
         public string RegFirstName { get; set; } = string.Empty;

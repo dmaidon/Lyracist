@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 10:53:00 -> Add audio normalization, silence trimming, and waveform preview toggles
+// Edited on Sep 6, 2026 @ 12:47:00 -> Add Provider Settings panel: preferred provider, file type, audio toggles, target folder, and lyrics format
 import React from "react";
 import { StoreSettings } from "./types";
 
@@ -115,6 +115,110 @@ export const SettingsStore: React.FC<SettingsStoreProps> = ({
         </div>
       </div>
 
+      {/* Provider & Format Preferences Section */}
+      <div style={styles.ffmpegSection}>
+        <span style={styles.sectionSubtitle}>Provider Preferences &amp; Import Defaults:</span>
+        <div style={styles.selectGrid}>
+          {/* Preferred Provider */}
+          <div style={styles.selectGroup}>
+            <label style={styles.label}>Preferred Provider:</label>
+            <select
+              value={settings.preferredProvider || "KV"}
+              onChange={(e) => onSettingsChange({ preferredProvider: e.target.value as any })}
+              style={styles.select}
+            >
+              <option value="KV">Karaoke Version (KV)</option>
+              <option value="PT">Party Tyme (PT)</option>
+              <option value="Sunfly">Sunfly (SF)</option>
+              <option value="Karaoke.com">Karaoke.com</option>
+            </select>
+          </div>
+
+          {/* Preferred File Type */}
+          <div style={styles.selectGroup}>
+            <label style={styles.label}>Preferred File Type:</label>
+            <select
+              value={settings.preferredFileType || "MP3+G"}
+              onChange={(e) => onSettingsChange({ preferredFileType: e.target.value as any })}
+              style={styles.select}
+            >
+              <option value="MP3+G">MP3+G (Paired Audio/Graphics)</option>
+              <option value="MP4">MP4 Video</option>
+              <option value="Audio-only">Audio-only Backing</option>
+            </select>
+          </div>
+
+          {/* Preferred Target Folder */}
+          <div style={styles.selectGroup}>
+            <label style={styles.label}>Preferred Target Folder:</label>
+            <select
+              value={settings.preferredTargetFolder || "Karaoke"}
+              onChange={(e) => onSettingsChange({ preferredTargetFolder: e.target.value as any })}
+              style={styles.select}
+            >
+              <option value="Karaoke">Karaoke Folder</option>
+              <option value="Music">Music / Audio Folder</option>
+            </select>
+          </div>
+
+          {/* Preferred Lyrics Format */}
+          <div style={styles.selectGroup}>
+            <label style={styles.label}>Preferred Lyrics Format:</label>
+            <select
+              value={settings.preferredLyricsFormat || "LRC"}
+              onChange={(e) => onSettingsChange({ preferredLyricsFormat: e.target.value as any })}
+              style={styles.select}
+            >
+              <option value="LRC">.LRC (Synchronized)</option>
+              <option value="TXT">.TXT (Plain Lyrics)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Baseline Audio Processing Toggles */}
+        <div style={styles.toggleRow}>
+          <label style={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={settings.defaultNormalizeAudio ?? true}
+              onChange={(e) => onSettingsChange({ defaultNormalizeAudio: e.target.checked })}
+              style={styles.checkbox}
+            />
+            Normalize audio by default
+          </label>
+
+          <label style={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={settings.defaultTrimSilence ?? true}
+              onChange={(e) => onSettingsChange({ defaultTrimSilence: e.target.checked })}
+              style={styles.checkbox}
+            />
+            Trim silence by default
+          </label>
+
+          <label style={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={settings.defaultGenerateWaveform ?? true}
+              onChange={(e) => onSettingsChange({ defaultGenerateWaveform: e.target.checked })}
+              style={styles.checkbox}
+            />
+            Generate waveform by default
+          </label>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "10px" }}>
+          <button
+            type="button"
+            onClick={() => onSettingsChange({ ...settings })}
+            style={styles.saveButton}
+          >
+            ✓ Save Settings
+          </button>
+        </div>
+      </div>
+
       {/* Watcher Status Badge */}
       <div style={styles.statusBox}>
         <span style={styles.statusLabel}>Watcher Status:</span>
@@ -213,5 +317,34 @@ const styles: Record<string, React.CSSProperties> = {
   },
   statusValue: {
     color: "#cbd5e0",
+  },
+  selectGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "14px",
+    margin: "12px 0",
+  },
+  selectGroup: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  select: {
+    padding: "8px 10px",
+    borderRadius: "6px",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    color: "#ffffff",
+    fontSize: "0.85rem",
+    outline: "none",
+  },
+  saveButton: {
+    padding: "8px 18px",
+    borderRadius: "6px",
+    border: "none",
+    backgroundColor: "#38bdf8",
+    color: "#0f172a",
+    fontSize: "0.88rem",
+    fontWeight: 600,
+    cursor: "pointer",
   },
 };

@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:55:00 -> Add unit tests for Bulk Import Wizard folder scanning, option toggles, and destination conflict resolution
+// Edited on Sep 6, 2026 @ 13:05:00 -> Add unit tests for StoreNotificationService toast notifications and badges
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -47,6 +47,10 @@ public class StoreImportTests
     [Fact]
     public void AppSettings_StoreDefaults_AreConfiguredProperly()
     {
+        AppSettings.StoreAutoImportEnabled = false;
+        AppSettings.StoreNormalizeAudioOnImport = false;
+        AppSettings.StoreTrimSilenceOnImport = false;
+        AppSettings.StoreGenerateWaveformOnImport = false;
         string expectedDownloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
         Assert.Equal(expectedDownloads, AppSettings.StorePurchasedTracksFolder);
         Assert.False(AppSettings.StoreAutoImportEnabled);
@@ -593,7 +597,12 @@ public class StoreImportTests
     [Fact]
     public void BulkImportViewModel_BatchToggles_UpdatesAllPreviewItems()
     {
-        var vm = new BulkImportViewModel();
+        var vm = new BulkImportViewModel
+        {
+            NormalizeAll = false,
+            TrimSilenceAll = false,
+            GenerateWaveformAll = false
+        };
 
         var candidate1 = new BulkImportCandidate { PrimaryFilePath = @"C:\dummy1.mp3", WillNormalize = false, WillTrimSilence = false, WillGenerateWaveform = false };
         var candidate2 = new BulkImportCandidate { PrimaryFilePath = @"C:\dummy2.mp3", WillNormalize = false, WillTrimSilence = false, WillGenerateWaveform = false };
@@ -641,4 +650,479 @@ public class StoreImportTests
             }
         }
     }
+
+    [Fact]
+    public void SyncService_ResolveSyncFolder_UsesPreferredFolderIfProvided()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), "Lyracist_SyncFolderTest_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            string resolved = PurchasedTrackSyncService.ResolveSyncFolder(tempDir);
+            Assert.Equal(tempDir, resolved);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                try { Directory.Delete(tempDir, true); } catch { }
+            }
+        }
+    }
+
+    [Fact]
+    public async Task SyncService_SyncPurchasedTracksAsync_EmptyFolder_ReturnsZeroResults()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), "Lyracist_EmptySyncTest_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            var mockLibrary = new Mock<ILibraryService>();
+            var watcher = new PurchasedTrackWatcherService(mockLibrary.Object);
+            var syncService = new PurchasedTrackSyncService(watcher);
+
+            var result = await syncService.SyncPurchasedTracksAsync(tempDir, cancellationToken: TestContext.Current.CancellationToken);
+
+            Assert.Equal(0, result.TotalScanned);
+            Assert.Equal(0, result.TotalImported);
+            Assert.Equal(0, result.TotalErrors);
+            Assert.Equal(tempDir, result.ScannedFolder);
+            Assert.Equal("None", result.ProvidersInvolvedText);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                try { Directory.Delete(tempDir, true); } catch { }
+            }
+        }
+    }
+
+    [Fact]
+    public async Task FFmpegService_GenerateAudioPreviewAsync_MissingFile_ReturnsFalse()
+    {
+        bool result = await FFmpegService.GenerateAudioPreviewAsync(
+            "C:\\non_existent_file.mp3",
+            "C:\\temp\\out.mp3");
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task FFmpegService_GenerateSpectrogramAsync_MissingFile_ReturnsFalse()
+    {
+        bool result = await FFmpegService.GenerateSpectrogramAsync(
+            "C:\\non_existent_file.mp3",
+            "C:\\temp\\spec.png");
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task FFmpegService_GenerateVideoPreviewAsync_MissingFile_ReturnsFalse()
+    {
+        bool result = await FFmpegService.GenerateVideoPreviewAsync(
+            "C:\\non_existent_file.mp4",
+            "C:\\temp\\video.mp4");
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task TrackPreviewViewModel_LoadPreview_MissingFile_SetsHasTrackFalse()
+    {
+        using var vm = new TrackPreviewViewModel();
+        await vm.LoadPreviewAsync("C:\\non_existent_path.mp3");
+
+        Assert.False(vm.HasTrack);
+    }
+
+    [Fact]
+    public async Task TrackPreviewViewModel_LoadFromRecentImport_PopulatesProperties()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), "Lyracist_PreviewTest_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+        string tempFile = Path.Combine(tempDir, "Adele - Hello (KV).mp3");
+        File.WriteAllText(tempFile, "fake audio header");
+
+        try
+        {
+            using var vm = new TrackPreviewViewModel();
+            var item = new PurchasedTrackItem
+            {
+                Title = "Hello",
+                Artist = "Adele",
+                Source = "Karaoke Version",
+                FilePath = tempFile,
+                KaraokeType = "MP3+G",
+                HasDualAudio = true,
+                Key = "Fm",
+                BPM = 79,
+                Quality = "High",
+                Difficulty = "Medium",
+                VocalPresence = "guide vocals",
+                DurationSeconds = 295
+            };
+
+            await vm.LoadFromRecentImportAsync(item);
+
+            Assert.True(vm.HasTrack);
+            Assert.Equal("Hello", vm.Title);
+            Assert.Equal("Adele", vm.Artist);
+            Assert.Equal("Karaoke Version", vm.Provider);
+            Assert.Equal("MP3+G", vm.FileType);
+            Assert.True(vm.HasDualAudio);
+            Assert.Equal("Fm", vm.MusicalKey);
+            Assert.Equal("79", vm.BpmText);
+            Assert.Equal("High", vm.Quality);
+            Assert.Equal("Medium", vm.Difficulty);
+            Assert.Equal("guide vocals", vm.VocalPresence);
+            Assert.Equal("4:55", vm.DurationText);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                try { Directory.Delete(tempDir, true); } catch { }
+            }
+        }
+    }
+
+    [Fact]
+    public async Task TrackPreviewViewModel_LoadFromBulkCandidate_PopulatesProperties()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), "Lyracist_CandidatePreviewTest_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+        string tempFile = Path.Combine(tempDir, "Bon Jovi - Livin On A Prayer (PT).mp4");
+        File.WriteAllText(tempFile, "fake video header");
+
+        try
+        {
+            using var vm = new TrackPreviewViewModel();
+            var candidate = new BulkImportCandidate
+            {
+                PrimaryFilePath = tempFile,
+                Title = "Livin' On A Prayer",
+                Artist = "Bon Jovi",
+                Provider = "Party Tyme",
+                FileType = "MP4",
+                HasDualAudio = true,
+                Duration = 245,
+                Key = "Em",
+                Bpm = 123,
+                Quality = "High",
+                Difficulty = "Hard",
+                VocalPresence = "no vocals"
+            };
+
+            await vm.LoadFromBulkCandidateAsync(candidate);
+
+            Assert.True(vm.HasTrack);
+            Assert.True(vm.IsVideo);
+            Assert.Equal("Livin' On A Prayer", vm.Title);
+            Assert.Equal("Bon Jovi", vm.Artist);
+            Assert.Equal("Party Tyme", vm.Provider);
+            Assert.Equal("MP4", vm.FileType);
+            Assert.True(vm.HasDualAudio);
+            Assert.Equal("Em", vm.MusicalKey);
+            Assert.Equal("123", vm.BpmText);
+            Assert.Equal("High", vm.Quality);
+            Assert.Equal("Hard", vm.Difficulty);
+            Assert.Equal("no vocals", vm.VocalPresence);
+            Assert.Equal("4:05", vm.DurationText);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                try { Directory.Delete(tempDir, true); } catch { }
+            }
+        }
+    }
+
+    [Fact]
+    public void ProviderSettingsViewModel_LoadAndSave_PersistsToAppSettings()
+    {
+        var vm = new ProviderSettingsViewModel
+        {
+            PreferredProvider = "Sunfly",
+            PreferredFileType = "MP4",
+            DefaultNormalizeAudio = false,
+            DefaultTrimSilence = false,
+            DefaultGenerateWaveform = false,
+            PreferredTargetFolder = "Music",
+            PreferredLyricsFormat = "TXT"
+        };
+
+        bool eventFired = false;
+        vm.SettingsSaved += (_, _) => eventFired = true;
+
+        vm.SaveSettingsCommand.Execute(null);
+
+        Assert.True(eventFired);
+        Assert.True(vm.HasStatusMessage);
+        Assert.Equal("Sunfly", AppSettings.PreferredProvider);
+        Assert.Equal("MP4", AppSettings.PreferredFileType);
+        Assert.False(AppSettings.DefaultNormalizeAudio);
+        Assert.False(AppSettings.DefaultTrimSilence);
+        Assert.False(AppSettings.DefaultGenerateWaveform);
+        Assert.Equal("Music", AppSettings.PreferredTargetFolder);
+        Assert.Equal("TXT", AppSettings.PreferredLyricsFormat);
+    }
+
+    [Fact]
+    public void ProviderSettingsViewModel_ResetToDefaults_RestoresDefaults()
+    {
+        var vm = new ProviderSettingsViewModel();
+        vm.ResetToDefaultsCommand.Execute(null);
+
+        Assert.Equal("KV", AppSettings.PreferredProvider);
+        Assert.Equal("MP3+G", AppSettings.PreferredFileType);
+        Assert.True(AppSettings.DefaultNormalizeAudio);
+        Assert.True(AppSettings.DefaultTrimSilence);
+        Assert.True(AppSettings.DefaultGenerateWaveform);
+        Assert.Equal("Karaoke", AppSettings.PreferredTargetFolder);
+        Assert.Equal("LRC", AppSettings.PreferredLyricsFormat);
+    }
+
+    [Fact]
+    public void StoreViewModel_PreferredProviderHighlighting_CalculatesCorrectly()
+    {
+        AppSettings.PreferredProvider = "PT";
+        var mockWatcher = new Mock<PurchasedTrackWatcherService>(MockBehavior.Loose, null!);
+        using var vm = new StoreViewModel(mockWatcher.Object);
+
+        Assert.False(vm.IsPreferredKv);
+        Assert.True(vm.IsPreferredPt);
+        Assert.False(vm.IsPreferredKc);
+        Assert.False(vm.IsPreferredSf);
+        Assert.Equal("Party Tyme", vm.PreferredProviderName);
+
+        // Reset to KV
+        AppSettings.PreferredProvider = "KV";
+        Assert.True(vm.IsPreferredKv);
+        Assert.False(vm.IsPreferredPt);
+    }
+
+    [Fact]
+    public void PurchasedTrackWatcherService_FindMatchingLyricsFile_HonorsPreferredLyricsFormat()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), "LyracistTest_LyricsPref_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+        string audioFile = Path.Combine(tempDir, "Song.mp3");
+        string lrcFile = Path.Combine(tempDir, "Song.lrc");
+        string txtFile = Path.Combine(tempDir, "Song.txt");
+
+        File.WriteAllText(audioFile, "fake audio");
+        File.WriteAllText(lrcFile, "[00:01.00] lyric line");
+        File.WriteAllText(txtFile, "plain lyric text");
+
+        try
+        {
+            AppSettings.PreferredLyricsFormat = "TXT";
+            string? foundTxt = PurchasedTrackWatcherService.FindMatchingLyricsFile(audioFile);
+            Assert.Equal(txtFile, foundTxt);
+
+            AppSettings.PreferredLyricsFormat = "LRC";
+            string? foundLrc = PurchasedTrackWatcherService.FindMatchingLyricsFile(audioFile);
+            Assert.Equal(lrcFile, foundLrc);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                try { Directory.Delete(tempDir, true); } catch { }
+            }
+        }
+    }
+
+    [Fact]
+    public void PurchasedTrackWatcherService_GetProviderAbbreviation_UsesPreferredProviderFallback()
+    {
+        AppSettings.PreferredProvider = "Sunfly";
+        Assert.Equal("SF", PurchasedTrackWatcherService.GetProviderAbbreviation("Local"));
+
+        AppSettings.PreferredProvider = "Karaoke.com";
+        Assert.Equal("KCOM", PurchasedTrackWatcherService.GetProviderAbbreviation("Local"));
+
+        AppSettings.PreferredProvider = "KV";
+        Assert.Equal("KV", PurchasedTrackWatcherService.GetProviderAbbreviation("Local"));
+    }
+
+    [Fact]
+    public void ProviderRegistry_InitializesWithDefaultCommercialProviders()
+    {
+        var registry = ProviderRegistry.Instance;
+        Assert.NotNull(registry);
+        Assert.True(registry.Providers.Count >= 4);
+
+        var kv = registry.GetProviderBySource(ProviderSource.KaraokeVersion);
+        Assert.NotNull(kv);
+        Assert.Equal("Karaoke Version", kv.Name);
+
+        var pt = registry.GetProviderBySource(ProviderSource.PartyTyme);
+        Assert.NotNull(pt);
+        Assert.Equal("Party Tyme", pt.Name);
+
+        var sf = registry.GetProviderBySource(ProviderSource.Sunfly);
+        Assert.NotNull(sf);
+        Assert.Equal("Sunfly", sf.Name);
+
+        var kc = registry.GetProviderBySource(ProviderSource.KaraokeCom);
+        Assert.NotNull(kc);
+        Assert.Equal("Karaoke.com", kc.Name);
+    }
+
+    [Theory]
+    [InlineData(ProviderSource.KaraokeVersion, "", "https://www.karaoke-version.com/")]
+    [InlineData(ProviderSource.KaraokeVersion, "Queen", "https://www.karaoke-version.com/search.html?q=Queen")]
+    [InlineData(ProviderSource.PartyTyme, "", "https://www.partytyme.net/")]
+    [InlineData(ProviderSource.PartyTyme, "Sweet Caroline", "https://www.partytyme.net/search?q=Sweet%20Caroline")]
+    [InlineData(ProviderSource.Sunfly, "", "https://www.sunflykaraoke.com/")]
+    [InlineData(ProviderSource.Sunfly, "Abba", "https://www.sunflykaraoke.com/catalogsearch/result/?q=Abba")]
+    [InlineData(ProviderSource.KaraokeCom, "", "https://karaoke.com/")]
+    [InlineData(ProviderSource.KaraokeCom, "Journey", "https://karaoke.com/search?type=product&q=Journey")]
+    public void Provider_BuildSearchUri_ConstructsValidUris(ProviderSource source, string query, string expectedUrl)
+    {
+        var provider = ProviderRegistry.Instance.GetProviderBySource(source);
+        Assert.NotNull(provider);
+
+        var uri = provider.BuildSearchUri(query);
+        Assert.Equal(expectedUrl, uri.AbsoluteUri);
+    }
+
+    [Theory]
+    [InlineData("Artist - Title (Karaoke Version).mp3", ProviderSource.KaraokeVersion)]
+    [InlineData("KV1234 - Artist - Title.mp3", ProviderSource.KaraokeVersion)]
+    [InlineData("Artist - Title (Party Tyme).mp3", ProviderSource.PartyTyme)]
+    [InlineData("PT999 - Artist - Title.mp3", ProviderSource.PartyTyme)]
+    [InlineData("SF100 - Artist - Title.mp3", ProviderSource.Sunfly)]
+    [InlineData("Sunfly Karaoke - Track.mp3", ProviderSource.Sunfly)]
+    [InlineData("Artist - Title (Karaoke.com).mp3", ProviderSource.KaraokeCom)]
+    [InlineData("Generic Song Title.mp3", null)]
+    public void ProviderRegistry_DetectProviderFromFilename_ResolvesExpectedProvider(string filename, ProviderSource? expectedSource)
+    {
+        var provider = ProviderRegistry.Instance.DetectProviderFromFilename(filename);
+        if (expectedSource == null)
+        {
+            Assert.Null(provider);
+        }
+        else
+        {
+            Assert.NotNull(provider);
+            Assert.Equal(expectedSource.Value, provider.Source);
+        }
+    }
+
+    [Fact]
+    public void ProviderRegistry_RegisterProvider_AllowsCustomPlugin()
+    {
+        var customProvider = new CustomTestProvider();
+        ProviderRegistry.Instance.RegisterProvider(customProvider);
+
+        var retrieved = ProviderRegistry.Instance.GetProviderByName("Custom Karaoke");
+        Assert.NotNull(retrieved);
+        Assert.Equal("Custom Karaoke", retrieved.Name);
+        Assert.True(retrieved.DetectFromFilename("custom_track_123.mp3"));
+    }
+
+    private sealed class CustomTestProvider : BaseStoreProvider
+    {
+        public override string Name => "Custom Karaoke";
+        public override ProviderSource Source => ProviderSource.Local;
+
+        public override Uri BuildSearchUri(string query) => new($"https://example.com/search?q={Uri.EscapeDataString(query)}");
+
+        public override bool DetectFromFilename(string filename) => filename.Contains("custom_track");
+    }
+
+    [Fact]
+    public void StoreNotificationService_EnqueueAndDismiss_ManagesActiveCollection()
+    {
+        var service = StoreNotificationService.Instance;
+        service.ClearAll();
+        Assert.Empty(service.ActiveNotifications);
+
+        var item = new StoreNotificationItem
+        {
+            Type = StoreNotificationType.Info,
+            Title = "Test Notification",
+            Message = "Test Message",
+            AutoDismissSeconds = 0 // prevent auto dismiss during test
+        };
+
+        service.Enqueue(item);
+        Assert.Single(service.ActiveNotifications);
+        Assert.Equal("Test Notification", service.ActiveNotifications[0].Title);
+
+        service.Dismiss(item.Id);
+        Assert.Empty(service.ActiveNotifications);
+    }
+
+    [Fact]
+    public void StoreNotificationService_ShowTrackImported_ConfiguresCorrectBadgesAndProperties()
+    {
+        var service = StoreNotificationService.Instance;
+        service.ClearAll();
+
+        service.ShowTrackImported(
+            title: "Sweet Caroline",
+            artist: "Neil Diamond",
+            provider: "Karaoke Version",
+            format: "MP3+G",
+            normalized: true,
+            trimmed: true,
+            waveform: true);
+
+        Assert.Single(service.ActiveNotifications);
+        var toast = service.ActiveNotifications[0];
+
+        Assert.Equal(StoreNotificationType.TrackImported, toast.Type);
+        Assert.Equal("Track Imported", toast.Title);
+        Assert.Equal("Imported: Neil Diamond - Sweet Caroline (Karaoke Version)", toast.Message);
+        Assert.Equal("MP3+G", toast.FormatBadge);
+        Assert.True(toast.IsNormalized);
+        Assert.True(toast.IsTrimmed);
+        Assert.True(toast.HasWaveform);
+        Assert.True(toast.HasBadges);
+        Assert.Equal("ShoppingBag24", toast.TypeIcon);
+
+        service.ClearAll();
+    }
+
+    [Fact]
+    public void StoreNotificationService_ShowProcessingAndBatchAlerts_ConfiguresCorrectMessages()
+    {
+        var service = StoreNotificationService.Instance;
+        service.ClearAll();
+
+        service.ShowNormalizationComplete("Song A", "Artist A");
+        Assert.Single(service.ActiveNotifications);
+        Assert.Equal("Audio normalized: Artist A - Song A", service.ActiveNotifications[0].Message);
+        Assert.Equal(StoreNotificationType.NormalizationComplete, service.ActiveNotifications[0].Type);
+
+        service.ShowSilenceTrimmed("Song B", "Artist B");
+        Assert.Equal(2, service.ActiveNotifications.Count);
+        Assert.Equal("Silence trimmed: Artist B - Song B", service.ActiveNotifications[1].Message);
+        Assert.Equal(StoreNotificationType.SilenceTrimmed, service.ActiveNotifications[1].Type);
+
+        service.ShowWaveformGenerated("Song C", "Artist C");
+        Assert.Equal(3, service.ActiveNotifications.Count);
+        Assert.Equal("Waveform ready: Artist C - Song C", service.ActiveNotifications[2].Message);
+        Assert.Equal(StoreNotificationType.WaveformGenerated, service.ActiveNotifications[2].Type);
+
+        service.ShowSyncCompleted(7);
+        Assert.Equal(4, service.ActiveNotifications.Count);
+        Assert.Equal("Store Sync Complete — 7 tracks imported", service.ActiveNotifications[3].Message);
+
+        service.ShowBulkImportCompleted(15);
+        Assert.Equal(5, service.ActiveNotifications.Count);
+        Assert.Equal("Bulk Import Complete — 15 tracks processed", service.ActiveNotifications[4].Message);
+
+        service.ClearAll();
+        Assert.Empty(service.ActiveNotifications);
+    }
 }
+

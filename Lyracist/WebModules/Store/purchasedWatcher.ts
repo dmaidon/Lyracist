@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:09:00 -> Integrate advanced provider fingerprinting (ZIP, ID3, CDG, MP4, heuristics, referrer hint)
+// Edited on Sep 6, 2026 @ 12:51:30 -> Integrate providerRegistry for provider fingerprinting detection
 import * as fs from "fs";
 import * as path from "path";
 import { Track, TrackSource, StoreSettings, ImportLogEvent } from "./types";
@@ -12,6 +12,7 @@ import {
   detectProviderFromMp4,
   getReferrerHint,
 } from "./importMetadata";
+import { providerRegistry } from "./providerRegistry";
 import { probeMediaFile, normalizeAudio, trimSilence, generateWaveformPreview } from "./ffmpegUtils";
 
 export type OnTrackImportedCallback = (track: Track) => void;
@@ -194,22 +195,22 @@ export class PurchasedTrackWatcher {
     let detectedSource: TrackSource | null = null;
 
     if (ext === ".zip") {
-      detectedSource = inspectZipForProvider(filePath);
+      detectedSource = (providerRegistry.detectProviderFromZip(filePath)?.source as TrackSource) ?? null;
     }
 
     if (!detectedSource) {
       const cdgFile = fileGroup.find((f) => f.toLowerCase().endsWith(".cdg"));
       if (cdgFile) {
-        detectedSource = detectProviderFromCdgHeader(cdgFile);
+        detectedSource = (providerRegistry.detectProviderFromCdg(cdgFile)?.source as TrackSource) ?? null;
       }
     }
 
     if (!detectedSource && (ext === ".mp3" || fileGroup.some((f) => f.toLowerCase().endsWith(".mp3")))) {
-      detectedSource = detectProviderFromId3(probeInfo);
+      detectedSource = (providerRegistry.detectProviderFromId3(probeInfo)?.source as TrackSource) ?? null;
     }
 
     if (!detectedSource && ext === ".mp4") {
-      detectedSource = detectProviderFromMp4(probeInfo);
+      detectedSource = (providerRegistry.detectProviderFromMp4(probeInfo)?.source as TrackSource) ?? null;
     }
 
     if (!detectedSource && meta.source !== "Local") {

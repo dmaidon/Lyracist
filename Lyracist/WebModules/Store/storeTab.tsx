@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 10:55:00 -> Add Import Log panel (last 20 events), media stream details, lyrics badges, and FFmpeg tags
+// Edited on Sep 6, 2026 @ 12:22:00 -> Add Track Preview Player panel with 5s audio, waveform, spectrogram, video, and dual-audio channels
 import React, { useState } from "react";
 import { Track, StoreSettings, ImportLogEvent } from "./types";
 import { StoreSearch } from "./storeSearch";
@@ -42,6 +42,10 @@ export const StoreTab: React.FC<StoreTabProps> = ({
   const [importLogs, setImportLogs] = useState<ImportLogEvent[]>([]);
   const [importStatus, setImportStatus] = useState<string>("Ready");
   const [showLogPanel, setShowLogPanel] = useState<boolean>(true);
+  const [selectedPreviewTrack, setSelectedPreviewTrack] = useState<Track | null>(null);
+  const [isPlayingPreview, setIsPlayingPreview] = useState<boolean>(false);
+  const [previewDualChannel, setPreviewDualChannel] = useState<number>(0);
+  const [previewVisualTab, setPreviewVisualTab] = useState<"waveform" | "spectrogram" | "video">("waveform");
 
   const addLogEvent = (
     title: string,
@@ -167,6 +171,7 @@ export const StoreTab: React.FC<StoreTabProps> = ({
           <table style={styles.table}>
             <thead>
               <tr style={styles.thRow}>
+                <th style={styles.th}>Action</th>
                 <th style={styles.th}>Source</th>
                 <th style={styles.th}>Title</th>
                 <th style={styles.th}>Artist</th>
@@ -178,6 +183,18 @@ export const StoreTab: React.FC<StoreTabProps> = ({
             <tbody>
               {recentTracks.map((t) => (
                 <tr key={t.id} style={styles.tr}>
+                  <td style={styles.td}>
+                    <button
+                      onClick={() => {
+                        setSelectedPreviewTrack(t);
+                        setIsPlayingPreview(false);
+                      }}
+                      style={styles.previewBtn}
+                      title="Inspect and preview track"
+                    >
+                      ▶ Preview
+                    </button>
+                  </td>
                   <td style={styles.td}>
                     <span style={getSourceBadgeStyle(t.source)}>{t.source}</span>
                   </td>
@@ -218,6 +235,123 @@ export const StoreTab: React.FC<StoreTabProps> = ({
               ))}
             </tbody>
           </table>
+        )}
+
+        {/* Track Preview Player Panel */}
+        {selectedPreviewTrack && (
+          <div style={styles.previewContainer}>
+            <div style={styles.previewHeader}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ fontSize: "1.2rem" }}>🎧</span>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: "1.05rem", color: "#ffffff" }}>
+                    {selectedPreviewTrack.title}
+                    <span style={{ ...getSourceBadgeStyle(selectedPreviewTrack.source), marginLeft: "10px", fontSize: "0.75rem" }}>
+                      {selectedPreviewTrack.source}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: "0.82rem", color: "#a0aec0" }}>
+                    by <strong style={{ color: "#e2e8f0" }}>{selectedPreviewTrack.artist}</strong> • {selectedPreviewTrack.karaokeType || "Karaoke"}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setSelectedPreviewTrack(null);
+                  setIsPlayingPreview(false);
+                }}
+                style={styles.closePreviewBtn}
+                title="Close Preview"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Visual Selector Tabs */}
+            <div style={styles.previewTabs}>
+              <button
+                onClick={() => setPreviewVisualTab("waveform")}
+                style={previewVisualTab === "waveform" ? styles.activePreviewTab : styles.previewTab}
+              >
+                📊 Waveform Peak
+              </button>
+              <button
+                onClick={() => setPreviewVisualTab("spectrogram")}
+                style={previewVisualTab === "spectrogram" ? styles.activePreviewTab : styles.previewTab}
+              >
+                🌈 Spectrogram
+              </button>
+              {selectedPreviewTrack.karaokeType === "MP4" && (
+                <button
+                  onClick={() => setPreviewVisualTab("video")}
+                  style={previewVisualTab === "video" ? styles.activePreviewTab : styles.previewTab}
+                >
+                  🎬 5s Video Preview
+                </button>
+              )}
+            </div>
+
+            {/* Visual Display Box */}
+            <div style={styles.visualDisplayBox}>
+              {previewVisualTab === "waveform" && (
+                <div style={styles.visualCanvasWave}>
+                  <div style={styles.simulatedWaveform} />
+                </div>
+              )}
+              {previewVisualTab === "spectrogram" && (
+                <div style={styles.visualCanvasSpec}>
+                  <div style={styles.simulatedSpectrogram} />
+                </div>
+              )}
+              {previewVisualTab === "video" && (
+                <div style={styles.visualCanvasVideo}>
+                  <div style={{ textAlign: "center", color: "#94a3b8" }}>
+                    <span style={{ fontSize: "2rem", display: "block", marginBottom: "6px" }}>🎬</span>
+                    5-Second MP4 Video Preview Frame
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 5-Second Audio Preview Bar */}
+            <div style={styles.audioPreviewBar}>
+              <button
+                onClick={() => setIsPlayingPreview(!isPlayingPreview)}
+                style={styles.playPreviewBtn}
+              >
+                {isPlayingPreview ? "⏸ Pause (5s)" : "▶ Play 5s Preview"}
+              </button>
+
+              <div style={{ flex: 1, margin: "0 16px" }}>
+                <div style={styles.progressBarBg}>
+                  <div style={{ ...styles.progressBarFill, width: isPlayingPreview ? "60%" : "0%" }} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.72rem", color: "#a0aec0", marginTop: "4px" }}>
+                  <span>5-Second Audio Preview</span>
+                  <span>{isPlayingPreview ? "0:03 / 0:05" : "0:00 / 0:05"}</span>
+                </div>
+              </div>
+
+              {selectedPreviewTrack.hasDualAudio && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ fontSize: "0.78rem", color: "#cbd5e0", fontWeight: 600 }}>Channel:</span>
+                  <button
+                    onClick={() => setPreviewDualChannel(0)}
+                    style={previewDualChannel === 0 ? styles.activeChannelBtn : styles.channelBtn}
+                  >
+                    🎤 Guide (A)
+                  </button>
+                  <button
+                    onClick={() => setPreviewDualChannel(1)}
+                    style={previewDualChannel === 1 ? styles.activeChannelBtn : styles.channelBtn}
+                  >
+                    🎵 Music (B)
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
@@ -495,5 +629,151 @@ const styles: Record<string, React.CSSProperties> = {
   logDetails: {
     color: "#718096",
     fontSize: "0.75rem",
+  },
+  previewBtn: {
+    backgroundColor: "rgba(59, 130, 246, 0.2)",
+    color: "#60a5fa",
+    border: "1px solid rgba(59, 130, 246, 0.4)",
+    borderRadius: "4px",
+    padding: "3px 8px",
+    fontSize: "0.75rem",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  previewContainer: {
+    marginTop: "16px",
+    backgroundColor: "rgba(15, 23, 42, 0.6)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    borderRadius: "8px",
+    padding: "16px",
+  },
+  previewHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "12px",
+  },
+  closePreviewBtn: {
+    backgroundColor: "transparent",
+    border: "none",
+    color: "#94a3b8",
+    fontSize: "1.1rem",
+    cursor: "pointer",
+    padding: "4px 8px",
+  },
+  previewTabs: {
+    display: "flex",
+    gap: "8px",
+    marginBottom: "10px",
+  },
+  previewTab: {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    color: "#94a3b8",
+    borderRadius: "4px",
+    padding: "4px 10px",
+    fontSize: "0.78rem",
+    cursor: "pointer",
+  },
+  activePreviewTab: {
+    backgroundColor: "rgba(2, 132, 199, 0.3)",
+    border: "1px solid #0284c7",
+    color: "#38bdf8",
+    borderRadius: "4px",
+    padding: "4px 10px",
+    fontSize: "0.78rem",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  visualDisplayBox: {
+    backgroundColor: "#0b1120",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: "6px",
+    height: "120px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "12px",
+    overflow: "hidden",
+  },
+  visualCanvasWave: {
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "linear-gradient(90deg, rgba(0, 201, 255, 0.15) 0%, rgba(142, 45, 226, 0.15) 100%)",
+  },
+  simulatedWaveform: {
+    width: "90%",
+    height: "50px",
+    background: "repeating-linear-gradient(90deg, #00c9ff, #00c9ff 2px, transparent 2px, transparent 6px)",
+    opacity: 0.8,
+  },
+  visualCanvasSpec: {
+    width: "100%",
+    height: "100%",
+    background: "linear-gradient(180deg, #ff0055 0%, #ff9900 25%, #33cc33 50%, #0099ff 75%, #000033 100%)",
+    opacity: 0.85,
+  },
+  simulatedSpectrogram: {
+    width: "100%",
+    height: "100%",
+    opacity: 0.9,
+  },
+  visualCanvasVideo: {
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#020617",
+  },
+  audioPreviewBar: {
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    borderRadius: "6px",
+    padding: "8px 12px",
+  },
+  playPreviewBtn: {
+    backgroundColor: "#0284c7",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "4px",
+    padding: "6px 12px",
+    fontSize: "0.8rem",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  progressBarBg: {
+    height: "6px",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: "3px",
+    overflow: "hidden",
+  },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: "#38bdf8",
+    transition: "width 0.3s linear",
+  },
+  channelBtn: {
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    color: "#94a3b8",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    borderRadius: "4px",
+    padding: "3px 8px",
+    fontSize: "0.72rem",
+    cursor: "pointer",
+  },
+  activeChannelBtn: {
+    backgroundColor: "rgba(168, 85, 247, 0.25)",
+    color: "#e9d5ff",
+    border: "1px solid #a855f7",
+    borderRadius: "4px",
+    padding: "3px 8px",
+    fontSize: "0.72rem",
+    fontWeight: 600,
+    cursor: "pointer",
   },
 };

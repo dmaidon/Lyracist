@@ -1,0 +1,151 @@
+<!-- Created on Sep 6, 2026 @ 13:00:30 -> ToastNotificationControl for Store notifications with slide-in animation, badges, and dismiss button -->
+<UserControl x:Class="Lyracist.Controls.ToastNotificationControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Width="360"
+             Margin="0,0,0,10"
+             RenderTransformOrigin="0.5,0.5">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <Style x:Key="ToastBadge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Padding" Value="5,1"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <UserControl.RenderTransform>
+        <TranslateTransform x:Name="ToastTransform" X="320"/>
+    </UserControl.RenderTransform>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="UserControl.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="ToastTransform"
+                                     Storyboard.TargetProperty="X"
+                                     From="320" To="0"
+                                     Duration="0:0:0.35">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0.0" To="1.0"
+                                     Duration="0:0:0.25"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers>
+
+    <Border Background="#23273A"
+            BorderBrush="#384260"
+            BorderThickness="1.2"
+            CornerRadius="10"
+            Padding="14,12">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="16" ShadowDepth="4" Direction="270" Color="#000000" Opacity="0.45"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                <ColumnDefinition Width="*"/>    <!-- Text & Badges -->
+                <ColumnDefinition Width="Auto"/> <!-- Close Button -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Icon Column -->
+            <Border Grid.Column="0"
+                    Width="36" Height="36"
+                    CornerRadius="8"
+                    Background="{Binding TypeAccentBrush}"
+                    VerticalAlignment="Top"
+                    Margin="0,0,12,0">
+                <ui:SymbolIcon Symbol="{Binding TypeIcon}"
+                               FontSize="18"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+            </Border>
+
+            <!-- Body Column -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Title}"
+                           FontWeight="Bold"
+                           FontSize="13"
+                           Foreground="White"
+                           Margin="0,0,0,2"/>
+
+                <TextBlock Text="{Binding Message}"
+                           FontSize="12"
+                           Foreground="#CBD5E1"
+                           TextWrapping="Wrap"
+                           LineHeight="16"
+                           Margin="0,0,0,6"/>
+
+                <!-- Badges Row -->
+                <WrapPanel Visibility="{Binding HasBadges, Converter={StaticResource BoolToVis}}">
+                    <!-- Format Badge -->
+                    <Border Style="{StaticResource ToastBadge}"
+                            Background="#3B82F6"
+                            Visibility="{Binding FormatBadge, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="{Binding FormatBadge}" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                    </Border>
+
+                    <!-- Normalized Badge -->
+                    <Border Style="{StaticResource ToastBadge}"
+                            Background="#10B981"
+                            Visibility="{Binding IsNormalized, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="NORM" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                    </Border>
+
+                    <!-- Trimmed Badge -->
+                    <Border Style="{StaticResource ToastBadge}"
+                            Background="#06B6D4"
+                            Visibility="{Binding IsTrimmed, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="TRIM" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                    </Border>
+
+                    <!-- Waveform Badge -->
+                    <Border Style="{StaticResource ToastBadge}"
+                            Background="#8B5CF6"
+                            Visibility="{Binding HasWaveform, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="WAVE" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                    </Border>
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- Dismiss Button -->
+            <Button Grid.Column="2"
+                    Command="{Binding DismissCommand}"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="4"
+                    Width="24" Height="24"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Right"
+                    Cursor="Hand"
+                    ToolTip="Dismiss">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ui:SymbolIcon Symbol="Dismiss16" FontSize="12" Foreground="#94A3B8"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>

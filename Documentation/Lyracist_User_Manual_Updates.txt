@@ -1,4 +1,165 @@
-// Edited on Sep 6, 2026 @ 11:38:00 -> Document Store Analytics Panel: Provider stats, File type stats, FFmpeg processing metrics, Quality & Difficulty distribution, Key & BPM histograms, and 14-day / 24-hour activity heatmaps
+// Edited on Sep 6, 2026 @ 13:06:00 -> Document Store Notifications: StoreNotificationService, ToastNotificationControl, and audio pipeline/sync/bulk triggers
+Store Notifications: Toast Alerts, Progress Milestones & Auto-Dismissal Architecture (`Lyracist` ONLY) - (September 2026)
+
+Section: Lyracist / Karaoke Store & Licensed Track Import / Store Notifications (Lyracist ONLY)
+
+[Overview & Purpose]
+The Store Notifications system provides non-intrusive, animated toast alerts that inform users in real time as tracks are processed and cataloged into their Lyracist library. Designed to eliminate guesswork during background downloading and batch ingestion, notifications appear in a dedicated bottom-right overlay container inside the Store tab and the Bulk Import Wizard. Each toast features smooth slide-in/fade-in entry animations, category iconography, detailed track attribution, processing badges, a manual dismiss button, and an automatic 5-second dismissal timer.
+
+[Notification Triggers & Types]
+1. Track Imported:
+   - Alert: "Imported: Artist - Title (Provider)"
+   - Badges: Packaging format (MP3+G, MP4, ZIP) along with pipeline flags (NORM, TRIM, WAVE).
+   - Trigger: Dispatched immediately when a purchased track finishes metadata probing, renaming, audio processing, and library database indexing.
+
+2. Audio Normalization Complete:
+   - Alert: "Audio normalized: Artist - Title"
+   - Trigger: Dispatched when EBU R128 loudness normalization (-16 LUFS) completes successfully.
+
+3. Silence Trimmed:
+   - Alert: "Silence trimmed: Artist - Title"
+   - Trigger: Dispatched when leading and trailing dead-air silence below -50dB is removed via FFmpeg.
+
+4. Waveform Generated:
+   - Alert: "Waveform ready: Artist - Title"
+   - Trigger: Dispatched when the high-contrast acoustic waveform preview image finishes rendering.
+
+5. Store Sync Completed:
+   - Alert: "Store Sync Complete — X tracks imported"
+   - Trigger: Dispatched when the 1-Click Store Sync scanner finishes evaluating the download directory.
+
+6. Bulk Import Completed:
+   - Alert: "Bulk Import Complete — X tracks processed"
+   - Trigger: Dispatched when a batch import job completes inside the Bulk Import Wizard.
+
+[UI Controls & Architecture]
+- `ToastNotificationControl`: High-DPI dark acrylic card (#23273A) with subtle border (#384260), drop shadow, category accent badge, wrap-around message text, badge strip, and manual close button.
+- `NotificationHost Overlay`: Positioned at the bottom-right corner of `StorePage.xaml` and `BulkImportWindow.xaml`, stacking up to 5 active toasts vertically without obstructing user interactions or scrolling page content.
+- `StoreNotificationService`: Central thread-safe notification manager providing event dispatching, thread marshalling to the WPF UI Dispatcher, and auto-dismiss timer cancellation.
+
+Store Plugin API: Modular Provider Architecture, Extensible Registry & Multi-Vector Fingerprinting (`Lyracist` ONLY) - (September 2026)
+
+Section: Lyracist / Karaoke Store & Licensed Track Import / Store Plugin API (Lyracist ONLY)
+
+[Overview & Purpose]
+The Store Plugin API establishes a modular, extensible plugin architecture for the Lyracist Store ecosystem. Commercial karaoke providers (Karaoke Version, Party Tyme, Sunfly, Karaoke.com, and future additions) are encapsulated as independent, self-contained plugins adhering to the `IStoreProvider` interface. This architecture centralizes search URI generation, filename heuristics, ZIP archive inspection, CDG binary header matching, ID3 tag identification, and MP4 container metadata analysis into dedicated provider modules managed by a thread-safe `ProviderRegistry`.
+
+[Architecture & Core Components]
+1. `IStoreProvider` Interface:
+   - `string Name { get; }`: Display title of the commercial provider (e.g., "Karaoke Version").
+   - `ProviderSource Source { get; }`: Provider origin enum value (`KaraokeVersion`, `PartyTyme`, `Sunfly`, `KaraokeCom`, `Local`).
+   - `Uri BuildSearchUri(string query)`: Formats deep search URLs for catalog queries or homepages.
+   - `bool DetectFromFilename(string filename)`: Evaluates filename and title/artist heuristic patterns.
+   - `bool DetectFromId3(FFprobeResult metadata)`: Evaluates ID3 audio tags (e.g. TXXX frames).
+   - `bool DetectFromZip(string zipPath)`: Scans internal archive hierarchy and file pair layouts.
+   - `bool DetectFromCdgHeader(byte[] header)`: Matches initial CDG magic header bytes.
+   - `bool DetectFromMp4(FFprobeResult metadata)`: Analyzes MP4 stream metadata and container tags.
+
+2. `BaseStoreProvider` Abstract Base Class:
+   - Provides default `false` implementations for all detection methods, allowing plugins to override only their supported signatures.
+   - Encapsulates safe ZIP entry enumeration (`MatchesZipEntries`), ID3 tag scanning (`MatchesId3Tags`), and MP4 metadata inspection (`MatchesMp4Metadata`).
+
+3. Concrete Store Providers:
+   - `KaraokeVersionProvider`: Search URL for karaoke-version.com, detection of `/custom_backing_track/` or `track.mp3`+`track.cdg` pairs, `KV` prefix/tags, and CDG magic header bytes `0x01 0x0F`.
+   - `PartyTymeProvider`: Search URL for partytyme.net, detection of `/karaoke/` folders, `_pt.` naming, `PT` tags, and CDG magic header bytes `0x02 0x0A`.
+   - `SunflyProvider`: Search URL for sunflykaraoke.com, detection of `sf` entry prefixes, `SF` tags, and CDG magic header bytes `0x03 0x0C`.
+   - `KaraokeComProvider`: Search URL for karaoke.com, detection of `kcom` signatures, and ID3/MP4 metadata watermarks.
+
+4. `ProviderRegistry` Central Registry:
+   - Maintains a thread-safe catalog of registered provider plugins.
+   - Supports dynamic registration via `RegisterProvider(IStoreProvider)`.
+   - Provides unified multi-vector discovery APIs: `DetectProviderFromFilename`, `DetectProviderFromZip`, `DetectProviderFromCdg`, `DetectProviderFromId3`, and `DetectProviderFromMp4`.
+   - Directly drives background download watcher ingestion, Bulk Import Wizard classification, Store Sync verification, and StoreViewModel search button generation.
+
+Store Tab Provider Settings Panel: Provider Defaults, Packaging Preferences & Audio Processing Automation (`Lyracist` ONLY) - (September 2026)
+
+Section: Lyracist / Karaoke Store & Licensed Track Import / Provider Settings (Lyracist ONLY)
+
+[Overview & Purpose]
+The Provider Settings panel provides centralized configuration of host preferences across the Lyracist Store ecosystem. Integrated directly into the Folder Settings & Processing Pipeline section of the Store tab as a collapsible panel, this interface empowers DJs and KJs to configure their preferred commercial karaoke vendor, preferred media packaging formats, target library routing destinations, baseline FFmpeg audio processing automation flags, and companion lyrics format choices. These preferences seamlessly drive default search behaviors, visual toolbar highlights, Bulk Import Wizard presets, Store Sync ingestion hints, and Smart Import auto-renaming rules.
+
+[Configurable Preferences]
+1. Preferred Commercial Provider (KV, PT, Sunfly, Karaoke.com):
+   - Configures the default store provider across search actions, UI button highlights, and fallback ingestion hints.
+   - Highlights the designated provider button in the Store search toolbar with a gold "★ PREFERRED" badge.
+   - Pressing Enter inside the Store search box immediately queries the preferred provider's catalog.
+   - Acts as an intelligent attribution fallback for unbranded files during Store Sync and Bulk Import operations.
+
+2. Preferred File Packaging Type (MP3+G, MP4, Audio-only):
+   - Establishes the host's preferred karaoke format (MP3+G discrete pairs, MPEG-4 self-contained video, or standalone Audio backing tracks).
+   - In Bulk Import Wizard: Automatically prioritizes and sorts candidate tracks matching the preferred packaging format to the top of the review grid.
+   - In Smart Import Rules: Serves as a classification hint when disambiguating companion files.
+
+3. Baseline Audio Processing Automation Flags:
+   - "Normalize audio by default": Automatically pre-checks EBU R128 loudness normalization (-16 LUFS) for folder watcher imports and Bulk Import Wizard operations.
+   - "Trim silence by default": Automatically pre-checks leading/trailing dead air silence removal below -50dB.
+   - "Generate waveform by default": Automatically enables high-contrast visual PNG waveform preview rendering.
+
+4. Preferred Target Folder Routing (Karaoke or Music):
+   - Sets the default destination directory category when auto-routing downloaded purchases into organized library folders.
+   - Directs karaoke containers (.zip, .cdg/.mp3, .mp4) to the Target Karaoke Folder or standalone audio files to the Target Music Folder.
+
+5. Preferred Synchronized Lyrics Format (LRC or TXT):
+   - Configures priority format resolution when multiple companion lyric files exist in the same download directory.
+   - When set to "LRC", the scanner searches for and pairs `.lrc` synchronized files first, falling back to plain `.txt`.
+   - When set to "TXT", plain text files take precedence over `.lrc`.
+
+[User Interface & Controls]
+- Dropdown: Preferred Provider (Karaoke Version [KV], Party Tyme [PT], Sunfly [SF], Karaoke.com)
+- Dropdown: Preferred File Type (MP3+G, MP4, Audio-only)
+- Dropdown: Preferred Target Folder (Karaoke, Music)
+- Dropdown: Preferred Lyrics Format (LRC, TXT)
+- ToggleSwitch: Normalize audio by default
+- ToggleSwitch: Trim silence by default
+- ToggleSwitch: Generate waveform by default
+- Action Buttons: "Save Settings" (persists to app configuration with instant visual confirmation) and "Reset Defaults" (reverts to standard factory defaults).
+
+Track Preview Player: Audio Inspection, Visualizations & Dual-Channel Auditioning (`Lyracist` ONLY) - (September 2026)
+
+Section: Lyracist / Karaoke Store & Licensed Track Import / Track Preview Player (Lyracist ONLY)
+
+[Overview & Purpose]
+The Track Preview Player provides instant audio-visual inspection and acoustic verification for newly downloaded or cataloged karaoke purchases before or after library import. Integrated seamlessly within the Recent Imports audit grid on the Store tab and the Bulk Import Wizard candidate review list, the preview player allows host DJs to quickly audition tracks, verify audio quality, preview CDG/MP4 video streams, inspect spectral dynamics, and toggle dual-audio vocal channels without launching full karaoke playback sessions.
+
+[Acoustic & Video Preview Engines]
+1. 5-Second Rapid Audio Preview:
+   - Powered by asynchronous FFmpeg stream extraction: extracts the opening 5 seconds of the source track into an uncompressed WAV or MP3 stream stored safely in the system temporary directory.
+   - Built-in lightweight playback engine utilizes WPF MediaPlayer with accurate millisecond progress tracking, auto-rewind on completion, and manual scrub capability.
+   - 1-click Play/Pause toggle with real-time elapsed time display (00:00 / 00:05).
+
+2. Dual-Audio Channel Auditioning (Channel A / Channel B):
+   - Multi-channel stream detection automatically flags dual-audio tracks (such as Party Tyme or Karaoke Version multiplex files featuring lead vocals on one stereo channel and instrumental backing on the other).
+   - Interactive channel toggle:
+     • Channel A (Guide Vocals): FFmpeg isolates and routes the left channel (c0) across stereo outputs (`pan=mono|c0=c0`) for vocal guidance verification.
+     • Channel B (Instrumental): FFmpeg isolates and routes the right channel (c1) across stereo outputs (`pan=mono|c0=c1`) for backing track rehearsal.
+   - Switching channels dynamically re-extracts the 5-second preview and resumes playback seamlessly.
+
+3. Waveform Peak Visualization:
+   - Generates and renders a high-contrast visual PNG waveform representation using FFmpeg `showwavespic`.
+   - Allows hosts to visually inspect audio transients, identify dead air lead-in, and gauge dynamic range at a glance.
+
+4. High-Resolution Spectrogram Visualization:
+   - Generates a spectral acoustic density map using FFmpeg filter `showspectrum=s=800x300:color=intensity`.
+   - Visually reveals frequency distribution across bass, midrange, and treble spectrums, highlighting audio fidelity, clipping, and high-frequency compression artifacts.
+
+5. MP4 Video Stream Preview:
+   - For MPEG-4 karaoke video files, FFmpeg extracts the opening 5-second video clip (`-ss 0 -t 5 -c:v libx264 -preset ultrafast -c:a aac`).
+   - Rendered directly inside an embedded WPF MediaElement with hardware-accelerated playback and looping control.
+   - Allows immediate visual verification of lyrics animation, title screen graphics, and video resolution.
+
+[Technical Metadata Inspection Dashboard]
+The Track Preview Player displays an organized technical badge dashboard highlighting critical musical and audio metadata:
+- Filename & Source Provider: Clean canonical naming alongside color-coded provider tag (Karaoke Version, Party Tyme, Sunfly, Karaoke.com, or Local).
+- File Type & Container: Format badge indicating MP3G, ZIPCDG, MP4, or Audio.
+- Track Duration: Total song playback length formatted as mm:ss.
+- Musical Key & BPM: Detected musical key signature (e.g. C, G, Am) and tempo beats-per-minute.
+- Stream Quality & Difficulty: Fidelity rating (High, Medium, Low) and performance difficulty tier (Easy, Medium, Hard).
+- Vocal Presence: Classification indicating guide vocals, background vocals, or clean instrumental.
+
+[Trigger Points & Integration]
+- Store Tab (Recent Imports): Selecting any row in the Recent Imports grid or clicking the dedicated "Preview" button in the Action column instantly displays the Track Preview Player below the table.
+- Bulk Import Wizard: Selecting any candidate track in the import review data grid automatically loads its preview, allowing hosts to verify tracks before committing bulk import operations.
+
 Store Tab Analytics Panel: Statistical Insights, Audio Processing Metrics & Import Activity (`Lyracist` ONLY) - (September 2026)
 
 Section: Lyracist / Karaoke Store & Licensed Track Import / Store Analytics (Lyracist ONLY)
@@ -1561,3 +1722,31 @@ Section: Lyracist / Bulk Import Wizard
      * Karaoke providers involved across the batch
      * Average processing time per track and total elapsed duration
    - Automatically triggers a refresh of Store Analytics and Library indices upon window closure.
+
+Section: Lyracist / Store Sync (1-Click Purchased Tracks Ingestion)
+
+[Store Sync & Automated Downloads Ingestion]
+1. 1-Click "Sync Purchased Tracks" Action:
+   - Dedicated primary action button on the Store tab toolbar equipped with an animated sync icon (`ArrowSync24`).
+   - Initiates an immediate, on-demand scan of the user's configured Purchased Tracks folder (or user Downloads folder fallback).
+   - Serves as the user-initiated counterpart to the background file watcher, ensuring newly downloaded purchases from Karaoke Version, Party Tyme, Sunfly, and Karaoke.com are cataloged without waiting or restarting.
+
+2. Multi-Format Scanning & Companion Pairing:
+   - Thoroughly scans for ZIP archives (MP3+G), MP3+G separate companion pairs, MP4 video karaoke files, and auxiliary lyrics files (.lrc, .txt).
+   - Intelligently filters out active browser download temp files (`.crdownload`, `.part`, `.tmp`, `~$*`) to avoid premature processing of incomplete downloads.
+   - Pairs matching base names across companion files (e.g. `Song.mp3` + `Song.cdg` + `Song.lrc`).
+
+3. Pipeline Execution & Deduplication:
+   - Verifies track presence in the SQLite master catalog to prevent duplicate reprocessing of previously imported tracks, marking them as skipped.
+   - For new purchases, routes through the full Provider Intelligence pipeline to detect provider origins, apply Smart Import canonical renaming (`Artist - Title (Provider).ext`), apply EBU R128 loudness normalization and silence trimming via FFmpeg, extract peak waveforms, and insert into the library database.
+   - Fires `ImportLogged` events to keep the Recent Imports audit trail synchronized.
+
+4. Post-Sync Modal Summary Dialog:
+   - Displays an elegant dark acrylic modal summary window upon sync completion detailing:
+     * Total files scanned across the folder
+     * Total new tracks imported successfully
+     * Total tracks skipped (already existing in library)
+     * Total errors encountered during processing
+     * Distinct karaoke providers detected across the imported batch
+     * Average processing time per track and total elapsed sync time
+   - Automatically triggers a refresh of Store Analytics cards, provider distribution charts, and audio benchmarks.

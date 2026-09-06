@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:52:00 -> Add OpenBulkImportCommand for Bulk Import Wizard
+// Edited on Sep 6, 2026 @ 13:01:15 -> Expose StoreNotificationService and toast notifications collection in StoreViewModel
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -19,9 +19,40 @@ public partial class StoreViewModel : BaseViewModel, IDisposable
 {
     private readonly PurchasedTrackWatcherService _watcherService;
     private readonly ILibraryService? _libraryService;
+    private readonly PurchasedTrackSyncService _syncService;
     private bool _isDisposed;
 
     public AnalyticsViewModel Analytics { get; } = new();
+    public TrackPreviewViewModel TrackPreview { get; } = new();
+    public ProviderSettingsViewModel ProviderSettings { get; } = new();
+    public StoreNotificationService NotificationService => StoreNotificationService.Instance;
+    public ObservableCollection<StoreNotificationItem> Notifications => NotificationService.ActiveNotifications;
+
+    [ObservableProperty]
+    private bool _showProviderSettings;
+
+    public bool IsPreferredKv => string.Equals(AppSettings.PreferredProvider, "KV", StringComparison.OrdinalIgnoreCase);
+    public bool IsPreferredPt => string.Equals(AppSettings.PreferredProvider, "PT", StringComparison.OrdinalIgnoreCase);
+    public bool IsPreferredKc => string.Equals(AppSettings.PreferredProvider, "Karaoke.com", StringComparison.OrdinalIgnoreCase);
+    public bool IsPreferredSf => string.Equals(AppSettings.PreferredProvider, "Sunfly", StringComparison.OrdinalIgnoreCase);
+    public string PreferredProviderName => AppSettings.PreferredProvider switch
+    {
+        "PT" => "Party Tyme",
+        "Sunfly" => "Sunfly",
+        "Karaoke.com" => "Karaoke.com",
+        _ => "Karaoke Version"
+    };
+
+    [ObservableProperty]
+    private PurchasedTrackItem? _selectedRecentImport;
+
+    partial void OnSelectedRecentImportChanged(PurchasedTrackItem? value)
+    {
+        if (value != null)
+        {
+            _ = TrackPreview.LoadFromRecentImportAsync(value);
+        }
+    }
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -63,15 +94,22 @@ public partial class StoreViewModel : BaseViewModel, IDisposable
     private bool _isImporting;
 
     [ObservableProperty]
+    private bool _isSyncing;
+
+    [ObservableProperty]
     private string _importStatusMessage = "Ready";
 
     public ObservableCollection<PurchasedTrackItem> RecentImports { get; } = [];
     public ObservableCollection<PurchasedImportLogItem> ImportLogs { get; } = [];
 
-    public StoreViewModel(PurchasedTrackWatcherService watcherService, ILibraryService? libraryService = null)
+    public StoreViewModel(
+        PurchasedTrackWatcherService watcherService,
+        ILibraryService? libraryService = null,
+        PurchasedTrackSyncService? syncService = null)
     {
         _watcherService = watcherService;
         _libraryService = libraryService;
+        _syncService = syncService ?? new PurchasedTrackSyncService(watcherService);
 
         // Load settings
         _purchasedTracksFolder = AppSettings.StorePurchasedTracksFolder;
@@ -93,6 +131,7 @@ public partial class StoreViewModel : BaseViewModel, IDisposable
         _watcherService.TrackImported += OnTrackImported;
         _watcherService.WatcherStatusChanged += OnWatcherStatusChanged;
         _watcherService.ImportLogged += OnImportLogged;
+        ProviderSettings.SettingsSaved += OnProviderSettingsSaved;
 
         // Initialize analytics
         _ = Analytics.RefreshAnalyticsAsync();
@@ -171,53 +210,38 @@ public partial class StoreViewModel : BaseViewModel, IDisposable
         AppSettings.StoreGenerateWaveformOnImport = value;
     }
 
-    [RelayCommand]
-    private void SearchKaraokeVersion()
-    {
-        PurchasedTrackWatcherService.ReferrerHint = "Karaoke Version";
-        string query = SearchQuery?.Trim() ?? string.Empty;
-        string url = string.IsNullOrWhiteSpace(query)
-            ? "https://www.karaoke-version.com/"
-            : $"https://www.karaoke-version.com/search.html?q={Uri.EscapeDataString(query)}";
+    public IReadOnlyList<IStoreProvider> RegisteredProviders => ProviderRegistry.Instance.Providers;
 
-        OpenBrowserUrl(url);
+    [RelayCommand]
+    public void SearchProvider(IStoreProvider? provider)
+    {
+        if (provider == null) return;
+        PurchasedTrackWatcherService.ReferrerHint = provider.Name;
+        string query = SearchQuery?.Trim() ?? string.Empty;
+        Uri uri = provider.BuildSearchUri(query);
+        OpenBrowserUrl(uri.AbsoluteUri);
+    }
+
+    public void SearchProviderBySource(ProviderSource source)
+    {
+        var provider = ProviderRegistry.Instance.GetProviderBySource(source);
+        if (provider != null)
+        {
+            SearchProvider(provider);
+        }
     }
 
     [RelayCommand]
-    private void SearchPartyTyme()
-    {
-        PurchasedTrackWatcherService.ReferrerHint = "Party Tyme";
-        string query = SearchQuery?.Trim() ?? string.Empty;
-        string url = string.IsNullOrWhiteSpace(query)
-            ? "https://www.partytyme.net/"
-            : $"https://www.partytyme.net/search?q={Uri.EscapeDataString(query)}";
-
-        OpenBrowserUrl(url);
-    }
+    private void SearchKaraokeVersion() => SearchProviderBySource(ProviderSource.KaraokeVersion);
 
     [RelayCommand]
-    private void SearchKaraokeDotCom()
-    {
-        PurchasedTrackWatcherService.ReferrerHint = "Karaoke.com";
-        string query = SearchQuery?.Trim() ?? string.Empty;
-        string url = string.IsNullOrWhiteSpace(query)
-            ? "https://karaoke.com/"
-            : $"https://karaoke.com/search?type=product&q={Uri.EscapeDataString(query)}";
-
-        OpenBrowserUrl(url);
-    }
+    private void SearchPartyTyme() => SearchProviderBySource(ProviderSource.PartyTyme);
 
     [RelayCommand]
-    private void SearchSunfly()
-    {
-        PurchasedTrackWatcherService.ReferrerHint = "Sunfly";
-        string query = SearchQuery?.Trim() ?? string.Empty;
-        string url = string.IsNullOrWhiteSpace(query)
-            ? "https://www.sunflykaraoke.com/"
-            : $"https://www.sunflykaraoke.com/catalogsearch/result/?q={Uri.EscapeDataString(query)}";
+    private void SearchKaraokeDotCom() => SearchProviderBySource(ProviderSource.KaraokeCom);
 
-        OpenBrowserUrl(url);
-    }
+    [RelayCommand]
+    private void SearchSunfly() => SearchProviderBySource(ProviderSource.Sunfly);
 
     [RelayCommand]
     private void ToggleAdditionalProviders()
@@ -316,6 +340,43 @@ public partial class StoreViewModel : BaseViewModel, IDisposable
     }
 
     [RelayCommand]
+    private async Task SyncPurchasedTracksAsync()
+    {
+        if (IsSyncing) return;
+
+        IsSyncing = true;
+        ImportStatusMessage = "Syncing purchased tracks from downloads...";
+
+        try
+        {
+            var result = await _syncService.SyncPurchasedTracksAsync(PurchasedTracksFolder);
+            ImportStatusMessage = $"Store sync complete: {result.TotalImported} imported, {result.TotalSkipped} skipped, {result.TotalErrors} errors.";
+
+            // Display completion summary modal dialog
+            if (System.Windows.Application.Current?.MainWindow != null)
+            {
+                var summaryWin = new Windows.StoreSyncSummaryWindow(result)
+                {
+                    Owner = System.Windows.Application.Current.MainWindow
+                };
+                summaryWin.ShowDialog();
+            }
+
+            // Refresh analytics after sync
+            await Analytics.RefreshAnalyticsAsync();
+        }
+        catch (Exception ex)
+        {
+            ImportStatusMessage = $"Sync failed: {ex.Message}";
+            Globals.LogError("Lyracist", "Store sync failed", ex);
+        }
+        finally
+        {
+            IsSyncing = false;
+        }
+    }
+
+    [RelayCommand]
     private async Task OpenBulkImportAsync()
     {
         var bulkVm = new BulkImportViewModel(_libraryService);
@@ -358,10 +419,52 @@ public partial class StoreViewModel : BaseViewModel, IDisposable
     }
 
     [RelayCommand]
+    private async Task PreviewTrackAsync(PurchasedTrackItem? item)
+    {
+        item ??= SelectedRecentImport;
+        if (item != null)
+        {
+            await TrackPreview.LoadFromRecentImportAsync(item);
+        }
+    }
+
+    [RelayCommand]
     private void ClearRecentImports()
     {
         RecentImports.Clear();
         ImportStatusMessage = "Recent list cleared.";
+    }
+
+    [RelayCommand]
+    private void ToggleProviderSettings()
+    {
+        ShowProviderSettings = !ShowProviderSettings;
+    }
+
+    [RelayCommand]
+    public void SearchPreferredProvider()
+    {
+        var source = AppSettings.PreferredProvider switch
+        {
+            "PT" => ProviderSource.PartyTyme,
+            "Sunfly" => ProviderSource.Sunfly,
+            "Karaoke.com" => ProviderSource.KaraokeCom,
+            _ => ProviderSource.KaraokeVersion
+        };
+        SearchProviderBySource(source);
+    }
+
+    private void OnProviderSettingsSaved(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(IsPreferredKv));
+        OnPropertyChanged(nameof(IsPreferredPt));
+        OnPropertyChanged(nameof(IsPreferredKc));
+        OnPropertyChanged(nameof(IsPreferredSf));
+        OnPropertyChanged(nameof(PreferredProviderName));
+
+        NormalizeAudioOnImport = AppSettings.DefaultNormalizeAudio;
+        TrimSilenceOnImport = AppSettings.DefaultTrimSilence;
+        GenerateWaveformOnImport = AppSettings.DefaultGenerateWaveform;
     }
 
     private static void OpenBrowserUrl(string url)
@@ -381,9 +484,11 @@ public partial class StoreViewModel : BaseViewModel, IDisposable
         if (_isDisposed) return;
         _isDisposed = true;
 
+        TrackPreview.Dispose();
         _watcherService.TrackImported -= OnTrackImported;
         _watcherService.WatcherStatusChanged -= OnWatcherStatusChanged;
         _watcherService.ImportLogged -= OnImportLogged;
+        ProviderSettings.SettingsSaved -= OnProviderSettingsSaved;
         GC.SuppressFinalize(this);
     }
 }
