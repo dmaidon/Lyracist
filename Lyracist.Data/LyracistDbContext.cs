@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 11:35:00 -> Add GetStoreAnalyticsAsync query method with null-safe provider and format counters
+// Edited on Sep 6, 2026 @ 18:13:00 -> Add ClearAbandonedMigrationLocks to prevent SQLite Error 11 malformed schema lock errors
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -37,6 +37,80 @@ namespace Lyracist.Data
             // Shared cache also introduces its own table-level SQLITE_LOCKED errors that busy_timeout
             // does not cover (busy_timeout only retries SQLITE_BUSY).
             return $"Data Source={dbPath}";
+        }
+
+        /// <summary>
+        /// Proactively drops and purges any abandoned __EFMigrationsLock table left behind by an interrupted migration or crash.
+        /// Uses PRAGMA writable_schema to repair SQLite Error 11: 'malformed database schema (__EFMigrationsLock) - table already exists'.
+        /// </summary>
+        public static void ClearAbandonedMigrationLocks()
+        {
+            try
+            {
+                using var conn = new Microsoft.Data.Sqlite.SqliteConnection(GetConnectionString());
+                conn.Open();
+
+                // 1. Direct catalog purge: removes corrupted/duplicate __EFMigrationsLock entry from sqlite_master
+                try
+                {
+                    using var repairCmd = conn.CreateCommand();
+                    repairCmd.CommandText = @"
+                        PRAGMA writable_schema = ON;
+                        DELETE FROM sqlite_master WHERE name = '__EFMigrationsLock' OR tbl_name = '__EFMigrationsLock';
+                        PRAGMA writable_schema = OFF;
+                    ";
+                    repairCmd.ExecuteNonQuery();
+                }
+                catch (Exception catalogEx)
+                {
+                    // Logged (not swallowed) so a repeat corruption is diagnosable instead of silent -
+                    // this step failing outright would explain the rest of the repair being a no-op.
+                    Lyracist.Shared.Globals.LogInfo("Lyracist", $"ClearAbandonedMigrationLocks: catalog purge step failed: {catalogEx.Message}");
+                }
+
+                // 2. Standard DROP TABLE to clean up any physical table/indexes if still registered
+                try
+                {
+                    using var dropCmd = conn.CreateCommand();
+                    dropCmd.CommandText = "DROP TABLE IF EXISTS \"__EFMigrationsLock\";";
+                    dropCmd.ExecuteNonQuery();
+                }
+                catch (Exception dropEx)
+                {
+                    Lyracist.Shared.Globals.LogInfo("Lyracist", $"ClearAbandonedMigrationLocks: DROP TABLE step failed: {dropEx.Message}");
+                }
+
+                // 3. Truncate WAL to ensure in-flight lock records in wal file are flushed
+                try
+                {
+                    using var walCmd = conn.CreateCommand();
+                    walCmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
+                    walCmd.ExecuteNonQuery();
+                }
+                catch (Exception walEx)
+                {
+                    Lyracist.Shared.Globals.LogInfo("Lyracist", $"ClearAbandonedMigrationLocks: WAL checkpoint step failed: {walEx.Message}");
+                }
+
+                // 4. Verify the repair actually took: if a fresh query against the catalog still trips
+                // the same corrupt-schema error, the steps above did not fix it (this has been observed
+                // in production - see CHANGELOG entry for Sep 6, 2026 recurrence) and the caller's
+                // subsequent Migrate() call is expected to fail again.
+                try
+                {
+                    using var verifyCmd = conn.CreateCommand();
+                    verifyCmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE name = '__EFMigrationsLock';";
+                    verifyCmd.ExecuteScalar();
+                }
+                catch (Exception verifyEx)
+                {
+                    Lyracist.Shared.Globals.LogInfo("Lyracist", $"ClearAbandonedMigrationLocks: repair did not take - schema still corrupt after repair attempt: {verifyEx.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogInfo("Lyracist", $"ClearAbandonedMigrationLocks: {ex.Message}");
+            }
         }
 
         public LyracistDbContext()

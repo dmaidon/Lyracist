@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -10,34 +11,64 @@ namespace Lyracist.Services.Media;
 
 public class PlaylistService : IPlaylistService
 {
+    // These three reads run from ShowFlowService's constructor during app startup (via
+    // RefreshPlaylists), before anything can catch a DB failure - an unguarded exception here
+    // aborts MainWindow creation entirely and leaves the app stuck on the splash screen with no
+    // feedback, instead of the app just starting with empty playlists like it would for a fresh
+    // install. Matches the log-and-continue pattern already used by OccasionService/LoadSingerNames
+    // for the same class of startup DB failure.
     public List<PlaylistTrack> GetOpeningPlaylist()
     {
-        using var context = new LyracistDbContext();
-        var items = context.OpeningPlaylistItems
-            .Include(i => i.Song)
-            .OrderBy(i => i.Order)
-            .ToList();
-        return [.. items.Select(i => Map(i.OpeningPlaylistItemId, i.SongId, i.Order, i.Song))];
+        try
+        {
+            using var context = new LyracistDbContext();
+            var items = context.OpeningPlaylistItems
+                .Include(i => i.Song)
+                .OrderBy(i => i.Order)
+                .ToList();
+            return [.. items.Select(i => Map(i.OpeningPlaylistItemId, i.SongId, i.Order, i.Song))];
+        }
+        catch (Exception ex)
+        {
+            Core.Helpers.AppLogger.LogError(ex, "PlaylistService.GetOpeningPlaylist");
+            return [];
+        }
     }
 
     public List<PlaylistTrack> GetFillInPlaylist()
     {
-        using var context = new LyracistDbContext();
-        var items = context.FillInPlaylistItems
-            .Include(i => i.Song)
-            .OrderBy(i => i.Order)
-            .ToList();
-        return [.. items.Select(i => Map(i.FillInPlaylistItemId, i.SongId, i.Order, i.Song))];
+        try
+        {
+            using var context = new LyracistDbContext();
+            var items = context.FillInPlaylistItems
+                .Include(i => i.Song)
+                .OrderBy(i => i.Order)
+                .ToList();
+            return [.. items.Select(i => Map(i.FillInPlaylistItemId, i.SongId, i.Order, i.Song))];
+        }
+        catch (Exception ex)
+        {
+            Core.Helpers.AppLogger.LogError(ex, "PlaylistService.GetFillInPlaylist");
+            return [];
+        }
     }
 
     public List<PlaylistTrack> GetEndRotationPlaylist()
     {
-        using var context = new LyracistDbContext();
-        var items = context.EndRotationPlaylistItems
-            .Include(i => i.Song)
-            .OrderBy(i => i.Order)
-            .ToList();
-        return [.. items.Select(i => Map(i.EndRotationPlaylistItemId, i.SongId, i.Order, i.Song))];
+        try
+        {
+            using var context = new LyracistDbContext();
+            var items = context.EndRotationPlaylistItems
+                .Include(i => i.Song)
+                .OrderBy(i => i.Order)
+                .ToList();
+            return [.. items.Select(i => Map(i.EndRotationPlaylistItemId, i.SongId, i.Order, i.Song))];
+        }
+        catch (Exception ex)
+        {
+            Core.Helpers.AppLogger.LogError(ex, "PlaylistService.GetEndRotationPlaylist");
+            return [];
+        }
     }
 
     public void AddSongToOpening(int songId)
