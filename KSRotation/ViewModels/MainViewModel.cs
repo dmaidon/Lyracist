@@ -121,6 +121,25 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial double DefaultSongLengthMinutes { get; set; } = 4.75;
 
+        /// <summary>Whether the rotation-screen "estimated wait time" badge is shown at all. Some
+        /// DJs prefer not to display wait estimates to the audience; defaults on.</summary>
+        [ObservableProperty]
+        public partial bool ShowEstimatedWaitTime { get; set; } = true;
+
+        partial void OnShowEstimatedWaitTimeChanged(bool value)
+        {
+            if (_isInitializing) return;
+            _displayWindowService.SetShowEstimatedWaitTime(value);
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: value);
+            RefreshBillboardState();
+            RebuildRotationJsonCacheNow();
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
+            }
+            QueueSaveSettings();
+        }
+
         partial void OnFloatCurrentSingerToTopChanged(bool value)
         {
             if (_isInitializing) return;
@@ -956,6 +975,8 @@ namespace KSRotation.ViewModels
             AutoAcceptRequests = settings.AutoAcceptRequests;
             FloatCurrentSingerToTop = settings.FloatCurrentSingerToTop;
             DefaultSongLengthMinutes = Math.Clamp(settings.DefaultSongLengthMinutes > 0 ? settings.DefaultSongLengthMinutes : 4.75, 1, 20);
+            ShowEstimatedWaitTime = settings.ShowEstimatedWaitTime;
+            _displayWindowService.SetShowEstimatedWaitTime(ShowEstimatedWaitTime);
             _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
             SelectedProjectionView = "Normal List";
             _displayWindowService.SetBannerText(BannerText, VenueName, DjName);
@@ -1177,7 +1198,7 @@ namespace KSRotation.ViewModels
             // Keeps wait-time badges current as soon as a singer is added - otherwise a fresh
             // rotation shows no badges at all until the first singer finishes, since nothing else
             // recalculates them.
-            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
         }
 
         [RelayCommand]
@@ -1321,7 +1342,7 @@ namespace KSRotation.ViewModels
             if (PendingLinkSinger == entry) PendingLinkSinger = null;
             RefreshLinkedPartnerNames();
             RotationHelpers.EnsureRotationStartFlag(Singers);
-            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
             UpdateNextSingerHighlight();
             RebuildRotationJsonCacheNow();
             QueueSaveDatabase();
@@ -1667,7 +1688,7 @@ namespace KSRotation.ViewModels
                 // Recalculate every waiting singer's estimated wait time now that the rotation
                 // order has settled - KSRotation has no song-duration library, so this always
                 // falls back to RotationHelpers.DefaultEstimatedPerformanceSeconds per song ahead.
-                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
 
                 // 3. Save state and notify displays
                 RefreshBillboardState();
@@ -1737,7 +1758,7 @@ namespace KSRotation.ViewModels
 
                 EnforceActiveInactiveOrder(entry);
                 RotationHelpers.EnsureRotationStartFlag(Singers);
-                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
                 UpdateNextSingerHighlight();
             }
             finally
@@ -1761,7 +1782,7 @@ namespace KSRotation.ViewModels
             {
                 Singers.Move(index, index - 1);
                 UpdateNextSingerHighlight();
-                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
                 RebuildRotationJsonCacheNow();
                 QueueSaveDatabase();
             }
@@ -1776,7 +1797,7 @@ namespace KSRotation.ViewModels
             {
                 Singers.Move(index, index + 1);
                 UpdateNextSingerHighlight();
-                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
                 RebuildRotationJsonCacheNow();
                 QueueSaveDatabase();
             }
@@ -1844,7 +1865,7 @@ namespace KSRotation.ViewModels
                 }
                 // Linked-adjacency enforcement runs off Singers.CollectionChanged (see
                 // OnSingersCollectionChanged) - the Move() call above already triggered it.
-                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
             }
         }
 
@@ -1874,7 +1895,7 @@ namespace KSRotation.ViewModels
                 }
                 // Linked-adjacency enforcement runs off Singers.CollectionChanged (see
                 // OnSingersCollectionChanged) - the Move() call above already triggered it.
-                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
             }
         }
 
@@ -1899,7 +1920,7 @@ namespace KSRotation.ViewModels
 
             // Keeps wait-time badges current as soon as someone's marked current - otherwise a fresh
             // rotation shows no badges at all until the first singer finishes.
-            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
 
             // IsCurrent/IsNext changes made above were suppressed by _isFinishingSong, so rebuild explicitly
             // — patron/DJ web clients read this cache and shouldn't see a stale rotation after this action.
@@ -1930,7 +1951,7 @@ namespace KSRotation.ViewModels
             {
                 RotationHelpers.SetCurrentSinger(Singers, entry, floatCurrentToTop: true, isLastRound: IsLastRound);
             }
-            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
             RebuildRotationJsonCacheNow();
             QueueSaveDatabase();
             if (IsDisplayEnabled)
@@ -2476,7 +2497,8 @@ namespace KSRotation.ViewModels
                 RotationTarget = RotationTarget,
                 AutoAcceptRequests = AutoAcceptRequests,
                 FloatCurrentSingerToTop = FloatCurrentSingerToTop,
-                DefaultSongLengthMinutes = Math.Clamp(DefaultSongLengthMinutes, 1, 20)
+                DefaultSongLengthMinutes = Math.Clamp(DefaultSongLengthMinutes, 1, 20),
+                ShowEstimatedWaitTime = ShowEstimatedWaitTime
             };
 
             try

@@ -532,15 +532,16 @@ namespace Lyracist.Shared
         /// it. The current singer's own wait is set to 0 (already up); inactive/paused singers - and,
         /// when <paramref name="isLastRound"/> is true, anyone who already sang this round - are
         /// skipped and their wait cleared to 0, matching how they're already excluded from "next"
-        /// traversal elsewhere in this file. If there is no current singer, every entry's wait is
-        /// cleared to 0.
+        /// traversal elsewhere in this file. If there is no current singer, or <paramref name="enabled"/>
+        /// is false (the DJ has turned the feature off), every entry's wait is cleared to 0 - every
+        /// display already hides the badge whenever the wait is 0, so this alone is enough to hide it.
         /// </summary>
-        public static void RecalculateEstimatedWaits<T>(IList<T> singers, bool isLastRound = false, double defaultEstimatedPerformanceSeconds = DefaultEstimatedPerformanceSeconds) where T : class, IRotationSinger
+        public static void RecalculateEstimatedWaits<T>(IList<T> singers, bool isLastRound = false, double defaultEstimatedPerformanceSeconds = DefaultEstimatedPerformanceSeconds, bool enabled = true) where T : class, IRotationSinger
         {
             ArgumentNullException.ThrowIfNull(singers);
 
             int count = singers.Count;
-            T? current = GetCurrentSinger(singers);
+            T? current = enabled ? GetCurrentSinger(singers) : null;
 
             if (current == null)
             {

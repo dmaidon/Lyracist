@@ -58,6 +58,17 @@ public partial class SettingsViewModel : BaseViewModel
 
     partial void OnDefaultSongLengthMinutesChanged(double value) => AppSettings.DefaultSongLengthMinutes = value;
 
+    /// <summary>Whether the rotation-screen wait-time badge is shown at all - some DJs prefer not
+    /// to display estimated wait times to the audience.</summary>
+    [ObservableProperty]
+    private bool _showEstimatedWaitTime = AppSettings.ShowEstimatedWaitTime;
+
+    partial void OnShowEstimatedWaitTimeChanged(bool value)
+    {
+        AppSettings.ShowEstimatedWaitTime = value;
+        _rotation.RefreshEstimatedWaitTimeVisibility();
+    }
+
     // Audio
     [ObservableProperty]
     private List<AudioDeviceItem> _audioDevices = [];

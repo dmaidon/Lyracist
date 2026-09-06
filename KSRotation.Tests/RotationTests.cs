@@ -484,6 +484,21 @@ public class RotationHelpersTests
     }
 
     [Fact]
+    public void RecalculateEstimatedWaits_DisabledByDj_ClearsEveryoneToZero_SingerEntryModel()
+    {
+        // The DJ can turn wait-time badges off entirely; every display already hides the badge
+        // when EstimatedWaitMinutes is 0, so disabling just needs to clear everyone to 0.
+        var alice = new SingerEntry { Name = "Alice", IsCurrent = true, EstimatedPerformanceSeconds = 300 };
+        var bob = new SingerEntry { Name = "Bob", EstimatedWaitMinutes = 7 }; // stale value from before being disabled
+        var singers = new ObservableCollection<SingerEntry> { alice, bob };
+
+        RotationHelpers.RecalculateEstimatedWaits(singers, enabled: false);
+
+        Assert.Equal(0, alice.EstimatedWaitMinutes);
+        Assert.Equal(0, bob.EstimatedWaitMinutes);
+    }
+
+    [Fact]
     public void LinkSingers_SetsMutualLinkAndSnapsThemAdjacent_SingerEntryModel()
     {
         var alice = new SingerEntry { Name = "Alice" };

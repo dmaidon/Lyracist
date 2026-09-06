@@ -42,6 +42,12 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial double MarqueeSpeed { get; set; } = 60;
 
+        /// <summary>Whether the "UP NEXT: # in {} = Estimated wait time" / "ON DECK: ..." legend
+        /// captions (Marquee and Vinyl views) are shown - mirrors the DJ's "Show Estimated Wait
+        /// Time" setting, since the legend is meaningless once the badges themselves are hidden.</summary>
+        [ObservableProperty]
+        public partial bool ShowEstimatedWaitTime { get; set; } = true;
+
         public sealed record NextSingerDisplay(string Text, bool IsRotationStart);
 
         public ObservableCollection<NextSingerDisplay> NextSingers { get; } = [];

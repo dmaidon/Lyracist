@@ -85,6 +85,10 @@ namespace KSRotation.Models
         /// <summary>Default estimated song length in minutes, used by the rotation-screen
         /// "estimated wait time" badge whenever a queued song's actual duration isn't known.</summary>
         public double DefaultSongLengthMinutes { get; init; } = 4.75;
+
+        /// <summary>Whether the rotation-screen "estimated wait time" badge is shown at all. Some
+        /// DJs prefer not to display wait estimates to the audience; defaults on.</summary>
+        public bool ShowEstimatedWaitTime { get; init; } = true;
     }
 }
 

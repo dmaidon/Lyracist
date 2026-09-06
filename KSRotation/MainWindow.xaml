@@ -1702,10 +1702,18 @@
                                                VerticalAlignment="Center" />
                             </Grid>
 
+                            <!-- Estimated Wait Time -->
+                            <CheckBox
+                                Content="Show Estimated Wait Time on Rotation Screens"
+                                IsChecked="{Binding ShowEstimatedWaitTime, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource ModernCheckBoxStyle}"
+                                Margin="0,10,0,4"
+                                ToolTip="Shows/hides the {N} minute wait-time badge next to each waiting singer's name on the audience-facing rotation displays." />
+
                             <!-- Default Song Length (Estimated Wait Time) -->
                             <TextBlock Text="Default Song Length (Estimated Wait Time)" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}"
                                        ToolTip="Used to estimate how long a queued singer's wait is on the rotation screen, whenever that singer's actual song length isn't known." />
-                            <Grid Margin="0,0,0,4">
+                            <Grid Margin="0,0,0,4" IsEnabled="{Binding ShowEstimatedWaitTime}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />

@@ -874,6 +874,14 @@ public static class AppSettings
         set { _data.DefaultSongLengthMinutes = value; Save(); }
     }
 
+    /// <summary>Whether the rotation-screen "estimated wait time" badge is shown at all. Some DJs
+    /// prefer not to display wait estimates to the audience; defaults on.</summary>
+    public static bool ShowEstimatedWaitTime
+    {
+        get => _data.ShowEstimatedWaitTime;
+        set { _data.ShowEstimatedWaitTime = value; Save(); }
+    }
+
     // ─── Data Model ────────────────────────────────────────────────────────
 
     private sealed class SettingsData
@@ -885,6 +893,7 @@ public static class AppSettings
         public bool EnableKillVocal { get; set; } = false;
         public bool FloatCurrentSingerToTop { get; set; } = false;
         public double DefaultSongLengthMinutes { get; set; } = 4.75;
+        public bool ShowEstimatedWaitTime { get; set; } = true;
 
         // Registration data
         public string RegFirstName { get; set; } = string.Empty;

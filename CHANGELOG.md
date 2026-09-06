@@ -1,9 +1,19 @@
-<!-- Edited on Sep 5, 2026 @ 23:45:00 -> Release 26.9.5.10: Fix Estimated Wait Time badges not appearing until the first singer finished a song -->
-Last Edit: Sep 5, 2026 - Fix Estimated Wait Time Badges Not Appearing Until First Singer Finished
+<!-- Edited on Sep 5, 2026 @ 23:58:00 -> Release 26.9.5.11: Add DJ toggle to hide Estimated Wait Time badges entirely -->
+Last Edit: Sep 5, 2026 - Add "Show Estimated Wait Time" Toggle
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.11] - 2026-09-05
+
+### Added
+- **Lyracist / KSRotation (Toggle to Hide Estimated Wait Time Badges)**:
+  - New "Show Estimated Wait Time on Rotation Screens" setting (Lyracist's Settings page, Display tab; KSRotation's Settings tab) lets the DJ turn the `{N}` minute wait-time badge off entirely - some DJs don't want the audience seeing wait estimates at all. Defaults on (unchanged behavior).
+  - `RotationHelpers.RecalculateEstimatedWaits()` gained an `enabled` parameter (defaults `true`); when `false` it clears every singer's estimate to 0, and since every display already hides the badge whenever the estimate is 0, no rendering code needed to change.
+  - Flipping the toggle takes effect immediately (no need to wait for the next rotation change) - Lyracist's `RotationViewModel.RefreshEstimatedWaitTimeVisibility()` and KSRotation's `OnShowEstimatedWaitTimeChanged` both force an immediate recalculation and display refresh.
+  - The Default Song Length slider is grayed out and disabled whenever the toggle is off, since it has no effect while wait times aren't shown. KSRotation.Maui shares KSRotation's `MainViewModel`/`AppSettings` so it honors the same setting, though it has no dedicated toggle in its own UI yet.
+  - KSRotation's Vegas/Broadway Marquee and Vinyl Record projection styles (`SingerDisplayWindow.xaml`) also carry an "UP NEXT/ON DECK: # in {} = Estimated wait time" legend caption above the queue - now hidden along with the badges themselves via a new `DisplayViewModel.ShowEstimatedWaitTime` property, kept in sync by `DisplayWindowService.SetShowEstimatedWaitTime()`.
 
 ## [26.9.5.10] - 2026-09-05
 

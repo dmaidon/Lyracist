@@ -32,6 +32,11 @@ namespace KSRotation.Services
             _viewModel.ShowQrCode = show;
         }
 
+        public void SetShowEstimatedWaitTime(bool show)
+        {
+            _viewModel.ShowEstimatedWaitTime = show;
+        }
+
         public void SetLastSongBanner(string? path)
         {
             _lastSongBannerPath = path;
