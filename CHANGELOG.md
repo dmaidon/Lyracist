@@ -1,5 +1,5 @@
-<!-- Edited on Sep 6, 2026 @ 00:45:00 -> Extend the {N}=Estimated wait time legend to Lyracist and KSRotation.Maui, and to the Normal List/Star Wars Crawl views in all 3 apps -->
-Last Edit: Sep 6, 2026 - Estimated Wait Time Legend Everywhere the Badge Appears
+<!-- Edited on Sep 5, 2026 @ 20:45:00 -> Update ChangeLog for billboard styling and wait time legend updates -->
+Last Edit: Sep 5, 2026 - Estimated Wait Time Legend Everywhere and Billboard Formatting
 
 # Changelog
 
@@ -13,6 +13,7 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Every instance hides along with the badges when the DJ turns "Show Estimated Wait Time" off, and reappears immediately when turned back on - no restart needed.
   - Lyracist's `RotationWindowViewModel` gained a `ShowEstimatedWaitTime` property (it had none before this - only `RotationViewModel`/`AppSettings` did), pushed live via a new `IDisplayService.SetShowEstimatedWaitTime()` and triggering an immediate Star Wars Crawl rebuild through the existing `Vm_PropertyChanged` hook.
   - Checked all patron-facing web pages (`kiosk.html`, `dj.html`, `billboard.html`, `PatronPortal.html`, Lyracist's `mobile.html`/`index.html`): none of them currently serialize or render `EstimatedWaitMinutes` to patrons at all, so there is nothing to gate there yet - adding the badge to the patron-facing web/JSON pipeline would be a separate, larger feature.
+- **KSRotation (billboard.html)**: Cleaned up CSS stylesheet indentation and JavaScript string escaping formatting in the web rotation billboard template.
 
 ### Fixed
 - **KSRotation.Maui (Broken Build Introduced by the Wait Time Toggle)**: the `26.9.5.11` toggle feature added `DisplayWindowService.SetShowEstimatedWaitTime()` to KSRotation's real service but missed the Maui-only no-op stand-in in `KSRotation.Maui/Shims/WpfShims.cs` - since KSRotation.Maui compiles KSRotation's `MainViewModel.cs` directly but substitutes its own WPF-free service shims, this broke KSRotation.Maui's build entirely (masked at the time by a `| tail` pipe that hid the real `dotnet build` exit code in verification output). Added the missing shim method; confirmed by reading the actual build output text this time, not just the wrapping shell command's exit code.

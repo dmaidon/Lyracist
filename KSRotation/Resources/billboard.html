@@ -1,4 +1,4 @@
-<!-- Edited on Sep 3, 2026 @ 23:51:15 -> Add Last Round banner and filter completed singers in billboard.html -->
+<!-- Edited on Sep 5, 2026 @ 20:45:00 -> Format CSS and JavaScript in billboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,8 +41,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
-                              radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+            background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
         }
 
         /* Top Header Bar */
@@ -109,9 +108,9 @@
             gap: 8px;
         }
 
-        .status-pill strong {
-            color: var(--text-main);
-        }
+            .status-pill strong {
+                color: var(--text-main);
+            }
 
         .clock-display {
             font-size: 1.35rem;
@@ -154,8 +153,13 @@
         }
 
         @keyframes pulse-glow {
-            from { box-shadow: 0 0 25px rgba(245, 158, 11, 0.18); }
-            to { box-shadow: 0 0 45px rgba(245, 158, 11, 0.32); }
+            from {
+                box-shadow: 0 0 25px rgba(245, 158, 11, 0.18);
+            }
+
+            to {
+                box-shadow: 0 0 45px rgba(245, 158, 11, 0.32);
+            }
         }
 
         .spotlight-badge {
@@ -229,10 +233,10 @@
             gap: 10px;
         }
 
-        .now-song-meta .artist-tag {
-            color: #94A3B8;
-            font-weight: 400;
-        }
+            .now-song-meta .artist-tag {
+                color: #94A3B8;
+                font-weight: 400;
+            }
 
         /* Last Round Announcement Banner */
         .last-round-banner {
@@ -251,8 +255,15 @@
         }
 
         @keyframes pulseLastRound {
-            0%, 100% { opacity: 0.95; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.008); }
+            0%, 100% {
+                opacity: 0.95;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.008);
+            }
         }
 
         /* Spotlight: Up Next / On Deck */
@@ -315,14 +326,14 @@
             padding-right: 4px;
         }
 
-        .queue-list::-webkit-scrollbar {
-            width: 4px;
-        }
+            .queue-list::-webkit-scrollbar {
+                width: 4px;
+            }
 
-        .queue-list::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
+            .queue-list::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 4px;
+            }
 
         .queue-row {
             display: flex;
@@ -388,19 +399,19 @@
             overflow: hidden;
         }
 
-        .hub-card.primary-hub {
-            flex: 1.2;
-            background: linear-gradient(145deg, #131E32 0%, #1A2844 100%);
-            border: 1.5px solid rgba(139, 92, 246, 0.4);
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
-        }
+            .hub-card.primary-hub {
+                flex: 1.2;
+                background: linear-gradient(145deg, #131E32 0%, #1A2844 100%);
+                border: 1.5px solid rgba(139, 92, 246, 0.4);
+                box-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
+            }
 
-        .hub-card.wifi-hub {
-            flex: 1;
-            background: linear-gradient(145deg, #0F172A 0%, #152033 100%);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
-        }
+            .hub-card.wifi-hub {
+                flex: 1;
+                background: linear-gradient(145deg, #0F172A 0%, #152033 100%);
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+            }
 
         .hub-badge {
             display: inline-flex;
@@ -487,10 +498,10 @@
             color: var(--text-muted);
         }
 
-        .wifi-field strong {
-            color: #FFFFFF;
-            font-weight: 700;
-        }
+            .wifi-field strong {
+                color: #FFFFFF;
+                font-weight: 700;
+            }
 
         /* Empty State */
         .empty-placeholder {
@@ -504,9 +515,9 @@
             text-align: center;
         }
 
-        .empty-placeholder .icon {
-            font-size: 2.5rem;
-        }
+            .empty-placeholder .icon {
+                font-size: 2.5rem;
+            }
     </style>
 </head>
 <body>
@@ -654,7 +665,7 @@
                 const ssid = data.wifiSsid || "";
                 const pass = data.wifiPassword || "";
                 document.getElementById('wifi-ssid-display').textContent = ssid || "DJ Travel Router";
-                
+
                 const passContainer = document.getElementById('wifi-pass-container');
                 if (pass) {
                     passContainer.style.display = "block";
@@ -769,10 +780,10 @@
 
             if (upcoming.length === 0) {
                 queueListEl.innerHTML = `
-                    <div class="empty-placeholder">
-                        <span class="icon">📋</span>
-                        <span>${activeSingers.length > 0 ? "You're up next! Ready to sing?" : "Rotation is empty. Scan QR to get on stage!"}</span>
-                    </div>`;
+                            <div class="empty-placeholder">
+                                <span class="icon">📋</span>
+                                <span>${activeSingers.length > 0 ? "You're up next! Ready to sing?" : "Rotation is empty. Scan QR to get on stage!"}</span>
+                            </div>`;
             } else {
                 let html = "";
                 upcoming.forEach((s, idx) => {
@@ -783,13 +794,13 @@
                     const rotationStartBadge = s.isRotationStart ? '<span class="rotation-start-badge" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>' : '';
 
                     html += `
-                        <div class="queue-row"${pausedClass}>
-                            <span class="queue-pos">${idx + 1}</span>
-                            <div class="queue-info">
-                                <div class="queue-name">${rotationStartBadge}${escapeHtml(s.name)}${partnerText}${pausedBadge}</div>
-                                <div class="queue-song">${songDesc}</div>
-                            </div>
-                        </div>`;
+                                <div class="queue-row"${pausedClass}>
+                                    <span class="queue-pos">${idx + 1}</span>
+                                    <div class="queue-info">
+                                        <div class="queue-name">${rotationStartBadge}${escapeHtml(s.name)}${partnerText}${pausedBadge}</div>
+                                        <div class="queue-song">${songDesc}</div>
+                                    </div>
+                                </div>`;
                 });
                 queueListEl.innerHTML = html;
             }
@@ -800,7 +811,7 @@
             return String(text)
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
+                .replace( />/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
