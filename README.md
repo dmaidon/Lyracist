@@ -1,5 +1,5 @@
-<!-- Edited on Sep 6, 2026 @ 06:33:00 -> Update README and ChangeLog for Rotation Settings groupbox in KSRotation -->
-Last Edit: Sep 6, 2026 - KSRotation Settings Tab Layout, Compact Email Settings & Rotation Settings GroupBox
+<!-- Edited on Sep 6, 2026 @ 08:18:00 -> Update README with Per-Singer Key/Tempo and Mic Level/EQ Recall features -->
+Last Edit: Sep 6, 2026 - Per-Singer Key/Tempo Recall & Mic Level/EQ Save and Recall
 # Lyracist Pro
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -7,6 +7,22 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### 🎤 Per-Singer Key/Tempo Recall & Mic Level/EQ Recall (`Lyracist`)
+- **Dual-Tier Key & Playback Speed Memory**:
+  - **Per-Song Performance Memory**: Whenever a performer sings a song, their exact key transposition semitone offset and playback tempo multiplier (e.g. 1.1x) are saved in the SQLite `SingerHistory` database table. Re-queuing that song in the future automatically recalls the performer's exact key and tempo.
+  - **Performer Profile Defaults**: Global performer vocal preferences stored in `SingerAudioSettings` act as the initial baseline when a performer sings a track for the first time without prior history.
+  - **Live Pitch & Speed Synchronization**: Recalled key and tempo are passed into `ActivePerformerKey` and `ActivePerformerTempo` on `MediaEngine`, instantly setting the Live Deck pitch and speed sliders as soon as the track begins.
+- **Per-Singer Mic Level & Vocal EQ Recall**:
+  - Automatically loads the performer's saved vocal gain (`Volume`), 3-band parametric EQ (`Treble`, `Mid`, `Bass`), dynamic compressor threshold, and peak limiter from `SingerAudioSettings` when their turn begins.
+  - On-screen Audio Controls sliders update live to match the active performer's profile.
+- **Quick-Action Audio Controls [Save to Singer] & [Recall Singer] Buttons**:
+  - Located on the Audio Controls card header next to "Reset Audio":
+    * **Save to Singer**: Instantly saves current Audio Controls slider values (Volume as Vocal Gain, Treble, Mid, Bass, Compressor, Limiter) as the active performer's defaults in `SingerAudioSettings`, and records active Key and Tempo into `SingerHistory`.
+    * **Recall Singer**: Reloads stored profile audio defaults on demand, resetting the DSP chain and slider controls if adjustments were made during the performance.
+- **Singer History DataGrid Tracking**:
+  - Dedicated "Key" and "Speed" columns in the Singer History tab (`KaraokePage.xaml`) display historical transposition and tempo settings for every completed song.
+  - Re-adding songs from Singer History back into the rotation queue retains historical key and tempo settings automatically.
 
 ### 🛑 Last Round Rotation Management (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `dj.html`)
 - **One-Click Host & Remote Activation**: Standout emerald green "Last Round" button positioned directly after the Clear button across host interfaces (`RotationPage.xaml`, `MainWindow.xaml`, `MainPage.xaml`) and on the Remote DJ Board (`dj.html`), immediately synchronizing across the rotation lifecycle, embedded servers, and display services.
@@ -345,6 +361,8 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Advanced Audio Engine**: Master volume, latency compensation, and active output device selection.
 - **Active Performance Key Transposition**: Real-time pitch transposition from `-6` to `+6` semitones. Automatically hot-reloads the audio track and seeks back to the exact millisecond in under 150ms to apply FFmpeg-based pitch shifting (`asetrate` + `atempo`) during active playback.
 - **Audio Processing Controls**: Fully adjustable 3-band EQ (Bass, Mid, Treble) alongside integrated Compressor and Limiter.
+- **Per-Singer Key & Tempo Recall**: Automatically tracks each singer's customized pitch shift (key) and tempo (playback speed multiplier) per song in `SingerHistory`. When a singer is added to rotation or re-queues a track from search or singer history, their preferred key and speed are instantly recalled. Global profile defaults in `SingerAudioSettings` act as the initial baseline when a singer performs a new track.
+- **Per-Singer Mic Level & Vocal EQ Recall**: Automatically loads and applies the on-stage performer's saved vocal gain (mic level), 3-band EQ (Treble, Mid, Bass), Compressor, and Limiter settings from `SingerAudioSettings` to the audio engine and `KaraokePage` sliders when their performance starts. Includes dedicated **[Save to Singer]** and **[Recall Singer]** action buttons right on the Audio Controls card header for one-click live preset saving and instant recall.
 - **Automatic Volume Normalization**: Measures each track's integrated loudness (LUFS) via a single-pass FFmpeg `loudnorm` (EBU R128) analysis the first time it's loaded for playback, then applies a corrective gain so every song lands near the same perceived loudness without the DJ manually riding the volume between tracks. Configurable target loudness and an on/off toggle in Settings; measurement runs in the background and is cached permanently per song.
 - **Show Flow Automation**: Automatically manages background music levels between tracks (Opening Music, Fill-in Music, and End of Rotation sets).
 - **Configurable Fill-In Music Delay**: Settings slider (0-30s) to set the exact delay before fill-in background music starts.

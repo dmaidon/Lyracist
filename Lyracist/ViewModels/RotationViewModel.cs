@@ -1,4 +1,4 @@
-// Edited on Sep 4, 2026 @ 07:25:00 -> Add ToggleLastRoundCommand
+// Edited on Sep 6, 2026 @ 07:31:30 -> Support per-singer key/tempo recall, pending song tempo, and performance history persistence
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,6 +25,9 @@ public partial class PendingSong : ObservableObject
 
     [ObservableProperty]
     private string _key = "0";
+
+    [ObservableProperty]
+    private double _tempo = 1.0;
 
     [ObservableProperty]
     private string _notes = string.Empty;
@@ -155,7 +158,7 @@ public partial class RotationViewModel : BaseViewModel
         ? "No songs performed in this session yet."
         : string.Join(Environment.NewLine, SessionPerformedSongs.Select(s => s.FormattedText));
 
-    public void RecordPerformedSong(string singerName, string songTitle, string artist, string key = "0", string duetPartner = "")
+    public void RecordPerformedSong(string singerName, string songTitle, string artist, string key = "0", string duetPartner = "", double tempo = 1.0)
     {
         if (string.IsNullOrWhiteSpace(singerName)) return;
 
@@ -167,6 +170,7 @@ public partial class RotationViewModel : BaseViewModel
             SongTitle = string.IsNullOrWhiteSpace(songTitle) ? "Unknown Song" : songTitle,
             Artist = artist ?? string.Empty,
             Key = key ?? "0",
+            Tempo = tempo <= 0 ? 1.0 : tempo,
             PerformedAt = DateTime.Now
         };
 
@@ -406,12 +410,42 @@ public partial class RotationViewModel : BaseViewModel
         });
     }
 
-    public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "", string duetPartner = "", bool isMusic = false)
+    public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "", string duetPartner = "", bool isMusic = false, double tempo = 1.0)
     {
         name = NameFormatting.ProperCase(name);
         duetPartner = NameFormatting.ProperCase(duetPartner);
         title = NameFormatting.ProperCase(title);
         artist = NameFormatting.ProperCase(artist);
+
+        // Auto-recall key and tempo if not explicitly customized
+        if (!isMusic && (string.IsNullOrWhiteSpace(key) || key == "0") && Math.Abs(tempo - 1.0) < 0.001 && !string.IsNullOrWhiteSpace(title))
+        {
+            var recalled = Lyracist.Services.Database.SingerHistoryService.GetSongHistory(name, title, artist);
+            if (recalled.HasValue)
+            {
+                key = recalled.Value.Key;
+                tempo = recalled.Value.Tempo;
+            }
+            else
+            {
+                try
+                {
+                    using var context = new Lyracist.Data.LyracistDbContext();
+                    var dbSinger = context.Singers.Include(s => s.AudioSettings).FirstOrDefault(s => s.Name == name);
+                    if (dbSinger?.AudioSettings != null)
+                    {
+                        if (dbSinger.AudioSettings.Key != 0)
+                            key = dbSinger.AudioSettings.Key.ToString("+0;-0;0");
+                        if (dbSinger.AudioSettings.Tempo > 0.1 && Math.Abs(dbSinger.AudioSettings.Tempo - 1.0) > 0.01)
+                            tempo = dbSinger.AudioSettings.Tempo;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.LogError(ex, "AddSinger: failed to load singer default key/tempo");
+                }
+            }
+        }
 
         if (isMusic)
         {
@@ -421,6 +455,7 @@ public partial class RotationViewModel : BaseViewModel
                 SongTitle = title,
                 Artist = artist,
                 Key = key,
+                Tempo = tempo,
                 Notes = notes,
                 Source = source,
                 ExternalLink = externalLink,
@@ -437,10 +472,10 @@ public partial class RotationViewModel : BaseViewModel
             return;
         }
 
-        // Save to singer song history database
+        // Save to singer song history database with key and tempo
         System.Threading.Tasks.Task.Run(() =>
         {
-            Lyracist.Services.Database.SingerHistoryService.SaveHistory(name, title, artist, source, externalLink);
+            Lyracist.Services.Database.SingerHistoryService.SaveHistory(name, title, artist, source, externalLink, key, tempo);
         });
 
         int score = 0;
@@ -473,6 +508,7 @@ public partial class RotationViewModel : BaseViewModel
                 existingSinger.SongTitle = title;
                 existingSinger.Artist = artist;
                 existingSinger.Key = key;
+                existingSinger.Tempo = tempo;
                 existingSinger.Notes = notes;
                 existingSinger.Source = source;
                 existingSinger.ExternalLink = externalLink;
@@ -496,6 +532,7 @@ public partial class RotationViewModel : BaseViewModel
                     Title = title,
                     Artist = artist,
                     Key = key,
+                    Tempo = tempo,
                     Notes = notes,
                     Source = source,
                     ExternalLink = externalLink
@@ -519,6 +556,7 @@ public partial class RotationViewModel : BaseViewModel
             inactiveSinger.SongTitle = title;
             inactiveSinger.Artist = artist;
             inactiveSinger.Key = key;
+            inactiveSinger.Tempo = tempo;
             inactiveSinger.Notes = notes;
             inactiveSinger.Source = source;
             inactiveSinger.ExternalLink = externalLink;
@@ -569,6 +607,7 @@ public partial class RotationViewModel : BaseViewModel
             SongTitle = title,
             Artist = artist,
             Key = key,
+            Tempo = tempo,
             Notes = notes,
             Source = source,
             ExternalLink = externalLink,
@@ -686,7 +725,8 @@ public partial class RotationViewModel : BaseViewModel
             }
 
             // Log performance history in database
-            SavePerformanceHistory(name, title, artist);
+            SavePerformanceHistory(name, title, artist, removed.Key, removed.Tempo, removed.Source, removed.ExternalLink);
+            RecordPerformedSong(name, title, artist, removed.Key, removed.DuetPartnerName, removed.Tempo);
 
             // Check if there is a pending song for this singer!
             if (_pendingSingerSongs.TryGetValue(name, out var list) && list.Count > 0)
@@ -701,6 +741,7 @@ public partial class RotationViewModel : BaseViewModel
                     SongTitle = nextSong.Title,
                     Artist = nextSong.Artist,
                     Key = nextSong.Key,
+                    Tempo = nextSong.Tempo,
                     Notes = nextSong.Notes,
                     Source = nextSong.Source,
                     ExternalLink = nextSong.ExternalLink
@@ -894,8 +935,8 @@ public partial class RotationViewModel : BaseViewModel
         singer.TotalSongsSung++;
 
         // 2. Log performance history in database and session history
-        SavePerformanceHistory(name, title, artist);
-        RecordPerformedSong(name, title, artist, singer.Key, singer.DuetPartnerName);
+        SavePerformanceHistory(name, title, artist, singer.Key, singer.Tempo, singer.Source, singer.ExternalLink);
+        RecordPerformedSong(name, title, artist, singer.Key, singer.DuetPartnerName, singer.Tempo);
 
         // Clear duet partner for subsequent rounds/songs in rotation
         singer.DuetPartnerName = string.Empty;
@@ -914,6 +955,7 @@ public partial class RotationViewModel : BaseViewModel
             singer.SongTitle = nextSong.Title;
             singer.Artist = nextSong.Artist;
             singer.Key = nextSong.Key;
+            singer.Tempo = nextSong.Tempo;
             singer.Notes = nextSong.Notes;
             singer.Source = nextSong.Source;
             singer.ExternalLink = nextSong.ExternalLink;
@@ -924,6 +966,7 @@ public partial class RotationViewModel : BaseViewModel
             singer.SongTitle = string.Empty;
             singer.Artist = string.Empty;
             singer.Key = "0";
+            singer.Tempo = 1.0;
             singer.ExternalLink = string.Empty;
             singer.Source = "Local";
         }
@@ -1262,7 +1305,7 @@ public partial class RotationViewModel : BaseViewModel
         _display.UpdateRotation([.. Rotation]);
     }
 
-    private void SavePerformanceHistory(string name, string title, string artist)
+    private void SavePerformanceHistory(string name, string title, string artist, string key = "0", double tempo = 1.0, string source = "Local", string link = "")
     {
         if (string.IsNullOrEmpty(name)) return;
 
@@ -1270,6 +1313,9 @@ public partial class RotationViewModel : BaseViewModel
         {
             try
             {
+                // Persist to SingerHistory with Key and Tempo
+                Lyracist.Services.Database.SingerHistoryService.SaveHistory(name, title, artist, source, link, key, tempo);
+
                 using var context = new Lyracist.Data.LyracistDbContext();
                 var dbSinger = context.Singers.FirstOrDefault(s => s.Name == name);
                 if (dbSinger != null)
@@ -1295,11 +1341,20 @@ public partial class RotationViewModel : BaseViewModel
 
                     if (dbSong != null)
                     {
+                        int parsedKey = 0;
+                        if (!string.IsNullOrWhiteSpace(key))
+                        {
+                            string cleanKey = key.TrimStart('+');
+                            int.TryParse(cleanKey, out parsedKey);
+                        }
+
                         var entry = new Lyracist.Data.Models.RotationEntry
                         {
                             SingerId = dbSinger.SingerId,
                             SongId = dbSong.SongId,
                             Status = "Finished",
+                            RequestedKey = parsedKey,
+                            RequestedTempo = tempo <= 0 ? 1.0 : tempo,
                             TimestampAdded = System.DateTime.UtcNow
                         };
                         context.RotationEntries.Add(entry);

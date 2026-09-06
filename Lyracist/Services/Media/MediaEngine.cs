@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 09:53:00 -> Add SongEnded event and wire IVideoBackend.EndReached for AutoAdvanceManager integration
+// Edited on Sep 6, 2026 @ 07:33:45 -> Support ActivePerformerKey and ActivePerformerTempo in UpdateAudioParameters
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -184,6 +184,34 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
             if (_activeDuetPartnerName != value)
             {
                 _activeDuetPartnerName = value;
+                UpdateAudioParameters();
+            }
+        }
+    }
+
+    private string? _activePerformerKey;
+    public string? ActivePerformerKey
+    {
+        get => _activePerformerKey;
+        set
+        {
+            if (_activePerformerKey != value)
+            {
+                _activePerformerKey = value;
+                UpdateAudioParameters();
+            }
+        }
+    }
+
+    private double _activePerformerTempo = 1.0;
+    public double ActivePerformerTempo
+    {
+        get => _activePerformerTempo;
+        set
+        {
+            if (Math.Abs(_activePerformerTempo - value) > 0.01)
+            {
+                _activePerformerTempo = value;
                 UpdateAudioParameters();
             }
         }
@@ -557,13 +585,25 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
             mergedLimiter = songSettings.Limiter;
         }
 
+        int performerKeyOffset = 0;
+        if (!string.IsNullOrWhiteSpace(ActivePerformerKey) && ActivePerformerKey != "0")
+        {
+            string clean = ActivePerformerKey.TrimStart('+');
+            int.TryParse(clean, out performerKeyOffset);
+        }
+        double performerTempo = ActivePerformerTempo > 0.1 ? ActivePerformerTempo : 1.0;
+
         // Apply Singer settings (merge/fallback)
         if (singerSettings != null && singerSettings.SingerId > 0)
         {
-            // Pitch offset sum (clamp to standard bounds -6 to +6)
-            mergedPitch = Math.Clamp(mergedPitch + singerSettings.Key, -6, 6);
-            // Speed factor multiplication (clamp to 0.5x to 2.0x)
-            mergedSpeed = Math.Clamp(mergedSpeed * singerSettings.Tempo, 0.5, 2.0);
+            // If performer requested/recalled key is set, use it; otherwise use singer default key
+            int effectiveKey = performerKeyOffset != 0 ? performerKeyOffset : singerSettings.Key;
+            mergedPitch = Math.Clamp(mergedPitch + effectiveKey, -6, 6);
+
+            // If performer requested/recalled tempo is set, use it; otherwise use singer default tempo
+            double effectiveTempo = Math.Abs(performerTempo - 1.0) > 0.01 ? performerTempo : singerSettings.Tempo;
+            mergedSpeed = Math.Clamp(mergedSpeed * effectiveTempo, 0.5, 2.0);
+
             // Volume attenuation multiplication
             mergedVolume = Math.Clamp((mergedVolume / 100.0) * (singerSettings.Gain / 100.0) * 100.0, 0.0, 100.0);
             // Equalization filters sum (clamp to -10dB to +10dB)
@@ -574,6 +614,13 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
             mergedCompressor = Math.Clamp(Math.Max(mergedCompressor, singerSettings.Compressor), 0.0, 100.0);
             // Limiter threshold: use lowest (most restrictive) dB ceiling (Min)
             mergedLimiter = Math.Clamp(Math.Min(mergedLimiter, singerSettings.Limiter), -20.0, 0.0);
+        }
+        else
+        {
+            if (performerKeyOffset != 0)
+                mergedPitch = Math.Clamp(mergedPitch + performerKeyOffset, -6, 6);
+            if (Math.Abs(performerTempo - 1.0) > 0.01)
+                mergedSpeed = Math.Clamp(mergedSpeed * performerTempo, 0.5, 2.0);
         }
 
         // Merge in Duet Partner settings

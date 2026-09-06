@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 09:52:45 -> Add SongEnded event to IMediaEngine for natural song finish notification
+// Edited on Sep 6, 2026 @ 07:33:00 -> Add ActivePerformerKey and ActivePerformerTempo to IMediaEngine for per-performer audio recall
 using System;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -45,6 +45,9 @@ public interface IMediaEngine
 
     string? ActiveSingerName { get; set; }
     string? ActiveDuetPartnerName { get; set; }
+    string? ActivePerformerKey { get; set; }
+    double ActivePerformerTempo { get; set; }
     bool EnableKillVocal { get; set; }
     void UpdateAudioParameters();
 }
+

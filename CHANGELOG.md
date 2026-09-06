@@ -1,9 +1,28 @@
-<!-- Edited on Sep 6, 2026 @ 06:33:00 -> Update ChangeLog for Rotation Settings groupbox in KSRotation -->
-Last Edit: Sep 6, 2026 - KSRotation Settings Tab Layout, Compact Email Settings & Rotation Settings GroupBox
+<!-- Edited on Sep 6, 2026 @ 07:44:00 -> Update ChangeLog for per-singer key/tempo recall and mic/EQ save and recall -->
+Last Edit: Sep 6, 2026 - Per-Singer Key/Tempo Recall & Mic Level/EQ Save and Recall
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.15] - 2026-09-06
+
+### Added
+- **Per-Singer Key/Tempo Recall & Per-Singer Mic Level/EQ Save and Recall (Lyracist)**:
+  - **Dual-Tier Key and Tempo Recall**:
+    - *Per-Song History Tracking*: Key shift (`Key`) and playback speed (`Tempo`) are recorded per performer and song in the `SingerHistory` SQLite database table. When a performer selects or repeats a song (via Search, Singer History, or rotation queuing), their exact key and tempo for that track are automatically recalled.
+    - *Singer Profile Defaults*: Global performer vocal defaults in `SingerAudioSettings` serve as the fallback initial baseline when a performer sings a song for the first time without prior history.
+    - Added `Singer.Tempo` and `PendingSong.Tempo` properties to carry custom tempo settings through the rotation queue, and implemented `SingerHistoryService.GetSongHistory()` with case-insensitive `COLLATE NOCASE` lookups.
+  - **Per-Singer Mic Level & Vocal EQ Recall**:
+    - A performer's saved vocal level gain (mic level), 3-band EQ (`Treble`, `Mid`, `Bass`), and dynamics (`Compressor`, `Limiter`) from `SingerAudioSettings` are automatically loaded and applied when their performance begins.
+    - The host console's Audio Controls sliders on `KaraokePage` dynamically update to reflect the on-stage performer's profile.
+    - Direct **[Save to Singer]** and **[Recall Singer]** action buttons in the Audio Controls card header allow the KJ to instantly save live audio adjustments into the performer's profile or revert to their saved defaults with a single click.
+  - **Singer History DataGrid Enhancements**:
+    - Added `Key` and `Speed` columns to the Singer History tab in `KaraokePage.xaml`.
+    - Preserved recalled key and tempo when queuing past songs directly from the Singer History tab into the active rotation via `AddHistorySongToRotationCommand`.
+  - **Database Migration & Unit Tests**:
+    - Auto-migrated `SingerHistory` SQLite table schema to add `Key TEXT DEFAULT '0'` and `Tempo REAL DEFAULT 1.0` columns safely on startup.
+    - Added `SingerAudioRecallTests` in `Lyracist.Tests` validating database persistence, song history key/tempo recall, and rotation completion tracking.
 
 ## [26.9.5.14] - 2026-09-06
 

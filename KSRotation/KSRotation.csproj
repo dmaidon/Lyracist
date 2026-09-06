@@ -1,4 +1,4 @@
-<!-- Edited on Sep 3, 2026 @ 08:22:00 -> Embed Resources\billboard.html for Audience Billboard web portal -->
+<!-- Edited on Sep 6, 2026 @ 08:01:00 -> Version bump to 26.9.6.593 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.9.6.592</AssemblyVersion>
-    <FileVersion>26.9.6.592</FileVersion>
+    <AssemblyVersion>26.9.6.593</AssemblyVersion>
+    <FileVersion>26.9.6.593</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>

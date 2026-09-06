@@ -1,4 +1,4 @@
-// Edited on Aug 30, 2026 @ 11:02:00 -> Document Unknown Artist tracking, deploy script version control, and repo size optimization
+// Edited on Sep 6, 2026 @ 07:46:00 -> Document Per-Singer Key, Tempo, Mic Level & Vocal EQ Recall and Audio Controls actions
 Library Metadata Probing & Deployment Synchronization (`Lyracist`, `LyracistDbEditor`, `Deploy`) - (August 2026)
 
 Section: Library Management & Deployment / High-Speed In-Memory Probing & Laptop Sync
@@ -1178,3 +1178,24 @@ Section: Lyracist & KSRotation & KSRotation.Maui / Linked Singers
    - KSRotation.Maui: a 🔗 button in each singer's action row on the main rotation screen.
    - Not yet available: automatically linking two singers who sign up together from the patron/kiosk request app - for now, linking is a DJ action performed after both singers are already in the rotation.
 
+Section: Lyracist / Per-Singer Key, Tempo, Mic Level & Vocal EQ Recall
+
+[Per-Singer Audio & Performance Memory]
+1. Automatic Key & Tempo Memory per Performer per Song:
+   - When a singer is added to the rotation (via local library search, patron kiosk request, or manual queue entry), Lyracist automatically checks the singer's performance history (`SingerHistory`).
+   - If the singer has previously performed that specific song, their saved Key transposition (semitone offset) and playback Tempo (speed multiplier, e.g., 1.1x) are automatically recalled and applied to the rotation entry.
+   - If the song has not been sung by that performer before, Lyracist falls back to the performer's general profile preferences (`SingerAudioSettings`), ensuring personalized pitch and speed defaults are maintained without manual host intervention.
+   - When the performer takes the stage and their track begins playback, the live Pitch Transpose and Speed sliders in the Live Deck reflect these recalled settings immediately.
+
+2. Per-Singer Mic Level & Vocal EQ Recall:
+   - When a performer's turn begins and their track starts, Lyracist automatically loads and applies the performer's saved vocal gain (`Gain`), 3-band parametric EQ (`Treble`, `Mid`, `Bass`), dynamic compressor threshold, and peak limiter from `SingerAudioSettings`.
+   - The on-screen Audio Controls sliders in the Karaoke dashboard update in real time to reflect the active performer's profile, delivering consistent microphone leveling and tonal balance throughout the show.
+
+3. Quick Action Buttons in Audio Controls ("Save to Singer" & "Recall Singer"):
+   - Located on the Audio Controls card header alongside the "Reset Audio" button:
+     * "Save to Singer": Instantly saves the current Audio Controls slider values (Volume as Vocal Gain, Treble, Mid, Bass, Compressor, Limiter) as the active singer's saved defaults in `SingerAudioSettings`, and updates their performance history with the current Pitch and Speed settings.
+     * "Recall Singer": Re-reads and reapplies the active singer's saved audio defaults from the database on demand, resetting the DSP chain and slider controls to their stored preferences if adjustments were made during the song.
+
+4. Singer History Key & Speed Tracking:
+   - The Singer History table in the Karaoke tab now includes dedicated "Key" and "Speed" columns displaying past transposition and tempo settings for every completed performance.
+   - Re-adding a song from Singer History back into the rotation queue preserves and applies the historical Key and Tempo settings seamlessly.

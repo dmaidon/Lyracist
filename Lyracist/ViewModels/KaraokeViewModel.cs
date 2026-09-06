@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 07:07:00 -> Use Lyracist.Shared for NameFormatting
+// Edited on Sep 6, 2026 @ 07:35:00 -> Add SaveSingerAudioDefaults and RecallSingerAudioDefaults commands, per-singer key/tempo/mic recall
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -1167,7 +1167,7 @@ public partial class KaraokeViewModel : BaseViewModel
             }
         }
 
-        Rotation.AddSinger(targetSingerName, entry.SongTitle, entry.Artist, "0", string.Empty, entry.Source, entry.Link, NewDuetPartnerName);
+        Rotation.AddSinger(targetSingerName, entry.SongTitle, entry.Artist, entry.Key ?? "0", string.Empty, entry.Source, entry.Link, NewDuetPartnerName, tempo: entry.Tempo > 0.1 ? entry.Tempo : 1.0);
     }
 
     [RelayCommand]
@@ -1239,6 +1239,118 @@ public partial class KaraokeViewModel : BaseViewModel
         Bass = 0.0;
         Compressor = 0.0;
         Limiter = 0.0;
+    }
+
+    [RelayCommand]
+    private void SaveSingerAudioDefaults()
+    {
+        string singerName = _mediaEngine.ActiveSingerName ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(singerName) || singerName.Equals("None", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Rotation.SelectedSinger != null)
+                singerName = Rotation.SelectedSinger.Name;
+        }
+
+        if (string.IsNullOrWhiteSpace(singerName) || singerName.Equals("None", StringComparison.OrdinalIgnoreCase))
+        {
+            System.Windows.MessageBox.Show(
+                "Please select an active singer or performer in the rotation first.",
+                "No Singer Selected",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        // 1. Save Mic Level (Gain), 3-band EQ, Dynamics, and base Key/Tempo to SingerAudioSettings
+        var settings = new Lyracist.Data.Models.SingerAudioSettings
+        {
+            Gain = Volume,
+            Treble = Treble,
+            Mid = Mid,
+            Bass = Bass,
+            Compressor = Compressor,
+            Limiter = Limiter,
+            Key = Pitch,
+            Tempo = Speed
+        };
+        _libraryService.SaveSingerSettings(singerName, settings);
+
+        // 2. If a current or selected performer has a song, save Pitch & Speed into SingerHistory and Rotation
+        var activeSinger = Rotation.Rotation.FirstOrDefault(s => s.Name.Equals(singerName, StringComparison.OrdinalIgnoreCase))
+                           ?? Rotation.SelectedSinger;
+        if (activeSinger != null)
+        {
+            activeSinger.Key = Pitch.ToString("+0;-0;0");
+            activeSinger.Tempo = Speed;
+
+            if (!string.IsNullOrWhiteSpace(activeSinger.SongTitle))
+            {
+                Lyracist.Services.Database.SingerHistoryService.SaveHistory(
+                    singerName,
+                    activeSinger.SongTitle,
+                    activeSinger.Artist,
+                    activeSinger.Source,
+                    activeSinger.ExternalLink,
+                    activeSinger.Key,
+                    activeSinger.Tempo);
+            }
+        }
+
+        System.Windows.MessageBox.Show(
+            $"Saved vocal EQ, mic level ({Volume:0}%), key ({Pitch:+0;-0;0}), and tempo ({Speed:0.0}x) for {singerName}.",
+            "Singer Audio Saved",
+            System.Windows.MessageBoxButton.OK,
+            System.Windows.MessageBoxImage.Information);
+    }
+
+    [RelayCommand]
+    private void RecallSingerAudioDefaults()
+    {
+        string singerName = _mediaEngine.ActiveSingerName ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(singerName) || singerName.Equals("None", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Rotation.SelectedSinger != null)
+                singerName = Rotation.SelectedSinger.Name;
+        }
+
+        if (string.IsNullOrWhiteSpace(singerName) || singerName.Equals("None", StringComparison.OrdinalIgnoreCase))
+        {
+            System.Windows.MessageBox.Show(
+                "Please select an active singer or performer in the rotation first.",
+                "No Singer Selected",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var activeSinger = Rotation.Rotation.FirstOrDefault(s => s.Name.Equals(singerName, StringComparison.OrdinalIgnoreCase))
+                           ?? Rotation.SelectedSinger;
+
+        if (activeSinger != null && !string.IsNullOrWhiteSpace(activeSinger.SongTitle))
+        {
+            var recalled = Lyracist.Services.Database.SingerHistoryService.GetSongHistory(singerName, activeSinger.SongTitle, activeSinger.Artist);
+            if (recalled.HasValue)
+            {
+                activeSinger.Key = recalled.Value.Key;
+                activeSinger.Tempo = recalled.Value.Tempo;
+                _mediaEngine.ActivePerformerKey = activeSinger.Key;
+                _mediaEngine.ActivePerformerTempo = activeSinger.Tempo;
+            }
+            else
+            {
+                var dbSettings = _libraryService.GetSingerSettings(singerName);
+                if (dbSettings.SingerId > 0)
+                {
+                    activeSinger.Key = dbSettings.Key.ToString("+0;-0;0");
+                    activeSinger.Tempo = dbSettings.Tempo > 0.1 ? dbSettings.Tempo : 1.0;
+                    _mediaEngine.ActivePerformerKey = activeSinger.Key;
+                    _mediaEngine.ActivePerformerTempo = activeSinger.Tempo;
+                }
+            }
+        }
+
+        _mediaEngine.UpdateAudioParameters();
+        NotifyAudioPropertiesChanged();
     }
 
     [RelayCommand]
@@ -1377,6 +1489,8 @@ public partial class KaraokeViewModel : BaseViewModel
             CurrentSongName = $"{singer.Artist} - {singer.SongTitle}";
             _mediaEngine.ActiveSingerName = singer.Name;
             _mediaEngine.ActiveDuetPartnerName = singer.DuetPartnerName;
+            _mediaEngine.ActivePerformerKey = singer.Key;
+            _mediaEngine.ActivePerformerTempo = singer.Tempo;
 
             IsExternalPerformanceActive = false;
             ExternalPerformanceSource = string.Empty;

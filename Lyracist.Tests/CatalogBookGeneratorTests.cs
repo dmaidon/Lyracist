@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 09:21:10 -> Disable test parallelization and add online metadata fetch tests
+// Edited on Sep 6, 2026 @ 07:51:00 -> Include WAL and SHM files in test database staging
 using System;
 using System.IO;
 using Xunit;
@@ -12,28 +12,47 @@ namespace Lyracist.Tests
 {
     public class CatalogBookGeneratorTests
     {
+        private static bool _dbSeeded;
+        private static readonly object _dbLock = new object();
+
         public CatalogBookGeneratorTests()
         {
-            // Seed the test database by copying the active developer DB to the test runtime's Data folder
-            string sourceDb = @"C:\VB26\Release\Lyracist\Debug\net10.0-windows\Data\lyracist.db";
-            string targetDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
-            string targetDb = Path.Combine(targetDir, "lyracist.db");
-
-            if (File.Exists(sourceDb))
+            lock (_dbLock)
             {
-                Directory.CreateDirectory(targetDir);
-                try
+                if (!_dbSeeded)
                 {
-                    if (File.Exists(targetDb))
+                    // Seed the test database by copying the active developer DB to the test runtime's Data folder
+                    string sourceDb = @"C:\VB26\Release\Lyracist\Debug\net10.0-windows\Data\lyracist.db";
+                    string targetDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+                    string targetDb = Path.Combine(targetDir, "lyracist.db");
+
+                    if (File.Exists(sourceDb))
                     {
-                        File.SetAttributes(targetDb, FileAttributes.Normal);
+                        Directory.CreateDirectory(targetDir);
+                        try
+                        {
+                            foreach (var ext in new[] { "", "-wal", "-shm" })
+                            {
+                                string s = sourceDb + ext;
+                                string t = targetDb + ext;
+                                if (File.Exists(s))
+                                {
+                                    if (File.Exists(t))
+                                    {
+                                        File.SetAttributes(t, FileAttributes.Normal);
+                                    }
+                                    File.Copy(s, t, overwrite: true);
+                                    File.SetAttributes(t, FileAttributes.Normal);
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Ignore if file is in use or copy fails
+                        }
                     }
-                    File.Copy(sourceDb, targetDb, overwrite: true);
-                    File.SetAttributes(targetDb, FileAttributes.Normal);
-                }
-                catch
-                {
-                    // Ignore if file is in use or copy fails
+
+                    _dbSeeded = true;
                 }
             }
 

@@ -1,4 +1,4 @@
-<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update Content links for consolidated Packs, Banners, and Data directories -->
+<!-- Edited on Sep 6, 2026 @ 07:47:00 -> Bump version to 26.9.5.478 for per-singer key/tempo and mic level/EQ recall -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.9.5.477</AssemblyVersion>
-    <FileVersion>26.9.5.477</FileVersion>
+    <AssemblyVersion>26.9.5.478</AssemblyVersion>
+    <FileVersion>26.9.5.478</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->

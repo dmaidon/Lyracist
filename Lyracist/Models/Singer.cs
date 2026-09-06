@@ -1,4 +1,4 @@
-// Edited on Sep 5, 2026 @ 18:30:00 -> Add Id/LinkedSingerId for Linked Singers (stay-adjacent rotation pairs)
+// Edited on Sep 6, 2026 @ 07:29:15 -> Add Tempo property to support per-singer tempo recall
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -49,6 +49,9 @@ public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
 
     [ObservableProperty]
     private string _key = "0"; // e.g., +2, -1, or 0
+
+    [ObservableProperty]
+    private double _tempo = 1.0; // e.g. 1.0x, 1.1x
 
     [ObservableProperty]
     private string _notes = string.Empty;
