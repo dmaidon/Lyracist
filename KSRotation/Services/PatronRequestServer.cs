@@ -508,6 +508,7 @@ namespace KSRotation.Services
                         Lyracist.Data.Models.Singer? dbSinger;
                         bool wasRegistered = false;
                         bool wasClaimed = false;
+                        bool rateLimited = false;
                         await _singerLoginLock.WaitAsync(readTimeoutCts.Token);
                         try
                         {
@@ -516,20 +517,26 @@ namespace KSRotation.Services
                             {
                                 if (!TryAllowRegistration(clientIp))
                                 {
-                                    await SendTooManyRequestsAsync(stream);
-                                    return;
+                                    // Just note it and fall through to the finally - by this point the
+                                    // DB read has already completed and nothing further will write, so
+                                    // there's nothing left for the lock to serialize. Awaiting the 429
+                                    // send while still holding it would stall every other patron's login
+                                    // behind however long this client takes to drain its socket.
+                                    rateLimited = true;
                                 }
-
-                                dbSinger = new Lyracist.Data.Models.Singer
+                                else
                                 {
-                                    Name = name,
-                                    PinCode = singerPin,
-                                    AvatarType = "None",
-                                    AvatarSource = ""
-                                };
-                                context.Singers.Add(dbSinger);
-                                await context.SaveChangesAsync();
-                                wasRegistered = true;
+                                    dbSinger = new Lyracist.Data.Models.Singer
+                                    {
+                                        Name = name,
+                                        PinCode = singerPin,
+                                        AvatarType = "None",
+                                        AvatarSource = ""
+                                    };
+                                    context.Singers.Add(dbSinger);
+                                    await context.SaveChangesAsync();
+                                    wasRegistered = true;
+                                }
                             }
                             else if (string.IsNullOrEmpty(dbSinger.PinCode))
                             {
@@ -543,8 +550,14 @@ namespace KSRotation.Services
                             _singerLoginLock.Release();
                         }
 
+                        if (rateLimited)
+                        {
+                            await SendTooManyRequestsAsync(stream);
+                            return;
+                        }
+
                         // Non-null by construction: the only path that leaves dbSinger null returns
-                        // early (line ~527) before reaching here.
+                        // early (the rateLimited check above) before reaching here.
                         var confirmedSinger = dbSinger!;
 
                         if (wasRegistered)

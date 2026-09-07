@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 12:08:00 -> Register PurchasedTrackSyncService and StoreSyncSummaryWindow in DI
+// Edited on Sep 6, 2026 @ 18:13:00 -> Add ClearAbandonedMigrationLocks and migration retry logic to prevent SQLite Error 11
 using System;
 using System.Linq;
 using System.Windows;
@@ -43,6 +43,28 @@ public partial class App : System.Windows.Application
         {
             AppLogger.LogError(ex, "Failed to initialize SQLite keep-alive connection");
         }
+    }
+
+    /// <summary>
+    /// Runs the post-Migrate() steps every startup needs, regardless of whether Migrate() succeeded
+    /// on the first try or only on the self-healing retry - the retry catch used to skip these
+    /// entirely, so a database that only recovered via retry booted without the SingerHistory table
+    /// (breaking per-singer key/tempo save/recall with "no such table: SingerHistory") and without
+    /// the deduplicated unique Songs.FilePath index.
+    /// </summary>
+    private static void ApplyPostMigrationSetup(Lyracist.Data.LyracistDbContext db)
+    {
+        db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+
+        // Clean up migration lock so subsequent connections start clean
+        db.Database.ExecuteSqlRaw("DROP TABLE IF EXISTS \"__EFMigrationsLock\";");
+
+        // Deduplicate Songs on FilePath before making index unique
+        db.Database.ExecuteSqlRaw("DELETE FROM Songs WHERE SongId NOT IN (SELECT MIN(SongId) FROM Songs GROUP BY FilePath);");
+        db.Database.ExecuteSqlRaw("DROP INDEX IF EXISTS IX_Songs_FilePath;");
+        db.Database.ExecuteSqlRaw("CREATE UNIQUE INDEX IF NOT EXISTS IX_Songs_FilePath ON Songs (FilePath);");
+
+        Lyracist.Services.Database.SingerHistoryService.EnsureTableCreated();
     }
 
     private static void CleanUpOrphanedPlaybackTempDirs()
@@ -242,23 +264,33 @@ public partial class App : System.Windows.Application
         // fully-formed schema instead of an empty 0-byte SQLite file.
         try
         {
+            // Clear any abandoned __EFMigrationsLock table left from an interrupted session/crash
+            Lyracist.Data.LyracistDbContext.ClearAbandonedMigrationLocks();
+
             using var db = new Lyracist.Data.LyracistDbContext();
             db.Database.Migrate();
-            db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+            ApplyPostMigrationSetup(db);
 
-            // Deduplicate Songs on FilePath before making index unique
-            db.Database.ExecuteSqlRaw("DELETE FROM Songs WHERE SongId NOT IN (SELECT MIN(SongId) FROM Songs GROUP BY FilePath);");
-            db.Database.ExecuteSqlRaw("DROP INDEX IF EXISTS IX_Songs_FilePath;");
-            db.Database.ExecuteSqlRaw("CREATE UNIQUE INDEX IF NOT EXISTS IX_Songs_FilePath ON Songs (FilePath);");
-
-            Lyracist.Services.Database.SingerHistoryService.EnsureTableCreated();
-            
             // Keep database connection alive to optimize SQLite caching and concurrency
             KeepDatabaseAlive();
         }
         catch (Exception ex)
         {
             AppLogger.LogError(ex, "Database migration");
+
+            // Self-healing recovery: if an abandoned migration lock caused an Error 11, retry once
+            try
+            {
+                Lyracist.Data.LyracistDbContext.ClearAbandonedMigrationLocks();
+                using var dbRetry = new Lyracist.Data.LyracistDbContext();
+                dbRetry.Database.Migrate();
+                ApplyPostMigrationSetup(dbRetry);
+                KeepDatabaseAlive();
+            }
+            catch (Exception retryEx)
+            {
+                AppLogger.LogError(retryEx, "Database migration recovery retry");
+            }
         }
 
         // Resolve and show the SplashWindow only if the setting is enabled

@@ -409,6 +409,7 @@ namespace KSRotation.ViewModels
 
         private (string Ssid, string Password) _cachedWifiInfo = (string.Empty, string.Empty);
         private DateTime _wifiInfoCachedAt = DateTime.MinValue;
+        private readonly object _wifiInfoLock = new();
 
         // WifiHelper.GetConnectedSsid() can fall back to spawning "netsh wlan show interfaces" and
         // blocking up to 1 second when the native WLAN API path fails - GetVenueInfoJson is wired to
@@ -419,16 +420,27 @@ namespace KSRotation.ViewModels
 
         private string GetVenueInfoJson()
         {
-            if (DateTime.UtcNow - _wifiInfoCachedAt >= WifiInfoCacheDuration)
+            // Concurrent per-connection request threads (see PatronRequestServer) all call this - a
+            // plain check-then-refresh without a lock lets every one of them observe the same stale
+            // timestamp at a cache-expiry boundary and independently pay the ~1s netsh fallback, and
+            // (string, string) isn't assigned atomically, so a reader could see a torn (newSsid,
+            // oldPassword) pair mid-refresh. The lock also spans the read so it always sees a
+            // consistent pair, not just a consistent write.
+            string ssid, pass;
+            lock (_wifiInfoLock)
             {
-                string freshSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
-                string freshPass = !string.IsNullOrWhiteSpace(freshSsid) ? WifiPasswordStore.GetPasswordForSsid(freshSsid) : string.Empty;
-                _cachedWifiInfo = (freshSsid, freshPass);
-                _wifiInfoCachedAt = DateTime.UtcNow;
+                if (DateTime.UtcNow - _wifiInfoCachedAt >= WifiInfoCacheDuration)
+                {
+                    string freshSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
+                    string freshPass = !string.IsNullOrWhiteSpace(freshSsid) ? WifiPasswordStore.GetPasswordForSsid(freshSsid) : string.Empty;
+                    _cachedWifiInfo = (freshSsid, freshPass);
+                    _wifiInfoCachedAt = DateTime.UtcNow;
+                }
+
+                ssid = _cachedWifiInfo.Ssid;
+                pass = _cachedWifiInfo.Password;
             }
 
-            string ssid = _cachedWifiInfo.Ssid;
-            string pass = _cachedWifiInfo.Password;
             var dto = new VenueInfoResponseDto
             {
                 venue = VenueName,
