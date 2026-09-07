@@ -116,6 +116,24 @@ namespace System.Windows
                 method.DynamicInvoke();
             });
         }
+
+        /// <summary>
+        /// Synchronous WPF-style Dispatcher.Invoke, needed so code shared with the WPF apps (e.g.
+        /// MainViewModel.IsSongInCurrentSession's thread-safe collection reads) compiles here too.
+        /// MainThread.InvokeOnMainThreadAsync already runs the callback inline with no dispatch when
+        /// called from the main thread itself, matching WPF's own "no-op passthrough" behavior for
+        /// Invoke called on the UI thread - GetAwaiter().GetResult() only actually blocks when called
+        /// from a background thread.
+        /// </summary>
+        public T Invoke<T>(Func<T> func)
+        {
+            return Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(func).GetAwaiter().GetResult();
+        }
+
+        /// <summary>WPF-style CheckAccess, so shared code can skip marshaling entirely when already on
+        /// the main thread instead of always paying for a dispatch (or hanging, if some caller ever
+        /// invoked this from a thread MAUI has no pump running for - MainThread's is always live).</summary>
+        public bool CheckAccess() => Microsoft.Maui.ApplicationModel.MainThread.IsMainThread;
     }
 }
 

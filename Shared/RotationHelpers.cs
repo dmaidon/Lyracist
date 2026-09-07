@@ -1,7 +1,10 @@
-// Edited on Sep 3, 2026 @ 23:48:30 -> Support Last Round mode in rotation advancement and next-singer highlights
+// Edited on Sep 7, 2026 @ 09:40:00 -> Add shared singer-name/song matching helpers (NormalizeForComparison,
+// IsSameSingerName, IsSameSong, IsSameSongLenient), consolidating what used to be near-identical hand-written
+// copies independently duplicated across KSRotation and Lyracist (and up to 4x within KSRotation alone).
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 
 namespace Lyracist.Shared
 {
@@ -11,6 +14,90 @@ namespace Lyracist.Shared
     /// </summary>
     public static class RotationHelpers
     {
+        /// <summary>
+        /// Cleans a name/title/artist string for comparison: replaces non-breaking spaces and tabs (which
+        /// patron devices and copy-pasted song titles commonly introduce) with regular spaces, collapses
+        /// runs of whitespace to a single space, and trims. Does not change case - callers compare with
+        /// <see cref="StringComparison.OrdinalIgnoreCase"/> so casing differences don't matter separately.
+        /// </summary>
+        public static string NormalizeForComparison(string? value)
+        {
+            if (string.IsNullOrEmpty(value)) return string.Empty;
+            string clean = value.Replace((char)0x00A0, ' ').Replace('\t', ' ').Trim();
+            return Regex.Replace(clean, @"\s+", " ");
+        }
+
+        /// <summary>True if two singer names are the same after <see cref="NormalizeForComparison"/>.</summary>
+        public static bool IsSameSingerName(string? name1, string? name2)
+        {
+            if (name1 == null || name2 == null) return false;
+            return string.Equals(NormalizeForComparison(name1), NormalizeForComparison(name2), StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Strict song match: both title and artist must match (after normalization). Used where a
+        /// specific already-known song is being compared against another specific song, e.g. checking
+        /// whether one singer already has this exact song queued.
+        /// </summary>
+        public static bool IsSameSong(string? title1, string? artist1, string? title2, string? artist2)
+        {
+            return string.Equals(NormalizeForComparison(title1), NormalizeForComparison(title2), StringComparison.OrdinalIgnoreCase)
+                && string.Equals(NormalizeForComparison(artist1), NormalizeForComparison(artist2), StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Lenient song match for session-wide duplicate detection: the title must match, and the artist
+        /// only has to match when BOTH sides have a known (non-blank) artist - an unknown artist on either
+        /// side falls back to a title-only match, so a request/history entry with no artist attached still
+        /// gets caught instead of silently bypassing the check.
+        /// </summary>
+        public static bool IsSameSongLenient(string? candidateTitle, string? candidateArtist, string queryTitle, string queryArtist)
+        {
+            if (!string.Equals(NormalizeForComparison(candidateTitle), NormalizeForComparison(queryTitle), StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            string cleanCandidateArtist = NormalizeForComparison(candidateArtist);
+            string cleanQueryArtist = NormalizeForComparison(queryArtist);
+            if (cleanCandidateArtist.Length == 0 || cleanQueryArtist.Length == 0)
+            {
+                return true;
+            }
+
+            return string.Equals(cleanCandidateArtist, cleanQueryArtist, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Runs a read against a collection that may be concurrently mutated on another thread (e.g. a
+        /// background HTTP request-handling thread reading a rotation ObservableCollection the UI
+        /// thread owns and mutates via Add/Remove/Move). Enumeration throws InvalidOperationException
+        /// if the collection changes mid-enumeration; this retries once (the mutation that caused it
+        /// will very likely have completed by then) and falls back to <paramref name="fallback"/> if
+        /// it's still racing, rather than propagating the exception.
+        /// Deliberately does not use Dispatcher.Invoke to marshal onto the owning thread instead - that
+        /// requires an actively-pumped message loop, which isn't guaranteed to exist (e.g. a unit test's
+        /// bare, un-started WPF Application) and would hang forever waiting for one that never runs.
+        /// </summary>
+        public static T ReadWithConcurrentRetry<T>(Func<T> read, T fallback)
+        {
+            try
+            {
+                return read();
+            }
+            catch (InvalidOperationException)
+            {
+                try
+                {
+                    return read();
+                }
+                catch (InvalidOperationException)
+                {
+                    return fallback;
+                }
+            }
+        }
+
         /// <summary>
         /// Moves an item from <paramref name="oldIndex"/> to <paramref name="newIndex"/> in <paramref name="list"/>.
         /// Uses RemoveAt + Insert to ensure visual collection containers update deterministically across all platforms.

@@ -179,27 +179,6 @@ public partial class RotationViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// True if the title matches and, when both sides have a known artist, the artist also matches.
-    /// An unknown (blank) artist on either side falls back to a title-only match, so callers that
-    /// don't yet know the artist (or requests with no artist attached) still get caught.
-    /// </summary>
-    private static bool IsSameSongForSession(string? candidateTitle, string? candidateArtist, string queryTitle, string queryArtist)
-    {
-        if (!string.Equals(candidateTitle?.Trim(), queryTitle, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        string cleanCandidateArtist = candidateArtist?.Trim() ?? string.Empty;
-        if (cleanCandidateArtist.Length == 0 || queryArtist.Length == 0)
-        {
-            return true;
-        }
-
-        return string.Equals(cleanCandidateArtist, queryArtist, StringComparison.OrdinalIgnoreCase);
-    }
-
-    /// <summary>
     /// Checks whether a song has already been performed or is currently queued in the active rotation during this session.
     /// </summary>
     public bool IsSongInCurrentSession(string songTitle, string artist = "")
@@ -208,19 +187,16 @@ public partial class RotationViewModel : BaseViewModel
         string cleanTitle = songTitle.Trim();
         string cleanArtist = artist?.Trim() ?? string.Empty;
 
-        // 1. Check songs already performed this session
-        if (SessionPerformedSongs.Any(s => IsSameSongForSession(s.SongTitle, s.Artist, cleanTitle, cleanArtist)))
-        {
-            return true;
-        }
-
-        // 2. Check songs currently queued in active rotation
-        if (Rotation.Any(s => IsSameSongForSession(s.SongTitle, s.Artist, cleanTitle, cleanArtist)))
-        {
-            return true;
-        }
-
-        return false;
+        // SessionPerformedSongs and Rotation are both ObservableCollections mutated only on the UI
+        // thread elsewhere in this app, but this method is also invoked directly from
+        // TabletLyricsServer's background request-handling thread (it runs its listen loop via
+        // Task.Run), which can race with a UI-thread Add/Remove/Move mid-enumeration. Fails open
+        // (treats it as not a duplicate) rather than blocking - see ReadWithConcurrentRetry's own
+        // comment for why Dispatcher.Invoke isn't used here.
+        return RotationHelpers.ReadWithConcurrentRetry(() =>
+            SessionPerformedSongs.Any(s => RotationHelpers.IsSameSongLenient(s.SongTitle, s.Artist, cleanTitle, cleanArtist))
+            || Rotation.Any(s => RotationHelpers.IsSameSongLenient(s.SongTitle, s.Artist, cleanTitle, cleanArtist)),
+            fallback: false);
     }
 
     [RelayCommand]
