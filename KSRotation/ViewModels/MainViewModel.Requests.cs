@@ -74,21 +74,13 @@ namespace KSRotation.ViewModels
         {
             if (request == null) return;
 
-            string normalizedName = string.Empty;
-            if (!string.IsNullOrWhiteSpace(request.Name))
-            {
-                normalizedName = System.Text.RegularExpressions.Regex.Replace(
-                    request.Name.Replace('\u00A0', ' ').Replace('\t', ' '),
-                    @"\s+",
-                    " "
-                ).Trim();
-            }
+            string normalizedName = RotationHelpers.NormalizeForComparison(request.Name);
 
             var requestedSongs = request.Songs?.Count > 0
                 ? request.Songs
                 : [new RequestedSong(request.Song, request.Artist)];
 
-            var existingSinger = Singers.FirstOrDefault(s => IsSameSingerName(s.Name, normalizedName) && s.IsMusic == (request.RequestType == "Music"));
+            var existingSinger = Singers.FirstOrDefault(s => RotationHelpers.IsSameSingerName(s.Name, normalizedName) && s.IsMusic == (request.RequestType == "Music"));
             if (existingSinger != null)
             {
                 if (!string.IsNullOrWhiteSpace(request.DuetPartnerName))
@@ -111,6 +103,12 @@ namespace KSRotation.ViewModels
                     if (string.IsNullOrWhiteSpace(reqSong.Song)) continue;
 
                     if (SingerHasSong(existingSinger, reqSong.Song, reqSong.Artist)) continue;
+
+                    // The patron-portal submission checked this at request time, but the session can
+                    // change between submission and a DJ clicking Accept (e.g. someone else performed
+                    // or got queued for the same song in the meantime) - re-check here so accepting a
+                    // now-stale request doesn't silently let a duplicate back in.
+                    if (BlockDuplicateSongsInSession && IsSongInCurrentSession(reqSong.Song, reqSong.Artist)) continue;
 
                     if (string.IsNullOrWhiteSpace(existingSinger.Song))
                     {
@@ -137,6 +135,9 @@ namespace KSRotation.ViewModels
                     if (string.IsNullOrWhiteSpace(reqSong.Song)) continue;
 
                     if (SingerHasSong(newSinger, reqSong.Song, reqSong.Artist)) continue;
+
+                    // See matching comment in the existingSinger branch above.
+                    if (BlockDuplicateSongsInSession && IsSongInCurrentSession(reqSong.Song, reqSong.Artist)) continue;
 
                     if (string.IsNullOrWhiteSpace(newSinger.Song))
                     {
@@ -406,10 +407,28 @@ namespace KSRotation.ViewModels
 
         private string GetRotationJson() => _cachedRotationJson;
 
+        private (string Ssid, string Password) _cachedWifiInfo = (string.Empty, string.Empty);
+        private DateTime _wifiInfoCachedAt = DateTime.MinValue;
+
+        // WifiHelper.GetConnectedSsid() can fall back to spawning "netsh wlan show interfaces" and
+        // blocking up to 1 second when the native WLAN API path fails - GetVenueInfoJson is wired to
+        // /api/info, polled every few seconds by every connected patron/kiosk/billboard client, and
+        // the SSID essentially never changes mid-event, so re-querying it on every single poll turned
+        // an occasional slow call into a recurring per-client latency hit.
+        private static readonly TimeSpan WifiInfoCacheDuration = TimeSpan.FromSeconds(30);
+
         private string GetVenueInfoJson()
         {
-            string ssid = WifiHelper.GetConnectedSsid() ?? string.Empty;
-            string pass = !string.IsNullOrWhiteSpace(ssid) ? WifiPasswordStore.GetPasswordForSsid(ssid) : string.Empty;
+            if (DateTime.UtcNow - _wifiInfoCachedAt >= WifiInfoCacheDuration)
+            {
+                string freshSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
+                string freshPass = !string.IsNullOrWhiteSpace(freshSsid) ? WifiPasswordStore.GetPasswordForSsid(freshSsid) : string.Empty;
+                _cachedWifiInfo = (freshSsid, freshPass);
+                _wifiInfoCachedAt = DateTime.UtcNow;
+            }
+
+            string ssid = _cachedWifiInfo.Ssid;
+            string pass = _cachedWifiInfo.Password;
             var dto = new VenueInfoResponseDto
             {
                 venue = VenueName,
@@ -583,14 +602,11 @@ namespace KSRotation.ViewModels
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
                         if (singer == null) return "Singer not found.";
 
-                        if (singer.IsRotationStart)
-                        {
-                            singer.IsRotationStart = false;
-                        }
-                        else
-                        {
-                            RotationHelpers.SetRotationStartSinger(Singers, singer);
-                        }
+                        // ToggleRotationStartSinger handles both directions, including reassigning the
+                        // anchor to the next active singer when clearing it - setting IsRotationStart
+                        // = false directly here (as this used to) left no singer holding the anchor
+                        // until some unrelated mutation happened to call EnsureRotationStartFlag.
+                        RotationHelpers.ToggleRotationStartSinger(Singers, singer);
 
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();

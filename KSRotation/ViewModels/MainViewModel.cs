@@ -113,27 +113,6 @@ namespace KSRotation.ViewModels
                 now);
         }
 
-        /// <summary>
-        /// True if the title matches and, when both sides have a known artist, the artist also matches.
-        /// An unknown (blank) artist on either side falls back to a title-only match, so callers that
-        /// don't yet know the artist (or requests with no artist attached) still get caught.
-        /// </summary>
-        private static bool IsSameSongForSession(string? candidateTitle, string? candidateArtist, string queryTitle, string queryArtist)
-        {
-            if (!string.Equals(candidateTitle?.Trim(), queryTitle, StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            string cleanCandidateArtist = candidateArtist?.Trim() ?? string.Empty;
-            if (cleanCandidateArtist.Length == 0 || queryArtist.Length == 0)
-            {
-                return true;
-            }
-
-            return string.Equals(cleanCandidateArtist, queryArtist, StringComparison.OrdinalIgnoreCase);
-        }
-
         public bool IsSongInCurrentSession(string songTitle, string artist = "")
         {
             if (string.IsNullOrWhiteSpace(songTitle)) return false;
@@ -142,13 +121,22 @@ namespace KSRotation.ViewModels
 
             lock (_performanceHistoryLock)
             {
-                if (_performanceHistory.Any(p => IsSameSongForSession(p.SongTitle, p.ArtistName, cleanTitle, cleanArtist)))
+                if (_performanceHistory.Any(p => RotationHelpers.IsSameSongLenient(p.SongTitle, p.ArtistName, cleanTitle, cleanArtist)))
                 {
                     return true;
                 }
             }
 
-            if (Singers.Any(s => IsSameSongForSession(s.Song, s.Artist, cleanTitle, cleanArtist)))
+            // Singers is an ObservableCollection mutated only on the UI thread (Dispatcher.BeginInvoke
+            // everywhere else in this app), but this method is invoked directly from PatronRequestServer's
+            // background request-handling thread via the onCheckDuplicateSong delegate, which can race
+            // with a UI-thread Add/Remove/Move mid-enumeration. Fails open (treats it as not a duplicate)
+            // rather than blocking - see ReadWithConcurrentRetry's own comment for why Dispatcher.Invoke
+            // isn't used here.
+            bool queuedMatch = RotationHelpers.ReadWithConcurrentRetry(
+                () => Singers.Any(s => RotationHelpers.IsSameSongLenient(s.Song, s.Artist, cleanTitle, cleanArtist)),
+                fallback: false);
+            if (queuedMatch)
             {
                 return true;
             }
@@ -1480,7 +1468,7 @@ namespace KSRotation.ViewModels
             string trimmedSong = song?.Trim() ?? string.Empty;
             string trimmedArtist = artist?.Trim() ?? string.Empty;
 
-            var existingSinger = Singers.FirstOrDefault(s => IsSameSingerName(s.Name, trimmedName));
+            var existingSinger = Singers.FirstOrDefault(s => RotationHelpers.IsSameSingerName(s.Name, trimmedName));
             if (existingSinger != null)
             {
                 if (existingSinger.IsInactive)
@@ -1520,48 +1508,16 @@ namespace KSRotation.ViewModels
             return true;
         }
 
-        private static bool IsSameSingerName(string? name1, string? name2)
-        {
-            if (name1 == null || name2 == null) return false;
-
-            // Trim and replace any non-breaking spaces or tabs with regular spaces
-            string clean1 = name1.Replace('\u00A0', ' ').Replace('\t', ' ').Trim();
-            string clean2 = name2.Replace('\u00A0', ' ').Replace('\t', ' ').Trim();
-
-            // Collapse multiple spaces into one
-            clean1 = System.Text.RegularExpressions.Regex.Replace(clean1, @"\s+", " ");
-            clean2 = System.Text.RegularExpressions.Regex.Replace(clean2, @"\s+", " ");
-
-            return string.Equals(clean1, clean2, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool IsSameSong(string? title1, string? artist1, string? title2, string? artist2)
-        {
-            string cleanTitle1 = title1?.Replace('\u00A0', ' ').Replace('\t', ' ').Trim() ?? string.Empty;
-            string cleanArtist1 = artist1?.Replace('\u00A0', ' ').Replace('\t', ' ').Trim() ?? string.Empty;
-            string cleanTitle2 = title2?.Replace('\u00A0', ' ').Replace('\t', ' ').Trim() ?? string.Empty;
-            string cleanArtist2 = artist2?.Replace('\u00A0', ' ').Replace('\t', ' ').Trim() ?? string.Empty;
-
-            // Collapse multiple spaces into one
-            cleanTitle1 = System.Text.RegularExpressions.Regex.Replace(cleanTitle1, @"\s+", " ");
-            cleanArtist1 = System.Text.RegularExpressions.Regex.Replace(cleanArtist1, @"\s+", " ");
-            cleanTitle2 = System.Text.RegularExpressions.Regex.Replace(cleanTitle2, @"\s+", " ");
-            cleanArtist2 = System.Text.RegularExpressions.Regex.Replace(cleanArtist2, @"\s+", " ");
-
-            return string.Equals(cleanTitle1, cleanTitle2, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(cleanArtist1, cleanArtist2, StringComparison.OrdinalIgnoreCase);
-        }
-
         private static bool SingerHasSong(SingerEntry singer, string? song, string? artist)
         {
             if (string.IsNullOrWhiteSpace(song)) return false;
 
-            if (IsSameSong(singer.Song, singer.Artist, song, artist))
+            if (RotationHelpers.IsSameSong(singer.Song, singer.Artist, song, artist))
             {
                 return true;
             }
 
-            return singer.QueuedSongs.Any(qs => IsSameSong(qs.Song, qs.Artist, song, artist));
+            return singer.QueuedSongs.Any(qs => RotationHelpers.IsSameSong(qs.Song, qs.Artist, song, artist));
         }
 
         public bool TryAddPerformer(string? name, string? song, string? artist, string? duetPartner = "")
@@ -1573,13 +1529,9 @@ namespace KSRotation.ViewModels
             }
 
             // Normalize spaces in the added singer's name to clean up any tabs/non-breaking spaces
-            trimmedName = System.Text.RegularExpressions.Regex.Replace(
-                trimmedName.Replace('\u00A0', ' ').Replace('\t', ' '),
-                @"\s+",
-                " "
-            ).Trim();
+            trimmedName = RotationHelpers.NormalizeForComparison(trimmedName);
 
-            var existingSinger = Singers.FirstOrDefault(s => IsSameSingerName(s.Name, trimmedName));
+            var existingSinger = Singers.FirstOrDefault(s => RotationHelpers.IsSameSingerName(s.Name, trimmedName));
             if (existingSinger != null)
             {
                 bool wasInactive = existingSinger.IsInactive;
@@ -1849,13 +1801,20 @@ namespace KSRotation.ViewModels
 
                 EnforceActiveInactiveOrder(entry);
                 RotationHelpers.EnsureRotationStartFlag(Singers);
-                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
                 UpdateNextSingerHighlight();
             }
             finally
             {
                 _isFinishingSong = false;
             }
+
+            // _isFinishingSong suppressed OnSingersCollectionChanged's reentrant call above (same
+            // reason FinishSingerSong re-invokes this once it clears the flag) - without this, pausing
+            // or reactivating one half of a linked/duet pair could leave them non-adjacent until some
+            // unrelated mutation happened to trigger EnforceLinkedAdjacency again.
+            RotationHelpers.EnforceLinkedAdjacency(Singers);
+            RefreshLinkedPartnerNames();
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
 
             QueueSaveDatabase();
             if (IsDisplayEnabled)
@@ -1871,6 +1830,15 @@ namespace KSRotation.ViewModels
             int index = Singers.IndexOf(entry);
             if (index > 0)
             {
+                // Same active/inactive boundary guard as the desktop-bound MoveUp - this command is
+                // also reachable from the web DJ remote and KSRotation.Maui, which previously moved
+                // singers across the boundary unguarded, corrupting the ordering MoveUp/MoveDown and
+                // EnforceActiveInactiveOrder assume elsewhere.
+                if (entry.IsInactive && !Singers[index - 1].IsInactive)
+                {
+                    return;
+                }
+
                 Singers.Move(index, index - 1);
                 UpdateNextSingerHighlight();
                 RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
@@ -1886,6 +1854,12 @@ namespace KSRotation.ViewModels
             int index = Singers.IndexOf(entry);
             if (index >= 0 && index < Singers.Count - 1)
             {
+                // Same active/inactive boundary guard as the desktop-bound MoveDown - see MoveSingerUp.
+                if (!entry.IsInactive && Singers[index + 1].IsInactive)
+                {
+                    return;
+                }
+
                 Singers.Move(index, index + 1);
                 UpdateNextSingerHighlight();
                 RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
@@ -2008,6 +1982,12 @@ namespace KSRotation.ViewModels
             {
                 _isFinishingSong = false;
             }
+
+            // _isFinishingSong suppressed OnSingersCollectionChanged's reentrant call above, so
+            // (as in FinishSingerSong/ToggleSingerInactive) re-invoke it explicitly - manually
+            // promoting one half of a linked/duet pair to current shouldn't leave them non-adjacent.
+            RotationHelpers.EnforceLinkedAdjacency(Singers);
+            RefreshLinkedPartnerNames();
 
             // Keeps wait-time badges current as soon as someone's marked current - otherwise a fresh
             // rotation shows no badges at all until the first singer finishes.
@@ -2231,14 +2211,14 @@ namespace KSRotation.ViewModels
                     AddKnownSinger(entry.Name);
 
                     // Check if another singer already exists with the same name (ignoring spaces/casing)
-                    var target = Singers.FirstOrDefault(s => s != entry && IsSameSingerName(s.Name, entry.Name));
+                    var target = Singers.FirstOrDefault(s => s != entry && RotationHelpers.IsSameSingerName(s.Name, entry.Name));
                     if (target != null)
                     {
                         Action mergeAction = () =>
                         {
                             if (Singers.Contains(entry))
                             {
-                                var existingTarget = Singers.FirstOrDefault(s => s != entry && IsSameSingerName(s.Name, entry.Name));
+                                var existingTarget = Singers.FirstOrDefault(s => s != entry && RotationHelpers.IsSameSingerName(s.Name, entry.Name));
                                 if (existingTarget != null)
                                 {
                                     // 1. Reactivate the target singer if they were inactive
@@ -2261,11 +2241,50 @@ namespace KSRotation.ViewModels
                                     // 3. Merge any queued songs from the duplicate row
                                     existingTarget.QueuedSongs.AddRange(entry.QueuedSongs);
 
-                                    // 4. Delete the duplicate row
-                                    Singers.Remove(entry);
+                                    // 4. Same cleanup RemoveSinger performs before deleting a row - without
+                                    // this, merging away a singer who happened to be IsCurrent silently left
+                                    // no current singer at all, and a linked/rotation-start entry left a
+                                    // dangling reference instead of being reassigned.
+                                    if (entry.IsRotationStart)
+                                    {
+                                        RotationHelpers.HandleSingerRetiredOrRemoved(Singers, entry);
+                                    }
 
-                                    // 5. Update lists & database save
+                                    if (entry.IsCurrent)
+                                    {
+                                        SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
+                                        if (nextCurrent == null)
+                                        {
+                                            int currentIndex = Singers.IndexOf(entry);
+                                            int count = Singers.Count;
+                                            for (int i = 1; i < count; i++)
+                                            {
+                                                SingerEntry candidate = Singers[(currentIndex + i) % count];
+                                                if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
+                                                {
+                                                    nextCurrent = candidate;
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        entry.IsCurrent = false;
+                                        if (nextCurrent != null)
+                                        {
+                                            RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop, isLastRound: IsLastRound);
+                                        }
+                                    }
+
+                                    // 5. Delete the duplicate row
+                                    Singers.Remove(entry);
+                                    RotationHelpers.UnlinkSinger(Singers, entry);
+                                    if (PendingLinkSinger == entry) PendingLinkSinger = null;
+                                    RotationHelpers.EnsureRotationStartFlag(Singers);
+                                    RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
+
+                                    // 6. Update lists & database save
                                     UpdateNextSingerHighlight();
+                                    RefreshLinkedPartnerNames();
                                     RebuildRotationJsonCacheNow();
                                     QueueSaveDatabase();
                                 }

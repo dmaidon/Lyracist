@@ -55,6 +55,14 @@ namespace KSRotation.Services
         private readonly Func<string, string, bool>? _onCheckDuplicateSong = onCheckDuplicateSong;
         private readonly Func<string?>? _onCheckRequestAllowed = onCheckRequestAllowed;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
+
+        // Serializes the /api/singer/login check-then-write sequence (find-by-name, then insert or
+        // claim-empty-PIN). Without this, two near-simultaneous logins for the same new name can both
+        // see no existing row and both insert, creating duplicate Singer rows for one name - there is
+        // no unique DB constraint on Singer.Name to catch this at the database level. Login is low
+        // frequency (a patron joining, not a hot path), so serializing it process-wide costs nothing
+        // noticeable.
+        private readonly SemaphoreSlim _singerLoginLock = new(1, 1);
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, PinAttemptState> _pinAttemptsByIp = new();
 
         // Separate from _pinAttemptsByIp above: singer PINs (login/profile/avatar upload) get the
@@ -323,18 +331,11 @@ namespace KSRotation.Services
                         }
                         else if (path.StartsWith("/api/singer/avatar", StringComparison.OrdinalIgnoreCase))
                         {
-                            string queryName = "";
-                            int nameIdx = rawPath.IndexOf("name=");
-                            if (nameIdx >= 0)
-                            {
-                                queryName = rawPath[(nameIdx + 5)..];
-                                int ampIdx = queryName.IndexOf('&');
-                                if (ampIdx >= 0)
-                                {
-                                    queryName = queryName[..ampIdx];
-                                }
-                                queryName = WebUtility.UrlDecode(queryName).Trim();
-                            }
+                            // ParseQueryParam matches the whole "name" key between '?'/'&' delimiters,
+                            // unlike a raw IndexOf("name=") which used to match inside any other param
+                            // whose value or key happened to contain that substring (e.g. "?nickname=Bob&name=Alice"
+                            // would previously resolve to "Bob").
+                            string queryName = ParseQueryParam(rawPath, "name").Trim();
 
                             if (string.IsNullOrEmpty(queryName))
                             {
@@ -360,7 +361,7 @@ namespace KSRotation.Services
                                         try
                                         {
                                             byte[] fileBytes = await File.ReadAllBytesAsync(fullPath);
-                                            await SendImageResponseAsync(stream, fileBytes);
+                                            await SendImageResponseAsync(stream, fileBytes, GetContentTypeForAvatarExtension(fullPath));
                                             return;
                                         }
                                         catch (Exception ex)
@@ -500,65 +501,88 @@ namespace KSRotation.Services
                         }
 
                         await using var context = new Lyracist.Data.LyracistDbContext();
-                        var dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name);
-                        if (dbSinger == null)
+
+                        // The find-then-insert (or find-then-claim-empty-PIN) sequence below is a
+                        // check-then-write race with no unique DB constraint on Singer.Name to catch
+                        // it, so it must be serialized - see _singerLoginLock's own comment.
+                        Lyracist.Data.Models.Singer? dbSinger;
+                        bool wasRegistered = false;
+                        bool wasClaimed = false;
+                        await _singerLoginLock.WaitAsync(readTimeoutCts.Token);
+                        try
                         {
-                            if (!TryAllowRegistration(clientIp))
+                            dbSinger = await context.Singers.FirstOrDefaultAsync(s => s.Name == name);
+                            if (dbSinger == null)
                             {
-                                await SendTooManyRequestsAsync(stream);
-                                return;
+                                if (!TryAllowRegistration(clientIp))
+                                {
+                                    await SendTooManyRequestsAsync(stream);
+                                    return;
+                                }
+
+                                dbSinger = new Lyracist.Data.Models.Singer
+                                {
+                                    Name = name,
+                                    PinCode = singerPin,
+                                    AvatarType = "None",
+                                    AvatarSource = ""
+                                };
+                                context.Singers.Add(dbSinger);
+                                await context.SaveChangesAsync();
+                                wasRegistered = true;
                             }
-
-                            dbSinger = new Lyracist.Data.Models.Singer
+                            else if (string.IsNullOrEmpty(dbSinger.PinCode))
                             {
-                                Name = name,
-                                PinCode = singerPin,
-                                AvatarType = "None",
-                                AvatarSource = ""
-                            };
-                            context.Singers.Add(dbSinger);
-                            await context.SaveChangesAsync();
+                                dbSinger.PinCode = singerPin;
+                                await context.SaveChangesAsync();
+                                wasClaimed = true;
+                            }
+                        }
+                        finally
+                        {
+                            _singerLoginLock.Release();
+                        }
 
+                        // Non-null by construction: the only path that leaves dbSinger null returns
+                        // early (line ~527) before reaching here.
+                        var confirmedSinger = dbSinger!;
+
+                        if (wasRegistered)
+                        {
                             await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new
                             {
                                 success = true,
                                 registered = true,
-                                singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
+                                singer = new { name = confirmedSinger.Name, avatarType = confirmedSinger.AvatarType, avatarSource = confirmedSinger.AvatarSource, email = confirmedSinger.Email, vocalRange = confirmedSinger.VocalRange, customTitle = confirmedSinger.CustomTitle }
+                            }));
+                        }
+                        else if (wasClaimed)
+                        {
+                            await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new
+                            {
+                                success = true,
+                                claimed = true,
+                                singer = new { name = confirmedSinger.Name, avatarType = confirmedSinger.AvatarType, avatarSource = confirmedSinger.AvatarSource, email = confirmedSinger.Email, vocalRange = confirmedSinger.VocalRange, customTitle = confirmedSinger.CustomTitle }
                             }));
                         }
                         else
                         {
-                            if (string.IsNullOrEmpty(dbSinger.PinCode))
+                            bool authorized = TryAuthorizeSinger(clientIp, () => confirmedSinger.PinCode == singerPin, out bool singerLockedOut);
+                            if (singerLockedOut)
                             {
-                                dbSinger.PinCode = singerPin;
-                                await context.SaveChangesAsync();
-
+                                await SendTooManyRequestsAsync(stream);
+                            }
+                            else if (authorized)
+                            {
                                 await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new
                                 {
                                     success = true,
-                                    claimed = true,
-                                    singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
+                                    singer = new { name = confirmedSinger.Name, avatarType = confirmedSinger.AvatarType, avatarSource = confirmedSinger.AvatarSource, email = confirmedSinger.Email, vocalRange = confirmedSinger.VocalRange, customTitle = confirmedSinger.CustomTitle }
                                 }));
                             }
                             else
                             {
-                                bool authorized = TryAuthorizeSinger(clientIp, () => dbSinger.PinCode == singerPin, out bool singerLockedOut);
-                                if (singerLockedOut)
-                                {
-                                    await SendTooManyRequestsAsync(stream);
-                                }
-                                else if (authorized)
-                                {
-                                    await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new
-                                    {
-                                        success = true,
-                                        singer = new { name = dbSinger.Name, avatarType = dbSinger.AvatarType, avatarSource = dbSinger.AvatarSource, email = dbSinger.Email, vocalRange = dbSinger.VocalRange, customTitle = dbSinger.CustomTitle }
-                                    }));
-                                }
-                                else
-                                {
-                                    await SendBadRequestAsync(stream, "{\"error\":\"Incorrect PIN code for this singer name.\"}");
-                                }
+                                await SendBadRequestAsync(stream, "{\"error\":\"Incorrect PIN code for this singer name.\"}");
                             }
                         }
 #else
@@ -646,9 +670,9 @@ namespace KSRotation.Services
                             // The request body cap (MaxRequestBodyBytes) allows up to 4 MB overall,
                             // but a single avatar image has no business being that large - and
                             // without checking the actual bytes, anything decoded from the "image"
-                            // field would be written straight to disk under a .jpg extension
+                            // field would be written straight to disk under a made-up extension
                             // regardless of what it actually contains.
-                            if (imgBytes.Length > MaxAvatarImageBytes || !LooksLikeImage(imgBytes))
+                            if (imgBytes.Length > MaxAvatarImageBytes || !TryDetectImageFormat(imgBytes, out string detectedExtension, out _))
                             {
                                 await SendBadRequestAsync(stream, "{\"error\":\"Invalid or oversized image.\"}");
                                 return;
@@ -658,8 +682,9 @@ namespace KSRotation.Services
                             Directory.CreateDirectory(avatarsDir);
 
                             // Filename is derived from a GUID, never from patron-controlled input,
-                            // so it cannot contain path-traversal segments.
-                            string filename = $"{Guid.NewGuid():N}.jpg";
+                            // so it cannot contain path-traversal segments. Extension matches the
+                            // format actually detected above (JPEG/PNG/GIF/WEBP), not assumed.
+                            string filename = $"{Guid.NewGuid():N}{detectedExtension}";
                             string? fullPath = ResolveAvatarPath(avatarsDir, filename);
                             if (fullPath == null)
                             {
@@ -893,22 +918,6 @@ namespace KSRotation.Services
         }
 
 #if !MAUI
-        private static async Task SendImageResponseAsync(NetworkStream stream, byte[] imageBytes)
-        {
-            byte[] responseBytes = Encoding.UTF8.GetBytes(
-                "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: image/jpeg\r\n" +
-                "Access-Control-Allow-Origin: *\r\n" +
-                $"Content-Length: {imageBytes.Length}\r\n" +
-                "Connection: close\r\n\r\n");
-
-            byte[] fullResponse = new byte[responseBytes.Length + imageBytes.Length];
-            Buffer.BlockCopy(responseBytes, 0, fullResponse, 0, responseBytes.Length);
-            Buffer.BlockCopy(imageBytes, 0, fullResponse, responseBytes.Length, imageBytes.Length);
-
-            await stream.WriteAsync(fullResponse);
-        }
-
         private static string MD5Hash(string input)
         {
             byte[] inputBytes = Encoding.UTF8.GetBytes(input.Trim().ToLowerInvariant());
@@ -937,29 +946,60 @@ namespace KSRotation.Services
 
         /// <summary>
         /// Cheap format sniff so an avatar upload can't write arbitrary patron-supplied bytes to
-        /// disk under a .jpg extension - checks for the magic bytes of the image formats a phone
-        /// camera or gallery picker would actually produce (JPEG, PNG, WEBP, GIF).
+        /// disk under a fixed extension - checks for the magic bytes of the image formats a phone
+        /// camera or gallery picker would actually produce (JPEG, PNG, WEBP, GIF), and reports back
+        /// the extension/Content-Type that actually matches the bytes instead of assuming JPEG:
+        /// storing a PNG/WEBP/GIF upload as ".jpg" and always serving "image/jpeg" (as this used to)
+        /// made strict clients reject or mis-render anything that wasn't actually a JPEG.
         /// </summary>
-        private static bool LooksLikeImage(byte[] bytes)
+        private static bool TryDetectImageFormat(byte[] bytes, out string extension, out string contentType)
         {
-            if (bytes.Length < 12) return false;
+            if (bytes.Length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF)
+            {
+                extension = ".jpg";
+                contentType = "image/jpeg";
+                return true;
+            }
 
-            // JPEG: FF D8 FF
-            if (bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF) return true;
+            if (bytes.Length >= 4 && bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47)
+            {
+                extension = ".png";
+                contentType = "image/png";
+                return true;
+            }
 
-            // PNG: 89 50 4E 47 0D 0A 1A 0A
-            if (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47) return true;
+            if (bytes.Length >= 6 && bytes[0] == 'G' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == '8'
+                && (bytes[4] == '7' || bytes[4] == '9') && bytes[5] == 'a')
+            {
+                extension = ".gif";
+                contentType = "image/gif";
+                return true;
+            }
 
-            // GIF: "GIF87a" or "GIF89a"
-            if (bytes[0] == 'G' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == '8'
-                && (bytes[4] == '7' || bytes[4] == '9') && bytes[5] == 'a') return true;
+            if (bytes.Length >= 12 && bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F'
+                && bytes[8] == 'W' && bytes[9] == 'E' && bytes[10] == 'B' && bytes[11] == 'P')
+            {
+                extension = ".webp";
+                contentType = "image/webp";
+                return true;
+            }
 
-            // WEBP: "RIFF"....."WEBP"
-            if (bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F'
-                && bytes[8] == 'W' && bytes[9] == 'E' && bytes[10] == 'B' && bytes[11] == 'P') return true;
-
+            extension = "";
+            contentType = "";
             return false;
         }
+
+        /// <summary>Maps a stored avatar file's extension back to a Content-Type for serving it, so a
+        /// previously-uploaded PNG/WEBP/GIF (see <see cref="TryDetectImageFormat"/>) is served with its
+        /// real Content-Type instead of a hardcoded one. Defaults to JPEG for legacy files written
+        /// before this mapping existed, all of which really were JPEGs.</summary>
+        private static string GetContentTypeForAvatarExtension(string filePath) => Path.GetExtension(filePath).ToLowerInvariant() switch
+        {
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            _ => "image/jpeg",
+        };
 #endif
 
         /// <summary>
