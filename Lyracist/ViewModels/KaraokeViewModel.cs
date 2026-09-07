@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 07:35:00 -> Add SaveSingerAudioDefaults and RecallSingerAudioDefaults commands, per-singer key/tempo/mic recall
+// Edited on Sep 6, 2026 @ 18:03:00 -> Add SearchDatabaseCommand to immediately query library database for search query
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -979,6 +979,14 @@ public partial class KaraokeViewModel : BaseViewModel
             OnPropertyChanged(nameof(Compressor));
             OnPropertyChanged(nameof(Limiter));
         }
+    }
+
+    [RelayCommand]
+    public void SearchDatabase()
+    {
+        _searchDebounceTimer.Stop();
+        RefreshFilteredList();
+        SearchExternalCommand.Execute(null);
     }
 
     [RelayCommand]

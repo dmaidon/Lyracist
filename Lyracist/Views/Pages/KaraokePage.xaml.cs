@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 09:58:30 -> Add StartSongButton_Click and SkipSingerButton_Click event handlers for DJ Control Panel
+// Edited on Sep 6, 2026 @ 18:03:00 -> Add SearchBox_KeyDown to trigger SearchDatabaseCommand on Enter
 using System.Windows;
 using System.Windows.Controls;
 using Lyracist.ViewModels;
@@ -45,6 +45,14 @@ public partial class KaraokePage : Page
         if (DataContext is KaraokeViewModel vm && vm.SelectedHistoryEntry != null)
         {
             vm.AddHistorySongToRotationCommand.Execute(vm.SelectedHistoryEntry);
+        }
+    }
+
+    private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.Enter && DataContext is KaraokeViewModel vm)
+        {
+            vm.SearchDatabaseCommand.Execute(null);
         }
     }
 }

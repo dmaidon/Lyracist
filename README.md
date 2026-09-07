@@ -1,5 +1,5 @@
-<!-- Edited on Sep 6, 2026 @ 13:35:00 -> Update licensed store deep-link search URLs to working endpoints preventing 404/410 errors -->
-Last Edit: Sep 6, 2026 - Store Search URL Endpoint Corrections (Karaoke Version, Party Tyme, Sunfly)
+<!-- Edited on Sep 7, 2026 @ 11:18:00 -> Document Shared RotationHelpers consolidation, rotation invariants, migration parity, search scan, and compact toolbar -->
+Last Edit: Sep 7, 2026 - Rotation Invariants & Helpers Consolidation, SQLite Migration Parity, Search Scan & Compact DJ Toolbar
 # Lyracist Pro
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -7,6 +7,23 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### 🔄 Rotation Invariants & Shared Logic Consolidation (`Shared/RotationHelpers`, `KSRotation`, `Lyracist`)
+- **Unified Song & Singer Matching (`Shared/RotationHelpers.cs`)**: Consolidated `NormalizeForComparison`, `IsSameSingerName`, `IsSameSong`, and `IsSameSongLenient` into shared routines across both `Lyracist` and `KSRotation`, eliminating cross-application logic divergence.
+- **Thread-Safe Collection Reads (`ReadWithConcurrentRetry`)**: Replaces hazardous background-thread UI dispatcher calls with lockless, non-deadlocking snapshot retries, preventing `InvalidOperationException` collection enumeration races between web request threads and the UI.
+- **Linked Singer Adjacency & Active Boundary Preservation**: Restored `EnforceLinkedAdjacency` post-invocations on singer pause/promote flows so duet partners remain strictly adjacent, and added active/inactive boundary guarding to remote singer moves (`MoveSingerUp`, `MoveSingerDown`).
+- **Duplicate Singer Auto-Merge Safety**: Hardened singer merging to properly execute full singer cleanup (reassigning current performer and rotation anchor) rather than raw collection removal.
+- **Web Remote & Network Performance**: Cached WiFi SSID queries (30s) to eliminate recurring 1-second `netsh` stalls on patron polling, released singer-login locks before 429 rate-limit responses, and added dynamic byte inspection for patron avatar uploads.
+
+### 🛡️ SQLite Migration Lock Self-Healing (`LyracistDbContext`, `App.xaml.cs`)
+- **Proactive Lock Table Cleanup**: Automatically drops abandoned `__EFMigrationsLock` tables on application startup via `LyracistDbContext.ClearAbandonedMigrationLocks()`, preventing SQLite Error 11 (`malformed database schema (__EFMigrationsLock) - table already exists`) caused by interrupted previous sessions or sudden process termination.
+- **Automated Migration Recovery & Setup Parity**: Startup automatically recovers from migration lock exceptions, ensuring post-migration setup (`ApplyPostMigrationSetup`: song deduplication, index rebuilds, and `SingerHistory` table creation) executes reliably on both normal and retry branches.
+
+### 🎤 Karaoke Song Search & Compact Auto-Advance Toolbar (`KaraokePage`)
+- **Direct Database Search & Scan**: Clicking the "Scan" button right beside the search input or pressing <kbd>Enter</kbd> immediately executes a database query (`SearchDatabaseCommand`) against the local SQLite library for matching songs and artists, eliminating unintentional Windows File Explorer prompts.
+- **Dedicated Disk Folder Scan Button**: An independent folder icon button (`ScanFolderCommand`) provides direct access to disk folder scanning with clear tooltips.
+- **Ultra-Compact DJ Control Toolbar**: Streamlined Auto-Advance & DJ control strip compressed from ~80px down to a sleek ~32px horizontal toolbar, recovering over 50px of vertical workspace for the song library, singer queue, and player columns.
+- **Streamlined DJ Flow Actions**: Compact "▶ Start Song" and "⏭ Skip Singer" buttons provide rapid queue advancement with minimal screen footprint.
 
 ### 🛍️ Dedicated "Store" Tab & Licensed Track Import Pipeline (`Lyracist` ONLY)
 - **Store Tab Placement**:

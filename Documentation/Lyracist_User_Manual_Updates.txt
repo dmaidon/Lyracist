@@ -1750,3 +1750,19 @@ Section: Lyracist / Store Sync (1-Click Purchased Tracks Ingestion)
      * Distinct karaoke providers detected across the imported batch
      * Average processing time per track and total elapsed sync time
    - Automatically triggers a refresh of Store Analytics cards, provider distribution charts, and audio benchmarks.
+
+
+Section: Karaoke Song Search & Compact Auto-Advance Toolbar
+
+[Update Details]
+Optimizations have been introduced to the primary Karaoke hosting workspace for database search and Auto-Advance DJ control.
+
+1. Direct Song Search Database Scan:
+   - Clicking the 'Scan' button beside the search input box immediately scans and filters songs from the local SQLite database matching the search text.
+   - Pressing the Enter key while typing inside the search input box also immediately executes the database scan.
+   - Disk folder scanning is cleanly separated into an adjacent folder icon button ('Scan music folder from disk into library...'), preventing unintentional folder picker dialogs.
+
+2. Compact Auto-Advance DJ Toolbar:
+   - The Auto-Advance control strip has been redesigned into a slim, space-efficient horizontal toolbar (reducing vertical height from ~80px to ~32px).
+   - DJ controls ('Start Song' and 'Skip Singer') have been streamlined into compact action buttons with informative tooltips.
+   - This reclaims significant vertical screen real estate for the song results table, singer queue, and live lyrics preview panels on laptop displays.

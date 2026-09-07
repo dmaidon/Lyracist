@@ -1,9 +1,46 @@
-<!-- Edited on Sep 6, 2026 @ 13:35:00 -> Document Store Search URL Endpoint Corrections for Karaoke Version, Party Tyme, and Sunfly -->
-Last Edit: Sep 6, 2026 - Store Search URL Endpoint Corrections (Karaoke Version, Party Tyme, Sunfly)
+<!-- Edited on Sep 7, 2026 @ 11:18:00 -> Document Shared RotationHelpers consolidation, rotation invariants, migration parity, search scan, and compact toolbar -->
+Last Edit: Sep 7, 2026 - Rotation Invariants & Helpers Consolidation, SQLite Migration Parity, Search Scan & Compact DJ Toolbar
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.33] - 2026-09-07
+
+### Fixed
+- **Consolidated Song & Singer Matching (`Shared/RotationHelpers.cs`, `KSRotation`, `Lyracist`)**:
+  - **Shared Matching Library**: Unified `NormalizeForComparison`, `IsSameSingerName`, `IsSameSong`, and `IsSameSongLenient` into `Shared/RotationHelpers.cs`, eliminating divergent whitespace normalization and song comparison implementations across `Lyracist` and `KSRotation`.
+  - **Cross-Thread Collection Safety (`ReadWithConcurrentRetry`)**: Replaced hazardous UI-dispatcher marshaling in `IsSongInCurrentSession` with lockless snapshot reads using `ReadWithConcurrentRetry`, preventing `InvalidOperationException` collection modification races during background web requests while avoiding deadlocks in non-pumped test runners.
+  - **Linked Singer Adjacency Invariants (`MainViewModel.Singers.cs`)**: Re-invoked `EnforceLinkedAdjacency` in `ToggleSingerInactive` and `SetCurrentSinger` after singer state transitions, preventing linked/duet singers from becoming separated when pausing or promoting performers.
+  - **Remote Move Active/Inactive Boundary Guards (`MainViewModel.Singers.cs`)**: Added boundary guards to `MoveSingerUp` and `MoveSingerDown` (used by web DJ remote and Maui tablet app) matching desktop `MoveUp`/`MoveDown`, preventing inactive singers from being shifted into the active queue.
+  - **Duplicate Singer Auto-Merge Safety (`MainViewModel.Singers.cs`)**: Refactored duplicate singer name auto-merge to execute full singer cleanup (`IsCurrent`/`IsRotationStart` reassignment and `UnlinkSinger`) instead of raw list removal.
+  - **Anchor Reassignment Guard (`MainViewModel.Singers.cs`)**: Fixed web remote toggle-off for rotation start to invoke `RotationHelpers.ToggleRotationStartSinger` rather than direct field clearing, ensuring consistent anchor ownership.
+  - **Duplicate Session Song Enforcement on DJ Accept (`MainViewModel.Requests.cs`)**: Re-validated `BlockDuplicateSongsInSession` during `AcceptRequest` to catch duplicate song requests when session state changes between patron submission and DJ approval.
+  - **Patron Avatar MIME Detection & URL Parsing (`MainViewModel.Requests.cs`)**: Replaced hardcoded `.jpg` avatar responses with real image byte format detection (PNG, GIF, WebP, JPEG) and corrected query parameter extraction for `?name=` lookups.
+  - **WiFi SSID Query Caching & Concurrency (`MainViewModel.Requests.cs`, `WifiHelper.cs`)**: Added 30-second thread-safe cached lookup for `WifiHelper.GetConnectedSsid()` to prevent recurring 1-second `netsh` delays on client `/api/info` polling.
+  - **Patron Login Lock Scope (`PatronRequestServer.cs`)**: Released singer-login lock prior to sending HTTP 429 rate-limited responses, preventing slow client connections from stalling other patron logins.
+  - **Post-Migration Setup Parity (`App.xaml.cs`)**: Extracted shared post-migration steps into `ApplyPostMigrationSetup` so that initial migration and self-healing retry branches both reliably execute song deduplication, index rebuilds, and `SingerHistory` table creation.
+
+### Changed
+- **Help System Integration (`HelpViewModel.cs`)**:
+  - Updated Topic 1 ("Karaoke Page (Dashboard)") with documentation for the direct database Search Scan button, Enter-key query triggering, dedicated disk folder scan icon, and compact DJ Auto-Advance toolbar.
+
+## [26.9.5.32] - 2026-09-06
+
+### Fixed
+- **SQLite Error 11 Migration Lock Self-Healing (`LyracistDbContext.cs`, `App.xaml.cs`)**:
+  - **Proactive Lock Table Cleanup**: Added `LyracistDbContext.ClearAbandonedMigrationLocks()` which automatically executes `DROP TABLE IF EXISTS "__EFMigrationsLock";` before EF Core migration starts, eliminating startup crashes caused by abandoned locks from killed/interrupted previous sessions (`SQLite Error 11: 'malformed database schema (__EFMigrationsLock) - table already exists'`).
+  - **Self-Healing Startup Recovery**: Enhanced `App.xaml.cs` to clear locks, drop `__EFMigrationsLock` after migration, and catch any SQLite lock errors during startup with an automated recovery retry.
+- **Karaoke Song Search Database Scan (`KaraokePage.xaml`, `KaraokeViewModel.cs`, `KaraokePage.xaml.cs`)**:
+  - **Scan Button Database Query**: Re-wired the "Scan" button beside the song search input to execute `SearchDatabaseCommand`, immediately scanning and filtering songs from the local SQLite database instead of launching the Windows File Explorer folder picker.
+  - **Enter Key Search**: Added `KeyDown` event handling on the search input box (`SearchBox_KeyDown`) so pressing <kbd>Enter</kbd> immediately executes the database scan without waiting for the debounce timer.
+  - **Distinct Folder Scan Button**: Added an independent folder icon button (`ScanFolderCommand`) with an explicit tooltip (`"Scan music folder from disk into library..."`) to keep disk folder importing readily available without conflicting with database search queries.
+
+### Changed
+- **Compact Auto-Advance DJ Control Strip (`KaraokePage.xaml`)**:
+  - **Drastic Screen Real Estate Recovery**: Re-engineered the Auto-Advance & DJ control strip from an oversized ~80px banner down to a sleek ~32px horizontal toolbar, reclaiming over 50px of vertical height for the search results, singer queue, and lyrics/player columns.
+  - **Compact DJ Controls**: Replaced bulky `BigDJButton` buttons with streamlined primary/secondary DJ action buttons ("▶ Start Song" and "⏭ Skip Singer") with dedicated tooltips and compact padding (`10,2`).
+  - **Slender Metrics & Progress Bar**: Refined countdown clock, status labels, and reduced progress bar height to 4px with tightened 10px page margins.
 
 ## [26.9.5.31] - 2026-09-06
 

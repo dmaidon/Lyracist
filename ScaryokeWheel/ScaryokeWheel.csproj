@@ -10,8 +10,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.9.5.164</AssemblyVersion>
-    <FileVersion>26.9.5.164</FileVersion>
+    <AssemblyVersion>26.9.6.165</AssemblyVersion>
+    <FileVersion>26.9.6.165</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
