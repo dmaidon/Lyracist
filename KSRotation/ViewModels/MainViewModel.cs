@@ -27,6 +27,13 @@ namespace KSRotation.ViewModels
         private readonly Dictionary<SingerEntry, string> _lastSingerNames = [];
         private readonly bool _isInitializing;
         private bool _isFinishingSong;
+
+        /// <summary>Whichever singer was still IsCurrent (Finish Song not yet clicked for them) the
+        /// moment Last Round was toggled on. Their now-stale turn predates Last Round being announced,
+        /// so it must not be the one counted as their last-round turn - see OnIsLastRoundChanged and
+        /// FinishSingerSong.</summary>
+        private SingerEntry? _singerCurrentWhenLastRoundActivated;
+
         private bool _djBannerWasAutoDisabled;
         private bool _isAutoDisablingDjBanner;
         private readonly Random _random = new();
@@ -154,10 +161,18 @@ namespace KSRotation.ViewModels
 
             if (value)
             {
+                // Whoever is still current right now (Finish Song not yet clicked for them) already
+                // performed before Last Round was announced - remember them so FinishSingerSong can
+                // give that specific turn a pass instead of counting it as their last-round turn.
+                _singerCurrentWhenLastRoundActivated = RotationHelpers.GetCurrentSinger(Singers);
                 foreach (var s in Singers)
                 {
                     s.HasSungInLastRound = false;
                 }
+            }
+            else
+            {
+                _singerCurrentWhenLastRoundActivated = null;
             }
             UpdateNextSingerHighlight();
             RefreshBillboardState();
@@ -409,7 +424,7 @@ namespace KSRotation.ViewModels
                 case nameof(ActiveSpecialEvent):
                     foreach (var option in SpecialEventOptions)
                     {
-                        if (option.Value == ActiveSpecialEvent)
+                        if (string.Equals(option.Value, ActiveSpecialEvent, StringComparison.OrdinalIgnoreCase))
                         {
                             if (!option.IsSelected) option.IsSelected = true;
                         }
@@ -1692,7 +1707,16 @@ namespace KSRotation.ViewModels
 
                     if (IsLastRound)
                     {
-                        entry.HasSungInLastRound = true;
+                        if (entry == _singerCurrentWhenLastRoundActivated)
+                        {
+                            // This turn was already in progress before Last Round was toggled on -
+                            // give it a pass so entry still gets a genuine last-round turn later.
+                            _singerCurrentWhenLastRoundActivated = null;
+                        }
+                        else
+                        {
+                            entry.HasSungInLastRound = true;
+                        }
                     }
 
                     // Advance rotation sequentially after entry (wraps around to top of rotation if last singer)
