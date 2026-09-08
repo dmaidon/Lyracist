@@ -717,6 +717,15 @@
                                                                 Visibility="{Binding IsRotationStart, Converter={StaticResource BoolToVis}}">
                                                             <TextBlock Text="⚓ Anchor" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                                                         </Border>
+                                                        <Border Background="#5C1010"
+                                                                CornerRadius="4"
+                                                                Padding="4,2"
+                                                                Margin="0,0,4,0"
+                                                                VerticalAlignment="Center"
+                                                                ToolTip="Singer has completed their song in the last round"
+                                                                Visibility="{Binding HasSungInLastRound, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock Text="DONE (LAST ROUND)" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                                                        </Border>
                                                         <Border Background="#1E3A5F"
                                                                 BorderBrush="#0EA5E9"
                                                                 BorderThickness="1"
