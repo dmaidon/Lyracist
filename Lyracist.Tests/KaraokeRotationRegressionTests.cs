@@ -498,48 +498,48 @@ public class KaraokeRotationRegressionTests
         Assert.Equal("Carol", karaokeVm.NextUpName);
     }
 
-    // Reproduces a DJ-reported bug (KSRotation, ported here for parity): the DJ clicks "Last Round"
-    // while the singer who just finished the previous round is still marked IsCurrent (DoneSinger
-    // hasn't been clicked for them yet). That singer's now-stale turn - which really happened before
-    // Last Round was announced - must not be the one counted as their last-round turn.
+    // Regression coverage for a DJ-reported issue (KSRotation, ported here for parity): clicking
+    // "Last Round" while the Rotation Anchor (or anyone else) is already the current singer, mid-turn,
+    // must not exempt that singer's upcoming performance from counting as their last-round turn -
+    // otherwise, once the rotation wraps back around, they get picked again and sing twice.
     [Fact]
-    public void LastRound_ToggledWhileFinalSingerStillCurrent_DoesNotConsumeTheirLastRoundTurn()
+    public void LastRound_ToggledWhileSingerIsAlreadyCurrent_DoesNotGetThemASecondTurn()
     {
         var rotationVm = CreateRotationViewModel();
         var singers = new List<Singer>();
-        for (int i = 1; i <= 14; i++)
+        for (int i = 1; i <= 15; i++)
         {
             var s = MakeSinger($"Singer{i}");
             rotationVm.Rotation.Add(s);
             singers.Add(s);
         }
-        var lastSinger = singers[13];
+        var anchor = singers[7];
         foreach (var s in singers) s.IsCurrent = false;
-        lastSinger.IsCurrent = true; // DJ hasn't clicked "Done" for them yet
+        anchor.IsCurrent = true;
+        anchor.IsRotationStart = true;
 
-        // DJ clicks "Last Round" before finishing Singer14's already-completed performance.
+        // DJ clicks "Last Round" while the Anchor is already up for their normal turn.
         rotationVm.IsLastRound = true;
 
-        // DJ now clicks "Done" for Singer14.
-        rotationVm.DoneSingerCommand.Execute(lastSinger);
+        // Anchor performs and DJ clicks Done.
+        rotationVm.DoneSingerCommand.Execute(anchor);
 
-        // That performance predates Last Round being announced, so it must not count as Singer14's
-        // last-round turn.
-        Assert.False(lastSinger.HasSungInLastRound);
+        // That performance happened during Last Round, so it must count as Anchor's last-round turn.
+        Assert.True(anchor.HasSungInLastRound);
 
-        // Singers 1-13 take their real last-round turn.
+        // Everyone else takes their last-round turn; Anchor must never come up again.
         var current = RotationHelpers.GetCurrentSinger(rotationVm.Rotation);
-        for (int i = 0; i < 13; i++)
+        for (int i = 0; i < 14; i++)
         {
             Assert.NotNull(current);
-            Assert.NotSame(lastSinger, current);
+            Assert.NotSame(anchor, current);
             rotationVm.DoneSingerCommand.Execute(current!);
             current = RotationHelpers.GetCurrentSinger(rotationVm.Rotation);
         }
 
-        // Singer14 should now be up for their own genuine last-round turn.
-        Assert.Same(lastSinger, current);
-        Assert.False(lastSinger.HasSungInLastRound);
+        // All 15 singers (Anchor included) have now sung exactly once - nobody eligible remains.
+        Assert.Null(current);
+        Assert.All(singers, s => Assert.True(s.HasSungInLastRound));
     }
 
     [Fact]

@@ -50,11 +50,6 @@ public partial class RotationViewModel : BaseViewModel
     // reordering before it finishes and leave the current singer stuck instead of at the top.
     private bool _suppressRotationOrderSync;
 
-    /// <summary>Whichever singer was still IsCurrent (DoneSinger not yet clicked for them) the moment
-    /// Last Round was toggled on. Their now-stale turn predates Last Round being announced, so it must
-    /// not be the one counted as their last-round turn - see OnIsLastRoundChanged and DoneSinger.</summary>
-    private Singer? _singerCurrentWhenLastRoundActivated;
-
     /// <summary>
     /// Runs <paramref name="action"/> with the CollectionChanged auto-sync handler suppressed, then
     /// re-syncs the rotation-start flag and (if enabled) floats the current singer to the top once,
@@ -115,18 +110,10 @@ public partial class RotationViewModel : BaseViewModel
     {
         if (value)
         {
-            // Whoever is still current right now (DoneSinger not yet clicked for them) already
-            // performed before Last Round was announced - remember them so DoneSinger can give that
-            // specific turn a pass instead of counting it as their last-round turn.
-            _singerCurrentWhenLastRoundActivated = Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation);
             foreach (var singer in Rotation)
             {
                 singer.HasSungInLastRound = false;
             }
-        }
-        else
-        {
-            _singerCurrentWhenLastRoundActivated = null;
         }
         Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation, isLastRound: value);
         _display.SetLastRound(value);
@@ -961,16 +948,7 @@ public partial class RotationViewModel : BaseViewModel
 
         if (IsLastRound)
         {
-            if (singer == _singerCurrentWhenLastRoundActivated)
-            {
-                // This turn was already in progress before Last Round was toggled on - give it a
-                // pass so singer still gets a genuine last-round turn later.
-                _singerCurrentWhenLastRoundActivated = null;
-            }
-            else
-            {
-                singer.HasSungInLastRound = true;
-            }
+            singer.HasSungInLastRound = true;
         }
 
         // 1. Increment completed count (cap at 10) and total songs sung
