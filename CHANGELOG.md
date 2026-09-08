@@ -1,9 +1,26 @@
-<!-- Edited on Sep 7, 2026 @ 11:18:00 -> Document Shared RotationHelpers consolidation, rotation invariants, migration parity, search scan, and compact toolbar -->
-Last Edit: Sep 7, 2026 - Rotation Invariants & Helpers Consolidation, SQLite Migration Parity, Search Scan & Compact DJ Toolbar
+<!-- Edited on Sep 8, 2026 @ 07:15:00 -> Document search result row tinting, SpecialEventBanner radio grouping, Last Round rules, and help update -->
+Last Edit: Sep 8, 2026 - Search Result Row Tinting, Special Event Radio Grouping, Last Round Invariants & Help Update
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.34] - 2026-09-08
+
+### Added
+- **Search Result Track Type Row Tinting (`KaraokePage.xaml`, `HelpViewModel.cs`)**:
+  - Added `SongTypeRowStyle` to visually tint song search results: emerald green (`#1522C55E`) for karaoke tracks (`IsKaraoke = true`) and subtle amber/gold (`#15F59E0B`) for standard music library tracks (`IsKaraoke = false`), making track classifications distinguishable at a glance.
+  - Documented search result row tinting in `HelpViewModel.cs` Topic 1 ("Karaoke Page (Dashboard)").
+- **KSRotation Done Last Round Indicator (`KSRotation/MainWindow.xaml`)**:
+  - Added `DONE (LAST ROUND)` indicator badge in KSRotation singer rows matching Lyracist's rotation display, ensuring KJs have clear on-screen confirmation of completed last-round turns.
+
+### Fixed
+- **Special Event Banner Radio Button Mutual Exclusion (`KSRotation/MainWindow.xaml`)**:
+  - Explicitly assigned `GroupName="SpecialEventBanner"` to the RadioButton template inside the ItemsControl for Special Events, ensuring that selecting one banner option properly deselects others across dynamically generated items.
+- **Last Round Turn Rule Enforcement & Rotation Invariants (`KSRotation`, `Lyracist`, `Tests`)**:
+  - Reverted the premature grace-pass logic to uphold the strict rule: whoever completes a song while Last Round is active is marked with `HasSungInLastRound = true`. This prevents a singer already current when Last Round activates from receiving a duplicate performance after the queue wraps around.
+  - Added comprehensive regression tests locking in this behavior across test suites.
+  - Restored case-insensitive string comparisons for `ActiveSpecialEvent`.
 
 ## [26.9.5.33] - 2026-09-07
 

@@ -1,5 +1,5 @@
-<!-- Edited on Sep 7, 2026 @ 11:18:00 -> Document Shared RotationHelpers consolidation, rotation invariants, migration parity, search scan, and compact toolbar -->
-Last Edit: Sep 7, 2026 - Rotation Invariants & Helpers Consolidation, SQLite Migration Parity, Search Scan & Compact DJ Toolbar
+<!-- Edited on Sep 8, 2026 @ 07:15:00 -> Document search result row tinting, SpecialEventBanner radio grouping, and Last Round invariants -->
+Last Edit: Sep 8, 2026 - Search Result Row Tinting, Special Event Radio Grouping, and Last Round Invariants
 # Lyracist Pro
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -7,6 +7,13 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### 🎨 Search Result Track Type Tinting (`KaraokePage.xaml`, `HelpViewModel.cs`)
+- **Instant Visual Distinction**: Search result rows feature subtle, semi-transparent row tinting to immediately distinguish track formats at a glance: emerald green (`#1522C55E`) for karaoke tracks (`IsKaraoke = true`) and warm gold (`#15F59E0B`) for standard background music tracks (`IsKaraoke = false`).
+- **Help Topic Integration**: Topic 1 in the in-app help system documents search result row tinting alongside direct database scan and compact DJ toolbars.
+
+### 🔘 Special Event Banner Mutual Exclusion & Grouping (`KSRotation/MainWindow.xaml`)
+- **Grouped Template Radio Buttons**: Added explicit `GroupName="SpecialEventBanner"` to radio buttons in the ItemsControl data template, guaranteeing single-selection mutual exclusion across dynamic event banners.
 
 ### 🔄 Rotation Invariants & Shared Logic Consolidation (`Shared/RotationHelpers`, `KSRotation`, `Lyracist`)
 - **Unified Song & Singer Matching (`Shared/RotationHelpers.cs`)**: Consolidated `NormalizeForComparison`, `IsSameSingerName`, `IsSameSong`, and `IsSameSongLenient` into shared routines across both `Lyracist` and `KSRotation`, eliminating cross-application logic divergence.

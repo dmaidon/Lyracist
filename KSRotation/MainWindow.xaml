@@ -1,4 +1,4 @@
-<!-- Edited on Sep 6, 2026 @ 10:15:00 -> Set high-contrast light text foreground across Users tab to prevent black text on dark background -->
+<!-- Edited on Sep 8, 2026 @ 07:14:00 -> Set GroupName on SpecialEventBanner radio buttons in template for mutual exclusion -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -2015,7 +2015,7 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <RadioButton Content="{Binding DisplayName}" IsChecked="{Binding IsSelected, Mode=TwoWay}" Margin="0,4,0,4" FontSize="14" Foreground="{DynamicResource AppContrastTextBrush}" />
+                                                <RadioButton Content="{Binding DisplayName}" IsChecked="{Binding IsSelected, Mode=TwoWay}" GroupName="SpecialEventBanner" Margin="0,4,0,4" FontSize="14" Foreground="{DynamicResource AppContrastTextBrush}" />
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
