@@ -1766,3 +1766,23 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
    - The Auto-Advance control strip has been redesigned into a slim, space-efficient horizontal toolbar (reducing vertical height from ~80px to ~32px).
    - DJ controls ('Start Song' and 'Skip Singer') have been streamlined into compact action buttons with informative tooltips.
    - This reclaims significant vertical screen real estate for the song results table, singer queue, and live lyrics preview panels on laptop displays.
+
+
+Section: Audience Lyrics Screen QR Code & Library Format Separation
+
+[Update Details]
+Major updates have been added to improve projection screen customization and local library management across karaoke and standard music tracks.
+
+1. Audience Lyrics Screen QR Code Toggle:
+   - Hosts can now toggle the display of the patron mobile request QR code badge positioned in the top-right corner of the lyrics projection window.
+   - Configurable in three intuitive locations:
+     - Settings -> Monitors & Screen Assignments: 'Show QR Code on Lyrics Screen' checkbox under Lyrics Projection Screen.
+     - Lyrics Page: 'Show QR Code on Lyrics Screen' toggle switch under the Audience Lyrics Screen settings card.
+     - Lyrics Window Context Menu: Right-click anywhere on the active lyrics projection window and click 'Show QR Code' to toggle visibility instantly during a live show.
+   - The toggle state is permanently persisted across application restarts in AppSettings.
+
+2. Karaoke Library vs. Music Library Separation:
+   - Automatic MP3+G Companion CDG Detection: The library scanner now automatically identifies unzipped karaoke pairs (e.g. song.mp3 + song.cdg) and routes them into the Karaoke Library as MP3G tracks, preventing karaoke files from mistakenly appearing as standard background music.
+   - Expanded Audio Format Support: The library scanner now supports comprehensive audio file types including .mp3, .mp4, .zip, .wav, .m4a, .flac, .wma, .aac, and .ogg.
+   - Distinct Library Tabs with Live Count Badges: The search results view now features 'Karaoke Library' and 'Music Library' tabs displaying live match count badges (e.g. 'Karaoke Library (12)' and 'Music Library (3)').
+   - Search Query Isolation: SQLite database queries now evaluate track type filters directly in SQL, ensuring music searches return up to 150 matching music songs without being crowded out by karaoke results.

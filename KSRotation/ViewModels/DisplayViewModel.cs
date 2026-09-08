@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 08:38:20 -> Support performer selfie avatar on Vegas marquee and vinyl turntable displays
+// Edited on Sep 8, 2026 @ 08:51:00 -> Fix CS8799 accessibility modifier on partial property change callbacks
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -334,7 +334,6 @@ namespace KSRotation.ViewModels
                         : $" ({singer.Artist})";
 
                     newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, offset == 0, singer.IsRotationStart));
-
                 }
             }
             else
@@ -398,5 +397,4 @@ namespace KSRotation.ViewModels
             bool IsCurrent,
             bool IsRotationStart);
     }
-
 }

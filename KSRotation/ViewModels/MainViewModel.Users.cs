@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 10:06:00 -> Add defensive setters to LevelText and SongsText for XAML two-way binding safety
+// Edited on Sep 8, 2026 @ 08:04:00 -> Add HasUserSearchText and ClearUserSearch command for Users search box
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -99,7 +99,18 @@ namespace KSRotation.ViewModels
             "Bass"
         ];
 
-        [ObservableProperty] private string _userSearchText = string.Empty;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasUserSearchText))]
+        private string _userSearchText = string.Empty;
+
+        public bool HasUserSearchText => !string.IsNullOrWhiteSpace(UserSearchText);
+
+        [RelayCommand]
+        private void ClearUserSearch()
+        {
+            UserSearchText = string.Empty;
+        }
+
         [ObservableProperty] private SingerUserItem? _selectedUser;
         [ObservableProperty] private SingerUserItem? _selectedMergeUser;
         [ObservableProperty] private bool _isUserMergeOpen;

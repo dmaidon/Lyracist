@@ -6,7 +6,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:KSRotation.ViewModels"
-    xmlns:local="clr-namespace:KSRotation.Windows"
     mc:Ignorable="d"
     Title="Singer Display"
     Width="450"
@@ -279,7 +278,7 @@
                                        FontSize="18"
                                        FontWeight="Bold"
                                        Foreground="#FFE0A93B" />
-                            <TextBlock Text=": # in {} = Estimated wait time"
+                            <TextBlock Text=" : {} = Estimated wait time"
                                        FontSize="18"
                                        FontWeight="Bold"
                                        Foreground="#FFE0A93B"
@@ -491,7 +490,7 @@
                                    FontSize="18"
                                    FontWeight="Bold"
                                    Foreground="#FFB98A3A" />
-                        <TextBlock Text=": # in {} = Estimated wait time"
+                        <TextBlock Text=" : {} = Estimated wait time"
                                    FontSize="18"
                                    FontWeight="Bold"
                                    Foreground="#FFB98A3A"

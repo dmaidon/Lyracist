@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Document that the FrameReady subscription is intentionally permanent (AddSingleton lifetime)
+// Edited on Sep 8, 2026 @ 08:50:00 -> Add ShowQrCodeOnLyricsScreen property and inject LyricsWindowViewModel into LyricsViewModel
 using System;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -15,6 +15,7 @@ public partial class LyricsViewModel : ObservableObject
     private readonly IMediaEngine _media;
     private readonly IDisplayService _display;
     private readonly ITabletLyricsServer _tablet;
+    private readonly LyricsWindowViewModel? _lyricsWindowVm;
 
     [ObservableProperty]
     private ImageSource? _framePreview;
@@ -34,13 +35,29 @@ public partial class LyricsViewModel : ObservableObject
     [ObservableProperty]
     private bool _isLyricsWindowSyncEnabled = true;
 
+    public bool ShowQrCodeOnLyricsScreen
+    {
+        get => Lyracist.Core.Helpers.AppSettings.ShowQrCodeOnLyricsScreen;
+        set
+        {
+            if (Lyracist.Core.Helpers.AppSettings.ShowQrCodeOnLyricsScreen != value)
+            {
+                Lyracist.Core.Helpers.AppSettings.ShowQrCodeOnLyricsScreen = value;
+                OnPropertyChanged();
+                _lyricsWindowVm?.NotifyPropertyChanged(nameof(LyricsWindowViewModel.ShowQrCodeOnLyricsScreen));
+            }
+        }
+    }
+
     public LyricsViewModel(IMediaEngine media,
                            IDisplayService display,
-                           ITabletLyricsServer tablet)
+                           ITabletLyricsServer tablet,
+                           LyricsWindowViewModel? lyricsWindowVm = null)
     {
         _media = media;
         _display = display;
         _tablet = tablet;
+        _lyricsWindowVm = lyricsWindowVm;
 
         // Never unsubscribed: LyricsViewModel is registered AddSingleton in App.xaml.cs, so
         // exactly one instance exists for the app's lifetime and this subscription is meant

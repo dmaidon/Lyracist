@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 10:33:30 -> Implement NotifyLibraryUpdated method
+// Edited on Sep 8, 2026 @ 12:13:00 -> Pass isKaraoke flag to SearchService queries to prevent search limit starvation
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -138,8 +138,8 @@ public class LibraryService : ILibraryService
 
             var searchService = new SearchService(context);
             // Run matching search synchronously on SQLite FTS5 table
-            var results = searchService.SearchSync(query);
-            return results.Where(s => s.IsKaraoke == !isMusic).Select(MapToKaraokeSong);
+            var results = searchService.SearchSync(query, isKaraoke: !isMusic);
+            return results.Select(MapToKaraokeSong);
         }
         catch (Exception ex)
         {
@@ -161,8 +161,8 @@ public class LibraryService : ILibraryService
             }
 
             var searchService = new SearchService(context);
-            var results = await searchService.Search(query);
-            return results.Where(s => s.IsKaraoke == !isMusic).Select(MapToKaraokeSong);
+            var results = await searchService.Search(query, isKaraoke: !isMusic);
+            return results.Select(MapToKaraokeSong);
         }
         catch (Exception ex)
         {

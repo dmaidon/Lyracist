@@ -1,6 +1,14 @@
-<!-- Created on Sep 4, 2026 @ 23:05:00 -> Log Trivia and Trivia Settings text-contrast fix in Dark mode -->
+<!-- Edited on Sep 8, 2026 @ 13:48:00 -> Log Users page search textbox visibility fix on 1080p screens and DisplayViewModel accessibility fix -->
 
 # Changelog
+
+## 2026-09-08
+
+- **User Search Input Sizing & Usability Fix (`MainWindow.xaml`, `MainViewModel.Users.cs`)**:
+  - Replaced the Material Design outlined text box style on the **Users** tab (which had an incompatible 56px minimum height and 16px internal vertical padding that squeezed user input down into an unusable thin slit when placed inside constrained containers on 1920x1080 laptops) with a responsive, modern custom ControlTemplate.
+  - Implemented 36px height, vertically centered text alignment, theme-adaptive stroke and background brushes, 6px corner radii, an integrated magnifying glass icon, and an interactive clear button (`✕`) bound to `ClearUserSearchCommand` that activates whenever text is entered.
+- **Compiler Cleanliness (`DisplayViewModel.cs`)**:
+  - Removed erroneous `private` modifiers from `partial void OnHasDesignatedCurrentSingerChanged` and `partial void OnIsCurrentMusicChanged` to resolve `CS8799` partial method accessibility mismatches.
 
 ## 2026-09-04
 

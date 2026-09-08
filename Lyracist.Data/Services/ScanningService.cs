@@ -1,4 +1,4 @@
-// Edited on Aug 30, 2026 @ 09:41:00 -> Replace external process probing and network throttling with high-speed in-memory TagLibSharp extraction and parallel batching
+// Edited on Sep 8, 2026 @ 12:13:00 -> Detect companion CDG files, expand audio format scanning, and isolate keyword matching
 using Lyracist.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -58,11 +58,17 @@ namespace Lyracist.Data.Services
             string catalogCode = "";
             string ext = Path.GetExtension(filePath).ToLowerInvariant();
 
-            string pathLower = filePath.ToLowerInvariant();
-            if (pathLower.Contains("karaoke") ||
-                pathLower.Contains("instrumental") ||
-                pathLower.Contains("sing-along") ||
-                pathLower.Contains("backing track"))
+            string fileNameLower = Path.GetFileName(filePath).ToLowerInvariant();
+            string? parentDir = Path.GetDirectoryName(filePath);
+            string parentDirName = !string.IsNullOrEmpty(parentDir) ? Path.GetFileName(parentDir).ToLowerInvariant() : string.Empty;
+
+            if (fileNameLower.Contains("karaoke") ||
+                fileNameLower.Contains("instrumental") ||
+                fileNameLower.Contains("sing-along") ||
+                fileNameLower.Contains("singalong") ||
+                fileNameLower.Contains("backing track") ||
+                parentDirName.Equals("karaoke", StringComparison.OrdinalIgnoreCase) ||
+                parentDirName.Contains("karaoke", StringComparison.OrdinalIgnoreCase))
             {
                 isKaraoke = true;
             }
@@ -89,7 +95,7 @@ namespace Lyracist.Data.Services
                     title = remaining;
                 }
             }
-            else if (pathLower.Contains("sunfly"))
+            else if (fileNameLower.Contains("sunfly") || parentDirName.Contains("sunfly"))
             {
                 isKaraoke = true;
                 catalogCode = "SF";
@@ -129,7 +135,7 @@ namespace Lyracist.Data.Services
                     title = cleaned.Trim();
                 }
             }
-            else if (pathLower.Contains("karaoke version") || pathLower.Contains("karaoke-version"))
+            else if (fileNameLower.Contains("karaoke version") || fileNameLower.Contains("karaoke-version"))
             {
                 isKaraoke = true;
                 if (string.IsNullOrEmpty(catalogCode))
@@ -174,9 +180,19 @@ namespace Lyracist.Data.Services
                     karaokeType = "MP4";
                 }
             }
-            else if (isKaraoke)
+            else
             {
-                karaokeType = "MP3G";
+                // Check if an accompanying .cdg graphics file exists next to this audio file (classic MP3+G / WAV+G)
+                string companionCdg = Path.ChangeExtension(filePath, ".cdg");
+                if (File.Exists(companionCdg))
+                {
+                    isKaraoke = true;
+                    karaokeType = "MP3G";
+                }
+                else if (isKaraoke)
+                {
+                    karaokeType = "MP3G";
+                }
             }
 
             string typeLabel = isKaraoke ? (string.IsNullOrEmpty(karaokeType) ? "MP3G" : karaokeType) : "Audio";
@@ -644,7 +660,7 @@ namespace Lyracist.Data.Services
                         // (see MediaEngine.LoadSong) - it never needs its own database row.
                         // Cataloguing it too used to create a second, unplayable "song" for every
                         // unzipped karaoke track, roughly doubling the apparent library size.
-                        if (ext == ".mp3" || ext == ".mp4" || ext == ".zip")
+                        if (ext == ".mp3" || ext == ".mp4" || ext == ".zip" || ext == ".m4a" || ext == ".flac" || ext == ".wav" || ext == ".wma" || ext == ".aac" || ext == ".ogg")
                         {
                             files.Add(f);
                         }

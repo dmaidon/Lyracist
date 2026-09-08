@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 08:56:30 -> Add Session Schedule and Last Request Cutoff properties
+// Edited on Sep 8, 2026 @ 08:49:00 -> Inject LyricsWindowViewModel for lyrics screen QR code setting synchronization
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -29,6 +29,7 @@ public partial class SettingsViewModel : BaseViewModel
     private readonly ILibraryService _library;
     private readonly RotationViewModel _rotation;
     private readonly RotationWindowViewModel _rotationWindowVm;
+    private readonly LyricsWindowViewModel? _lyricsWindowVm;
     private readonly IKSRotationSyncService _ksRotationSync;
 
     // Theme
@@ -172,7 +173,8 @@ public partial class SettingsViewModel : BaseViewModel
                              IRequestService requests,
                              IKSRotationSyncService ksRotationSync,
                              IChromecastDiscoveryService chromecastDiscovery,
-                             ICastingService casting)
+                             ICastingService casting,
+                             LyricsWindowViewModel? lyricsWindowVm = null)
     {
         _display = display;
         _tablet = tablet;
@@ -181,6 +183,7 @@ public partial class SettingsViewModel : BaseViewModel
         _library = library;
         _rotation = rotation;
         _rotationWindowVm = rotationWindowVm;
+        _lyricsWindowVm = lyricsWindowVm;
         _karaoke = karaoke;
         _requests = requests;
         _ksRotationSync = ksRotationSync;

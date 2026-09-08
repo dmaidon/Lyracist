@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 18:03:00 -> Add UpdateUserManualsForSearchScanAndCompactAutoAdvance documentation fact
+// Edited on Sep 8, 2026 @ 13:47:00 -> Add UpdateUserManualsForQrCodeToggleAndMusicLibrarySeparation documentation fact
 using System;
 using System.IO;
 using Xunit;
@@ -900,6 +900,129 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
             Lyracist.Data.LyracistDbContext.ClearAbandonedMigrationLocks();
             using var context = new Lyracist.Data.LyracistDbContext();
             context.Database.Migrate();
+        }
+
+        [Fact]
+        public void UpdateUserManualsForQrCodeToggleAndMusicLibrarySeparation()
+        {
+            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+            string updateText = @"
+Section: Audience Lyrics Screen QR Code & Library Format Separation
+
+[Update Details]
+Major updates have been added to improve projection screen customization and local library management across karaoke and standard music tracks.
+
+1. Audience Lyrics Screen QR Code Toggle:
+   - Hosts can now toggle the display of the patron mobile request QR code badge positioned in the top-right corner of the lyrics projection window.
+   - Configurable in three intuitive locations:
+     - Settings -> Monitors & Screen Assignments: 'Show QR Code on Lyrics Screen' checkbox under Lyrics Projection Screen.
+     - Lyrics Page: 'Show QR Code on Lyrics Screen' toggle switch under the Audience Lyrics Screen settings card.
+     - Lyrics Window Context Menu: Right-click anywhere on the active lyrics projection window and click 'Show QR Code' to toggle visibility instantly during a live show.
+   - The toggle state is permanently persisted across application restarts in AppSettings.
+
+2. Karaoke Library vs. Music Library Separation:
+   - Automatic MP3+G Companion CDG Detection: The library scanner now automatically identifies unzipped karaoke pairs (e.g. song.mp3 + song.cdg) and routes them into the Karaoke Library as MP3G tracks, preventing karaoke files from mistakenly appearing as standard background music.
+   - Expanded Audio Format Support: The library scanner now supports comprehensive audio file types including .mp3, .mp4, .zip, .wav, .m4a, .flac, .wma, .aac, and .ogg.
+   - Distinct Library Tabs with Live Count Badges: The search results view now features 'Karaoke Library' and 'Music Library' tabs displaying live match count badges (e.g. 'Karaoke Library (12)' and 'Music Library (3)').
+   - Search Query Isolation: SQLite database queries now evaluate track type filters directly in SQL, ensuring music searches return up to 150 matching music songs without being crowded out by karaoke results.
+";
+
+            // 1. Update text file if not already present
+            if (File.Exists(txtPath))
+            {
+                string content = File.ReadAllText(txtPath);
+                if (!content.Contains("Audience Lyrics Screen QR Code & Library Format Separation"))
+                {
+                    File.AppendAllText(txtPath, "\n" + updateText);
+                }
+            }
+
+            // 2. Update docx file by appending paragraph to the end
+            if (File.Exists(docxPath))
+            {
+                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                {
+                    var body = doc.MainDocumentPart?.Document?.Body;
+                    
+                    if (body != null)
+                    {
+                        bool alreadyAppended = false;
+                        foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        {
+                            if (p.Text != null && p.Text.Contains("Audience Lyrics Screen QR Code & Library Format Separation"))
+                            {
+                                alreadyAppended = true;
+                                break;
+                            }
+                        }
+
+                        if (!alreadyAppended)
+                        {
+                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Audience Lyrics Screen QR Code & Library Format Separation")
+                                )
+                            ));
+
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                    )
+                                ));
+                            }
+                            doc.Save();
+                        }
+                    }
+                }
+            }
+
+            // 3. Update pdf file by appending a page using PDFsharp
+            if (File.Exists(pdfPath))
+            {
+                try
+                {
+                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                    {
+                        string keywords = doc.Info.Keywords;
+                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("QrCodeToggleAndMusicSeparation"))
+                        {
+                            var page = doc.AddPage();
+                            page.Size = PdfSharp.PageSize.Letter;
+                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                            
+                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+                            
+                            gfx.DrawString("Section: Audience Lyrics Screen QR Code & Library Format Separation", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+                            
+                            double yPos = 70;
+                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                if (line.StartsWith("Section:")) continue;
+                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                yPos += 15;
+                            }
+                            
+                            doc.Info.Keywords = (keywords ?? string.Empty) + " QrCodeToggleAndMusicSeparation";
+                            doc.Save(pdfPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                }
+            }
         }
     }
 }

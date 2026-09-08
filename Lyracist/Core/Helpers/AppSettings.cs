@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 12:35:00 -> Add Provider Settings: PreferredProvider, PreferredFileType, DefaultNormalizeAudio, DefaultTrimSilence, DefaultGenerateWaveform, PreferredTargetFolder, and PreferredLyricsFormat
+// Edited on Sep 8, 2026 @ 08:48:00 -> Add ShowQrCodeOnLyricsScreen setting for lyrics projection screen QR code visibility
 using System;
 using System.IO;
 using System.Text.Json;
@@ -612,6 +612,12 @@ public static class AppSettings
         set { _data.ShowQrCodeOnRotationScreen = value; Save(); }
     }
 
+    public static bool ShowQrCodeOnLyricsScreen
+    {
+        get => _data.ShowQrCodeOnLyricsScreen;
+        set { _data.ShowQrCodeOnLyricsScreen = value; Save(); }
+    }
+
     public static string SelectedRatingIcon
     {
         get => _data.SelectedRatingIcon;
@@ -1163,6 +1169,7 @@ public static class AppSettings
 
         public bool IsRatingSystemEnabled { get; set; } = true;
         public bool ShowQrCodeOnRotationScreen { get; set; } = true;
+        public bool ShowQrCodeOnLyricsScreen { get; set; } = true;
         public string SelectedRatingIcon { get; set; } = "⭐ Star";
         public List<string> AvailableRatingIcons { get; set; } = ["⭐ Star", "❤️ Heart", "🔥 Fire", "🎵 Note", "🏆 Trophy", "👑 Crown", "👍 Like"];
         public string CdgBackdropMode { get; set; } = "Original Color";

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 8, 2026 @ 07:14:00 -> Set GroupName on SpecialEventBanner radio buttons in template for mutual exclusion -->
+<!-- Edited on Sep 8, 2026 @ 08:05:00 -> Update ModernTextBoxStyle template with vertical centering and hint support to prevent text clipping; add search icon and clear button to users search box -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -186,11 +186,78 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="ModernTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
-            <Setter Property="Margin" Value="0,4" />
+        <Style x:Key="ModernTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="FontSize" Value="14" />
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
             <Setter Property="Foreground" Value="{DynamicResource AppContrastTextBrush}" />
             <Setter Property="CaretBrush" Value="{DynamicResource AppContrastTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Margin" Value="0,4" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                              Focusable="False"
+                                              HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                              VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Padding="{TemplateBinding Padding}"
+                                              SnapsToDevicePixels="True" />
+                                <TextBlock x:Name="PART_Placeholder"
+                                           Text="{Binding Path=(materialDesign:HintAssist.Hint), RelativeSource={RelativeSource TemplatedParent}}"
+                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                           Opacity="0.55"
+                                           FontSize="{TemplateBinding FontSize}"
+                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                           Margin="{TemplateBinding Padding}"
+                                           TextTrimming="CharacterEllipsis"
+                                           IsHitTestVisible="False"
+                                           Visibility="Collapsed" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Text" Value="" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="PART_Placeholder" Property="Visibility" Value="Visible" />
+                            </MultiTrigger>
+                            <Trigger Property="Text" Value="{x:Null}">
+                                <Setter TargetName="PART_Placeholder" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="AcceptsReturn" Value="True">
+                                <Setter Property="VerticalContentAlignment" Value="Top" />
+                                <Setter Property="Padding" Value="10,6" />
+                                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}" />
+                                <Setter TargetName="border" Property="BorderThickness" Value="1.5" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="ModernButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
@@ -2175,12 +2242,46 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- Search Box -->
-                                <TextBox Grid.Row="0"
-                                         Text="{Binding UserSearchText, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource ModernTextBoxStyle}"
-                                         materialDesign:HintAssist.Hint="Search singers by name, email, or title..."
-                                         Margin="0,0,0,10"
-                                         Height="36" />
+                                <Grid Grid.Row="0" Margin="0,0,0,10">
+                                    <TextBox Text="{Binding UserSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource ModernTextBoxStyle}"
+                                             materialDesign:HintAssist.Hint="Search singers by name, email, or title..."
+                                             Height="36"
+                                             Padding="34,0,28,0" />
+                                    <!-- Search Magnify Icon -->
+                                    <materialDesign:PackIcon Kind="Magnify"
+                                                             Width="18"
+                                                             Height="18"
+                                                             Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                             Opacity="0.65"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Left"
+                                                             Margin="10,0,0,0"
+                                                             IsHitTestVisible="False" />
+                                    <!-- Clear Button -->
+                                    <Button Command="{Binding ClearUserSearchCommand}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="0"
+                                            Width="22"
+                                            Height="22"
+                                            Cursor="Hand"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Margin="0,0,8,0"
+                                            ToolTip="Clear search text"
+                                            Visibility="{Binding HasUserSearchText, Converter={StaticResource BoolToVis}}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="Transparent" CornerRadius="11">
+                                                    <TextBlock Text="✕" FontSize="11" FontWeight="Bold"
+                                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </Grid>
 
                                 <!-- Singer List -->
                                 <ListBox Grid.Row="1"

@@ -1,5 +1,5 @@
-<!-- Edited on Sep 8, 2026 @ 07:15:00 -> Document search result row tinting, SpecialEventBanner radio grouping, and Last Round invariants -->
-Last Edit: Sep 8, 2026 - Search Result Row Tinting, Special Event Radio Grouping, and Last Round Invariants
+<!-- Edited on Sep 8, 2026 @ 13:48:00 -> Document Audience Lyrics Screen QR Code Toggle and Karaoke & Music Library Separation -->
+Last Edit: Sep 8, 2026 - Audience Lyrics Screen QR Code Toggle, Karaoke & Music Library Separation & Search Isolation
 # Lyracist Pro
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -7,6 +7,20 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### 📱 Audience Lyrics Screen QR Code Toggle (`SettingsPage.xaml`, `LyricsPage.xaml`, `LyricsWindow.xaml`)
+- **Projection Screen Customization**: KJs can easily show or hide the patron mobile song request QR code badge displayed in the top-right corner of the lyrics projection window.
+- **Triple Access Points**:
+  - **Settings**: Checkbox under **Monitors & Screen Assignments -> Lyrics Projection Screen**.
+  - **Lyrics Page**: Dedicated toggle inside the **Audience Lyrics Screen** configuration card.
+  - **Live Right-Click Context Menu**: Right-click anywhere on the running lyrics projection screen and toggle **Show QR Code** on the fly without navigating away from the show.
+- **Persistent State**: Synced and persisted automatically via `AppSettings.ShowQrCodeOnLyricsScreen`.
+
+### 🎵 Karaoke & Music Library Separation & Search Isolation (`ScanningService`, `SearchService`, `LibraryService`, `KaraokePage.xaml`)
+- **Companion CDG Detection**: `ScanningService.ParseStoreDownload` automatically detects accompanying `.cdg` graphics files (`Path.ChangeExtension(filePath, ".cdg")`), reliably classifying unzipped MP3+G / WAV+G tracks as `IsKaraoke = true, KaraokeType = "MP3G"` and preventing them from mistakenly being routed to the background music library.
+- **Expanded Audio Format Enumeration**: The file crawler now catalogs standard music files in `.mp3`, `.mp4`, `.zip`, `.wav`, `.m4a`, `.flac`, `.wma`, `.aac`, and `.ogg` formats.
+- **Dedicated Library Tabs & Live Match Badges**: The search results view clearly distinguishes **Karaoke Library** and **Music Library** tabs, each displaying dynamic match count badges (e.g. `Karaoke Library (12)` and `Music Library (3)`).
+- **SQLite FTS Search Query Isolation**: SQLite FTS search queries now evaluate the `IsKaraoke` filter directly in SQL (`AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)`), preventing voluminous karaoke results from starving out music tracks under the 150-match query limit.
 
 ### 🎨 Search Result Track Type Tinting (`KaraokePage.xaml`, `HelpViewModel.cs`)
 - **Instant Visual Distinction**: Search result rows feature subtle, semi-transparent row tinting to immediately distinguish track formats at a glance: emerald green (`#1522C55E`) for karaoke tracks (`IsKaraoke = true`) and warm gold (`#15F59E0B`) for standard background music tracks (`IsKaraoke = false`).

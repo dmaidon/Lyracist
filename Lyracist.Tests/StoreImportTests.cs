@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 13:35:00 -> Update search URL assertions to match working provider endpoints
+// Edited on Sep 8, 2026 @ 12:14:00 -> Add unit tests for companion CDG karaoke detection and standard audio classification
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -1123,6 +1123,86 @@ public class StoreImportTests
 
         service.ClearAll();
         Assert.Empty(service.ActiveNotifications);
+    }
+
+    [Fact]
+    public void ParseStoreDownload_WithCompanionCdg_IdentifiesAsKaraokeMp3G()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), "LyracistTest_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+        try
+        {
+            string mp3Path = Path.Combine(tempDir, "Stevie Wonder - Superstition.mp3");
+            string cdgPath = Path.Combine(tempDir, "Stevie Wonder - Superstition.cdg");
+            File.WriteAllText(mp3Path, "dummy audio");
+            File.WriteAllText(cdgPath, "dummy cdg");
+
+            var parsed = ScanningService.ParseStoreDownload(mp3Path);
+
+            Assert.True(parsed.IsKaraoke);
+            Assert.Equal("MP3G", parsed.KaraokeType);
+            Assert.Equal("Stevie Wonder", parsed.Artist);
+            Assert.Equal("Superstition", parsed.Title);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                Directory.Delete(tempDir, true);
+            }
+        }
+    }
+
+    [Fact]
+    public void ParseStoreDownload_WithoutCompanionCdg_IdentifiesAsAudio()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), "LyracistTest_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+        try
+        {
+            string mp3Path = Path.Combine(tempDir, "Queen - Bohemian Rhapsody.mp3");
+            File.WriteAllText(mp3Path, "dummy audio");
+
+            var parsed = ScanningService.ParseStoreDownload(mp3Path);
+
+            Assert.False(parsed.IsKaraoke);
+            Assert.Equal("Audio", parsed.KaraokeType);
+            Assert.Equal("Queen", parsed.Artist);
+            Assert.Equal("Bohemian Rhapsody", parsed.Title);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                Directory.Delete(tempDir, true);
+            }
+        }
+    }
+
+    [Fact]
+    public void ParseStoreDownload_FlacWithoutCdg_IdentifiesAsAudio()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), "LyracistTest_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+        try
+        {
+            string flacPath = Path.Combine(tempDir, "Led Zeppelin - Stairway to Heaven.flac");
+            File.WriteAllText(flacPath, "dummy audio");
+
+            var parsed = ScanningService.ParseStoreDownload(flacPath);
+
+            Assert.False(parsed.IsKaraoke);
+            Assert.Equal("Audio", parsed.KaraokeType);
+            Assert.Equal("Led Zeppelin", parsed.Artist);
+            Assert.Equal("Stairway to Heaven", parsed.Title);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                Directory.Delete(tempDir, true);
+            }
+        }
     }
 }
 

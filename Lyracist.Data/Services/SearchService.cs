@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1261 async disposal on commands and RCS1118 const SQL strings
+// Edited on Sep 8, 2026 @ 12:13:00 -> Add IsKaraoke filter support to FTS search queries
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -186,7 +186,7 @@ namespace Lyracist.Data.Services
             }
         }
 
-        public async Task<List<Song>> Search(string query)
+        public async Task<List<Song>> Search(string query, bool? isKaraoke = null)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -214,6 +214,7 @@ namespace Lyracist.Data.Services
                     WHERE s.SongId IN (
                         SELECT SongId FROM SongSearch WHERE SongSearch MATCH @ftsQuery
                     )
+                    AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
                     LIMIT 150";
 
                 var results = await connection.QueryAsync<Song, SongAudioSettings, Song>(
@@ -223,7 +224,7 @@ namespace Lyracist.Data.Services
                         song.AudioSettings = audioSettings;
                         return song;
                     },
-                    new { ftsQuery },
+                    new { ftsQuery, isKaraoke },
                     splitOn: "SongAudioSettingsId"
                 );
 
@@ -233,6 +234,17 @@ namespace Lyracist.Data.Services
             {
                 Lyracist.Shared.Globals.LogError("Lyracist", "Dapper search execution failed", ex);
                 // Fallback to standard EF Core query (clamped) in case of connection exceptions
+                if (isKaraoke.HasValue)
+                {
+                    bool kVal = isKaraoke.Value;
+                    return await _context.Songs
+                        .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0}) AND IsKaraoke = {1}", ftsQuery, kVal)
+                        .AsNoTracking()
+                        .Include(s => s.AudioSettings)
+                        .Take(150)
+                        .ToListAsync();
+                }
+
                 return await _context.Songs
                     .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0})", ftsQuery)
                     .AsNoTracking()
@@ -351,7 +363,7 @@ namespace Lyracist.Data.Services
             }
         }
 
-        public List<Song> SearchSync(string query)
+        public List<Song> SearchSync(string query, bool? isKaraoke = null)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -384,6 +396,7 @@ namespace Lyracist.Data.Services
                     WHERE s.SongId IN (
                         SELECT SongId FROM SongSearch WHERE SongSearch MATCH @ftsQuery
                     )
+                    AND (@isKaraoke IS NULL OR s.IsKaraoke = @isKaraoke)
                     LIMIT 150";
 
                 var results = connection.Query<Song, SongAudioSettings, Song>(
@@ -393,7 +406,7 @@ namespace Lyracist.Data.Services
                         song.AudioSettings = audioSettings;
                         return song;
                     },
-                    new { ftsQuery },
+                    new { ftsQuery, isKaraoke },
                     splitOn: "SongAudioSettingsId"
                 );
 
@@ -402,6 +415,17 @@ namespace Lyracist.Data.Services
             catch (Exception ex)
             {
                 Lyracist.Shared.Globals.LogError("Lyracist", "Dapper sync search execution failed", ex);
+                if (isKaraoke.HasValue)
+                {
+                    bool kVal = isKaraoke.Value;
+                    return _context.Songs
+                        .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0}) AND IsKaraoke = {1}", ftsQuery, kVal)
+                        .AsNoTracking()
+                        .Include(s => s.AudioSettings)
+                        .Take(150)
+                        .ToList();
+                }
+
                 return _context.Songs
                     .FromSqlRaw("SELECT * FROM Songs WHERE SongId IN (SELECT SongId FROM SongSearch WHERE SongSearch MATCH {0})", ftsQuery)
                     .AsNoTracking()

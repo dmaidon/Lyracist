@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 09:53:40 -> Add LoadSong methods to LyricsWindowViewModel for projection screen updates
+// Edited on Sep 8, 2026 @ 08:49:00 -> Add ShowQrCodeOnLyricsScreen property and inherit BaseViewModel in LyricsWindowViewModel
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
@@ -12,7 +12,7 @@ namespace Lyracist.ViewModels;
 
 public sealed record MonitorOption(int Index, string Label);
 
-public partial class LyricsWindowViewModel : ObservableObject
+public partial class LyricsWindowViewModel : BaseViewModel
 {
     private readonly IDisplayService _display;
 
@@ -29,6 +29,19 @@ public partial class LyricsWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private string _joinUrl = string.Empty;
+
+    public bool ShowQrCodeOnLyricsScreen
+    {
+        get => Lyracist.Core.Helpers.AppSettings.ShowQrCodeOnLyricsScreen;
+        set
+        {
+            if (Lyracist.Core.Helpers.AppSettings.ShowQrCodeOnLyricsScreen != value)
+            {
+                Lyracist.Core.Helpers.AppSettings.ShowQrCodeOnLyricsScreen = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     public void RefreshQrCode()
     {

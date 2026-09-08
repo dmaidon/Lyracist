@@ -1,4 +1,4 @@
-<!-- Created on Sep 4, 2026 @ 23:05:00 -> Basic project overview of KSRotation tabs, theming, and architecture -->
+<!-- Edited on Sep 8, 2026 @ 13:48:00 -> Add Users tab description and modern search input controls -->
 
 # KSRotation
 
@@ -7,6 +7,7 @@ KSRotation ("Karaoke Singer Rotation") is a WPF (.NET, C#, Material Design in XA
 ## Tabs
 
 - **Rotation** — Manages the singer rotation queue for the night.
+- **Users** — Centralized user, performer, and staff management with high-DPI quick-search, profile management, and history.
 - **Settings** — Venue, DJ, banner, and general app settings (theme, etc.).
 - **Display** — Controls the audience-facing display window(s)/monitor output.
 - **Trivia** — Live "Game Master" controls for running a trivia round (question packs, questions-per-game, live question navigation, timer controls, scoring reveal, patron mobile portal status).

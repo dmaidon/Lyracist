@@ -1,4 +1,4 @@
-<!-- Edited on Sep 8, 2026 @ 07:14:00 -> Add SongTypeRowStyle for green karaoke and gold music search result row tinting -->
+<!-- Edited on Sep 8, 2026 @ 12:13:00 -> Rename Local Library to Karaoke Library and add live result hit count badges to tabs -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -321,7 +321,13 @@
 
                 <!-- Search Results list -->
                 <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
-                    <TabItem Header="Local Library" FontSize="12">
+                    <TabItem FontSize="12">
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Karaoke Library" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding FilteredSongs.Count, StringFormat=' ({0})'}" VerticalAlignment="Center" Opacity="0.75" Margin="2,0,0,0" />
+                            </StackPanel>
+                        </TabItem.Header>
                         <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="4" Margin="0,8,0,0">
                             <DataGrid ItemsSource="{Binding FilteredSongs}"
                                       SelectedItem="{Binding SelectedSong, Mode=TwoWay}"
@@ -357,7 +363,13 @@
                         </Border>
                     </TabItem>
 
-                    <TabItem Header="Music Library" FontSize="12">
+                    <TabItem FontSize="12">
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Music Library" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding FilteredMusic.Count, StringFormat=' ({0})'}" VerticalAlignment="Center" Opacity="0.75" Margin="2,0,0,0" />
+                            </StackPanel>
+                        </TabItem.Header>
                         <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Padding="4" Margin="0,8,0,0">
                             <DataGrid ItemsSource="{Binding FilteredMusic}"
                                       SelectedItem="{Binding SelectedSong, Mode=TwoWay}"

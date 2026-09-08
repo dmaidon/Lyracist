@@ -1,9 +1,32 @@
-<!-- Edited on Sep 8, 2026 @ 07:15:00 -> Document search result row tinting, SpecialEventBanner radio grouping, Last Round rules, and help update -->
-Last Edit: Sep 8, 2026 - Search Result Row Tinting, Special Event Radio Grouping, Last Round Invariants & Help Update
+<!-- Edited on Sep 8, 2026 @ 13:48:00 -> Document 26.9.5.35 release with QR code toggle, library separation, and KSRotation user search -->
+Last Edit: Sep 8, 2026 - Audience Lyrics Screen QR Code Toggle, Karaoke & Music Library Separation, and KSRotation User Search
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.35] - 2026-09-08
+
+### Added
+- **Audience Lyrics Screen QR Code Toggle (`LyricsWindow.xaml`, `SettingsPage.xaml`, `LyricsPage.xaml`, `AppSettings.cs`)**:
+  - Added a configurable toggle allowing KJs to show or hide the patron mobile song request QR code badge on the audience lyrics projection screen.
+  - Accessible via **Settings -> Monitors & Screen Assignments**, the **Lyrics Page** (Audience Lyrics Screen card), and via right-click context menu directly on the active **Lyrics Window**.
+  - Persisted in `AppSettings.ShowQrCodeOnLyricsScreen` and documented in Help Topic 5 and the user manuals.
+- **Dedicated Karaoke & Music Library Tabs with Live Count Badges (`KaraokePage.xaml`)**:
+  - Renamed "Local Library" to "Karaoke Library" and added live result hit count badges to both tabs (`Karaoke Library ({Count})` and `Music Library ({Count})`).
+
+### Fixed
+- **Karaoke vs. Music Library Classification & Companion CDG Detection (`ScanningService.cs`)**:
+  - Added companion `.cdg` file detection (`File.Exists(Path.ChangeExtension(filePath, ".cdg"))`) to `ScanningService.ParseStoreDownload`, correctly classifying unzipped MP3+G / WAV+G karaoke pairs as `IsKaraoke = true, KaraokeType = "MP3G"` and preventing them from being mistakenly routed to the background music library.
+  - Expanded `SafeEnumerateFiles` to catalog standard audio files in `.mp3`, `.mp4`, `.zip`, `.wav`, `.m4a`, `.flac`, `.wma`, `.aac`, and `.ogg`.
+  - Rescanning automatically identifies and updates existing database records and FTS5 search indexes.
+- **SQLite FTS Search Query Isolation (`SearchService.cs`, `LibraryService.cs`)**:
+  - Pushed the `IsKaraoke` check into SQLite's SQL query so music queries return their own full 150 matching tracks without being starved by karaoke matches.
+- **KSRotation User Search Box Layout (`KSRotation/MainWindow.xaml`, `MainViewModel.Users.cs`)**:
+  - Replaced the Material Design outlined text box style on the Users tab (which had an incompatible 56px minimum height and 16px internal vertical padding that squeezed user input down into an invisible 2px slit on 1920x1080 laptops) with a responsive, modern custom ControlTemplate.
+  - Added integrated magnifying glass icon, theme-adaptive styling, and an interactive clear button (`✕`) bound to `ClearUserSearchCommand`.
+- **KSRotation Compiler Cleanliness (`DisplayViewModel.cs`)**:
+  - Removed erroneous `private` modifier from `partial void OnHasDesignatedCurrentSingerChanged` and `partial void OnIsCurrentMusicChanged` to resolve C# CS8799 compiler errors.
 
 ## [26.9.5.34] - 2026-09-08
 

@@ -1,4 +1,4 @@
-// Edited on Aug 17, 2026 @ 14:38:40 -> Add LaunchTrivia and PreviewConnectInstructions commands
+// Edited on Sep 8, 2026 @ 08:49:00 -> Add ShowQrCodeOnLyricsScreen property to sync lyrics projection screen QR code visibility
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -78,6 +78,20 @@ public partial class SettingsViewModel
                 AppSettings.ShowQrCodeOnRotationScreen = value;
                 OnPropertyChanged();
                 _rotationWindowVm.NotifyPropertyChanged(nameof(RotationWindowViewModel.ShowQrCodeOnRotationScreen));
+            }
+        }
+    }
+
+    public bool ShowQrCodeOnLyricsScreen
+    {
+        get => AppSettings.ShowQrCodeOnLyricsScreen;
+        set
+        {
+            if (AppSettings.ShowQrCodeOnLyricsScreen != value)
+            {
+                AppSettings.ShowQrCodeOnLyricsScreen = value;
+                OnPropertyChanged();
+                _lyricsWindowVm?.NotifyPropertyChanged(nameof(LyricsWindowViewModel.ShowQrCodeOnLyricsScreen));
             }
         }
     }
