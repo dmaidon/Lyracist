@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 14:05:00 -> Always use WASAPI mmdevice, initialize 0dB equalizer preamp, and support software volume boost
+// Edited on Sep 9, 2026 @ 16:34:00 -> Apply MasterOutputBoostDb preamp, 200% volume ceiling, and anti-clipping limiter
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -84,7 +84,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         get => _volume;
         set
         {
-            _volume = Math.Clamp(value, 0.0, 150.0);
+            _volume = Math.Clamp(value, 0.0, 200.0);
             _mediaPlayer?.Volume = (int)_volume;
         }
     }
@@ -109,9 +109,11 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
     {
         if (_equalizer == null) return;
 
+        float preampBoost = (float)Lyracist.Core.Helpers.AppSettings.MasterOutputBoostDb;
+
         if (Lyracist.Core.Helpers.AppSettings.IsHardwareMixerMode)
         {
-            _equalizer.SetPreamp(0.0f);
+            _equalizer.SetPreamp(preampBoost);
             for (uint i = 0; i < 10; i++)
             {
                 _equalizer.SetAmp(0.0f, i);
@@ -119,7 +121,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         }
         else if (_enableKillVocal)
         {
-            _equalizer.SetPreamp(0.0f);
+            _equalizer.SetPreamp(preampBoost);
             // Cut vocal bands completely (-20dB represents complete suppression in LibVLC)
             foreach (uint band in MidBands) _equalizer.SetAmp(-20.0f, band);
             // Boost Bass and Treble slightly to emphasize accompaniment tracks
@@ -128,7 +130,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         }
         else
         {
-            _equalizer.SetPreamp(0.0f);
+            _equalizer.SetPreamp(preampBoost);
             foreach (uint band in BassBands) _equalizer.SetAmp((float)_bass, band);
             foreach (uint band in MidBands) _equalizer.SetAmp((float)_mid, band);
             foreach (uint band in TrebleBands) _equalizer.SetAmp((float)_treble, band);
@@ -229,7 +231,8 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
             // (same constraint the existing pitch-shift option below already has) - so all active
             // filter modules must be combined into a single ":audio-filter=" option here, since a
             // second AddOption call for the same key would just override rather than append.
-            bool compressorActive = _compressor > 0 || _limiter < 0;
+            bool limiterEnabled = Lyracist.Core.Helpers.AppSettings.EnableAudioLimiter;
+            bool compressorActive = _compressor > 0 || _limiter < 0 || limiterEnabled;
             var filterModules = new List<string>();
             if (compressorActive) filterModules.Add("compressor");
             if (_pitchShift != 0) filterModules.Add("pitch");
@@ -245,20 +248,22 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
                 // limiter module - so Limiter is folded in as a floor on the compression
                 // threshold, with the ratio pushed toward the max whenever Limiter's dB ceiling
                 // is the more restrictive of the two (i.e. acting as a hard limit rather than a
-                // musical compressor). Threshold/ratio scaling mirrors FFmpegService.BuildAudioFilterString's
-                // ffmpeg-backend mapping so both playback engines behave consistently.
-                double compressorThresholdDb = -40.0 * Math.Clamp(_compressor / 100.0, 0.0, 1.0);
-                double threshold = Math.Clamp(_limiter < 0 ? Math.Min(compressorThresholdDb, _limiter) : compressorThresholdDb, -30.0, 0.0);
-                double ratio = _compressor > 0 ? Math.Clamp(1.0 + (_compressor / 100.0) * 19.0, 1.0, 20.0) : 4.0;
-                if (_limiter < 0 && _limiter <= compressorThresholdDb)
+                // musical compressor).
+                double compressorThresholdDb = _compressor > 0
+                    ? -40.0 * Math.Clamp(_compressor / 100.0, 0.0, 1.0)
+                    : 0.0;
+                double limiterFloorDb = _limiter < 0 ? _limiter : (limiterEnabled ? -0.5 : 0.0);
+                double threshold = Math.Clamp(Math.Min(compressorThresholdDb, limiterFloorDb), -30.0, 0.0);
+                double ratio = _compressor > 0 ? Math.Clamp(1.0 + (_compressor / 100.0) * 19.0, 1.0, 20.0) : 20.0;
+                if ((_limiter < 0 || limiterEnabled) && limiterFloorDb <= compressorThresholdDb)
                 {
                     ratio = 20.0;
                 }
 
                 media.AddOption($":compressor-threshold={threshold.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
                 media.AddOption($":compressor-ratio={ratio.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
-                media.AddOption(":compressor-attack=20");
-                media.AddOption(":compressor-release=250");
+                media.AddOption(":compressor-attack=10");
+                media.AddOption(":compressor-release=150");
                 media.AddOption(":compressor-makeup-gain=0");
             }
 

@@ -1,6 +1,7 @@
-// Created on Aug 6, 2026 @ 07:01:27 -> Split MediaEngine/CDG/audio device settings out of SettingsViewModel.cs (God-object cleanup); pure code move, no behavior change
+// Edited on Sep 9, 2026 @ 16:37:00 -> Expose MasterOutputBoostDb, EnableAudioLimiter, and SetMasterOutputBoostCommand
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Lyracist.Core.Helpers;
 using Lyracist.Core.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -123,6 +124,49 @@ public partial class SettingsViewModel
                 var mediaEngine = App.AppHost.Services.GetService(typeof(IMediaEngine)) as IMediaEngine;
                 mediaEngine?.UpdateAudioParameters();
             }
+        }
+    }
+
+    public double MasterOutputBoostDb
+    {
+        get => AppSettings.MasterOutputBoostDb;
+        set
+        {
+            if (System.Math.Abs(AppSettings.MasterOutputBoostDb - value) > 0.01)
+            {
+                AppSettings.MasterOutputBoostDb = value;
+                OnPropertyChanged(nameof(MasterOutputBoostDb));
+
+                var mediaEngine = App.AppHost.Services.GetService(typeof(IMediaEngine)) as IMediaEngine;
+                mediaEngine?.UpdateAudioParameters();
+
+                _showFlow.RefreshOutputSettings();
+            }
+        }
+    }
+
+    public bool EnableAudioLimiter
+    {
+        get => AppSettings.EnableAudioLimiter;
+        set
+        {
+            if (AppSettings.EnableAudioLimiter != value)
+            {
+                AppSettings.EnableAudioLimiter = value;
+                OnPropertyChanged(nameof(EnableAudioLimiter));
+
+                var mediaEngine = App.AppHost.Services.GetService(typeof(IMediaEngine)) as IMediaEngine;
+                mediaEngine?.UpdateAudioParameters();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void SetMasterOutputBoost(string? dbStr)
+    {
+        if (double.TryParse(dbStr, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double db))
+        {
+            MasterOutputBoostDb = db;
         }
     }
 

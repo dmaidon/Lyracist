@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 14:08:00 -> Always route audio through WASAPI mmdevice on Windows
+// Edited on Sep 9, 2026 @ 16:32:00 -> Apply MasterOutputBoostDb to preamp and expand volume headroom to 200
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -83,7 +83,7 @@ public class BackgroundMusicPlayer : IDisposable
         get => _baseVolume;
         set
         {
-            _baseVolume = Math.Clamp(value, 0, 100);
+            _baseVolume = Math.Clamp(value, 0, 200);
             if (!_isCrossfading)
             {
                 _active.Volume = CurrentTargetVolume;
@@ -275,11 +275,14 @@ public class BackgroundMusicPlayer : IDisposable
         player.SetEqualizer(_equalizer);
     }
 
+    public void UpdatePreamp() => ApplyEqualizer();
+
     private void ApplyEqualizer()
     {
+        float masterBoost = (float)Lyracist.Core.Helpers.AppSettings.MasterOutputBoostDb;
         if (Lyracist.Core.Helpers.AppSettings.IsHardwareMixerMode)
         {
-            _equalizer.SetPreamp(0.0f);
+            _equalizer.SetPreamp(masterBoost);
             for (uint i = 0; i < 10; i++)
             {
                 _equalizer.SetAmp(0.0f, i);
@@ -287,7 +290,7 @@ public class BackgroundMusicPlayer : IDisposable
         }
         else
         {
-            _equalizer.SetPreamp((float)_preampDb);
+            _equalizer.SetPreamp((float)Math.Clamp(_preampDb + masterBoost, -20.0, 20.0));
             foreach (uint band in BassBands) _equalizer.SetAmp((float)_bassDb, band);
             foreach (uint band in TrebleBands) _equalizer.SetAmp((float)_trebleDb, band);
         }

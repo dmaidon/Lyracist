@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 14:30:00 -> Add UpdateUserManualsForSearchPerformanceTabletButtonsAndAudioVolume and synchronize manual updates
+// Edited on Sep 9, 2026 @ 16:42:00 -> Add UpdateUserManualsForUsbMixerOutputBoostAndLimiter test for documentation sync
 using System;
 using System.IO;
 using Xunit;
@@ -1146,6 +1146,107 @@ Major performance, layout responsiveness, and audio output enhancements have bee
                                 }
                                 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " SearchPerfTabletButtonsAudioVolume";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForUsbMixerOutputBoostAndLimiter()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter (Updated Sep 9, 2026)
+- Master Output Boost / Preamp (USB Mixer Mode): Provides an adjustable digital preamplification slider from 0 dB to +12 dB with dedicated quick presets for 0 dB (Standard), +6 dB (USB Mixer / Club), and +12 dB (Maximum Drive).
+- Optimized for Professional USB Mixers: Engineered specifically for external sound cards and USB audio interfaces like the Yamaha MG10XU (Channel 9/10 USB stereo return), supplying a robust, punchy +4 dBu professional line-level signal directly from Windows without having to crank mixer channel gain knobs to their physical limits.
+- Anti-Clipping Peak Limiter: Integrated transparent soft-knee peak compressor/limiter that safeguards against digital clipping and speaker distortion when output boost is engaged or when loud audio tracks are played.
+- Expanded Volume Headroom: Playback volume headroom ceiling extended to 200% (+6 dB digital gain) across both the main karaoke media engine and the background music fill-in players.
+- Unified BGM and Performance Levels: Master preamp boost settings automatically apply across all playback channels (Karaoke performances, Opening Music, Fill-in Music, and End-of-Rotation Music) ensuring seamless, matched volume levels throughout the entire show.";
+
+                // 1. Append to updates log text file
+                File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+
+                // 2. Update docx file
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter")
+                                    )
+                                ));
+
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("UsbMixerOutputBoostLimiter"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                                double yPos = 70;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                    yPos += 15;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " UsbMixerOutputBoostLimiter";
                                 doc.Save(pdfPath);
                             }
                         }

@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 09:52:30 -> Add EndReached event implementation for FFME media ended
+// Edited on Sep 9, 2026 @ 16:35:00 -> Support volume headroom up to 200 in FfmeVideoBackend
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -32,8 +32,11 @@ public class FfmeVideoBackend : IVideoBackend, IDisposable
         get => _volume;
         set
         {
-            _volume = Math.Clamp(value, 0.0, 100.0);
-            _mediaElement?.Volume = _volume / 100.0;
+            _volume = Math.Clamp(value, 0.0, 200.0);
+            if (_mediaElement != null)
+            {
+                _mediaElement.Volume = Math.Clamp(_volume / 100.0, 0.0, 1.0);
+            }
         }
     }
 

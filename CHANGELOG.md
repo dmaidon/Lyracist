@@ -1,5 +1,5 @@
-<!-- Edited on Sep 9, 2026 @ 14:45:00 -> Document 26.9.5.36 release with search performance, tablet touch layout, and high-output WASAPI audio -->
-Last Edit: Sep 9, 2026 - Search Performance, Tablet Touch Layout & High-Output WASAPI Audio Engine
+<!-- Edited on Sep 9, 2026 @ 16:45:00 -> Add USB Mixer Master Output Boost, Anti-Clipping Limiter, and 200% Headroom -->
+Last Edit: Sep 9, 2026 - Master Output Boost (USB Mixer Mode), Anti-Clipping Limiter & Search Performance
 
 # Changelog
 
@@ -8,6 +8,12 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.5.36] - 2026-09-09
 
 ### Added
+- **Master Output Boost / Preamp (USB Mixer Mode) (`SettingsPage.xaml`, `SettingsViewModel.MediaEngine.cs`, `AppSettings.cs`)**:
+  - Added an adjustable digital preamp slider (0 dB to +12 dB) with one-click presets for `0 dB (Standard)`, `+6 dB (USB Mixer)`, and `+12 dB (Maximum)`.
+  - Engineered specifically for external sound cards and USB audio interfaces like the Yamaha MG10XU (Channel 9/10 USB stereo return), supplying a robust, punchy +4 dBu professional line-level signal directly from Windows without having to crank mixer channel gain knobs to their physical limits.
+  - Automatically synchronizes BGM player preamps across Opening, Fill-In, End-of-Rotation, and Special Occasion playlists via `ShowFlowService.RefreshOutputSettings`.
+- **Anti-Clipping Peak Limiter (`LibVlcVideoBackend.cs`, `SettingsPage.xaml`, `AppSettings.cs`)**:
+  - Embedded a transparent soft-knee peak compressor/limiter into LibVLC's native playback pipeline, automatically clamping hot audio signals to prevent digital clipping or speaker distortion when high-gain tracks are played.
 - **Instant Search Clear Button (`KaraokePage.xaml`, `KaraokeViewModel.cs`)**:
   - Integrated a dedicated clear button (`✕`) directly into the search box that appears whenever text is entered, enabling one-click query resets.
 - **Streaming Search Query Isolation (`KaraokeViewModel.cs`, `KaraokeViewModel.ExternalSearch.cs`, `KaraokePage.xaml`)**:
@@ -22,10 +28,9 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Search Stutter & UI Thread Thrashing (`KaraokeViewModel.cs`, `KaraokePage.xaml`)**:
   - Replaced individual item-by-item `.Add()` collection mutations (which fired 150+ UI layout passes on the UI thread per keystroke) with atomic batch collection assignments.
   - Enabled active UI recycling virtualization (`VirtualizingPanel.IsVirtualizing="True"`, `VirtualizingPanel.VirtualizationMode="Recycling"`, `VirtualizingPanel.ScrollUnit="Item"`) on all search DataGrids, eliminating visual lag and stutter during rapid typing.
-- **Quiet Audio Playback & WASAPI Routing (`LibVlcVideoBackend.cs`, `BackgroundMusicPlayer.cs`, `MediaEngine.cs`, `AppSettings.cs`)**:
+- **Quiet Audio Playback, Headroom & WASAPI Routing (`LibVlcVideoBackend.cs`, `BackgroundMusicPlayer.cs`, `MediaEngine.cs`, `AppSettings.cs`)**:
   - Configured `LibVlcVideoBackend` and `BackgroundMusicPlayer` to unconditionally route audio through modern Windows Core Audio WASAPI (`SetAudioOutput("mmdevice")`) on both default and custom audio devices, bypassing legacy DirectSound/WaveOut software mixer attenuation.
-  - Initialized a stable `0 dB` equalizer preamp on all playback modes, eliminating hidden internal filter attenuation that lowered track output.
-  - Expanded software volume headroom up to `150%` (+6 dB digital gain boost), ensuring playback volume matches native drive playback without forcing volume and gain sliders to their limits.
+  - Expanded software volume headroom ceiling up to `200%` (+6 dB digital gain boost), ensuring playback volume matches native drive playback without forcing volume and gain sliders to their limits.
   - Recalibrated default integrated loudness normalization to `-12 LUFS` (live performance/DJ standard) and guarded against uninitialized zero-gain multipliers in `MediaEngine.UpdateAudioParameters`.
 
 ## [26.9.5.35] - 2026-09-08

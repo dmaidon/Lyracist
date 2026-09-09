@@ -1809,3 +1809,17 @@ Major performance, layout responsiveness, and audio output enhancements have bee
    - Equalizer Preamp Stabilization: Hardware and software equalizer filters now initialize with clean 0 dB preamp gain, eliminating internal filter attenuation that previously reduced track volume.
    - Enhanced DJ Volume Headroom: Software volume and gain headroom have been expanded up to 150% (+6 dB digital boost), matching native drive playback loudness and allowing performers to cut through live venue acoustics.
    - Calibrated Live Loudness Target: Automatic volume normalization has been recalibrated to -12 LUFS (matching commercial live performance standards), delivering loud, punchy playback without crushing volume.
+
+Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter (Updated Sep 9, 2026)
+- Master Output Boost / Preamp (USB Mixer Mode): Provides an adjustable digital preamplification slider from 0 dB to +12 dB with dedicated quick presets for 0 dB (Standard), +6 dB (USB Mixer / Club), and +12 dB (Maximum Drive).
+- Optimized for Professional USB Mixers: Engineered specifically for external sound cards and USB audio interfaces like the Yamaha MG10XU (Channel 9/10 USB stereo return), supplying a robust, punchy +4 dBu professional line-level signal directly from Windows without having to crank mixer channel gain knobs to their physical limits.
+- Anti-Clipping Peak Limiter: Integrated transparent soft-knee peak compressor/limiter that safeguards against digital clipping and speaker distortion when output boost is engaged or when loud audio tracks are played.
+- Expanded Volume Headroom: Playback volume headroom ceiling extended to 200% (+6 dB digital gain) across both the main karaoke media engine and the background music fill-in players.
+- Unified BGM and Performance Levels: Master preamp boost settings automatically apply across all playback channels (Karaoke performances, Opening Music, Fill-in Music, and End-of-Rotation Music) ensuring seamless, matched volume levels throughout the entire show.
+
+Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter (Updated Sep 9, 2026)
+- Master Output Boost / Preamp (USB Mixer Mode): Provides an adjustable digital preamplification slider from 0 dB to +12 dB with dedicated quick presets for 0 dB (Standard), +6 dB (USB Mixer / Club), and +12 dB (Maximum Drive).
+- Optimized for Professional USB Mixers: Engineered specifically for external sound cards and USB audio interfaces like the Yamaha MG10XU (Channel 9/10 USB stereo return), supplying a robust, punchy +4 dBu professional line-level signal directly from Windows without having to crank mixer channel gain knobs to their physical limits.
+- Anti-Clipping Peak Limiter: Integrated transparent soft-knee peak compressor/limiter that safeguards against digital clipping and speaker distortion when output boost is engaged or when loud audio tracks are played.
+- Expanded Volume Headroom: Playback volume headroom ceiling extended to 200% (+6 dB digital gain) across both the main karaoke media engine and the background music fill-in players.
+- Unified BGM and Performance Levels: Master preamp boost settings automatically apply across all playback channels (Karaoke performances, Opening Music, Fill-in Music, and End-of-Rotation Music) ensuring seamless, matched volume levels throughout the entire show.

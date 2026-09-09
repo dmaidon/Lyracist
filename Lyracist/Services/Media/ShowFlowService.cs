@@ -1,4 +1,4 @@
-// Edited on Aug 20, 2026 @ 09:56:30 -> Coordinate fill-in music and playback lifecycle with AutoAdvanceManager
+// Edited on Sep 9, 2026 @ 16:33:00 -> Implement RefreshOutputSettings to update BGM player preamps
 using System;
 using System.Linq;
 using System.Threading;
@@ -98,6 +98,14 @@ public class ShowFlowService : IShowFlowService
         };
 
         SetBgmAudioDevice(Lyracist.Core.Helpers.AppSettings.SelectedBgmAudioDevice);
+    }
+
+    public void RefreshOutputSettings()
+    {
+        _opening.UpdatePreamp();
+        _fillIn.UpdatePreamp();
+        _endRotation.UpdatePreamp();
+        _occasion.UpdatePreamp();
     }
 
     public void RefreshPlaylists()

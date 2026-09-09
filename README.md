@@ -1,4 +1,4 @@
-<!-- Edited on Sep 9, 2026 @ 14:40:00 -> Add High-Output WASAPI Audio Engine, Instant Search, and Tablet Touch Layout -->
+<!-- Edited on Sep 9, 2026 @ 16:45:00 -> Add USB Mixer Master Output Boost, Anti-Clipping Limiter, and 200% Headroom -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -178,12 +178,17 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Dedicated "Key" and "Speed" columns in the Singer History tab (`KaraokePage.xaml`) display historical transposition and tempo settings for every completed song.
   - Re-adding songs from Singer History back into the rotation queue retains historical key and tempo settings automatically.
 
-### 🚀 High-Output WASAPI Audio Engine, Instant Search & Tablet Touch Layout (`Lyracist`)
+### 🚀 High-Output WASAPI Audio Engine, USB Mixer Output Boost & Tablet Touch Layout (`Lyracist`)
 - **Native Windows WASAPI mmdevice Audio Pipeline**:
   - `LibVlcVideoBackend` and `BackgroundMusicPlayer` now route all audio output directly through Windows Core Audio WASAPI (`mmdevice`) for both default and custom audio output devices, completely bypassing legacy DirectSound/WaveOut software mixer attenuation.
-  - Initialized 0 dB graphic equalizer preamp calibration, eliminating internal filter attenuation that previously reduced track volumes.
-  - Expanded software volume headroom up to 150% (+6 dB clean digital gain boost), ensuring playback loudness matches native media player levels without cranking volume controls to maximum.
+  - Expanded software volume headroom up to **200%** (+6 dB clean digital gain boost), ensuring playback loudness matches native media player levels without cranking volume controls to maximum.
   - Recalibrated default integrated loudness normalization to -12 LUFS (matching commercial live performance/DJ standards), delivering punchy, loud audio output.
+- **Master Output Boost / Preamp (USB Mixer Mode)**:
+  - Adjustable digital preamp slider from 0 dB to +12 dB with dedicated quick presets for `0 dB (Standard)`, `+6 dB (USB Mixer)`, and `+12 dB (Maximum)`.
+  - Specifically designed for external sound cards and USB audio interfaces like the **Yamaha MG10XU** (Channel 9/10 USB stereo return), supplying a robust, punchy +4 dBu professional line-level signal directly from Windows without having to crank mixer channel gain knobs to their physical limits.
+  - Master preamp boost settings automatically apply across all playback channels (Karaoke performances, Opening Music, Fill-in Music, and End-of-Rotation Music) ensuring seamless, matched volume levels throughout the entire show.
+- **Anti-Clipping Peak Limiter**:
+  - Embedded a transparent soft-knee peak compressor/limiter into LibVLC's playback pipeline (`--audio-filter=compressor`), protecting against digital clipping, distortion, or harsh speaker spikes when high-gain tracks are played.
 - **Instant Search & Query Isolation**:
   - Batched collection updates replace individual item additions, updating search tables instantaneously without visual stuttering or UI thread thrashing.
   - External streaming queries (Spotify, YouTube, Amazon) are isolated exclusively to the "Streaming Links" tab, ensuring local library song lookup is immediate and free of background network overhead.

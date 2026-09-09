@@ -1,4 +1,4 @@
-<!-- Edited on Sep 8, 2026 @ 08:49:00 -> Add Show QR Code on Lyrics Screen checkbox in Monitors & Screen Assignments -->
+<!-- Edited on Sep 9, 2026 @ 16:38:00 -> Add Master Output Boost (USB Mixer Mode) and Anti-Clipping Limiter to Audio Settings -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -764,6 +764,23 @@
                                     <ComboBox ItemsSource="{Binding AudioDevices}" SelectedValue="{Binding SelectedBgmAudioDevice, Mode=TwoWay}" SelectedValuePath="DeviceIdentifier" DisplayMemberPath="Description" Margin="0,0,0,12" />
 
                                     <CheckBox Content="Enable Hardware Mixer Mode (Bypass Software EQ)" IsChecked="{Binding IsHardwareMixerMode, Mode=TwoWay}" Margin="0,0,0,12" />
+
+                                    <TextBlock Text="Master Output Boost / Preamp (USB Mixer Mode)" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Grid.Column="0" Minimum="0" Maximum="12" Value="{Binding MasterOutputBoostDb, Mode=TwoWay}" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" ToolTip="Digital preamplification applied to audio output. 0 dB is standard; +6 dB to +12 dB is recommended for external USB mixers like the Yamaha MG10XU." />
+                                        <TextBlock Grid.Column="1" Text="{Binding MasterOutputBoostDb, StringFormat='{}{0:0} dB'}" FontSize="12" FontWeight="Bold" Width="70" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0" />
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <Button Content="0 dB (Standard)" Command="{Binding SetMasterOutputBoostCommand}" CommandParameter="0" Height="24" Padding="8,1" FontSize="11" Margin="0,0,6,0" />
+                                        <Button Content="+6 dB (USB Mixer)" Command="{Binding SetMasterOutputBoostCommand}" CommandParameter="6" Height="24" Padding="8,1" FontSize="11" Margin="0,0,6,0" />
+                                        <Button Content="+12 dB (Maximum)" Command="{Binding SetMasterOutputBoostCommand}" CommandParameter="12" Height="24" Padding="8,1" FontSize="11" />
+                                    </StackPanel>
+
+                                    <CheckBox Content="Enable Anti-Clipping Peak Limiter" IsChecked="{Binding EnableAudioLimiter, Mode=TwoWay}" Margin="0,0,0,12" ToolTip="Transparent soft-knee peak limiter protects against digital clipping or distortion when output gain is boosted." />
 
                                     <CheckBox Content="Normalize Volume Across Tracks" IsChecked="{Binding NormalizeVolumeEnabled, Mode=TwoWay}" Margin="0,0,0,4" ToolTip="Automatically level perceived loudness track-to-track using each song's measured loudness. Tracks are measured once in the background the first time they play." />
                                     <Grid Margin="0,0,0,12" IsEnabled="{Binding NormalizeVolumeEnabled}">

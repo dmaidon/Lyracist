@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 14:12:00 -> Update default TargetLoudnessLufs to -12.0 for louder live playback output
+// Edited on Sep 9, 2026 @ 16:30:00 -> Add MasterOutputBoostDb and EnableAudioLimiter for USB mixer gain staging
 using System;
 using System.IO;
 using System.Text.Json;
@@ -831,6 +831,18 @@ public static class AppSettings
         set { _data.TargetLoudnessLufs = value; Save(); }
     }
 
+    public static double MasterOutputBoostDb
+    {
+        get => _data.MasterOutputBoostDb;
+        set { _data.MasterOutputBoostDb = Math.Clamp(value, 0.0, 12.0); Save(); }
+    }
+
+    public static bool EnableAudioLimiter
+    {
+        get => _data.EnableAudioLimiter;
+        set { _data.EnableAudioLimiter = value; Save(); }
+    }
+
     public static bool AutoPlayRotationMusic
     {
         get => _data.AutoPlayRotationMusic;
@@ -1182,6 +1194,8 @@ public static class AppSettings
         public bool IsHardwareMixerMode { get; set; } = false;
         public bool NormalizeVolumeEnabled { get; set; } = true;
         public double TargetLoudnessLufs { get; set; } = -12.0;
+        public double MasterOutputBoostDb { get; set; } = 6.0;
+        public bool EnableAudioLimiter { get; set; } = true;
         public bool AutoPlayRotationMusic { get; set; } = true;
         public int RotationMusicDelaySeconds { get; set; } = 0;
         public List<Lyracist.Shared.SpecialEventConfig> SpecialEvents { get; set; } =

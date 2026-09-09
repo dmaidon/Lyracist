@@ -1,9 +1,10 @@
-// Edited on Jul 19, 2026 @ 09:40:00 -> Add SetBgmAudioDevice method
+// Edited on Sep 9, 2026 @ 16:31:00 -> Add RefreshOutputSettings method to IShowFlowService
 namespace Lyracist.Core.Interfaces;
 
 public interface IShowFlowService
 {
     void SetBgmAudioDevice(string deviceId);
+    void RefreshOutputSettings();
     bool IsOpeningPlaying { get; }
     bool IsFillInPlaying { get; }
     bool IsFillInDucked { get; }
