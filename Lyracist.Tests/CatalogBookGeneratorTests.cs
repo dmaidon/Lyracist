@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 13:47:00 -> Add UpdateUserManualsForQrCodeToggleAndMusicLibrarySeparation documentation fact
+// Edited on Sep 9, 2026 @ 14:30:00 -> Add UpdateUserManualsForSearchPerformanceTabletButtonsAndAudioVolume and synchronize manual updates
 using System;
 using System.IO;
 using Xunit;
@@ -14,6 +14,7 @@ namespace Lyracist.Tests
     {
         private static bool _dbSeeded;
         private static readonly object _dbLock = new object();
+        private static readonly object _manualLock = new object();
 
         public CatalogBookGeneratorTests()
         {
@@ -905,7 +906,9 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
         [Fact]
         public void UpdateUserManualsForQrCodeToggleAndMusicLibrarySeparation()
         {
-            string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+            lock (_manualLock)
+            {
+                string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
             string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
             string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
 
@@ -1021,6 +1024,136 @@ Major updates have been added to improve projection screen customization and loc
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                }
+            }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForSearchPerformanceTabletButtonsAndAudioVolume()
+        {
+            lock (_manualLock)
+            {
+                string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
+                string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+                string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+
+                string updateText = @"
+Section: Search Performance, Tablet Touch Sizing & High-Output Audio Engine
+
+[Update Details]
+Major performance, layout responsiveness, and audio output enhancements have been integrated into Lyracist for seamless live DJ and KJ operation.
+
+1. High-Performance Instant Search & Lookup:
+   - Zero-Lag Search Results: Song search results now batch UI notifications, updating the Karaoke and Music library tables instantaneously without visual stuttering or UI thread delays.
+   - Isolated Streaming Queries: External network searches (YouTube, Spotify, Amazon) are isolated exclusively to the Streaming Links tab, keeping local library song lookup instantaneous and eliminating unnecessary bandwidth usage during shows.
+   - Quick-Clear Search Button: A dedicated clear button ('X') has been integrated directly into the search bar to clear queries and reset results with a single tap or click.
+   - Active Row Virtualization: Search grids now employ full UI recycling virtualization, ensuring instant scrolling even with large catalog result sets.
+
+2. Responsive Tablet Touch Sizing & Column Protection:
+   - Tablet-Optimized Action Buttons: Action buttons in search result tables (Add to Rotation, Singer History, and Singer Queue) are locked to dedicated 52px non-collapsing columns with generous 38x32px touch targets.
+   - Anti-Squish Protection on High-DPI Displays: On 1080p tablet screens operating under 150% or 175% Windows DPI scaling, action buttons maintain their full proportions and never collapse into thin vertical lines.
+   - Minimum Panel Width: The search and assignment panel enforces a 360px minimum width to ensure readable song titles and artist names regardless of window resizing.
+
+3. Punchy High-Output Audio Playback:
+   - Native Windows WASAPI mmdevice Audio Pipeline: All karaoke playback (LibVlcVideoBackend) and background music channels (BackgroundMusicPlayer) now route directly through the modern Windows Audio Session API (WASAPI mmdevice) on both default and custom audio devices, bypassing legacy DirectSound/WaveOut software mixer attenuation.
+   - Equalizer Preamp Stabilization: Hardware and software equalizer filters now initialize with clean 0 dB preamp gain, eliminating internal filter attenuation that previously reduced track volume.
+   - Enhanced DJ Volume Headroom: Software volume and gain headroom have been expanded up to 150% (+6 dB digital boost), matching native drive playback loudness and allowing performers to cut through live venue acoustics.
+   - Calibrated Live Loudness Target: Automatic volume normalization has been recalibrated to -12 LUFS (matching commercial live performance standards), delivering loud, punchy playback without crushing volume.
+";
+
+                // 1. Update text file if not already present
+                if (File.Exists(txtPath))
+                {
+                    string content = File.ReadAllText(txtPath);
+                    if (!content.Contains("Search Performance, Tablet Touch Sizing & High-Output Audio Engine"))
+                    {
+                        File.AppendAllText(txtPath, "\n" + updateText);
+                    }
+                }
+
+                // 2. Update docx file by appending paragraph to the end
+                if (File.Exists(docxPath))
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+                        
+                        if (body != null)
+                        {
+                            bool alreadyAppended = false;
+                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                            {
+                                if (p.Text != null && p.Text.Contains("Search Performance, Tablet Touch Sizing & High-Output Audio Engine"))
+                                {
+                                    alreadyAppended = true;
+                                    break;
+                                }
+                            }
+
+                            if (!alreadyAppended)
+                            {
+                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Search Performance, Tablet Touch Sizing & High-Output Audio Engine")
+                                    )
+                                ));
+
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SearchPerfTabletButtonsAudioVolume"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+                                
+                                gfx.DrawString("Section: Search Performance, Tablet Touch Sizing & High-Output Audio Engine", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+                                
+                                double yPos = 70;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                    yPos += 15;
+                                }
+                                
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " SearchPerfTabletButtonsAudioVolume";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                    }
                 }
             }
         }

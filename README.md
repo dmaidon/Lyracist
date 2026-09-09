@@ -1,6 +1,5 @@
-<!-- Edited on Sep 8, 2026 @ 13:48:00 -> Document Audience Lyrics Screen QR Code Toggle and Karaoke & Music Library Separation -->
-Last Edit: Sep 8, 2026 - Audience Lyrics Screen QR Code Toggle, Karaoke & Music Library Separation & Search Isolation
-# Lyracist Pro
+<!-- Edited on Sep 9, 2026 @ 14:40:00 -> Add High-Output WASAPI Audio Engine, Instant Search, and Tablet Touch Layout -->
+# Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
 
@@ -178,6 +177,22 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Singer History DataGrid Tracking**:
   - Dedicated "Key" and "Speed" columns in the Singer History tab (`KaraokePage.xaml`) display historical transposition and tempo settings for every completed song.
   - Re-adding songs from Singer History back into the rotation queue retains historical key and tempo settings automatically.
+
+### 🚀 High-Output WASAPI Audio Engine, Instant Search & Tablet Touch Layout (`Lyracist`)
+- **Native Windows WASAPI mmdevice Audio Pipeline**:
+  - `LibVlcVideoBackend` and `BackgroundMusicPlayer` now route all audio output directly through Windows Core Audio WASAPI (`mmdevice`) for both default and custom audio output devices, completely bypassing legacy DirectSound/WaveOut software mixer attenuation.
+  - Initialized 0 dB graphic equalizer preamp calibration, eliminating internal filter attenuation that previously reduced track volumes.
+  - Expanded software volume headroom up to 150% (+6 dB clean digital gain boost), ensuring playback loudness matches native media player levels without cranking volume controls to maximum.
+  - Recalibrated default integrated loudness normalization to -12 LUFS (matching commercial live performance/DJ standards), delivering punchy, loud audio output.
+- **Instant Search & Query Isolation**:
+  - Batched collection updates replace individual item additions, updating search tables instantaneously without visual stuttering or UI thread thrashing.
+  - External streaming queries (Spotify, YouTube, Amazon) are isolated exclusively to the "Streaming Links" tab, ensuring local library song lookup is immediate and free of background network overhead.
+  - Dedicated one-click clear button (`✕`) integrated directly inside the search box for rapid query resets.
+  - Fully enabled UI recycling virtualization on all search DataGrids, ensuring smooth scrolling across thousands of tracks.
+- **Responsive Tablet Touch Sizing & Column Protection**:
+  - Locked action buttons in search results (Add to Rotation, Singer History, and Singer Queue) to dedicated 52px non-collapsing columns with generous 38x32px touch targets.
+  - On 1920x1080 tablets operating at 150% or 175% Windows DPI scaling, action buttons maintain their full proportions and never compress into thin vertical lines.
+  - Enforced a 360px minimum width on the search panel to prevent column squishing on compact screens.
 
 ### 🛑 Last Round Rotation Management (`Lyracist`, `KSRotation`, `KSRotation.Maui`, `dj.html`)
 - **One-Click Host & Remote Activation**: Standout emerald green "Last Round" button positioned directly after the Clear button across host interfaces (`RotationPage.xaml`, `MainWindow.xaml`, `MainPage.xaml`) and on the Remote DJ Board (`dj.html`), immediately synchronizing across the rotation lifecycle, embedded servers, and display services.

@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 18:03:00 -> Add SearchDatabaseCommand to immediately query library database for search query
+// Edited on Sep 9, 2026 @ 14:20:00 -> Batch search results, isolate external queries to streaming tab, and add ClearSearchQueryCommand
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -595,7 +595,10 @@ public partial class KaraokeViewModel : BaseViewModel
         {
             _searchDebounceTimer.Stop();
             RefreshFilteredList();
-            SearchExternalCommand.Execute(null);
+            if (SelectedSearchTabIndex == 2)
+            {
+                SearchExternalCommand.Execute(null);
+            }
         };
 
         _mediaEngine.FrameReady += OnFrameReady;
@@ -683,14 +686,18 @@ public partial class KaraokeViewModel : BaseViewModel
 
     partial void OnSearchQueryChanged(string value)
     {
-        // Local library and external (YouTube/Spotify/Amazon) search both fire from the debounce
-        // tick now - previously external search ran on every keystroke with no debounce and no
-        // staleness guard (see SearchExternal's token check below), so typing a full query issued
-        // one external API call per character and whichever response arrived last won, not
-        // whichever was issued last.
+        OnPropertyChanged(nameof(HasSearchQuery));
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Start();
     }
+
+    [RelayCommand]
+    private void ClearSearchQuery()
+    {
+        SearchQuery = string.Empty;
+    }
+
+    public bool HasSearchQuery => !string.IsNullOrEmpty(SearchQuery);
 
     private async void RefreshFilteredList()
     {
@@ -705,17 +712,8 @@ public partial class KaraokeViewModel : BaseViewModel
             // Discard results if a newer search has since been issued.
             if (myToken != _searchRequestToken) return;
 
-            FilteredSongs.Clear();
-            foreach (var song in results)
-            {
-                FilteredSongs.Add(song);
-            }
-
-            FilteredMusic.Clear();
-            foreach (var song in musicResults)
-            {
-                FilteredMusic.Add(song);
-            }
+            FilteredSongs = new ObservableCollection<KaraokeSong>(results);
+            FilteredMusic = new ObservableCollection<KaraokeSong>(musicResults);
         }
         catch { }
     }
@@ -986,7 +984,10 @@ public partial class KaraokeViewModel : BaseViewModel
     {
         _searchDebounceTimer.Stop();
         RefreshFilteredList();
-        SearchExternalCommand.Execute(null);
+        if (SelectedSearchTabIndex == 2)
+        {
+            SearchExternalCommand.Execute(null);
+        }
     }
 
     [RelayCommand]

@@ -1,9 +1,32 @@
-<!-- Edited on Sep 8, 2026 @ 13:48:00 -> Document 26.9.5.35 release with QR code toggle, library separation, and KSRotation user search -->
-Last Edit: Sep 8, 2026 - Audience Lyrics Screen QR Code Toggle, Karaoke & Music Library Separation, and KSRotation User Search
+<!-- Edited on Sep 9, 2026 @ 14:45:00 -> Document 26.9.5.36 release with search performance, tablet touch layout, and high-output WASAPI audio -->
+Last Edit: Sep 9, 2026 - Search Performance, Tablet Touch Layout & High-Output WASAPI Audio Engine
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.36] - 2026-09-09
+
+### Added
+- **Instant Search Clear Button (`KaraokePage.xaml`, `KaraokeViewModel.cs`)**:
+  - Integrated a dedicated clear button (`✕`) directly into the search box that appears whenever text is entered, enabling one-click query resets.
+- **Streaming Search Query Isolation (`KaraokeViewModel.cs`, `KaraokeViewModel.ExternalSearch.cs`, `KaraokePage.xaml`)**:
+  - Bound TabControl `SelectedIndex` to `SelectedSearchTabIndex` in the viewmodel, isolating external YouTube, Spotify, and Amazon network requests strictly to the "Streaming Links" tab.
+  - Typing in search now searches only local database tables, keeping song lookup instantaneous and free of background network overhead.
+
+### Fixed
+- **Tablet Action Button Vertical Line Collapse (`KaraokePage.xaml`)**:
+  - Replaced unconstrained `Width="Auto"` template columns in Karaoke Library, Music Library, Singer History, and Singer Queue with dedicated `52px` and `98px` non-collapsing columns (`CanUserResize=False`) with centered `38x32px` touch targets.
+  - Prevents buttons on 1080p tablet screens operating under 150% or 175% Windows DPI scaling from collapsing into thin 1px vertical lines when star columns consume available width.
+  - Enforced a `360px` minimum width on the search panel to ensure readability and comfortable touch spacing regardless of display resolution or window layout.
+- **Search Stutter & UI Thread Thrashing (`KaraokeViewModel.cs`, `KaraokePage.xaml`)**:
+  - Replaced individual item-by-item `.Add()` collection mutations (which fired 150+ UI layout passes on the UI thread per keystroke) with atomic batch collection assignments.
+  - Enabled active UI recycling virtualization (`VirtualizingPanel.IsVirtualizing="True"`, `VirtualizingPanel.VirtualizationMode="Recycling"`, `VirtualizingPanel.ScrollUnit="Item"`) on all search DataGrids, eliminating visual lag and stutter during rapid typing.
+- **Quiet Audio Playback & WASAPI Routing (`LibVlcVideoBackend.cs`, `BackgroundMusicPlayer.cs`, `MediaEngine.cs`, `AppSettings.cs`)**:
+  - Configured `LibVlcVideoBackend` and `BackgroundMusicPlayer` to unconditionally route audio through modern Windows Core Audio WASAPI (`SetAudioOutput("mmdevice")`) on both default and custom audio devices, bypassing legacy DirectSound/WaveOut software mixer attenuation.
+  - Initialized a stable `0 dB` equalizer preamp on all playback modes, eliminating hidden internal filter attenuation that lowered track output.
+  - Expanded software volume headroom up to `150%` (+6 dB digital gain boost), ensuring playback volume matches native drive playback without forcing volume and gain sliders to their limits.
+  - Recalibrated default integrated loudness normalization to `-12 LUFS` (live performance/DJ standard) and guarded against uninitialized zero-gain multipliers in `MediaEngine.UpdateAudioParameters`.
 
 ## [26.9.5.35] - 2026-09-08
 

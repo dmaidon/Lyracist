@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 07:01:27 -> Dispose the outgoing Media instance on track change to stop leaking native libVLC handles
+// Edited on Sep 9, 2026 @ 14:08:00 -> Always route audio through WASAPI mmdevice on Windows
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -59,11 +59,11 @@ public class BackgroundMusicPlayer : IDisposable
 
     private void ApplyAudioDevice()
     {
+        _playerA.SetAudioOutput("mmdevice");
+        _playerB.SetAudioOutput("mmdevice");
         if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
         {
-            _playerA.SetAudioOutput("mmdevice");
             _playerA.SetOutputDevice(_audioDeviceId);
-            _playerB.SetAudioOutput("mmdevice");
             _playerB.SetOutputDevice(_audioDeviceId);
         }
     }
@@ -124,6 +124,7 @@ public class BackgroundMusicPlayer : IDisposable
         _active = _playerA;
         _inactive = _playerB;
         _equalizer = new Equalizer();
+        ApplyAudioDevice();
 
         _monitorTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
         _monitorTimer.Tick += OnMonitorTick;
@@ -263,9 +264,9 @@ public class BackgroundMusicPlayer : IDisposable
         var oldMedia = player.Media;
         player.Media = media;
         oldMedia?.Dispose();
+        player.SetAudioOutput("mmdevice");
         if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
         {
-            player.SetAudioOutput("mmdevice");
             player.SetOutputDevice(_audioDeviceId);
         }
         player.Play();

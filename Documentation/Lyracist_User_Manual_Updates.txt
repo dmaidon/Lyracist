@@ -1786,3 +1786,26 @@ Major updates have been added to improve projection screen customization and loc
    - Expanded Audio Format Support: The library scanner now supports comprehensive audio file types including .mp3, .mp4, .zip, .wav, .m4a, .flac, .wma, .aac, and .ogg.
    - Distinct Library Tabs with Live Count Badges: The search results view now features 'Karaoke Library' and 'Music Library' tabs displaying live match count badges (e.g. 'Karaoke Library (12)' and 'Music Library (3)').
    - Search Query Isolation: SQLite database queries now evaluate track type filters directly in SQL, ensuring music searches return up to 150 matching music songs without being crowded out by karaoke results.
+
+
+Section: Search Performance, Tablet Touch Sizing & High-Output Audio Engine
+
+[Update Details]
+Major performance, layout responsiveness, and audio output enhancements have been integrated into Lyracist for seamless live DJ and KJ operation.
+
+1. High-Performance Instant Search & Lookup:
+   - Zero-Lag Search Results: Song search results now batch UI notifications, updating the Karaoke and Music library tables instantaneously without visual stuttering or UI thread delays.
+   - Isolated Streaming Queries: External network searches (YouTube, Spotify, Amazon) are isolated exclusively to the Streaming Links tab, keeping local library song lookup instantaneous and eliminating unnecessary bandwidth usage during shows.
+   - Quick-Clear Search Button: A dedicated clear button ('X') has been integrated directly into the search bar to clear queries and reset results with a single tap or click.
+   - Active Row Virtualization: Search grids now employ full UI recycling virtualization, ensuring instant scrolling even with large catalog result sets.
+
+2. Responsive Tablet Touch Sizing & Column Protection:
+   - Tablet-Optimized Action Buttons: Action buttons in search result tables (Add to Rotation, Singer History, and Singer Queue) are locked to dedicated 52px non-collapsing columns with generous 38x32px touch targets.
+   - Anti-Squish Protection on High-DPI Displays: On 1080p tablet screens operating under 150% or 175% Windows DPI scaling, action buttons maintain their full proportions and never collapse into thin vertical lines.
+   - Minimum Panel Width: The search and assignment panel enforces a 360px minimum width to ensure readable song titles and artist names regardless of window resizing.
+
+3. Punchy High-Output Audio Playback:
+   - Native Windows WASAPI mmdevice Audio Pipeline: All karaoke playback (LibVlcVideoBackend) and background music channels (BackgroundMusicPlayer) now route directly through the modern Windows Audio Session API (WASAPI mmdevice) on both default and custom audio devices, bypassing legacy DirectSound/WaveOut software mixer attenuation.
+   - Equalizer Preamp Stabilization: Hardware and software equalizer filters now initialize with clean 0 dB preamp gain, eliminating internal filter attenuation that previously reduced track volume.
+   - Enhanced DJ Volume Headroom: Software volume and gain headroom have been expanded up to 150% (+6 dB digital boost), matching native drive playback loudness and allowing performers to cut through live venue acoustics.
+   - Calibrated Live Loudness Target: Automatic volume normalization has been recalibrated to -12 LUFS (matching commercial live performance standards), delivering loud, punchy playback without crushing volume.

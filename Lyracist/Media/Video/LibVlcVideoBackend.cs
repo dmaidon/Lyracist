@@ -1,4 +1,4 @@
-// Edited on Sep 5, 2026 @ 15:40:00 -> Wire up Compressor/Limiter to VLC's compressor audio filter (previously stored but never applied to playback)
+// Edited on Sep 9, 2026 @ 14:05:00 -> Always use WASAPI mmdevice, initialize 0dB equalizer preamp, and support software volume boost
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -57,13 +57,18 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         set
         {
             _audioDeviceId = value;
-            if (_mediaPlayer != null)
+            ApplyAudioDevice();
+        }
+    }
+
+    private void ApplyAudioDevice()
+    {
+        if (_mediaPlayer != null)
+        {
+            _mediaPlayer.SetAudioOutput("mmdevice");
+            if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
             {
-                if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
-                {
-                    _mediaPlayer.SetAudioOutput("mmdevice");
-                    _mediaPlayer.SetOutputDevice(_audioDeviceId);
-                }
+                _mediaPlayer.SetOutputDevice(_audioDeviceId);
             }
         }
     }
@@ -79,7 +84,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         get => _volume;
         set
         {
-            _volume = Math.Clamp(value, 0.0, 100.0);
+            _volume = Math.Clamp(value, 0.0, 150.0);
             _mediaPlayer?.Volume = (int)_volume;
         }
     }
@@ -114,6 +119,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         }
         else if (_enableKillVocal)
         {
+            _equalizer.SetPreamp(0.0f);
             // Cut vocal bands completely (-20dB represents complete suppression in LibVLC)
             foreach (uint band in MidBands) _equalizer.SetAmp(-20.0f, band);
             // Boost Bass and Treble slightly to emphasize accompaniment tracks
@@ -122,6 +128,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
         }
         else
         {
+            _equalizer.SetPreamp(0.0f);
             foreach (uint band in BassBands) _equalizer.SetAmp((float)_bass, band);
             foreach (uint band in MidBands) _equalizer.SetAmp((float)_mid, band);
             foreach (uint band in TrebleBands) _equalizer.SetAmp((float)_treble, band);
@@ -191,6 +198,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
 
         _libVLC = new LibVLC();
         _mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(_libVLC);
+        ApplyAudioDevice();
 
         // Bind raw video decoding pipeline callbacks
         _mediaPlayer.SetVideoFormatCallbacks(VideoFormatCallback, VideoCleanupCallback);
@@ -264,11 +272,7 @@ public class LibVlcVideoBackend : IVideoBackend, IDisposable
             oldMedia?.Dispose();
 
             // Apply selected audio device
-            if (!string.IsNullOrEmpty(_audioDeviceId) && _audioDeviceId != "Default System Device")
-            {
-                _mediaPlayer.SetAudioOutput("mmdevice");
-                _mediaPlayer.SetOutputDevice(_audioDeviceId);
-            }
+            ApplyAudioDevice();
 
             // Re-apply rate, volume, and equalizer settings
             _mediaPlayer.Volume = (int)_volume;

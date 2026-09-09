@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 07:33:45 -> Support ActivePerformerKey and ActivePerformerTempo in UpdateAudioParameters
+// Edited on Sep 9, 2026 @ 14:10:00 -> Protect default unity gain, allow volume headroom, and prevent zero-gain attenuation
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -575,7 +575,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
         // Apply Song settings first (if customized or record exists)
         if (songSettings != null && songSettings.SongId > 0)
         {
-            mergedVolume = songSettings.Gain;
+            mergedVolume = songSettings.Gain > 0 ? songSettings.Gain : 100.0;
             mergedSpeed = songSettings.Tempo;
             mergedPitch = songSettings.Key;
             mergedTreble = songSettings.Treble;
@@ -605,7 +605,8 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
             mergedSpeed = Math.Clamp(mergedSpeed * effectiveTempo, 0.5, 2.0);
 
             // Volume attenuation multiplication
-            mergedVolume = Math.Clamp((mergedVolume / 100.0) * (singerSettings.Gain / 100.0) * 100.0, 0.0, 100.0);
+            double singerGain = singerSettings.Gain > 0 ? singerSettings.Gain : 100.0;
+            mergedVolume = Math.Clamp((mergedVolume / 100.0) * (singerGain / 100.0) * 100.0, 0.0, 150.0);
             // Equalization filters sum (clamp to -10dB to +10dB)
             mergedTreble = Math.Clamp(mergedTreble + singerSettings.Treble, -10.0, 10.0);
             mergedMid = Math.Clamp(mergedMid + singerSettings.Mid, -10.0, 10.0);
@@ -626,7 +627,8 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
         // Merge in Duet Partner settings
         if (partnerSettings != null && partnerSettings.SingerId > 0)
         {
-            mergedVolume = Math.Clamp((mergedVolume / 100.0) * (partnerSettings.Gain / 100.0) * 100.0, 0.0, 100.0);
+            double partnerGain = partnerSettings.Gain > 0 ? partnerSettings.Gain : 100.0;
+            mergedVolume = Math.Clamp((mergedVolume / 100.0) * (partnerGain / 100.0) * 100.0, 0.0, 150.0);
             mergedTreble = Math.Clamp((mergedTreble + partnerSettings.Treble) / 2.0, -10.0, 10.0);
             mergedMid = Math.Clamp((mergedMid + partnerSettings.Mid) / 2.0, -10.0, 10.0);
             mergedBass = Math.Clamp((mergedBass + partnerSettings.Bass) / 2.0, -10.0, 10.0);
@@ -644,7 +646,7 @@ public class MediaEngine : Lyracist.Core.Interfaces.IMediaEngine, IDisposable
             if (measuredLufs.HasValue)
             {
                 double normFactor = Math.Pow(10.0, (AppSettings.TargetLoudnessLufs - measuredLufs.Value) / 20.0);
-                mergedVolume = Math.Clamp(mergedVolume * normFactor, 0.0, 100.0);
+                mergedVolume = Math.Clamp(mergedVolume * normFactor, 0.0, 150.0);
             }
             else
             {

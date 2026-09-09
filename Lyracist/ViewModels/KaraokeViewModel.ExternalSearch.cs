@@ -1,4 +1,4 @@
-// Edited on Aug 6, 2026 @ 08:40:05 -> Remove PartyTyme fields and properties
+// Edited on Sep 9, 2026 @ 14:18:00 -> Add SelectedSearchTabIndex to isolate external streaming queries to the streaming tab
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -59,6 +59,17 @@ public partial class KaraokeViewModel
 
     [ObservableProperty]
     private string _externalPerformanceUrl = string.Empty;
+
+    [ObservableProperty]
+    private int _selectedSearchTabIndex;
+
+    partial void OnSelectedSearchTabIndexChanged(int value)
+    {
+        if (value == 2 && !string.IsNullOrWhiteSpace(SearchQuery) && ExternalResults.Count == 0 && !IsExternalLoading)
+        {
+            _ = SearchExternal();
+        }
+    }
 
     partial void OnSelectedExternalTrackChanged(ExternalTrack? value)
     {

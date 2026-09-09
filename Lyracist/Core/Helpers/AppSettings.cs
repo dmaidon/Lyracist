@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 08:48:00 -> Add ShowQrCodeOnLyricsScreen setting for lyrics projection screen QR code visibility
+// Edited on Sep 9, 2026 @ 14:12:00 -> Update default TargetLoudnessLufs to -12.0 for louder live playback output
 using System;
 using System.IO;
 using System.Text.Json;
@@ -1181,7 +1181,7 @@ public static class AppSettings
         public string SelectedBgmAudioDevice { get; set; } = string.Empty;
         public bool IsHardwareMixerMode { get; set; } = false;
         public bool NormalizeVolumeEnabled { get; set; } = true;
-        public double TargetLoudnessLufs { get; set; } = -16.0;
+        public double TargetLoudnessLufs { get; set; } = -12.0;
         public bool AutoPlayRotationMusic { get; set; } = true;
         public int RotationMusicDelaySeconds { get; set; } = 0;
         public List<Lyracist.Shared.SpecialEventConfig> SpecialEvents { get; set; } =

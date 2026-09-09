@@ -1,4 +1,4 @@
-<!-- Edited on Sep 8, 2026 @ 12:13:00 -> Rename Local Library to Karaoke Library and add live result hit count badges to tabs -->
+<!-- Edited on Sep 9, 2026 @ 14:25:00 -> Fix tablet DataGrid action button vertical line collapse, add search clear button, and bind SelectedSearchTabIndex -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -268,7 +268,7 @@
         <!-- Main Content -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2.8*" />
+                <ColumnDefinition Width="2.8*" MinWidth="360" />
                 <ColumnDefinition Width="3.2*" />
                 <ColumnDefinition Width="4*" />
             </Grid.ColumnDefinitions>
@@ -299,12 +299,23 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ui:TextBox Grid.Column="0"
-                                Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                PlaceholderText="Search song or artist..."
-                                Icon="{ui:SymbolIcon Search24}"
-                                KeyDown="SearchBox_KeyDown"
-                                Margin="0,0,6,0" />
+                    <Grid Grid.Column="0" Margin="0,0,6,0">
+                        <ui:TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                    PlaceholderText="Search song or artist..."
+                                    Icon="{ui:SymbolIcon Search24}"
+                                    KeyDown="SearchBox_KeyDown" />
+                        <ui:Button Command="{Binding ClearSearchQueryCommand}"
+                                   Icon="{ui:SymbolIcon Dismiss16}"
+                                   Appearance="Transparent"
+                                   Padding="4"
+                                   Width="28"
+                                   Height="28"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,4,0"
+                                   ToolTip="Clear search text"
+                                   Visibility="{Binding HasSearchQuery, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+                    </Grid>
                     <ui:Button Grid.Column="1"
                                Content="Scan"
                                Icon="{ui:SymbolIcon Search24}"
@@ -320,7 +331,7 @@
                 </Grid>
 
                 <!-- Search Results list -->
-                <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
+                <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedSearchTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="0" Margin="0,0,0,12">
                     <TabItem FontSize="12">
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal">
@@ -339,12 +350,15 @@
                                       Background="Transparent"
                                       BorderThickness="0"
                                       RowStyle="{StaticResource SongTypeRowStyle}"
+                                      VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.VirtualizationMode="Recycling"
+                                      VirtualizingPanel.ScrollUnit="Item"
                                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                       ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Song" Binding="{Binding Title}" Width="*" />
                                     <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="*" />
-                                    <DataGridTemplateColumn Width="Auto">
+                                    <DataGridTemplateColumn Width="52" MinWidth="52" CanUserResize="False">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <ui:Button Icon="{ui:SymbolIcon Add24}"
@@ -352,8 +366,11 @@
                                                            CommandParameter="{Binding}"
                                                            ToolTip="Add to Rotation"
                                                            Appearance="Primary"
-                                                           Padding="6"
+                                                           Width="36"
+                                                           Height="32"
+                                                           Padding="4"
                                                            Margin="2"
+                                                           HorizontalAlignment="Center"
                                                            VerticalAlignment="Center" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -381,12 +398,15 @@
                                       Background="Transparent"
                                       BorderThickness="0"
                                       RowStyle="{StaticResource SongTypeRowStyle}"
+                                      VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.VirtualizationMode="Recycling"
+                                      VirtualizingPanel.ScrollUnit="Item"
                                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                       ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Song" Binding="{Binding Title}" Width="*" />
                                     <DataGridTextColumn Header="Artist" Binding="{Binding Artist}" Width="*" />
-                                    <DataGridTemplateColumn Width="Auto">
+                                    <DataGridTemplateColumn Width="52" MinWidth="52" CanUserResize="False">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <ui:Button Icon="{ui:SymbolIcon Add24}"
@@ -394,8 +414,11 @@
                                                            CommandParameter="{Binding}"
                                                            ToolTip="Add to Rotation"
                                                            Appearance="Primary"
-                                                           Padding="6"
+                                                           Width="36"
+                                                           Height="32"
+                                                           Padding="4"
                                                            Margin="2"
+                                                           HorizontalAlignment="Center"
                                                            VerticalAlignment="Center" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -537,6 +560,9 @@
                                        GridLinesVisibility="Horizontal"
                                        Background="Transparent"
                                        BorderThickness="0"
+                                       VirtualizingPanel.IsVirtualizing="True"
+                                       VirtualizingPanel.VirtualizationMode="Recycling"
+                                       VirtualizingPanel.ScrollUnit="Item"
                                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                        ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <DataGrid.Columns>
@@ -545,14 +571,18 @@
                                     <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="45" />
                                     <DataGridTextColumn Header="Speed" Binding="{Binding Tempo, StringFormat='{}{0:0.0}x'}" Width="50" />
                                     <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="75" />
-                                    <DataGridTemplateColumn Width="Auto">
+                                    <DataGridTemplateColumn Width="52" MinWidth="52" CanUserResize="False">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <ui:Button Icon="{ui:SymbolIcon Add24}"
                                                            Command="{Binding DataContext.AddHistorySongToRotationCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                                            CommandParameter="{Binding}"
                                                            ToolTip="Add Song to Rotation"
-                                                           Padding="6"
+                                                           Width="36"
+                                                           Height="32"
+                                                           Padding="4"
+                                                           Margin="2"
+                                                           HorizontalAlignment="Center"
                                                            VerticalAlignment="Center" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -638,26 +668,32 @@
                                 <DataGridTextColumn Header="Artist" Binding="{Binding Artist, Mode=TwoWay}" IsReadOnly="False" Width="*" />
                                 <DataGridTextColumn Header="Key" Binding="{Binding Key, Mode=TwoWay}" IsReadOnly="False" Width="40" />
                                 <DataGridTextColumn Header="Notes" Binding="{Binding Notes, Mode=TwoWay}" IsReadOnly="False" Width="1.2*" />
-                                <DataGridTemplateColumn Width="Auto" IsReadOnly="True">
+                                <DataGridTemplateColumn Width="98" MinWidth="98" CanUserResize="False" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <ui:Button Icon="{ui:SymbolIcon ArrowUp16}"
                                                            Command="{Binding DataContext.Rotation.MovePendingSongUpCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                                            CommandParameter="{Binding}"
                                                            ToolTip="Move Up"
-                                                           Padding="4" Margin="0,0,2,0" />
+                                                           Width="28"
+                                                           Height="28"
+                                                           Padding="2" Margin="0,0,2,0" />
                                                 <ui:Button Icon="{ui:SymbolIcon ArrowDown16}"
                                                            Command="{Binding DataContext.Rotation.MovePendingSongDownCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                                            CommandParameter="{Binding}"
                                                            ToolTip="Move Down"
-                                                           Padding="4" Margin="0,0,2,0" />
+                                                           Width="28"
+                                                           Height="28"
+                                                           Padding="2" Margin="0,0,2,0" />
                                                 <ui:Button Icon="{ui:SymbolIcon Delete16}"
                                                            Command="{Binding DataContext.Rotation.RemovePendingSongCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                                            CommandParameter="{Binding}"
                                                            ToolTip="Remove"
                                                            Appearance="Danger"
-                                                           Padding="4" />
+                                                           Width="28"
+                                                           Height="28"
+                                                           Padding="2" />
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
