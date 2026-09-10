@@ -1,5 +1,5 @@
-<!-- Edited on Sep 9, 2026 @ 16:45:00 -> Add USB Mixer Master Output Boost, Anti-Clipping Limiter, and 200% Headroom -->
-Last Edit: Sep 9, 2026 - Master Output Boost (USB Mixer Mode), Anti-Clipping Limiter & Search Performance
+<!-- Edited on Sep 9, 2026 @ 21:26:00 -> Add Android Multi-RID Deployment Fix in KSRotation.Maui -->
+Last Edit: Sep 9, 2026 - Master Output Boost, Anti-Clipping Limiter, Search Performance & Android Multi-RID Deployment Fix
 
 # Changelog
 
@@ -21,6 +21,9 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Typing in search now searches only local database tables, keeping song lookup instantaneous and free of background network overhead.
 
 ### Fixed
+- **Android Multi-RID Deployment Missing DLL (`KSRotation.Maui.csproj`)**:
+  - Added MSBuild target `EnsureOuterAssemblyForProcessAssemblies` running before `_ProcessAssemblies`, `ProcessAssemblies`, and `SignAndroidPackage`.
+  - Automatically bridges RID-specific inner compiled assemblies (`android-arm64`, `android-x64`) to the outer intermediate directory (`obj\Debug\net10.0-android\`), eliminating `XAPRAS7028: Could not find file '...KSRotation.Maui.dll'` when deploying directly from Visual Studio or CLI to connected Android devices (e.g. Lenovo tablet).
 - **Tablet Action Button Vertical Line Collapse (`KaraokePage.xaml`)**:
   - Replaced unconstrained `Width="Auto"` template columns in Karaoke Library, Music Library, Singer History, and Singer Queue with dedicated `52px` and `98px` non-collapsing columns (`CanUserResize=False`) with centered `38x32px` touch targets.
   - Prevents buttons on 1080p tablet screens operating under 150% or 175% Windows DPI scaling from collapsing into thin 1px vertical lines when star columns consume available width.

@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 16:42:00 -> Add UpdateUserManualsForUsbMixerOutputBoostAndLimiter test for documentation sync
+// Edited on Sep 9, 2026 @ 21:27:00 -> Add idempotency checks to UpdateUserManualsForUsbMixerOutputBoostAndLimiter
 using System;
 using System.IO;
 using Xunit;
@@ -1182,10 +1182,17 @@ Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter (Updated S
 - Expanded Volume Headroom: Playback volume headroom ceiling extended to 200% (+6 dB digital gain) across both the main karaoke media engine and the background music fill-in players.
 - Unified BGM and Performance Levels: Master preamp boost settings automatically apply across all playback channels (Karaoke performances, Opening Music, Fill-in Music, and End-of-Rotation Music) ensuring seamless, matched volume levels throughout the entire show.";
 
-                // 1. Append to updates log text file
-                File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
 
-                // 2. Update docx file
+                // 2. Update docx file if not already present
                 if (File.Exists(docxPath))
                 {
                     using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
@@ -1195,24 +1202,37 @@ Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter (Updated S
                             var body = doc.MainDocumentPart?.Document?.Body;
                             if (body != null)
                             {
-                                body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
-                                    new DocumentFormat.OpenXml.Wordprocessing.Run(
-                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
-                                        new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter")
-                                    )
-                                ));
-
-                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
                                 {
-                                    if (line.StartsWith("Section:")) continue;
+                                    if (p.Text != null && p.Text.Contains("Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
                                     body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
                                         new DocumentFormat.OpenXml.Wordprocessing.Run(
-                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
-                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter")
                                         )
                                     ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
                                 }
-                                doc.Save();
                             }
                         }
                     }

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 9, 2026 @ 16:45:00 -> Add USB Mixer Master Output Boost, Anti-Clipping Limiter, and 200% Headroom -->
+<!-- Edited on Sep 9, 2026 @ 21:26:00 -> Add Android Multi-RID Deployment Fix in KSRotation.Maui -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -6,6 +6,10 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### 📱 Android Multi-RID Deployment Pipeline (`KSRotation.Maui.csproj`)
+- **Self-Healing Multi-RID Packaging Target**: Integrated `EnsureOuterAssemblyForProcessAssemblies` before Android assembly processing and package signing. Automatically bridges RID-specific inner compiled assemblies (`android-arm64`, `android-x64`) into the outer intermediate directory (`obj\Debug\net10.0-android\`), preventing `XAPRAS7028` missing DLL errors during direct-to-device deployments.
+- **Direct Hardware Deployment**: Guarantees seamless one-click Visual Studio and CLI deployment directly to connected tablets (e.g., Lenovo TB373FU).
 
 ### 📱 Audience Lyrics Screen QR Code Toggle (`SettingsPage.xaml`, `LyricsPage.xaml`, `LyricsWindow.xaml`)
 - **Projection Screen Customization**: KJs can easily show or hide the patron mobile song request QR code badge displayed in the top-right corner of the lyrics projection window.
