@@ -1,4 +1,4 @@
-// Edited on Aug 14, 2026 @ 10:17:50 -> Prompt for performer name on Birthday Special Event selection
+// Edited on Sep 11, 2026 @ 07:47:00 -> Remove redundant re-sync calls delegated to OnActiveSpecialEventChanged
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,6 +10,7 @@ namespace Lyracist.ViewModels;
 
 public partial class KaraokeViewModel
 {
+    public Action<string>? OnLocalSpecialEventChanged { get; set; }
     public ObservableCollection<Lyracist.Shared.DjBannerItem> DjBanners { get; } = [];
 
     [ObservableProperty]
@@ -164,26 +165,52 @@ public partial class KaraokeViewModel
         }
         ActiveSpecialEvent = value;
         _displayService.UpdateSpecialEvent(value);
+        OnLocalSpecialEventChanged?.Invoke(value);
+    }
+
+    partial void OnActiveSpecialEventChanged(string value)
+    {
+        SyncSpecialEventOptionSelections(value);
+    }
+
+    public void SyncSpecialEventOptionSelections(string eventName)
+    {
+        bool foundMatch = false;
+        foreach (var option in SpecialEventOptions)
+        {
+            bool shouldBeSelected = string.Equals(option.Value, eventName, StringComparison.OrdinalIgnoreCase);
+            if (shouldBeSelected) foundMatch = true;
+            if (option.IsSelected != shouldBeSelected)
+            {
+                option.SetSelectedQuietly(shouldBeSelected);
+            }
+        }
+
+        // If an unrecognized custom event came in from KSRotation, dynamically add it so it is visible and selected
+        if (!foundMatch && !string.IsNullOrWhiteSpace(eventName) && !eventName.Equals("None", StringComparison.OrdinalIgnoreCase))
+        {
+            var customOption = new SpecialEventOptionViewModel(eventName, eventName, true, OnSpecialEventChanged);
+            SpecialEventOptions.Add(customOption);
+            foundMatch = true;
+        }
+
+        // If still no match (e.g. invalid event or "None"), guarantee "None" is selected so all options are never deselected
+        if (!foundMatch)
+        {
+            var noneOption = SpecialEventOptions.FirstOrDefault(o => o.Value.Equals("None", StringComparison.OrdinalIgnoreCase));
+            if (noneOption != null && !noneOption.IsSelected)
+            {
+                noneOption.SetSelectedQuietly(true);
+            }
+        }
     }
 
     public void UpdateActiveSpecialEventFromSync(string eventName)
     {
-        if (ActiveSpecialEvent == eventName) return;
+        if (string.Equals(ActiveSpecialEvent, eventName, StringComparison.OrdinalIgnoreCase)) return;
 
         ActiveSpecialEvent = eventName;
         _displayService.UpdateSpecialEvent(eventName);
-
-        foreach (var option in SpecialEventOptions)
-        {
-            if (option.Value == eventName)
-            {
-                if (!option.IsSelected) option.IsSelected = true;
-            }
-            else
-            {
-                if (option.IsSelected) option.IsSelected = false;
-            }
-        }
     }
 }
 
@@ -204,6 +231,11 @@ public class SpecialEventOptionViewModel : ObservableObject
                 _onSelected(Value);
             }
         }
+    }
+
+    public void SetSelectedQuietly(bool value)
+    {
+        SetProperty(ref _isSelected, value, nameof(IsSelected));
     }
 
     public SpecialEventOptionViewModel(string displayName, string value, bool isSelected, Action<string> onSelected)

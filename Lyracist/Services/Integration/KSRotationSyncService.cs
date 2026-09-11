@@ -1,9 +1,11 @@
-// Edited on Sep 3, 2026 @ 23:55:00 -> Sync hasSungInLastRound property from KSRotation API
+// Edited on Sep 10, 2026 @ 12:53:00 -> Add two-way special event sync and local selection grace window
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,11 +24,14 @@ namespace Lyracist.Services.Integration
         private Task? _syncTask;
         private bool _lastConnectSuccess = true;
         private readonly Lock _lock = new();
+        private DateTime _lastLocalSelectionTime = DateTime.MinValue;
+        private string? _lastLocalSpecialEvent = null;
 
         public KSRotationSyncService(RotationViewModel rotationViewModel, KaraokeViewModel karaokeViewModel)
         {
             _rotationViewModel = rotationViewModel;
             _karaokeViewModel = karaokeViewModel;
+            _karaokeViewModel.OnLocalSpecialEventChanged = NotifyLocalSpecialEventChanged;
             _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
         }
 
@@ -143,7 +148,17 @@ namespace Lyracist.Services.Integration
                     if (doc.RootElement.TryGetProperty("activeSpecialEvent", out var activeProp))
                     {
                         string activeEvent = activeProp.GetString() ?? "None";
-                        await UpdateSpecialEventDataAsync(activeEvent);
+                        // If a local DJ selection occurred within the last 5 seconds and differs from KSRotation's current state,
+                        // retain the local selection to prevent race-condition reversion while the POST is processed.
+                        if (DateTime.UtcNow - _lastLocalSelectionTime < TimeSpan.FromSeconds(5)
+                            && !string.Equals(activeEvent, _lastLocalSpecialEvent, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Retain local selection
+                        }
+                        else
+                        {
+                            await UpdateSpecialEventDataAsync(activeEvent);
+                        }
                     }
                 }
             }
@@ -161,11 +176,36 @@ namespace Lyracist.Services.Integration
             }
         }
 
+        public void NotifyLocalSpecialEventChanged(string eventName)
+        {
+            _lastLocalSelectionTime = DateTime.UtcNow;
+            _lastLocalSpecialEvent = eventName;
+            _ = PushSpecialEventAsync(eventName);
+        }
+
+        public async Task PushSpecialEventAsync(string eventName, string performerName = "")
+        {
+            try
+            {
+                string url = $"http://{AppSettings.KSRotationIpAddress}:{AppSettings.KSRotationPort}/api/special-event/active";
+                var payload = new { activeSpecialEvent = eventName, performer = performerName };
+                using var content = JsonContent.Create(payload);
+                await _httpClient.PostAsync(url, content);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"Failed pushing active special event to KSRotation: {ex.Message}", "KSRotationSyncService");
+            }
+        }
+
         private Task UpdateSpecialEventDataAsync(string activeSpecialEvent)
         {
             return System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                _karaokeViewModel.UpdateActiveSpecialEventFromSync(activeSpecialEvent);
+                if (!string.Equals(_karaokeViewModel.ActiveSpecialEvent, activeSpecialEvent, StringComparison.OrdinalIgnoreCase))
+                {
+                    _karaokeViewModel.UpdateActiveSpecialEventFromSync(activeSpecialEvent);
+                }
             }).Task;
         }
 

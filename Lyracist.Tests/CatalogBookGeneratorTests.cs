@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 21:27:00 -> Add idempotency checks to UpdateUserManualsForUsbMixerOutputBoostAndLimiter
+// Edited on Sep 11, 2026 @ 07:47:00 -> Fix Word paragraph run splitting and rethrow PDF write exceptions in manual generators
 using System;
 using System.IO;
 using Xunit;
@@ -1274,6 +1274,247 @@ Section: Master Output Boost / USB Mixer Mode & Anti-Clipping Limiter (Updated S
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForKaraoke1080pLayoutOptimization()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Karaoke Screen 1080p Resolution Layout Optimization, Search Results Grid Scrolling & Compact TitleBlock (Updated Sep 10, 2026)
+- 1920x1080 Resolution Optimization: Refined page margins and layout heights to eliminate vertical clipping on standard Full HD (1080p) laptops and monitors running at 100% and 125% Windows display scaling.
+- Compact TitleBlock & Reclaimed Real Estate: Replaced the large 100px+ header with a sleek 40px toolbar featuring inline Venue/DJ branding, compact request bulbs, and compact theme selection, reclaiming over 60px of vertical space for the active queue and lyrics monitor.
+- Interactive QR Code Thumbnail & Quick Popout: Scaled the inline QR code to a clean 30x30 thumbnail with Join URL and 1-click 'Kiosk' launcher; clicking the QR thumbnail instantly launches the enlarged, high-resolution QR modal for patrons or tablet kiosk setup.
+- Internal Search Results DataGrid Scrolling: Removed the outer column ScrollViewer so the Karaoke and Music Library DataGrids are constrained to 15–20 visible rows with smooth internal vertical scrolling and UI recycling virtualization, preventing massive lists (100+ songs) from stretching the page.
+- Direct Singer Assignment Visibility: Redesigned the Singer Assignment card into a compact two-column layout (Singer Name + Duet Partner, Key Slider + Notes), anchoring it permanently beneath the search grid so DJs never have to scroll down to assign selected songs to performers.
+- Compact Global FooterBar & Anti-Impingement Spacing: Streamlined the playback footer bar from ~94px down to ~52px by merging the performer name and active song title onto a single row (displaying the song in bold italics and golden highlight color), placing the seek bar on the 2nd row with dedicated right margin spacing to prevent the duration progress bar and timestamps from impinging on the center Play/Pause/Stop controls.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Karaoke Screen 1080p Resolution Layout Optimization"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Karaoke Screen 1080p Resolution Layout Optimization"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Karaoke Screen 1080p Resolution Layout Optimization, Search Results Grid Scrolling & Compact TitleBlock")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("Karaoke1080pLayoutOptimization"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Karaoke Screen 1080p Resolution Layout Optimization", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                                double yPos = 70;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                    yPos += 15;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " Karaoke1080pLayoutOptimization";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForSpecialEventBannerSelection()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Special Event Banner Single Selection & 'None' Button Reset (Updated Sep 10, 2026)
+- Guaranteed Mutual Exclusion: Special Event Banners (e.g. Birthday, Anniversary, Holiday, Scaryoke) now strictly enforce single-selection mutual exclusion across the radio button group. Selecting any banner immediately deselects all other banners.
+- Active 'None' Selection Reset: Selecting the 'None' radio button cleanly clears and deselects all active special event banner selections across the interface and restores standard DJ branding banners automatically.
+- Synchronization & Persistence: The active selection is synchronized seamlessly between Lyracist and KSRotation through the event synchronization loop and saved in application display preferences.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Special Event Banner Single Selection"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Special Event Banner Single Selection"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Special Event Banner Single Selection & 'None' Button Reset")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SpecialEventBannerMutualExclusion"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Special Event Banner Single Selection & 'None' Button Reset", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                                double yPos = 70;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                    yPos += 15;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " SpecialEventBannerMutualExclusion";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
                     }
                 }
             }

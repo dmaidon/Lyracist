@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 09:10:00 -> Initialize singer users loading in MainViewModel constructor
+// Edited on Sep 11, 2026 @ 07:47:00 -> Remove redundant sync call in OnSpecialEventOptionChanged handled by ActiveSpecialEvent PropertyChanged
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -407,17 +407,7 @@ namespace KSRotation.ViewModels
                     break;
 
                 case nameof(ActiveSpecialEvent):
-                    foreach (var option in SpecialEventOptions)
-                    {
-                        if (string.Equals(option.Value, ActiveSpecialEvent, StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (!option.IsSelected) option.IsSelected = true;
-                        }
-                        else
-                        {
-                            if (option.IsSelected) option.IsSelected = false;
-                        }
-                    }
+                    SyncSpecialEventOptions(ActiveSpecialEvent);
                     UpdateDjBannerPath();
                     UpdateLastSongState();
                     QueueSaveSettings();
@@ -2992,7 +2982,36 @@ namespace KSRotation.ViewModels
 #endif
             }
             ActiveSpecialEvent = value;
-            UpdateDjBannerPath();
+        }
+
+        private void SyncSpecialEventOptions(string eventName)
+        {
+            bool foundMatch = false;
+            foreach (var option in SpecialEventOptions)
+            {
+                bool shouldBeSelected = string.Equals(option.Value, eventName, StringComparison.OrdinalIgnoreCase);
+                if (shouldBeSelected) foundMatch = true;
+                if (option.IsSelected != shouldBeSelected)
+                {
+                    option.SetSelectedQuietly(shouldBeSelected);
+                }
+            }
+
+            if (!foundMatch && !string.IsNullOrWhiteSpace(eventName) && !eventName.Equals("None", StringComparison.OrdinalIgnoreCase))
+            {
+                var customOption = new SpecialEventOptionViewModel(eventName, eventName, true, OnSpecialEventOptionChanged);
+                SpecialEventOptions.Add(customOption);
+                foundMatch = true;
+            }
+
+            if (!foundMatch)
+            {
+                var noneOption = SpecialEventOptions.FirstOrDefault(o => o.Value.Equals("None", StringComparison.OrdinalIgnoreCase));
+                if (noneOption != null && !noneOption.IsSelected)
+                {
+                    noneOption.SetSelectedQuietly(true);
+                }
+            }
         }
 
 #if WPF
@@ -3182,6 +3201,11 @@ namespace KSRotation.ViewModels
                     _onSelected(Value);
                 }
             }
+        }
+
+        public void SetSelectedQuietly(bool value)
+        {
+            SetProperty(ref _isSelected, value, nameof(IsSelected));
         }
 
         public SpecialEventOptionViewModel(string displayName, string value, bool isSelected, Action<string> onSelected)

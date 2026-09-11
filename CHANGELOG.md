@@ -1,9 +1,50 @@
-<!-- Edited on Sep 9, 2026 @ 21:26:00 -> Add Android Multi-RID Deployment Fix in KSRotation.Maui -->
-Last Edit: Sep 9, 2026 - Master Output Boost, Anti-Clipping Limiter, Search Performance & Android Multi-RID Deployment Fix
+<!-- Edited on Sep 11, 2026 @ 07:47:00 -> Document test coverage against production methods, Word run handling, and dead sync removal -->
+Last Edit: Sep 11, 2026 - Production Sync Test Verification, OpenXml Run Robustness & Redundant Code Cleanup
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.5.37] - 2026-09-11
+
+### Added
+- **Production Sync & Mutual Exclusion Test Suite (`SpecialEventBannerSelectionTests.cs`)**:
+  - Replaced simulated local test routines with direct invocations of production methods on real `KaraokeViewModel` instances (`SyncSpecialEventOptionSelections`, `UpdateActiveSpecialEventFromSync`, and `SpecialEventOptions` mutual exclusion).
+  - Directly verifies dynamic addition of unrecognized custom events, mutual exclusion enforcement, "None" option reset, and that background sync updates the UI quietly without triggering user-action callbacks or launching modal dialogs.
+  - Retained unit-level test verification of `SpecialEventOptionViewModel.SetSelectedQuietly` and case-insensitive sync guards.
+
+### Fixed
+- **OpenXml Run Splitting & PDF Exception Handling in Manual Generators (`CatalogBookGeneratorTests.cs`)**:
+  - Updated `UpdateUserManualsForSpecialEventBannerSelection` and `UpdateUserManualsForKaraoke1080pLayoutOptimization` to evaluate `paragraph.InnerText` across `Paragraph` descendants rather than individual `Text` elements, preventing missed idempotency headers when Word fragments strings across multiple `<w:r>` runs.
+  - Replaced swallowed `Console.WriteLine` error logging in PDF manual generator blocks with `throw new InvalidOperationException(...)` to ensure PDF write failures fail tests loudly and reliably.
+- **Dead Code & Redundant Re-Sync Cleanup (`MainViewModel.cs`, `KaraokeViewModel.DjBanner.cs`)**:
+  - Removed duplicate explicit re-sync calls in `MainViewModel.cs:2985` (`SyncSpecialEventOptions` and `UpdateDjBannerPath`) and in `KaraokeViewModel.DjBanner.cs`, as `ActiveSpecialEvent` property change handlers (`OnActiveSpecialEventChanged`) already trigger option synchronization and banner refreshes automatically without running redundant double loops.
+- **Interactive QR Code Quick Popout (`KaraokePage.xaml`, `KaraokeViewModel.cs`)**:
+  - Scaled the inline QR code to an unobtrusive 30x30 thumbnail in the header with click-to-enlarge action launching the full-size `KioskQrCodePopoutWindow`.
+  - Added quick-access "📟 Kiosk" button right in the header for rapid tablet setup.
+
+### Fixed
+- **Special Event Two-Way Synchronization & Local Edit Protection (`KSRotationSyncService.cs`, `PatronRequestServer.cs`, `KaraokeViewModel.DjBanner.cs`, `MainViewModel.cs`)**:
+  - Fixed one-way sync bug where local DJ banner selections in Lyracist were silently overwritten by the 2-second polling loop.
+  - Added `POST /api/special-event/active` in `PatronRequestServer.cs` and wired `KSRotationSyncService.NotifyLocalSpecialEventChanged` to push selections to KSRotation immediately.
+  - Introduced a 5-second local selection grace window to protect local changes against polling race conditions while requests process.
+  - Fixed case-sensitivity mismatch in the sync guard by enforcing `StringComparison.OrdinalIgnoreCase`.
+  - Added dynamic addition of unrecognized custom event banners across applications so custom events never leave all radio buttons deselected.
+- **Modal Dialog Sync Re-entrancy & Unattended Host Protection (`KaraokeViewModel.DjBanner.cs`, `MainViewModel.cs`)**:
+  - Implemented `SetSelectedQuietly` on `SpecialEventOptionViewModel` across both Lyracist and KSRotation to update radio button UI states without invoking user-action callbacks.
+  - Prevents background polling or remote patron requests from re-entering the Birthday flow and popping a blocking `ShowPersonalizedBirthdayPrompt` modal dialog on unattended host laptops.
+- **Special Event Banners Single Selection & "None" Button Clearing (`KaraokePage.xaml`, `KaraokeViewModel.DjBanner.cs`, `KSRotation/ViewModels/MainViewModel.cs`)**:
+  - Resolved an issue where multiple special event banners could be selected simultaneously in Lyracist by adding explicit `GroupName="SpecialEventBanner"` to the RadioButton template inside the `SpecialEventOptions` `ItemsControl`.
+  - Fixed the "None" button not clearing previous selections by introducing an explicit synchronization loop (`SyncSpecialEventOptionSelections`) in `KaraokeViewModel` and `KSRotation`'s `MainViewModel` that automatically deselects all other options when any option or "None" is selected.
+  - Implemented `OnActiveSpecialEventChanged` partial handler to guarantee that two-way data bindings, programmatic changes, and sync events remain strictly in mutual-exclusion sync with the active event.
+- **1080p Screen Layout & Adaptive Viewport Fallback (`KaraokePage.xaml`)**:
+  - Optimized page margins from `24` to `16,10,16,12` and streamlined TitleBlock from ~102px down to a sleek ~40px toolbar with inline Venue & DJ branding and compact request indicator bulbs.
+  - Reclaims over 60px of vertical height across the page, completely eliminating vertical overflow on 1920x1080 screens running at 100% and 125% Windows DPI scaling.
+  - Wrapped Column 0 in an adaptive `ScrollViewer` bound to `ActualHeight` (`MinHeight="500"`), preserving 15–20 row internal DataGrid virtualization on 1080p while offering outer scroll fallback so the Singer Assignment card is never clipped on small or heavily scaled viewports.
+- **Playback FooterBar Anti-Impingement Layout (`MainWindow.xaml`)**:
+  - Streamlined the global playback footer bar from ~94px down to ~52px (`Padding="20,6"`), saving over 40 vertical pixels across the main application window.
+  - Replaced the horizontal `StackPanel` with a bounded 3-column `Grid` (`MaxWidth="180"` with ellipsis on performer name, `*` with ellipsis on song title rendered in bold italics and `#F5D042` gold).
+  - Placed the seek bar cleanly onto the 2nd row with dedicated right-margin breathing room (`Margin="0,0,28,0"`), physically preventing the performer name, song title, and seek slider from impinging on the center Play/Pause/Stop playback buttons.
 
 ## [26.9.5.36] - 2026-09-09
 

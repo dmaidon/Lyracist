@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 08:55:30 -> Add onCheckRequestAllowed callback for session schedule and cutoff
+// Edited on Sep 10, 2026 @ 12:53:00 -> Add POST /api/special-event/active endpoint for two-way sync with Lyracist
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -474,6 +474,43 @@ namespace KSRotation.Services
                         string artist = root.TryGetProperty("artist", out var artProp) ? (artProp.GetString() ?? "") : "";
 
                         string error = await _onHandleDjAction(action, targetId, extraData, name, song, artist, duetPartner);
+                        if (string.IsNullOrEmpty(error))
+                        {
+                            await SendJsonResponseAsync(stream, "{\"success\":true}");
+                        }
+                        else
+                        {
+                            await SendBadRequestAsync(stream, $"{{\"error\":\"{JsonEncodedText.Encode(error)}\"}}");
+                        }
+                    }
+                    else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/special-event/active", StringComparison.OrdinalIgnoreCase))
+                    {
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, readTimeoutCts.Token);
+                        string body = Encoding.UTF8.GetString(bodyBytes);
+                        string targetEvent = "None";
+                        string performer = "";
+                        try
+                        {
+                            using var doc = JsonDocument.Parse(body);
+                            if (doc.RootElement.TryGetProperty("activeSpecialEvent", out var evtProp))
+                            {
+                                targetEvent = evtProp.GetString() ?? "None";
+                            }
+                            else if (doc.RootElement.TryGetProperty("event", out var eProp))
+                            {
+                                targetEvent = eProp.GetString() ?? "None";
+                            }
+                            if (doc.RootElement.TryGetProperty("performer", out var pProp))
+                            {
+                                performer = pProp.GetString() ?? "";
+                            }
+                        }
+                        catch
+                        {
+                            if (!string.IsNullOrWhiteSpace(body)) targetEvent = body.Trim();
+                        }
+
+                        string error = await _onHandleDjAction("set-special-event", targetEvent, performer, performer, "", "", "");
                         if (string.IsNullOrEmpty(error))
                         {
                             await SendJsonResponseAsync(stream, "{\"success\":true}");
