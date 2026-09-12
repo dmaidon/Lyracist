@@ -1,9 +1,17 @@
-<!-- Edited on Sep 11, 2026 @ 07:47:00 -> Document test coverage against production methods, Word run handling, and dead sync removal -->
-Last Edit: Sep 11, 2026 - Production Sync Test Verification, OpenXml Run Robustness & Redundant Code Cleanup
+<!-- Edited on Sep 12, 2026 @ 11:27:00 -> Version increment to 26.9.12 and cleanup in DjBannerWindowService -->
+Last Edit: Sep 12, 2026 - Solution Version Bump (26.9.12) & Code Cleanup
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.12.0] - 2026-09-12
+
+### Changed
+- **Solution Assembly & File Version Bump**:
+  - Incremented build version numbers across all solution projects to `26.9.12.*` (`Lyracist`, `KSRotation`, `KnockoutTrivia`, `Lyracist.Data`, `Lyracist.Trivia`, `Lyracist.Trivia.Core`, `LyracistDbEditor`, `ScaryokeWheel`, `TriviaDbCreator`, and test suites).
+- **Code Hygiene & Cleanup (`DjBannerWindowService.cs`)**:
+  - Removed unused namespace imports and cleaned up legacy comments in `DjBannerWindowService.cs`.
 
 ## [26.9.5.37] - 2026-09-11
 

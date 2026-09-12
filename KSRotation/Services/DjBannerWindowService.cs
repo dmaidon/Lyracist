@@ -1,13 +1,8 @@
-// Edited on Aug 13, 2026 @ 13:46:21 -> Set IsShuttingDown before Close() so the DJ banner window actually closes on app exit
-// Edited on Aug 2, 2026 @ 10:14:00 -> Delegate banner updating logic to the window UpdateBanner method
+// Edited on Sep 12, 2026 @ 11:26:00 -> Clean up unused imports and obsolete comments
+
 using KSRotation.Windows;
 using Lyracist.Shared;
-using System;
-using System.IO;
-using System.Linq;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Screen = System.Windows.Forms.Screen;
 
 namespace KSRotation.Services
