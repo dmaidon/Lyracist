@@ -1,4 +1,4 @@
-<!-- Edited on Sep 8, 2026 @ 08:05:00 -> Update ModernTextBoxStyle template with vertical centering and hint support to prevent text clipping; add search icon and clear button to users search box -->
+<!-- Edited on Sep 13, 2026 @ 10:22:00 -> Remove unused Watermark Opacity slider and corresponding help topic from Settings tab -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1774,8 +1774,8 @@
                               Grid.Column="1"
                               Grid.Row="1"
                               Grid.RowSpan="3"
-                              Margin="15,0,0,12">
-                        <StackPanel Margin="0,4,0,0">
+                              Margin="15,0,0,61">
+                        <StackPanel Height="497">
                             <!-- Theme -->
                             <TextBlock Text="Theme" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
                             <ComboBox
@@ -1819,28 +1819,6 @@
                                 <TextBlock Grid.Column="2" Text="Fast" VerticalAlignment="Center" Margin="8,0,8,0" />
                                 <TextBlock Grid.Column="3"
                                                Text="{Binding MarqueeSpeed, StringFormat={}{0:F0}}"
-                                               VerticalAlignment="Center" />
-                            </Grid>
-
-                            <!-- Watermark Opacity -->
-                            <TextBlock Text="Watermark Opacity" FontWeight="SemiBold" Margin="0,4,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                            <Grid Margin="0,0,0,4">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="44" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Invisible" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                <Slider Grid.Column="1"
-                                            Minimum="0.0" Maximum="1.0"
-                                            SmallChange="0.01" LargeChange="0.1"
-                                            TickFrequency="0.1" TickPlacement="BottomRight"
-                                            Value="{Binding WatermarkOpacity, UpdateSourceTrigger=PropertyChanged}"
-                                            VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Text="Solid" VerticalAlignment="Center" Margin="8,0,8,0" />
-                                <TextBlock Grid.Column="3"
-                                               Text="{Binding WatermarkOpacity, StringFormat={}{0:P0}}"
                                                VerticalAlignment="Center" />
                             </Grid>
 
@@ -3751,9 +3729,6 @@
 
                                 <TextBlock Text="Theme Engine" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
                                 <TextBlock Text="Choose between Light, Dark, or System themes. Changing the theme instantly adjusts the main application visual styles dynamically using the Material Design in XAML Toolkit. With System selected, the app also follows live Windows light/dark switches automatically." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-
-                                <TextBlock Text="Watermark Opacity" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                <TextBlock Text="Adjust the background logo's transparency from 0% (Invisible) to 100% (Solid). This affects the centered logo watermarks on both the main dashboard and the audience projection screen in real-time." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
 
                                 <TextBlock Text="Email and Reports" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
                                 <TextBlock Text="Configure the Report Email Recipient. Check the box to launch your mail client automatically when 'Save Rotation' is clicked." Margin="0,0,0,12" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />

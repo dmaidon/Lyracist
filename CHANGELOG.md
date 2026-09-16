@@ -1,11 +1,29 @@
-<!-- Edited on Sep 12, 2026 @ 11:27:00 -> Version increment to 26.9.12 and cleanup in DjBannerWindowService -->
-Last Edit: Sep 12, 2026 - Solution Version Bump (26.9.12) & Code Cleanup
+<!-- Edited on Sep 16, 2026 @ 00:15:00 -> Document linked singer rotation movement fix (jumping past linked pairs on MoveUp/MoveDown) -->
+Last Edit: Sep 16, 2026 - Linked Singer Rotation Movement Jump Fix
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [26.9.12.0] - 2026-09-12
+## [26.9.16.0] - 2026-09-16
+
+### Fixed
+- **Linked Singer Rotation Movement & Jump Traversal (`Shared/RotationHelpers.cs`, `KSRotation/ViewModels/MainViewModel.cs`, `Lyracist/ViewModels/RotationViewModel.cs`)**:
+  - Implemented `RotationHelpers.MoveSingerUp<T>` and `RotationHelpers.MoveSingerDown<T>` to handle adjacent linked singer pairs during rotation reordering.
+  - When a singer directly below a linked pair is moved up, they now jump past the entire linked pair directly above them instead of landing between them and getting pushed back by linked adjacency enforcement.
+  - Symmetrically, a singer directly above a linked pair jumps past the linked pair when moved down.
+  - Moving within a linked pair cleanly swaps the order of the two partners.
+  - Moving outward on either end of the linked pair moves the entire pair together as a unit.
+  - Preserved active/inactive partition boundaries and updated `MoveSingerInList` to utilize `ObservableCollection<T>.Move` for atomic notifications.
+  - Added unit test coverage across `KSRotation.Tests/RotationTests.cs` and `Lyracist.Tests/RotationHelpersSingerTests.cs`.
+
+## [26.9.13.0] - 2026-09-13
+
+### Removed
+- **Unused Watermark Opacity Slider (`KSRotation/MainWindow.xaml`)**:
+  - Removed the non-functional "Watermark Opacity" slider and percentage display from the KSRotation Settings tab.
+  - Removed the corresponding outdated help topic from the Settings documentation panel.
+
 
 ### Changed
 - **Solution Assembly & File Version Bump**:

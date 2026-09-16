@@ -786,17 +786,16 @@ public partial class RotationViewModel : BaseViewModel
         if (SelectedSinger == null)
             return;
 
-        int index = Rotation.IndexOf(SelectedSinger);
-        if (index > 0)
+        var singer = SelectedSinger;
+        bool moved = false;
+        RunRotationOrderChange(() =>
         {
-            var singer = SelectedSinger;
-            RunRotationOrderChange(() =>
-            {
-                Rotation.RemoveAt(index);
-                Rotation.Insert(index - 1, singer);
-            });
-            SelectedSinger = singer;
+            moved = Lyracist.Shared.RotationHelpers.MoveSingerUp(Rotation, singer);
+        });
 
+        if (moved)
+        {
+            SelectedSinger = singer;
             RotationStateChanged?.Invoke();
             _display.UpdateRotation([.. Rotation]);
         }
@@ -808,17 +807,16 @@ public partial class RotationViewModel : BaseViewModel
         if (SelectedSinger == null)
             return;
 
-        int index = Rotation.IndexOf(SelectedSinger);
-        if (index < Rotation.Count - 1)
+        var singer = SelectedSinger;
+        bool moved = false;
+        RunRotationOrderChange(() =>
         {
-            var singer = SelectedSinger;
-            RunRotationOrderChange(() =>
-            {
-                Rotation.RemoveAt(index);
-                Rotation.Insert(index + 1, singer);
-            });
-            SelectedSinger = singer;
+            moved = Lyracist.Shared.RotationHelpers.MoveSingerDown(Rotation, singer);
+        });
 
+        if (moved)
+        {
+            SelectedSinger = singer;
             RotationStateChanged?.Invoke();
             _display.UpdateRotation([.. Rotation]);
         }

@@ -641,5 +641,47 @@ public class RotationHelpersSingerTests
 
         Assert.Equal(1, Math.Abs(list.IndexOf(alice) - list.IndexOf(bob)));
     }
+
+    [Fact]
+    public void MoveSingerUp_JumpsPastLinkedPair_WhenPushedFromBelow_SingerModel()
+    {
+        var s1 = new Singer { Name = "Singer1" };
+        var s2 = new Singer { Name = "Singer2" };
+        var s3 = new Singer { Name = "Singer3" };
+        var s4 = new Singer { Name = "Singer4" };
+        var s5 = new Singer { Name = "Singer5" };
+        var s6 = new Singer { Name = "Singer6" };
+        var s7 = new Singer { Name = "Singer7" };
+        var list = new List<Singer> { s1, s2, s3, s4, s5, s6, s7 };
+
+        RotationHelpers.LinkSingers(list, s4, s5);
+
+        bool moved = RotationHelpers.MoveSingerUp(list, s6);
+
+        Assert.True(moved);
+        Assert.Equal(["Singer1", "Singer2", "Singer3", "Singer6", "Singer4", "Singer5", "Singer7"], list.Select(s => s.Name));
+        Assert.Equal(1, Math.Abs(list.IndexOf(s4) - list.IndexOf(s5)));
+    }
+
+    [Fact]
+    public void MoveSingerDown_JumpsPastLinkedPair_WhenPushedFromAbove_SingerModel()
+    {
+        var s1 = new Singer { Name = "Singer1" };
+        var s2 = new Singer { Name = "Singer2" };
+        var s3 = new Singer { Name = "Singer3" };
+        var s4 = new Singer { Name = "Singer4" };
+        var s5 = new Singer { Name = "Singer5" };
+        var s6 = new Singer { Name = "Singer6" };
+        var s7 = new Singer { Name = "Singer7" };
+        var list = new List<Singer> { s1, s2, s3, s4, s5, s6, s7 };
+
+        RotationHelpers.LinkSingers(list, s4, s5);
+
+        bool moved = RotationHelpers.MoveSingerDown(list, s3);
+
+        Assert.True(moved);
+        Assert.Equal(["Singer1", "Singer2", "Singer4", "Singer5", "Singer3", "Singer6", "Singer7"], list.Select(s => s.Name));
+        Assert.Equal(1, Math.Abs(list.IndexOf(s4) - list.IndexOf(s5)));
+    }
 }
 

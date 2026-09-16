@@ -646,6 +646,135 @@ public class RotationHelpersTests
 
         Assert.Equal(1, Math.Abs(list.IndexOf(alice) - list.IndexOf(bob)));
     }
+
+    [Fact]
+    public void MoveSingerUp_JumpsPastLinkedPair_WhenPushedFromBelow()
+    {
+        // 7 singers, #4 and #5 linked. Moving #6 up should jump past the linked pair [4, 5]
+        var s1 = new SingerEntry { Name = "Singer1" };
+        var s2 = new SingerEntry { Name = "Singer2" };
+        var s3 = new SingerEntry { Name = "Singer3" };
+        var s4 = new SingerEntry { Name = "Singer4" };
+        var s5 = new SingerEntry { Name = "Singer5" };
+        var s6 = new SingerEntry { Name = "Singer6" };
+        var s7 = new SingerEntry { Name = "Singer7" };
+        var list = new ObservableCollection<SingerEntry> { s1, s2, s3, s4, s5, s6, s7 };
+
+        RotationHelpers.LinkSingers(list, s4, s5);
+
+        // Move S6 up
+        bool moved = RotationHelpers.MoveSingerUp(list, s6);
+
+        Assert.True(moved);
+        Assert.Equal(["Singer1", "Singer2", "Singer3", "Singer6", "Singer4", "Singer5", "Singer7"], list.Select(s => s.Name));
+        Assert.Equal(1, Math.Abs(list.IndexOf(s4) - list.IndexOf(s5)));
+    }
+
+    [Fact]
+    public void MoveSingerDown_JumpsPastLinkedPair_WhenPushedFromAbove()
+    {
+        // 7 singers, #4 and #5 linked. Moving #3 down should jump past the linked pair [4, 5]
+        var s1 = new SingerEntry { Name = "Singer1" };
+        var s2 = new SingerEntry { Name = "Singer2" };
+        var s3 = new SingerEntry { Name = "Singer3" };
+        var s4 = new SingerEntry { Name = "Singer4" };
+        var s5 = new SingerEntry { Name = "Singer5" };
+        var s6 = new SingerEntry { Name = "Singer6" };
+        var s7 = new SingerEntry { Name = "Singer7" };
+        var list = new ObservableCollection<SingerEntry> { s1, s2, s3, s4, s5, s6, s7 };
+
+        RotationHelpers.LinkSingers(list, s4, s5);
+
+        // Move S3 down
+        bool moved = RotationHelpers.MoveSingerDown(list, s3);
+
+        Assert.True(moved);
+        Assert.Equal(["Singer1", "Singer2", "Singer4", "Singer5", "Singer3", "Singer6", "Singer7"], list.Select(s => s.Name));
+        Assert.Equal(1, Math.Abs(list.IndexOf(s4) - list.IndexOf(s5)));
+    }
+
+    [Fact]
+    public void MoveSingerUp_SwapsOrderWithinLinkedPair()
+    {
+        var s1 = new SingerEntry { Name = "Singer1" };
+        var s2 = new SingerEntry { Name = "Singer2" };
+        var list = new ObservableCollection<SingerEntry> { s1, s2 };
+
+        RotationHelpers.LinkSingers(list, s1, s2);
+
+        // Move second partner S2 up: swaps with S1
+        bool moved = RotationHelpers.MoveSingerUp(list, s2);
+
+        Assert.True(moved);
+        Assert.Equal(["Singer2", "Singer1"], list.Select(s => s.Name));
+        Assert.Equal(1, Math.Abs(list.IndexOf(s1) - list.IndexOf(s2)));
+    }
+
+    [Fact]
+    public void MoveSingerDown_SwapsOrderWithinLinkedPair()
+    {
+        var s1 = new SingerEntry { Name = "Singer1" };
+        var s2 = new SingerEntry { Name = "Singer2" };
+        var list = new ObservableCollection<SingerEntry> { s1, s2 };
+
+        RotationHelpers.LinkSingers(list, s1, s2);
+
+        // Move first partner S1 down: swaps with S2
+        bool moved = RotationHelpers.MoveSingerDown(list, s1);
+
+        Assert.True(moved);
+        Assert.Equal(["Singer2", "Singer1"], list.Select(s => s.Name));
+        Assert.Equal(1, Math.Abs(list.IndexOf(s1) - list.IndexOf(s2)));
+    }
+
+    [Fact]
+    public void MoveSingerUp_MovesEntireLinkedPairUp_WhenLeadingPartnerMovesUp()
+    {
+        var s1 = new SingerEntry { Name = "Singer1" };
+        var s2 = new SingerEntry { Name = "Singer2" };
+        var s3 = new SingerEntry { Name = "Singer3" };
+        var list = new ObservableCollection<SingerEntry> { s1, s2, s3 };
+
+        RotationHelpers.LinkSingers(list, s2, s3);
+
+        // Move S2 (leading partner of [S2, S3]) up
+        bool moved = RotationHelpers.MoveSingerUp(list, s2);
+
+        Assert.True(moved);
+        Assert.Equal(["Singer2", "Singer3", "Singer1"], list.Select(s => s.Name));
+        Assert.Equal(1, Math.Abs(list.IndexOf(s2) - list.IndexOf(s3)));
+    }
+
+    [Fact]
+    public void MoveSingerDown_MovesEntireLinkedPairDown_WhenTrailingPartnerMovesDown()
+    {
+        var s1 = new SingerEntry { Name = "Singer1" };
+        var s2 = new SingerEntry { Name = "Singer2" };
+        var s3 = new SingerEntry { Name = "Singer3" };
+        var list = new ObservableCollection<SingerEntry> { s1, s2, s3 };
+
+        RotationHelpers.LinkSingers(list, s1, s2);
+
+        // Move S2 (trailing partner of [S1, S2]) down
+        bool moved = RotationHelpers.MoveSingerDown(list, s2);
+
+        Assert.True(moved);
+        Assert.Equal(["Singer3", "Singer1", "Singer2"], list.Select(s => s.Name));
+        Assert.Equal(1, Math.Abs(list.IndexOf(s1) - list.IndexOf(s2)));
+    }
+
+    [Fact]
+    public void MoveSingerUp_PreventsInactiveCrossingActiveBoundary()
+    {
+        var s1 = new SingerEntry { Name = "Active" };
+        var s2 = new SingerEntry { Name = "Inactive", IsInactive = true };
+        var list = new ObservableCollection<SingerEntry> { s1, s2 };
+
+        bool moved = RotationHelpers.MoveSingerUp(list, s2);
+
+        Assert.False(moved);
+        Assert.Equal(["Active", "Inactive"], list.Select(s => s.Name));
+    }
 }
 
 // ---------------------------------------------------------------------------

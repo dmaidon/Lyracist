@@ -1817,19 +1817,8 @@ namespace KSRotation.ViewModels
         public void MoveSingerUp(SingerEntry entry)
         {
             if (entry == null) return;
-            int index = Singers.IndexOf(entry);
-            if (index > 0)
+            if (RotationHelpers.MoveSingerUp(Singers, entry))
             {
-                // Same active/inactive boundary guard as the desktop-bound MoveUp - this command is
-                // also reachable from the web DJ remote and KSRotation.Maui, which previously moved
-                // singers across the boundary unguarded, corrupting the ordering MoveUp/MoveDown and
-                // EnforceActiveInactiveOrder assume elsewhere.
-                if (entry.IsInactive && !Singers[index - 1].IsInactive)
-                {
-                    return;
-                }
-
-                Singers.Move(index, index - 1);
                 UpdateNextSingerHighlight();
                 RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
                 RebuildRotationJsonCacheNow();
@@ -1841,16 +1830,8 @@ namespace KSRotation.ViewModels
         public void MoveSingerDown(SingerEntry entry)
         {
             if (entry == null) return;
-            int index = Singers.IndexOf(entry);
-            if (index >= 0 && index < Singers.Count - 1)
+            if (RotationHelpers.MoveSingerDown(Singers, entry))
             {
-                // Same active/inactive boundary guard as the desktop-bound MoveDown - see MoveSingerUp.
-                if (!entry.IsInactive && Singers[index + 1].IsInactive)
-                {
-                    return;
-                }
-
-                Singers.Move(index, index + 1);
                 UpdateNextSingerHighlight();
                 RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
                 RebuildRotationJsonCacheNow();
@@ -1895,64 +1876,10 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
-        private void MoveUp(SingerEntry entry)
-        {
-            if (entry == null)
-            {
-                return;
-            }
-
-            int index = Singers.IndexOf(entry);
-            if (index > 0)
-            {
-                if (entry.IsInactive)
-                {
-                    // Inactive singer can only move up if the one above is also inactive
-                    if (Singers[index - 1].IsInactive)
-                    {
-                        Singers.Move(index, index - 1);
-                    }
-                }
-                else
-                {
-                    // Active singer can always move up
-                    Singers.Move(index, index - 1);
-                }
-                // Linked-adjacency enforcement runs off Singers.CollectionChanged (see
-                // OnSingersCollectionChanged) - the Move() call above already triggered it.
-                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
-            }
-        }
+        private void MoveUp(SingerEntry entry) => MoveSingerUp(entry);
 
         [RelayCommand]
-        private void MoveDown(SingerEntry entry)
-        {
-            if (entry == null)
-            {
-                return;
-            }
-
-            int index = Singers.IndexOf(entry);
-            if (index >= 0 && index < Singers.Count - 1)
-            {
-                if (!entry.IsInactive)
-                {
-                    // Active singer can only move down if the one below is also active
-                    if (!Singers[index + 1].IsInactive)
-                    {
-                        Singers.Move(index, index + 1);
-                    }
-                }
-                else
-                {
-                    // Inactive singer can always move down
-                    Singers.Move(index, index + 1);
-                }
-                // Linked-adjacency enforcement runs off Singers.CollectionChanged (see
-                // OnSingersCollectionChanged) - the Move() call above already triggered it.
-                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
-            }
-        }
+        private void MoveDown(SingerEntry entry) => MoveSingerDown(entry);
 
         /// <summary>Promotes the chosen singer to current, reactivating them first if paused.</summary>
         [RelayCommand]

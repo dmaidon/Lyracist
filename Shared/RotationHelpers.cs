@@ -107,6 +107,12 @@ namespace Lyracist.Shared
             if (oldIndex == newIndex || oldIndex < 0 || newIndex < 0 || oldIndex >= list.Count || newIndex >= list.Count)
                 return;
 
+            if (list is ObservableCollection<T> oc)
+            {
+                oc.Move(oldIndex, newIndex);
+                return;
+            }
+
             T item = list[oldIndex];
             list.RemoveAt(oldIndex);
             list.Insert(newIndex, item);
@@ -812,6 +818,179 @@ namespace Lyracist.Shared
                 handled.Add(entry);
                 handled.Add(partner);
             }
+        }
+
+        /// <summary>
+        /// Finds the active, non-current linked partner of <paramref name="singer"/> in <paramref name="singers"/>,
+        /// or null if the singer is not linked, or the partner is inactive, current, or missing.
+        /// </summary>
+        public static T? GetActiveLinkedPartner<T>(IList<T> singers, T singer) where T : class, IRotationSinger
+        {
+            if (singers == null || singer == null || !singer.LinkedSingerId.HasValue || singer.IsInactive || singer.IsCurrent)
+                return null;
+
+            Guid partnerId = singer.LinkedSingerId.Value;
+            for (int i = 0; i < singers.Count; i++)
+            {
+                T candidate = singers[i];
+                if (candidate != singer && candidate.Id == partnerId)
+                {
+                    if (!candidate.IsInactive && !candidate.IsCurrent)
+                    {
+                        return candidate;
+                    }
+                    break;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Attempts to move <paramref name="entry"/> up in <paramref name="singers"/>.
+        /// If the singer immediately above is part of an active linked pair (and not <paramref name="entry"/>'s partner),
+        /// jumps past the entire linked pair so the pair is not broken apart.
+        /// If <paramref name="entry"/> and the singer immediately above are linked partners, swaps their order within the pair.
+        /// If <paramref name="entry"/> is the leading partner of an active linked pair, moves the pair up as a unit.
+        /// Enforces active/inactive boundary restrictions.
+        /// Returns true if a move occurred; false otherwise.
+        /// </summary>
+        public static bool MoveSingerUp<T>(IList<T> singers, T entry) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            if (entry == null) return false;
+
+            int index = singers.IndexOf(entry);
+            if (index <= 0) return false;
+
+            T above = singers[index - 1];
+
+            // Inactive singer cannot move into the active partition
+            if (entry.IsInactive && !above.IsInactive)
+            {
+                return false;
+            }
+
+            T? entryPartner = GetActiveLinkedPartner(singers, entry);
+            T? abovePartner = GetActiveLinkedPartner(singers, above);
+
+            // Case 1: entry is linked to above (they are adjacent partners). Swap within pair.
+            if (entryPartner != null && entryPartner == above)
+            {
+                MoveSingerInList(singers, index, index - 1);
+                return true;
+            }
+
+            // Case 2: above is part of an active linked pair (and not entry's partner).
+            // Check if above's partner is at index - 2.
+            if (abovePartner != null && index >= 2 && singers[index - 2] == abovePartner)
+            {
+                if (entry.IsInactive && !abovePartner.IsInactive)
+                {
+                    return false;
+                }
+
+                // If entry is itself part of an active linked pair with entryPartner at index + 1:
+                if (entryPartner != null && index + 1 < singers.Count && singers[index + 1] == entryPartner)
+                {
+                    // Move both partners [entry, entryPartner] past [abovePartner, above]
+                    MoveSingerInList(singers, index, index - 2);
+                    int partnerOldIdx = singers.IndexOf(entryPartner);
+                    MoveSingerInList(singers, partnerOldIdx, index - 1);
+                    return true;
+                }
+
+                // Normal singer jumps past the linked pair to index - 2
+                MoveSingerInList(singers, index, index - 2);
+                return true;
+            }
+
+            // Case 3: entry is the leading partner of an active linked pair with entryPartner at index + 1.
+            // Move the pair up together past above.
+            if (entryPartner != null && index + 1 < singers.Count && singers[index + 1] == entryPartner)
+            {
+                MoveSingerInList(singers, index, index - 1);
+                int partnerIdx = singers.IndexOf(entryPartner);
+                MoveSingerInList(singers, partnerIdx, index);
+                return true;
+            }
+
+            // Normal move up 1 position
+            MoveSingerInList(singers, index, index - 1);
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to move <paramref name="entry"/> down in <paramref name="singers"/>.
+        /// If the singer immediately below is part of an active linked pair (and not <paramref name="entry"/>'s partner),
+        /// jumps past the entire linked pair so the pair is not broken apart.
+        /// If <paramref name="entry"/> and the singer immediately below are linked partners, swaps their order within the pair.
+        /// If <paramref name="entry"/> is the trailing partner of an active linked pair, moves the pair down as a unit.
+        /// Enforces active/inactive boundary restrictions.
+        /// Returns true if a move occurred; false otherwise.
+        /// </summary>
+        public static bool MoveSingerDown<T>(IList<T> singers, T entry) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            if (entry == null) return false;
+
+            int index = singers.IndexOf(entry);
+            if (index < 0 || index >= singers.Count - 1) return false;
+
+            T below = singers[index + 1];
+
+            // Active singer cannot move into the inactive partition
+            if (!entry.IsInactive && below.IsInactive)
+            {
+                return false;
+            }
+
+            T? entryPartner = GetActiveLinkedPartner(singers, entry);
+            T? belowPartner = GetActiveLinkedPartner(singers, below);
+
+            // Case 1: entry is linked to below (they are adjacent partners). Swap within pair.
+            if (entryPartner != null && entryPartner == below)
+            {
+                MoveSingerInList(singers, index, index + 1);
+                return true;
+            }
+
+            // Case 2: below is part of an active linked pair (and not entry's partner).
+            // Check if below's partner is at index + 2.
+            if (belowPartner != null && index + 2 < singers.Count && singers[index + 2] == belowPartner)
+            {
+                if (!entry.IsInactive && belowPartner.IsInactive)
+                {
+                    return false;
+                }
+
+                // If entry is itself the trailing partner of an active linked pair [entryPartner, entry]:
+                if (entryPartner != null && index >= 1 && singers[index - 1] == entryPartner)
+                {
+                    // Move [below, belowPartner] before [entryPartner, entry]
+                    int b1Idx = singers.IndexOf(below);
+                    MoveSingerInList(singers, b1Idx, index - 1);
+                    int b2Idx = singers.IndexOf(belowPartner);
+                    MoveSingerInList(singers, b2Idx, index);
+                    return true;
+                }
+
+                // Normal singer jumps past the linked pair (lands at index + 2)
+                MoveSingerInList(singers, index, index + 2);
+                return true;
+            }
+
+            // Case 3: entry is the trailing partner of an active linked pair with entryPartner at index - 1.
+            // Move the pair down together past below (by moving below before entryPartner).
+            if (entryPartner != null && index >= 1 && singers[index - 1] == entryPartner)
+            {
+                int belowIdx = singers.IndexOf(below);
+                MoveSingerInList(singers, belowIdx, index - 1);
+                return true;
+            }
+
+            // Normal move down 1 position
+            MoveSingerInList(singers, index, index + 1);
+            return true;
         }
     }
 }
