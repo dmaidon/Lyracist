@@ -1072,7 +1072,7 @@ public static class AppSettings
         public string ConnectInstructionsScreen { get; set; } = "All Screens / Monitors";
         public bool IsDjBannerQrCodeEnabled { get; set; } = true;
         public bool EnableKillVocal { get; set; } = false;
-        public bool FloatCurrentSingerToTop { get; set; } = false;
+        public bool FloatCurrentSingerToTop { get; set; } = true;
         public double DefaultSongLengthMinutes { get; set; } = 4.75;
         public bool ShowEstimatedWaitTime { get; set; } = true;
         public bool BlockDuplicateSongsInSession { get; set; } = true;

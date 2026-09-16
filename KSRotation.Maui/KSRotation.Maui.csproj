@@ -44,9 +44,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.9.9.283</AssemblyVersion>
+		<AssemblyVersion>26.9.16.284</AssemblyVersion>
 
-		<FileVersion>26.9.9.283</FileVersion>
+		<FileVersion>26.9.16.284</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 
@@ -215,9 +215,7 @@
 	<!-- Workaround for XAPRAS7028: Multi-RID or Deploy-first builds compile into $(IntermediateOutputPath)android-*/ leaving
 	     the outer $(IntermediateOutputPath)$(TargetName).dll missing when outer _ProcessAssemblies runs.
 	     Auto-populate the outer dll from inner RID outputs, target directory, or trigger compilation before _ProcessAssemblies executes. -->
-	<Target Name="EnsureOuterAssemblyForProcessAssemblies"
-	        BeforeTargets="_ProcessAssemblies;ProcessAssemblies;_GeneratePackageManagerJava;SignAndroidPackage"
-	        Condition="$(TargetFramework.Contains('-android')) and !Exists('$(IntermediateOutputPath)$(TargetName).dll')">
+	<Target Name="EnsureOuterAssemblyForProcessAssemblies" BeforeTargets="_ProcessAssemblies;ProcessAssemblies;_GeneratePackageManagerJava;SignAndroidPackage" Condition="$(TargetFramework.Contains('-android')) and !Exists('$(IntermediateOutputPath)$(TargetName).dll')">
 		<ItemGroup>
 			<_CandidateOuterDlls Include="$(IntermediateOutputPath)android-arm64\$(TargetName).dll" Condition="Exists('$(IntermediateOutputPath)android-arm64\$(TargetName).dll')" />
 			<_CandidateOuterDlls Include="$(IntermediateOutputPath)android-x64\$(TargetName).dll" Condition="Exists('$(IntermediateOutputPath)android-x64\$(TargetName).dll')" />
@@ -225,10 +223,7 @@
 			<_CandidateOuterDlls Include="$(TargetDir)android-x64\$(TargetName).dll" Condition="Exists('$(TargetDir)android-x64\$(TargetName).dll')" />
 			<_CandidateOuterDlls Include="$(TargetDir)$(TargetName).dll" Condition="Exists('$(TargetDir)$(TargetName).dll')" />
 		</ItemGroup>
-		<Copy SourceFiles="@(_CandidateOuterDlls)"
-		      DestinationFolder="$(IntermediateOutputPath)"
-		      Condition="'@(_CandidateOuterDlls)' != ''"
-		      SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(_CandidateOuterDlls)" DestinationFolder="$(IntermediateOutputPath)" Condition="'@(_CandidateOuterDlls)' != ''" SkipUnchangedFiles="true" />
 	</Target>
 
 </Project>

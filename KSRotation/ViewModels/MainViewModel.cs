@@ -177,7 +177,7 @@ namespace KSRotation.ViewModels
 
         /// <summary>When true, the current singer always floats to index 0 of the active rotation list.</summary>
         [ObservableProperty]
-        public partial bool FloatCurrentSingerToTop { get; set; }
+        public partial bool FloatCurrentSingerToTop { get; set; } = true;
 
         /// <summary>Default estimated song length in minutes, used by the rotation-screen "estimated
         /// wait time" badge whenever a queued song's actual duration isn't known/resolvable.</summary>

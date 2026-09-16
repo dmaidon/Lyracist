@@ -101,7 +101,7 @@ public partial class RotationViewModel : BaseViewModel
     public ObservableCollection<PerformedSong> SessionPerformedSongs { get; } = [];
 
     [ObservableProperty]
-    private bool _floatCurrentSingerToTop;
+    private bool _floatCurrentSingerToTop = true;
 
     [ObservableProperty]
     private bool _isLastRound;

@@ -17,6 +17,10 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Preserved active/inactive partition boundaries and updated `MoveSingerInList` to utilize `ObservableCollection<T>.Move` for atomic notifications.
   - Added unit test coverage across `KSRotation.Tests/RotationTests.cs` and `Lyracist.Tests/RotationHelpersSingerTests.cs`.
 
+### Changed
+- **Default "Float to Top" Enabled Across All Applications (`AppSettings.cs`, `RotationViewModel.cs`, `MainViewModel.cs`)**:
+  - Ensured "Float Current to Top" is checked and enabled by default in Lyracist, KSRotation desktop, and KSRotation.Maui tablet app so new and unconfigured sessions float the active performer to the top of the rotation queue automatically.
+
 ## [26.9.13.0] - 2026-09-13
 
 ### Removed

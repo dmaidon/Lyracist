@@ -80,7 +80,7 @@ namespace KSRotation.Models
         public bool AutoAcceptRequests { get; init; } = false;
 
         /// <summary>When true, the current singer always floats to the top of the rotation list.</summary>
-        public bool FloatCurrentSingerToTop { get; init; } = false;
+        public bool FloatCurrentSingerToTop { get; init; } = true;
 
         /// <summary>Default estimated song length in minutes, used by the rotation-screen
         /// "estimated wait time" badge whenever a queued song's actual duration isn't known.</summary>
