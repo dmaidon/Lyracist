@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 08:54:50 -> Add Session Schedule and Last Request Cutoff properties
+// Edited on Sep 17, 2026 @ 11:15:30 -> Add ListDjAndVenueOnBillboard property to AppSettings
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -37,6 +37,9 @@ namespace KSRotation.Models
         public double WatermarkOpacity { get; init; } = 0.06;
 
         public string DjName { get; init; } = "Guest DJ";
+
+        /// <summary>When true, displays the DJ name and Venue on the billboard header and external displays.</summary>
+        public bool ListDjAndVenueOnBillboard { get; init; } = true;
 
         /// <summary>Optional manual IPv4 host override used when composing the patron portal URL and QR code.</summary>
         public string PreferredHostIp { get; init; } = string.Empty;

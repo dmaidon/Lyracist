@@ -1,5 +1,4 @@
-// Edited on Sep 3, 2026 @ 23:49:25 -> Add isLastRound property to VenueInfoResponseDto
-
+// Edited on Sep 17, 2026 @ 11:15:45 -> Add listDjAndVenue property to VenueInfoResponseDto
 namespace KSRotation.Models
 {
     /// <summary>
@@ -15,5 +14,7 @@ namespace KSRotation.Models
         public string wifiPassword { get; set; } = string.Empty;
         public bool isLastRound { get; set; }
         public bool showQrCode { get; set; } = true;
+        public bool listDjAndVenue { get; set; } = true;
     }
 }
+

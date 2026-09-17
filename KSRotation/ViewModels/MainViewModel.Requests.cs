@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 08:56:00 -> Wire session schedule and last request cutoff check to PatronRequestServer
+// Edited on Sep 17, 2026 @ 11:16:30 -> Include listDjAndVenue in VenueInfoResponseDto
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -450,7 +450,8 @@ namespace KSRotation.ViewModels
                 wifiSsid = ssid,
                 wifiPassword = pass,
                 isLastRound = IsLastRound,
-                showQrCode = ShowQrCodeOnRotationScreen
+                showQrCode = ShowQrCodeOnRotationScreen,
+                listDjAndVenue = ListDjAndVenueOnBillboard
             };
             return JsonSerializer.Serialize(dto, AppJsonContext.Default.VenueInfoResponseDto);
         }

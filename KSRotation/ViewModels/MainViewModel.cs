@@ -1,4 +1,4 @@
-// Edited on Sep 11, 2026 @ 07:47:00 -> Remove redundant sync call in OnSpecialEventOptionChanged handled by ActiveSpecialEvent PropertyChanged
+// Edited on Sep 17, 2026 @ 11:16:00 -> Add ListDjAndVenueOnBillboard observable property and persistence
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -434,6 +434,10 @@ namespace KSRotation.ViewModels
                     QueueSaveSettings();
                     break;
 
+                case nameof(ListDjAndVenueOnBillboard):
+                    QueueSaveSettings();
+                    break;
+
                 case nameof(SelectedVenue):
                     if (!string.IsNullOrWhiteSpace(SelectedVenue))
                     {
@@ -541,6 +545,9 @@ namespace KSRotation.ViewModels
         [NotifyPropertyChangedFor(nameof(TriviaHostName))]
 #endif
         public partial string DjName { get; set; } = "Guest DJ";
+
+        [ObservableProperty]
+        public partial bool ListDjAndVenueOnBillboard { get; set; } = true;
 
         [ObservableProperty]
         public partial string? SelectedDj { get; set; }
@@ -1013,6 +1020,7 @@ namespace KSRotation.ViewModels
             DjName = string.IsNullOrWhiteSpace(settings.DjName) ? "Guest DJ" : settings.DjName.Trim();
             SelectedDj = Djs.FirstOrDefault(d => string.Equals(d, DjName, System.StringComparison.OrdinalIgnoreCase))
                          ?? Djs.FirstOrDefault();
+            ListDjAndVenueOnBillboard = settings.ListDjAndVenueOnBillboard;
 
             SelectedTheme = NormalizeTheme(settings.Theme);
             BannerText = string.IsNullOrWhiteSpace(settings.BannerText)
@@ -2499,6 +2507,7 @@ namespace KSRotation.ViewModels
             {
                 VenueName = string.IsNullOrWhiteSpace(VenueName) ? "Karaoke Night" : VenueName.Trim(),
                 DjName = string.IsNullOrWhiteSpace(DjName) ? "Guest DJ" : DjName.Trim(),
+                ListDjAndVenueOnBillboard = ListDjAndVenueOnBillboard,
                 Theme = NormalizeTheme(SelectedTheme),
                 IsDisplayEnabled = IsDisplayEnabled,
                 BannerText = string.IsNullOrWhiteSpace(BannerText) ? "Welcome to Karaoke Night!" : BannerText.Trim(),

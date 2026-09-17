@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:40:00 -> Use conditional access (RCS1146)
+// Edited on Sep 17, 2026 @ 10:36:40 -> Acquire Android MulticastLock during mDNS Chromecast discovery
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,6 +30,22 @@ namespace Lyracist.Shared
 
         public async Task<List<ChromecastDevice>> DiscoverAsync()
         {
+#if ANDROID
+            Android.Net.Wifi.WifiManager.MulticastLock? multicastLock = null;
+            try
+            {
+                var context = Android.App.Application.Context;
+                var wifiManager = (Android.Net.Wifi.WifiManager?)context.GetSystemService(Android.Content.Context.WifiService);
+                multicastLock = wifiManager?.CreateMulticastLock("KSRotationChromecastDiscovery");
+                multicastLock?.SetReferenceCounted(true);
+                multicastLock?.Acquire();
+            }
+            catch (Exception ex)
+            {
+                Log($"Android MulticastLock acquire error: {ex.Message}");
+            }
+#endif
+
             using var client = new UdpClient();
 
             // On a machine with more than one active NIC (e.g. Wi-Fi to the LAN plus a second,
@@ -191,6 +207,20 @@ namespace Lyracist.Shared
             Log($"Discovery finished. Query sends: {sendAttempts} ok / {sendFailures} failed. " +
                 $"Packets received: {packetsReceived} total, {packetsMentioningGooglecast} mention 'googlecast' raw, {packetsCastRelated} parsed as cast-related. " +
                 $"Devices found: {devicesByAddress.Count}.");
+
+#if ANDROID
+            try
+            {
+                if (multicastLock != null && multicastLock.IsHeld)
+                {
+                    multicastLock.Release();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Android MulticastLock release error: {ex.Message}");
+            }
+#endif
 
             return devicesByAddress.Values.ToList();
         }

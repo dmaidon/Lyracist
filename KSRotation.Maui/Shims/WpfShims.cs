@@ -1,9 +1,10 @@
-// Edited on Sep 3, 2026 @ 23:56:00 -> Add SetLastRound shim to DisplayWindowService
+// Edited on Sep 17, 2026 @ 10:37:30 -> Wire DisplayWindowService StopCastingAsync shim to MauiCastingService
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using KSRotation.Models;
 using Lyracist.Shared;
+using KSRotation.Maui.Services;
 
 namespace System.Windows.Threading
 {
@@ -159,8 +160,12 @@ namespace KSRotation.Services
         public void SetShowEstimatedWaitTime(bool show) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
-        public Task StopCastingAsync() => Task.CompletedTask;
-        public Lyracist.Shared.ChromecastDevice? SelectedDevice { get; set; }
+        public Task StopCastingAsync() => MauiCastingService.Instance.StopCastingAsync();
+        public Lyracist.Shared.ChromecastDevice? SelectedDevice
+        {
+            get => MauiCastingService.Instance.ActiveDevice;
+            set { }
+        }
     }
 
     public static class ThemeService

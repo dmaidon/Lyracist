@@ -1,4 +1,4 @@
-<!-- Edited on Sep 9, 2026 @ 21:26:00 -> Add EnsureOuterAssemblyForProcessAssemblies workaround for XAPRAS7028 multi-RID deploy -->
+<!-- Edited on Sep 17, 2026 @ 11:36:00 -> Update ApplicationId to psft.ksrotation.maui and bump version to 26.9.16.285 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -20,7 +20,7 @@
 		<ApplicationTitle>KSRotation.Maui</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.ksrotation.maui</ApplicationId>
+		<ApplicationId>psft.ksrotation.maui</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -28,7 +28,7 @@
 		<WindowsPackageType>None</WindowsPackageType>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-	</PropertyGroup>
+	</PropertyGroup>                                                                                                                                                                                                                                                                                          
 
 	<PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
@@ -44,9 +44,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.9.16.284</AssemblyVersion>
+		<AssemblyVersion>26.9.16.285</AssemblyVersion>
 
-		<FileVersion>26.9.16.284</FileVersion>
+		<FileVersion>26.9.16.285</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 

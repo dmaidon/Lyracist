@@ -1,6 +1,9 @@
-// Edited on Sep 3, 2026 @ 12:39:00 -> Set BindingContext before InitializeComponent to ensure safe early binding resolution
+// Edited on Sep 17, 2026 @ 11:18:30 -> Add persistent device storage and handlers for DJ Name, Venue Name, and billboard listing
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using KSRotation.Maui.Services;
+using Lyracist.Shared;
 using Microsoft.Maui.Controls;
 
 namespace KSRotation.Maui;
@@ -17,6 +20,28 @@ public partial class MainPage : ContentPage
         // The patron request server runs on this device for the whole session — keep the screen
         // awake so Android doesn't dim/lock and throttle it mid-show.
         Microsoft.Maui.Devices.DeviceDisplay.Current.KeepScreenOn = true;
+
+        // Restore persistent device settings for DJ and Venue until changed
+        if (Microsoft.Maui.Storage.Preferences.Default.ContainsKey("DeviceDjName"))
+        {
+            string savedDj = Microsoft.Maui.Storage.Preferences.Default.Get("DeviceDjName", string.Empty);
+            if (!string.IsNullOrWhiteSpace(savedDj))
+            {
+                vm.DjName = savedDj;
+            }
+        }
+        if (Microsoft.Maui.Storage.Preferences.Default.ContainsKey("DeviceVenueName"))
+        {
+            string savedVenue = Microsoft.Maui.Storage.Preferences.Default.Get("DeviceVenueName", string.Empty);
+            if (!string.IsNullOrWhiteSpace(savedVenue))
+            {
+                vm.VenueName = savedVenue;
+            }
+        }
+        if (Microsoft.Maui.Storage.Preferences.Default.ContainsKey("DeviceListDjAndVenue"))
+        {
+            vm.ListDjAndVenueOnBillboard = Microsoft.Maui.Storage.Preferences.Default.Get("DeviceListDjAndVenue", true);
+        }
 
         if (Application.Current != null)
         {
@@ -176,6 +201,14 @@ public partial class MainPage : ContentPage
 
     private void OnAboutClicked(object? sender, EventArgs e)
     {
+        if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            DjNameEntry.Text = vm.DjName;
+            VenueNameEntry.Text = vm.VenueName;
+            ListDjAndVenueCheckBox.IsChecked = vm.ListDjAndVenueOnBillboard;
+            PreferredIpEntry.Text = vm.PreferredHostIp;
+            EmailRecipientEntry.Text = vm.EmailRecipient;
+        }
         AboutOverlay.IsVisible = true;
     }
 
@@ -192,6 +225,19 @@ public partial class MainPage : ContentPage
     {
         if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
         {
+            string dj = DjNameEntry.Text?.Trim() ?? string.Empty;
+            vm.DjName = string.IsNullOrWhiteSpace(dj) ? "Guest DJ" : dj;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
+
+            string venue = VenueNameEntry.Text?.Trim() ?? string.Empty;
+            vm.VenueName = string.IsNullOrWhiteSpace(venue) ? "Karaoke Night" : venue;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", vm.VenueName);
+
+            vm.ListDjAndVenueOnBillboard = ListDjAndVenueCheckBox.IsChecked;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceListDjAndVenue", vm.ListDjAndVenueOnBillboard);
+
+            PersistDjAndVenue(vm);
+
             vm.PreferredHostIp = PreferredIpEntry.Text?.Trim() ?? string.Empty;
             vm.EmailRecipient = EmailRecipientEntry.Text?.Trim() ?? string.Empty;
         }
@@ -221,6 +267,228 @@ public partial class MainPage : ContentPage
     private void OnToggleExternalDisplayClicked(object? sender, EventArgs e)
     {
         KSRotation.Maui.Services.SecondaryDisplayService.Instance.ToggleSecondaryBillboard();
+    }
+
+    private async void OnShowCastDialogClicked(object? sender, EventArgs e)
+    {
+        CastDeviceOverlay.IsVisible = true;
+        UpdateCastStatusUI();
+        await MauiCastingService.Instance.DiscoverDevicesAsync();
+        RefreshCastDeviceListUI();
+    }
+
+    private void OnCloseCastDialogClicked(object? sender, EventArgs e)
+    {
+        CastDeviceOverlay.IsVisible = false;
+    }
+
+    private async void OnRescanCastDevicesClicked(object? sender, EventArgs e)
+    {
+        UpdateCastStatusUI();
+        await MauiCastingService.Instance.DiscoverDevicesAsync();
+        RefreshCastDeviceListUI();
+    }
+
+    private async void OnStopCastingClicked(object? sender, EventArgs e)
+    {
+        await MauiCastingService.Instance.StopCastingAsync();
+        UpdateCastStatusUI();
+        RefreshCastDeviceListUI();
+    }
+
+    private async Task CastToDeviceAsync(ChromecastDevice device)
+    {
+        if (BindingContext is not KSRotation.ViewModels.MainViewModel vm) return;
+
+        string billboardUrl = vm.BillboardConnectionUrl;
+        if (string.IsNullOrEmpty(billboardUrl))
+        {
+            await DisplayAlertAsync("Cast Error", "Billboard URL is not available. Please ensure the server is running.", "OK");
+            return;
+        }
+
+        CastStatusLabel.Text = $"Connecting to {device.Name}...";
+        CastScanningSpinner.IsVisible = true;
+        CastScanningSpinner.IsRunning = true;
+
+        bool success = await MauiCastingService.Instance.CastBillboardAsync(device, billboardUrl);
+
+        CastScanningSpinner.IsRunning = false;
+        CastScanningSpinner.IsVisible = false;
+        UpdateCastStatusUI();
+        RefreshCastDeviceListUI();
+
+        if (!success)
+        {
+            await DisplayAlertAsync("Cast Connection", $"Could not launch billboard on {device.Name}. Ensure device is powered on and connected to the same Wi-Fi.", "OK");
+        }
+    }
+
+    private void UpdateCastStatusUI()
+    {
+        var castingService = MauiCastingService.Instance;
+        bool isCasting = castingService.IsCasting && castingService.ActiveDevice != null;
+        CastActiveStatusCard.IsVisible = isCasting;
+        if (isCasting && castingService.ActiveDevice != null)
+        {
+            CastActiveDeviceLabel.Text = $"📡 Currently Casting to {castingService.ActiveDevice.Name}";
+        }
+
+        CastScanningSpinner.IsVisible = castingService.IsDiscovering;
+        CastScanningSpinner.IsRunning = castingService.IsDiscovering;
+        CastStatusLabel.Text = string.IsNullOrEmpty(castingService.StatusMessage)
+            ? (castingService.IsDiscovering ? "Scanning for devices..." : "Ready to cast")
+            : castingService.StatusMessage;
+    }
+
+    private void RefreshCastDeviceListUI()
+    {
+        UpdateCastStatusUI();
+        CastDevicesList.Children.Clear();
+
+        var castingService = MauiCastingService.Instance;
+        bool isDark = Application.Current?.UserAppTheme == AppTheme.Dark;
+
+        if (castingService.DiscoveredDevices.Count == 0)
+        {
+            CastDevicesList.Children.Add(new Label
+            {
+                Text = castingService.IsDiscovering ? "Searching for Google Cast devices..." : "No Google Cast devices found.\nTap '🔄 Rescan' to search again.",
+                TextColor = Color.FromArgb("#9CA3AF"),
+                FontSize = 11,
+                HorizontalTextAlignment = TextAlignment.Center,
+                Margin = new Thickness(0, 12, 0, 12)
+            });
+            return;
+        }
+
+        foreach (var device in castingService.DiscoveredDevices)
+        {
+            bool isThisCasting = castingService.IsCasting && castingService.ActiveDevice?.Address?.Equals(device.Address) == true;
+
+            var card = new Border
+            {
+                StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 8 },
+                BackgroundColor = isDark ? Color.FromArgb("#23273A") : Color.FromArgb("#F8FAFC"),
+                Stroke = isDark ? Color.FromArgb("#384260") : Color.FromArgb("#E2E8F0"),
+                StrokeThickness = 1,
+                Padding = new Thickness(10, 8),
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+
+            var grid = new Grid
+            {
+                ColumnDefinitions = [new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto)],
+                VerticalOptions = LayoutOptions.Center
+            };
+
+            var infoStack = new VerticalStackLayout { Spacing = 2 };
+            infoStack.Children.Add(new Label
+            {
+                Text = device.Name,
+                FontAttributes = FontAttributes.Bold,
+                FontSize = 12,
+                TextColor = isDark ? Colors.White : Color.FromArgb("#1E293B")
+            });
+            infoStack.Children.Add(new Label
+            {
+                Text = device.Address?.ToString() ?? string.Empty,
+                FontSize = 10,
+                TextColor = Color.FromArgb("#9CA3AF")
+            });
+
+            var castBtn = new Button
+            {
+                Text = isThisCasting ? "Active" : "Cast",
+                BackgroundColor = isThisCasting ? Color.FromArgb("#10B981") : Color.FromArgb("#D97706"),
+                TextColor = Colors.White,
+                FontAttributes = FontAttributes.Bold,
+                FontSize = 11,
+                HeightRequest = 30,
+                Padding = new Thickness(12, 0),
+                CornerRadius = 6,
+                IsEnabled = !isThisCasting
+            };
+
+            var targetDevice = device;
+            castBtn.Clicked += async (_, _) => await CastToDeviceAsync(targetDevice);
+
+            grid.Children.Add(infoStack);
+            Grid.SetColumn(infoStack, 0);
+
+            grid.Children.Add(castBtn);
+            Grid.SetColumn(castBtn, 1);
+
+            card.Content = grid;
+            CastDevicesList.Children.Add(card);
+        }
+    }
+
+    private void OnDjNameUnfocused(object? sender, FocusEventArgs e)
+    {
+        if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            string val = entry.Text?.Trim() ?? string.Empty;
+            vm.DjName = string.IsNullOrWhiteSpace(val) ? "Guest DJ" : val;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
+            PersistDjAndVenue(vm);
+        }
+    }
+
+    private void OnDjNameCompleted(object? sender, EventArgs e)
+    {
+        if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            string val = entry.Text?.Trim() ?? string.Empty;
+            vm.DjName = string.IsNullOrWhiteSpace(val) ? "Guest DJ" : val;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
+            PersistDjAndVenue(vm);
+        }
+    }
+
+    private void OnVenueNameUnfocused(object? sender, FocusEventArgs e)
+    {
+        if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            string val = entry.Text?.Trim() ?? string.Empty;
+            vm.VenueName = string.IsNullOrWhiteSpace(val) ? "Karaoke Night" : val;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", vm.VenueName);
+            PersistDjAndVenue(vm);
+        }
+    }
+
+    private void OnVenueNameCompleted(object? sender, EventArgs e)
+    {
+        if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            string val = entry.Text?.Trim() ?? string.Empty;
+            vm.VenueName = string.IsNullOrWhiteSpace(val) ? "Karaoke Night" : val;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", vm.VenueName);
+            PersistDjAndVenue(vm);
+        }
+    }
+
+    private void OnListDjAndVenueCheckedChanged(object? sender, CheckedChangedEventArgs e)
+    {
+        if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            vm.ListDjAndVenueOnBillboard = e.Value;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceListDjAndVenue", e.Value);
+        }
+    }
+
+    private static void PersistDjAndVenue(KSRotation.ViewModels.MainViewModel vm)
+    {
+        if (!string.IsNullOrWhiteSpace(vm.DjName) && !vm.Djs.Any(d => string.Equals(d, vm.DjName, StringComparison.OrdinalIgnoreCase)))
+        {
+            vm.Djs.Add(vm.DjName);
+            KSRotation.Services.DjService.Save(vm.Djs);
+        }
+        if (!string.IsNullOrWhiteSpace(vm.VenueName) && !vm.Venues.Any(v => string.Equals(v, vm.VenueName, StringComparison.OrdinalIgnoreCase)))
+        {
+            vm.Venues.Add(vm.VenueName);
+            KSRotation.Services.VenueService.Save(vm.Venues);
+        }
     }
 
     private void OnPreferredHostIpUnfocused(object? sender, FocusEventArgs e)

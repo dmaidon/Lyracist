@@ -1,9 +1,31 @@
-<!-- Edited on Sep 16, 2026 @ 00:15:00 -> Document linked singer rotation movement fix (jumping past linked pairs on MoveUp/MoveDown) -->
-Last Edit: Sep 16, 2026 - Linked Singer Rotation Movement Jump Fix
+<!-- Edited on Sep 17, 2026 @ 11:22:30 -> Document persistent DJ Name, Venue Name, and billboard listing option in About popup -->
+Last Edit: Sep 17, 2026 - KSRotation.Maui DJ and Venue Device Persistence
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.17.0] - 2026-09-17
+
+### Added
+- **Persistent DJ Name, Venue Name & Billboard Listing Option (`KSRotation.Maui`, `MainViewModel`, `billboard.html`)**:
+  - Added input fields for "DJ / Host Name" and "Venue Name" to the "ⓘ About" popup dialog in `KSRotation.Maui`.
+  - Added a "List DJ Name & Venue on Billboard & TV" toggle option to control header branding visibility across audience screens.
+  - Wired dual device persistence using MAUI `Preferences.Default` and `ksrotation_settings.json`, automatically restoring settings on launch and persisting edits across sessions, reboots, and app resets until changed.
+  - Synchronized `/api/info` and `billboard.html` to adapt dynamically to the configured DJ name, venue name, and listing preferences.
+- **Chromecast Web-Casting for KSRotation.Maui (`KSRotation.Maui`, `Shared`)**:
+  - Added DashCast web-receiver support (`appId: 84912283`, `urn:x-cast:com.madmod.dashcast`) to `ChromecastSender.cs` and `IChromecastSender`, allowing direct streaming of the live Audience Billboard URL (`billboard.html`) to any Chromecast or Google TV device on the local network.
+  - Implemented Android `WifiManager.MulticastLock` management in `ChromecastDiscoveryService.cs` during discovery loops to ensure mobile Wi-Fi chipsets reliably receive incoming mDNS multicast packets on port 5353.
+  - Created `MauiCastingService` to manage asynchronous Chromecast discovery, connection lifecycles, and active session state for MAUI.
+  - Added "📡 Cast to TV" triggers to `MainPage.xaml` (DJ portal connection card, full-screen billboard control bar, and Connect QR TV mode tab).
+  - Designed and implemented a dedicated `CastDeviceOverlay` device picker modal with live discovery status, rescan controls, discovered device list with one-tap casting, and active cast status banner with quick stop functionality.
+
+### Changed
+- **Audience Billboard & Cast Screen TV Redesign (`billboard.html`, `BillboardView.xaml`)**:
+  - Redesigned the external cast screen (`billboard.html`) and native MAUI billboard (`BillboardView.xaml`) for optimal visibility on televisions and external monitors.
+  - Moved the Upcoming Rotation list into a dedicated, full-height right-hand column so performers, song titles, and queue order have complete vertical space and are clearly visible across the venue.
+  - Relocated the Song Requests and Wi-Fi Join QR code cards to the bottom of the left column directly beneath the Now Performing and Up Next stage cards.
+  - Arranged the two QR codes side-by-side with high-contrast borders and spacious scannable sizing, eliminating vertical crowding.
 
 ## [26.9.16.0] - 2026-09-16
 

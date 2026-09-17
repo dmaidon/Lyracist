@@ -1,4 +1,4 @@
-<!-- Edited on Sep 5, 2026 @ 20:45:00 -> Format CSS and JavaScript in billboard.html -->
+<!-- Edited on Sep 17, 2026 @ 11:17:00 -> Support listDjAndVenue toggle and empty dj name handling in billboard header -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -124,18 +124,26 @@
         main.billboard-main {
             flex: 1;
             display: grid;
-            grid-template-columns: 1.35fr 1fr;
+            grid-template-columns: 1.18fr 1fr;
             gap: 24px;
-            padding: 24px 36px;
+            padding: 20px 32px;
             height: calc(100vh - 72px);
             overflow: hidden;
         }
 
-        /* Left Column: Stage & Queue */
+        /* Left Column: Stage & Side-by-Side QR Codes */
         .stage-column {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Right Column: Full-Height Upcoming Rotation Queue */
+        .rotation-column {
+            display: flex;
+            flex-direction: column;
             height: 100%;
             overflow: hidden;
         }
@@ -144,8 +152,8 @@
         .card-now-performing {
             background: linear-gradient(135deg, rgba(217, 119, 6, 0.18) 0%, rgba(20, 27, 45, 0.85) 100%);
             border: 2px solid var(--amber-glow);
-            border-radius: 18px;
-            padding: 24px 28px;
+            border-radius: 16px;
+            padding: 16px 24px;
             box-shadow: 0 0 35px rgba(245, 158, 11, 0.22), inset 0 0 20px rgba(245, 158, 11, 0.08);
             position: relative;
             flex-shrink: 0;
@@ -166,13 +174,13 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 5px 14px;
+            padding: 4px 12px;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 800;
             letter-spacing: 1.2px;
             text-transform: uppercase;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .badge-now {
@@ -188,7 +196,7 @@
         }
 
         .now-performer-name {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 900;
             color: #FFFFFF;
             line-height: 1.15;
@@ -200,7 +208,7 @@
         }
 
         .now-duet-tag {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 600;
             font-style: italic;
             color: #FBBF24;
@@ -224,8 +232,8 @@
         }
 
         .now-song-meta {
-            margin-top: 8px;
-            font-size: 1.35rem;
+            margin-top: 6px;
+            font-size: 1.15rem;
             font-weight: 600;
             color: #E2E8F0;
             display: flex;
@@ -271,13 +279,13 @@
             background: linear-gradient(135deg, rgba(37, 99, 235, 0.14) 0%, rgba(20, 27, 45, 0.8) 100%);
             border: 1.5px solid var(--blue-glow);
             border-radius: 14px;
-            padding: 16px 22px;
+            padding: 12px 20px;
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
             flex-shrink: 0;
         }
 
         .next-performer-name {
-            font-size: 1.55rem;
+            font-size: 1.4rem;
             font-weight: 800;
             color: #FFFFFF;
             line-height: 1.2;
@@ -287,34 +295,36 @@
         }
 
         .next-song-meta {
-            margin-top: 4px;
-            font-size: 1.05rem;
+            margin-top: 3px;
+            font-size: 0.98rem;
             font-weight: 500;
             color: #CBD5E1;
         }
 
-        /* Upcoming Queue Container */
+        /* Upcoming Queue Container (Full-Height Right Column) */
         .card-upcoming-queue {
             background: var(--bg-panel);
-            border: 1px solid var(--border-card);
-            border-radius: 14px;
-            padding: 18px 22px;
-            flex: 1;
+            border: 1.5px solid var(--border-card);
+            border-radius: 18px;
+            padding: 20px 24px;
+            height: 100%;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .queue-title {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 800;
             color: var(--text-dim);
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-shrink: 0;
         }
 
         .queue-list {
@@ -322,16 +332,16 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding-right: 4px;
+            gap: 10px;
+            padding-right: 6px;
         }
 
             .queue-list::-webkit-scrollbar {
-                width: 4px;
+                width: 5px;
             }
 
             .queue-list::-webkit-scrollbar-thumb {
-                background: rgba(255, 255, 255, 0.15);
+                background: rgba(255, 255, 255, 0.2);
                 border-radius: 4px;
             }
 
@@ -340,17 +350,17 @@
             align-items: center;
             gap: 14px;
             background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 12px 18px;
             transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
         .queue-pos {
-            font-size: 1rem;
+            font-size: 1.15rem;
             font-weight: 800;
             color: #64748B;
-            width: 24px;
+            width: 28px;
             text-align: center;
         }
 
@@ -360,8 +370,8 @@
         }
 
         .queue-name {
-            font-size: 1.05rem;
-            font-weight: 700;
+            font-size: 1.25rem;
+            font-weight: 800;
             color: #FFFFFF;
             white-space: nowrap;
             overflow: hidden;
@@ -369,7 +379,7 @@
         }
 
         .queue-song {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 500;
             color: var(--text-muted);
             white-space: nowrap;
@@ -377,37 +387,37 @@
             text-overflow: ellipsis;
         }
 
-        /* Right Column: Connect & Request Hub */
-        .hub-column {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            height: 100%;
+        /* Side-By-Side QR Hubs Row (Bottom of Left Column) */
+        .qr-hubs-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            flex: 1;
+            min-height: 0;
         }
 
         .hub-card {
             background: var(--bg-panel);
             border: 1px solid var(--border-card);
-            border-radius: 18px;
-            padding: 24px 28px;
+            border-radius: 16px;
+            padding: 14px 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
             position: relative;
             overflow: hidden;
+            justify-content: center;
         }
 
             .hub-card.primary-hub {
-                flex: 1.2;
                 background: linear-gradient(145deg, #131E32 0%, #1A2844 100%);
                 border: 1.5px solid rgba(139, 92, 246, 0.4);
-                box-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
+                box-shadow: 0 0 25px rgba(139, 92, 246, 0.15);
             }
 
             .hub-card.wifi-hub {
-                flex: 1;
                 background: linear-gradient(145deg, #0F172A 0%, #152033 100%);
                 border: 1px solid rgba(16, 185, 129, 0.3);
                 box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
@@ -416,14 +426,14 @@
         .hub-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 16px;
+            gap: 6px;
+            padding: 4px 12px;
             border-radius: 9999px;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 800;
-            letter-spacing: 1.2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            margin-bottom: 14px;
+            margin-bottom: 8px;
         }
 
         .badge-request {
@@ -440,13 +450,50 @@
 
         .qr-container {
             background: #FFFFFF;
-            padding: 12px;
-            border-radius: 14px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
+        }
+
+        .qr-image {
+            width: 110px;
+            height: 110px;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .hub-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            margin-bottom: 2px;
+        }
+
+        .hub-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        .hub-link {
+            margin-top: 4px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #A78BFA;
+            letter-spacing: 0.2px;
+            word-break: break-all;
+        }
+
+        .wifi-details {
+            margin-top: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 0.82rem;
         }
 
         .qr-image-lg {
@@ -542,7 +589,7 @@
 
     <!-- Main Grid Content -->
     <main class="billboard-main">
-        <!-- Left Column: Stage Queue -->
+        <!-- Left Column: Stage (Now Performing, Up Next) & Side-by-Side QR Hubs -->
         <section class="stage-column">
             <!-- LAST ROUND BANNER -->
             <div class="last-round-banner" id="last-round-banner" style="display: none;">
@@ -576,7 +623,36 @@
                 </div>
             </div>
 
-            <!-- UPCOMING QUEUE -->
+            <!-- SIDE-BY-SIDE QR HUBS -->
+            <div class="qr-hubs-row">
+                <!-- Portal Request Hub -->
+                <div class="hub-card primary-hub">
+                    <div class="hub-badge badge-request">📱 Song Requests</div>
+                    <div class="qr-container" id="portal-qr-container">
+                        <img id="portal-qr-image" class="qr-image" src="/api/qr?text=http%3A%2F%2F127.0.0.1%3A5005" alt="Request Portal QR Code" />
+                    </div>
+                    <div class="hub-title">Pick Your Song</div>
+                    <p class="hub-desc">Browse &amp; request from your phone</p>
+                    <div class="hub-link" id="portal-url-display">http://...</div>
+                </div>
+
+                <!-- Wi-Fi Connect Hub -->
+                <div class="hub-card wifi-hub">
+                    <div class="hub-badge badge-wifi">📶 Fast Wi-Fi Join</div>
+                    <div class="qr-container" id="wifi-qr-container">
+                        <img id="wifi-qr-image" class="qr-image" src="/api/qr?text=WIFI%3AS%3A%3BT%3AWPA%3BP%3A%3B%3B" alt="Wi-Fi QR Code" />
+                    </div>
+                    <div class="hub-title">Connect To Wi-Fi</div>
+                    <div class="wifi-details">
+                        <div class="wifi-field">Network: <strong id="wifi-ssid-display">Auto-detecting...</strong></div>
+                        <div class="wifi-field" id="wifi-pass-container">Password: <strong id="wifi-pass-display">None</strong></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Full-Height Upcoming Rotation Queue -->
+        <aside class="rotation-column">
             <div class="card-upcoming-queue">
                 <div class="queue-title">
                     <span>Upcoming In Rotation</span>
@@ -587,33 +663,6 @@
                         <span class="icon">📋</span>
                         <span>Rotation is empty. Add a song to get on stage!</span>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Right Column: Connect & Request Hub -->
-        <aside class="hub-column">
-            <!-- Portal Request Hub -->
-            <div class="hub-card primary-hub">
-                <div class="hub-badge badge-request">📱 Song Requests</div>
-                <div class="qr-container" id="portal-qr-container">
-                    <img id="portal-qr-image" class="qr-image-lg" src="/api/qr?text=http%3A%2F%2F127.0.0.1%3A5005" alt="Request Portal QR Code" />
-                </div>
-                <div class="hub-title">Scan To Pick Your Song</div>
-                <p class="hub-desc">Browse thousands of karaoke tracks and submit requests straight from your phone!</p>
-                <div class="hub-link" id="portal-url-display">http://...</div>
-            </div>
-
-            <!-- Wi-Fi Connect Hub -->
-            <div class="hub-card wifi-hub">
-                <div class="hub-badge badge-wifi">📶 Fast Wi-Fi Join</div>
-                <div class="qr-container" id="wifi-qr-container">
-                    <img id="wifi-qr-image" class="qr-image-sm" src="/api/qr?text=WIFI%3AS%3A%3BT%3AWPA%3BP%3A%3B%3B" alt="Wi-Fi QR Code" />
-                </div>
-                <div class="hub-title">Connect To Venue Wi-Fi</div>
-                <div class="wifi-details">
-                    <div class="wifi-field">Network: <strong id="wifi-ssid-display">Auto-detecting...</strong></div>
-                    <div class="wifi-field" id="wifi-pass-container">Password: <strong id="wifi-pass-display">None</strong></div>
                 </div>
             </div>
         </aside>
@@ -649,11 +698,27 @@
                 if (hash === previousInfoHash) return;
                 previousInfoHash = hash;
 
-                if (data.venue) {
-                    document.getElementById('billboard-venue-name').textContent = data.venue;
-                }
-                if (data.dj) {
-                    document.getElementById('billboard-dj-name').textContent = `Hosted by ${data.dj}`;
+                const brandTitlesEl = document.querySelector('.brand-titles');
+                if (brandTitlesEl) {
+                    if (data.listDjAndVenue === false) {
+                        brandTitlesEl.style.display = 'none';
+                    } else {
+                        brandTitlesEl.style.display = 'flex';
+                        const venueEl = document.getElementById('billboard-venue-name');
+                        if (venueEl) {
+                            venueEl.textContent = data.venue || "Karaoke Night";
+                        }
+                        const djEl = document.getElementById('billboard-dj-name');
+                        if (djEl) {
+                            if (data.dj && data.dj.trim()) {
+                                djEl.textContent = `Hosted by ${data.dj}`;
+                                djEl.style.display = "";
+                            } else {
+                                djEl.textContent = "";
+                                djEl.style.display = "none";
+                            }
+                        }
+                    }
                 }
 
                 // Portal URL & QR

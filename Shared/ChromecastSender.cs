@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix CsWinRT1028 partial class on CastSession
+// Edited on Sep 17, 2026 @ 10:36:20 -> Add DashCast web receiver support for HTML billboard casting
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -15,6 +15,7 @@ namespace Lyracist.Shared
     {
         Task<bool> LaunchReceiverAsync(ChromecastDevice device);
         Task<bool> SendRotationUrlAsync(ChromecastDevice device, string rotationUrl);
+        Task<bool> CastWebUrlAsync(ChromecastDevice device, string webUrl);
         Task StopCastingAsync(ChromecastDevice device);
     }
 
@@ -43,6 +44,19 @@ namespace Lyracist.Shared
             }
 
             return await session.LoadMediaAsync(rotationUrl);
+        }
+
+        public async Task<bool> CastWebUrlAsync(ChromecastDevice device, string webUrl)
+        {
+            if (device?.Address == null) return false;
+
+            var session = await GetOrCreateSessionAsync(device);
+            if (session == null) return false;
+
+            var launched = await session.LaunchWebReceiverAsync();
+            if (!launched) return false;
+
+            return await session.LoadWebUrlAsync(webUrl);
         }
 
         public async Task StopCastingAsync(ChromecastDevice device)
@@ -90,6 +104,8 @@ namespace Lyracist.Shared
         private const string NsReceiver = "urn:x-cast:com.google.cast.receiver";
         private const string NsMedia = "urn:x-cast:com.google.cast.media";
         private const string DefaultMediaReceiverAppId = "CC1AD845";
+        private const string DashCastAppId = "84912283";
+        private const string NsDashCast = "urn:x-cast:com.madmod.dashcast";
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(8);
         private static readonly TimeSpan HeartbeatInterval = TimeSpan.FromSeconds(5);
 
@@ -106,6 +122,7 @@ namespace Lyracist.Shared
         private int _requestId;
         private string? _transportId;
         private string? _sessionId;
+        private string _expectedAppId = DefaultMediaReceiverAppId;
 
         public bool IsConnected => _sslStream != null && _tcpClient?.Connected == true;
 
@@ -147,6 +164,7 @@ namespace Lyracist.Shared
         {
             if (!IsConnected) return false;
 
+            _expectedAppId = DefaultMediaReceiverAppId;
             var requestId = NextRequestId();
             var tcs = new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously);
             _pendingRequests[requestId] = tcs;
@@ -174,6 +192,53 @@ namespace Lyracist.Shared
             {
                 _pendingRequests.TryRemove(requestId, out _);
             }
+        }
+
+        public async Task<bool> LaunchWebReceiverAsync()
+        {
+            if (!IsConnected) return false;
+
+            _expectedAppId = DashCastAppId;
+            var requestId = NextRequestId();
+            var tcs = new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _pendingRequests[requestId] = tcs;
+
+            try
+            {
+                var launchMsg = $"{{\"type\":\"LAUNCH\",\"appId\":\"{DashCastAppId}\",\"requestId\":{requestId}}}";
+                await SendAsync(SenderId, PlatformDestinationId, NsReceiver, launchMsg);
+
+                using var timeoutCts = new CancellationTokenSource(RequestTimeout);
+                await using (timeoutCts.Token.Register(() => tcs.TrySetCanceled()))
+                {
+                    var status = await tcs.Task;
+                    var ok = ApplyReceiverStatus(status);
+                    Globals.LogInfo("Shared", $"ChromecastSender.LaunchWebReceiverAsync: status applied, ok={ok}, transportId={_transportId ?? "(none)"}");
+                    return ok;
+                }
+            }
+            catch (Exception ex)
+            {
+                Globals.LogError("Shared", "ChromecastSender.LaunchWebReceiverAsync", ex);
+                return false;
+            }
+            finally
+            {
+                _pendingRequests.TryRemove(requestId, out _);
+            }
+        }
+
+        public async Task<bool> LoadWebUrlAsync(string webUrl)
+        {
+            if (!IsConnected || string.IsNullOrEmpty(_transportId))
+            {
+                Globals.LogInfo("Shared", $"ChromecastSender.LoadWebUrlAsync: not connected or no transportId (connected={IsConnected}, transportId={_transportId ?? "(none)"})");
+                return false;
+            }
+
+            var payload = $"{{\"url\":\"{JsonEscape(webUrl)}\",\"force\":true,\"reload\":false}}";
+            await SendAsync(SenderId, _transportId!, NsDashCast, payload);
+            return true;
         }
 
         public async Task<bool> LoadMediaAsync(string rotationUrl)
@@ -233,7 +298,7 @@ namespace Lyracist.Shared
                 foreach (var app in apps.EnumerateArray())
                 {
                     if (app.TryGetProperty("appId", out var appIdProp) &&
-                        string.Equals(appIdProp.GetString(), DefaultMediaReceiverAppId, StringComparison.OrdinalIgnoreCase))
+                        string.Equals(appIdProp.GetString(), _expectedAppId, StringComparison.OrdinalIgnoreCase))
                     {
                         if (app.TryGetProperty("transportId", out var tid))
                         {

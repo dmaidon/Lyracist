@@ -1,4 +1,55 @@
-// Edited on Sep 10, 2026 @ 08:42:00 -> Document Special Event Banner Single Selection & None Button Reset
+// Edited on Sep 17, 2026 @ 11:22:00 -> Document persistent DJ Name, Venue Name, and billboard listing option in About popup
+KSRotation.Maui: Persistent DJ Name, Venue Name & Billboard Listing Option (`KSRotation.Maui`) - (September 2026)
+
+Section: KSRotation.Maui / Settings & Configuration / About Popup DJ & Venue Persistence
+
+[Overview & Purpose]
+Hosts and DJs running KSRotation.Maui can now configure and store their DJ/Host Name and Venue Name directly inside the "ⓘ About" popup dialog on tablets and mobile devices. This eliminates hardcoded defaults ("Guest DJ" / "Karaoke Night") and ensures all external displays, Chromecast streams, audience billboards, and reports accurately identify the host and location. The entered information is stored permanently on the local device until explicitly changed.
+
+[Features & User Controls]
+1. About Dialog Configuration Fields:
+   - "DJ / Host Name" input field: Enter or edit the performer or host name (e.g., "DJ Dave", "Host Sarah").
+   - "Venue Name" input field: Enter or edit the venue, club, or lounge name (e.g., "The Blue Room", "Main Stage Lounge").
+   - "List DJ Name & Venue on Billboard & TV" CheckBox: Toggles whether the host branding header appears on the Audience Billboard (`BillboardView.xaml`) and Web-Cast TV screen (`billboard.html`). When unchecked, the venue and DJ headers are neatly hidden for a minimalist, distraction-free stage screen.
+2. Device-Level Persistence:
+   - Values are instantly saved to the device's native key-value storage (`Microsoft.Maui.Storage.Preferences`) and disk settings (`ksrotation_settings.json`).
+   - Entries are automatically added to the persisted DJ and Venue history (`ksrotation_djs.json` and `ksrotation_venues.json`).
+   - Persisted across app restarts, session resets, and tablet reboots until changed by the user.
+
+KSRotation.Maui: Chromecast Web-Casting & TV Billboard Attractor Streaming (`KSRotation.Maui`) - (September 2026)
+
+Section: KSRotation.Maui / Audience Billboard & TV Display / Chromecast Web-Casting & TV Layout
+
+[Overview & Purpose]
+KSRotation.Maui now features built-in Google Cast / Chromecast web-casting capability, allowing DJs and karaoke hosts running KSRotation.Maui (on Android tablets, phones, or Windows laptops) to stream the live audience billboard directly to any Google Cast or Chromecast-enabled television or smart display on the local network.
+
+[TV Billboard Redesign: High-Visibility Rotation & Side-by-Side QR Codes]
+To ensure optimal legibility on TVs and external monitors across all viewing distances:
+1. Dedicated Full-Height Rotation Column (Right Column):
+   - The Upcoming Rotation list now occupies the entire right column from top to bottom.
+   - Performer cards, song titles, queue position badges, and rotation status are rendered with generous spacing and high contrast, eliminating vertical clipping and ensuring performers in the queue are clearly visible even on 720p/1080p/4K displays.
+2. Side-by-Side QR Code Layout (Left Column):
+   - The "Song Requests" QR code and the "Wi-Fi Join" QR code are positioned side-by-side directly beneath the "Now Performing" and "Up Next" stage spotlight cards in the left column.
+   - Both QR cards maintain large, scannable dimensions with venue SSID/password details and request instructions, efficiently utilizing the lower-left area without competing with the singer rotation.
+
+[Architecture & Features]
+1. Chromecast Discovery:
+   - Utilizes asynchronous mDNS multicast scanning (`_googlecast._tcp.local`) via `ChromecastDiscoveryService` to discover all nearby Chromecast devices, Android TVs, and Google TVs.
+   - Automatically manages Android `WifiManager.MulticastLock` during the discovery window to guarantee incoming mDNS packet reception on mobile Wi-Fi chipsets.
+2. Web-Receiver Streaming:
+   - Streams the lightweight, real-time responsive Audience Billboard (`billboard.html`) served from the local device's embedded HTTP server.
+   - Interfaces with the standard DashCast web receiver (`appId: 84912283`, `urn:x-cast:com.madmod.dashcast`) to render the full HTML5/CSS animated rotation billboard on the TV at native TV resolution without putting CPU/GPU video encoding load on the mobile device.
+3. User Interface & Controls:
+   - "📡 Cast to TV" entry points added to:
+     - Portal Connection card in the master DJ console.
+     - Full-screen Audience Billboard floating control bar.
+     - Connect QR overlay under the "📺 TV" mode tab.
+   - Dedicated "📡 CAST TO CHROMECAST" device picker modal with:
+     - Live device list showing device names and IP addresses.
+     - One-click "Cast" / "Active" button indicators.
+     - Real-time scanning status and "🔄 Rescan" button.
+     - Active cast banner displaying current device with a 1-click "Stop Casting" button.
+
 Store Notifications: Toast Alerts, Progress Milestones & Auto-Dismissal Architecture (`Lyracist` ONLY) - (September 2026)
 
 Section: Lyracist / Karaoke Store & Licensed Track Import / Store Notifications (Lyracist ONLY)

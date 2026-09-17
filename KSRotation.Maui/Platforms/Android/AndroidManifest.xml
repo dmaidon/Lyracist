@@ -1,7 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Edited on Sep 17, 2026 @ 10:35:00 -> Add CHANGE_WIFI_MULTICAST_STATE permission and update app label to KSRotation.MAUI -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-	<application android:allowBackup="true" android:supportsRtl="true" android:usesCleartextTraffic="true" android:label="Karaoke Singer Rotation.MAUI"></application>
+	<application android:allowBackup="true" android:supportsRtl="true" android:usesCleartextTraffic="true" android:label="KSRotation.MAUI"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 </manifest>
