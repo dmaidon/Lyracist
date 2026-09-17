@@ -1,4 +1,4 @@
-<!-- Edited on Aug 29, 2026 @ 10:36:00 -> Added KnockoutTrivia project reference for automated unit tests -->
+<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -12,8 +12,8 @@
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.9.12.48</AssemblyVersion>
-    <FileVersion>26.9.12.48</FileVersion>
+    <AssemblyVersion>26.9.17.49</AssemblyVersion>
+    <FileVersion>26.9.17.49</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

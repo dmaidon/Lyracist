@@ -1,4 +1,4 @@
-<!-- Edited on Aug 27, 2026 @ 07:07:00 -> Added NameFormatting linked compile reference -->
+<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.9.12.187</AssemblyVersion>
-    <FileVersion>26.9.12.187</FileVersion>
+    <AssemblyVersion>26.9.17.188</AssemblyVersion>
+    <FileVersion>26.9.17.188</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>

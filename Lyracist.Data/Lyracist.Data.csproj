@@ -1,4 +1,4 @@
-<!-- Edited on Aug 30, 2026 @ 09:40:00 -> Add TagLibSharp package reference for high-performance in-memory metadata probing -->
+<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -7,8 +7,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>26.9.16.248</AssemblyVersion>
-    <FileVersion>26.9.16.248</FileVersion>
+    <AssemblyVersion>26.9.17.249</AssemblyVersion>
+    <FileVersion>26.9.17.249</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>

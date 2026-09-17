@@ -1,4 +1,4 @@
-<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update Content links for consolidated Packs, Banners, and Data directories -->
+<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
-    <AssemblyVersion>26.9.12.53</AssemblyVersion>
-    <FileVersion>26.9.12.53</FileVersion>
+    <AssemblyVersion>26.9.17.54</AssemblyVersion>
+    <FileVersion>26.9.17.54</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>

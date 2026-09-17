@@ -1,4 +1,4 @@
-<!-- Created on Aug 29, 2026 @ 10:40:00 -> KnockoutTrivia.Tests xUnit.v3 test project for automated test suite -->
+<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -12,8 +12,8 @@
     <Company>PAROLE Software</Company>
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.9.12.18</AssemblyVersion>
-    <FileVersion>26.9.12.18</FileVersion>
+    <AssemblyVersion>26.9.17.19</AssemblyVersion>
+    <FileVersion>26.9.17.19</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

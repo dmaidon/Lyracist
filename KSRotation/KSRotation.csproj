@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 11:59:00 -> Add shared venue location and GPS services compile items -->
+<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.9.17.619</AssemblyVersion>
-    <FileVersion>26.9.17.619</FileVersion>
+    <AssemblyVersion>26.9.17.620</AssemblyVersion>
+    <FileVersion>26.9.17.620</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>

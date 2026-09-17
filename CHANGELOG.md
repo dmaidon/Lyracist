@@ -1,5 +1,5 @@
-<!-- Edited on Sep 17, 2026 @ 12:48:00 -> Document live TV cast dynamic injection fix, Help topics, and User Manual updates -->
-Last Edit: Sep 17, 2026 - Hybrid GPS Venue Auto-Location & Live Cast Fix
+<!-- Edited on Sep 17, 2026 @ 14:36:30 -> Synchronize solution assembly version 26.9.17 across all projects -->
+Last Edit: Sep 17, 2026 - Solution Version Bump 26.9.17
 
 # Changelog
 
@@ -8,6 +8,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.17.0] - 2026-09-17
 
 ### Added
+- **Solution Version Synchronization**: Synchronized `AssemblyVersion` and `FileVersion` to `26.9.17.*` across all projects in the solution.
 - **Hybrid GPS & Wi-Fi Venue Auto-Location System (`Shared`, `KSRotation`, `KSRotation.Maui`, `Lyracist`)**:
   - Implemented `VenueLocationStore`, `GeoMath`, `ILocationService`, and `VenueLocationItem` models supporting GPS coordinate persistence, 150-meter spherical proximity matching, Wi-Fi SSID fallback, and travel router exclusion.
   - Added "📍 Tag GPS" buttons and location status indicators in `KSRotation` (Settings / Venue Management), `Lyracist` (Settings / Venue Management), and `KSRotation.Maui` (About dialog).

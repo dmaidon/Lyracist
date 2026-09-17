@@ -1,4 +1,4 @@
-<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update Content links for consolidated Packs, Banners, and Data directories -->
+<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -15,8 +15,8 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
-    <AssemblyVersion>26.9.12.110</AssemblyVersion>
-    <FileVersion>26.9.12.110</FileVersion>
+    <AssemblyVersion>26.9.17.111</AssemblyVersion>
+    <FileVersion>26.9.17.111</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <PackageIcon>LyracistTrivia_128.png</PackageIcon>
     <ApplicationIcon>LyracistTrivia.ico</ApplicationIcon>

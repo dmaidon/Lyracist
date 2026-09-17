@@ -1,4 +1,4 @@
-<!-- Edited on Aug 30, 2026 @ 08:26:00 -> Update Content links for consolidated Packs, Banners, and Data directories -->
+<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -12,8 +12,8 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <Title>Knockout Trivia</Title>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.9.12.26</AssemblyVersion>
-    <FileVersion>26.9.12.26</FileVersion>
+    <AssemblyVersion>26.9.17.27</AssemblyVersion>
+    <FileVersion>26.9.17.27</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <ApplicationIcon>glove.ico</ApplicationIcon>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
