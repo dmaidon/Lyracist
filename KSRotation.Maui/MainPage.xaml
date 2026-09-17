@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 11:18:00 -> Add DJ Name, Venue Name, and List on Billboard option to About popup -->
+<!-- Edited on Sep 17, 2026 @ 12:37:00 -> Enable TwoWay binding and TextChanged live sync for DJ and Venue entries -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -441,7 +441,8 @@
 
                             <Label Text="DJ / Host Name" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" Margin="0,0,0,2" />
                             <Entry x:Name="DjNameEntry"
-                                   Text="{Binding DjName, Mode=OneWay}"
+                                   Text="{Binding DjName, Mode=TwoWay}"
+                                   TextChanged="OnDjNameTextChanged"
                                    Unfocused="OnDjNameUnfocused"
                                    Completed="OnDjNameCompleted"
                                    Placeholder="e.g. DJ Dave or Host"
@@ -452,14 +453,43 @@
 
                             <Label Text="Venue Name" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" Margin="0,0,0,2" />
                             <Entry x:Name="VenueNameEntry"
-                                   Text="{Binding VenueName, Mode=OneWay}"
+                                   Text="{Binding VenueName, Mode=TwoWay}"
+                                   TextChanged="OnVenueNameTextChanged"
                                    Unfocused="OnVenueNameUnfocused"
                                    Completed="OnVenueNameCompleted"
                                    Placeholder="e.g. Main Stage Lounge"
                                    TextColor="{AppThemeBinding Light=Black, Dark=White}"
                                    PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}"
                                    FontSize="12" />
-                            <Label Text="Name of the venue or location. Displayed on TV billboard, reports, and patron portal." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,8" />
+                            <Label Text="Name of the venue or location. Displayed on TV billboard, reports, and patron portal." TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="9" Margin="0,2,0,4" />
+
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                                <Label x:Name="LocationStatusLabel"
+                                       Text="📍 Location: Checking..."
+                                       TextColor="{AppThemeBinding Light=#0284C7, Dark=#38BDF8}"
+                                       FontSize="10"
+                                       VerticalOptions="Center"
+                                       LineBreakMode="TailTruncation" />
+                                <Button Grid.Column="1"
+                                        Text="📍 Tag Location"
+                                        Clicked="OnTagLocationClicked"
+                                        BackgroundColor="#059669"
+                                        TextColor="White"
+                                        FontSize="10"
+                                        FontAttributes="Bold"
+                                        Padding="8,0"
+                                        HeightRequest="26" />
+                            </Grid>
+
+                            <HorizontalStackLayout Spacing="6" Margin="0,0,0,8">
+                                <CheckBox x:Name="IsTravelRouterCheckBox"
+                                          CheckedChanged="OnIsTravelRouterCheckedChanged"
+                                          Scale="0.85" />
+                                <Label Text="Current Wi-Fi is my Travel Router / Hotspot"
+                                       TextColor="{AppThemeBinding Light=#1E293B, Dark=White}"
+                                       FontSize="10"
+                                       VerticalOptions="Center" />
+                            </HorizontalStackLayout>
 
                             <HorizontalStackLayout Spacing="6" Margin="0,0,0,8">
                                 <CheckBox x:Name="ListDjAndVenueCheckBox"

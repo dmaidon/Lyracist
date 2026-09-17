@@ -1,5 +1,5 @@
-<!-- Edited on Sep 17, 2026 @ 11:22:30 -> Document persistent DJ Name, Venue Name, and billboard listing option in About popup -->
-Last Edit: Sep 17, 2026 - KSRotation.Maui DJ and Venue Device Persistence
+<!-- Edited on Sep 17, 2026 @ 12:48:00 -> Document live TV cast dynamic injection fix, Help topics, and User Manual updates -->
+Last Edit: Sep 17, 2026 - Hybrid GPS Venue Auto-Location & Live Cast Fix
 
 # Changelog
 
@@ -8,6 +8,16 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.17.0] - 2026-09-17
 
 ### Added
+- **Hybrid GPS & Wi-Fi Venue Auto-Location System (`Shared`, `KSRotation`, `KSRotation.Maui`, `Lyracist`)**:
+  - Implemented `VenueLocationStore`, `GeoMath`, `ILocationService`, and `VenueLocationItem` models supporting GPS coordinate persistence, 150-meter spherical proximity matching, Wi-Fi SSID fallback, and travel router exclusion.
+  - Added "📍 Tag GPS" buttons and location status indicators in `KSRotation` (Settings / Venue Management), `Lyracist` (Settings / Venue Management), and `KSRotation.Maui` (About dialog).
+  - Added Travel Router toggle (`IsTravelRouterCheckBox`) in `KSRotation.Maui` and `VenueLocationStore.SetTravelRouterSsid` to prevent portable DJ travel routers from generating false venue matches across different gigs.
+  - Implemented tablet-to-host peer location syncing via `GET` and `POST /api/venue/location` in `PatronRequestServer` and `KSRotationSyncService`.
+  - Added startup auto-location detection in `KSRotation`, `Lyracist`, and `KSRotation.Maui`.
+  - Added unit test suite in `KSRotation.Tests/VenueLocationTests.cs` covering Haversine distance calculations, coordinate proximity matching, Wi-Fi fallback, and travel router exclusions.
+- **Help System & User Manuals Documentation (`HelpViewModel`, `CatalogBookGeneratorTests`, `Lyracist_User_Manual.docx`, `Lyracist_User_Manual.pdf`)**:
+  - Added Help topic 26 for "Settings: Venue Management & Hybrid GPS Auto-Location" and updated Topic 14 for DashCast Chromecast TV display.
+  - Updated User Manuals (.docx and .pdf) via automated OpenXml and PDFsharp test generators (`UpdateUserManualsForHybridGpsVenueAndCasting`).
 - **Persistent DJ Name, Venue Name & Billboard Listing Option (`KSRotation.Maui`, `MainViewModel`, `billboard.html`)**:
   - Added input fields for "DJ / Host Name" and "Venue Name" to the "ⓘ About" popup dialog in `KSRotation.Maui`.
   - Added a "List DJ Name & Venue on Billboard & TV" toggle option to control header branding visibility across audience screens.
@@ -26,6 +36,11 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Moved the Upcoming Rotation list into a dedicated, full-height right-hand column so performers, song titles, and queue order have complete vertical space and are clearly visible across the venue.
   - Relocated the Song Requests and Wi-Fi Join QR code cards to the bottom of the left column directly beneath the Now Performing and Up Next stage cards.
   - Arranged the two QR codes side-by-side with high-contrast borders and spacious scannable sizing, eliminating vertical crowding.
+
+### Fixed
+- **Instant DJ Name & Venue Live TV Cast Display Fix (`KSRotation.Maui`, `PatronRequestServer`)**:
+  - Updated `MainPage.xaml` DJ Name and Venue Name entries to `Mode=TwoWay` with `TextChanged` live synchronization to ViewModel and `Preferences`, ensuring typed changes commit immediately without waiting for focus loss.
+  - Enhanced `GetBillboardHtmlContent()` in `PatronRequestServer` to dynamically replace placeholder tokens (`Karaoke Night` and `Hosted by DJ`) with active venue and DJ names directly at HTTP serve time, eliminating initial paint delays on Chromecast and web receivers.
 
 ## [26.9.16.0] - 2026-09-16
 

@@ -1,4 +1,4 @@
-// Edited on Sep 10, 2026 @ 12:53:00 -> Add two-way special event sync and local selection grace window
+// Edited on Sep 17, 2026 @ 12:15:00 -> Add venue location auto-sync from KSRotation / KSRotation.Maui
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Lyracist.Core.Helpers;
 using Lyracist.ViewModels;
 using Lyracist.Models;
+using Lyracist.Shared;
 
 namespace Lyracist.Services.Integration
 {
@@ -26,6 +27,7 @@ namespace Lyracist.Services.Integration
         private readonly Lock _lock = new();
         private DateTime _lastLocalSelectionTime = DateTime.MinValue;
         private string? _lastLocalSpecialEvent = null;
+        private int _venueLocationSyncCounter = 0;
 
         public KSRotationSyncService(RotationViewModel rotationViewModel, KaraokeViewModel karaokeViewModel)
         {
@@ -160,6 +162,13 @@ namespace Lyracist.Services.Integration
                             await UpdateSpecialEventDataAsync(activeEvent);
                         }
                     }
+                }
+
+                // Periodically sync venue location from companion device
+                if (++_venueLocationSyncCounter >= 5)
+                {
+                    _venueLocationSyncCounter = 0;
+                    await SyncVenueLocationAsync(token);
                 }
             }
             catch (OperationCanceledException)
@@ -297,6 +306,33 @@ namespace Lyracist.Services.Integration
                 }
             }
             return true;
+        }
+
+        private async Task SyncVenueLocationAsync(CancellationToken token)
+        {
+            try
+            {
+                string url = $"http://{AppSettings.KSRotationIpAddress}:{AppSettings.KSRotationPort}/api/venue/location";
+                var response = await _httpClient.GetAsync(url, token);
+                if (response.IsSuccessStatusCode)
+                {
+                    string json = await response.Content.ReadAsStringAsync(token);
+                    var venueItem = JsonSerializer.Deserialize<VenueLocationItem>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (venueItem != null && !string.IsNullOrWhiteSpace(venueItem.Name))
+                    {
+                        if (venueItem.Latitude.HasValue && venueItem.Longitude.HasValue)
+                        {
+                            WindowsLocationService.SetSyncedCoordinates(venueItem.Latitude.Value, venueItem.Longitude.Value);
+                            VenueLocationStore.UpsertVenue(venueItem.Name, venueItem.Latitude.Value, venueItem.Longitude.Value, venueItem.WifiSsid);
+                        }
+                        if (!string.Equals(AppSettings.SelectedVenue, venueItem.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            AppSettings.SelectedVenue = venueItem.Name;
+                        }
+                    }
+                }
+            }
+            catch { }
         }
 
         private class RotationItemDto

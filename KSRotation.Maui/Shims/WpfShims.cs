@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 10:37:30 -> Wire DisplayWindowService StopCastingAsync shim to MauiCastingService
+// Edited on Sep 17, 2026 @ 12:06:45 -> Add Invoke and InvokeAsync shims to Dispatcher for shared MainViewModel compatibility
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -116,6 +116,16 @@ namespace System.Windows
             {
                 method.DynamicInvoke();
             });
+        }
+
+        public Task InvokeAsync(Action action)
+        {
+            return Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(action);
+        }
+
+        public void Invoke(Action action)
+        {
+            Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(action).GetAwaiter().GetResult();
         }
 
         /// <summary>

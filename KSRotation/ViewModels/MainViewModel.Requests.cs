@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 11:16:30 -> Include listDjAndVenue in VenueInfoResponseDto
+// Edited on Sep 17, 2026 @ 12:06:00 -> Pass OnVenueLocationSyncedFromPeer callback to PatronRequestServer
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -207,7 +207,8 @@ namespace KSRotation.ViewModels
                         () => ActiveSpecialEvent,
                         GetVenueInfoJson,
                         (song, artist) => BlockDuplicateSongsInSession && IsSongInCurrentSession(song, artist),
-                        () => IsRequestSubmissionAllowed(out string r) ? null : r);
+                        () => IsRequestSubmissionAllowed(out string r) ? null : r,
+                        OnVenueLocationSyncedFromPeer);
                     _requestServer.Start();
                     activePort = p;
                     started = true;
@@ -356,6 +357,22 @@ namespace KSRotation.ViewModels
                 {
                     AcceptRequest(request);
                 }
+            }));
+        }
+
+        private void OnVenueLocationSyncedFromPeer(string venueName, double lat, double lon)
+        {
+            if (string.IsNullOrWhiteSpace(venueName)) return;
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (!Venues.Any(v => string.Equals(v, venueName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    Venues.Add(venueName);
+                    VenueService.Save(Venues);
+                }
+                SelectedVenue = venueName;
+                VenueName = venueName;
+                QueueSaveSettings();
             }));
         }
 

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 13, 2026 @ 10:22:00 -> Remove unused Watermark Opacity slider and corresponding help topic from Settings tab -->
+<!-- Edited on Sep 17, 2026 @ 12:09:00 -> Add Tag GPS button to Venue settings -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1535,13 +1535,20 @@
                                 <Button
                                          Content="Add Venue"
                                          Command="{Binding AddVenueCommand}"
-                                         Width="110"
-                                         Margin="0,0,8,0"
+                                         Width="100"
+                                         Margin="0,0,6,0"
                                          Style="{StaticResource ModernButtonStyle}" />
                                 <Button
                                          Content="Remove"
                                          Command="{Binding RemoveVenueCommand}"
-                                         Width="90"
+                                         Width="80"
+                                         Margin="0,0,6,0"
+                                         Style="{StaticResource ModernSecondaryButtonStyle}" />
+                                <Button
+                                         Content="📍 Tag GPS"
+                                         Command="{Binding TagCurrentLocationCommand}"
+                                         Width="80"
+                                         ToolTip="Tag current GPS coordinates to active venue for auto-retrieval"
                                          Style="{StaticResource ModernSecondaryButtonStyle}" />
                             </StackPanel>
                         </Grid>

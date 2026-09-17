@@ -1,4 +1,4 @@
-<!-- Edited on Sep 6, 2026 @ 09:25:30 -> Add FlashCap package reference for webcam photo capture -->
+<!-- Edited on Sep 17, 2026 @ 11:59:00 -> Add shared venue location and GPS services compile items -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.9.16.618</AssemblyVersion>
-    <FileVersion>26.9.16.618</FileVersion>
+    <AssemblyVersion>26.9.17.619</AssemblyVersion>
+    <FileVersion>26.9.17.619</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -142,6 +142,11 @@
     <Compile Include="..\Lyracist\Core\Helpers\SingerXpHelper.cs" Link="Helpers\SingerXpHelper.cs" />
     <Compile Include="..\Lyracist\Services\Database\SingerHistoryService.cs" Link="Services\SingerHistoryService.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />
+    <Compile Include="..\Shared\VenueLocation.cs" Link="VenueLocation.cs" />
+    <Compile Include="..\Shared\GeoMath.cs" Link="GeoMath.cs" />
+    <Compile Include="..\Shared\VenueLocationStore.cs" Link="VenueLocationStore.cs" />
+    <Compile Include="..\Shared\ILocationService.cs" Link="ILocationService.cs" />
+    <Compile Include="..\Shared\WindowsLocationService.cs" Link="WindowsLocationService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lyracist.Data\Lyracist.Data.csproj" />

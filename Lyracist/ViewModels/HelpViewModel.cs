@@ -1,4 +1,4 @@
-// Edited on Sep 11, 2026 @ 08:21:00 -> Update Help topics for 1080p layout optimization, playback footer anti-impingement, and special event sync mutual exclusion
+// Edited on Sep 17, 2026 @ 12:46:00 -> Update Help topics for Chromecast TV Billboard casting and Hybrid GPS Venue Auto-Location
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -118,11 +118,11 @@ public partial class HelpViewModel : BaseViewModel
                 DescriptionContent = "• Hardware Mixing Philosophy: When using a hardware mixer like the Pyle PMXU88BT, singers' microphones connect directly to mixer physical inputs (XLR Channels 1-4). Sound levels, microphone EQ, and effects are adjusted physically on the mixer.\n\n• Hardware Mixer Mode: Toggle 'Enable Hardware Mixer Mode' in settings to flatten software equalizer, limiter, and compressor, and output at 100% volume for clean unprocessed audio output.\n\n• Separate Karaoke & BGM Buses: Route Karaoke output and BGM (Background Music) to separate channels on your mixer to crossfade and EQ them independently using physical mixer faders."
             },
             new() {
-                Title = "14. Wireless Casting & DJ Banners",
+                Title = "14. Wireless Casting, Chromecast TV Billboard & DJ Banners",
                 Icon = "Cast24",
                 AccentColor = "#0078D4",
-                DescriptionHeader = "Casting the Rotation and Custom DJ Banners",
-                DescriptionContent = "• Wireless Casting: Navigate to Casting. Choose a casting target (Monitor, Miracast, Chromecast, Browser Cast, AirPlay, or Wireless HDMI). Click 'Cast Rotation' to initialize casting using off-screen buffer rendering.\n\n• Browser Cast Server: Self-hosts a real-time rotation page on http://[Your-Laptop-IP]:8080/rotation/ readable by any browser on local Wi-Fi.\n\n• Custom DJ Banners: Set up borderless, full-screen DJ branding banners (PNG, JPG, GIF, BMP, MP4 video) to display on a selected monitor.\n\n• Same-Screen Deconfliction: If DJ Banner and Rotation Display target the same screen, Rotation Display takes priority and DJ Banner hides automatically."
+                DescriptionHeader = "Casting the Rotation, Chromecast Web Displays, and Custom DJ Banners",
+                DescriptionContent = "• Wireless Casting & DashCast TV Display: Navigate to Casting or use the 1-tap 'Cast to TV' button in KSRotation.Maui. Cast the live rotation queue, currently singing performer, upcoming queue, and dual QR codes directly to Google Cast / Chromecast displays via DashCast web streaming.\n\n• Live Initial Paint & Dynamic Rendering: Billboard template dynamically injects the active venue name, DJ branding, and server IP at serve time for instant TV display with zero wait.\n\n• Browser Cast Server: Self-hosts a real-time rotation page on http://[Your-Laptop-IP]:8080/rotation/ or http://[Your-Laptop-IP]:5005/billboard readable by any smart TV or browser on local Wi-Fi.\n\n• Custom DJ Banners: Set up borderless, full-screen DJ branding banners (PNG, JPG, GIF, BMP, MP4 video) to display on a selected monitor.\n\n• Same-Screen Deconfliction: If DJ Banner and Rotation Display target the same screen, Rotation Display takes priority and DJ Banner hides automatically."
             },
             new() {
                 Title = "15. Connect & Request Instructions Screen",
@@ -200,6 +200,13 @@ public partial class HelpViewModel : BaseViewModel
                 AccentColor = "#F59E0B",
                 DescriptionHeader = "Real-Time Slide-In Toast Alerts for Ingestion, DSP Pipelines & Batch Sync",
                 DescriptionContent = "• Automated Slide-In Toasts: Real-time non-intrusive notification cards animate smoothly in the bottom-right corner of the Store Page and Bulk Import Wizard.\n\n• Track Imported Alerts: Displays 'Imported: Artist - Title (Provider)' accompanied by visual pill badges for file packaging (MP3+G, MP4, ZIPCDG) and applied enhancements (Normalized, Trimmed, Waveform).\n\n• Audio DSP Feedback: Instant toasts alert the host when EBU R128 audio normalization completes, when lead/tail silence is trimmed below -50dB, or when visual peak waveform data is ready.\n\n• Sync & Batch Completion: Clear summary toasts pop up upon Store Sync ('Store Sync Complete — X tracks imported') and Bulk Import completion ('Bulk Import Complete — X tracks processed').\n\n• Auto-Dismiss & Manual Dismissal: Toasts automatically fade out after 5 seconds or can be dismissed immediately via the top-right close button. Up to 5 toasts stack cleanly without obstructing background navigation."
+            },
+            new() {
+                Title = "26. Settings: Venue Management & Hybrid GPS Auto-Location",
+                Icon = "Location24",
+                AccentColor = "#107C41",
+                DescriptionHeader = "Hybrid GPS & Wi-Fi Geotagging, Travel Router Immunity & Tablet GPS Sync",
+                DescriptionContent = "• Hybrid GPS & Wi-Fi Matching: Automatically identifies known performance venues using a 150-meter GPS proximity circle (calculated via Haversine spherical distance). Known venues in Settings/venues.json or ksrotation_venues.json are selected automatically on launch.\n\n• Travel Router Immunity: When using a portable travel router with a static SSID across different venues, flag the network as a 'Travel Router'. Flagged SSIDs are registered in ksrotation_travel_routers.json and excluded from Wi-Fi matching, preventing false venue detection.\n\n• Tablet-to-Laptop GPS Bridging: Laptops lacking dedicated satellite GPS hardware receive real-time peer GPS coordinates from companion Android tablets running KSRotation.Maui via POST /api/venue/location, enabling precision venue auto-location on desktop PCs.\n\n• 1-Click '📍 Tag GPS' Geotagging: Instantly bind current satellite coordinates and Wi-Fi SSID to the active venue name across Lyracist, KSRotation, and KSRotation.Maui with automatic database persistence."
             }
         ];
 

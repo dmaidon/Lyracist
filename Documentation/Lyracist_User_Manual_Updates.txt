@@ -1,4 +1,28 @@
-// Edited on Sep 17, 2026 @ 11:22:00 -> Document persistent DJ Name, Venue Name, and billboard listing option in About popup
+// Edited on Sep 17, 2026 @ 12:16:30 -> Document hybrid GPS venue auto-location, travel router immunity, and tablet GPS sync
+Lyracist Pro Suite & KSRotation: Hybrid GPS & Wi-Fi Venue Auto-Location (`KSRotation`, `KSRotation.Maui`, `Lyracist`) - (September 2026)
+
+Section: Lyracist & KSRotation / Venue Management / Hybrid GPS & Wi-Fi Venue Auto-Location
+
+[Overview & Purpose]
+Professional DJs and karaoke hosts frequently perform at multiple venues. In many venues, house Wi-Fi is either unavailable or unreliable, prompting hosts to use a portable travel router. Because a travel router broadcasts the same SSID and password everywhere, traditional Wi-Fi-based venue detection fails. Lyracist Pro, KSRotation, and KSRotation.Maui now feature a hybrid auto-location system combining high-precision GPS coordinate detection (with an adaptive 150-meter radius threshold) as the primary ground truth, with house Wi-Fi SSID as a secondary fallback. The system automatically selects recognized venues on startup and prompts to record new venue coordinates when arriving at a new location.
+
+[Key Capabilities & Workflow]
+1. Primary GPS Proximity Matching:
+   - Evaluates physical geographic coordinates (Latitude and Longitude) using the Haversine spherical distance formula (`GeoMath`).
+   - If the current position is within 150 meters of a known venue recorded in `Settings/ksrotation_venues.json` (or `venues.json`), that venue is automatically selected as the active venue.
+2. Travel Router Immunity:
+   - When using a portable travel router, DJs can mark the active network as a "Travel Router" in KSRotation.Maui's About dialog.
+   - Flagged travel router SSIDs are registered in `Settings/ksrotation_travel_routers.json` and excluded from Wi-Fi venue matching, preventing the system from erroneously selecting an old gig location just because the travel router is connected.
+   - House Wi-Fi SSIDs without travel router flags continue to serve as a fast secondary fallback when GPS hardware is offline.
+3. Tablet-to-Laptop GPS Sync:
+   - Laptops running Windows often lack dedicated GPS satellite hardware. Companion Android tablets running KSRotation.Maui capture hardware satellite coordinates and automatically push them to the host laptop via `POST /api/venue/location`.
+   - The host laptop caches these peer-synced coordinates in `WindowsLocationService`, allowing the desktop apps to perform pinpoint venue matching even without onboard laptop GPS.
+4. User Controls & Tagging:
+   - "📍 Tag GPS" Button: Located in KSRotation (Settings / Venue Management), Lyracist (Settings / Venues tab), and KSRotation.Maui (About dialog). Clicking the button tags the currently detected GPS coordinates and active Wi-Fi SSID directly to the selected or entered venue name.
+   - Startup Auto-Detection: On application launch, location detection runs automatically in the background. If a known venue is detected, the venue dropdown and settings update seamlessly without requiring manual intervention.
+   - New Venue Auto-Save: If a new venue name is entered and tagged, it is automatically appended to the venue database with its coordinates and radius.
+
+
 KSRotation.Maui: Persistent DJ Name, Venue Name & Billboard Listing Option (`KSRotation.Maui`) - (September 2026)
 
 Section: KSRotation.Maui / Settings & Configuration / About Popup DJ & Venue Persistence
@@ -1887,3 +1911,10 @@ Section: Special Event Banner Single Selection & 'None' Button Reset (Updated Se
 - Guaranteed Mutual Exclusion: Special Event Banners (e.g. Birthday, Anniversary, Holiday, Scaryoke) now strictly enforce single-selection mutual exclusion across the radio button group. Selecting any banner immediately deselects all other banners.
 - Active 'None' Selection Reset: Selecting the 'None' radio button cleanly clears and deselects all active special event banner selections across the interface and restores standard DJ branding banners automatically.
 - Synchronization & Persistence: The active selection is synchronized seamlessly between Lyracist and KSRotation through the event synchronization loop and saved in application display preferences.
+
+Section: Hybrid GPS Venue Auto-Location & DashCast TV Streaming (Updated Sep 17, 2026)
+- Hybrid GPS & Wi-Fi Venue Detection: Automatically recognizes performance venues using a 150-meter GPS proximity circle (via Haversine spherical distance). Known venues in Settings/ksrotation_venues.json or venues.json are selected automatically on launch.
+- Travel Router SSID Immunity: Portable travel routers broadcasting static SSIDs across multiple gigs can be marked as 'Travel Router' in KSRotation.Maui About popup. Flagged SSIDs are excluded from Wi-Fi matching to prevent incorrect venue selection.
+- Tablet-to-Laptop GPS Sync: Laptops without satellite GPS hardware receive real-time peer GPS coordinates from companion Android tablets running KSRotation.Maui via POST /api/venue/location.
+- 1-Click '📍 Tag GPS' Geotagging: Instantly records and saves current satellite coordinates, Wi-Fi SSID, and 150m detection radius to the active venue name across Lyracist, KSRotation, and KSRotation.Maui.
+- DashCast TV Billboard Streaming: Stream live rotation queues, current singer, upcoming queue, and dual QR codes directly to Google Cast / Chromecast displays with dynamic server-side template injection for instant first paint.

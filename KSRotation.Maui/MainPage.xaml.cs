@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 11:18:30 -> Add persistent device storage and handlers for DJ Name, Venue Name, and billboard listing
+// Edited on Sep 17, 2026 @ 12:37:30 -> Live sync DJ and Venue inputs on TextChanged and Tag Location
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,8 +14,8 @@ public partial class MainPage : ContentPage
 
     public MainPage(KSRotation.ViewModels.MainViewModel vm)
     {
-        BindingContext = vm;
         InitializeComponent();
+        BindingContext = vm;
 
         // The patron request server runs on this device for the whole session — keep the screen
         // awake so Android doesn't dim/lock and throttle it mid-show.
@@ -42,6 +42,9 @@ public partial class MainPage : ContentPage
         {
             vm.ListDjAndVenueOnBillboard = Microsoft.Maui.Storage.Preferences.Default.Get("DeviceListDjAndVenue", true);
         }
+
+        // Auto-detect venue based on GPS / Wi-Fi on startup
+        _ = AutoDetectVenueOnStartupAsync(vm);
 
         if (Application.Current != null)
         {
@@ -208,6 +211,12 @@ public partial class MainPage : ContentPage
             ListDjAndVenueCheckBox.IsChecked = vm.ListDjAndVenueOnBillboard;
             PreferredIpEntry.Text = vm.PreferredHostIp;
             EmailRecipientEntry.Text = vm.EmailRecipient;
+
+            string? currentSsid = Lyracist.Shared.WifiHelper.GetConnectedSsid();
+            IsTravelRouterCheckBox.IsChecked = !string.IsNullOrWhiteSpace(currentSsid) && Lyracist.Shared.VenueLocationStore.IsTravelRouterSsid(currentSsid);
+
+            LocationStatusLabel.Text = "📍 Location: Checking...";
+            _ = UpdateLocationStatusLabelAsync();
         }
         AboutOverlay.IsVisible = true;
     }
@@ -226,12 +235,19 @@ public partial class MainPage : ContentPage
         if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
         {
             string dj = DjNameEntry.Text?.Trim() ?? string.Empty;
-            vm.DjName = string.IsNullOrWhiteSpace(dj) ? "Guest DJ" : dj;
-            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
+            if (!string.IsNullOrWhiteSpace(dj))
+            {
+                vm.DjName = dj;
+                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
+            }
 
             string venue = VenueNameEntry.Text?.Trim() ?? string.Empty;
-            vm.VenueName = string.IsNullOrWhiteSpace(venue) ? "Karaoke Night" : venue;
-            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", vm.VenueName);
+            if (!string.IsNullOrWhiteSpace(venue))
+            {
+                vm.VenueName = venue;
+                vm.SelectedVenue = venue;
+                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", vm.VenueName);
+            }
 
             vm.ListDjAndVenueOnBillboard = ListDjAndVenueCheckBox.IsChecked;
             Microsoft.Maui.Storage.Preferences.Default.Set("DeviceListDjAndVenue", vm.ListDjAndVenueOnBillboard);
@@ -424,14 +440,31 @@ public partial class MainPage : ContentPage
         }
     }
 
+    private void OnDjNameTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            string val = e.NewTextValue?.Trim() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(val))
+            {
+                vm.DjName = val;
+                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", val);
+                PersistDjAndVenue(vm);
+            }
+        }
+    }
+
     private void OnDjNameUnfocused(object? sender, FocusEventArgs e)
     {
         if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
         {
             string val = entry.Text?.Trim() ?? string.Empty;
-            vm.DjName = string.IsNullOrWhiteSpace(val) ? "Guest DJ" : val;
-            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
-            PersistDjAndVenue(vm);
+            if (!string.IsNullOrWhiteSpace(val))
+            {
+                vm.DjName = val;
+                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
+                PersistDjAndVenue(vm);
+            }
         }
     }
 
@@ -440,9 +473,27 @@ public partial class MainPage : ContentPage
         if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
         {
             string val = entry.Text?.Trim() ?? string.Empty;
-            vm.DjName = string.IsNullOrWhiteSpace(val) ? "Guest DJ" : val;
-            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
-            PersistDjAndVenue(vm);
+            if (!string.IsNullOrWhiteSpace(val))
+            {
+                vm.DjName = val;
+                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", vm.DjName);
+                PersistDjAndVenue(vm);
+            }
+        }
+    }
+
+    private void OnVenueNameTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            string val = e.NewTextValue?.Trim() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(val))
+            {
+                vm.VenueName = val;
+                vm.SelectedVenue = val;
+                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", val);
+                PersistDjAndVenue(vm);
+            }
         }
     }
 
@@ -451,9 +502,13 @@ public partial class MainPage : ContentPage
         if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
         {
             string val = entry.Text?.Trim() ?? string.Empty;
-            vm.VenueName = string.IsNullOrWhiteSpace(val) ? "Karaoke Night" : val;
-            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", vm.VenueName);
-            PersistDjAndVenue(vm);
+            if (!string.IsNullOrWhiteSpace(val))
+            {
+                vm.VenueName = val;
+                vm.SelectedVenue = val;
+                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", vm.VenueName);
+                PersistDjAndVenue(vm);
+            }
         }
     }
 
@@ -462,9 +517,13 @@ public partial class MainPage : ContentPage
         if (sender is Entry entry && BindingContext is KSRotation.ViewModels.MainViewModel vm)
         {
             string val = entry.Text?.Trim() ?? string.Empty;
-            vm.VenueName = string.IsNullOrWhiteSpace(val) ? "Karaoke Night" : val;
-            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", vm.VenueName);
-            PersistDjAndVenue(vm);
+            if (!string.IsNullOrWhiteSpace(val))
+            {
+                vm.VenueName = val;
+                vm.SelectedVenue = val;
+                Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", vm.VenueName);
+                PersistDjAndVenue(vm);
+            }
         }
     }
 
@@ -477,6 +536,119 @@ public partial class MainPage : ContentPage
         }
     }
 
+    private async void OnTagLocationClicked(object? sender, EventArgs e)
+    {
+        if (BindingContext is not KSRotation.ViewModels.MainViewModel vm) return;
+        string venue = VenueNameEntry.Text?.Trim() ?? vm.VenueName;
+        if (string.IsNullOrWhiteSpace(venue))
+        {
+            await DisplayAlertAsync("Tag Location", "Please enter a Venue Name first.", "OK");
+            return;
+        }
+
+        vm.VenueName = venue;
+        vm.SelectedVenue = venue;
+        Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", venue);
+
+        string dj = DjNameEntry.Text?.Trim() ?? vm.DjName;
+        if (!string.IsNullOrWhiteSpace(dj))
+        {
+            vm.DjName = dj;
+            Microsoft.Maui.Storage.Preferences.Default.Set("DeviceDjName", dj);
+        }
+
+        PersistDjAndVenue(vm);
+
+        LocationStatusLabel.Text = "📍 Acquiring GPS fix...";
+        var coords = await Services.MauiLocationService.Instance.GetCurrentCoordinatesAsync();
+        if (!coords.HasValue)
+        {
+            await DisplayAlertAsync("GPS Location", "Could not acquire GPS coordinates. Please ensure Location permissions and device GPS are turned on.", "OK");
+            LocationStatusLabel.Text = "⚠️ No GPS fix";
+            return;
+        }
+
+        string? currentSsid = Lyracist.Shared.WifiHelper.GetConnectedSsid();
+        Lyracist.Shared.VenueLocationStore.UpsertVenue(venue, coords.Value.Latitude, coords.Value.Longitude, currentSsid);
+        LocationStatusLabel.Text = $"📍 Tagged: {coords.Value.Latitude:F4}, {coords.Value.Longitude:F4}";
+        await DisplayAlertAsync("Location Tagged", $"'{venue}' has been associated with current GPS coordinates ({coords.Value.Latitude:F4}, {coords.Value.Longitude:F4}). It will auto-retrieve on return visits!", "OK");
+
+        // Also push to desktop host if connected
+        _ = PushVenueLocationToHostAsync(vm, venue, coords.Value.Latitude, coords.Value.Longitude, currentSsid);
+    }
+
+    private void OnIsTravelRouterCheckedChanged(object? sender, CheckedChangedEventArgs e)
+    {
+        string? currentSsid = Lyracist.Shared.WifiHelper.GetConnectedSsid();
+        if (!string.IsNullOrWhiteSpace(currentSsid))
+        {
+            Lyracist.Shared.VenueLocationStore.SetTravelRouterSsid(currentSsid, e.Value);
+        }
+    }
+
+    private async Task UpdateLocationStatusLabelAsync()
+    {
+        try
+        {
+            var coords = await Services.MauiLocationService.Instance.GetCurrentCoordinatesAsync();
+            if (coords.HasValue)
+            {
+                string? ssid = Lyracist.Shared.WifiHelper.GetConnectedSsid();
+                var matched = Lyracist.Shared.VenueLocationStore.FindMatchingVenue(coords.Value.Latitude, coords.Value.Longitude, ssid);
+                if (matched != null)
+                {
+                    double dist = Lyracist.Shared.GeoMath.CalculateDistanceMeters(coords.Value.Latitude, coords.Value.Longitude, matched.Latitude ?? coords.Value.Latitude, matched.Longitude ?? coords.Value.Longitude);
+                    LocationStatusLabel.Text = $"📍 Matched: {matched.Name} ({dist:F0}m)";
+                }
+                else
+                {
+                    LocationStatusLabel.Text = $"📍 GPS: {coords.Value.Latitude:F4}, {coords.Value.Longitude:F4} (New)";
+                }
+            }
+            else
+            {
+                string? ssid = Lyracist.Shared.WifiHelper.GetConnectedSsid();
+                if (!string.IsNullOrWhiteSpace(ssid))
+                {
+                    LocationStatusLabel.Text = $"📍 Wi-Fi: {ssid} (No GPS fix)";
+                }
+                else
+                {
+                    LocationStatusLabel.Text = "⚠️ Location unavailable";
+                }
+            }
+        }
+        catch
+        {
+            LocationStatusLabel.Text = "⚠️ Location unavailable";
+        }
+    }
+
+    private static async Task AutoDetectVenueOnStartupAsync(KSRotation.ViewModels.MainViewModel vm)
+    {
+        try
+        {
+            var coords = await Services.MauiLocationService.Instance.GetCurrentCoordinatesAsync();
+            string? ssid = Lyracist.Shared.WifiHelper.GetConnectedSsid();
+            var matched = Lyracist.Shared.VenueLocationStore.FindMatchingVenue(coords?.Latitude, coords?.Longitude, ssid);
+            if (matched != null && !string.IsNullOrWhiteSpace(matched.Name))
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    vm.VenueName = matched.Name;
+                    vm.SelectedVenue = matched.Name;
+                    Microsoft.Maui.Storage.Preferences.Default.Set("DeviceVenueName", matched.Name);
+                });
+
+                if (coords.HasValue)
+                {
+                    _ = PushVenueLocationToHostAsync(vm, matched.Name, coords.Value.Latitude, coords.Value.Longitude, ssid);
+                }
+            }
+        }
+        catch { }
+    }
+
     private static void PersistDjAndVenue(KSRotation.ViewModels.MainViewModel vm)
     {
         if (!string.IsNullOrWhiteSpace(vm.DjName) && !vm.Djs.Any(d => string.Equals(d, vm.DjName, StringComparison.OrdinalIgnoreCase)))
@@ -484,11 +656,42 @@ public partial class MainPage : ContentPage
             vm.Djs.Add(vm.DjName);
             KSRotation.Services.DjService.Save(vm.Djs);
         }
-        if (!string.IsNullOrWhiteSpace(vm.VenueName) && !vm.Venues.Any(v => string.Equals(v, vm.VenueName, StringComparison.OrdinalIgnoreCase)))
+        if (!string.IsNullOrWhiteSpace(vm.VenueName))
         {
-            vm.Venues.Add(vm.VenueName);
+            if (!vm.Venues.Any(v => string.Equals(v, vm.VenueName, StringComparison.OrdinalIgnoreCase)))
+            {
+                vm.Venues.Add(vm.VenueName);
+            }
+            // Auto-save location if new venue or update existing
+            _ = AutoSaveVenueLocationAsync(vm.VenueName);
             KSRotation.Services.VenueService.Save(vm.Venues);
         }
+    }
+
+    private static async Task AutoSaveVenueLocationAsync(string venueName)
+    {
+        try
+        {
+            var coords = await Services.MauiLocationService.Instance.GetCurrentCoordinatesAsync();
+            string? currentSsid = Lyracist.Shared.WifiHelper.GetConnectedSsid();
+            Lyracist.Shared.VenueLocationStore.UpsertVenue(venueName, coords?.Latitude, coords?.Longitude, currentSsid);
+        }
+        catch { }
+    }
+
+    private static async Task PushVenueLocationToHostAsync(KSRotation.ViewModels.MainViewModel vm, string venueName, double lat, double lon, string? wifiSsid)
+    {
+        try
+        {
+            string hostIp = !string.IsNullOrWhiteSpace(vm.PreferredHostIp) ? vm.PreferredHostIp : "127.0.0.1";
+            string url = $"http://{hostIp}:5005/api/venue/location";
+            using var client = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+            var payload = new { venueName, latitude = lat, longitude = lon, wifiSsid };
+            string json = System.Text.Json.JsonSerializer.Serialize(payload);
+            using var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            await client.PostAsync(url, content);
+        }
+        catch { }
     }
 
     private void OnPreferredHostIpUnfocused(object? sender, FocusEventArgs e)

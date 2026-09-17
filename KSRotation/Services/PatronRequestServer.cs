@@ -1,4 +1,4 @@
-// Edited on Sep 10, 2026 @ 12:53:00 -> Add POST /api/special-event/active endpoint for two-way sync with Lyracist
+// Edited on Sep 17, 2026 @ 12:37:00 -> Dynamically inject current DJ and Venue into served billboard.html
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,7 +29,8 @@ namespace KSRotation.Services
         Func<string> onGetActiveSpecialEvent,
         Func<string>? onGetVenueInfoJson = null,
         Func<string, string, bool>? onCheckDuplicateSong = null,
-        Func<string?>? onCheckRequestAllowed = null)
+        Func<string?>? onCheckRequestAllowed = null,
+        Action<string, double, double>? onVenueLocationSynced = null)
     {
         private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
         private const int MaxAvatarImageBytes = 2_097_152; // 2 MB - a profile avatar has no business being larger
@@ -54,6 +55,7 @@ namespace KSRotation.Services
         private readonly Func<string>? _onGetVenueInfoJson = onGetVenueInfoJson;
         private readonly Func<string, string, bool>? _onCheckDuplicateSong = onCheckDuplicateSong;
         private readonly Func<string?>? _onCheckRequestAllowed = onCheckRequestAllowed;
+        private readonly Action<string, double, double>? _onVenueLocationSynced = onVenueLocationSynced;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
 
         // Serializes the /api/singer/login check-then-write sequence (find-by-name, then insert or
@@ -329,6 +331,23 @@ namespace KSRotation.Services
                             string json = JsonSerializer.Serialize(new { activeSpecialEvent = activeEvent });
                             await SendJsonResponseAsync(stream, json);
                         }
+                        else if (path.StartsWith("/api/venue/location", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var venues = Lyracist.Shared.VenueLocationStore.Load();
+                            string currentVenue = "";
+                            if (_onGetVenueInfoJson != null)
+                            {
+                                try
+                                {
+                                    var infoObj = JsonSerializer.Deserialize<VenueInfoResponseDto>(_onGetVenueInfoJson());
+                                    currentVenue = infoObj?.venue ?? "";
+                                }
+                                catch { }
+                            }
+                            var matched = venues.FirstOrDefault(v => string.Equals(v.Name, currentVenue, StringComparison.OrdinalIgnoreCase));
+                            string json = JsonSerializer.Serialize(matched ?? new Lyracist.Shared.VenueLocationItem { Name = currentVenue });
+                            await SendJsonResponseAsync(stream, json);
+                        }
                         else if (path.StartsWith("/api/singer/avatar", StringComparison.OrdinalIgnoreCase))
                         {
                             // ParseQueryParam matches the whole "name" key between '?'/'&' delimiters,
@@ -518,6 +537,35 @@ namespace KSRotation.Services
                         else
                         {
                             await SendBadRequestAsync(stream, $"{{\"error\":\"{JsonEncodedText.Encode(error)}\"}}");
+                        }
+                    }
+                    else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/venue/location", StringComparison.OrdinalIgnoreCase))
+                    {
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, readTimeoutCts.Token);
+                        string body = Encoding.UTF8.GetString(bodyBytes);
+                        try
+                        {
+                            using JsonDocument doc = JsonDocument.Parse(body);
+                            JsonElement root = doc.RootElement;
+                            double? lat = root.TryGetProperty("latitude", out var latEl) && latEl.TryGetDouble(out double latVal) ? latVal : null;
+                            double? lon = root.TryGetProperty("longitude", out var lonEl) && lonEl.TryGetDouble(out double lonVal) ? lonVal : null;
+                            string? venueName = root.TryGetProperty("venueName", out var vEl) ? vEl.GetString() : null;
+                            string? wifiSsid = root.TryGetProperty("wifiSsid", out var wEl) ? wEl.GetString() : null;
+
+                            if (lat.HasValue && lon.HasValue)
+                            {
+                                Lyracist.Shared.WindowsLocationService.SetSyncedCoordinates(lat.Value, lon.Value);
+                                if (!string.IsNullOrWhiteSpace(venueName))
+                                {
+                                    Lyracist.Shared.VenueLocationStore.UpsertVenue(venueName, lat.Value, lon.Value, wifiSsid);
+                                    _onVenueLocationSynced?.Invoke(venueName, lat.Value, lon.Value);
+                                }
+                            }
+                            await SendJsonResponseAsync(stream, "{\"success\":true}");
+                        }
+                        catch (Exception ex)
+                        {
+                            await SendBadRequestAsync(stream, $"{{\"error\":\"{JsonEncodedText.Encode(ex.Message)}\"}}");
                         }
                     }
                     else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/singer/login", StringComparison.OrdinalIgnoreCase))
@@ -1179,7 +1227,43 @@ namespace KSRotation.Services
         private static string GetHtmlContent() => CachedHtml.Value;
         private static string GetDjHtmlContent() => CachedDjHtml.Value;
         private static string GetKioskHtmlContent() => CachedKioskHtml.Value;
-        private static string GetBillboardHtmlContent() => CachedBillboardHtml.Value;
+        private string GetBillboardHtmlContent()
+        {
+            string html = CachedBillboardHtml.Value;
+            if (_onGetVenueInfoJson != null)
+            {
+                try
+                {
+                    string infoJson = _onGetVenueInfoJson();
+                    if (!string.IsNullOrWhiteSpace(infoJson))
+                    {
+                        var info = JsonSerializer.Deserialize<VenueInfoResponseDto>(infoJson);
+                        if (info != null)
+                        {
+                            if (!info.listDjAndVenue)
+                            {
+                                html = html.Replace("<div class=\"brand-titles\">", "<div class=\"brand-titles\" style=\"display: none;\">");
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrWhiteSpace(info.venue))
+                                {
+                                    html = html.Replace("<span class=\"venue-name\" id=\"billboard-venue-name\">Karaoke Night</span>",
+                                        $"<span class=\"venue-name\" id=\"billboard-venue-name\">{WebUtility.HtmlEncode(info.venue)}</span>");
+                                }
+                                if (!string.IsNullOrWhiteSpace(info.dj))
+                                {
+                                    html = html.Replace("<span class=\"dj-badge\" id=\"billboard-dj-name\">Hosted by DJ</span>",
+                                        $"<span class=\"dj-badge\" id=\"billboard-dj-name\">Hosted by {WebUtility.HtmlEncode(info.dj)}</span>");
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
+            return html;
+        }
 
         private static string LoadHtmlContent()
         {

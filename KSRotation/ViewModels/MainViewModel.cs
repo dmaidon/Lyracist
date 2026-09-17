@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 11:16:00 -> Add ListDjAndVenueOnBillboard observable property and persistence
+// Edited on Sep 17, 2026 @ 12:08:30 -> Await Dispatcher.InvokeAsync in AutoDetectVenueLocationAsync
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -1174,10 +1174,72 @@ namespace KSRotation.ViewModels
             SaveSettings();
             StartRequestServer();
             RebuildRotationJsonCacheNow();
+            _ = AutoDetectVenueLocationAsync();
 #if !MAUI
             InitializeTrivia();
             _ = LoadAllUsersAsync();
 #endif
+        }
+
+        private async Task AutoDetectVenueLocationAsync()
+        {
+            try
+            {
+                var coords = await WindowsLocationService.Instance.GetCurrentCoordinatesAsync();
+                string? ssid = WifiHelper.GetConnectedSsid();
+                var matched = VenueLocationStore.FindMatchingVenue(coords?.Latitude, coords?.Longitude, ssid);
+                if (matched != null && !string.IsNullOrWhiteSpace(matched.Name))
+                {
+                    if (System.Windows.Application.Current?.Dispatcher != null)
+                    {
+                        await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            if (!Venues.Any(v => string.Equals(v, matched.Name, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                Venues.Add(matched.Name);
+                                VenueService.Save(Venues);
+                            }
+                            SelectedVenue = matched.Name;
+                            VenueName = matched.Name;
+                            QueueSaveSettings();
+                        });
+                    }
+                }
+            }
+            catch { }
+        }
+
+        [RelayCommand]
+        private async Task TagCurrentLocationAsync()
+        {
+            string venue = VenueName?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(venue)) return;
+
+            var coords = await WindowsLocationService.Instance.GetCurrentCoordinatesAsync();
+            string? ssid = WifiHelper.GetConnectedSsid();
+            VenueLocationStore.UpsertVenue(venue, coords?.Latitude, coords?.Longitude, ssid);
+
+            if (coords.HasValue)
+            {
+#if !MAUI
+                System.Windows.MessageBox.Show(
+                    $"Location coordinates ({coords.Value.Latitude:F4}, {coords.Value.Longitude:F4}) tagged to '{venue}'. It will auto-retrieve on return visits!",
+                    "Venue Location Tagged",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+#endif
+            }
+        }
+
+        private static async Task AutoSaveNewVenueLocationAsync(string venueName)
+        {
+            try
+            {
+                var coords = await WindowsLocationService.Instance.GetCurrentCoordinatesAsync();
+                string? ssid = WifiHelper.GetConnectedSsid();
+                VenueLocationStore.UpsertVenue(venueName, coords?.Latitude, coords?.Longitude, ssid);
+            }
+            catch { }
         }
 
         [RelayCommand]
@@ -1194,6 +1256,7 @@ namespace KSRotation.ViewModels
             {
                 Venues.Add(trimmed);
                 VenueService.Save(Venues);
+                _ = AutoSaveNewVenueLocationAsync(trimmed);
             }
 
             SelectedVenue = Venues.FirstOrDefault(v => string.Equals(v, trimmed, System.StringComparison.OrdinalIgnoreCase));

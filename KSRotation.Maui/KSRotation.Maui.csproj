@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 11:36:00 -> Update ApplicationId to psft.ksrotation.maui and bump version to 26.9.16.285 -->
+<!-- Edited on Sep 17, 2026 @ 12:07:30 -> Link WindowsLocationService.cs for shared types -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -25,6 +25,8 @@
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
+
+		<!-- To develop on Windows with unpackaged, change to None -->
 		<WindowsPackageType>None</WindowsPackageType>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
@@ -44,9 +46,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.9.16.285</AssemblyVersion>
+		<AssemblyVersion>26.9.17.286</AssemblyVersion>
 
-		<FileVersion>26.9.16.285</FileVersion>
+		<FileVersion>26.9.17.286</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 
@@ -162,6 +164,11 @@
 		<Compile Include="..\Shared\WifiPasswordStore.cs" Link="WifiPasswordStore.cs" />
 		<Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />
 		<Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
+		<Compile Include="..\Shared\VenueLocation.cs" Link="VenueLocation.cs" />
+		<Compile Include="..\Shared\GeoMath.cs" Link="GeoMath.cs" />
+		<Compile Include="..\Shared\VenueLocationStore.cs" Link="VenueLocationStore.cs" />
+		<Compile Include="..\Shared\ILocationService.cs" Link="ILocationService.cs" />
+		<Compile Include="..\Shared\WindowsLocationService.cs" Link="WindowsLocationService.cs" />
 	</ItemGroup>
 
 	<!-- Exclude platform-specific files from compiling on non-matching frameworks -->

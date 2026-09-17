@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 16:30:00 -> Add MasterOutputBoostDb and EnableAudioLimiter for USB mixer gain staging
+// Edited on Sep 17, 2026 @ 12:10:00 -> Integrate VenueLocationStore and AutoDetectVenueLocationAsync
 using System;
 using System.IO;
 using System.Text.Json;
@@ -473,20 +473,30 @@ public static class AppSettings
 
     public static System.Collections.Generic.IReadOnlyList<string> Venues
     {
-        get { lock (_lock) { return _data.Venues.ToList(); } }
+        get
+        {
+            lock (_lock)
+            {
+                var names = _data.Venues.Union(VenueLocationStore.GetVenueNames(), StringComparer.OrdinalIgnoreCase).ToList();
+                return names;
+            }
+        }
     }
 
-    public static void AddVenue(string venue)
+    public static void AddVenue(string venue, double? lat = null, double? lon = null)
     {
         if (string.IsNullOrWhiteSpace(venue)) return;
 
+        string trimmed = venue.Trim();
         lock (_lock)
         {
-            if (!_data.Venues.Contains(venue, StringComparer.OrdinalIgnoreCase))
+            if (!_data.Venues.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
             {
-                _data.Venues.Add(venue);
+                _data.Venues.Add(trimmed);
                 Save();
             }
+            string? currentSsid = WifiHelper.GetConnectedSsid();
+            VenueLocationStore.UpsertVenue(trimmed, lat, lon, currentSsid);
         }
     }
 
@@ -501,6 +511,23 @@ public static class AppSettings
             }
             Save();
         }
+    }
+
+    public static async Task<string?> AutoDetectVenueLocationAsync()
+    {
+        try
+        {
+            var coords = await WindowsLocationService.Instance.GetCurrentCoordinatesAsync();
+            string? ssid = WifiHelper.GetConnectedSsid();
+            var matched = VenueLocationStore.FindMatchingVenue(coords?.Latitude, coords?.Longitude, ssid);
+            if (matched != null && !string.IsNullOrWhiteSpace(matched.Name))
+            {
+                SelectedVenue = matched.Name;
+                return matched.Name;
+            }
+        }
+        catch { }
+        return null;
     }
 
     public static System.Collections.Generic.IReadOnlyList<string> GetVenueGraphics(string venue)

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 6, 2026 @ 09:25:00 -> Add FlashCap package reference for webcam photo capture -->
+<!-- Edited on Sep 17, 2026 @ 12:01:00 -> Add shared venue location and GPS services compile items -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.9.12.501</AssemblyVersion>
-    <FileVersion>26.9.12.501</FileVersion>
+    <AssemblyVersion>26.9.17.502</AssemblyVersion>
+    <FileVersion>26.9.17.502</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -123,6 +123,11 @@
     <Compile Include="..\Shared\SessionScheduleHelper.cs" Link="SessionScheduleHelper.cs" />
     <Compile Include="..\Shared\WebcamCaptureService.cs" Link="WebcamCaptureService.cs" />
     <Compile Include="..\Lyracist.Trivia\Services\TriviaBannerGenerator.cs" Link="Services\TriviaBannerGenerator.cs" />
+    <Compile Include="..\Shared\VenueLocation.cs" Link="VenueLocation.cs" />
+    <Compile Include="..\Shared\GeoMath.cs" Link="GeoMath.cs" />
+    <Compile Include="..\Shared\VenueLocationStore.cs" Link="VenueLocationStore.cs" />
+    <Compile Include="..\Shared\ILocationService.cs" Link="ILocationService.cs" />
+    <Compile Include="..\Shared\WindowsLocationService.cs" Link="WindowsLocationService.cs" />
   </ItemGroup>
 
   <ItemGroup>
