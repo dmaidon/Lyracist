@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer support to AddSinger, DoneSinger, and ToggleSpecialSingerCommand
+// Edited on Sep 18, 2026 @ 09:22:00 -> Promote special singer to current at top of rotation in AddSinger and ToggleSpecialSingerCommand
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1232,6 +1232,13 @@ public partial class RotationViewModel : BaseViewModel
     {
         if (singer == null) return;
         singer.IsSpecial = !singer.IsSpecial;
+        if (singer.IsSpecial)
+        {
+            RotationHelpers.PromoteSpecialSingerToCurrent(Rotation, singer);
+            Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+            RefreshLinkedPartnerNames();
+            Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0, enabled: AppSettings.ShowEstimatedWaitTime);
+        }
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
     }

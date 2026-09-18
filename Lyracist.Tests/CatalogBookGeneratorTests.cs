@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add UpdateUserManualsForSpecialSinger to update docx and pdf user manuals
+// Edited on Sep 18, 2026 @ 09:25:00 -> Update documentation for special singer placement at top of list as current singer
 using System;
 using System.IO;
 using Xunit;
@@ -1781,6 +1781,8 @@ Section: Singer Skip Round-Scoped Rotation Bypass (Updated Sep 17, 2026)
                 string updateText = @"
 Section: Special Singer (One-Time Performance) (Updated Sep 18, 2026)
 - Special / Guest Performer Support: Accommodates guest singers or one-off performances who only perform a single song without joining the ongoing rotation.
+- Instant Top of List & Current Singer: When added or designated, the special singer is placed immediately at the top of the queue (index 0) and promoted to current performer, accommodating spur-of-the-moment guest performances.
+- Displaced Performer Continuity: If another performer was already singing or designated next, they are preserved as 'Up Next' so rotation resumes with them seamlessly once the special performance concludes.
 - Visual Highlight While Performing: Displays a prominent '⭐ SPECIAL' badge on stage, detached rotation displays, external audience billboards, TV web-casts, tablet kiosks, and mobile portals.
 - Automatic Inactive Transition: Immediately following the conclusion of their song, the special performer is marked inactive automatically.
 - Seamless Queue Resumption: The rotation immediately resumes with the displaced performer or next sequential singer as if the guest was never in the rotation.
@@ -1790,7 +1792,7 @@ Section: Special Singer (One-Time Performance) (Updated Sep 18, 2026)
                 if (File.Exists(updatesTxtPath))
                 {
                     string existingUpdates = File.ReadAllText(updatesTxtPath);
-                    if (!existingUpdates.Contains("Special Singer (One-Time Performance)"))
+                    if (!existingUpdates.Contains("Instant Top of List & Current Singer"))
                     {
                         File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
                     }
@@ -1809,7 +1811,7 @@ Section: Special Singer (One-Time Performance) (Updated Sep 18, 2026)
                                 bool alreadyAppended = false;
                                 foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
                                 {
-                                    if (p.InnerText.Contains("Special Singer (One-Time Performance)"))
+                                    if (p.InnerText.Contains("Instant Top of List & Current Singer"))
                                     {
                                         alreadyAppended = true;
                                         break;
@@ -1850,7 +1852,7 @@ Section: Special Singer (One-Time Performance) (Updated Sep 18, 2026)
                         using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
                         {
                             string keywords = doc.Info.Keywords;
-                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SpecialSingerOneTimePerformance"))
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SpecialSingerCurrentTopPlacement"))
                             {
                                 var page = doc.AddPage();
                                 page.Size = PdfSharp.PageSize.Letter;
@@ -1870,7 +1872,7 @@ Section: Special Singer (One-Time Performance) (Updated Sep 18, 2026)
                                     yPos += 15;
                                 }
 
-                                doc.Info.Keywords = (keywords ?? string.Empty) + " SpecialSingerOneTimePerformance";
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " SpecialSingerCurrentTopPlacement";
                                 doc.Save(pdfPath);
                             }
                         }

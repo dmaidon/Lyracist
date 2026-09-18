@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer support to AddSpecialSinger, FinishSingerSong, and ToggleSpecialSinger
+// Edited on Sep 18, 2026 @ 09:22:00 -> Promote special singer to current at top of rotation in AddActiveSinger, TryAddPerformer, and ToggleSpecialSinger
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -1339,6 +1339,19 @@ namespace KSRotation.ViewModels
             // OnSingersCollectionChanged) - InsertNewSinger's own Insert() already triggers it.
             RotationHelpers.InsertNewSinger(Singers, newSinger);
 
+            if (newSinger.IsSpecial)
+            {
+                RotationHelpers.EnforceLinkedAdjacency(Singers);
+                RefreshLinkedPartnerNames();
+                UpdateNextSingerHighlight();
+                RefreshBillboardState();
+                RebuildRotationJsonCacheNow();
+                if (IsDisplayEnabled)
+                {
+                    _displayWindowService.Update(Singers);
+                }
+            }
+
             // Keeps wait-time badges current as soon as a singer is added - otherwise a fresh
             // rotation shows no badges at all until the first singer finishes, since nothing else
             // recalculates them.
@@ -1616,8 +1629,18 @@ namespace KSRotation.ViewModels
                 if (isSpecial)
                 {
                     existingSinger.IsSpecial = true;
+                    RotationHelpers.PromoteSpecialSingerToCurrent(Singers, existingSinger);
+                    RotationHelpers.EnforceLinkedAdjacency(Singers);
+                    RefreshLinkedPartnerNames();
+                    UpdateNextSingerHighlight();
+                    RefreshBillboardState();
+                    RebuildRotationJsonCacheNow();
+                    if (IsDisplayEnabled)
+                    {
+                        _displayWindowService.Update(Singers);
+                    }
                 }
-                if (wasInactive)
+                else if (wasInactive)
                 {
                     EnforceActiveInactiveOrder(existingSinger);
                 }
@@ -1981,6 +2004,15 @@ namespace KSRotation.ViewModels
         {
             if (entry == null) return;
             entry.IsSpecial = !entry.IsSpecial;
+            if (entry.IsSpecial)
+            {
+                RotationHelpers.PromoteSpecialSingerToCurrent(Singers, entry);
+                RotationHelpers.EnforceLinkedAdjacency(Singers);
+                RefreshLinkedPartnerNames();
+                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
+                UpdateNextSingerHighlight();
+                RefreshBillboardState();
+            }
             RebuildRotationJsonCacheNow();
             QueueSaveDatabase();
             if (IsDisplayEnabled)

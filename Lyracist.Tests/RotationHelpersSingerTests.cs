@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add unit tests for Special Singer lifecycle and resumption
+// Edited on Sep 18, 2026 @ 09:23:00 -> Add unit tests for Special Singer placement at top as current and resumption
 using Lyracist.Models;
 using Lyracist.Shared;
 
@@ -851,6 +851,73 @@ public class RotationHelpersSingerTests
         // Special guest should NOT receive the anchor; Alice should
         Assert.False(special.IsRotationStart);
         Assert.True(alice.IsRotationStart);
+    }
+
+    [Fact]
+    public void InsertNewSinger_SpecialSinger_PlacedAtTopOfListAndMadeCurrent()
+    {
+        var bob = new Singer { Name = "Bob", IsCurrent = true, IsRotationStart = true };
+        var carol = Active("Carol");
+        var dave = Special("Dave");
+        var singers = new List<Singer> { bob, carol };
+
+        // Insert new special singer into active rotation
+        RotationHelpers.InsertNewSinger(singers, dave);
+
+        // Dave should be at index 0 and marked Current
+        Assert.Equal(dave, singers[0]);
+        Assert.True(dave.IsCurrent);
+        Assert.True(dave.IsSpecial);
+
+        // Bob (previous current) should now be Next
+        Assert.True(bob.IsNext);
+        Assert.False(carol.IsNext);
+
+        // Dave finishes his performance
+        RotationHelpers.AdvanceRotationAfterFinished(singers, dave, floatCurrentToTop: false);
+
+        // Dave becomes inactive
+        Assert.True(dave.IsInactive);
+        Assert.False(dave.IsCurrent);
+
+        // Bob resumes as Current, Carol becomes Next
+        Assert.True(bob.IsCurrent);
+        Assert.True(carol.IsNext);
+    }
+
+    [Fact]
+    public void InsertNewSinger_SpecialSinger_EmptyList_PlacedAtTopAndMadeCurrent()
+    {
+        var dave = Special("Dave");
+        var singers = new List<Singer>();
+
+        RotationHelpers.InsertNewSinger(singers, dave);
+
+        Assert.Single(singers);
+        Assert.Equal(dave, singers[0]);
+        Assert.True(dave.IsCurrent);
+        Assert.True(dave.IsSpecial);
+    }
+
+    [Fact]
+    public void PromoteSpecialSingerToCurrent_ExistingSinger_MovesToTopAndBecomesCurrent()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true, IsRotationStart = true };
+        var bob = Active("Bob");
+        var dave = Active("Dave");
+        var singers = new List<Singer> { alice, bob, dave };
+
+        // Promote Dave to special singer
+        RotationHelpers.PromoteSpecialSingerToCurrent(singers, dave);
+
+        // Dave should now be at index 0 and Current
+        Assert.Equal(dave, singers[0]);
+        Assert.True(dave.IsCurrent);
+        Assert.True(dave.IsSpecial);
+
+        // Alice (previous current) should be Next
+        Assert.True(alice.IsNext);
+        Assert.False(bob.IsNext);
     }
 }
 

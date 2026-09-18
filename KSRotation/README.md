@@ -1,4 +1,4 @@
-<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Mention Special Singer one-time performance feature in KSRotation README.md -->
+<!-- Edited on Sep 18, 2026 @ 09:26:00 -> Update Special Singer top of list placement and current singer promotion in KSRotation README.md -->
 
 # KSRotation
 

@@ -117,7 +117,66 @@ namespace Lyracist.Shared
         }
 
         /// <summary>
+        /// Helper to check if any singer in <paramref name="singers"/> is active, non-paused, and not a special singer.
+        /// </summary>
+        private static bool HasActiveNonSpecialSinger<T>(IList<T> singers) where T : class, IRotationSinger
+        {
+            for (int i = 0; i < singers.Count; i++)
+            {
+                if (!singers[i].IsInactive && !singers[i].IsPaused && !singers[i].IsSpecial)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Places a special (one-time performance) singer at the top of the list (index 0) and sets them as the current singer.
+        /// If another singer was currently performing, that singer is marked as Next so rotation resumes with them once the special
+        /// performance concludes.
+        /// </summary>
+        public static void PromoteSpecialSingerToCurrent<T>(IList<T> singers, T specialSinger) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            ArgumentNullException.ThrowIfNull(specialSinger);
+
+            specialSinger.IsSpecial = true;
+            specialSinger.IsInactive = false;
+            specialSinger.IsPaused = false;
+            specialSinger.IsSkipped = false;
+
+            T? previousCurrent = GetCurrentSinger(singers);
+
+            int existingIndex = singers.IndexOf(specialSinger);
+            if (existingIndex < 0)
+            {
+                singers.Insert(0, specialSinger);
+            }
+            else if (existingIndex > 0)
+            {
+                MoveSingerInList(singers, existingIndex, 0);
+            }
+
+            ClearHighlights(singers);
+            specialSinger.IsCurrent = true;
+
+            if (previousCurrent != null && previousCurrent != specialSinger && !previousCurrent.IsInactive && !previousCurrent.IsPaused && !previousCurrent.IsSkipped)
+            {
+                previousCurrent.IsNext = true;
+            }
+            else
+            {
+                UpdateNextSingerHighlight(singers);
+            }
+
+            EnsureRotationStartFlag(singers);
+        }
+
+        /// <summary>
         /// Inserts a new active singer into <paramref name="singers"/> at the end of the current active rotation round.
+        /// If the new singer is a special singer (<see cref="IRotationSinger.IsSpecial"/>), they are placed at the top of
+        /// the list (index 0) and set as the current performer immediately.
         /// When previous singers have already performed in the current cycle and moved to the bottom
         /// (anchored by the active singer holding <see cref="IRotationSinger.IsRotationStart"/> at index > 0),
         /// the new singer is inserted right before that anchor (at that anchor index) so they perform in the current
@@ -131,6 +190,12 @@ namespace Lyracist.Shared
         {
             ArgumentNullException.ThrowIfNull(singers);
             ArgumentNullException.ThrowIfNull(newSinger);
+
+            if (newSinger.IsSpecial)
+            {
+                PromoteSpecialSingerToCurrent(singers, newSinger);
+                return;
+            }
 
             int count = singers.Count;
             if (count == 0)
@@ -201,7 +266,7 @@ namespace Lyracist.Shared
             {
                 if (singers[i].IsRotationStart)
                 {
-                    if (singers[i].IsInactive || singers[i].IsPaused)
+                    if (singers[i].IsInactive || singers[i].IsPaused || (singers[i].IsSpecial && count > 1 && HasActiveNonSpecialSinger(singers)))
                     {
                         singers[i].IsRotationStart = false;
                     }
@@ -635,12 +700,15 @@ namespace Lyracist.Shared
                 if (oldIdx >= 0 && count > 1)
                 {
                     int targetIdx = count - 1;
-                    for (int i = 0; i < count; i++)
+                    if (!finishedEntry.IsInactive)
                     {
-                        if (singers[i].IsInactive && singers[i] != finishedEntry)
+                        for (int i = 0; i < count; i++)
                         {
-                            targetIdx = (oldIdx < i) ? (i - 1) : i;
-                            break;
+                            if (singers[i].IsInactive && singers[i] != finishedEntry)
+                            {
+                                targetIdx = (oldIdx < i) ? (i - 1) : i;
+                                break;
+                            }
                         }
                     }
                     if (oldIdx != targetIdx && targetIdx >= 0 && targetIdx < count)

@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer support to add/edit and OnToggleSingerSpecialClicked
+// Edited on Sep 18, 2026 @ 09:22:00 -> Promote special singer to current at top of rotation in OnSaveEditSingerClicked
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -839,11 +839,19 @@ public partial class MainPage : ContentPage
             return;
         }
 
+        bool becameSpecial = !_editingSinger.IsSpecial && EditSpecialCheckBox.IsChecked;
         _editingSinger.Name = name;
         _editingSinger.DuetPartnerName = EditDuetEntry.Text?.Trim() ?? string.Empty;
         _editingSinger.Song = EditSongEntry.Text?.Trim() ?? string.Empty;
         _editingSinger.Artist = EditArtistEntry.Text?.Trim() ?? string.Empty;
         _editingSinger.IsSpecial = EditSpecialCheckBox.IsChecked;
+
+        if (becameSpecial)
+        {
+            var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
+            RotationHelpers.PromoteSpecialSingerToCurrent(vm.Singers, _editingSinger);
+            vm.RefreshBillboardState();
+        }
 
         _editingSinger = null;
         EditSingerOverlay.IsVisible = false;

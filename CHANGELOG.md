@@ -1,4 +1,4 @@
-<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer one-time performance feature to Changelog -->
+<!-- Edited on Sep 18, 2026 @ 09:26:00 -> Update Special Singer top of list placement and current singer promotion -->
 Last Edit: Sep 18, 2026 - Special Singer Feature
 
 # Changelog
@@ -10,10 +10,14 @@ All notable changes to the Lyracist project are documented here. The format is b
 ### Added
 - **Special Singer (One-Time Performance) Lifecycle (`Shared`, `Lyracist`, `KSRotation`, `KSRotation.Maui`, Web Portals)**:
   - Added ability to designate one-time guest or special singers who perform for a single round only.
+  - **Instant Top of Queue & Current Performer**: When added or toggled as Special, the singer is immediately placed at the very top of the list (index 0) and promoted to Current singer, catering directly to spur-of-the-moment guest performances.
+  - **Displaced Singer Preservation**: If a performer was already singing or designated as Next, they are preserved as 'Up Next' so that when the special singer finishes, rotation resumes with them seamlessly.
   - While singing, the performer is flagged and badged with "⭐ Special" across all DJ consoles, audience billboards, kiosks, and patron web portals.
   - Once their performance concludes (or when marked Done/Finished), the special singer is automatically marked inactive, and normal rotation resumes immediately as if the special guest was never in the rotation queue.
   - Added `bool IsSpecial { get; set; }` across `IRotationSinger`, `Singer`, `SingerEntry`, `RotationItemDto`, `DisplayRotationEntry`, and `DisplayViewModel`.
   - Updated `RotationHelpers.cs`:
+    - `PromoteSpecialSingerToCurrent`: Moves or inserts special performer at index 0, sets `IsCurrent = true`, marks displaced performer as `IsNext = true`, and preserves round anchor.
+    - `InsertNewSinger`: Intercepts special singers and routes them through `PromoteSpecialSingerToCurrent`.
     - `EnsureRotationStartFlag`: Excludes special singers when auto-assigning round anchors so round tracking is never attached to a transient performer.
     - `HandleSingerRetiredOrRemoved`: Prioritizes non-special performers when reassigning rotation anchors.
     - `AdvanceRotationAfterFinished`: Checks `finishedEntry.IsSpecial`. When true, automatically marks `IsInactive = true`, clears `IsCurrent`, relocates the performer to the inactive section in float mode, and immediately promotes the designated next singer to current.
@@ -21,7 +25,7 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Added "Add Special" button, context menu option, and violet `⭐ SPECIAL` badges in KSRotation desktop (`MainWindow.xaml`, `SingerDisplayWindow.xaml`).
   - Added Special checkbox to Add/Edit overlays, `⭐` action toggle button, and status badges in KSRotation.Maui (`MainPage.xaml`, `MainPage.xaml.cs`, `BillboardView.xaml`).
   - Updated web portals (`dj.html`, `billboard.html`, `kiosk.html`, `PatronPortal.html`): remote DJs can add special singers via modal or toggle existing singers, with visual `⭐ SPECIAL` badges across all audience screens.
-  - Added unit test coverage in `RotationHelpersSingerTests.cs` validating special singer completion, inactive transition, anchor protection, and sequential/float resumption.
+  - Added unit test coverage in `RotationHelpersSingerTests.cs` validating special singer top placement, current promotion, completion, inactive transition, anchor protection, and sequential/float resumption.
 - **Singer Skip Round-Scoped Rotation Bypass (`Shared`, `Lyracist`, `KSRotation`, `KSRotation.Maui`, `Web UI`)**:
   - Implemented a single-round **Singer Skip** feature allowing DJs to pass over performers who temporarily step away without forfeiting their position in the rotation order.
   - Added `bool IsSkipped { get; set; }` across `IRotationSinger`, `Singer`, `SingerEntry`, and `RotationItemDto` models.
