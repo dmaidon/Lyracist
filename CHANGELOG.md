@@ -1,9 +1,23 @@
-<!-- Edited on Sep 17, 2026 @ 14:36:30 -> Synchronize solution assembly version 26.9.17 across all projects -->
-Last Edit: Sep 17, 2026 - Solution Version Bump 26.9.17
+<!-- Edited on Sep 18, 2026 @ 08:16:00 -> Add Singer Skip round-scoped rotation bypass feature to Changelog -->
+Last Edit: Sep 18, 2026 - Singer Skip Feature
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.18.0] - 2026-09-18
+
+### Added
+- **Singer Skip Round-Scoped Rotation Bypass (`Shared`, `Lyracist`, `KSRotation`, `Web UI`)**:
+  - Implemented a single-round **Singer Skip** feature allowing DJs to pass over performers who temporarily step away without forfeiting their position in the rotation order.
+  - Added `bool IsSkipped { get; set; }` across `IRotationSinger`, `Singer`, `SingerEntry`, and `RotationItemDto` models.
+  - Updated `RotationHelpers.AdvanceRotationAfterFinished`, `UpdateNextSingerHighlight`, `RecalculateEstimatedWaits`, and `GetNextActiveSingers` to bypass skipped singers while keeping their queue position intact.
+  - Built automatic round-scoped rollover: when rotation advances and the round completes (crossing or reaching the '⚓ Anchor' singer), all `IsSkipped` flags automatically clear so skipped performers sing normally in the subsequent round.
+  - Added `ToggleSkipSingerCommand` across Lyracist and KSRotation, automatically promoting the next eligible performer if the active singer is skipped.
+  - Added `toggle-skip` action routing in `MainViewModel.Requests.cs` for remote DJ portal operations.
+  - Added visual amber `⏭ SKIPPED` badges, row styling triggers, and Skip/Unskip action buttons in `RotationPage.xaml`, `KaraokePage.xaml`, `MainWindow.xaml` (KSRotation), `dj.html`, `billboard.html`, `kiosk.html`, and `PatronPortal.html`.
+  - Updated in-app Help System (Topic 2: Rotation Page) detailing Singer Skip vs. Inactive vs. Paused.
+  - Added unit test suite in `RotationHelpersSingerTests.cs` and updated User Manuals (`.docx`, `.pdf`, and `_Updates.txt`) via `CatalogBookGeneratorTests.UpdateUserManualsForSingerSkip`.
 
 ## [26.9.17.0] - 2026-09-17
 

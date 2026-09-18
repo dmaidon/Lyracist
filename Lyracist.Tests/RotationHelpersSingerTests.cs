@@ -1,4 +1,4 @@
-// Edited on Sep 3, 2026 @ 23:57:00 -> Add Last Round unit tests for Singer model
+// Edited on Sep 17, 2026 @ 23:48:00 -> Add unit tests for Singer Skip round-scoped behavior
 using Lyracist.Models;
 using Lyracist.Shared;
 
@@ -14,6 +14,7 @@ public class RotationHelpersSingerTests
     private static Singer Active(string name) => new() { Name = name };
     private static Singer Inactive(string name) => new() { Name = name, IsInactive = true };
     private static Singer Paused(string name) => new() { Name = name, IsPaused = true };
+    private static Singer Skipped(string name) => new() { Name = name, IsSkipped = true };
 
     [Fact]
     public void SetCurrentSinger_PromotesEntryAndMarksPreviousCurrentAsNext()
@@ -682,6 +683,106 @@ public class RotationHelpersSingerTests
         Assert.True(moved);
         Assert.Equal(["Singer1", "Singer2", "Singer4", "Singer5", "Singer3", "Singer6", "Singer7"], list.Select(s => s.Name));
         Assert.Equal(1, Math.Abs(list.IndexOf(s4) - list.IndexOf(s5)));
+    }
+
+    [Fact]
+    public void UpdateNextSingerHighlight_SkipsSkippedSingers()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true };
+        var bob = Skipped("Bob");
+        var carol = Active("Carol");
+        var singers = new List<Singer> { alice, bob, carol };
+
+        RotationHelpers.UpdateNextSingerHighlight(singers);
+
+        Assert.False(bob.IsNext);
+        Assert.True(carol.IsNext);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_BypassesSkippedSinger_NonFloat()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true };
+        var bob = Skipped("Bob");
+        var carol = Active("Carol");
+        var singers = new List<Singer> { alice, bob, carol };
+
+        RotationHelpers.AdvanceRotationAfterFinished(singers, alice, floatCurrentToTop: false);
+
+        Assert.False(alice.IsCurrent);
+        Assert.False(bob.IsCurrent);
+        Assert.True(carol.IsCurrent);
+        // Bob retains place in rotation and remains skipped for this round
+        Assert.True(bob.IsSkipped);
+        Assert.Equal("Bob", singers[1].Name);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_BypassesSkippedSinger_FloatMode()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true };
+        var bob = Skipped("Bob");
+        var carol = Active("Carol");
+        var singers = new List<Singer> { alice, bob, carol };
+
+        RotationHelpers.AdvanceRotationAfterFinished(singers, alice, floatCurrentToTop: true);
+
+        // Bob was bypassed, Carol becomes current
+        Assert.True(carol.IsCurrent);
+        Assert.False(alice.IsCurrent);
+        Assert.False(bob.IsCurrent);
+        // Bob is still skipped and stays in queue
+        Assert.True(bob.IsSkipped);
+        Assert.Contains(bob, singers);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_ClearsSkippedOnRoundRollover()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true, IsRotationStart = true };
+        var bob = Skipped("Bob");
+        var carol = Active("Carol");
+        var singers = new List<Singer> { alice, bob, carol };
+
+        // Advance past Alice: Bob skipped -> Carol becomes current
+        RotationHelpers.AdvanceRotationAfterFinished(singers, alice, floatCurrentToTop: false);
+        Assert.True(carol.IsCurrent);
+        Assert.True(bob.IsSkipped);
+
+        // Carol finishes: round wraps back to Alice (the RotationStart anchor)
+        RotationHelpers.AdvanceRotationAfterFinished(singers, carol, floatCurrentToTop: false);
+        Assert.True(alice.IsCurrent);
+        // Bob's IsSkipped should automatically be cleared on round rollover!
+        Assert.False(bob.IsSkipped);
+    }
+
+    [Fact]
+    public void RecalculateEstimatedWaits_ExcludesSkippedSingers()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true };
+        var bob = Skipped("Bob");
+        var carol = Active("Carol");
+        var singers = new List<Singer> { alice, bob, carol };
+
+        RotationHelpers.RecalculateEstimatedWaits(singers, defaultEstimatedPerformanceSeconds: 180, enabled: true);
+
+        // Carol only waits for Alice (1 song = 180s = 3 mins), Bob is skipped so he doesn't add wait time
+        Assert.Equal(3, carol.EstimatedWaitMinutes);
+    }
+
+    [Fact]
+    public void ResetSkippedSingers_ClearsFlagOnAllEntries()
+    {
+        var s1 = Skipped("S1");
+        var s2 = Active("S2");
+        var s3 = Skipped("S3");
+        var singers = new List<Singer> { s1, s2, s3 };
+
+        RotationHelpers.ResetSkippedSingers(singers);
+
+        Assert.False(s1.IsSkipped);
+        Assert.False(s2.IsSkipped);
+        Assert.False(s3.IsSkipped);
     }
 }
 

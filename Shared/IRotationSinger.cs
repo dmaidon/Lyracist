@@ -1,4 +1,4 @@
-// Edited on Sep 5, 2026 @ 18:30:00 -> Add Id/LinkedSingerId for Linked Singers (stay-adjacent rotation pairs)
+// Edited on Sep 17, 2026 @ 23:31:00 -> Add IsSkipped property for single-round singer skip
 using System;
 
 namespace Lyracist.Shared
@@ -22,6 +22,7 @@ namespace Lyracist.Shared
         bool IsNext { get; set; }
         bool IsInactive { get; set; }
         bool IsPaused { get; set; }
+        bool IsSkipped { get; set; }
         bool IsMusic { get; set; }
         bool IsRotationStart { get; set; }
         bool HasSungInLastRound { get; set; }

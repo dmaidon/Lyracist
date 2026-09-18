@@ -1,4 +1,4 @@
-<!-- Edited on Sep 4, 2026 @ 07:25:00 -> Change Last Round to standout emerald green button after Clear button -->
+<!-- Edited on Sep 17, 2026 @ 23:31:00 -> Add SKIPPED badge and Skip Singer button to rotation list -->
 <Page x:Class="Lyracist.Views.Pages.RotationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -269,6 +269,9 @@
                                                 <Border Visibility="{Binding IsPaused, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#CC3300" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock Text="PAUSED" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
                                                 </Border>
+                                                <Border Visibility="{Binding IsSkipped, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#6D28D9" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Singer skipped for this round (retains place in rotation)">
+                                                    <TextBlock Text="SKIPPED" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                                                </Border>
                                                 <Border Visibility="{Binding HasSungInLastRound, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#5C1010" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Singer has completed their song in the last round">
                                                     <TextBlock Text="DONE (LAST ROUND)" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
                                                 </Border>
@@ -354,11 +357,31 @@
                                                 <ui:Button.Style>
                                                     <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
                                                         <Setter Property="Icon" Value="{ui:SymbolIcon Pause20}" />
-                                                        <Setter Property="ToolTip" Value="Pause performer (temporary skip)" />
+                                                        <Setter Property="ToolTip" Value="Pause performer (hold across rounds)" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsPaused}" Value="True">
                                                                 <Setter Property="Icon" Value="{ui:SymbolIcon Play20}" />
                                                                 <Setter Property="ToolTip" Value="Resume performer" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ui:Button.Style>
+                                            </ui:Button>
+
+                                            <!-- Skip Button (Single-Round Skip) -->
+                                            <ui:Button Command="{Binding DataContext.ToggleSkipSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                                                       CommandParameter="{Binding}" 
+                                                       Margin="0,0,2,0"
+                                                       Padding="4">
+                                                <ui:Button.Style>
+                                                    <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                                        <Setter Property="Icon" Value="{ui:SymbolIcon Next20}" />
+                                                        <Setter Property="ToolTip" Value="Skip performer for this round (retains rotation position)" />
+                                                        <Setter Property="Appearance" Value="Secondary" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsSkipped}" Value="True">
+                                                                <Setter Property="Appearance" Value="Primary" />
+                                                                <Setter Property="ToolTip" Value="Unskip performer (restore for this round)" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>

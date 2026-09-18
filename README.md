@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 14:36:30 -> Synchronize solution assembly version 26.9.17 across all projects -->
+<!-- Edited on Sep 18, 2026 @ 08:16:00 -> Document Singer Skip feature in README.md -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -6,6 +6,17 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### ⏭️ Singer Skip (Round-Scoped Rotation Bypass) (`Shared`, `Lyracist`, `KSRotation`, `dj.html`, `billboard.html`, `kiosk.html`, `PatronPortal.html`)
+- **Single-Round Bypass**: Allows the DJ to pass over a performer who needs to temporarily step away (e.g. stepping outside or grabbing a drink) without forfeiting their position in the rotation or dropping them to the back of the queue.
+- **Distinct from Inactive & Pause**:
+  - `IsInactive`: Marks the performer as inactive/deleted, moves them out of active rotation to the end of the line, and excludes them from active counts.
+  - `IsPaused`: Retains queue position, but halts performance turns indefinitely until the DJ manually unpauses them.
+  - `IsSkipped`: Retains queue position, passes over them for the current round only, and automatically clears when the round rolls over.
+- **Automatic Round Rollover**: When rotation advances and the round completes (crossing or reaching the `⚓ Anchor` singer), all `IsSkipped` flags automatically clear so skipped performers sing normally in the following round without requiring manual DJ intervention.
+- **Immediate Promotion When Skipping Current**: If the currently performing singer is skipped, the rotation immediately advances to the next eligible singer.
+- **Synchronized Wait-Time Recalculation**: `RecalculateEstimatedWaits` ignores skipped performers so on-deck and waiting singers see true, accurate wait times.
+- **Cross-Platform UI & Indicators**: Amber `⏭ SKIPPED` badges, row styling, and `Skip / Unskip` buttons across Lyracist, KSRotation desktop, remote DJ board (`dj.html`), audience billboard (`billboard.html`), kiosk (`kiosk.html`), and patron mobile portal (`PatronPortal.html`).
 
 ### 📍 Hybrid GPS & Wi-Fi Venue Auto-Location (`KSRotation`, `KSRotation.Maui`, `Lyracist`, `Shared`)
 - **Hybrid Ground-Truth Detection**: Uses high-precision GPS coordinates (Latitude/Longitude) with a 150-meter spherical Haversine radius (`GeoMath`) as the primary ground truth, with house Wi-Fi SSID as a secondary fallback.

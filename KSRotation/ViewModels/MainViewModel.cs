@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 12:08:30 -> Await Dispatcher.InvokeAsync in AutoDetectVenueLocationAsync
+// Edited on Sep 17, 2026 @ 23:40:00 -> Add ToggleSkipSinger command and handle skipped singers
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -212,8 +212,8 @@ namespace KSRotation.ViewModels
                 var current = RotationHelpers.GetCurrentSinger(Singers);
                 if (current == null)
                 {
-                    var first = Singers.FirstOrDefault(s => s.IsRotationStart && !s.IsInactive && !s.IsPaused)
-                                ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+                    var first = Singers.FirstOrDefault(s => s.IsRotationStart && !s.IsInactive && !s.IsPaused && !s.IsSkipped)
+                                ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped);
                     if (first != null)
                     {
                         RotationHelpers.SetCurrentSinger(Singers, first, floatCurrentToTop: true, isLastRound: IsLastRound);
@@ -1159,8 +1159,8 @@ namespace KSRotation.ViewModels
                 var current = RotationHelpers.GetCurrentSinger(Singers);
                 if (current == null)
                 {
-                    var first = Singers.FirstOrDefault(s => s.IsRotationStart && !s.IsInactive && !s.IsPaused)
-                                ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+                    var first = Singers.FirstOrDefault(s => s.IsRotationStart && !s.IsInactive && !s.IsPaused && !s.IsSkipped)
+                                ?? Singers.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped);
                     if (first != null)
                     {
                         RotationHelpers.SetCurrentSinger(Singers, first, floatCurrentToTop: true, isLastRound: IsLastRound);
@@ -1452,7 +1452,7 @@ namespace KSRotation.ViewModels
             if (entry.IsCurrent)
             {
                 // 1. Try the singer already flagged as Next (manual next-singer override)
-                SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
+                SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
 
                 if (nextCurrent == null)
                 {
@@ -1462,7 +1462,7 @@ namespace KSRotation.ViewModels
                     for (int i = 1; i < count; i++)
                     {
                         SingerEntry candidate = Singers[(currentIndex + i) % count];
-                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
+                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!IsLastRound || !candidate.HasSungInLastRound))
                         {
                             nextCurrent = candidate;
                             break;
@@ -1829,7 +1829,7 @@ namespace KSRotation.ViewModels
                 if (wasCurrent)
                 {
                     // 1. Try the singer already flagged as Next (manual next-singer override)
-                    nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
+                    nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
 
                     if (nextCurrent == null)
                     {
@@ -1839,7 +1839,7 @@ namespace KSRotation.ViewModels
                         for (int i = 1; i < count; i++)
                         {
                             SingerEntry candidate = Singers[(currentIndex + i) % count];
-                            if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
+                            if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!IsLastRound || !candidate.HasSungInLastRound))
                             {
                                 nextCurrent = candidate;
                                 break;
@@ -1877,6 +1877,71 @@ namespace KSRotation.ViewModels
             RefreshLinkedPartnerNames();
             RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
 
+            QueueSaveDatabase();
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
+            }
+        }
+
+        /// <summary>Toggles the singer's skipped state for the current round without forfeiting rotation placement.</summary>
+        [RelayCommand]
+        public void ToggleSkipSinger(SingerEntry entry)
+        {
+            if (entry == null || entry.IsInactive)
+            {
+                return;
+            }
+
+            _isFinishingSong = true;
+            try
+            {
+                bool skipping = !entry.IsSkipped && entry.IsCurrent;
+                SingerEntry? nextCurrent = null;
+
+                if (skipping)
+                {
+                    // If the current performer is being skipped, find the next eligible singer to promote
+                    nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
+
+                    if (nextCurrent == null)
+                    {
+                        int currentIndex = Singers.IndexOf(entry);
+                        int count = Singers.Count;
+                        for (int i = 1; i < count; i++)
+                        {
+                            SingerEntry candidate = Singers[(currentIndex + i) % count];
+                            if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!IsLastRound || !candidate.HasSungInLastRound))
+                            {
+                                nextCurrent = candidate;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                entry.IsSkipped = !entry.IsSkipped;
+
+                if (entry.IsSkipped && entry.IsCurrent)
+                {
+                    entry.IsCurrent = false;
+                }
+
+                if (skipping && nextCurrent != null)
+                {
+                    RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop, isLastRound: IsLastRound);
+                }
+
+                UpdateNextSingerHighlight();
+            }
+            finally
+            {
+                _isFinishingSong = false;
+            }
+
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
+            RefreshBillboardState();
+            RebuildRotationJsonCacheNow();
             QueueSaveDatabase();
             if (IsDisplayEnabled)
             {
@@ -2240,7 +2305,7 @@ namespace KSRotation.ViewModels
 
                                     if (entry.IsCurrent)
                                     {
-                                        SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
+                                        SingerEntry? nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
                                         if (nextCurrent == null)
                                         {
                                             int currentIndex = Singers.IndexOf(entry);
@@ -2248,7 +2313,7 @@ namespace KSRotation.ViewModels
                                             for (int i = 1; i < count; i++)
                                             {
                                                 SingerEntry candidate = Singers[(currentIndex + i) % count];
-                                                if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
+                                                if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!IsLastRound || !candidate.HasSungInLastRound))
                                                 {
                                                     nextCurrent = candidate;
                                                     break;

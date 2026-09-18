@@ -1,4 +1,4 @@
-// Created on Aug 20, 2026 @ 09:56:00 -> Add AutoAdvanceManager for safe DJ-friendly auto-advance with grace period, fill-in music, and state machine
+// Edited on Sep 17, 2026 @ 23:31:00 -> Exclude IsSkipped performers from auto-advance active singers list
 using System;
 using System.IO;
 using System.Linq;
@@ -205,7 +205,7 @@ public class AutoAdvanceManager
             }
 
             // Safety: Must have active singers in rotation
-            var activeSingers = _rotation.Rotation.Where(s => !s.IsInactive && !s.IsPaused).ToList();
+            var activeSingers = _rotation.Rotation.Where(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped).ToList();
             if (activeSingers.Count == 0)
             {
                 CurrentState = AutoAdvanceState.Idle;

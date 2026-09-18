@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 12:15:00 -> Add venue location auto-sync from KSRotation / KSRotation.Maui
+// Edited on Sep 17, 2026 @ 23:31:00 -> Include isSkipped in KSRotationSyncService DTO and sync comparison
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -251,6 +251,7 @@ namespace Lyracist.Services.Integration
                     singer.IsMusic = item.isMusic;
                     singer.IsRotationStart = item.isRotationStart;
                     singer.HasSungInLastRound = item.hasSungInLastRound;
+                    singer.IsSkipped = item.isSkipped;
 
                     newRotation.Add(singer);
                 }
@@ -300,7 +301,8 @@ namespace Lyracist.Services.Integration
                     s.isInactive != c.IsInactive ||
                     s.isMusic != c.IsMusic ||
                     s.isRotationStart != c.IsRotationStart ||
-                    s.hasSungInLastRound != c.HasSungInLastRound)
+                    s.hasSungInLastRound != c.HasSungInLastRound ||
+                    s.isSkipped != c.IsSkipped)
                 {
                     return false;
                 }
@@ -346,6 +348,7 @@ namespace Lyracist.Services.Integration
             public bool isMusic { get; set; }
             public bool isRotationStart { get; set; }
             public bool hasSungInLastRound { get; set; }
+            public bool isSkipped { get; set; }
         }
     }
 }

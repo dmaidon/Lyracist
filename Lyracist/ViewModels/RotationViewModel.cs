@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 08:36:00 -> Add IsSongInCurrentSession to check for duplicate songs
+// Edited on Sep 17, 2026 @ 23:31:00 -> Add ToggleSkipSinger command and single-round singer skip handling
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -137,8 +137,8 @@ public partial class RotationViewModel : BaseViewModel
                 var current = Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation);
                 if (current == null)
                 {
-                    var first = Rotation.FirstOrDefault(s => s.IsRotationStart && !s.IsInactive && !s.IsPaused)
-                                ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused);
+                    var first = Rotation.FirstOrDefault(s => s.IsRotationStart && !s.IsInactive && !s.IsPaused && !s.IsSkipped)
+                                ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped);
                     if (first != null)
                     {
                         Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation, first, floatCurrentToTop: true, isLastRound: IsLastRound);
@@ -845,13 +845,13 @@ public partial class RotationViewModel : BaseViewModel
     public Singer? GetCurrentSinger()
     {
         return Lyracist.Shared.RotationHelpers.GetCurrentSinger(Rotation) 
-               ?? Rotation.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound)) 
-               ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
+               ?? Rotation.FirstOrDefault(s => s.IsCurrent && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound)) 
+               ?? Rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
     }
 
     public Singer? GetNextSinger()
     {
-        var next = Rotation.FirstOrDefault(s => s.IsNext && !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
+        var next = Rotation.FirstOrDefault(s => s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
         if (next != null) return next;
 
         var current = GetCurrentSinger();
@@ -864,7 +864,7 @@ public partial class RotationViewModel : BaseViewModel
             for (int i = 1; i < count; i++)
             {
                 var candidate = Rotation[(currentIndex + i) % count];
-                if (candidate != current && !candidate.IsInactive && !candidate.IsPaused && (!IsLastRound || !candidate.HasSungInLastRound))
+                if (candidate != current && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!IsLastRound || !candidate.HasSungInLastRound))
                 {
                     return candidate;
                 }
@@ -1173,6 +1173,28 @@ public partial class RotationViewModel : BaseViewModel
         if (singer.IsPaused && string.Equals(singer.Name, _mediaEngine.ActiveSingerName, StringComparison.OrdinalIgnoreCase))
         {
             await _mediaEngine.Pause();
+        }
+
+        RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
+    }
+
+    [RelayCommand]
+    private void ToggleSkipSinger(Singer singer)
+    {
+        if (singer == null) return;
+        singer.IsSkipped = !singer.IsSkipped;
+
+        // If the singer was currently singing and is now skipped, advance rotation to the next eligible singer
+        if (singer.IsSkipped && singer.IsCurrent)
+        {
+            RunRotationOrderChange(() =>
+                Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop, isLastRound: IsLastRound));
+        }
+        else
+        {
+            Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(Rotation, isLastRound: IsLastRound);
+            Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0, enabled: AppSettings.ShowEstimatedWaitTime);
         }
 
         RotationStateChanged?.Invoke();

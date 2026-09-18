@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 07:29:15 -> Add Tempo property to support per-singer tempo recall
+// Edited on Sep 17, 2026 @ 23:31:00 -> Add IsSkipped property for single-round singer skip
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -73,6 +73,9 @@ public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
 
     [ObservableProperty]
     private bool _isPaused = false;
+
+    [ObservableProperty]
+    private bool _isSkipped = false;
 
     [ObservableProperty]
     private bool _isInactive = false;

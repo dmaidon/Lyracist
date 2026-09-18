@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 12:09:00 -> Add Tag GPS button to Venue settings -->
+<!-- Edited on Sep 17, 2026 @ 23:42:00 -> Add Singer Skip support to ContextMenu, ListView, and badges -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -116,6 +116,19 @@
                         <MenuItem Header="Finish Current Song"
                                   Command="{Binding Path=PlacementTarget.Tag.FinishSingerSongCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                   CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Command="{Binding Path=PlacementTarget.Tag.ToggleSkipSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="⏭ Skip Singer (This Round)" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=PlacementTarget.DataContext.IsSkipped, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Value="True">
+                                            <Setter Property="Header" Value="▶ Unskip Singer" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
                         <Separator />
                         <MenuItem Header="Move Up"
                                   Command="{Binding Path=PlacementTarget.Tag.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
@@ -181,6 +194,10 @@
                 <DataTrigger Binding="{Binding IsInactive}" Value="True">
                     <Setter Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
                     <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBodyLight}" />
+                    <Setter Property="FontStyle" Value="Italic" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSkipped}" Value="True">
+                    <Setter Property="Opacity" Value="0.65" />
                     <Setter Property="FontStyle" Value="Italic" />
                 </DataTrigger>
             </Style.Triggers>
@@ -804,6 +821,15 @@
                                                                 ToolTip="{Binding LinkedPartnerName, StringFormat='Linked with {0} - always stays adjacent in the rotation'}">
                                                             <TextBlock Text="{Binding LinkedPartnerName, StringFormat='🔗 {0}'}" FontSize="10" FontWeight="Bold" Foreground="#0EA5E9" VerticalAlignment="Center" />
                                                         </Border>
+                                                        <Border Background="#D97706"
+                                                                CornerRadius="4"
+                                                                Padding="4,2"
+                                                                Margin="0,0,4,0"
+                                                                VerticalAlignment="Center"
+                                                                ToolTip="Singer is skipped for this round"
+                                                                Visibility="{Binding IsSkipped, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock Text="⏭ SKIPPED" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                                                        </Border>
                                                     </StackPanel>
                                                     <TextBox
                                                     Grid.Column="1"
@@ -978,6 +1004,27 @@
                                                             <Style TargetType="Button" BasedOn="{StaticResource GridButtonStyle}">
                                                                 <Setter Property="MinWidth" Value="72" />
                                                                 <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsInactive}" Value="True">
+                                                                        <Setter Property="IsEnabled" Value="False" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+
+                                                    <Button Command="{Binding DataContext.ToggleSkipSingerCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                            CommandParameter="{Binding}"
+                                                            Margin="0,0,6,0"
+                                                            Padding="8,2"
+                                                            ToolTip="Skip or unskip singer for this round">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource GridButtonStyle}">
+                                                                <Setter Property="Content" Value="⏭ Skip" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsSkipped}" Value="True">
+                                                                        <Setter Property="Content" Value="▶ Unskip" />
+                                                                        <Setter Property="Foreground" Value="#F59E0B" />
+                                                                    </DataTrigger>
                                                                     <DataTrigger Binding="{Binding IsInactive}" Value="True">
                                                                         <Setter Property="IsEnabled" Value="False" />
                                                                     </DataTrigger>
@@ -1541,13 +1588,13 @@
                                 <Button
                                          Content="Remove"
                                          Command="{Binding RemoveVenueCommand}"
-                                         Width="80"
+                                         Width="85"
                                          Margin="0,0,6,0"
                                          Style="{StaticResource ModernSecondaryButtonStyle}" />
                                 <Button
                                          Content="📍 Tag GPS"
                                          Command="{Binding TagCurrentLocationCommand}"
-                                         Width="80"
+                                         Width="105"
                                          ToolTip="Tag current GPS coordinates to active venue for auto-retrieval"
                                          Style="{StaticResource ModernSecondaryButtonStyle}" />
                             </StackPanel>

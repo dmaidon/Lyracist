@@ -1,4 +1,4 @@
-// Edited on Sep 9, 2026 @ 14:20:00 -> Batch search results, isolate external queries to streaming tab, and add ClearSearchQueryCommand
+// Edited on Sep 17, 2026 @ 23:31:00 -> Support IsSkipped in rotation sync and current/next promotion
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -736,7 +736,7 @@ public partial class KaraokeViewModel : BaseViewModel
         string oldSinger = NowSingingName;
 
         var rotationList = Rotation.Rotation.ToList();
-        var activeSingers = rotationList.Where(s => !s.IsPaused && !s.IsInactive && (!Rotation.IsLastRound || !s.HasSungInLastRound)).ToList();
+        var activeSingers = rotationList.Where(s => !s.IsPaused && !s.IsInactive && !s.IsSkipped && (!Rotation.IsLastRound || !s.HasSungInLastRound)).ToList();
 
         if (activeSingers.Count == 0)
         {
@@ -763,7 +763,7 @@ public partial class KaraokeViewModel : BaseViewModel
         Singer? current = rotationList.FirstOrDefault(s => s.IsCurrent);
 
         // Fallback if current is not set or is no longer active
-        bool needsPromotion = current == null || current.IsPaused || current.IsInactive || !rotationList.Contains(current)
+        bool needsPromotion = current == null || current.IsPaused || current.IsInactive || current.IsSkipped || !rotationList.Contains(current)
             || (Rotation.IsLastRound && current.HasSungInLastRound);
         if (needsPromotion)
         {
@@ -775,7 +775,7 @@ public partial class KaraokeViewModel : BaseViewModel
             if (needsPromotion)
             {
                 // No valid current singer was designated (e.g. first singer of the night, or the
-                // previous current singer became paused/inactive) — promote one and establish next.
+                // previous current singer became paused/inactive/skipped) — promote one and establish next.
                 Lyracist.Shared.RotationHelpers.SetCurrentSinger(Rotation.Rotation, current, isLastRound: Rotation.IsLastRound);
             }
             else
@@ -785,7 +785,7 @@ public partial class KaraokeViewModel : BaseViewModel
                 // existing designation is missing or stale — never clobber a deliberate "next"
                 // that was just set (e.g. a displaced current singer resuming their spot in line).
                 Singer? existingNext = Rotation.Rotation.FirstOrDefault(s => s.IsNext);
-                bool nextIsValid = existingNext != null && existingNext != current && !existingNext.IsPaused && !existingNext.IsInactive
+                bool nextIsValid = existingNext != null && existingNext != current && !existingNext.IsPaused && !existingNext.IsInactive && !existingNext.IsSkipped
                     && (!Rotation.IsLastRound || !existingNext.HasSungInLastRound);
                 if (!nextIsValid)
                 {

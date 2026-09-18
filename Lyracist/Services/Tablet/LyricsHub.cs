@@ -1,4 +1,4 @@
-// Edited on Aug 21, 2026 @ 08:06:00 -> Include isRotationStart, isCurrent, isNext in initial queue payload
+// Edited on Sep 17, 2026 @ 23:31:00 -> Include isSkipped in queue payload
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Concurrent;
@@ -79,6 +79,7 @@ public class LyricsHub(RotationViewModel rotation, KaraokeViewModel karaoke) : H
             isNext = s.IsNext,
             isRotationStart = s.IsRotationStart,
             isPaused = s.IsPaused,
+            isSkipped = s.IsSkipped,
             isInactive = s.IsInactive
         }).ToList();
 

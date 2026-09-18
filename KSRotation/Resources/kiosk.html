@@ -1,4 +1,4 @@
-<!-- Edited on Aug 21, 2026 @ 17:59:00 -> Add Attractor / Welcome Screen with instructions, touch to start, and live queue snapshot when idle -->
+<!-- Edited on Sep 17, 2026 @ 23:45:00 -> Add Singer Skip support to kiosk queue display -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1469,7 +1469,7 @@
             const spotlightNextName = document.getElementById('spotlight-next-name');
             const spotlightNextSong = document.getElementById('spotlight-next-song');
 
-            const activeSingers = singers.filter(s => !s.isInactive && !s.isPaused);
+            const activeSingers = singers.filter(s => !s.isInactive && !s.isPaused && !s.isSkipped);
             countBadge.textContent = `${activeSingers.length} Active / ${singers.length} Total`;
 
             // Update Spotlight
@@ -1551,7 +1551,7 @@
                 let rowClasses = 'kiosk-singer-row';
                 let badgesHtml = '';
 
-                if (singer.isInactive || singer.isPaused) rowClasses += ' inactive';
+                if (singer.isInactive || singer.isPaused || singer.isSkipped) rowClasses += ' inactive';
                 if (singer.isCurrent) rowClasses += ' current';
                 else if (singer.isNext) rowClasses += ' next';
                 if (singer.isRotationStart) rowClasses += ' rotation-start';
@@ -1566,6 +1566,10 @@
                     badgesHtml += '<span class="badge-tag current">Singing</span> ';
                 } else if (singer.isNext) {
                     badgesHtml += '<span class="badge-tag next">Up Next</span> ';
+                }
+
+                if (singer.isSkipped) {
+                    badgesHtml += '<span class="badge-tag" style="background:#D97706; color:white;" title="Skipped for this round">Skipped</span> ';
                 }
 
                 let displayName = escapeHtml(singer.name);

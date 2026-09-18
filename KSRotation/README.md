@@ -1,4 +1,4 @@
-<!-- Edited on Sep 8, 2026 @ 13:48:00 -> Add Users tab description and modern search input controls -->
+<!-- Edited on Sep 18, 2026 @ 08:16:00 -> Mention Singer Skip round-scoped rotation bypass in KSRotation README.md -->
 
 # KSRotation
 
@@ -6,7 +6,7 @@ KSRotation ("Karaoke Singer Rotation") is a WPF (.NET, C#, Material Design in XA
 
 ## Tabs
 
-- **Rotation** — Manages the singer rotation queue for the night.
+- **Rotation** — Manages the singer rotation queue for the night, including current performer floating, linked singers, round anchor designation, singer pause/inactive states, and round-scoped Singer Skip.
 - **Users** — Centralized user, performer, and staff management with high-DPI quick-search, profile management, and history.
 - **Settings** — Venue, DJ, banner, and general app settings (theme, etc.).
 - **Display** — Controls the audience-facing display window(s)/monitor output.

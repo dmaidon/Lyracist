@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 08:51:00 -> Fix CS8799 accessibility modifier on partial property change callbacks
+// Edited on Sep 17, 2026 @ 23:31:00 -> Exclude IsSkipped performers from active rotation display
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -131,14 +131,14 @@ namespace KSRotation.ViewModels
 
             // Find the explicitly-marked current singer; fall back to the first active one.
             SingerEntry? current = Lyracist.Shared.RotationHelpers.GetCurrentSinger(rotation)
-                                ?? rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound));
+                                ?? rotation.FirstOrDefault(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
 
             if (current != null && IsLastRound && current.HasSungInLastRound)
             {
                 current = null;
             }
 
-            List<SingerEntry> activeRotation = [.. rotation.Where(s => !s.IsInactive && !s.IsPaused && (!IsLastRound || !s.HasSungInLastRound))];
+            List<SingerEntry> activeRotation = [.. rotation.Where(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound))];
 
             if (current == null)
             {

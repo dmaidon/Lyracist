@@ -1,6 +1,4 @@
-// Edited on Sep 7, 2026 @ 09:40:00 -> Add shared singer-name/song matching helpers (NormalizeForComparison,
-// IsSameSingerName, IsSameSong, IsSameSongLenient), consolidating what used to be near-identical hand-written
-// copies independently duplicated across KSRotation and Lyracist (and up to 4x within KSRotation alone).
+// Edited on Sep 17, 2026 @ 23:31:00 -> Add Singer Skip support to rotation advancement, next highlights, wait calculations, and rollover
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -356,7 +354,7 @@ namespace Lyracist.Shared
             for (int i = 0; i < count; i++)
             {
                 T s = singers[i];
-                if (s.IsCurrent && !s.IsInactive && !s.IsPaused)
+                if (s.IsCurrent && !s.IsInactive && !s.IsPaused && !s.IsSkipped)
                     return s;
             }
             return null;
@@ -382,7 +380,7 @@ namespace Lyracist.Shared
             for (int i = 0; i < count; i++)
             {
                 T s = singers[i];
-                if (!s.IsInactive && !s.IsPaused)
+                if (!s.IsInactive && !s.IsPaused && !s.IsSkipped)
                     activeCount++;
             }
             return activeCount;
@@ -425,7 +423,7 @@ namespace Lyracist.Shared
             for (int i = 1; i < count; i++)
             {
                 T candidate = singers[(startIndex + i) % count];
-                if (!candidate.IsInactive && !candidate.IsPaused && (!isLastRound || !candidate.HasSungInLastRound))
+                if (!candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!isLastRound || !candidate.HasSungInLastRound))
                 {
                     candidate.IsNext = true;
                     return;
@@ -482,6 +480,10 @@ namespace Lyracist.Shared
             {
                 entry.IsPaused = false;
             }
+            if (entry.IsSkipped)
+            {
+                entry.IsSkipped = false;
+            }
 
             ClearHighlights(singers);
 
@@ -498,7 +500,7 @@ namespace Lyracist.Shared
             }
             else
             {
-                if (previousCurrent != null && previousCurrent != entry && !previousCurrent.IsInactive && !previousCurrent.IsPaused
+                if (previousCurrent != null && previousCurrent != entry && !previousCurrent.IsInactive && !previousCurrent.IsPaused && !previousCurrent.IsSkipped
                     && (!isLastRound || !previousCurrent.HasSungInLastRound))
                 {
                     previousCurrent.IsNext = true;
@@ -512,11 +514,13 @@ namespace Lyracist.Shared
 
         /// <summary>
         /// Advances the rotation after <paramref name="finishedEntry"/> has completed their performance.
-        /// Clears IsCurrent on all singers, finds the first active non-paused singer sequentially AFTER
+        /// Clears IsCurrent on all singers, finds the first active non-paused non-skipped singer sequentially AFTER
         /// <paramref name="finishedEntry"/> (wrapping around the list to the top), promotes that singer to
         /// current, and updates <see cref="IRotationSinger.IsNext"/> highlights accordingly.
         /// If <paramref name="floatCurrentToTop"/> is true, moves <paramref name="finishedEntry"/> to the end of the active queue
         /// and ensures the next promoted singer is positioned at index 0.
+        /// When advancing reaches or crosses the round anchor (<see cref="IRotationSinger.IsRotationStart"/>),
+        /// all active singers who were passed over in that round have <see cref="IRotationSinger.IsSkipped"/> reset to false.
         /// </summary>
         public static T? AdvanceRotationAfterFinished<T>(IList<T> singers, T finishedEntry, bool floatCurrentToTop = false, bool isLastRound = false) where T : class, IRotationSinger
         {
@@ -528,13 +532,31 @@ namespace Lyracist.Shared
                 int currentIndex = singers.IndexOf(finishedEntry);
                 int count = singers.Count;
                 T? nextCurrent = null;
+                bool passedRoundAnchor = false;
+
+                int anchorIndex = -1;
+                for (int i = 0; i < count; i++)
+                {
+                    if (singers[i].IsRotationStart)
+                    {
+                        anchorIndex = i;
+                        break;
+                    }
+                }
+                if (anchorIndex == -1 && count > 0) anchorIndex = 0;
 
                 if (currentIndex >= 0 && count > 0)
                 {
                     for (int i = 1; i < count; i++)
                     {
-                        T candidate = singers[(currentIndex + i) % count];
-                        if (candidate != finishedEntry && !candidate.IsInactive && !candidate.IsPaused && (!isLastRound || !candidate.HasSungInLastRound))
+                        int candidateIdx = (currentIndex + i) % count;
+                        if (candidateIdx == anchorIndex)
+                        {
+                            passedRoundAnchor = true;
+                        }
+
+                        T candidate = singers[candidateIdx];
+                        if (candidate != finishedEntry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!isLastRound || !candidate.HasSungInLastRound))
                         {
                             nextCurrent = candidate;
                             break;
@@ -546,6 +568,17 @@ namespace Lyracist.Shared
 
                 if (nextCurrent != null)
                 {
+                    if (passedRoundAnchor || nextCurrent.IsRotationStart)
+                    {
+                        for (int i = 0; i < singers.Count; i++)
+                        {
+                            if (singers[i] != nextCurrent && singers[i].IsSkipped)
+                            {
+                                singers[i].IsSkipped = false;
+                            }
+                        }
+                    }
+
                     nextCurrent.IsCurrent = true;
                     MarkNextSinger(singers, nextCurrent, isLastRound);
                 }
@@ -575,14 +608,46 @@ namespace Lyracist.Shared
                     }
                 }
 
+                // If any skipped singers are at the top of the queue, they are passed over for this round;
+                // move them to the bottom of the active queue to preserve relative rotation order.
+                int maxMoves = singers.Count;
+                while (maxMoves-- > 0 && singers.Count > 1)
+                {
+                    T top = singers[0];
+                    if (!top.IsInactive && !top.IsPaused && top.IsSkipped)
+                    {
+                        int targetIdx = singers.Count - 1;
+                        for (int i = 0; i < singers.Count; i++)
+                        {
+                            if (singers[i].IsInactive)
+                            {
+                                targetIdx = i - 1;
+                                break;
+                            }
+                        }
+                        if (targetIdx > 0)
+                        {
+                            MoveSingerInList(singers, 0, targetIdx);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
                 ClearHighlights(singers);
 
-                // Find the first active non-paused singer in the reordered list
+                // Find the first active non-paused non-skipped singer in the reordered list
                 T? nextCurrent = null;
                 for (int i = 0; i < singers.Count; i++)
                 {
                     T candidate = singers[i];
-                    if (!candidate.IsInactive && !candidate.IsPaused && (!isLastRound || !candidate.HasSungInLastRound))
+                    if (!candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!isLastRound || !candidate.HasSungInLastRound))
                     {
                         nextCurrent = candidate;
                         break;
@@ -597,6 +662,18 @@ namespace Lyracist.Shared
                         MoveSingerInList(singers, nextIdx, 0);
                     }
                     nextCurrent.IsCurrent = true;
+
+                    if (nextCurrent.IsRotationStart)
+                    {
+                        for (int i = 0; i < singers.Count; i++)
+                        {
+                            if (singers[i] != nextCurrent && singers[i].IsSkipped)
+                            {
+                                singers[i].IsSkipped = false;
+                            }
+                        }
+                    }
+
                     MarkNextSinger(singers, nextCurrent, isLastRound);
                 }
 
@@ -654,7 +731,7 @@ namespace Lyracist.Shared
                 T candidate = singers[(startIndex + i) % count];
                 if (candidate == current) continue;
 
-                if (candidate.IsInactive || candidate.IsPaused || (isLastRound && candidate.HasSungInLastRound))
+                if (candidate.IsInactive || candidate.IsPaused || candidate.IsSkipped || (isLastRound && candidate.HasSungInLastRound))
                 {
                     candidate.EstimatedWaitMinutes = 0;
                     continue;
@@ -671,7 +748,7 @@ namespace Lyracist.Shared
         }
 
         /// <summary>
-        /// Gets up to <paramref name="maxCount"/> active, non-paused singers sequentially following <paramref name="currentEntry"/>.
+        /// Gets up to <paramref name="maxCount"/> active, non-paused, non-skipped singers sequentially following <paramref name="currentEntry"/>.
         /// </summary>
         public static List<T> GetNextActiveSingers<T>(IList<T> singers, T currentEntry, int maxCount, bool isLastRound = false) where T : class, IRotationSinger
         {
@@ -688,12 +765,24 @@ namespace Lyracist.Shared
             for (int i = 1; i <= count && list.Count < maxCount; i++)
             {
                 T candidate = singers[(startIndex + i) % count];
-                if (candidate != currentEntry && !candidate.IsInactive && !candidate.IsPaused && (!isLastRound || !candidate.HasSungInLastRound))
+                if (candidate != currentEntry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!isLastRound || !candidate.HasSungInLastRound))
                 {
                     list.Add(candidate);
                 }
             }
             return list;
+        }
+
+        /// <summary>
+        /// Resets the <see cref="IRotationSinger.IsSkipped"/> flag on all singers in <paramref name="singers"/>.
+        /// </summary>
+        public static void ResetSkippedSingers<T>(IList<T> singers) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+            for (int i = 0; i < singers.Count; i++)
+            {
+                singers[i].IsSkipped = false;
+            }
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-// Edited on Sep 3, 2026 @ 23:48:45 -> Add HasSungInLastRound property for Last Round mode
+// Edited on Sep 17, 2026 @ 23:31:00 -> Add IsSkipped property for single-round singer skip
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -117,6 +117,9 @@ namespace KSRotation.Models
 
         [ObservableProperty]
         public partial bool IsPaused { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsSkipped { get; set; }
 
         [ObservableProperty]
         public partial bool IsMusic { get; set; }

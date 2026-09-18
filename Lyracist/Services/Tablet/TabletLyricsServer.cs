@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 08:55:00 -> Enforce session schedule and last request cutoff on portal and kiosk endpoints
+// Edited on Sep 17, 2026 @ 23:31:00 -> Include isSkipped in queue payload
 using System;
 using System.IO;
 using System.Linq;
@@ -994,6 +994,7 @@ public class TabletLyricsServer(
             isNext = s.IsNext,
             isRotationStart = s.IsRotationStart,
             isPaused = s.IsPaused,
+            isSkipped = s.IsSkipped,
             isInactive = s.IsInactive
         }).ToList();
     }
