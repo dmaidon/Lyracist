@@ -695,6 +695,49 @@ namespace Lyracist.Shared
                 int oldIdx = singers.IndexOf(finishedEntry);
                 int count = singers.Count;
 
+                // Determine the next current singer and whether advancing crosses the round anchor,
+                // using original positions before any reordering below (mirrors the non-float branch's
+                // anchor math so skip flags clear consistently in both modes).
+                T? nextCurrent = designatedNext;
+                bool passedRoundAnchor = false;
+
+                int anchorIndex = -1;
+                for (int i = 0; i < count; i++)
+                {
+                    if (singers[i].IsRotationStart)
+                    {
+                        anchorIndex = i;
+                        break;
+                    }
+                }
+
+                if (nextCurrent == null && oldIdx >= 0 && count > 0)
+                {
+                    for (int i = 1; i < count; i++)
+                    {
+                        int candidateIdx = (oldIdx + i) % count;
+                        if (candidateIdx == anchorIndex)
+                        {
+                            passedRoundAnchor = true;
+                        }
+
+                        T candidate = singers[candidateIdx];
+                        if (candidate != finishedEntry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!isLastRound || !candidate.HasSungInLastRound))
+                        {
+                            nextCurrent = candidate;
+                            break;
+                        }
+                    }
+                }
+                else if (nextCurrent != null && oldIdx >= 0 && count > 0)
+                {
+                    int nextIdx = singers.IndexOf(nextCurrent);
+                    if (anchorIndex >= 0 && ((oldIdx < anchorIndex && anchorIndex <= nextIdx) || (oldIdx > nextIdx && (anchorIndex > oldIdx || anchorIndex <= nextIdx))))
+                    {
+                        passedRoundAnchor = true;
+                    }
+                }
+
                 // Move finishedEntry to the bottom of the active queue (before any inactive singers,
                 // or to the inactive section at the bottom if finishedEntry is now inactive)
                 if (oldIdx >= 0 && count > 1)
@@ -751,8 +794,7 @@ namespace Lyracist.Shared
 
                 ClearHighlights(singers);
 
-                // If a designated next singer was identified, promote them; otherwise find the first active non-paused non-skipped singer
-                T? nextCurrent = designatedNext;
+                // Fallback: if no eligible singer was identified above (e.g. designatedNext became ineligible), find the first eligible singer.
                 if (nextCurrent == null)
                 {
                     for (int i = 0; i < singers.Count; i++)
@@ -775,7 +817,7 @@ namespace Lyracist.Shared
                     }
                     nextCurrent.IsCurrent = true;
 
-                    if (nextCurrent.IsRotationStart)
+                    if (passedRoundAnchor || nextCurrent.IsRotationStart)
                     {
                         for (int i = 0; i < singers.Count; i++)
                         {

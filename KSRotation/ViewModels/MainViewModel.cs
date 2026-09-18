@@ -1950,39 +1950,14 @@ namespace KSRotation.ViewModels
             try
             {
                 bool skipping = !entry.IsSkipped && entry.IsCurrent;
-                SingerEntry? nextCurrent = null;
-
-                if (skipping)
-                {
-                    // If the current performer is being skipped, find the next eligible singer to promote
-                    nextCurrent = Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
-
-                    if (nextCurrent == null)
-                    {
-                        int currentIndex = Singers.IndexOf(entry);
-                        int count = Singers.Count;
-                        for (int i = 1; i < count; i++)
-                        {
-                            SingerEntry candidate = Singers[(currentIndex + i) % count];
-                            if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!IsLastRound || !candidate.HasSungInLastRound))
-                            {
-                                nextCurrent = candidate;
-                                break;
-                            }
-                        }
-                    }
-                }
 
                 entry.IsSkipped = !entry.IsSkipped;
 
-                if (entry.IsSkipped && entry.IsCurrent)
+                // If the current performer is being skipped, advance rotation to the next eligible singer,
+                // relocating the skipped singer the same way a finished singer would be (matches Lyracist).
+                if (skipping)
                 {
-                    entry.IsCurrent = false;
-                }
-
-                if (skipping && nextCurrent != null)
-                {
-                    RotationHelpers.SetCurrentSinger(Singers, nextCurrent, FloatCurrentSingerToTop, isLastRound: IsLastRound);
+                    RotationHelpers.AdvanceRotationAfterFinished(Singers, entry, FloatCurrentSingerToTop, isLastRound: IsLastRound);
                 }
 
                 UpdateNextSingerHighlight();
