@@ -19,6 +19,7 @@
             --blue-glow: #3B82F6;
             --green-glow: #10B981;
             --purple-glow: #8B5CF6;
+            --orange-glow: #D97706;
             --border-color: rgba(255, 255, 255, 0.08);
             --border-card: rgba(255, 255, 255, 0.12);
             --red-flag: #DC2626;
@@ -601,7 +602,7 @@
                 <div class="spotlight-badge badge-now">🎙️ Now Performing</div>
                 <div class="now-performer-name">
                     <span class="rotation-start-badge" id="now-rotation-start-badge" style="display: none;" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>
-                    <span class="rotation-start-badge" id="now-special-badge" style="display: none; background: #8B5CF6;" title="Special Performer (One-Time)">⭐ SPECIAL</span>
+                    <span class="rotation-start-badge" id="now-special-badge" style="display: none; background: var(--purple-glow);" title="Special Performer (One-Time)">⭐ SPECIAL</span>
                     <span id="now-singer-name">Stage is Open</span>
                     <span class="now-duet-tag" id="now-duet-tag" style="display: none;"></span>
                 </div>
@@ -616,7 +617,7 @@
                 <div class="spotlight-badge badge-next">⏭️ Up Next</div>
                 <div class="next-performer-name">
                     <span class="rotation-start-badge" id="next-rotation-start-badge" style="display: none;" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>
-                    <span class="rotation-start-badge" id="next-special-badge" style="display: none; background: #8B5CF6;" title="Special Performer (One-Time)">⭐ SPECIAL</span>
+                    <span class="rotation-start-badge" id="next-special-badge" style="display: none; background: var(--purple-glow);" title="Special Performer (One-Time)">⭐ SPECIAL</span>
                     <span id="next-singer-name">Ready for singers</span>
                     <span class="now-duet-tag" id="next-duet-tag" style="display: none;"></span>
                 </div>
@@ -864,8 +865,8 @@
                             const songDesc = s.isMusic ? "♪ Background Music" : (s.song ? `"${escapeHtml(s.song)}"${s.artist ? ' by ' + escapeHtml(s.artist) : ''}` : "Choosing a song");
                             const pausedClass = (s.isPaused || s.isSkipped) ? ' style="opacity: 0.6;"' : '';
                             const pausedBadge = s.isPaused ? ' <span style="font-size:0.7rem; background:#64748B; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">PAUSED</span>' : '';
-                            const skippedBadge = s.isSkipped ? ' <span style="font-size:0.7rem; background:#D97706; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">SKIP</span>' : '';
-                            const specialBadge = s.isSpecial ? ' <span style="font-size:0.7rem; background:#8B5CF6; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">⭐ SPECIAL</span>' : '';
+                            const skippedBadge = s.isSkipped ? ' <span style="font-size:0.7rem; background:var(--orange-glow); color:white; padding:2px 6px; border-radius:4px; font-weight:700;">SKIP</span>' : '';
+                            const specialBadge = s.isSpecial ? ' <span style="font-size:0.7rem; background:var(--purple-glow); color:white; padding:2px 6px; border-radius:4px; font-weight:700;">⭐ SPECIAL</span>' : '';
                             const rotationStartBadge = s.isRotationStart ? '<span class="rotation-start-badge" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>' : '';
 
                             html += `

@@ -19,6 +19,7 @@
             --card-hover: #27354E;
             --primary: #8B5CF6;
             --primary-hover: #7C3AED;
+            --orange: #D97706;
             --accent-pink: #EC4899;
             --text-main: #F8FAFC;
             --text-muted: #94A3B8;
@@ -1569,11 +1570,11 @@
                 }
 
                 if (singer.isSkipped) {
-                    badgesHtml += '<span class="badge-tag" style="background:#D97706; color:white;" title="Skipped for this round">Skipped</span> ';
+                    badgesHtml += '<span class="badge-tag" style="background:var(--orange); color:white;" title="Skipped for this round">SKIP</span> ';
                 }
 
                 if (singer.isSpecial) {
-                    badgesHtml += '<span class="badge-tag" style="background:#8B5CF6; color:white;" title="Special Performer (One-Time)">⭐ Special</span> ';
+                    badgesHtml += '<span class="badge-tag" style="background:var(--primary); color:white;" title="Special Performer (One-Time)">⭐ SPECIAL</span> ';
                 }
 
                 let displayName = escapeHtml(singer.name);

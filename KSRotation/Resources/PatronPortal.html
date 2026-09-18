@@ -12,6 +12,7 @@
             --card-bg: #1E293B;
             --primary: #8B5CF6;
             --primary-hover: #7C3AED;
+            --orange: #D97706;
             --text-main: #F8FAFC;
             --text-muted: #94A3B8;
             --gold: #FCD34D;
@@ -841,10 +842,10 @@
                             : '<span class="badge next">Next</span>';
                     }
                     if (singer.isSkipped) {
-                        badge += '<span class="badge" style="background-color: #D97706; color: white; margin-left: 6px;" title="Skipped for this round">Skipped</span>';
+                        badge += '<span class="badge" style="background-color: var(--orange); color: white; margin-left: 6px;" title="Skipped for this round">SKIP</span>';
                     }
                     if (singer.isSpecial) {
-                        badge += '<span class="badge" style="background-color: #8B5CF6; color: white; margin-left: 6px;" title="Special Performer (One-Time)">⭐ Special</span>';
+                        badge += '<span class="badge" style="background-color: var(--primary); color: white; margin-left: 6px;" title="Special Performer (One-Time)">⭐ SPECIAL</span>';
                     }
 
                     if (singer.isMusic) {
