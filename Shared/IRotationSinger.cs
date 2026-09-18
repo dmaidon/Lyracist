@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Add IsSkipped property for single-round singer skip
+// Edited on Sep 18, 2026 @ 08:45:00 -> Add IsSpecial property for one-time performance special singers
 using System;
 
 namespace Lyracist.Shared
@@ -23,6 +23,7 @@ namespace Lyracist.Shared
         bool IsInactive { get; set; }
         bool IsPaused { get; set; }
         bool IsSkipped { get; set; }
+        bool IsSpecial { get; set; }
         bool IsMusic { get; set; }
         bool IsRotationStart { get; set; }
         bool HasSungInLastRound { get; set; }

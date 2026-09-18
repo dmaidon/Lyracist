@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 23:45:00 -> Add Singer Skip support to kiosk queue display -->
+<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer badge to kiosk queue display -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1570,6 +1570,10 @@
 
                 if (singer.isSkipped) {
                     badgesHtml += '<span class="badge-tag" style="background:#D97706; color:white;" title="Skipped for this round">Skipped</span> ';
+                }
+
+                if (singer.isSpecial) {
+                    badgesHtml += '<span class="badge-tag" style="background:#8B5CF6; color:white;" title="Special Performer (One-Time)">⭐ Special</span> ';
                 }
 
                 let displayName = escapeHtml(singer.name);

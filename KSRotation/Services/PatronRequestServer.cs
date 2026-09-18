@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 12:37:00 -> Dynamically inject current DJ and Venue into served billboard.html
+// Edited on Sep 18, 2026 @ 08:46:00 -> Pass isSpecial to onHandleDjAction from JSON
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -491,6 +491,11 @@ namespace KSRotation.Services
                         string duetPartner = root.TryGetProperty("duetPartner", out var dpProp) ? (dpProp.GetString() ?? "") : (root.TryGetProperty("duetPartnerName", out var dpnProp) ? (dpnProp.GetString() ?? "") : "");
                         string song = root.TryGetProperty("song", out var songProp) ? (songProp.GetString() ?? "") : "";
                         string artist = root.TryGetProperty("artist", out var artProp) ? (artProp.GetString() ?? "") : "";
+                        bool isSpecial = root.TryGetProperty("isSpecial", out var specProp) && (specProp.ValueKind == JsonValueKind.True || (specProp.ValueKind == JsonValueKind.String && bool.TryParse(specProp.GetString(), out var spB) && spB));
+                        if (isSpecial && string.IsNullOrEmpty(extraData))
+                        {
+                            extraData = "special";
+                        }
 
                         string error = await _onHandleDjAction(action, targetId, extraData, name, song, artist, duetPartner);
                         if (string.IsNullOrEmpty(error))

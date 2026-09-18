@@ -1,8 +1,17 @@
-<!-- Edited on Sep 18, 2026 @ 08:36:00 -> Add Singer Skip round-scoped rotation bypass feature to KSRotation & KSRotation.Maui Changelog -->
+<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer one-time performance feature to KSRotation & KSRotation.Maui Changelog -->
 
 # Changelog
 
 ## 2026-09-18
+
+- **Special Singer (One-Time Performance) Lifecycle (`MainWindow.xaml`, `MainViewModel.cs`, `KSRotation.Maui`, Web Portals)**:
+  - Added ability to add one-time guest/special singers who perform once and are automatically marked inactive upon song conclusion.
+  - While singing, the performer displays a `⭐ SPECIAL` badge on the DJ screen, detached display, MAUI app, and web portals.
+  - Added "Add Special" button, context menu item `⭐ Mark as Special (One-Time)`, and violet `⭐ SPECIAL` badge in `MainWindow.xaml`.
+  - Added Special checkbox in `AddSingerOverlay` and `EditSingerOverlay`, `⭐` toggle button in row actions, and badges in `MainPage.xaml` and `BillboardView.xaml` (KSRotation.Maui).
+  - Updated remote DJ portal (`dj.html`) with special checkbox in Add modal and `⭐ Special` toggle button in performer cards.
+  - Rotation immediately resumes with the displaced on-deck performer or next sequential singer once the special singer finishes.
+  - Anchor selection ignores special performers to prevent transitory singers from anchoring rounds.
 
 - **Singer Skip Round-Scoped Rotation Bypass (`MainWindow.xaml`, `MainViewModel.cs`, `MainViewModel.Requests.cs`, `KSRotation.Maui`, Web Portals)**:
   - Added single-round Singer Skip capability to bypass performers temporarily stepping away without losing rotation order.

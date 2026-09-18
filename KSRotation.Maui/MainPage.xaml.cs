@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:36:00 -> Add Singer Skip support and OnToggleSingerSkippedClicked
+// Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer support to add/edit and OnToggleSingerSpecialClicked
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -67,6 +67,7 @@ public partial class MainPage : ContentPage
         AddDuetEntry.Text = string.Empty;
         AddSongEntry.Text = string.Empty;
         AddArtistEntry.Text = string.Empty;
+        AddSpecialCheckBox.IsChecked = false;
         AddSingerOverlay.IsVisible = true;
     }
 
@@ -77,8 +78,9 @@ public partial class MainPage : ContentPage
         string duet = AddDuetEntry.Text?.Trim() ?? string.Empty;
         string song = AddSongEntry.Text?.Trim() ?? string.Empty;
         string artist = AddArtistEntry.Text?.Trim() ?? string.Empty;
+        bool isSpecial = AddSpecialCheckBox.IsChecked;
 
-        if (!vm.TryAddPerformer(name, song, artist, duet))
+        if (!vm.TryAddPerformer(name, song, artist, duet, isSpecial))
         {
             await DisplayAlertAsync("Required", "Singer name is required.", "OK");
             return;
@@ -818,6 +820,7 @@ public partial class MainPage : ContentPage
             EditDuetEntry.Text = entry.DuetPartnerName;
             EditSongEntry.Text = entry.Song;
             EditArtistEntry.Text = entry.Artist;
+            EditSpecialCheckBox.IsChecked = entry.IsSpecial;
             EditSingerOverlay.IsVisible = true;
         }
     }
@@ -840,6 +843,7 @@ public partial class MainPage : ContentPage
         _editingSinger.DuetPartnerName = EditDuetEntry.Text?.Trim() ?? string.Empty;
         _editingSinger.Song = EditSongEntry.Text?.Trim() ?? string.Empty;
         _editingSinger.Artist = EditArtistEntry.Text?.Trim() ?? string.Empty;
+        _editingSinger.IsSpecial = EditSpecialCheckBox.IsChecked;
 
         _editingSinger = null;
         EditSingerOverlay.IsVisible = false;
@@ -919,6 +923,15 @@ public partial class MainPage : ContentPage
         {
             var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
             vm.ToggleSkipSingerCommand.Execute(entry);
+        }
+    }
+
+    private void OnToggleSingerSpecialClicked(object? sender, EventArgs e)
+    {
+        if (sender is Button button && button.CommandParameter is KSRotation.Models.SingerEntry entry)
+        {
+            var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
+            vm.ToggleSpecialSingerCommand.Execute(entry);
         }
     }
 

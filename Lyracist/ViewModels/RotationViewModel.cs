@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Add ToggleSkipSinger command and single-round singer skip handling
+// Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer support to AddSinger, DoneSinger, and ToggleSpecialSingerCommand
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -256,6 +256,9 @@ public partial class RotationViewModel : BaseViewModel
     [ObservableProperty]
     private string _newDuetPartnerName = string.Empty;
 
+    [ObservableProperty]
+    private bool _isNewSingerSpecial;
+
     public RotationViewModel(IDisplayService display, IMediaEngine mediaEngine)
     {
         _display = display;
@@ -431,7 +434,7 @@ public partial class RotationViewModel : BaseViewModel
         });
     }
 
-    public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "", string duetPartner = "", bool isMusic = false, double tempo = 1.0)
+    public void AddSinger(string name, string title, string artist, string key, string notes, string source = "Local", string externalLink = "", string duetPartner = "", bool isMusic = false, double tempo = 1.0, bool isSpecial = false)
     {
         name = NameFormatting.ProperCase(name);
         duetPartner = NameFormatting.ProperCase(duetPartner);
@@ -637,7 +640,8 @@ public partial class RotationViewModel : BaseViewModel
             AverageRating = avgRating,
             RatingCount = ratingCount,
             TotalSongsSung = totalSongsSung,
-            IsMusic = isMusic
+            IsMusic = isMusic,
+            IsSpecial = isSpecial
         };
         RotationHelpers.InsertNewSinger(Rotation, newSinger);
         Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
@@ -658,7 +662,8 @@ public partial class RotationViewModel : BaseViewModel
             Name = NameFormatting.ProperCase(NewSingerName),
             DuetPartnerName = NameFormatting.ProperCase(NewDuetPartnerName),
             Notes = NewSingerNotes,
-            Key = NewSingerKey
+            Key = NewSingerKey,
+            IsSpecial = IsNewSingerSpecial
         };
         RotationHelpers.InsertNewSinger(Rotation, newSinger);
         Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
@@ -670,6 +675,7 @@ public partial class RotationViewModel : BaseViewModel
         NewDuetPartnerName = string.Empty;
         NewSingerNotes = string.Empty;
         NewSingerKey = "0";
+        IsNewSingerSpecial = false;
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
@@ -964,6 +970,26 @@ public partial class RotationViewModel : BaseViewModel
         RunRotationOrderChange(() =>
             Lyracist.Shared.RotationHelpers.AdvanceRotationAfterFinished(Rotation, singer, FloatCurrentSingerToTop, isLastRound: IsLastRound));
 
+        // If the singer was a one-time special performer, automatically mark them inactive and transfer to InactiveSingers
+        if (singer.IsSpecial)
+        {
+            Rotation.Remove(singer);
+            if (!InactiveSingers.Contains(singer))
+            {
+                InactiveSingers.Add(singer);
+            }
+            Lyracist.Shared.RotationHelpers.UnlinkSinger(Rotation, singer);
+            if (PendingLinkSinger == singer) PendingLinkSinger = null;
+            Lyracist.Shared.RotationHelpers.EnsureRotationStartFlag(Rotation);
+            Lyracist.Shared.RotationHelpers.EnforceLinkedAdjacency(Rotation);
+            RefreshLinkedPartnerNames();
+            ResolveEstimatedPerformanceSeconds();
+            Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0, enabled: AppSettings.ShowEstimatedWaitTime);
+            RotationStateChanged?.Invoke();
+            _display.UpdateRotation([.. Rotation]);
+            return;
+        }
+
         // 3. Check for pending songs
         if (_pendingSingerSongs.TryGetValue(name, out var list) && list.Count > 0)
         {
@@ -1197,6 +1223,15 @@ public partial class RotationViewModel : BaseViewModel
             Lyracist.Shared.RotationHelpers.RecalculateEstimatedWaits(Rotation, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: AppSettings.DefaultSongLengthMinutes * 60.0, enabled: AppSettings.ShowEstimatedWaitTime);
         }
 
+        RotationStateChanged?.Invoke();
+        _display.UpdateRotation([.. Rotation]);
+    }
+
+    [RelayCommand]
+    private void ToggleSpecialSinger(Singer singer)
+    {
+        if (singer == null) return;
+        singer.IsSpecial = !singer.IsSpecial;
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
     }

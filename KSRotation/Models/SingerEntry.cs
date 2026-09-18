@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Add IsSkipped property for single-round singer skip
+// Edited on Sep 18, 2026 @ 08:46:00 -> Add IsSpecial property for one-time performance special singers
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -120,6 +120,9 @@ namespace KSRotation.Models
 
         [ObservableProperty]
         public partial bool IsSkipped { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsSpecial { get; set; }
 
         [ObservableProperty]
         public partial bool IsMusic { get; set; }

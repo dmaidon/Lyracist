@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:48:00 -> Add unit tests for Singer Skip round-scoped behavior
+// Edited on Sep 18, 2026 @ 08:46:00 -> Add unit tests for Special Singer lifecycle and resumption
 using Lyracist.Models;
 using Lyracist.Shared;
 
@@ -15,6 +15,7 @@ public class RotationHelpersSingerTests
     private static Singer Inactive(string name) => new() { Name = name, IsInactive = true };
     private static Singer Paused(string name) => new() { Name = name, IsPaused = true };
     private static Singer Skipped(string name) => new() { Name = name, IsSkipped = true };
+    private static Singer Special(string name) => new() { Name = name, IsSpecial = true };
 
     [Fact]
     public void SetCurrentSinger_PromotesEntryAndMarksPreviousCurrentAsNext()
@@ -783,6 +784,73 @@ public class RotationHelpersSingerTests
         Assert.False(s1.IsSkipped);
         Assert.False(s2.IsSkipped);
         Assert.False(s3.IsSkipped);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_SpecialSinger_BecomesInactiveAndResumesPreservedNext()
+    {
+        // Setup: Bob was currently singing, Carol was next.
+        // Special guest Dave is inserted for one performance.
+        var bob = new Singer { Name = "Bob", IsCurrent = true, IsRotationStart = true };
+        var carol = Active("Carol");
+        var dave = Special("Dave");
+        var singers = new List<Singer> { bob, carol, dave };
+
+        // Dave is set as current (displacing Bob as Next)
+        RotationHelpers.SetCurrentSinger(singers, dave);
+        Assert.True(dave.IsCurrent);
+        Assert.True(dave.IsSpecial);
+        Assert.True(bob.IsNext);
+
+        // Dave finishes his special performance
+        RotationHelpers.AdvanceRotationAfterFinished(singers, dave, floatCurrentToTop: false);
+
+        // Dave is automatically marked inactive
+        Assert.True(dave.IsInactive);
+        Assert.False(dave.IsCurrent);
+
+        // Rotation resumes with the preserved Next singer (Bob)
+        Assert.True(bob.IsCurrent);
+        Assert.False(bob.IsNext);
+        Assert.True(carol.IsNext);
+    }
+
+    [Fact]
+    public void AdvanceRotationAfterFinished_SpecialSinger_FloatToTop_MovesToInactiveSection()
+    {
+        var alice = new Singer { Name = "Alice", IsRotationStart = true };
+        var specialGuest = new Singer { Name = "Special Guest", IsSpecial = true, IsCurrent = true };
+        var bob = Active("Bob");
+        var singers = new List<Singer> { specialGuest, alice, bob };
+
+        // Advance past special guest in floating mode
+        RotationHelpers.AdvanceRotationAfterFinished(singers, specialGuest, floatCurrentToTop: true);
+
+        // Special guest is marked inactive and placed at the end
+        Assert.True(specialGuest.IsInactive);
+        Assert.False(specialGuest.IsCurrent);
+        Assert.Equal(specialGuest, singers.Last());
+
+        // Alice (the next active singer) is floated to index 0 and marked current
+        Assert.Equal(alice, singers[0]);
+        Assert.True(alice.IsCurrent);
+        Assert.True(bob.IsNext);
+    }
+
+    [Fact]
+    public void EnsureRotationStartFlag_SkipsSpecialSingers()
+    {
+        var special = Special("Guest Star");
+        var alice = Active("Alice");
+        var bob = Active("Bob");
+        var singers = new List<Singer> { special, alice, bob };
+
+        // Call EnsureRotationStartFlag when no one has it
+        RotationHelpers.EnsureRotationStartFlag(singers);
+
+        // Special guest should NOT receive the anchor; Alice should
+        Assert.False(special.IsRotationStart);
+        Assert.True(alice.IsRotationStart);
     }
 }
 

@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:41:00 -> Add toggle-skip web action and serialize isSkipped
+// Edited on Sep 18, 2026 @ 08:46:00 -> Add toggle-special web action, serialize isSpecial, and route isSpecial through HandleDjAction
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -403,6 +403,7 @@ namespace KSRotation.ViewModels
                 isInactive = s.IsInactive,
                 isPaused = s.IsPaused,
                 isSkipped = s.IsSkipped,
+                isSpecial = s.IsSpecial,
                 isMusic = s.IsMusic,
                 isRotationStart = s.IsRotationStart,
                 hasSungInLastRound = s.HasSungInLastRound,
@@ -728,6 +729,14 @@ namespace KSRotation.ViewModels
                         ToggleSkipSinger(singer);
                         return "";
                     }
+                case "toggle-special":
+                    {
+                        var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
+                        if (singer == null) return "Singer not found.";
+
+                        ToggleSpecialSinger(singer);
+                        return "";
+                    }
                 case "delete":
                     {
                         var singer = Singers.FirstOrDefault(s => string.Equals(s.Id.ToString(), targetId, StringComparison.OrdinalIgnoreCase));
@@ -815,7 +824,8 @@ namespace KSRotation.ViewModels
                 case "add-singer":
                 case "add-performer":
                     {
-                        if (!TryAddPerformer(name, song, artist, duetPartner)) return "Singer name is required.";
+                        bool isSpecial = string.Equals(extraData, "special", StringComparison.OrdinalIgnoreCase);
+                        if (!TryAddPerformer(name, song, artist, duetPartner, isSpecial)) return "Singer name is required.";
 
                         RebuildRotationJsonCacheNow();
                         QueueSaveDatabase();

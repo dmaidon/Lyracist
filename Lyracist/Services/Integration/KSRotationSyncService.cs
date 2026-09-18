@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Include isSkipped in KSRotationSyncService DTO and sync comparison
+// Edited on Sep 18, 2026 @ 08:46:00 -> Include isSpecial in KSRotationSyncService DTO and sync comparison
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -252,6 +252,7 @@ namespace Lyracist.Services.Integration
                     singer.IsRotationStart = item.isRotationStart;
                     singer.HasSungInLastRound = item.hasSungInLastRound;
                     singer.IsSkipped = item.isSkipped;
+                    singer.IsSpecial = item.isSpecial;
 
                     newRotation.Add(singer);
                 }
@@ -302,7 +303,8 @@ namespace Lyracist.Services.Integration
                     s.isMusic != c.IsMusic ||
                     s.isRotationStart != c.IsRotationStart ||
                     s.hasSungInLastRound != c.HasSungInLastRound ||
-                    s.isSkipped != c.IsSkipped)
+                    s.isSkipped != c.IsSkipped ||
+                    s.isSpecial != c.IsSpecial)
                 {
                     return false;
                 }
@@ -349,6 +351,7 @@ namespace Lyracist.Services.Integration
             public bool isRotationStart { get; set; }
             public bool hasSungInLastRound { get; set; }
             public bool isSkipped { get; set; }
+            public bool isSpecial { get; set; }
         }
     }
 }

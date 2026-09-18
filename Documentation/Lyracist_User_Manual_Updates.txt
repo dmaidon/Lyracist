@@ -1925,3 +1925,10 @@ Section: Singer Skip Round-Scoped Rotation Bypass (Updated Sep 17, 2026)
 - Automatic Round-Scoped Rollover: When rotation advances and the round completes (crossing or reaching the '⚓ Anchor' singer), the 'IsSkipped' flag automatically resets so the performer sings normally in the following round without requiring manual DJ intervention.
 - Manual Unskip: The DJ can toggle 'Skip' off at any time using the row button, context menu, or remote DJ portal. If the currently performing singer is skipped, the rotation immediately advances to the next eligible performer.
 - Cross-Platform UI & Indicators: Supported with visual '⏭ SKIPPED' amber badges, quick action toggle buttons, and synchronized wait-time recalculations across Lyracist, KSRotation, Remote DJ Portal, Audience Billboard, Kiosk, and Patron Mobile Portal.
+
+Section: Special Singer (One-Time Performance) (Updated Sep 18, 2026)
+- Special / Guest Performer Support: Accommodates guest singers or one-off performances who only perform a single song without joining the ongoing rotation.
+- Visual Highlight While Performing: Displays a prominent '⭐ SPECIAL' badge on stage, detached rotation displays, external audience billboards, TV web-casts, tablet kiosks, and mobile portals.
+- Automatic Inactive Transition: Immediately following the conclusion of their song, the special performer is marked inactive automatically.
+- Seamless Queue Resumption: The rotation immediately resumes with the displaced performer or next sequential singer as if the guest was never in the rotation.
+- Rotation Anchor Immunity: Round anchor allocation algorithms ignore special performers so round tracking boundaries are never anchored to transitory guest singers.

@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Add IsSkipped property for single-round singer skip
+// Edited on Sep 18, 2026 @ 08:46:00 -> Add IsSpecial property for one-time performance special singers
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -76,6 +76,9 @@ public partial class Singer : ObservableObject, Lyracist.Shared.IRotationSinger
 
     [ObservableProperty]
     private bool _isSkipped = false;
+
+    [ObservableProperty]
+    private bool _isSpecial = false;
 
     [ObservableProperty]
     private bool _isInactive = false;

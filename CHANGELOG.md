@@ -1,5 +1,5 @@
-<!-- Edited on Sep 18, 2026 @ 08:36:00 -> Add Singer Skip round-scoped rotation bypass feature to Changelog (including KSRotation.Maui) -->
-Last Edit: Sep 18, 2026 - Singer Skip Feature
+<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer one-time performance feature to Changelog -->
+Last Edit: Sep 18, 2026 - Special Singer Feature
 
 # Changelog
 
@@ -8,6 +8,20 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.18.0] - 2026-09-18
 
 ### Added
+- **Special Singer (One-Time Performance) Lifecycle (`Shared`, `Lyracist`, `KSRotation`, `KSRotation.Maui`, Web Portals)**:
+  - Added ability to designate one-time guest or special singers who perform for a single round only.
+  - While singing, the performer is flagged and badged with "⭐ Special" across all DJ consoles, audience billboards, kiosks, and patron web portals.
+  - Once their performance concludes (or when marked Done/Finished), the special singer is automatically marked inactive, and normal rotation resumes immediately as if the special guest was never in the rotation queue.
+  - Added `bool IsSpecial { get; set; }` across `IRotationSinger`, `Singer`, `SingerEntry`, `RotationItemDto`, `DisplayRotationEntry`, and `DisplayViewModel`.
+  - Updated `RotationHelpers.cs`:
+    - `EnsureRotationStartFlag`: Excludes special singers when auto-assigning round anchors so round tracking is never attached to a transient performer.
+    - `HandleSingerRetiredOrRemoved`: Prioritizes non-special performers when reassigning rotation anchors.
+    - `AdvanceRotationAfterFinished`: Checks `finishedEntry.IsSpecial`. When true, automatically marks `IsInactive = true`, clears `IsCurrent`, relocates the performer to the inactive section in float mode, and immediately promotes the designated next singer to current.
+  - Added "⭐ Special (One-Time Performance)" checkbox and toggle commands in Lyracist (`RotationPage.xaml`, `KaraokePage.xaml`, `RotationWindow.xaml`).
+  - Added "Add Special" button, context menu option, and violet `⭐ SPECIAL` badges in KSRotation desktop (`MainWindow.xaml`, `SingerDisplayWindow.xaml`).
+  - Added Special checkbox to Add/Edit overlays, `⭐` action toggle button, and status badges in KSRotation.Maui (`MainPage.xaml`, `MainPage.xaml.cs`, `BillboardView.xaml`).
+  - Updated web portals (`dj.html`, `billboard.html`, `kiosk.html`, `PatronPortal.html`): remote DJs can add special singers via modal or toggle existing singers, with visual `⭐ SPECIAL` badges across all audience screens.
+  - Added unit test coverage in `RotationHelpersSingerTests.cs` validating special singer completion, inactive transition, anchor protection, and sequential/float resumption.
 - **Singer Skip Round-Scoped Rotation Bypass (`Shared`, `Lyracist`, `KSRotation`, `KSRotation.Maui`, `Web UI`)**:
   - Implemented a single-round **Singer Skip** feature allowing DJs to pass over performers who temporarily step away without forfeiting their position in the rotation order.
   - Added `bool IsSkipped { get; set; }` across `IRotationSinger`, `Singer`, `SingerEntry`, and `RotationItemDto` models.

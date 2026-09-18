@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 23:31:00 -> Add SKIPPED badge and Skip Singer button to rotation list -->
+<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer checkbox, badge, and toggle button to rotation page -->
 <Page x:Class="Lyracist.Views.Pages.RotationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -70,7 +70,9 @@
                         <ui:TextBox Text="{Binding NewSingerKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. +2, -1, 0..." Margin="0,0,0,10"/>
 
                         <TextBlock Text="Notes / Song Request" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <ui:TextBox Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Details..." MinLines="2" MaxLines="3" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12"/>
+                        <ui:TextBox Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Details..." MinLines="2" MaxLines="3" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10"/>
+
+                        <CheckBox Content="Special (One-Time Performance)" IsChecked="{Binding IsNewSingerSpecial}" Margin="0,0,0,12" ToolTip="Special performer who automatically becomes inactive after their single song"/>
 
                         <ui:Button Content="Add to Rotation" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddSingerCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" HorizontalAlignment="Stretch"/>
                     </StackPanel>
@@ -272,6 +274,9 @@
                                                 <Border Visibility="{Binding IsSkipped, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#6D28D9" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Singer skipped for this round (retains place in rotation)">
                                                     <TextBlock Text="SKIPPED" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
                                                 </Border>
+                                                <Border Visibility="{Binding IsSpecial, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#D97706" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Special Performer (one performance only - automatically becomes inactive after singing)">
+                                                    <TextBlock Text="⭐ SPECIAL" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                                                </Border>
                                                 <Border Visibility="{Binding HasSungInLastRound, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#5C1010" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Singer has completed their song in the last round">
                                                     <TextBlock Text="DONE (LAST ROUND)" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
                                                 </Border>
@@ -382,6 +387,26 @@
                                                             <DataTrigger Binding="{Binding IsSkipped}" Value="True">
                                                                 <Setter Property="Appearance" Value="Primary" />
                                                                 <Setter Property="ToolTip" Value="Unskip performer (restore for this round)" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ui:Button.Style>
+                                            </ui:Button>
+
+                                            <!-- Special Performer Button -->
+                                            <ui:Button Command="{Binding DataContext.ToggleSpecialSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                                                       CommandParameter="{Binding}" 
+                                                       Margin="0,0,2,0"
+                                                       Padding="4">
+                                                <ui:Button.Style>
+                                                    <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                                        <Setter Property="Icon" Value="{ui:SymbolIcon Star20}" />
+                                                        <Setter Property="ToolTip" Value="Mark as Special performer (one performance only - automatically becomes inactive after singing)" />
+                                                        <Setter Property="Appearance" Value="Secondary" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsSpecial}" Value="True">
+                                                                <Setter Property="Appearance" Value="Caution" />
+                                                                <Setter Property="ToolTip" Value="Remove Special status" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>

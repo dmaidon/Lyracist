@@ -1,4 +1,4 @@
-<!-- Edited on Sep 18, 2026 @ 08:36:00 -> Add Singer Skip badge, button, and styling trigger -->
+<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer badge, button, and popup options in MainPage.xaml -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -144,6 +144,9 @@
                                                 </Border>
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#D97706" Padding="4,2" IsVisible="{Binding IsSkipped}" StrokeThickness="0" ToolTipProperties.Text="Singer is skipped for this round">
                                                     <Label Text="SKIPPED" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                                                </Border>
+                                                <Border StrokeShape="RoundRectangle 4" BackgroundColor="#8B5CF6" Padding="4,2" IsVisible="{Binding IsSpecial}" StrokeThickness="0" ToolTipProperties.Text="Special one-time performer">
+                                                    <Label Text="⭐ SPECIAL" TextColor="White" FontSize="9" FontAttributes="Bold" />
                                                 </Border>
 
                                                 <Label Text="-" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="13" VerticalOptions="Center">
@@ -307,6 +310,20 @@
                                                         <Setter Property="BorderColor" Value="#F59E0B" />
                                                         <Setter Property="TextColor" Value="#F59E0B" />
                                                         <Setter Property="ToolTipProperties.Text" Value="Unskip singer for this round" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsInactive}" Value="True">
+                                                        <Setter Property="IsEnabled" Value="False" />
+                                                        <Setter Property="Opacity" Value="0.4" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
+
+                                            <!-- Toggle Special (One-Time Singer) -->
+                                            <Button Text="⭐" Clicked="OnToggleSingerSpecialClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#8B5CF6" BorderWidth="1" TextColor="#8B5CF6" FontSize="14" FontAttributes="Bold" HeightRequest="28" Padding="6,0" ToolTipProperties.Text="Toggle special one-time performer status">
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsSpecial}" Value="True">
+                                                        <Setter Property="BackgroundColor" Value="#8B5CF6" />
+                                                        <Setter Property="TextColor" Value="White" />
                                                     </DataTrigger>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsInactive}" Value="True">
                                                         <Setter Property="IsEnabled" Value="False" />
@@ -666,7 +683,12 @@
                     <Entry x:Name="AddSongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
 
                     <Label Text="Artist" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
-                    <Entry x:Name="AddArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,14" />
+                    <Entry x:Name="AddArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,10" />
+
+                    <HorizontalStackLayout Spacing="6" Margin="0,0,0,14">
+                        <CheckBox x:Name="AddSpecialCheckBox" Scale="0.85" />
+                        <Label Text="Special (One-Time Performance)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
 
                     <Button Text="Add" Clicked="OnSaveAddPerformerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
                     <Button Text="Cancel" Clicked="OnCancelAddPerformerClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" HeightRequest="36" />
@@ -691,7 +713,12 @@
                     <Entry x:Name="EditSongEntry" Placeholder="Song Title" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,8" />
 
                     <Label Text="Artist" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
-                    <Entry x:Name="EditArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,14" />
+                    <Entry x:Name="EditArtistEntry" Placeholder="Artist Name" TextColor="{AppThemeBinding Light=Black, Dark=White}" PlaceholderColor="{AppThemeBinding Light=#94A3B8, Dark=#70768F}" Margin="0,0,0,10" />
+
+                    <HorizontalStackLayout Spacing="6" Margin="0,0,0,14">
+                        <CheckBox x:Name="EditSpecialCheckBox" Scale="0.85" />
+                        <Label Text="Special (One-Time Performance)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
 
                     <Button Text="Save" Clicked="OnSaveEditSingerClicked" BackgroundColor="#6D28D9" TextColor="White" FontAttributes="Bold" HeightRequest="36" Margin="0,0,0,8" />
                     <Button Text="Cancel" Clicked="OnCancelEditSingerClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" HeightRequest="36" />
@@ -776,6 +803,19 @@
                                         <VerticalStackLayout Spacing="1" VerticalOptions="Center">
                                             <Label Text="Paused / Dimmed Row" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
                                             <Label Text="Performer stepped out; skipped without deleting" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <!-- Special Singer -->
+                                <Border StrokeShape="RoundRectangle 6" BackgroundColor="{AppThemeBinding Light=#EDE9FE, Dark=#1E1B4B}" StrokeThickness="0" Padding="8,6">
+                                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                        <Border StrokeShape="RoundRectangle 4" BackgroundColor="#8B5CF6" Padding="5,2" StrokeThickness="0" VerticalOptions="Center">
+                                            <Label Text="⭐ SPECIAL" TextColor="White" FontSize="10" FontAttributes="Bold" />
+                                        </Border>
+                                        <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                            <Label Text="Special (One-Time)" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" FontSize="11" FontAttributes="Bold" />
+                                            <Label Text="Performs once then automatically becomes inactive" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="10" />
                                         </VerticalStackLayout>
                                     </HorizontalStackLayout>
                                 </Border>

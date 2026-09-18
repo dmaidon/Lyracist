@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 23:42:00 -> Add Singer Skip support to ContextMenu, ListView, and badges -->
+<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer support to ContextMenu, ListView, and badges -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -124,6 +124,19 @@
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Path=PlacementTarget.DataContext.IsSkipped, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Value="True">
                                             <Setter Property="Header" Value="▶ Unskip Singer" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Command="{Binding Path=PlacementTarget.Tag.ToggleSpecialSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="⭐ Mark as Special (One-Time)" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=PlacementTarget.DataContext.IsSpecial, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Value="True">
+                                            <Setter Property="Header" Value="⭐ Clear Special Status" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -830,6 +843,15 @@
                                                                 Visibility="{Binding IsSkipped, Converter={StaticResource BoolToVis}}">
                                                             <TextBlock Text="⏭ SKIPPED" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                                                         </Border>
+                                                        <Border Background="#8B5CF6"
+                                                                CornerRadius="4"
+                                                                Padding="4,2"
+                                                                Margin="0,0,4,0"
+                                                                VerticalAlignment="Center"
+                                                                ToolTip="Special one-time performer - will become inactive after singing"
+                                                                Visibility="{Binding IsSpecial, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock Text="⭐ SPECIAL" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                                                        </Border>
                                                     </StackPanel>
                                                     <TextBox
                                                     Grid.Column="1"
@@ -1063,6 +1085,13 @@
                             Click="AddSingerButton_Click"
                             Width="120"
                             Margin="0,0,12,0" />
+                            <Button
+                            Content="Add Special"
+                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                            Command="{Binding AddSpecialSingerCommand}"
+                            Width="120"
+                            Margin="0,0,12,0"
+                            ToolTip="Add a special one-time singer who automatically becomes inactive after their performance" />
                             <Button
                             Content="Save Rotation"
                             Style="{StaticResource ModernSecondaryButtonStyle}"

@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Filter out IsSkipped singers from stage rotation displays
+// Edited on Sep 18, 2026 @ 08:46:00 -> Add CurrentSingerIsSpecial property for audience rotation display
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -205,6 +205,9 @@ public partial class RotationWindowViewModel : BaseViewModel
     private bool _currentSingerIsRotationStart;
 
     [ObservableProperty]
+    private bool _currentSingerIsSpecial;
+
+    [ObservableProperty]
     private bool _nextSingerIsRotationStart;
 
     [ObservableProperty]
@@ -261,6 +264,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerRatingCount = now.RatingCount;
             CurrentSingerHasRatings = now.RatingCount > 0;
             CurrentSingerIsRotationStart = now.IsRotationStart;
+            CurrentSingerIsSpecial = now.IsSpecial;
 
             var avatar = SingerAvatarConverter.ResolveSingerAvatar(now);
             if (avatar == null && !string.IsNullOrEmpty(now.Name))
@@ -292,6 +296,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerRatingCount = 0;
             CurrentSingerHasRatings = false;
             CurrentSingerIsRotationStart = false;
+            CurrentSingerIsSpecial = false;
             CurrentSingerAvatar = null;
             HasCurrentSingerAvatar = false;
         }
@@ -370,6 +375,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerRatingCount = currentMatch.RatingCount;
             CurrentSingerHasRatings = currentMatch.RatingCount > 0;
             CurrentSingerIsRotationStart = currentMatch.IsRotationStart;
+            CurrentSingerIsSpecial = currentMatch.IsSpecial;
         }
         else
         {
@@ -386,6 +392,7 @@ public partial class RotationWindowViewModel : BaseViewModel
             CurrentSingerRatingCount = singer.RatingCount;
             CurrentSingerHasRatings = singer.RatingCount > 0;
             CurrentSingerIsRotationStart = singer.IsRotationStart;
+            CurrentSingerIsSpecial = singer.IsSpecial;
         }
 
         var next = Rotation.FirstOrDefault(s => s.IsNext);

@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Include isSkipped in queue payload
+// Edited on Sep 18, 2026 @ 08:46:00 -> Include isSpecial in queue payload
 using System;
 using System.IO;
 using System.Linq;
@@ -995,6 +995,7 @@ public class TabletLyricsServer(
             isRotationStart = s.IsRotationStart,
             isPaused = s.IsPaused,
             isSkipped = s.IsSkipped,
+            isSpecial = s.IsSpecial,
             isInactive = s.IsInactive
         }).ToList();
     }

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 23:43:00 -> Add Singer Skip badge and toggle button to remote DJ board -->
+<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer badge, checkbox, and toggle button to remote DJ board -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -779,6 +779,10 @@
                                     <label for="add-artist">Artist (Optional)</label>
                                     <input type="text" id="add-artist" class="form-control" placeholder="Artist Name" onfocus="this.select()">
                                 </div>
+                                <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                    <input type="checkbox" id="add-special" style="width: 18px; height: 18px; accent-color: var(--primary);">
+                                    <label for="add-special" style="margin-bottom: 0; cursor: pointer; color: var(--text-main);">⭐ Special Singer (One-Time Performance)</label>
+                                </div>
                                 <div style="display: flex; gap: 8px; margin-top: 16px;">
                                     <button type="button" class="btn-outline" onclick="closeAddPerformerModal()" style="flex: 1; padding: 10px;">Cancel</button>
                                     <button type="submit" class="btn-primary" style="flex: 1.5; padding: 10px; font-weight: bold;">+ Add to Queue</button>
@@ -1102,6 +1106,9 @@
                     cardClass += ' skipped';
                     badges += '<span class="badge" style="background-color: #D97706; color: white; font-weight: bold; margin-left: 4px;">SKIPPED</span>';
                 }
+                if (s.isSpecial) {
+                    badges += '<span class="badge" style="background-color: #8B5CF6; color: white; font-weight: bold; margin-left: 4px;">⭐ SPECIAL</span>';
+                }
                 if (s.hasSungInLastRound) {
                     cardClass += ' sung-last-round';
                     badges += '<span class="badge" style="background-color: #059669; color: white; font-weight: bold; margin-left: 4px;">DONE (LAST ROUND)</span>';
@@ -1151,6 +1158,9 @@
                 const skipClass = s.isSkipped ? "btn-text resume" : "btn-text pause";
                 const skipHtml = s.isInactive ? '' : `<button class="${skipClass}" onclick="sendAction('toggle-skip', '${s.id}')" title="Skip or unskip singer for this round">${skipTextStr}</button>`;
 
+                const specialClass = s.isSpecial ? "btn-text resume" : "btn-text pause";
+                const specialHtml = s.isInactive ? '' : `<button class="${specialClass}" onclick="sendAction('toggle-special', '${s.id}')" title="Toggle special one-time singer status" style="${s.isSpecial ? 'background: #8B5CF6; color: white;' : 'border-color: #8B5CF6; color: #8B5CF6;'}">⭐ Special</button>`;
+
                 const setClicked = (s.isInactive || s.isPaused) ? '' : `onclick="sendAction('set-current', '${s.id}')"`;
                 const setStyle = (s.isInactive || s.isPaused) ? 'style="opacity:0.4; cursor:not-allowed;"' : '';
 
@@ -1185,6 +1195,7 @@
                                 <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
                                 <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
                                 <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>
+                                ${specialHtml}
                                 ${skipHtml}
                                 ${pauseHtml}
                                 ${deleteHtml}
@@ -1366,6 +1377,7 @@
             const duetPartner = document.getElementById("add-duet") ? document.getElementById("add-duet").value : "";
             const song = document.getElementById("add-song").value;
             const artist = document.getElementById("add-artist").value;
+            const isSpecial = document.getElementById("add-special") ? document.getElementById("add-special").checked : false;
 
             const pin = sessionStorage.getItem("dj_pin");
             try {
@@ -1380,7 +1392,8 @@
                         name,
                         duetPartner,
                         song,
-                        artist
+                        artist,
+                        isSpecial
                     })
                 });
 

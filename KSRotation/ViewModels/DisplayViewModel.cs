@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Exclude IsSkipped performers from active rotation display
+// Edited on Sep 18, 2026 @ 08:46:00 -> Add IsSpecial to DisplayRotationEntry for audience display
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -85,6 +85,9 @@ namespace KSRotation.ViewModels
         public partial bool CurrentSingerIsRotationStart { get; set; }
 
         [ObservableProperty]
+        public partial bool CurrentSingerIsSpecial { get; set; }
+
+        [ObservableProperty]
         public partial bool IsCurrentMusic { get; set; }
 
         public string PerformerHeaderText
@@ -119,6 +122,7 @@ namespace KSRotation.ViewModels
                 CurrentSongTitle = string.Empty;
                 HasDesignatedCurrentSinger = false;
                 CurrentSingerIsRotationStart = false;
+                CurrentSingerIsSpecial = false;
                 CurrentSingerAvatar = null;
                 HasCurrentSingerAvatar = false;
                 NextSingers.Clear();
@@ -148,6 +152,7 @@ namespace KSRotation.ViewModels
                 CurrentSongTitle = string.Empty;
                 HasDesignatedCurrentSinger = false;
                 CurrentSingerIsRotationStart = false;
+                CurrentSingerIsSpecial = false;
                 IsCurrentMusic = false;
                 CurrentSingerAvatar = null;
                 HasCurrentSingerAvatar = false;
@@ -159,6 +164,7 @@ namespace KSRotation.ViewModels
             else
             {
                 CurrentSingerIsRotationStart = current.IsRotationStart;
+                CurrentSingerIsSpecial = current.IsSpecial;
                 IsCurrentMusic = current.IsMusic;
                 if (current.IsMusic)
                 {
@@ -333,7 +339,7 @@ namespace KSRotation.ViewModels
                         ? string.Empty
                         : $" ({singer.Artist})";
 
-                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, offset == 0, singer.IsRotationStart));
+                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, offset == 0, singer.IsRotationStart, singer.IsSpecial));
                 }
             }
             else
@@ -356,7 +362,7 @@ namespace KSRotation.ViewModels
                         ? string.Empty
                         : $" ({singer.Artist})";
 
-                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, false, singer.IsRotationStart));
+                    newRotationEntries.Add(new DisplayRotationEntry(prefixAndSinger, songSeparatorAndTitle, artistInParentheses, false, singer.IsRotationStart, singer.IsSpecial));
 
                     index++;
                 }
@@ -395,6 +401,7 @@ namespace KSRotation.ViewModels
             string SongSeparatorAndTitle,
             string ArtistInParentheses,
             bool IsCurrent,
-            bool IsRotationStart);
+            bool IsRotationStart,
+            bool IsSpecial = false);
     }
 }

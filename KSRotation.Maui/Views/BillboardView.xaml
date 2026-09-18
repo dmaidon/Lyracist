@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Edited on Sep 18, 2026 @ 08:36:00 -> Add SKIPPED badge to billboard queue in BillboardView.xaml -->
+<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add SPECIAL badge to billboard queue and now singing in BillboardView.xaml -->
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:KSRotation.ViewModels;assembly=KSRotation"
@@ -104,6 +104,14 @@
                                     Padding="8,2">
                                 <Label Text="⚓ ANCHOR" FontSize="11" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
                             </Border>
+                            <Border HorizontalOptions="Start"
+                                    IsVisible="{Binding CurrentSingerIsSpecial}"
+                                    StrokeShape="RoundRectangle 6"
+                                    BackgroundColor="#8B5CF6"
+                                    StrokeThickness="0"
+                                    Padding="8,2">
+                                <Label Text="⭐ SPECIAL" FontSize="11" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                            </Border>
                         </HorizontalStackLayout>
 
                         <!-- Singer Name -->
@@ -155,6 +163,14 @@
                                     StrokeThickness="0"
                                     Padding="8,2">
                                 <Label Text="⚓ ANCHOR" FontSize="10" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                            </Border>
+                            <Border HorizontalOptions="Start"
+                                    IsVisible="{Binding NextSingerIsSpecial}"
+                                    StrokeShape="RoundRectangle 6"
+                                    BackgroundColor="#8B5CF6"
+                                    StrokeThickness="0"
+                                    Padding="8,2">
+                                <Label Text="⭐ SPECIAL" FontSize="10" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
                             </Border>
                         </HorizontalStackLayout>
 
@@ -344,8 +360,15 @@
                                                    LineBreakMode="TailTruncation" />
                                         </VerticalStackLayout>
 
-                                        <!-- Status badges (Skipped / Paused) -->
+                                        <!-- Status badges (Special / Skipped / Paused) -->
                                         <HorizontalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                            <Border IsVisible="{Binding IsSpecial}"
+                                                    StrokeShape="RoundRectangle 4"
+                                                    BackgroundColor="#8B5CF6"
+                                                    StrokeThickness="0"
+                                                    Padding="6,2">
+                                                <Label Text="⭐ SPECIAL" FontSize="9" FontAttributes="Bold" TextColor="White" />
+                                            </Border>
                                             <Border IsVisible="{Binding IsSkipped}"
                                                     StrokeShape="RoundRectangle 4"
                                                     BackgroundColor="#D97706"

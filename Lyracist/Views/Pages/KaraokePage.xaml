@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 23:31:00 -> Add SKIPPED badge and Skip Singer button to rotation panel -->
+<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer badge and context menu item to rotation panel -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -866,6 +866,18 @@
                                                     </Style>
                                                 </MenuItem.Style>
                                             </MenuItem>
+                                            <MenuItem Command="{Binding Path=PlacementTarget.Tag.Rotation.ToggleSpecialSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}">
+                                                <MenuItem.Style>
+                                                    <Style TargetType="MenuItem">
+                                                        <Setter Property="Header" Value="⭐ Mark as Special (One-Time)" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsSpecial}" Value="True">
+                                                                <Setter Property="Header" Value="⭐ Clear Special Status" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </MenuItem.Style>
+                                            </MenuItem>
                                             <MenuItem Header="Edit Singer Audio Defaults..." Command="{Binding Path=PlacementTarget.Tag.EditSingerSettingsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                                             <MenuItem Header="Play Performer's Request" Command="{Binding Path=PlacementTarget.Tag.PlayPerformerRequestCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" />
                                             <MenuItem Header="Open External Link in Browser" Command="{Binding Path=PlacementTarget.Tag.OpenExternalLinkInBrowserCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}">
@@ -930,6 +942,9 @@
                                                 </Border>
                                                 <Border Visibility="{Binding IsSkipped, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#6D28D9" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Singer skipped for this round (retains place in rotation)">
                                                     <TextBlock Text="SKIPPED" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
+                                                </Border>
+                                                <Border Visibility="{Binding IsSpecial, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#D97706" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Special Performer (one performance only - automatically becomes inactive after singing)">
+                                                    <TextBlock Text="⭐ SPECIAL" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
                                                 </Border>
 
                                                 <!-- Separator and song info only if there is a song loaded -->

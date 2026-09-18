@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:40:00 -> Add ToggleSkipSinger command and handle skipped singers
+// Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer support to AddSpecialSinger, FinishSingerSong, and ToggleSpecialSinger
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -785,6 +785,8 @@ namespace KSRotation.ViewModels
 
         public bool CurrentSingerIsRotationStart => CurrentSinger?.IsRotationStart ?? false;
         public bool NextSingerIsRotationStart => NextSinger?.IsRotationStart ?? false;
+        public bool CurrentSingerIsSpecial => CurrentSinger?.IsSpecial ?? false;
+        public bool NextSingerIsSpecial => NextSinger?.IsSpecial ?? false;
 
         public void RefreshBillboardState()
         {
@@ -807,6 +809,8 @@ namespace KSRotation.ViewModels
             OnPropertyChanged(nameof(NextSingerArtistDisplay));
             OnPropertyChanged(nameof(CurrentSingerIsRotationStart));
             OnPropertyChanged(nameof(NextSingerIsRotationStart));
+            OnPropertyChanged(nameof(CurrentSingerIsSpecial));
+            OnPropertyChanged(nameof(NextSingerIsSpecial));
         }
         #endregion
 
@@ -1352,6 +1356,18 @@ namespace KSRotation.ViewModels
             });
         }
 
+        [RelayCommand]
+        private void AddSpecialSinger()
+        {
+            AddActiveSinger(new SingerEntry
+            {
+                Name = "Special Guest",
+                Song = string.Empty,
+                Artist = string.Empty,
+                IsSpecial = true,
+            });
+        }
+
         /// <summary>Singer the DJ has clicked "Link" on, waiting for a second click on another
         /// singer to complete the link. Null when no link is pending.</summary>
         [ObservableProperty]
@@ -1581,7 +1597,7 @@ namespace KSRotation.ViewModels
             return singer.QueuedSongs.Any(qs => RotationHelpers.IsSameSong(qs.Song, qs.Artist, song, artist));
         }
 
-        public bool TryAddPerformer(string? name, string? song, string? artist, string? duetPartner = "")
+        public bool TryAddPerformer(string? name, string? song, string? artist, string? duetPartner = "", bool isSpecial = false)
         {
             string trimmedName = name?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(trimmedName))
@@ -1597,6 +1613,10 @@ namespace KSRotation.ViewModels
             {
                 bool wasInactive = existingSinger.IsInactive;
                 existingSinger.IsInactive = false;
+                if (isSpecial)
+                {
+                    existingSinger.IsSpecial = true;
+                }
                 if (wasInactive)
                 {
                     EnforceActiveInactiveOrder(existingSinger);
@@ -1631,6 +1651,7 @@ namespace KSRotation.ViewModels
                     DuetPartnerName = duetPartner?.Trim() ?? string.Empty,
                     Song = song?.Trim() ?? string.Empty,
                     Artist = artist?.Trim() ?? string.Empty,
+                    IsSpecial = isSpecial,
                 });
             }
 
@@ -1758,6 +1779,11 @@ namespace KSRotation.ViewModels
 
                     // Advance rotation sequentially after entry (wraps around to top of rotation if last singer)
                     RotationHelpers.AdvanceRotationAfterFinished(Singers, entry, FloatCurrentSingerToTop, isLastRound: IsLastRound);
+
+                    if (entry.IsSpecial)
+                    {
+                        EnforceActiveInactiveOrder(entry);
+                    }
 
                     // A music request with nothing left queued (and no further pending request merged in above)
                     // has been fully played — unlike a karaoke singer, it doesn't wait around in the rotation for
@@ -1941,6 +1967,20 @@ namespace KSRotation.ViewModels
 
             RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
             RefreshBillboardState();
+            RebuildRotationJsonCacheNow();
+            QueueSaveDatabase();
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
+            }
+        }
+
+        /// <summary>Toggles the singer's one-time special performance state.</summary>
+        [RelayCommand]
+        public void ToggleSpecialSinger(SingerEntry entry)
+        {
+            if (entry == null) return;
+            entry.IsSpecial = !entry.IsSpecial;
             RebuildRotationJsonCacheNow();
             QueueSaveDatabase();
             if (IsDisplayEnabled)

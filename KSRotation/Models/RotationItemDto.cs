@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Add isSkipped property to RotationItemDto
+// Edited on Sep 18, 2026 @ 08:46:00 -> Add isSpecial property to RotationItemDto
 using System.Collections.Generic;
 
 namespace KSRotation.Models
@@ -23,6 +23,7 @@ namespace KSRotation.Models
         public bool isInactive { get; set; }
         public bool isPaused { get; set; }
         public bool isSkipped { get; set; }
+        public bool isSpecial { get; set; }
         public bool isMusic { get; set; }
         public bool isRotationStart { get; set; }
         public bool hasSungInLastRound { get; set; }

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 6, 2026 @ 08:38:40 -> Display performer selfie avatar on Vegas marquee and vinyl turntable displays -->
+<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer badge to queue list -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -100,6 +100,11 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="12,4">
+                                <Border Background="#8B5CF6" CornerRadius="4" Padding="4,1" Margin="0,0,8,0" VerticalAlignment="Center"
+                                        ToolTip="Special Performer (one performance only)"
+                                        Visibility="{Binding IsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="⭐ SPECIAL" FontSize="14" FontWeight="ExtraBold" Foreground="White" />
+                                </Border>
                                 <Border Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,8,0" VerticalAlignment="Center"
                                         ToolTip="Rotation Anchor (marks where a round begins)"
                                         Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -245,6 +250,11 @@
                                 ToolTip="Rotation Anchor (marks where a round begins)"
                                 Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
+                        </Border>
+                        <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                ToolTip="Special Performer (One-Time)"
+                                Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="⭐ SPECIAL" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
                         </Border>
                         <TextBlock x:Name="MarqueeSingerName" Text="{Binding CurrentSingerName}"
                                    HorizontalAlignment="Center"
@@ -464,6 +474,11 @@
                             ToolTip="Rotation Anchor (marks where a round begins)"
                             Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock Text="⚓ ANCHOR" FontSize="18" FontWeight="ExtraBold" Foreground="White" />
+                    </Border>
+                    <Border Background="#8B5CF6" CornerRadius="6" Padding="8,3" Margin="0,0,0,8" HorizontalAlignment="Left"
+                            ToolTip="Special Performer (One-Time)"
+                            Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="⭐ SPECIAL" FontSize="18" FontWeight="ExtraBold" Foreground="White" />
                     </Border>
                     <TextBlock Text="{Binding CurrentSingerName}"
                                TextWrapping="Wrap"
