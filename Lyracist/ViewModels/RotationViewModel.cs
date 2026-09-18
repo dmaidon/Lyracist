@@ -857,26 +857,8 @@ public partial class RotationViewModel : BaseViewModel
 
     public Singer? GetNextSinger()
     {
-        var next = Rotation.FirstOrDefault(s => s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
-        if (next != null) return next;
-
         var current = GetCurrentSinger();
-        if (current == null) return null;
-
-        int currentIndex = Rotation.IndexOf(current);
-        int count = Rotation.Count;
-        if (currentIndex >= 0 && count > 1)
-        {
-            for (int i = 1; i < count; i++)
-            {
-                var candidate = Rotation[(currentIndex + i) % count];
-                if (candidate != current && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!IsLastRound || !candidate.HasSungInLastRound))
-                {
-                    return candidate;
-                }
-            }
-        }
-        return null;
+        return Lyracist.Shared.RotationHelpers.FindNextEligibleSinger(Rotation, current, isLastRound: IsLastRound);
     }
 
     [RelayCommand]

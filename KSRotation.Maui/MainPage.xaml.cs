@@ -126,29 +126,7 @@ public partial class MainPage : ContentPage
             }
 
             bool wasCurrent = entry.IsCurrent;
-            KSRotation.Models.SingerEntry? nextCurrent = null;
-
-            if (wasCurrent)
-            {
-                // 1. Try the singer already flagged as Next (manual next-singer override)
-                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped);
-
-                if (nextCurrent == null)
-                {
-                    // 2. Fall back to standard index-based rotation
-                    int currentIndex = vm.Singers.IndexOf(entry);
-                    int count = vm.Singers.Count;
-                    for (int i = 1; i < count; i++)
-                    {
-                        var candidate = vm.Singers[(currentIndex + i) % count];
-                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped)
-                        {
-                            nextCurrent = candidate;
-                            break;
-                        }
-                    }
-                }
-            }
+            KSRotation.Models.SingerEntry? nextCurrent = wasCurrent ? RotationHelpers.FindNextEligibleSinger(vm.Singers, entry) : null;
 
             entry.IsInactive = true;
             entry.IsCurrent = false;
@@ -897,29 +875,7 @@ public partial class MainPage : ContentPage
             if (entry.IsInactive) return;
 
             bool pausing = !entry.IsPaused && entry.IsCurrent;
-            KSRotation.Models.SingerEntry? nextCurrent = null;
-
-            if (pausing)
-            {
-                // 1. Try the singer already flagged as Next (manual next-singer override)
-                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped);
-
-                if (nextCurrent == null)
-                {
-                    // 2. Fall back to standard index-based rotation
-                    int currentIndex = vm.Singers.IndexOf(entry);
-                    int count = vm.Singers.Count;
-                    for (int i = 1; i < count; i++)
-                    {
-                        var candidate = vm.Singers[(currentIndex + i) % count];
-                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped)
-                        {
-                            nextCurrent = candidate;
-                            break;
-                        }
-                    }
-                }
-            }
+            KSRotation.Models.SingerEntry? nextCurrent = pausing ? RotationHelpers.FindNextEligibleSinger(vm.Singers, entry) : null;
 
             // Toggle the paused flag (retains spot in rotation)
             entry.IsPaused = !entry.IsPaused;

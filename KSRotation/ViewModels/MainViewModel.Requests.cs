@@ -678,29 +678,7 @@ namespace KSRotation.ViewModels
                         if (singer.IsInactive) return "Cannot pause a deleted singer.";
 
                         bool pausing = !singer.IsPaused && singer.IsCurrent;
-                        SingerEntry? nextCurrent = null;
-
-                        if (pausing)
-                        {
-                            // 1. Try the singer already flagged as Next (manual next-singer override)
-                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
-
-                            if (nextCurrent == null)
-                            {
-                                // 2. Fall back to standard index-based rotation
-                                int currentIndex = Singers.IndexOf(singer);
-                                int count = Singers.Count;
-                                for (int i = 1; i < count; i++)
-                                {
-                                    SingerEntry candidate = Singers[(currentIndex + i) % count];
-                                    if (candidate != singer && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!IsLastRound || !candidate.HasSungInLastRound))
-                                    {
-                                        nextCurrent = candidate;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                        SingerEntry? nextCurrent = pausing ? RotationHelpers.FindNextEligibleSinger(Singers, singer, isLastRound: IsLastRound) : null;
 
                         singer.IsPaused = !singer.IsPaused;
                         if (singer.IsPaused && singer.IsCurrent)
@@ -748,29 +726,7 @@ namespace KSRotation.ViewModels
                         }
 
                         bool wasCurrent = singer.IsCurrent;
-                        SingerEntry? nextCurrent = null;
-
-                        if (wasCurrent)
-                        {
-                            // 1. Try the singer already flagged as Next (manual next-singer override)
-                            nextCurrent = Singers.FirstOrDefault(s => s != singer && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
-
-                            if (nextCurrent == null)
-                            {
-                                // 2. Fall back to standard index-based rotation
-                                int currentIndex = Singers.IndexOf(singer);
-                                int count = Singers.Count;
-                                for (int i = 1; i < count; i++)
-                                {
-                                    SingerEntry candidate = Singers[(currentIndex + i) % count];
-                                    if (candidate != singer && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!IsLastRound || !candidate.HasSungInLastRound))
-                                    {
-                                        nextCurrent = candidate;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                        SingerEntry? nextCurrent = wasCurrent ? RotationHelpers.FindNextEligibleSinger(Singers, singer, isLastRound: IsLastRound) : null;
 
                         singer.IsInactive = true;
                         singer.IsCurrent = false;

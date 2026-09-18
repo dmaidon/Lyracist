@@ -761,30 +761,28 @@ namespace Lyracist.Shared
                 }
 
                 // If any skipped singers are at the top of the queue, they are passed over for this round;
-                // move them to the bottom of the active queue to preserve relative rotation order.
+                // move them to the bottom of the active queue to preserve relative rotation order. The
+                // bottom-of-active-queue target index is computed once rather than rescanned per singer:
+                // moving a skipped singer from the top to just before the inactive section never changes
+                // that boundary's own position (each move removes one entry before it and reinserts one
+                // entry before it, a net-zero shift).
+                int skipTargetIdx = singers.Count - 1;
+                for (int i = 0; i < singers.Count; i++)
+                {
+                    if (singers[i].IsInactive)
+                    {
+                        skipTargetIdx = i - 1;
+                        break;
+                    }
+                }
+
                 int maxMoves = singers.Count;
-                while (maxMoves-- > 0 && singers.Count > 1)
+                while (maxMoves-- > 0 && singers.Count > 1 && skipTargetIdx > 0)
                 {
                     T top = singers[0];
                     if (!top.IsInactive && !top.IsPaused && top.IsSkipped)
                     {
-                        int targetIdx = singers.Count - 1;
-                        for (int i = 0; i < singers.Count; i++)
-                        {
-                            if (singers[i].IsInactive && singers[i] != top)
-                            {
-                                targetIdx = i - 1;
-                                break;
-                            }
-                        }
-                        if (targetIdx > 0)
-                        {
-                            MoveSingerInList(singers, 0, targetIdx);
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        MoveSingerInList(singers, 0, skipTargetIdx);
                     }
                     else
                     {
@@ -925,6 +923,45 @@ namespace Lyracist.Shared
                 }
             }
             return list;
+        }
+
+        /// <summary>
+        /// Finds the singer who should become current after <paramref name="exclude"/> stops being current
+        /// (paused, skipped, deleted, or retired): first honors a singer already flagged
+        /// <see cref="IRotationSinger.IsNext"/> (a manual next-singer override), then falls back to a
+        /// wraparound scan starting just after <paramref name="exclude"/>'s current position. Does not
+        /// mutate <paramref name="singers"/>. If <paramref name="exclude"/> is null (e.g. no current singer
+        /// exists), only the IsNext check is performed.
+        /// </summary>
+        public static T? FindNextEligibleSinger<T>(IList<T> singers, T? exclude, bool isLastRound = false) where T : class, IRotationSinger
+        {
+            ArgumentNullException.ThrowIfNull(singers);
+
+            for (int i = 0; i < singers.Count; i++)
+            {
+                T s = singers[i];
+                if (s != exclude && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!isLastRound || !s.HasSungInLastRound))
+                {
+                    return s;
+                }
+            }
+
+            if (exclude == null) return null;
+
+            int currentIndex = singers.IndexOf(exclude);
+            int count = singers.Count;
+            if (currentIndex < 0 || count == 0) return null;
+
+            for (int i = 1; i < count; i++)
+            {
+                T candidate = singers[(currentIndex + i) % count];
+                if (candidate != exclude && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && (!isLastRound || !candidate.HasSungInLastRound))
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
