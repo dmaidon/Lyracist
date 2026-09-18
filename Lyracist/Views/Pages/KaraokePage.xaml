@@ -941,7 +941,7 @@
                                                     <TextBlock Text="PAUSED" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
                                                 </Border>
                                                 <Border Visibility="{Binding IsSkipped, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#6D28D9" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Singer skipped for this round (retains place in rotation)">
-                                                    <TextBlock Text="SKIPPED" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
+                                                    <TextBlock Text="SKIP" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
                                                 </Border>
                                                 <Border Visibility="{Binding IsSpecial, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#D97706" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Special Performer (one performance only - automatically becomes inactive after singing)">
                                                     <TextBlock Text="⭐ SPECIAL" FontSize="9" FontWeight="ExtraBold" Foreground="White" />

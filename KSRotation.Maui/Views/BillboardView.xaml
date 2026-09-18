@@ -374,7 +374,7 @@
                                                     BackgroundColor="#D97706"
                                                     StrokeThickness="0"
                                                     Padding="6,2">
-                                                <Label Text="SKIPPED" FontSize="9" FontAttributes="Bold" TextColor="White" />
+                                                <Label Text="SKIP" FontSize="9" FontAttributes="Bold" TextColor="White" />
                                             </Border>
                                             <Border IsVisible="{Binding IsPaused}"
                                                     StrokeShape="RoundRectangle 4"

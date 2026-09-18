@@ -10,8 +10,8 @@
 
     <Page.Resources>
         <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#00B4DB" Offset="0.0"/>
-            <GradientStop Color="#0083B0" Offset="1.0"/>
+            <GradientStop Color="#00B4DB" Offset="0.0" />
+            <GradientStop Color="#0083B0" Offset="1.0" />
         </LinearGradientBrush>
         <helpers:CompletedToCheckedConverter x:Key="CompletedToCheckedConverter" />
         <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
@@ -22,70 +22,70 @@
 
     <Grid Margin="24">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <!-- Header -->
         <Border Grid.Row="0" CornerRadius="12" Padding="20" Margin="0,0,0,24" Background="{StaticResource HeaderBackgroundBrush}">
             <StackPanel>
-                <TextBlock Text="Singer Rotation" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                <TextBlock Text="Manage active performers, pitch key adjustments, and track session performance history." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0"/>
+                <TextBlock Text="Singer Rotation" FontSize="28" FontWeight="Bold" Foreground="White" />
+                <TextBlock Text="Manage active performers, pitch key adjustments, and track session performance history." FontSize="14" Foreground="#F0F0F0" Margin="0,4,0,0" />
             </StackPanel>
         </Border>
 
         <!-- Main Workspace (3 Columns) -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="280"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="280" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="320" />
             </Grid.ColumnDefinitions>
 
             <!-- Left Column: Add Singer & Inactive Performers -->
             <Grid Grid.Column="0" Margin="0,0,12,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
                 <!-- Add Singer Form (Row 0) -->
                 <Border Grid.Row="0" Margin="0,0,0,16" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="16" VerticalAlignment="Top">
                     <StackPanel>
-                        <TextBlock Text="Add Performer" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                        <TextBlock Text="Add Performer" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12" />
 
-                        <TextBlock Text="Singer Name" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="Singer Name" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
                         <ComboBox IsEditable="True"
                                   Text="{Binding NewSingerName, UpdateSourceTrigger=PropertyChanged}"
                                   ItemsSource="{Binding SingerNames}"
                                   Margin="0,0,0,10" />
 
-                        <TextBlock Text="Duet Partner Name (Optional)" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="Duet Partner Name (Optional)" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
                         <ComboBox IsEditable="True"
                                   Text="{Binding NewDuetPartnerName, UpdateSourceTrigger=PropertyChanged}"
                                   ItemsSource="{Binding SingerNames}"
                                   Margin="0,0,0,10" />
 
-                        <TextBlock Text="Key Transposition (Semitones)" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <ui:TextBox Text="{Binding NewSingerKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. +2, -1, 0..." Margin="0,0,0,10"/>
+                        <TextBlock Text="Key Transposition (Semitones)" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding NewSingerKey, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. +2, -1, 0..." Margin="0,0,0,10" />
 
-                        <TextBlock Text="Notes / Song Request" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <ui:TextBox Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Details..." MinLines="2" MaxLines="3" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10"/>
+                        <TextBlock Text="Notes / Song Request" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <ui:TextBox Text="{Binding NewSingerNotes, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Details..." MinLines="2" MaxLines="3" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" />
 
-                        <CheckBox Content="Special (One-Time Performance)" IsChecked="{Binding IsNewSingerSpecial}" Margin="0,0,0,12" ToolTip="Special performer who automatically becomes inactive after their single song"/>
+                        <CheckBox Content="Special (One-Time Performance)" IsChecked="{Binding IsNewSingerSpecial}" Margin="0,0,0,12" ToolTip="Special performer who automatically becomes inactive after their single song" />
 
-                        <ui:Button Content="Add to Rotation" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddSingerCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" HorizontalAlignment="Stretch"/>
+                        <ui:Button Content="Add to Rotation" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddSingerCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" HorizontalAlignment="Stretch" />
                     </StackPanel>
                 </Border>
 
                 <!-- Inactive Performers Section (Row 1) -->
                 <Grid Grid.Row="1" Margin="0,8,0,0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Inactive Performers" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <TextBlock Grid.Row="0" Text="Inactive Performers" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8" />
 
                     <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="6">
                         <ListBox ItemsSource="{Binding InactiveSingers}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -94,32 +94,32 @@
                                     <Border BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="2" Background="{DynamicResource ControlFillColorDefaultBrush}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
 
                                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
-                                                <TextBlock Text="{Binding Notes}" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="{Binding Notes, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
+                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AppTextSecondaryBrush}" />
+                                                <TextBlock Text="{Binding Notes}" FontSize="10" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="{Binding Notes, Converter={StaticResource NotEmptyToVisibilityConverter}}" />
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                                                 <!-- Reinstate Button -->
-                                                <ui:Button Icon="{ui:SymbolIcon Add20}" 
-                                                           Command="{Binding DataContext.ToggleInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
-                                                           CommandParameter="{Binding}" 
-                                                           Appearance="Primary" 
+                                                <ui:Button Icon="{ui:SymbolIcon Add20}"
+                                                           Command="{Binding DataContext.ToggleInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                           CommandParameter="{Binding}"
+                                                           Appearance="Primary"
                                                            Background="{StaticResource UIAccentBrush}"
-                                                           Margin="0,0,4,0" 
+                                                           Margin="0,0,4,0"
                                                            Padding="4"
-                                                           ToolTip="Reinstate performer to active rotation"/>
+                                                           ToolTip="Reinstate performer to active rotation" />
                                                 <!-- Permanent Delete Button -->
-                                                <ui:Button Icon="{ui:SymbolIcon Delete20}" 
-                                                           Command="{Binding DataContext.DeleteInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
-                                                           CommandParameter="{Binding}" 
-                                                           Appearance="Danger" 
+                                                <ui:Button Icon="{ui:SymbolIcon Delete20}"
+                                                           Command="{Binding DataContext.DeleteInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                           CommandParameter="{Binding}"
+                                                           Appearance="Danger"
                                                            Padding="4"
-                                                           ToolTip="Remove performer permanently"/>
+                                                           ToolTip="Remove performer permanently" />
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -133,28 +133,28 @@
             <!-- Queue Management (Middle Column 1) -->
             <Grid Grid.Column="1" Margin="6,0,6,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0" Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Current Queue" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    
+                    <TextBlock Grid.Column="0" Text="Current Queue" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <CheckBox Content="Float Current to Top" IsChecked="{Binding FloatCurrentSingerToTop}" Margin="0,0,12,0" VerticalAlignment="Center" ToolTip="When checked, the current performer always floats to the top of the rotation list." />
-                        <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding MoveUpCommand}" Margin="0,0,4,0" ToolTip="Move Up"/>
-                        <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding MoveDownCommand}" Margin="0,0,4,0" ToolTip="Move Down"/>
-                        <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveSingerCommand}" Appearance="Danger" Margin="0,0,8,0" ToolTip="Remove Selected Singer"/>
-                        
+                        <ui:Button Icon="{ui:SymbolIcon ArrowUp24}" Command="{Binding MoveUpCommand}" Margin="0,0,4,0" ToolTip="Move Up" />
+                        <ui:Button Icon="{ui:SymbolIcon ArrowDown24}" Command="{Binding MoveDownCommand}" Margin="0,0,4,0" ToolTip="Move Down" />
+                        <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding RemoveSingerCommand}" Appearance="Danger" Margin="0,0,8,0" ToolTip="Remove Selected Singer" />
+
                         <Separator Width="1" Margin="0,0,4,0" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-                        
-                        <ui:Button Icon="{ui:SymbolIcon Play24}" Content="Current" Command="{Binding MarkAsSingingCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" ToolTip="Mark As Singing"/>
-                        <ui:Button Icon="{ui:SymbolIcon Dismiss24}" Content="Clear" Command="{Binding ClearRotationCommand}" Appearance="Secondary" ToolTip="Clear Rotation"/>
+
+                        <ui:Button Icon="{ui:SymbolIcon Play24}" Content="Current" Command="{Binding MarkAsSingingCommand}" Appearance="Primary" Background="{StaticResource UIAccentBrush}" Margin="0,0,4,0" ToolTip="Mark As Singing" />
+                        <ui:Button Icon="{ui:SymbolIcon Dismiss24}" Content="Clear" Command="{Binding ClearRotationCommand}" Appearance="Secondary" ToolTip="Clear Rotation" />
                         <Button Command="{Binding ToggleLastRoundCommand}"
                                 Margin="6,0,0,0"
                                 ToolTip="Toggle Last Round: announces on the rotation screen that the last round of the night is underway and removes singers after they perform">
@@ -189,8 +189,8 @@
                 <Border Grid.Row="1" Background="#1E3A5F" BorderBrush="#0EA5E9" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,8"
                         Visibility="{Binding HasPendingLinkSinger, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding PendingLinkSinger.Name, StringFormat='🔗 Click another singer to link with {0}, or click their 🔗 button again to cancel.'}" Foreground="#0EA5E9" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <ui:Button Content="Cancel" Command="{Binding CancelPendingLinkCommand}" Appearance="Secondary" Margin="12,0,0,0" Padding="8,2"/>
+                        <TextBlock Text="{Binding PendingLinkSinger.Name, StringFormat='🔗 Click another singer to link with {0}, or click their 🔗 button again to cancel.'}" Foreground="#0EA5E9" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <ui:Button Content="Cancel" Command="{Binding CancelPendingLinkCommand}" Appearance="Secondary" Margin="12,0,0,0" Padding="8,2" />
                     </StackPanel>
                 </Border>
 
@@ -198,11 +198,11 @@
                     <ListBox ItemsSource="{Binding Rotation}" SelectedItem="{Binding SelectedSinger}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                                <Setter Property="AllowDrop" Value="True"/>
-                                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown"/>
-                                <EventSetter Event="MouseMove" Handler="ListBoxItem_MouseMove"/>
-                                <EventSetter Event="DragOver" Handler="ListBoxItem_DragOver"/>
-                                <EventSetter Event="Drop" Handler="ListBoxItem_Drop"/>
+                                <Setter Property="AllowDrop" Value="True" />
+                                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown" />
+                                <EventSetter Event="MouseMove" Handler="ListBoxItem_MouseMove" />
+                                <EventSetter Event="DragOver" Handler="ListBoxItem_DragOver" />
+                                <EventSetter Event="Drop" Handler="ListBoxItem_Drop" />
                             </Style>
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
@@ -231,10 +231,10 @@
                                     </Border.Style>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Current Performer Selector Star Box -->
@@ -245,15 +245,15 @@
                                                     ToolTip="Set as Current Performer">
                                                 <Button.Style>
                                                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                                        <Setter Property="Foreground" Value="#888888"/>
-                                                        <Setter Property="Content" Value="☆"/>
-                                                        <Setter Property="FontSize" Value="14"/>
-                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                        <Setter Property="Foreground" Value="#888888" />
+                                                        <Setter Property="Content" Value="☆" />
+                                                        <Setter Property="FontSize" Value="14" />
+                                                        <Setter Property="FontWeight" Value="Bold" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                                                <Setter Property="Foreground" Value="#F5D042"/>
-                                                                <Setter Property="Content" Value="★"/>
-                                                                <Setter Property="BorderBrush" Value="#F5D042"/>
+                                                                <Setter Property="Foreground" Value="#F5D042" />
+                                                                <Setter Property="Content" Value="★" />
+                                                                <Setter Property="BorderBrush" Value="#F5D042" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -265,57 +265,57 @@
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Border Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}" Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="Rotation Anchor (marks where a round begins)">
-                                                    <TextBlock Text="⚓ ANCHOR" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                                                    <TextBlock Text="⚓ ANCHOR" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
                                                 </Border>
-                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}"/>
+                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AppTextPrimaryBrush}" />
                                                 <Border Visibility="{Binding IsPaused, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#CC3300" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="PAUSED" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                                                    <TextBlock Text="PAUSED" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
                                                 </Border>
                                                 <Border Visibility="{Binding IsSkipped, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#6D28D9" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Singer skipped for this round (retains place in rotation)">
-                                                    <TextBlock Text="SKIPPED" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                                                    <TextBlock Text="SKIP" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
                                                 </Border>
                                                 <Border Visibility="{Binding IsSpecial, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#D97706" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Special Performer (one performance only - automatically becomes inactive after singing)">
-                                                    <TextBlock Text="⭐ SPECIAL" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                                                    <TextBlock Text="⭐ SPECIAL" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
                                                 </Border>
                                                 <Border Visibility="{Binding HasSungInLastRound, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#5C1010" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Singer has completed their song in the last round">
-                                                    <TextBlock Text="DONE (LAST ROUND)" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                                                    <TextBlock Text="DONE (LAST ROUND)" FontSize="9" FontWeight="ExtraBold" Foreground="White" />
                                                 </Border>
                                                 <Border Visibility="{Binding IsLinked, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" Background="#1E3A5F" BorderBrush="#0EA5E9" BorderThickness="1" CornerRadius="4" Padding="4,1" Margin="6,0,0,0" VerticalAlignment="Center"
                                                         ToolTip="{Binding LinkedPartnerName, StringFormat='Linked with {0} - always stays adjacent in the rotation'}">
-                                                    <TextBlock Text="{Binding LinkedPartnerName, StringFormat='🔗 {0}'}" FontSize="9" FontWeight="ExtraBold" Foreground="#0EA5E9"/>
+                                                    <TextBlock Text="{Binding LinkedPartnerName, StringFormat='🔗 {0}'}" FontSize="9" FontWeight="ExtraBold" Foreground="#0EA5E9" />
                                                 </Border>
 
                                                 <!-- Separator and song info only if there is a song loaded -->
                                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding SongTitle, Converter={StaticResource NotEmptyToVisibilityConverter}}">
-                                                    <TextBlock Text="  ➔  " FontSize="11" Foreground="#888888" VerticalAlignment="Center"/>
-                                                    <TextBlock Text="{Binding SongTitle}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="180"/>
-                                                    <TextBlock Text=" by " FontSize="10" Foreground="#888888" VerticalAlignment="Center"/>
-                                                    <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="150"/>
+                                                    <TextBlock Text="  ➔  " FontSize="11" Foreground="#888888" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding SongTitle}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="180" />
+                                                    <TextBlock Text=" by " FontSize="10" Foreground="#888888" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="150" />
                                                 </StackPanel>
                                             </StackPanel>
-                                            <TextBlock Text="{Binding Notes}" FontSize="9" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="{Binding Notes, Converter={StaticResource NotEmptyToVisibilityConverter}}"/>
+                                            <TextBlock Text="{Binding Notes}" FontSize="9" Foreground="{DynamicResource AppTextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,0" Visibility="{Binding Notes, Converter={StaticResource NotEmptyToVisibilityConverter}}" />
                                         </StackPanel>
 
-                                         <!-- 10 Completed Rotation CheckBoxes (standard size) -->
-                                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=1, Mode=TwoWay}" Margin="1,0" ToolTip="Rotations completed"/>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=2, Mode=TwoWay}" Margin="1,0"/>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=3, Mode=TwoWay}" Margin="1,0"/>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=4, Mode=TwoWay}" Margin="1,0"/>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=5, Mode=TwoWay}" Margin="1,0"/>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=6, Mode=TwoWay}" Margin="1,0"/>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=7, Mode=TwoWay}" Margin="1,0"/>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=8, Mode=TwoWay}" Margin="1,0"/>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=9, Mode=TwoWay}" Margin="1,0"/>
-                                             <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=10, Mode=TwoWay}" Margin="1,0"/>
-                                         </StackPanel>
+                                        <!-- 10 Completed Rotation CheckBoxes (standard size) -->
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
+                                            <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=1, Mode=TwoWay}" Margin="1,0" ToolTip="Rotations completed" />
+                                            <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=2, Mode=TwoWay}" Margin="1,0" />
+                                            <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=3, Mode=TwoWay}" Margin="1,0" />
+                                            <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=4, Mode=TwoWay}" Margin="1,0" />
+                                            <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=5, Mode=TwoWay}" Margin="1,0" />
+                                            <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=6, Mode=TwoWay}" Margin="1,0" />
+                                            <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=7, Mode=TwoWay}" Margin="1,0" />
+                                            <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=8, Mode=TwoWay}" Margin="1,0" />
+                                            <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=9, Mode=TwoWay}" Margin="1,0" />
+                                            <CheckBox IsChecked="{Binding CompletedCount, Converter={StaticResource CompletedToCheckedConverter}, ConverterParameter=10, Mode=TwoWay}" Margin="1,0" />
+                                        </StackPanel>
 
                                         <!-- Key & Actions -->
                                         <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
                                             <Border CornerRadius="4" Background="{DynamicResource SystemFillColorCautionBackgroundBrush}" Padding="6,2" VerticalAlignment="Center" Margin="0,0,6,0">
-                                                <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorCautionBrush}"/>
+                                                <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource SystemFillColorCautionBrush}" />
                                             </Border>
-                                            
+
                                             <!-- Set/Clear Rotation Anchor Button -->
                                             <ui:Button Icon="{ui:SymbolIcon Flag20}"
                                                        Command="{Binding DataContext.SetRotationStartSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
@@ -343,7 +343,7 @@
                                                        Appearance="Secondary"
                                                        Margin="0,0,2,0"
                                                        Padding="4"
-                                                       ToolTip="Edit singer name, song, artist, key, or notes"/>
+                                                       ToolTip="Edit singer name, song, artist, key, or notes" />
 
                                             <!-- Done Button -->
                                             <ui:Button Icon="{ui:SymbolIcon Checkmark20}"
@@ -352,11 +352,11 @@
                                                        Appearance="Success"
                                                        Margin="0,0,2,0"
                                                        Padding="4"
-                                                       ToolTip="Mark current song as completed (updates song request and advances active indicator)"/>
-                                            
+                                                       ToolTip="Mark current song as completed (updates song request and advances active indicator)" />
+
                                             <!-- Pause/Resume Button -->
-                                            <ui:Button Command="{Binding DataContext.TogglePauseSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
-                                                       CommandParameter="{Binding}" 
+                                            <ui:Button Command="{Binding DataContext.TogglePauseSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                       CommandParameter="{Binding}"
                                                        Margin="0,0,2,0"
                                                        Padding="4">
                                                 <ui:Button.Style>
@@ -374,8 +374,8 @@
                                             </ui:Button>
 
                                             <!-- Skip Button (Single-Round Skip) -->
-                                            <ui:Button Command="{Binding DataContext.ToggleSkipSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
-                                                       CommandParameter="{Binding}" 
+                                            <ui:Button Command="{Binding DataContext.ToggleSkipSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                       CommandParameter="{Binding}"
                                                        Margin="0,0,2,0"
                                                        Padding="4">
                                                 <ui:Button.Style>
@@ -394,8 +394,8 @@
                                             </ui:Button>
 
                                             <!-- Special Performer Button -->
-                                            <ui:Button Command="{Binding DataContext.ToggleSpecialSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
-                                                       CommandParameter="{Binding}" 
+                                            <ui:Button Command="{Binding DataContext.ToggleSpecialSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                       CommandParameter="{Binding}"
                                                        Margin="0,0,2,0"
                                                        Padding="4">
                                                 <ui:Button.Style>
@@ -412,7 +412,7 @@
                                                     </Style>
                                                 </ui:Button.Style>
                                             </ui:Button>
-                                            
+
                                             <!-- Inactive Button -->
                                             <ui:Button Icon="{ui:SymbolIcon Dismiss20}"
                                                        Command="{Binding DataContext.ToggleInactiveSingerCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
@@ -420,7 +420,7 @@
                                                        Appearance="Secondary"
                                                        Padding="4"
                                                        Margin="0,0,2,0"
-                                                       ToolTip="Set performer inactive (removes from active rotation)"/>
+                                                       ToolTip="Set performer inactive (removes from active rotation)" />
 
                                             <!-- Link/Unlink Button -->
                                             <ui:Button Icon="{ui:SymbolIcon Link20}"
@@ -452,32 +452,32 @@
             <!-- Column 2: Session Performed Songs List & Textbox -->
             <Grid Grid.Column="2" Margin="12,0,0,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
                 <!-- Header & Actions -->
                 <Grid Grid.Row="0" Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="Performed Songs" FontSize="18" FontWeight="SemiBold"/>
-                        <TextBlock Text="{Binding SessionPerformedSongs.Count, StringFormat='Session Total: {0} songs'}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}"/>
+                        <TextBlock Text="Performed Songs" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding SessionPerformedSongs.Count, StringFormat='Session Total: {0} songs'}" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <ui:Button Icon="{ui:SymbolIcon Copy24}" Command="{Binding CopyPerformedSongsCommand}" Margin="0,0,4,0" ToolTip="Copy Session Songs to Clipboard"/>
-                        <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding ClearPerformedSongsCommand}" Appearance="Secondary" ToolTip="Clear Session Performed Songs"/>
+                        <ui:Button Icon="{ui:SymbolIcon Copy24}" Command="{Binding CopyPerformedSongsCommand}" Margin="0,0,4,0" ToolTip="Copy Session Songs to Clipboard" />
+                        <ui:Button Icon="{ui:SymbolIcon Delete24}" Command="{Binding ClearPerformedSongsCommand}" Appearance="Secondary" ToolTip="Clear Session Performed Songs" />
                     </StackPanel>
                 </Grid>
 
                 <!-- Container hosting 5-Color Rotating List & Copyable Textbox -->
                 <Border Grid.Row="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Background="{DynamicResource AppSurfaceBrush}" Padding="8">
                     <TabControl Background="Transparent" BorderThickness="0">
-<!-- Edited on Aug 15, 2026 @ 10:32:00 -> Decrease spacing between performed song boxes in Column 2 -->
+                        <!-- Edited on Aug 15, 2026 @ 10:32:00 -> Decrease spacing between performed song boxes in Column 2 -->
                         <!-- Tab 1: 5-Color Rotating Song List Cards -->
                         <TabItem Header="5-Color List">
                             <ListBox ItemsSource="{Binding SessionPerformedSongs}" Background="Transparent" BorderThickness="0" Margin="0,4,0,0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -494,36 +494,36 @@
                                                 BorderBrush="{Binding Converter={StaticResource PerformedSongColorConverter}, ConverterParameter=Border}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- Order Badge (1..N) -->
                                                 <Border Grid.Column="0" CornerRadius="10" Padding="5,1" Margin="0,0,6,0" VerticalAlignment="Center"
                                                         Background="{Binding Converter={StaticResource PerformedSongColorConverter}, ConverterParameter=Border}">
-                                                    <TextBlock Text="{Binding OrderNumber, StringFormat='#{0}'}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                                    <TextBlock Text="{Binding OrderNumber, StringFormat='#{0}'}" FontSize="10" FontWeight="Bold" Foreground="White" />
                                                 </Border>
 
                                                 <!-- Singer & Song Info -->
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding SingerName}" FontSize="11.5" FontWeight="Bold"
-                                                               Foreground="{Binding Converter={StaticResource PerformedSongColorConverter}, ConverterParameter=Foreground}"/>
+                                                               Foreground="{Binding Converter={StaticResource PerformedSongColorConverter}, ConverterParameter=Foreground}" />
                                                     <TextBlock FontSize="10.5" TextTrimming="CharacterEllipsis" Margin="0,1,0,0"
                                                                Foreground="{Binding Converter={StaticResource PerformedSongColorConverter}, ConverterParameter=Foreground}">
-                                                        <Run Text="{Binding SongTitle}" FontWeight="SemiBold"/>
-                                                        <Run Text="{Binding Artist, StringFormat=' - {0}'}" FontSize="9.5"/>
+                                                        <Run Text="{Binding SongTitle}" FontWeight="SemiBold" />
+                                                        <Run Text="{Binding Artist, StringFormat=' - {0}'}" FontSize="9.5" />
                                                     </TextBlock>
                                                 </StackPanel>
 
                                                 <!-- Time & Key -->
                                                 <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="6,0,0,0">
                                                     <TextBlock Text="{Binding DisplayTime}" FontSize="9" FontWeight="SemiBold" HorizontalAlignment="Right"
-                                                               Foreground="{Binding Converter={StaticResource PerformedSongColorConverter}, ConverterParameter=Foreground}"/>
+                                                               Foreground="{Binding Converter={StaticResource PerformedSongColorConverter}, ConverterParameter=Foreground}" />
                                                     <Border Visibility="{Binding HasKeyChange, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                             Background="{Binding Converter={StaticResource PerformedSongColorConverter}, ConverterParameter=Border}"
                                                             CornerRadius="4" Padding="3,0" Margin="0,2,0,0" HorizontalAlignment="Right">
-                                                        <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="8.5" FontWeight="Bold" Foreground="White"/>
+                                                        <TextBlock Text="{Binding Key, StringFormat='Key: {0}'}" FontSize="8.5" FontWeight="Bold" Foreground="White" />
                                                     </Border>
                                                 </StackPanel>
                                             </Grid>
@@ -544,7 +544,7 @@
                                         FontFamily="Consolas, Cascadia Code, Courier New"
                                         FontSize="12"
                                         Margin="0,8,0,0"
-                                        Padding="8"/>
+                                        Padding="8" />
                         </TabItem>
                     </TabControl>
                 </Border>
@@ -552,4 +552,3 @@
         </Grid>
     </Grid>
 </Page>
-

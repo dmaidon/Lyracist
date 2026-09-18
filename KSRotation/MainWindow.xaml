@@ -841,7 +841,7 @@
                                                                 VerticalAlignment="Center"
                                                                 ToolTip="Singer is skipped for this round"
                                                                 Visibility="{Binding IsSkipped, Converter={StaticResource BoolToVis}}">
-                                                            <TextBlock Text="⏭ SKIPPED" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                                                            <TextBlock Text="⏭ SKIP" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                                                         </Border>
                                                         <Border Background="#8B5CF6"
                                                                 CornerRadius="4"

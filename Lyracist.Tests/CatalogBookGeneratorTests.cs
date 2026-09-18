@@ -96,9 +96,9 @@ namespace Lyracist.Tests
         {
             string docxPath = CatalogBookGenerator.GenerateDocx(isKaraoke: true);
             Assert.True(File.Exists(docxPath));
-            
+
             // Delete file after validation
-            try { File.Delete(docxPath); } catch {}
+            try { File.Delete(docxPath); } catch { }
         }
 
         [Fact]
@@ -106,9 +106,9 @@ namespace Lyracist.Tests
         {
             string pdfPath = CatalogBookGenerator.GeneratePdf(isKaraoke: true);
             Assert.True(File.Exists(pdfPath));
-            
+
             // Delete file after validation
-            try { File.Delete(pdfPath); } catch {}
+            try { File.Delete(pdfPath); } catch { }
         }
 
         [Fact]
@@ -129,14 +129,14 @@ Operators can now export the entire song database (Karaoke or Music) into Word (
    - Provides two dropdown selectors:
      - Catalog: Choose between the ""Karaoke Catalog"" (tracks marked as karaoke) and the ""Music Catalog"" (standard audio tracks).
      - Format: Choose between ""Word Document (.docx)"" and ""PDF Document (.pdf)"".
-     
+
 2. Generated Fields & Formatting:
    - The generated books are structured as clean, professionally styled tables showing:
      - Artist: Alphabetically ordered performer names.
      - Title: Song titles.
      - Length: Formatted track durations (MM:SS).
      - Genre: The embedded audio genre (automatically populated during metadata scans).
-     
+
 3. Pagination & Output:
    - The document is fully paginated, displaying ""Page X"" or ""Page X of Y"" in the bottom footer.
    - For Word (.docx) books, a repeating header row is defined so column titles automatically reappear on the top of each page.
@@ -159,7 +159,7 @@ Operators can now export the entire song database (Karaoke or Music) into Word (
                 using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
                 {
                     var body = doc.MainDocumentPart?.Document?.Body;
-                    
+
                     if (body != null)
                     {
                         // Check if already appended to avoid duplicates
@@ -212,13 +212,13 @@ Operators can now export the entire song database (Karaoke or Music) into Word (
                             var page = doc.AddPage();
                             page.Size = PdfSharp.PageSize.Letter;
                             var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                            
+
                             PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
                             PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
                             PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-                            
+
                             gfx.DrawString("Section: Database Manager / Catalog Book Exporter", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-                            
+
                             double yPos = 70;
                             foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                             {
@@ -226,7 +226,7 @@ Operators can now export the entire song database (Karaoke or Music) into Word (
                                 gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
                                 yPos += 15;
                             }
-                            
+
                             doc.Info.Keywords = (keywords ?? string.Empty) + " CatalogBookExporter";
                             doc.Save(pdfPath);
                         }
@@ -281,7 +281,7 @@ Operators can now select different casting targets for the Singer Rotation Billb
                 using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
                 {
                     var body = doc.MainDocumentPart?.Document?.Body;
-                    
+
                     if (body != null)
                     {
                         // Check if already appended to avoid duplicates
@@ -334,13 +334,13 @@ Operators can now select different casting targets for the Singer Rotation Billb
                             var page = doc.AddPage();
                             page.Size = PdfSharp.PageSize.Letter;
                             var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                            
+
                             PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
                             PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
                             PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-                            
+
                             gfx.DrawString("Section: Display Projection Window / Casting Support", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-                            
+
                             double yPos = 70;
                             foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                             {
@@ -348,7 +348,7 @@ Operators can now select different casting targets for the Singer Rotation Billb
                                 gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
                                 yPos += 15;
                             }
-                            
+
                             doc.Info.Keywords = (keywords ?? string.Empty) + " CastingSupport";
                             doc.Save(pdfPath);
                         }
@@ -366,9 +366,9 @@ Operators can now select different casting targets for the Singer Rotation Billb
         {
             string txtPath = CatalogBookGenerator.GenerateTxt(isKaraoke: true);
             Assert.True(File.Exists(txtPath));
-            
+
             // Delete file after validation
-            try { File.Delete(txtPath); } catch {}
+            try { File.Delete(txtPath); } catch { }
         }
 
         [Fact]
@@ -409,7 +409,7 @@ Updates have been made to the Catalog Book Exporter formats and the Slow Metadat
                 using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
                 {
                     var body = doc.MainDocumentPart?.Document?.Body;
-                    
+
                     if (body != null)
                     {
                         // Check if already appended to avoid duplicates
@@ -462,13 +462,13 @@ Updates have been made to the Catalog Book Exporter formats and the Slow Metadat
                             var page = doc.AddPage();
                             page.Size = PdfSharp.PageSize.Letter;
                             var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                            
+
                             PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
                             PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
                             PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-                            
+
                             gfx.DrawString("Section: Database Manager / Catalog Book Exporter & Failed Artist List", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-                            
+
                             double yPos = 70;
                             foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                             {
@@ -476,7 +476,7 @@ Updates have been made to the Catalog Book Exporter formats and the Slow Metadat
                                 gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
                                 yPos += 15;
                             }
-                            
+
                             doc.Info.Keywords = (keywords ?? string.Empty) + " CatalogTxtAndFailedList";
                             doc.Save(pdfPath);
                         }
@@ -529,7 +529,7 @@ The Party Tyme karaoke streaming integration has been removed from the applicati
                 using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
                 {
                     var body = doc.MainDocumentPart?.Document?.Body;
-                    
+
                     if (body != null)
                     {
                         // Check if already appended to avoid duplicates
@@ -582,13 +582,13 @@ The Party Tyme karaoke streaming integration has been removed from the applicati
                             var page = doc.AddPage();
                             page.Size = PdfSharp.PageSize.Letter;
                             var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                            
+
                             PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
                             PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
                             PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-                            
+
                             gfx.DrawString("Section: Integration Settings / Party Tyme Removal", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-                            
+
                             double yPos = 70;
                             foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                             {
@@ -596,7 +596,7 @@ The Party Tyme karaoke streaming integration has been removed from the applicati
                                 gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
                                 yPos += 15;
                             }
-                            
+
                             doc.Info.Keywords = (keywords ?? string.Empty) + " PartyTymeRemoval";
                             doc.Save(pdfPath);
                         }
@@ -651,7 +651,7 @@ A comprehensive performer profile system and song tagging support have been inte
                 using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
                 {
                     var body = doc.MainDocumentPart?.Document?.Body;
-                    
+
                     if (body != null)
                     {
                         bool alreadyAppended = false;
@@ -703,13 +703,13 @@ A comprehensive performer profile system and song tagging support have been inte
                             var page = doc.AddPage();
                             page.Size = PdfSharp.PageSize.Letter;
                             var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                            
+
                             PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
                             PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
                             PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-                            
+
                             gfx.DrawString("Section: Performer Profiles, Song Tagging & Singer Avatars", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-                            
+
                             double yPos = 70;
                             foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                             {
@@ -717,7 +717,7 @@ A comprehensive performer profile system and song tagging support have been inte
                                 gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
                                 yPos += 15;
                             }
-                            
+
                             doc.Info.Keywords = (keywords ?? string.Empty) + " ProfilesAndTagging";
                             doc.Save(pdfPath);
                         }
@@ -770,7 +770,7 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
                 using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
                 {
                     var body = doc.MainDocumentPart?.Document?.Body;
-                    
+
                     if (body != null)
                     {
                         bool alreadyAppended = false;
@@ -822,13 +822,13 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
                             var page = doc.AddPage();
                             page.Size = PdfSharp.PageSize.Letter;
                             var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                            
+
                             PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
                             PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
                             PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-                            
+
                             gfx.DrawString("Section: Karaoke Song Search & Compact Auto-Advance Toolbar", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-                            
+
                             double yPos = 70;
                             foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                             {
@@ -836,7 +836,7 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
                                 gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
                                 yPos += 15;
                             }
-                            
+
                             doc.Info.Keywords = (keywords ?? string.Empty) + " SearchScanAndCompactToolbar";
                             doc.Save(pdfPath);
                         }
@@ -854,7 +854,7 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
         {
             string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempDir);
-            
+
             string mp3Path = Path.Combine(tempDir, "Toto - Africa.mp3");
             File.WriteAllBytes(mp3Path, [0x0, 0x1, 0x2]);
 
@@ -862,10 +862,10 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
             {
                 using var context = new Lyracist.Data.LyracistDbContext();
                 context.Database.Migrate();
-                
+
                 var scanner = new Lyracist.Data.Services.ScanningService(context);
                 await scanner.ScanDirectories([tempDir]);
-                
+
                 var song = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
                     context.Songs, s => s.FilePath == mp3Path, TestContext.Current.CancellationToken);
                 Assert.NotNull(song);
@@ -874,7 +874,7 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
             }
             finally
             {
-                try { Directory.Delete(tempDir, true); } catch {}
+                try { Directory.Delete(tempDir, true); } catch { }
             }
         }
 
@@ -909,10 +909,10 @@ Optimizations have been introduced to the primary Karaoke hosting workspace for 
             lock (_manualLock)
             {
                 string docxPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.docx";
-            string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
-            string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
+                string pdfPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual.pdf";
+                string txtPath = @"C:\VB26\Lyracist\Documentation\Lyracist_User_Manual_Updates.txt";
 
-            string updateText = @"
+                string updateText = @"
 Section: Audience Lyrics Screen QR Code & Library Format Separation
 
 [Update Details]
@@ -933,99 +933,99 @@ Major updates have been added to improve projection screen customization and loc
    - Search Query Isolation: SQLite database queries now evaluate track type filters directly in SQL, ensuring music searches return up to 150 matching music songs without being crowded out by karaoke results.
 ";
 
-            // 1. Update text file if not already present
-            if (File.Exists(txtPath))
-            {
-                string content = File.ReadAllText(txtPath);
-                if (!content.Contains("Audience Lyrics Screen QR Code & Library Format Separation"))
+                // 1. Update text file if not already present
+                if (File.Exists(txtPath))
                 {
-                    File.AppendAllText(txtPath, "\n" + updateText);
-                }
-            }
-
-            // 2. Update docx file by appending paragraph to the end
-            if (File.Exists(docxPath))
-            {
-                using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
-                {
-                    var body = doc.MainDocumentPart?.Document?.Body;
-                    
-                    if (body != null)
+                    string content = File.ReadAllText(txtPath);
+                    if (!content.Contains("Audience Lyrics Screen QR Code & Library Format Separation"))
                     {
-                        bool alreadyAppended = false;
-                        foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
+                        File.AppendAllText(txtPath, "\n" + updateText);
+                    }
+                }
+
+                // 2. Update docx file by appending paragraph to the end
+                if (File.Exists(docxPath))
+                {
+                    using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
+                    {
+                        var body = doc.MainDocumentPart?.Document?.Body;
+
+                        if (body != null)
                         {
-                            if (p.Text != null && p.Text.Contains("Audience Lyrics Screen QR Code & Library Format Separation"))
+                            bool alreadyAppended = false;
+                            foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>())
                             {
-                                alreadyAppended = true;
-                                break;
+                                if (p.Text != null && p.Text.Contains("Audience Lyrics Screen QR Code & Library Format Separation"))
+                                {
+                                    alreadyAppended = true;
+                                    break;
+                                }
                             }
-                        }
 
-                        if (!alreadyAppended)
-                        {
-                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
-                                new DocumentFormat.OpenXml.Wordprocessing.Run(
-                                    new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
-                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
-                                    new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Audience Lyrics Screen QR Code & Library Format Separation")
-                                )
-                            ));
-
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                            if (!alreadyAppended)
                             {
-                                if (line.StartsWith("Section:")) continue;
                                 body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
                                     new DocumentFormat.OpenXml.Wordprocessing.Run(
-                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
-                                        new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = DocumentFormat.OpenXml.Wordprocessing.BreakValues.Page },
+                                        new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "28" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Audience Lyrics Screen QR Code & Library Format Separation")
                                     )
                                 ));
-                            }
-                            doc.Save();
-                        }
-                    }
-                }
-            }
 
-            // 3. Update pdf file by appending a page using PDFsharp
-            if (File.Exists(pdfPath))
-            {
-                try
-                {
-                    using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
-                    {
-                        string keywords = doc.Info.Keywords;
-                        if (string.IsNullOrEmpty(keywords) || !keywords.Contains("QrCodeToggleAndMusicSeparation"))
-                        {
-                            var page = doc.AddPage();
-                            page.Size = PdfSharp.PageSize.Letter;
-                            var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                            
-                            PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
-                            PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
-                            PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-                            
-                            gfx.DrawString("Section: Audience Lyrics Screen QR Code & Library Format Separation", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-                            
-                            double yPos = 70;
-                            foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                if (line.StartsWith("Section:")) continue;
-                                gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
-                                yPos += 15;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                        )
+                                    ));
+                                }
+                                doc.Save();
                             }
-                            
-                            doc.Info.Keywords = (keywords ?? string.Empty) + " QrCodeToggleAndMusicSeparation";
-                            doc.Save(pdfPath);
                         }
                     }
                 }
-                catch (Exception ex)
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
                 {
-                    Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("QrCodeToggleAndMusicSeparation"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Audience Lyrics Screen QR Code & Library Format Separation", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                                double yPos = 70;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                    yPos += 15;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " QrCodeToggleAndMusicSeparation";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error updating PDF manual: {ex.Message}");
+                    }
                 }
-            }
             }
         }
 
@@ -1078,7 +1078,7 @@ Major performance, layout responsiveness, and audio output enhancements have bee
                     using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(docxPath, true))
                     {
                         var body = doc.MainDocumentPart?.Document?.Body;
-                        
+
                         if (body != null)
                         {
                             bool alreadyAppended = false;
@@ -1130,13 +1130,13 @@ Major performance, layout responsiveness, and audio output enhancements have bee
                                 var page = doc.AddPage();
                                 page.Size = PdfSharp.PageSize.Letter;
                                 var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
-                                
+
                                 PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
                                 PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
                                 PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
-                                
+
                                 gfx.DrawString("Section: Search Performance, Tablet Touch Sizing & High-Output Audio Engine", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
-                                
+
                                 double yPos = 70;
                                 foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                                 {
@@ -1144,7 +1144,7 @@ Major performance, layout responsiveness, and audio output enhancements have bee
                                     gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
                                     yPos += 15;
                                 }
-                                
+
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " SearchPerfTabletButtonsAudioVolume";
                                 doc.Save(pdfPath);
                             }
@@ -1663,7 +1663,7 @@ Section: Singer Skip Round-Scoped Rotation Bypass (Updated Sep 17, 2026)
 - Retains Rotation Placement: Unlike 'Inactive' (which forfeits rotation spot and drops the singer to the end of the line), a skipped singer retains their exact slot in the rotation queue.
 - Automatic Round-Scoped Rollover: When rotation advances and the round completes (crossing or reaching the '⚓ Anchor' singer), the 'IsSkipped' flag automatically resets so the performer sings normally in the following round without requiring manual DJ intervention.
 - Manual Unskip: The DJ can toggle 'Skip' off at any time using the row button, context menu, or remote DJ portal. If the currently performing singer is skipped, the rotation immediately advances to the next eligible performer.
-- Cross-Platform UI & Indicators: Supported with visual '⏭ SKIPPED' amber badges, quick action toggle buttons, and synchronized wait-time recalculations across Lyracist, KSRotation, Remote DJ Portal, Audience Billboard, Kiosk, and Patron Mobile Portal.";
+- Cross-Platform UI & Indicators: Supported with visual '⏭ SKIP' amber badges, quick action toggle buttons, and synchronized wait-time recalculations across Lyracist, KSRotation, Remote DJ Portal, Audience Billboard, Kiosk, and Patron Mobile Portal.";
 
                 // 1. Append to updates log text file if not already present
                 if (File.Exists(updatesTxtPath))

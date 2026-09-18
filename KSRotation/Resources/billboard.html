@@ -671,233 +671,233 @@
     </main>
 
     <script>
-        let previousRotationHash = "";
-        let previousInfoHash = "";
+                let previousRotationHash = "";
+                let previousInfoHash = "";
 
-        // Clock display
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            const clockEl = document.getElementById('billboard-clock');
-            if (clockEl) {
-                clockEl.textContent = `${hours}:${minutes} ${ampm}`;
-            }
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+                // Clock display
+                function updateClock() {
+                    const now = new Date();
+                    let hours = now.getHours();
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12;
+                    const clockEl = document.getElementById('billboard-clock');
+                    if (clockEl) {
+                        clockEl.textContent = `${hours}:${minutes} ${ampm}`;
+                    }
+                }
+                setInterval(updateClock, 1000);
+                updateClock();
 
-        // Fetch Venue & Wi-Fi Info
-        async function fetchInfo() {
-            try {
-                const response = await fetch('/api/info');
-                if (!response.ok) return;
-                const data = await response.json();
-                const hash = JSON.stringify(data);
-                if (hash === previousInfoHash) return;
-                previousInfoHash = hash;
+                // Fetch Venue & Wi-Fi Info
+                async function fetchInfo() {
+                    try {
+                        const response = await fetch('/api/info');
+                        if (!response.ok) return;
+                        const data = await response.json();
+                        const hash = JSON.stringify(data);
+                        if (hash === previousInfoHash) return;
+                        previousInfoHash = hash;
 
-                const brandTitlesEl = document.querySelector('.brand-titles');
-                if (brandTitlesEl) {
-                    if (data.listDjAndVenue === false) {
-                        brandTitlesEl.style.display = 'none';
-                    } else {
-                        brandTitlesEl.style.display = 'flex';
-                        const venueEl = document.getElementById('billboard-venue-name');
-                        if (venueEl) {
-                            venueEl.textContent = data.venue || "Karaoke Night";
-                        }
-                        const djEl = document.getElementById('billboard-dj-name');
-                        if (djEl) {
-                            if (data.dj && data.dj.trim()) {
-                                djEl.textContent = `Hosted by ${data.dj}`;
-                                djEl.style.display = "";
+                        const brandTitlesEl = document.querySelector('.brand-titles');
+                        if (brandTitlesEl) {
+                            if (data.listDjAndVenue === false) {
+                                brandTitlesEl.style.display = 'none';
                             } else {
-                                djEl.textContent = "";
-                                djEl.style.display = "none";
+                                brandTitlesEl.style.display = 'flex';
+                                const venueEl = document.getElementById('billboard-venue-name');
+                                if (venueEl) {
+                                    venueEl.textContent = data.venue || "Karaoke Night";
+                                }
+                                const djEl = document.getElementById('billboard-dj-name');
+                                if (djEl) {
+                                    if (data.dj && data.dj.trim()) {
+                                        djEl.textContent = `Hosted by ${data.dj}`;
+                                        djEl.style.display = "";
+                                    } else {
+                                        djEl.textContent = "";
+                                        djEl.style.display = "none";
+                                    }
+                                }
                             }
                         }
+
+                        // Portal URL & QR
+                        const portalUrl = data.portalUrl || window.location.origin;
+                        document.getElementById('portal-url-display').textContent = portalUrl;
+                        document.getElementById('portal-qr-image').src = `/api/qr?text=${encodeURIComponent(portalUrl)}`;
+
+                        // Wi-Fi details & QR
+                        const ssid = data.wifiSsid || "";
+                        const pass = data.wifiPassword || "";
+                        document.getElementById('wifi-ssid-display').textContent = ssid || "DJ Travel Router";
+
+                        const passContainer = document.getElementById('wifi-pass-container');
+                        if (pass) {
+                            passContainer.style.display = "block";
+                            document.getElementById('wifi-pass-display').textContent = pass;
+                        } else {
+                            document.getElementById('wifi-pass-display').textContent = "Open / No password";
+                        }
+
+                        const wifiPayload = `WIFI:S:${ssid};T:${pass ? 'WPA' : 'nopass'};P:${pass};;`;
+                        document.getElementById('wifi-qr-image').src = `/api/qr?text=${encodeURIComponent(wifiPayload)}`;
+
+                        const lastRoundBanner = document.getElementById('last-round-banner');
+                        if (lastRoundBanner) {
+                            lastRoundBanner.style.display = data.isLastRound ? "block" : "none";
+                        }
+
+                        const showQrCode = data.showQrCode !== false;
+                        document.getElementById('portal-qr-container').style.display = showQrCode ? "" : "none";
+                        document.getElementById('wifi-qr-container').style.display = showQrCode ? "" : "none";
+                    } catch (err) {
+                        console.warn("Error fetching info", err);
                     }
                 }
 
-                // Portal URL & QR
-                const portalUrl = data.portalUrl || window.location.origin;
-                document.getElementById('portal-url-display').textContent = portalUrl;
-                document.getElementById('portal-qr-image').src = `/api/qr?text=${encodeURIComponent(portalUrl)}`;
+                // Fetch Rotation Queue
+                async function fetchRotation() {
+                    try {
+                        const response = await fetch('/api/rotation');
+                        if (!response.ok) return;
+                        const singers = await response.json();
+                        const hash = JSON.stringify(singers);
+                        if (hash === previousRotationHash) return;
+                        previousRotationHash = hash;
 
-                // Wi-Fi details & QR
-                const ssid = data.wifiSsid || "";
-                const pass = data.wifiPassword || "";
-                document.getElementById('wifi-ssid-display').textContent = ssid || "DJ Travel Router";
-
-                const passContainer = document.getElementById('wifi-pass-container');
-                if (pass) {
-                    passContainer.style.display = "block";
-                    document.getElementById('wifi-pass-display').textContent = pass;
-                } else {
-                    document.getElementById('wifi-pass-display').textContent = "Open / No password";
+                        renderRotation(singers || []);
+                    } catch (err) {
+                        console.warn("Error fetching rotation", err);
+                    }
                 }
 
-                const wifiPayload = `WIFI:S:${ssid};T:${pass ? 'WPA' : 'nopass'};P:${pass};;`;
-                document.getElementById('wifi-qr-image').src = `/api/qr?text=${encodeURIComponent(wifiPayload)}`;
+                function renderRotation(singers) {
+                    const activeSingers = singers.filter(s => !s.isInactive && !s.hasSungInLastRound);
+                    document.getElementById('billboard-singer-count').textContent = `${activeSingers.length} Singers`;
 
-                const lastRoundBanner = document.getElementById('last-round-banner');
-                if (lastRoundBanner) {
-                    lastRoundBanner.style.display = data.isLastRound ? "block" : "none";
+                    // 1. Current Performer
+                    const currentSinger = singers.find(s => s.isCurrent && !s.hasSungInLastRound);
+                    const nowNameEl = document.getElementById('now-singer-name');
+                    const nowDuetEl = document.getElementById('now-duet-tag');
+                    const nowTitleEl = document.getElementById('now-song-title');
+                    const nowArtistEl = document.getElementById('now-song-artist');
+                    const nowRotationStartEl = document.getElementById('now-rotation-start-badge');
+                    const nowSpecialEl = document.getElementById('now-special-badge');
+
+                    if (currentSinger) {
+                        nowRotationStartEl.style.display = currentSinger.isRotationStart ? "inline-block" : "none";
+                        if (nowSpecialEl) nowSpecialEl.style.display = currentSinger.isSpecial ? "inline-block" : "none";
+                        nowNameEl.textContent = currentSinger.name;
+                        if (currentSinger.partner) {
+                            nowDuetEl.textContent = `w/ ${currentSinger.partner}`;
+                            nowDuetEl.style.display = "inline";
+                        } else {
+                            nowDuetEl.style.display = "none";
+                        }
+
+                        if (currentSinger.isMusic) {
+                            nowTitleEl.textContent = "♪ Background Music Track";
+                            nowArtistEl.textContent = "";
+                        } else {
+                            nowTitleEl.textContent = currentSinger.song ? `"${currentSinger.song}"` : "Song not selected";
+                            nowArtistEl.textContent = currentSinger.artist ? `by ${currentSinger.artist}` : "";
+                        }
+                    } else {
+                        nowRotationStartEl.style.display = "none";
+                        if (nowSpecialEl) nowSpecialEl.style.display = "none";
+                        nowNameEl.textContent = "Stage is Open";
+                        nowDuetEl.style.display = "none";
+                        nowTitleEl.textContent = "Ready for the next singer!";
+                        nowArtistEl.textContent = "";
+                    }
+
+                    // 2. Next Up Performer
+                    const nextSinger = singers.find(s => s.isNext && !s.hasSungInLastRound);
+                    const nextNameEl = document.getElementById('next-singer-name');
+                    const nextDuetEl = document.getElementById('next-duet-tag');
+                    const nextTitleEl = document.getElementById('next-song-title');
+                    const nextRotationStartEl = document.getElementById('next-rotation-start-badge');
+                    const nextSpecialEl = document.getElementById('next-special-badge');
+
+                    if (nextSinger) {
+                        nextRotationStartEl.style.display = nextSinger.isRotationStart ? "inline-block" : "none";
+                        if (nextSpecialEl) nextSpecialEl.style.display = nextSinger.isSpecial ? "inline-block" : "none";
+                        nextNameEl.textContent = nextSinger.name;
+                        if (nextSinger.partner) {
+                            nextDuetEl.textContent = `w/ ${nextSinger.partner}`;
+                            nextDuetEl.style.display = "inline";
+                        } else {
+                            nextDuetEl.style.display = "none";
+                        }
+
+                        if (nextSinger.isMusic) {
+                            nextTitleEl.textContent = "♪ Background Music Track";
+                        } else {
+                            const song = nextSinger.song ? `"${nextSinger.song}"` : "Picking a song";
+                            const artist = nextSinger.artist ? ` by ${nextSinger.artist}` : "";
+                            nextTitleEl.textContent = `${song}${artist}`;
+                        }
+                    } else {
+                        nextRotationStartEl.style.display = "none";
+                        if (nextSpecialEl) nextSpecialEl.style.display = "none";
+                        nextNameEl.textContent = "On Deck";
+                        nextDuetEl.style.display = "none";
+                        nextTitleEl.textContent = "Scan QR code to be up next!";
+                    }
+
+                    // 3. Upcoming Queue (all active singers after current & next)
+                    const queueListEl = document.getElementById('billboard-queue-list');
+                    const upcoming = activeSingers.filter(s => !s.isCurrent && !s.isNext);
+
+                    if (upcoming.length === 0) {
+                        queueListEl.innerHTML = `
+                                    <div class="empty-placeholder">
+                                        <span class="icon">📋</span>
+                                        <span>${activeSingers.length > 0 ? "You're up next! Ready to sing?" : "Rotation is empty. Scan QR to get on stage!"}</span>
+                                    </div>`;
+                    } else {
+                        let html = "";
+                        upcoming.forEach((s, idx) => {
+                            const partnerText = s.partner ? ` <span style="font-size:0.8rem; font-style:italic; color:#A78BFA;">w/ ${escapeHtml(s.partner)}</span>` : "";
+                            const songDesc = s.isMusic ? "♪ Background Music" : (s.song ? `"${escapeHtml(s.song)}"${s.artist ? ' by ' + escapeHtml(s.artist) : ''}` : "Choosing a song");
+                            const pausedClass = (s.isPaused || s.isSkipped) ? ' style="opacity: 0.6;"' : '';
+                            const pausedBadge = s.isPaused ? ' <span style="font-size:0.7rem; background:#64748B; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">PAUSED</span>' : '';
+                            const skippedBadge = s.isSkipped ? ' <span style="font-size:0.7rem; background:#D97706; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">SKIP</span>' : '';
+                            const specialBadge = s.isSpecial ? ' <span style="font-size:0.7rem; background:#8B5CF6; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">⭐ SPECIAL</span>' : '';
+                            const rotationStartBadge = s.isRotationStart ? '<span class="rotation-start-badge" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>' : '';
+
+                            html += `
+                                        <div class="queue-row"${pausedClass}>
+                                            <span class="queue-pos">${idx + 1}</span>
+                                            <div class="queue-info">
+                                                <div class="queue-name">${rotationStartBadge}${specialBadge}${escapeHtml(s.name)}${partnerText}${pausedBadge}${skippedBadge}</div>
+                                                <div class="queue-song">${songDesc}</div>
+                                            </div>
+                                        </div>`;
+                        });
+                        queueListEl.innerHTML = html;
+                    }
                 }
 
-                const showQrCode = data.showQrCode !== false;
-                document.getElementById('portal-qr-container').style.display = showQrCode ? "" : "none";
-                document.getElementById('wifi-qr-container').style.display = showQrCode ? "" : "none";
-            } catch (err) {
-                console.warn("Error fetching info", err);
-            }
-        }
-
-        // Fetch Rotation Queue
-        async function fetchRotation() {
-            try {
-                const response = await fetch('/api/rotation');
-                if (!response.ok) return;
-                const singers = await response.json();
-                const hash = JSON.stringify(singers);
-                if (hash === previousRotationHash) return;
-                previousRotationHash = hash;
-
-                renderRotation(singers || []);
-            } catch (err) {
-                console.warn("Error fetching rotation", err);
-            }
-        }
-
-        function renderRotation(singers) {
-            const activeSingers = singers.filter(s => !s.isInactive && !s.hasSungInLastRound);
-            document.getElementById('billboard-singer-count').textContent = `${activeSingers.length} Singers`;
-
-            // 1. Current Performer
-            const currentSinger = singers.find(s => s.isCurrent && !s.hasSungInLastRound);
-            const nowNameEl = document.getElementById('now-singer-name');
-            const nowDuetEl = document.getElementById('now-duet-tag');
-            const nowTitleEl = document.getElementById('now-song-title');
-            const nowArtistEl = document.getElementById('now-song-artist');
-            const nowRotationStartEl = document.getElementById('now-rotation-start-badge');
-            const nowSpecialEl = document.getElementById('now-special-badge');
-
-            if (currentSinger) {
-                nowRotationStartEl.style.display = currentSinger.isRotationStart ? "inline-block" : "none";
-                if (nowSpecialEl) nowSpecialEl.style.display = currentSinger.isSpecial ? "inline-block" : "none";
-                nowNameEl.textContent = currentSinger.name;
-                if (currentSinger.partner) {
-                    nowDuetEl.textContent = `w/ ${currentSinger.partner}`;
-                    nowDuetEl.style.display = "inline";
-                } else {
-                    nowDuetEl.style.display = "none";
+                function escapeHtml(text) {
+                    if (!text) return "";
+                    return String(text)
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace( />/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;");
                 }
 
-                if (currentSinger.isMusic) {
-                    nowTitleEl.textContent = "♪ Background Music Track";
-                    nowArtistEl.textContent = "";
-                } else {
-                    nowTitleEl.textContent = currentSinger.song ? `"${currentSinger.song}"` : "Song not selected";
-                    nowArtistEl.textContent = currentSinger.artist ? `by ${currentSinger.artist}` : "";
-                }
-            } else {
-                nowRotationStartEl.style.display = "none";
-                if (nowSpecialEl) nowSpecialEl.style.display = "none";
-                nowNameEl.textContent = "Stage is Open";
-                nowDuetEl.style.display = "none";
-                nowTitleEl.textContent = "Ready for the next singer!";
-                nowArtistEl.textContent = "";
-            }
-
-            // 2. Next Up Performer
-            const nextSinger = singers.find(s => s.isNext && !s.hasSungInLastRound);
-            const nextNameEl = document.getElementById('next-singer-name');
-            const nextDuetEl = document.getElementById('next-duet-tag');
-            const nextTitleEl = document.getElementById('next-song-title');
-            const nextRotationStartEl = document.getElementById('next-rotation-start-badge');
-            const nextSpecialEl = document.getElementById('next-special-badge');
-
-            if (nextSinger) {
-                nextRotationStartEl.style.display = nextSinger.isRotationStart ? "inline-block" : "none";
-                if (nextSpecialEl) nextSpecialEl.style.display = nextSinger.isSpecial ? "inline-block" : "none";
-                nextNameEl.textContent = nextSinger.name;
-                if (nextSinger.partner) {
-                    nextDuetEl.textContent = `w/ ${nextSinger.partner}`;
-                    nextDuetEl.style.display = "inline";
-                } else {
-                    nextDuetEl.style.display = "none";
-                }
-
-                if (nextSinger.isMusic) {
-                    nextTitleEl.textContent = "♪ Background Music Track";
-                } else {
-                    const song = nextSinger.song ? `"${nextSinger.song}"` : "Picking a song";
-                    const artist = nextSinger.artist ? ` by ${nextSinger.artist}` : "";
-                    nextTitleEl.textContent = `${song}${artist}`;
-                }
-            } else {
-                nextRotationStartEl.style.display = "none";
-                if (nextSpecialEl) nextSpecialEl.style.display = "none";
-                nextNameEl.textContent = "On Deck";
-                nextDuetEl.style.display = "none";
-                nextTitleEl.textContent = "Scan QR code to be up next!";
-            }
-
-            // 3. Upcoming Queue (all active singers after current & next)
-            const queueListEl = document.getElementById('billboard-queue-list');
-            const upcoming = activeSingers.filter(s => !s.isCurrent && !s.isNext);
-
-            if (upcoming.length === 0) {
-                queueListEl.innerHTML = `
-                            <div class="empty-placeholder">
-                                <span class="icon">📋</span>
-                                <span>${activeSingers.length > 0 ? "You're up next! Ready to sing?" : "Rotation is empty. Scan QR to get on stage!"}</span>
-                            </div>`;
-            } else {
-                let html = "";
-                upcoming.forEach((s, idx) => {
-                    const partnerText = s.partner ? ` <span style="font-size:0.8rem; font-style:italic; color:#A78BFA;">w/ ${escapeHtml(s.partner)}</span>` : "";
-                    const songDesc = s.isMusic ? "♪ Background Music" : (s.song ? `"${escapeHtml(s.song)}"${s.artist ? ' by ' + escapeHtml(s.artist) : ''}` : "Choosing a song");
-                    const pausedClass = (s.isPaused || s.isSkipped) ? ' style="opacity: 0.6;"' : '';
-                    const pausedBadge = s.isPaused ? ' <span style="font-size:0.7rem; background:#64748B; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">PAUSED</span>' : '';
-                    const skippedBadge = s.isSkipped ? ' <span style="font-size:0.7rem; background:#D97706; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">SKIPPED</span>' : '';
-                    const specialBadge = s.isSpecial ? ' <span style="font-size:0.7rem; background:#8B5CF6; color:white; padding:2px 6px; border-radius:4px; font-weight:700;">⭐ SPECIAL</span>' : '';
-                    const rotationStartBadge = s.isRotationStart ? '<span class="rotation-start-badge" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>' : '';
-
-                    html += `
-                                <div class="queue-row"${pausedClass}>
-                                    <span class="queue-pos">${idx + 1}</span>
-                                    <div class="queue-info">
-                                        <div class="queue-name">${rotationStartBadge}${specialBadge}${escapeHtml(s.name)}${partnerText}${pausedBadge}${skippedBadge}</div>
-                                        <div class="queue-song">${songDesc}</div>
-                                    </div>
-                                </div>`;
+                // Initialize polling loops
+                document.addEventListener("DOMContentLoaded", () => {
+                    fetchInfo();
+                    fetchRotation();
+                    setInterval(fetchInfo, 10000); // refresh venue/wifi info every 10s
+                    setInterval(fetchRotation, 3000); // refresh queue every 3s
                 });
-                queueListEl.innerHTML = html;
-            }
-        }
-
-        function escapeHtml(text) {
-            if (!text) return "";
-            return String(text)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace( />/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        // Initialize polling loops
-        document.addEventListener("DOMContentLoaded", () => {
-            fetchInfo();
-            fetchRotation();
-            setInterval(fetchInfo, 10000); // refresh venue/wifi info every 10s
-            setInterval(fetchRotation, 3000); // refresh queue every 3s
-        });
     </script>
 </body>
 </html>

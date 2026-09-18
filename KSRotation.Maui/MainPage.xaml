@@ -143,7 +143,7 @@
                                                     <Label Text="MUSIC" TextColor="White" FontSize="9" FontAttributes="Bold" />
                                                 </Border>
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#D97706" Padding="4,2" IsVisible="{Binding IsSkipped}" StrokeThickness="0" ToolTipProperties.Text="Singer is skipped for this round">
-                                                    <Label Text="SKIPPED" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                                                    <Label Text="SKIP" TextColor="White" FontSize="9" FontAttributes="Bold" />
                                                 </Border>
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#8B5CF6" Padding="4,2" IsVisible="{Binding IsSpecial}" StrokeThickness="0" ToolTipProperties.Text="Special one-time performer">
                                                     <Label Text="⭐ SPECIAL" TextColor="White" FontSize="9" FontAttributes="Bold" />

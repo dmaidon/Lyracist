@@ -26,7 +26,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Automatic Round Rollover**: When rotation advances and the round completes (crossing or reaching the `⚓ Anchor` singer), all `IsSkipped` flags automatically clear so skipped performers sing normally in the following round without requiring manual DJ intervention.
 - **Immediate Promotion When Skipping Current**: If the currently performing singer is skipped, the rotation immediately advances to the next eligible singer.
 - **Synchronized Wait-Time Recalculation**: `RecalculateEstimatedWaits` ignores skipped performers so on-deck and waiting singers see true, accurate wait times.
-- **Cross-Platform UI & Indicators**: Amber `⏭ SKIPPED` badges, row styling, and `Skip / Unskip` buttons across Lyracist, KSRotation desktop, remote DJ board (`dj.html`), audience billboard (`billboard.html`), kiosk (`kiosk.html`), and patron mobile portal (`PatronPortal.html`).
+- **Cross-Platform UI & Indicators**: Amber `⏭ SKIP` badges, row styling, and `Skip / Unskip` buttons across Lyracist, KSRotation desktop, remote DJ board (`dj.html`), audience billboard (`billboard.html`), kiosk (`kiosk.html`), and patron mobile portal (`PatronPortal.html`).
 
 ### 📍 Hybrid GPS & Wi-Fi Venue Auto-Location (`KSRotation`, `KSRotation.Maui`, `Lyracist`, `Shared`)
 - **Hybrid Ground-Truth Detection**: Uses high-precision GPS coordinates (Latitude/Longitude) with a 150-meter spherical Haversine radius (`GeoMath`) as the primary ground truth, with house Wi-Fi SSID as a secondary fallback.

@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KSRotation - Remote DJ Board</title>
     <script>
-        // Applied before first paint (and before the stylesheet below) to avoid a flash of the
-        // wrong theme on load.
-        (function () {
-            var saved = localStorage.getItem('ks_dj_theme');
-            if (saved === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-        })();
+                // Applied before first paint (and before the stylesheet below) to avoid a flash of the
+                // wrong theme on load.
+                (function () {
+                    var saved = localStorage.getItem('ks_dj_theme');
+                    if (saved === 'light') {
+                        document.documentElement.setAttribute('data-theme', 'light');
+                    }
+                })();
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -676,8 +676,13 @@
         }
 
         @keyframes lastRoundPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; }
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.85;
+            }
         }
 
         .singer-card.sung-last-round {
@@ -817,616 +822,616 @@
     </div>
 
     <script>
-        let pollInterval = null;
-        // Auto-check PIN in sessionStorage on page load
-        window.addEventListener('load', () => {
-            updateThemeToggleLabel();
+                let pollInterval = null;
+                // Auto-check PIN in sessionStorage on page load
+                window.addEventListener('load', () => {
+                    updateThemeToggleLabel();
 
-            const savedPin = sessionStorage.getItem("dj_pin");
-            if (savedPin) {
-                document.getElementById("lock-screen").style.display = "none";
-                document.getElementById("dashboard").style.display = "flex";
-                startPolling();
-            }
-        });
-
-        function toggleTheme() {
-            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-            if (isLight) {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.setItem('ks_dj_theme', 'dark');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('ks_dj_theme', 'light');
-            }
-            updateThemeToggleLabel();
-        }
-
-        function updateThemeToggleLabel() {
-            const btn = document.getElementById('theme-toggle-btn');
-            if (!btn) return;
-            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-            btn.textContent = isLight ? '🌙 Dark Mode' : '☀️ Light Mode';
-        }
-
-        function checkPinKey(event) {
-            if (event.key === "Enter") {
-                submitPin();
-            }
-        }
-
-        function submitPin() {
-            const pin = document.getElementById("pin-input").value;
-            if (pin) {
-                sessionStorage.setItem("dj_pin", pin);
-                document.getElementById("lock-screen").style.display = "none";
-                document.getElementById("dashboard").style.display = "flex";
-                startPolling();
-            }
-        }
-
-        function confirmLogout() {
-            if (confirm("Are you sure you want to lock the screen?")) {
-                logout();
-            }
-        }
-
-        function logout() {
-            sessionStorage.removeItem("dj_pin");
-            stopPolling();
-            // The Add Performer modal is nested inside #dashboard: hiding the dashboard also
-            // visually hides the modal, but its own display:flex and any typed-but-unsaved text
-            // survive underneath. Without closing it explicitly here, re-entering the PIN pops it
-            // back open over the fresh dashboard with whatever was left in it before the lock.
-            closeAddPerformerModal();
-            document.getElementById("pin-input").value = "";
-            document.getElementById("lock-screen").style.display = "flex";
-            document.getElementById("dashboard").style.display = "none";
-        }
-
-        function startPolling() {
-            // Guard against a double-invocation (e.g. a rapid double-tap on "Unlock Console")
-            // leaving an earlier interval orphaned - pollInterval would only ever hold the most
-            // recent one, so stopPolling()/logout() could never clear the first, leaving it
-            // polling with a stale/cleared PIN forever.
-            stopPolling();
-            loadData();
-            pollInterval = setInterval(loadData, 3000);
-        }
-
-        function stopPolling() {
-            if (pollInterval) {
-                clearInterval(pollInterval);
-                pollInterval = null;
-            }
-        }
-
-        async function loadData() {
-            const pin = sessionStorage.getItem("dj_pin");
-            const headers = { 'X-DJ-PIN': pin };
-            const querySuffix = `?pin=${encodeURIComponent(pin)}`;
-
-            try {
-                // Fetch Rotation Queue
-                const rotResponse = await fetch(`/api/rotation${querySuffix}`, { headers });
-                if (rotResponse.status === 401) {
-                    logout();
-                    alert("Unauthorized PIN. Please log in again.");
-                    return;
-                }
-                const rotation = await rotResponse.json();
-                renderQueue(rotation);
-
-                // Fetch Incoming Requests
-                const reqResponse = await fetch(`/api/requests${querySuffix}`, { headers });
-                const requests = await reqResponse.json();
-                renderRequests(requests);
-
-                // Fetch Special Events
-                const eventsResponse = await fetch(`/api/special-events${querySuffix}`, { headers });
-                if (eventsResponse.ok) {
-                    const data = await eventsResponse.json();
-                    renderSpecialEvents(data.specialEvents, data.activeSpecialEvent);
-                }
-
-                // Fetch Venue / Last Round Info
-                const infoResponse = await fetch(`/api/info${querySuffix}`, { headers });
-                if (infoResponse.ok) {
-                    const info = await infoResponse.json();
-                    updateLastRoundState(info.isLastRound);
-                }
-
-            } catch (err) {
-                console.error("Connection error loading DJ data", err);
-            }
-        }
-
-        function updateLastRoundState(isLastRound) {
-            const isRoundActive = !!isLastRound;
-
-            const btn = document.getElementById("last-round-btn");
-            if (btn) {
-                if (isRoundActive) {
-                    btn.classList.add("active");
-                    btn.textContent = "✓ Last Round";
-                    btn.title = "Last Round is active. Tap to turn off.";
-                } else {
-                    btn.classList.remove("active");
-                    btn.textContent = "Last Round";
-                    btn.title = "Toggle Last Round for the night";
-                }
-            }
-
-            const quickBtn = document.getElementById("last-round-quick-btn");
-            if (quickBtn) {
-                const label = quickBtn.querySelector(".last-round-label");
-                if (isRoundActive) {
-                    quickBtn.classList.add("active");
-                    if (label) label.textContent = "✓ Last Round";
-                } else {
-                    quickBtn.classList.remove("active");
-                    if (label) label.textContent = "Last Round";
-                }
-            }
-
-            const banner = document.getElementById("last-round-banner");
-            if (banner) {
-                banner.style.display = isRoundActive ? "block" : "none";
-            }
-        }
-
-        let currentSingerNameForBirthday = "";
-
-        function renderSpecialEvents(specialEvents, activeSpecialEvent) {
-            const container = document.getElementById("special-events-container");
-            if (!container) return;
-
-            container.innerHTML = "";
-
-            // Create option for 'None'
-            const noneBtn = document.createElement("button");
-            noneBtn.className = activeSpecialEvent === "None" || !activeSpecialEvent ? "btn-primary" : "btn-outline";
-            noneBtn.style.padding = "6px 12px";
-            noneBtn.style.fontSize = "12px";
-            noneBtn.innerText = "None";
-            noneBtn.onclick = () => sendAction("set-special-event", "None");
-            container.appendChild(noneBtn);
-
-            // Create buttons for each special event
-            if (specialEvents && specialEvents.length > 0) {
-                specialEvents.forEach(eventName => {
-                    const btn = document.createElement("button");
-                    btn.className = activeSpecialEvent === eventName ? "btn-primary" : "btn-outline";
-                    btn.style.padding = "6px 12px";
-                    btn.style.fontSize = "12px";
-                    btn.innerText = eventName;
-                    btn.onclick = () => {
-                        if (eventName.toLowerCase() === "birthday") {
-                            showBirthdayModal();
-                        } else {
-                            sendAction("set-special-event", eventName);
-                        }
-                    };
-                    container.appendChild(btn);
+                    const savedPin = sessionStorage.getItem("dj_pin");
+                    if (savedPin) {
+                        document.getElementById("lock-screen").style.display = "none";
+                        document.getElementById("dashboard").style.display = "flex";
+                        startPolling();
+                    }
                 });
-            }
-        }
 
-        function showBirthdayModal() {
-            const input = document.getElementById("birthday-name-input");
-            if (input) {
-                input.value = currentSingerNameForBirthday || "";
-            }
-            const modal = document.getElementById("birthday-modal");
-            if (modal) {
-                modal.style.display = "flex";
-                setTimeout(() => input && input.focus(), 100);
-            }
-        }
-
-        function closeBirthdayModal() {
-            const modal = document.getElementById("birthday-modal");
-            if (modal) modal.style.display = "none";
-        }
-
-        function checkBirthdayModalKey(event) {
-            if (event.key === "Enter") {
-                submitBirthdayBanner();
-            } else if (event.key === "Escape") {
-                closeBirthdayModal();
-            }
-        }
-
-        function submitBirthdayBanner() {
-            const input = document.getElementById("birthday-name-input");
-            const performerName = input ? input.value.trim() : "";
-            closeBirthdayModal();
-            sendAction("set-special-event", "Birthday", performerName);
-        }
-
-        function renderQueue(singers) {
-            if (singers && singers.length > 0) {
-                const cur = singers.find(s => s.isCurrent && !s.isMusic);
-                if (cur && cur.name) currentSingerNameForBirthday = cur.name;
-            }
-
-            const listDiv = document.getElementById("queue-list");
-            if (!singers || singers.length === 0) {
-                listDiv.innerHTML = '<div class="no-data">No performers in rotation</div>';
-                return;
-            }
-
-            // Remove no-data element if it exists
-            const noData = listDiv.querySelector('.no-data');
-            if (noData) {
-                listDiv.removeChild(noData);
-            }
-
-            // Keep track of existing cards
-            const existingCards = new Map();
-            Array.from(listDiv.children).forEach(child => {
-                if (child.id && child.id.startsWith('card-')) {
-                    existingCards.set(child.id, child);
-                }
-            });
-
-            // Process each singer in order
-            singers.forEach((s, index) => {
-                const cardId = `card-${s.id}`;
-                let card = existingCards.get(cardId);
-
-                // Determine card classes
-                let cardClass = 'singer-card';
-                let badges = '';
-                if (s.isRotationStart) {
-                    cardClass += ' rotation-start';
-                    badges += '<span class="badge rotation-start" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>';
-                }
-                if (s.isCurrent) {
-                    cardClass += ' current';
-                    badges += s.isMusic
-                        ? '<span class="badge current" style="background-color: var(--green); color: black;">Now Playing</span>'
-                        : '<span class="badge current">Now Singing</span>';
-                } else if (s.isNext) {
-                    cardClass += ' next';
-                    badges += s.isMusic
-                        ? '<span class="badge next" style="background-color: var(--green); color: white;">Next Track</span>'
-                        : '<span class="badge next">Next</span>';
-                }
-                if (s.isMusic && !s.isCurrent && !s.isNext) {
-                    badges += '<span class="badge" style="background-color: var(--border-color); color: var(--text-muted); border: 1px solid var(--text-muted); margin-left: 4px;">Music</span>';
-                }
-                if (s.isInactive) {
-                    cardClass += ' inactive';
-                }
-                if (s.isPaused) {
-                    cardClass += ' paused';
-                }
-                if (s.isSkipped) {
-                    cardClass += ' skipped';
-                    badges += '<span class="badge" style="background-color: #D97706; color: white; font-weight: bold; margin-left: 4px;">SKIPPED</span>';
-                }
-                if (s.isSpecial) {
-                    badges += '<span class="badge" style="background-color: #8B5CF6; color: white; font-weight: bold; margin-left: 4px;">⭐ SPECIAL</span>';
-                }
-                if (s.hasSungInLastRound) {
-                    cardClass += ' sung-last-round';
-                    badges += '<span class="badge" style="background-color: #059669; color: white; font-weight: bold; margin-left: 4px;">DONE (LAST ROUND)</span>';
+                function toggleTheme() {
+                    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+                    if (isLight) {
+                        document.documentElement.removeAttribute('data-theme');
+                        localStorage.setItem('ks_dj_theme', 'dark');
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'light');
+                        localStorage.setItem('ks_dj_theme', 'light');
+                    }
+                    updateThemeToggleLabel();
                 }
 
-                // Render rounds checkboxes
-                let roundsHtml = '';
-                if (s.isMusic) {
-                    roundsHtml = `<div style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">♪ Background Music Track</div>`;
-                } else {
-                    for (let r = 1; r <= 10; r++) {
-                        const completed = s[`song${r}Completed`] || false;
-                        const rClass = `round-box r${r}` + (completed ? ' completed' : '');
-                        roundsHtml += `<div class="${rClass}" onclick="toggleRound('${s.id}', ${r}, ${completed})">${r}</div>`;
+                function updateThemeToggleLabel() {
+                    const btn = document.getElementById('theme-toggle-btn');
+                    if (!btn) return;
+                    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+                    btn.textContent = isLight ? '🌙 Dark Mode' : '☀️ Light Mode';
+                }
+
+                function checkPinKey(event) {
+                    if (event.key === "Enter") {
+                        submitPin();
                     }
                 }
 
-                // Check for empty song details
-                let detailsText = '';
-                if (s.song) {
-                    const songStyle = s.isMusic ? 'style="color: var(--green); font-weight: bold;"' : '';
-                    detailsText = ` - <span class="singer-song" ${songStyle}>${escapeHtml(s.song)}</span>`;
-                    if (s.artist) {
-                        detailsText += ` <span class="singer-artist">(${escapeHtml(s.artist)})</span>`;
+                function submitPin() {
+                    const pin = document.getElementById("pin-input").value;
+                    if (pin) {
+                        sessionStorage.setItem("dj_pin", pin);
+                        document.getElementById("lock-screen").style.display = "none";
+                        document.getElementById("dashboard").style.display = "flex";
+                        startPolling();
                     }
                 }
 
-                // Render queued songs (with per-song remove control)
-                let queuedSongsHtml = '';
-                if (s.queuedSongs && s.queuedSongs.length > 0) {
-                    const rows = s.queuedSongs.map((q, idx) => `
-                                <div class="queued-song-row">
-                                    <span class="queued-song-text">${escapeHtml(q.song)}${q.artist ? ' (' + escapeHtml(q.artist) + ')' : ''}</span>
-                                    <button class="btn-circle red small" title="Remove from queue" onclick="sendAction('remove-queued-song', '${s.id}', ${idx})">✕</button>
-                                </div>
-                            `).join('');
-                    queuedSongsHtml = `<div class="queued-songs">${rows}</div>`;
-                }
-
-                // Pause and skip button text and state class
-                // Do not delete: 👁
-                const pauseTextStr = s.isPaused ? "Resume" : "Pause";
-                const pauseClass = s.isPaused ? "btn-text resume" : "btn-text pause";
-                const pauseHtml = s.isInactive ? '' : `<button class="${pauseClass}" onclick="sendAction('toggle-inactive', '${s.id}')">${pauseTextStr}</button>`;
-
-                const skipTextStr = s.isSkipped ? "Unskip" : "Skip";
-                const skipClass = s.isSkipped ? "btn-text resume" : "btn-text pause";
-                const skipHtml = s.isInactive ? '' : `<button class="${skipClass}" onclick="sendAction('toggle-skip', '${s.id}')" title="Skip or unskip singer for this round">${skipTextStr}</button>`;
-
-                const specialClass = s.isSpecial ? "btn-text resume" : "btn-text pause";
-                const specialHtml = s.isInactive ? '' : `<button class="${specialClass}" onclick="sendAction('toggle-special', '${s.id}')" title="Toggle special one-time singer status" style="${s.isSpecial ? 'background: #8B5CF6; color: white;' : 'border-color: #8B5CF6; color: #8B5CF6;'}">⭐ Special</button>`;
-
-                const setClicked = (s.isInactive || s.isPaused) ? '' : `onclick="sendAction('set-current', '${s.id}')"`;
-                const setStyle = (s.isInactive || s.isPaused) ? 'style="opacity:0.4; cursor:not-allowed;"' : '';
-
-                const setStartClicked = (s.isInactive || s.isPaused) ? '' : `onclick="sendAction('set-rotation-start', '${s.id}')"`;
-                const startTitle = s.isRotationStart ? "Rotation Anchor (marks where a round begins)" : "Set as Rotation Anchor";
-
-                const deleteHtml = s.isInactive
-                    ? `<button class="btn-text resume" title="Restore" onclick="sendAction('restore', '${s.id}')">↺ Restore</button>`
-                    : `<button class="btn-circle red" title="Delete" onclick="sendAction('delete', '${s.id}')">🗑</button>`;
-
-                const nameStyle = s.isMusic ? 'style="color: var(--green); font-weight: bold;"' : '';
-                let nameWithDuet = escapeHtml(s.name);
-                if (s.duetPartnerName && s.duetPartnerName !== "None" && !s.isMusic) {
-                    nameWithDuet += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(s.duetPartnerName)})</span>`;
-                }
-
-                const innerHTML = `
-                            <div class="singer-details">
-                                <div class="singer-info">
-                                    <span class="singer-name" ${nameStyle}>${nameWithDuet}</span>
-                                    ${detailsText}
-                                    ${badges}
-                                </div>
-                                <div class="rounds-container">
-                                    ${roundsHtml}
-                                </div>
-                                ${queuedSongsHtml}
-                            </div>
-                            <div class="actions-container">
-                                <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
-                                <button class="btn-circle red" title="${startTitle}" ${setStartClicked} ${setStyle}>⚓</button>
-                                <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
-                                <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
-                                <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>
-                                ${specialHtml}
-                                ${skipHtml}
-                                ${pauseHtml}
-                                ${deleteHtml}
-                            </div>
-                        `;
-
-                if (!card) {
-                    // Create new card
-                    card = document.createElement('div');
-                    card.id = cardId;
-                    card.className = cardClass;
-                    card.innerHTML = innerHTML;
-                    listDiv.appendChild(card);
-                } else {
-                    // Update existing card properties and content if changed to prevent flashing
-                    if (card.className !== cardClass) {
-                        card.className = cardClass;
+                function confirmLogout() {
+                    if (confirm("Are you sure you want to lock the screen?")) {
+                        logout();
                     }
-                    if (card.innerHTML !== innerHTML) {
-                        card.innerHTML = innerHTML;
+                }
+
+                function logout() {
+                    sessionStorage.removeItem("dj_pin");
+                    stopPolling();
+                    // The Add Performer modal is nested inside #dashboard: hiding the dashboard also
+                    // visually hides the modal, but its own display:flex and any typed-but-unsaved text
+                    // survive underneath. Without closing it explicitly here, re-entering the PIN pops it
+                    // back open over the fresh dashboard with whatever was left in it before the lock.
+                    closeAddPerformerModal();
+                    document.getElementById("pin-input").value = "";
+                    document.getElementById("lock-screen").style.display = "flex";
+                    document.getElementById("dashboard").style.display = "none";
+                }
+
+                function startPolling() {
+                    // Guard against a double-invocation (e.g. a rapid double-tap on "Unlock Console")
+                    // leaving an earlier interval orphaned - pollInterval would only ever hold the most
+                    // recent one, so stopPolling()/logout() could never clear the first, leaving it
+                    // polling with a stale/cleared PIN forever.
+                    stopPolling();
+                    loadData();
+                    pollInterval = setInterval(loadData, 3000);
+                }
+
+                function stopPolling() {
+                    if (pollInterval) {
+                        clearInterval(pollInterval);
+                        pollInterval = null;
                     }
-                    existingCards.delete(cardId);
                 }
 
-                // Ensure the card is in the correct position in the DOM list
-                if (listDiv.children[index] !== card) {
-                    listDiv.insertBefore(card, listDiv.children[index]);
+                async function loadData() {
+                    const pin = sessionStorage.getItem("dj_pin");
+                    const headers = { 'X-DJ-PIN': pin };
+                    const querySuffix = `?pin=${encodeURIComponent(pin)}`;
+
+                    try {
+                        // Fetch Rotation Queue
+                        const rotResponse = await fetch(`/api/rotation${querySuffix}`, { headers });
+                        if (rotResponse.status === 401) {
+                            logout();
+                            alert("Unauthorized PIN. Please log in again.");
+                            return;
+                        }
+                        const rotation = await rotResponse.json();
+                        renderQueue(rotation);
+
+                        // Fetch Incoming Requests
+                        const reqResponse = await fetch(`/api/requests${querySuffix}`, { headers });
+                        const requests = await reqResponse.json();
+                        renderRequests(requests);
+
+                        // Fetch Special Events
+                        const eventsResponse = await fetch(`/api/special-events${querySuffix}`, { headers });
+                        if (eventsResponse.ok) {
+                            const data = await eventsResponse.json();
+                            renderSpecialEvents(data.specialEvents, data.activeSpecialEvent);
+                        }
+
+                        // Fetch Venue / Last Round Info
+                        const infoResponse = await fetch(`/api/info${querySuffix}`, { headers });
+                        if (infoResponse.ok) {
+                            const info = await infoResponse.json();
+                            updateLastRoundState(info.isLastRound);
+                        }
+
+                    } catch (err) {
+                        console.error("Connection error loading DJ data", err);
+                    }
                 }
-            });
 
-            // Remove any remaining old cards
-            existingCards.forEach(card => {
-                listDiv.removeChild(card);
-            });
-        }
+                function updateLastRoundState(isLastRound) {
+                    const isRoundActive = !!isLastRound;
 
-        function renderRequests(requests) {
-            const listDiv = document.getElementById("requests-list");
-            if (!requests || requests.length === 0) {
-                listDiv.innerHTML = '<div class="no-data">No pending requests</div>';
-                return;
-            }
+                    const btn = document.getElementById("last-round-btn");
+                    if (btn) {
+                        if (isRoundActive) {
+                            btn.classList.add("active");
+                            btn.textContent = "✓ Last Round";
+                            btn.title = "Last Round is active. Tap to turn off.";
+                        } else {
+                            btn.classList.remove("active");
+                            btn.textContent = "Last Round";
+                            btn.title = "Toggle Last Round for the night";
+                        }
+                    }
 
-            let html = '';
-            requests.forEach((r) => {
-                let songsHtml = '';
-                if (r.songs && r.songs.length > 0) {
-                    r.songs.forEach(s => {
-                        songsHtml += `
-                                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; padding-left: 6px;">
-                                        • <strong>${escapeHtml(s.song)}</strong> - <em>${escapeHtml(s.artist || "Unknown Artist")}</em>
+                    const quickBtn = document.getElementById("last-round-quick-btn");
+                    if (quickBtn) {
+                        const label = quickBtn.querySelector(".last-round-label");
+                        if (isRoundActive) {
+                            quickBtn.classList.add("active");
+                            if (label) label.textContent = "✓ Last Round";
+                        } else {
+                            quickBtn.classList.remove("active");
+                            if (label) label.textContent = "Last Round";
+                        }
+                    }
+
+                    const banner = document.getElementById("last-round-banner");
+                    if (banner) {
+                        banner.style.display = isRoundActive ? "block" : "none";
+                    }
+                }
+
+                let currentSingerNameForBirthday = "";
+
+                function renderSpecialEvents(specialEvents, activeSpecialEvent) {
+                    const container = document.getElementById("special-events-container");
+                    if (!container) return;
+
+                    container.innerHTML = "";
+
+                    // Create option for 'None'
+                    const noneBtn = document.createElement("button");
+                    noneBtn.className = activeSpecialEvent === "None" || !activeSpecialEvent ? "btn-primary" : "btn-outline";
+                    noneBtn.style.padding = "6px 12px";
+                    noneBtn.style.fontSize = "12px";
+                    noneBtn.innerText = "None";
+                    noneBtn.onclick = () => sendAction("set-special-event", "None");
+                    container.appendChild(noneBtn);
+
+                    // Create buttons for each special event
+                    if (specialEvents && specialEvents.length > 0) {
+                        specialEvents.forEach(eventName => {
+                            const btn = document.createElement("button");
+                            btn.className = activeSpecialEvent === eventName ? "btn-primary" : "btn-outline";
+                            btn.style.padding = "6px 12px";
+                            btn.style.fontSize = "12px";
+                            btn.innerText = eventName;
+                            btn.onclick = () => {
+                                if (eventName.toLowerCase() === "birthday") {
+                                    showBirthdayModal();
+                                } else {
+                                    sendAction("set-special-event", eventName);
+                                }
+                            };
+                            container.appendChild(btn);
+                        });
+                    }
+                }
+
+                function showBirthdayModal() {
+                    const input = document.getElementById("birthday-name-input");
+                    if (input) {
+                        input.value = currentSingerNameForBirthday || "";
+                    }
+                    const modal = document.getElementById("birthday-modal");
+                    if (modal) {
+                        modal.style.display = "flex";
+                        setTimeout(() => input && input.focus(), 100);
+                    }
+                }
+
+                function closeBirthdayModal() {
+                    const modal = document.getElementById("birthday-modal");
+                    if (modal) modal.style.display = "none";
+                }
+
+                function checkBirthdayModalKey(event) {
+                    if (event.key === "Enter") {
+                        submitBirthdayBanner();
+                    } else if (event.key === "Escape") {
+                        closeBirthdayModal();
+                    }
+                }
+
+                function submitBirthdayBanner() {
+                    const input = document.getElementById("birthday-name-input");
+                    const performerName = input ? input.value.trim() : "";
+                    closeBirthdayModal();
+                    sendAction("set-special-event", "Birthday", performerName);
+                }
+
+                function renderQueue(singers) {
+                    if (singers && singers.length > 0) {
+                        const cur = singers.find(s => s.isCurrent && !s.isMusic);
+                        if (cur && cur.name) currentSingerNameForBirthday = cur.name;
+                    }
+
+                    const listDiv = document.getElementById("queue-list");
+                    if (!singers || singers.length === 0) {
+                        listDiv.innerHTML = '<div class="no-data">No performers in rotation</div>';
+                        return;
+                    }
+
+                    // Remove no-data element if it exists
+                    const noData = listDiv.querySelector('.no-data');
+                    if (noData) {
+                        listDiv.removeChild(noData);
+                    }
+
+                    // Keep track of existing cards
+                    const existingCards = new Map();
+                    Array.from(listDiv.children).forEach(child => {
+                        if (child.id && child.id.startsWith('card-')) {
+                            existingCards.set(child.id, child);
+                        }
+                    });
+
+                    // Process each singer in order
+                    singers.forEach((s, index) => {
+                        const cardId = `card-${s.id}`;
+                        let card = existingCards.get(cardId);
+
+                        // Determine card classes
+                        let cardClass = 'singer-card';
+                        let badges = '';
+                        if (s.isRotationStart) {
+                            cardClass += ' rotation-start';
+                            badges += '<span class="badge rotation-start" title="Rotation Anchor (marks where a round begins)">⚓ ANCHOR</span>';
+                        }
+                        if (s.isCurrent) {
+                            cardClass += ' current';
+                            badges += s.isMusic
+                                ? '<span class="badge current" style="background-color: var(--green); color: black;">Now Playing</span>'
+                                : '<span class="badge current">Now Singing</span>';
+                        } else if (s.isNext) {
+                            cardClass += ' next';
+                            badges += s.isMusic
+                                ? '<span class="badge next" style="background-color: var(--green); color: white;">Next Track</span>'
+                                : '<span class="badge next">Next</span>';
+                        }
+                        if (s.isMusic && !s.isCurrent && !s.isNext) {
+                            badges += '<span class="badge" style="background-color: var(--border-color); color: var(--text-muted); border: 1px solid var(--text-muted); margin-left: 4px;">Music</span>';
+                        }
+                        if (s.isInactive) {
+                            cardClass += ' inactive';
+                        }
+                        if (s.isPaused) {
+                            cardClass += ' paused';
+                        }
+                        if (s.isSkipped) {
+                            cardClass += ' skipped';
+                            badges += '<span class="badge" style="background-color: #D97706; color: white; font-weight: bold; margin-left: 4px;">SKIP</span>';
+                        }
+                        if (s.isSpecial) {
+                            badges += '<span class="badge" style="background-color: #8B5CF6; color: white; font-weight: bold; margin-left: 4px;">⭐ SPECIAL</span>';
+                        }
+                        if (s.hasSungInLastRound) {
+                            cardClass += ' sung-last-round';
+                            badges += '<span class="badge" style="background-color: #059669; color: white; font-weight: bold; margin-left: 4px;">DONE (LAST ROUND)</span>';
+                        }
+
+                        // Render rounds checkboxes
+                        let roundsHtml = '';
+                        if (s.isMusic) {
+                            roundsHtml = `<div style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">♪ Background Music Track</div>`;
+                        } else {
+                            for (let r = 1; r <= 10; r++) {
+                                const completed = s[`song${r}Completed`] || false;
+                                const rClass = `round-box r${r}` + (completed ? ' completed' : '');
+                                roundsHtml += `<div class="${rClass}" onclick="toggleRound('${s.id}', ${r}, ${completed})">${r}</div>`;
+                            }
+                        }
+
+                        // Check for empty song details
+                        let detailsText = '';
+                        if (s.song) {
+                            const songStyle = s.isMusic ? 'style="color: var(--green); font-weight: bold;"' : '';
+                            detailsText = ` - <span class="singer-song" ${songStyle}>${escapeHtml(s.song)}</span>`;
+                            if (s.artist) {
+                                detailsText += ` <span class="singer-artist">(${escapeHtml(s.artist)})</span>`;
+                            }
+                        }
+
+                        // Render queued songs (with per-song remove control)
+                        let queuedSongsHtml = '';
+                        if (s.queuedSongs && s.queuedSongs.length > 0) {
+                            const rows = s.queuedSongs.map((q, idx) => `
+                                        <div class="queued-song-row">
+                                            <span class="queued-song-text">${escapeHtml(q.song)}${q.artist ? ' (' + escapeHtml(q.artist) + ')' : ''}</span>
+                                            <button class="btn-circle red small" title="Remove from queue" onclick="sendAction('remove-queued-song', '${s.id}', ${idx})">✕</button>
+                                        </div>
+                                    `).join('');
+                            queuedSongsHtml = `<div class="queued-songs">${rows}</div>`;
+                        }
+
+                        // Pause and skip button text and state class
+                        // Do not delete: 👁
+                        const pauseTextStr = s.isPaused ? "Resume" : "Pause";
+                        const pauseClass = s.isPaused ? "btn-text resume" : "btn-text pause";
+                        const pauseHtml = s.isInactive ? '' : `<button class="${pauseClass}" onclick="sendAction('toggle-inactive', '${s.id}')">${pauseTextStr}</button>`;
+
+                        const skipTextStr = s.isSkipped ? "Unskip" : "Skip";
+                        const skipClass = s.isSkipped ? "btn-text resume" : "btn-text pause";
+                        const skipHtml = s.isInactive ? '' : `<button class="${skipClass}" onclick="sendAction('toggle-skip', '${s.id}')" title="Skip or unskip singer for this round">${skipTextStr}</button>`;
+
+                        const specialClass = s.isSpecial ? "btn-text resume" : "btn-text pause";
+                        const specialHtml = s.isInactive ? '' : `<button class="${specialClass}" onclick="sendAction('toggle-special', '${s.id}')" title="Toggle special one-time singer status" style="${s.isSpecial ? 'background: #8B5CF6; color: white;' : 'border-color: #8B5CF6; color: #8B5CF6;'}">⭐ Special</button>`;
+
+                        const setClicked = (s.isInactive || s.isPaused) ? '' : `onclick="sendAction('set-current', '${s.id}')"`;
+                        const setStyle = (s.isInactive || s.isPaused) ? 'style="opacity:0.4; cursor:not-allowed;"' : '';
+
+                        const setStartClicked = (s.isInactive || s.isPaused) ? '' : `onclick="sendAction('set-rotation-start', '${s.id}')"`;
+                        const startTitle = s.isRotationStart ? "Rotation Anchor (marks where a round begins)" : "Set as Rotation Anchor";
+
+                        const deleteHtml = s.isInactive
+                            ? `<button class="btn-text resume" title="Restore" onclick="sendAction('restore', '${s.id}')">↺ Restore</button>`
+                            : `<button class="btn-circle red" title="Delete" onclick="sendAction('delete', '${s.id}')">🗑</button>`;
+
+                        const nameStyle = s.isMusic ? 'style="color: var(--green); font-weight: bold;"' : '';
+                        let nameWithDuet = escapeHtml(s.name);
+                        if (s.duetPartnerName && s.duetPartnerName !== "None" && !s.isMusic) {
+                            nameWithDuet += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(s.duetPartnerName)})</span>`;
+                        }
+
+                        const innerHTML = `
+                                    <div class="singer-details">
+                                        <div class="singer-info">
+                                            <span class="singer-name" ${nameStyle}>${nameWithDuet}</span>
+                                            ${detailsText}
+                                            ${badges}
+                                        </div>
+                                        <div class="rounds-container">
+                                            ${roundsHtml}
+                                        </div>
+                                        ${queuedSongsHtml}
+                                    </div>
+                                    <div class="actions-container">
+                                        <button class="btn-circle blue" title="Mark Done" onclick="sendAction('finish-song', '${s.id}')">✓</button>
+                                        <button class="btn-circle red" title="${startTitle}" ${setStartClicked} ${setStyle}>⚓</button>
+                                        <button class="btn-circle green" title="Set Current" ${setClicked} ${setStyle}>🎙</button>
+                                        <button class="btn-circle" title="Move Up" onclick="sendAction('move-up', '${s.id}')">▲</button>
+                                        <button class="btn-circle" title="Move Down" onclick="sendAction('move-down', '${s.id}')">▼</button>
+                                        ${specialHtml}
+                                        ${skipHtml}
+                                        ${pauseHtml}
+                                        ${deleteHtml}
+                                    </div>
+                                `;
+
+                        if (!card) {
+                            // Create new card
+                            card = document.createElement('div');
+                            card.id = cardId;
+                            card.className = cardClass;
+                            card.innerHTML = innerHTML;
+                            listDiv.appendChild(card);
+                        } else {
+                            // Update existing card properties and content if changed to prevent flashing
+                            if (card.className !== cardClass) {
+                                card.className = cardClass;
+                            }
+                            if (card.innerHTML !== innerHTML) {
+                                card.innerHTML = innerHTML;
+                            }
+                            existingCards.delete(cardId);
+                        }
+
+                        // Ensure the card is in the correct position in the DOM list
+                        if (listDiv.children[index] !== card) {
+                            listDiv.insertBefore(card, listDiv.children[index]);
+                        }
+                    });
+
+                    // Remove any remaining old cards
+                    existingCards.forEach(card => {
+                        listDiv.removeChild(card);
+                    });
+                }
+
+                function renderRequests(requests) {
+                    const listDiv = document.getElementById("requests-list");
+                    if (!requests || requests.length === 0) {
+                        listDiv.innerHTML = '<div class="no-data">No pending requests</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    requests.forEach((r) => {
+                        let songsHtml = '';
+                        if (r.songs && r.songs.length > 0) {
+                            r.songs.forEach(s => {
+                                songsHtml += `
+                                            <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; padding-left: 6px;">
+                                                • <strong>${escapeHtml(s.song)}</strong> - <em>${escapeHtml(s.artist || "Unknown Artist")}</em>
+                                            </div>
+                                        `;
+                            });
+                        } else {
+                            songsHtml = `
+                                        <div class="request-song">${escapeHtml(r.song)}</div>
+                                        <div class="request-artist">${escapeHtml(r.artist || "Unknown Artist")}</div>
+                                    `;
+                        }
+
+                        const isMusic = r.requestType === "Music";
+                        const badgeColor = isMusic ? "var(--green)" : "var(--primary)";
+                        const badgeText = isMusic ? "Music" : "Karaoke";
+                        const badgeHtml = `<span class="badge" style="background-color: ${badgeColor}; color: white; margin-left: 8px; font-size: 0.65rem; vertical-align: middle;">${badgeText}</span>`;
+
+                        let reqNameDisplay = escapeHtml(r.name);
+                        if (r.duetPartnerName && r.duetPartnerName !== "None" && !isMusic) {
+                            reqNameDisplay += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(r.duetPartnerName)})</span>`;
+                        }
+
+                        html += `
+                                    <div class="request-card">
+                                        <div class="request-details">
+                                            <div class="request-name">${reqNameDisplay}${badgeHtml}</div>
+                                            ${songsHtml}
+                                        </div>
+                                        <div class="request-actions">
+                                            <button class="btn-outline" style="border-color: var(--green); color: var(--green);" onclick="sendRequestAction('accept', '${escapeJs(r.id)}')">✓ Accept</button>
+                                            <button class="btn-outline" style="border-color: var(--red); color: var(--red);" onclick="sendRequestAction('decline', '${escapeJs(r.id)}')">✕ Decline</button>
+                                        </div>
                                     </div>
                                 `;
                     });
-                } else {
-                    songsHtml = `
-                                <div class="request-song">${escapeHtml(r.song)}</div>
-                                <div class="request-artist">${escapeHtml(r.artist || "Unknown Artist")}</div>
-                            `;
+
+                    listDiv.innerHTML = html;
                 }
 
-                const isMusic = r.requestType === "Music";
-                const badgeColor = isMusic ? "var(--green)" : "var(--primary)";
-                const badgeText = isMusic ? "Music" : "Karaoke";
-                const badgeHtml = `<span class="badge" style="background-color: ${badgeColor}; color: white; margin-left: 8px; font-size: 0.65rem; vertical-align: middle;">${badgeText}</span>`;
+                async function sendAction(actionName, targetId, extraData = "") {
+                    const pin = sessionStorage.getItem("dj_pin");
+                    try {
+                        const response = await fetch(`/api/dj/action?pin=${encodeURIComponent(pin)}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-DJ-PIN': pin
+                            },
+                            body: JSON.stringify({ action: actionName, targetId, extraData: String(extraData) })
+                        });
 
-                let reqNameDisplay = escapeHtml(r.name);
-                if (r.duetPartnerName && r.duetPartnerName !== "None" && !isMusic) {
-                    reqNameDisplay += ` <span style="font-size: 0.85em; opacity: 0.85; font-weight: normal;">(with ${escapeHtml(r.duetPartnerName)})</span>`;
-                }
-
-                html += `
-                            <div class="request-card">
-                                <div class="request-details">
-                                    <div class="request-name">${reqNameDisplay}${badgeHtml}</div>
-                                    ${songsHtml}
-                                </div>
-                                <div class="request-actions">
-                                    <button class="btn-outline" style="border-color: var(--green); color: var(--green);" onclick="sendRequestAction('accept', '${escapeJs(r.id)}')">✓ Accept</button>
-                                    <button class="btn-outline" style="border-color: var(--red); color: var(--red);" onclick="sendRequestAction('decline', '${escapeJs(r.id)}')">✕ Decline</button>
-                                </div>
-                            </div>
-                        `;
-            });
-
-            listDiv.innerHTML = html;
-        }
-
-        async function sendAction(actionName, targetId, extraData = "") {
-            const pin = sessionStorage.getItem("dj_pin");
-            try {
-                const response = await fetch(`/api/dj/action?pin=${encodeURIComponent(pin)}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-DJ-PIN': pin
-                    },
-                    body: JSON.stringify({ action: actionName, targetId, extraData: String(extraData) })
-                });
-
-                if (response.ok) {
-                    loadData();
-                } else if (response.status === 401) {
-                    logout();
-                    alert("Session expired or invalid PIN.");
-                }
-            } catch (err) {
-                console.error("Action error", err);
-            }
-        }
-
-        async function sendRequestAction(action, requestId) {
-            const pin = sessionStorage.getItem("dj_pin");
-            try {
-                const response = await fetch(`/api/dj/action?pin=${encodeURIComponent(pin)}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-DJ-PIN': pin
-                    },
-                    body: JSON.stringify({ action, targetId: requestId })
-                });
-
-                if (response.ok) {
-                    loadData();
-                }
-            } catch (err) {
-                console.error("Request action error", err);
-            }
-        }
-
-        function toggleRound(singerId, round, isCompleted) {
-            // Toggles between complete and incomplete for the specific round
-            const action = isCompleted ? "clear-round" : "complete-round";
-            sendAction(action, singerId, round);
-        }
-
-        function openAddPerformerModal() {
-            const modal = document.getElementById("add-performer-modal");
-            if (modal) {
-                modal.style.display = "flex";
-                setTimeout(() => {
-                    const nameInput = document.getElementById("add-name");
-                    if (nameInput) {
-                        nameInput.focus();
-                        nameInput.select();
+                        if (response.ok) {
+                            loadData();
+                        } else if (response.status === 401) {
+                            logout();
+                            alert("Session expired or invalid PIN.");
+                        }
+                    } catch (err) {
+                        console.error("Action error", err);
                     }
-                }, 100);
-            }
-        }
+                }
 
-        function closeAddPerformerModal() {
-            const modal = document.getElementById("add-performer-modal");
-            if (modal) {
-                modal.style.display = "none";
-            }
-            const form = document.getElementById("add-singer-form");
-            if (form) {
-                form.reset();
-            }
-        }
+                async function sendRequestAction(action, requestId) {
+                    const pin = sessionStorage.getItem("dj_pin");
+                    try {
+                        const response = await fetch(`/api/dj/action?pin=${encodeURIComponent(pin)}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-DJ-PIN': pin
+                            },
+                            body: JSON.stringify({ action, targetId: requestId })
+                        });
 
-        function handleAddPerformerBackdropClick(event) {
-            if (event.target && event.target.id === "add-performer-modal") {
-                closeAddPerformerModal();
-            }
-        }
+                        if (response.ok) {
+                            loadData();
+                        }
+                    } catch (err) {
+                        console.error("Request action error", err);
+                    }
+                }
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeAddPerformerModal();
-                closeBirthdayModal();
-            }
-        });
+                function toggleRound(singerId, round, isCompleted) {
+                    // Toggles between complete and incomplete for the specific round
+                    const action = isCompleted ? "clear-round" : "complete-round";
+                    sendAction(action, singerId, round);
+                }
 
-        async function addPerformer(event) {
-            event.preventDefault();
-            const name = document.getElementById("add-name").value;
-            const duetPartner = document.getElementById("add-duet") ? document.getElementById("add-duet").value : "";
-            const song = document.getElementById("add-song").value;
-            const artist = document.getElementById("add-artist").value;
-            const isSpecial = document.getElementById("add-special") ? document.getElementById("add-special").checked : false;
+                function openAddPerformerModal() {
+                    const modal = document.getElementById("add-performer-modal");
+                    if (modal) {
+                        modal.style.display = "flex";
+                        setTimeout(() => {
+                            const nameInput = document.getElementById("add-name");
+                            if (nameInput) {
+                                nameInput.focus();
+                                nameInput.select();
+                            }
+                        }, 100);
+                    }
+                }
 
-            const pin = sessionStorage.getItem("dj_pin");
-            try {
-                const response = await fetch(`/api/dj/action?pin=${encodeURIComponent(pin)}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-DJ-PIN': pin
-                    },
-                    body: JSON.stringify({
-                        action: 'add-singer',
-                        name,
-                        duetPartner,
-                        song,
-                        artist,
-                        isSpecial
-                    })
+                function closeAddPerformerModal() {
+                    const modal = document.getElementById("add-performer-modal");
+                    if (modal) {
+                        modal.style.display = "none";
+                    }
+                    const form = document.getElementById("add-singer-form");
+                    if (form) {
+                        form.reset();
+                    }
+                }
+
+                function handleAddPerformerBackdropClick(event) {
+                    if (event.target && event.target.id === "add-performer-modal") {
+                        closeAddPerformerModal();
+                    }
+                }
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        closeAddPerformerModal();
+                        closeBirthdayModal();
+                    }
                 });
 
-                if (response.ok) {
-                    document.getElementById("add-singer-form").reset();
-                    closeAddPerformerModal();
-                    loadData();
-                } else {
-                    const data = await response.json();
-                    alert(data.error || "Failed to add performer.");
+                async function addPerformer(event) {
+                    event.preventDefault();
+                    const name = document.getElementById("add-name").value;
+                    const duetPartner = document.getElementById("add-duet") ? document.getElementById("add-duet").value : "";
+                    const song = document.getElementById("add-song").value;
+                    const artist = document.getElementById("add-artist").value;
+                    const isSpecial = document.getElementById("add-special") ? document.getElementById("add-special").checked : false;
+
+                    const pin = sessionStorage.getItem("dj_pin");
+                    try {
+                        const response = await fetch(`/api/dj/action?pin=${encodeURIComponent(pin)}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-DJ-PIN': pin
+                            },
+                            body: JSON.stringify({
+                                action: 'add-singer',
+                                name,
+                                duetPartner,
+                                song,
+                                artist,
+                                isSpecial
+                            })
+                        });
+
+                        if (response.ok) {
+                            document.getElementById("add-singer-form").reset();
+                            closeAddPerformerModal();
+                            loadData();
+                        } else {
+                            const data = await response.json();
+                            alert(data.error || "Failed to add performer.");
+                        }
+                    } catch (err) {
+                        console.error("Add performer error", err);
+                    }
                 }
-            } catch (err) {
-                console.error("Add performer error", err);
-            }
-        }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace( />/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
+                function escapeHtml(text) {
+                    if (!text) return '';
+                    return text
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace( />/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;");
+                }
 
-        function escapeJs(text) {
-            if (!text) return '';
-            return text
-                .replace(/\\/g, '\\\\')
-                .replace(/'/g, "\\'")
-                .replace(/"/g, '\\"');
-        }
+                function escapeJs(text) {
+                    if (!text) return '';
+                    return text
+                        .replace(/\\/g, '\\\\')
+                        .replace(/'/g, "\\'")
+                        .replace(/"/g, '\\"');
+                }
     </script>
 </body>
 </html>
