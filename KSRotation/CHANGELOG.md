@@ -1,12 +1,13 @@
-<!-- Edited on Sep 18, 2026 @ 08:16:00 -> Add Singer Skip round-scoped rotation bypass feature to KSRotation Changelog -->
+<!-- Edited on Sep 18, 2026 @ 08:36:00 -> Add Singer Skip round-scoped rotation bypass feature to KSRotation & KSRotation.Maui Changelog -->
 
 # Changelog
 
-## 2026-09-17
+## 2026-09-18
 
-- **Singer Skip Round-Scoped Rotation Bypass (`MainWindow.xaml`, `MainViewModel.cs`, `MainViewModel.Requests.cs`, Web Portals)**:
+- **Singer Skip Round-Scoped Rotation Bypass (`MainWindow.xaml`, `MainViewModel.cs`, `MainViewModel.Requests.cs`, `KSRotation.Maui`, Web Portals)**:
   - Added single-round Singer Skip capability to bypass performers temporarily stepping away without losing rotation order.
   - Added `ToggleSkipSingerCommand` to `MainViewModel` and wired context menu and list item buttons in `MainWindow.xaml`.
+  - Added Skip/Unskip action button, amber `SKIPPED` badge, and row opacity triggers in `KSRotation.Maui` (`MainPage.xaml`, `MainPage.xaml.cs`, `BillboardView.xaml`).
   - Added `toggle-skip` action to web request handler in `MainViewModel.Requests.cs`.
   - Added visual amber `⏭ SKIPPED` badges, row styling, and controls to Remote DJ board (`dj.html`), Billboard (`billboard.html`), Kiosk (`kiosk.html`), and Patron Request Portal (`PatronPortal.html`).
   - Implemented automatic clearing of `IsSkipped` upon round completion when reaching/crossing the rotation anchor (`IsRotationStart`).

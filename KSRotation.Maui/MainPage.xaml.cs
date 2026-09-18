@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 12:37:30 -> Live sync DJ and Venue inputs on TextChanged and Tag Location
+// Edited on Sep 18, 2026 @ 08:36:00 -> Add Singer Skip support and OnToggleSingerSkippedClicked
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -125,7 +125,7 @@ public partial class MainPage : ContentPage
             if (wasCurrent)
             {
                 // 1. Try the singer already flagged as Next (manual next-singer override)
-                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused);
+                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped);
 
                 if (nextCurrent == null)
                 {
@@ -135,7 +135,7 @@ public partial class MainPage : ContentPage
                     for (int i = 1; i < count; i++)
                     {
                         var candidate = vm.Singers[(currentIndex + i) % count];
-                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused)
+                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped)
                         {
                             nextCurrent = candidate;
                             break;
@@ -855,7 +855,7 @@ public partial class MainPage : ContentPage
     {
         if (sender is Button button && button.CommandParameter is KSRotation.Models.SingerEntry entry)
         {
-            if (entry.IsPaused || entry.IsInactive) return;
+            if (entry.IsPaused || entry.IsInactive || entry.IsSkipped) return;
             var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
             vm.SetCurrentSingerCommand.Execute(entry);
         }
@@ -875,7 +875,7 @@ public partial class MainPage : ContentPage
             if (pausing)
             {
                 // 1. Try the singer already flagged as Next (manual next-singer override)
-                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused);
+                nextCurrent = vm.Singers.FirstOrDefault(s => s != entry && s.IsNext && !s.IsInactive && !s.IsPaused && !s.IsSkipped);
 
                 if (nextCurrent == null)
                 {
@@ -885,7 +885,7 @@ public partial class MainPage : ContentPage
                     for (int i = 1; i < count; i++)
                     {
                         var candidate = vm.Singers[(currentIndex + i) % count];
-                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused)
+                        if (candidate != entry && !candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped)
                         {
                             nextCurrent = candidate;
                             break;
@@ -910,6 +910,15 @@ public partial class MainPage : ContentPage
 
             // Recalculate next singer based on new active/paused states
             Lyracist.Shared.RotationHelpers.UpdateNextSingerHighlight(vm.Singers);
+        }
+    }
+
+    private void OnToggleSingerSkippedClicked(object? sender, EventArgs e)
+    {
+        if (sender is Button button && button.CommandParameter is KSRotation.Models.SingerEntry entry)
+        {
+            var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
+            vm.ToggleSkipSingerCommand.Execute(entry);
         }
     }
 

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 12:37:00 -> Enable TwoWay binding and TextChanged live sync for DJ and Venue entries -->
+<!-- Edited on Sep 18, 2026 @ 08:36:00 -> Add Singer Skip badge, button, and styling trigger -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -85,6 +85,10 @@
                                             <Setter Property="Opacity" Value="0.4" />
                                             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#E2E8F0, Dark=#151722}" />
                                         </DataTrigger>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSkipped}" Value="True">
+                                            <Setter Property="Opacity" Value="0.6" />
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FEF3C7, Dark=#261E14}" />
+                                        </DataTrigger>
 
                                         <!-- Orange border outline and peach/rust background for current singer -->
                                         <DataTrigger TargetType="Border" Binding="{Binding IsCurrent}" Value="True">
@@ -137,6 +141,9 @@
                                                 </Border>
                                                 <Border StrokeShape="RoundRectangle 4" BackgroundColor="#10B981" Padding="4,2" IsVisible="{Binding IsMusic}" StrokeThickness="0">
                                                     <Label Text="MUSIC" TextColor="White" FontSize="9" FontAttributes="Bold" />
+                                                </Border>
+                                                <Border StrokeShape="RoundRectangle 4" BackgroundColor="#D97706" Padding="4,2" IsVisible="{Binding IsSkipped}" StrokeThickness="0" ToolTipProperties.Text="Singer is skipped for this round">
+                                                    <Label Text="SKIPPED" TextColor="White" FontSize="9" FontAttributes="Bold" />
                                                 </Border>
 
                                                 <Label Text="-" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="13" VerticalOptions="Center">
@@ -244,6 +251,10 @@
                                                         <Setter Property="IsEnabled" Value="False" />
                                                         <Setter Property="Opacity" Value="0.4" />
                                                     </DataTrigger>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsSkipped}" Value="True">
+                                                        <Setter Property="IsEnabled" Value="False" />
+                                                        <Setter Property="Opacity" Value="0.4" />
+                                                    </DataTrigger>
                                                 </Button.Triggers>
                                             </Button>
 
@@ -280,6 +291,22 @@
                                                         <Setter Property="Text" Value="▶ Resume" />
                                                         <Setter Property="BorderColor" Value="#10B981" />
                                                         <Setter Property="TextColor" Value="#10B981" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsInactive}" Value="True">
+                                                        <Setter Property="IsEnabled" Value="False" />
+                                                        <Setter Property="Opacity" Value="0.4" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
+
+                                            <!-- Toggle Skipped (Skip/Unskip for this round) -->
+                                            <Button Text="⏭" Clicked="OnToggleSingerSkippedClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" BorderColor="#D97706" BorderWidth="1" TextColor="#D97706" FontSize="15" FontAttributes="Bold" HeightRequest="28" Padding="6,0" ToolTipProperties.Text="Skip singer for this round">
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsSkipped}" Value="True">
+                                                        <Setter Property="Text" Value="▶ Unskip" />
+                                                        <Setter Property="BorderColor" Value="#F59E0B" />
+                                                        <Setter Property="TextColor" Value="#F59E0B" />
+                                                        <Setter Property="ToolTipProperties.Text" Value="Unskip singer for this round" />
                                                     </DataTrigger>
                                                     <DataTrigger TargetType="Button" Binding="{Binding IsInactive}" Value="True">
                                                         <Setter Property="IsEnabled" Value="False" />
