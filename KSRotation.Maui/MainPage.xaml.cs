@@ -854,13 +854,18 @@ public partial class MainPage : ContentPage
         _editingSinger.DuetPartnerName = EditDuetEntry.Text?.Trim() ?? string.Empty;
         _editingSinger.Song = EditSongEntry.Text?.Trim() ?? string.Empty;
         _editingSinger.Artist = EditArtistEntry.Text?.Trim() ?? string.Empty;
-        _editingSinger.IsSpecial = EditSpecialCheckBox.IsChecked;
 
+        var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
         if (becameSpecial)
         {
-            var vm = (KSRotation.ViewModels.MainViewModel)BindingContext;
-            RotationHelpers.PromoteSpecialSingerToCurrent(vm.Singers, _editingSinger);
-            vm.RefreshBillboardState();
+            // Reuse the same command OnSetSpecialSingerClicked uses so promotion is persisted and
+            // synced (RebuildRotationJsonCacheNow, QueueSaveDatabase, display window update) instead
+            // of only mutating the in-memory list.
+            vm.ToggleSpecialSingerCommand.Execute(_editingSinger);
+        }
+        else
+        {
+            _editingSinger.IsSpecial = EditSpecialCheckBox.IsChecked;
         }
 
         _editingSinger = null;
