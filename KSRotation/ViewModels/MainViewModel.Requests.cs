@@ -561,7 +561,7 @@ namespace KSRotation.ViewModels
         // the request page.
         private static readonly TimeSpan DjActionTimeout = TimeSpan.FromSeconds(5);
 
-        private async Task<string> HandleDjAction(string action, string targetId, string extraData, string name, string song, string artist, string duetPartner)
+        private async Task<string> HandleDjAction(string action, string targetId, string extraData, string name, string song, string artist, string duetPartner, bool isSpecial)
         {
             var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -578,7 +578,7 @@ namespace KSRotation.ViewModels
             {
                 try
                 {
-                    string err = ExecuteDjActionOnUi(action, targetId, extraData, name, song, artist, duetPartner);
+                    string err = ExecuteDjActionOnUi(action, targetId, extraData, name, song, artist, duetPartner, isSpecial);
                     tcs.TrySetResult(err);
                 }
                 catch (Exception ex)
@@ -598,7 +598,7 @@ namespace KSRotation.ViewModels
             }
         }
 
-        private string ExecuteDjActionOnUi(string action, string targetId, string extraData, string name, string song, string artist, string duetPartner)
+        private string ExecuteDjActionOnUi(string action, string targetId, string extraData, string name, string song, string artist, string duetPartner, bool isSpecial)
         {
             switch (action.ToLowerInvariant())
             {
@@ -824,7 +824,6 @@ namespace KSRotation.ViewModels
                 case "add-singer":
                 case "add-performer":
                     {
-                        bool isSpecial = string.Equals(extraData, "special", StringComparison.OrdinalIgnoreCase);
                         if (!TryAddPerformer(name, song, artist, duetPartner, isSpecial)) return "Singer name is required.";
 
                         RebuildRotationJsonCacheNow();

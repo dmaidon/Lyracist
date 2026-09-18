@@ -24,7 +24,7 @@ namespace KSRotation.Services
         Func<string> onGetRotationJson,
         Func<string, bool> onVerifyPin,
         Func<string> onGetRequestsJson,
-        Func<string, string, string, string, string, string, string, Task<string>> onHandleDjAction,
+        Func<string, string, string, string, string, string, string, bool, Task<string>> onHandleDjAction,
         Func<string> onGetSpecialEventsJson,
         Func<string> onGetActiveSpecialEvent,
         Func<string>? onGetVenueInfoJson = null,
@@ -49,7 +49,7 @@ namespace KSRotation.Services
         private readonly Func<string> _onGetRotationJson = onGetRotationJson;
         private readonly Func<string, bool> _onVerifyPin = onVerifyPin;
         private readonly Func<string> _onGetRequestsJson = onGetRequestsJson;
-        private readonly Func<string, string, string, string, string, string, string, Task<string>> _onHandleDjAction = onHandleDjAction;
+        private readonly Func<string, string, string, string, string, string, string, bool, Task<string>> _onHandleDjAction = onHandleDjAction;
         private readonly Func<string> _onGetSpecialEventsJson = onGetSpecialEventsJson;
         private readonly Func<string> _onGetActiveSpecialEvent = onGetActiveSpecialEvent;
         private readonly Func<string>? _onGetVenueInfoJson = onGetVenueInfoJson;
@@ -492,12 +492,8 @@ namespace KSRotation.Services
                         string song = root.TryGetProperty("song", out var songProp) ? (songProp.GetString() ?? "") : "";
                         string artist = root.TryGetProperty("artist", out var artProp) ? (artProp.GetString() ?? "") : "";
                         bool isSpecial = root.TryGetProperty("isSpecial", out var specProp) && (specProp.ValueKind == JsonValueKind.True || (specProp.ValueKind == JsonValueKind.String && bool.TryParse(specProp.GetString(), out var spB) && spB));
-                        if (isSpecial && string.IsNullOrEmpty(extraData))
-                        {
-                            extraData = "special";
-                        }
 
-                        string error = await _onHandleDjAction(action, targetId, extraData, name, song, artist, duetPartner);
+                        string error = await _onHandleDjAction(action, targetId, extraData, name, song, artist, duetPartner, isSpecial);
                         if (string.IsNullOrEmpty(error))
                         {
                             await SendJsonResponseAsync(stream, "{\"success\":true}");
@@ -534,7 +530,7 @@ namespace KSRotation.Services
                             if (!string.IsNullOrWhiteSpace(body)) targetEvent = body.Trim();
                         }
 
-                        string error = await _onHandleDjAction("set-special-event", targetEvent, performer, performer, "", "", "");
+                        string error = await _onHandleDjAction("set-special-event", targetEvent, performer, performer, "", "", "", false);
                         if (string.IsNullOrEmpty(error))
                         {
                             await SendJsonResponseAsync(stream, "{\"success\":true}");

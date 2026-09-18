@@ -218,7 +218,7 @@ namespace Lyracist.Shared
                         firstInactiveIndex = i;
                     }
                 }
-                else if (s.IsRotationStart && !s.IsPaused)
+                else if (s.IsRotationStart && !s.IsPaused && !s.IsSpecial)
                 {
                     if (startAnchorIndex == -1)
                     {

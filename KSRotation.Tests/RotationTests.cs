@@ -1007,7 +1007,7 @@ public class MainViewModelTests
         var method = typeof(KSRotation.ViewModels.MainViewModel).GetMethod(
             "ExecuteDjActionOnUi",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
-        return (string)method.Invoke(vm, [action, targetId, "", "", "", "", ""])!;
+        return (string)method.Invoke(vm, [action, targetId, "", "", "", "", "", false])!;
     }
 
     private static string InvokeDjAction(KSRotation.ViewModels.MainViewModel vm, string action, string targetId, string extraData)
@@ -1015,7 +1015,7 @@ public class MainViewModelTests
         var method = typeof(KSRotation.ViewModels.MainViewModel).GetMethod(
             "ExecuteDjActionOnUi",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
-        return (string)method.Invoke(vm, [action, targetId, extraData, "", "", "", ""])!;
+        return (string)method.Invoke(vm, [action, targetId, extraData, "", "", "", "", false])!;
     }
 
     [Fact]
