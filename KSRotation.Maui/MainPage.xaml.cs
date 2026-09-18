@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 09:22:00 -> Promote special singer to current at top of rotation in OnSaveEditSingerClicked
+// Edited on Sep 18, 2026 @ 09:36:00 -> Focus and select performer name in MAUI Add and Edit overlays
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -69,6 +69,10 @@ public partial class MainPage : ContentPage
         AddArtistEntry.Text = string.Empty;
         AddSpecialCheckBox.IsChecked = false;
         AddSingerOverlay.IsVisible = true;
+        Dispatcher.Dispatch(() =>
+        {
+            AddNameEntry.Focus();
+        });
     }
 
     private async void OnSaveAddPerformerClicked(object? sender, EventArgs e)
@@ -822,6 +826,12 @@ public partial class MainPage : ContentPage
             EditArtistEntry.Text = entry.Artist;
             EditSpecialCheckBox.IsChecked = entry.IsSpecial;
             EditSingerOverlay.IsVisible = true;
+            Dispatcher.Dispatch(() =>
+            {
+                EditNameEntry.Focus();
+                EditNameEntry.CursorPosition = 0;
+                EditNameEntry.SelectionLength = EditNameEntry.Text?.Length ?? 0;
+            });
         }
     }
 

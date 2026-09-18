@@ -1,4 +1,4 @@
-<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer support to ContextMenu, ListView, and badges -->
+<!-- Edited on Sep 18, 2026 @ 09:36:00 -> Select performer name text on add for regular and special singers -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1089,6 +1089,7 @@
                             Content="Add Special"
                             Style="{StaticResource ModernSecondaryButtonStyle}"
                             Command="{Binding AddSpecialSingerCommand}"
+                            Click="AddSingerButton_Click"
                             Width="120"
                             Margin="0,0,12,0"
                             ToolTip="Add a special one-time singer who automatically becomes inactive after their performance" />
@@ -3679,6 +3680,12 @@
                                         <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
                                     </BulletDecorator.Bullet>
                                     <TextBlock Text="Add Singer: Inserts a new performer at the end of the current active rotation round (right before whoever holds the '⚓ ANCHOR' badge). Automatically scrolls to the row, focuses the name field, and highlights 'New Singer' for immediate overwrite typing." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="Add Special: Inserts a special guest or one-time performer immediately at the top of the queue (index 0) as the current singer. Automatically focuses the name field and highlights 'Special Guest' for immediate overwrite typing. When their song concludes, they are automatically marked inactive and normal rotation resumes." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 </BulletDecorator>
                                 <BulletDecorator Margin="0,2">
                                     <BulletDecorator.Bullet>

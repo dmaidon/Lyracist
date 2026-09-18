@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 09:22:00 -> Promote special singer to current at top of rotation in AddActiveSinger, TryAddPerformer, and ToggleSpecialSinger
+// Edited on Sep 18, 2026 @ 09:36:00 -> Add SingerInsertedForEditing event to notify view to select performer name on add
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -1332,6 +1332,8 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial SingerEntry? LastInsertedSinger { get; set; }
 
+        public event EventHandler<SingerEntry>? SingerInsertedForEditing;
+
         private void AddActiveSinger(SingerEntry newSinger)
         {
             LastInsertedSinger = newSinger;
@@ -1356,6 +1358,8 @@ namespace KSRotation.ViewModels
             // rotation shows no badges at all until the first singer finishes, since nothing else
             // recalculates them.
             RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
+
+            SingerInsertedForEditing?.Invoke(this, newSinger);
         }
 
         [RelayCommand]

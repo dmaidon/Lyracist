@@ -1,5 +1,5 @@
-<!-- Edited on Sep 18, 2026 @ 09:26:00 -> Update Special Singer top of list placement and current singer promotion -->
-Last Edit: Sep 18, 2026 - Special Singer Feature
+<!-- Edited on Sep 18, 2026 @ 09:37:00 -> Document immediate performer name text selection on add -->
+Last Edit: Sep 18, 2026 - Performer Name Auto-Select on Add
 
 # Changelog
 
@@ -8,6 +8,13 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.18.0] - 2026-09-18
 
 ### Added
+- **Immediate Performer Name Selection on Add (`KSRotation`, `KSRotation.Maui`)**:
+  - Automatically selects and highlights the entire text in the name entry field ("New Singer", "Special Guest", etc.) whenever any regular or special singer is added.
+  - Allows DJs and hosts to immediately start typing the performer's name without needing to first click into the textbox or drag across existing text.
+  - Wired `Click="AddSingerButton_Click"` to the "Add Special" button in `MainWindow.xaml` alongside existing "Add Singer" handler.
+  - Added `SingerInsertedForEditing` event to `MainViewModel` ensuring the UI responds whenever performers are added for in-place editing.
+  - Enhanced `FocusSingerNameTextBox` in `MainWindow.xaml.cs` with targetted `SingerNameInput` resolution, container generation retries, `Keyboard.Focus`, and deferred `ApplicationIdle` selection assertion so button mouse-up events cannot clear the selection.
+  - Updated KSRotation.Maui (`MainPage.xaml.cs`) to focus and highlight the entire name entry text in both Add and Edit performer overlays.
 - **Special Singer (One-Time Performance) Lifecycle (`Shared`, `Lyracist`, `KSRotation`, `KSRotation.Maui`, Web Portals)**:
   - Added ability to designate one-time guest or special singers who perform for a single round only.
   - **Instant Top of Queue & Current Performer**: When added or toggled as Special, the singer is immediately placed at the very top of the list (index 0) and promoted to Current singer, catering directly to spur-of-the-moment guest performances.

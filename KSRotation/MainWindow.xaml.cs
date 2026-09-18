@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:36:00 -> Use conditional access (RCS1146)
+// Edited on Sep 18, 2026 @ 09:36:00 -> Select performer name text on add and wire SingerInsertedForEditing event
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -21,12 +21,42 @@ namespace KSRotation
         {
             InitializeComponent();
             Closed += OnMainWindowClosed;
+            Loaded += OnMainWindowLoaded;
+            DataContextChanged += OnMainWindowDataContextChanged;
+        }
+
+        private void OnMainWindowLoaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.MainViewModel vm)
+            {
+                vm.SingerInsertedForEditing -= OnSingerInsertedForEditing;
+                vm.SingerInsertedForEditing += OnSingerInsertedForEditing;
+            }
+        }
+
+        private void OnMainWindowDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is ViewModels.MainViewModel oldVm)
+            {
+                oldVm.SingerInsertedForEditing -= OnSingerInsertedForEditing;
+            }
+            if (e.NewValue is ViewModels.MainViewModel newVm)
+            {
+                newVm.SingerInsertedForEditing -= OnSingerInsertedForEditing;
+                newVm.SingerInsertedForEditing += OnSingerInsertedForEditing;
+            }
+        }
+
+        private void OnSingerInsertedForEditing(object? sender, Models.SingerEntry entry)
+        {
+            RequestFocusSingerName(entry);
         }
 
         private void OnMainWindowClosed(object? sender, EventArgs e)
         {
             if (DataContext is ViewModels.MainViewModel vm)
             {
+                vm.SingerInsertedForEditing -= OnSingerInsertedForEditing;
                 vm.Shutdown();
             }
             System.Windows.Application.Current.Shutdown();
@@ -250,28 +280,36 @@ namespace KSRotation
             }
         }
 
-        private void AddSingerButton_Click(object sender, RoutedEventArgs e)
+        private void RequestFocusSingerName(object? targetSinger = null)
         {
             Dispatcher.BeginInvoke(
-                DispatcherPriority.Loaded,
-                new Action(() => FocusNewestSingerNameTextBox(retryCount: 5)));
+                DispatcherPriority.Input,
+                new Action(() => FocusSingerNameTextBox(targetSinger, retryCount: 8)));
         }
 
-        private void FocusNewestSingerNameTextBox(int retryCount)
+        private void AddSingerButton_Click(object sender, RoutedEventArgs e)
+        {
+            RequestFocusSingerName();
+        }
+
+        private void FocusSingerNameTextBox(object? targetSinger, int retryCount)
         {
             if (SingersListView.Items.Count == 0)
             {
                 return;
             }
 
-            object? targetItem = null;
-            if (DataContext is ViewModels.MainViewModel vm && vm.LastInsertedSinger != null && vm.Singers.Contains(vm.LastInsertedSinger))
+            object? targetItem = targetSinger;
+            if (targetItem == null)
             {
-                targetItem = vm.LastInsertedSinger;
-            }
-            else
-            {
-                targetItem = SingersListView.Items[^1];
+                if (DataContext is ViewModels.MainViewModel vm && vm.LastInsertedSinger != null && vm.Singers.Contains(vm.LastInsertedSinger))
+                {
+                    targetItem = vm.LastInsertedSinger;
+                }
+                else
+                {
+                    targetItem = SingersListView.Items[^1];
+                }
             }
 
             if (targetItem == null)
@@ -279,27 +317,42 @@ namespace KSRotation
                 return;
             }
 
+            SingersListView.SelectedItem = targetItem;
             SingersListView.ScrollIntoView(targetItem);
             SingersListView.UpdateLayout();
 
             if (SingersListView.ItemContainerGenerator.ContainerFromItem(targetItem) is not WpfListViewItem listViewItem)
             {
-                RetryFocusNewestSingerNameTextBox(retryCount);
+                RetryFocusSingerNameTextBox(targetSinger, retryCount);
                 return;
             }
 
-            WpfTextBox? nameTextBox = FindVisualChild<WpfTextBox>(listViewItem);
+            WpfTextBox? nameTextBox = FindVisualChildByName<WpfTextBox>(listViewItem, "SingerNameInput")
+                ?? FindVisualChild<WpfTextBox>(listViewItem);
+
             if (nameTextBox == null)
             {
-                RetryFocusNewestSingerNameTextBox(retryCount);
+                RetryFocusSingerNameTextBox(targetSinger, retryCount);
                 return;
             }
 
             nameTextBox.Focus();
+            Keyboard.Focus(nameTextBox);
             nameTextBox.SelectAll();
+
+            // Re-assert select-all on ApplicationIdle so any trailing mouse-up or focus events cannot collapse the selection
+            Dispatcher.BeginInvoke(
+                DispatcherPriority.ApplicationIdle,
+                new Action(() =>
+                {
+                    if (nameTextBox.IsKeyboardFocusWithin || nameTextBox.IsFocused)
+                    {
+                        nameTextBox.SelectAll();
+                    }
+                }));
         }
 
-        private void RetryFocusNewestSingerNameTextBox(int retryCount)
+        private void RetryFocusSingerNameTextBox(object? targetSinger, int retryCount)
         {
             if (retryCount <= 0)
             {
@@ -308,7 +361,28 @@ namespace KSRotation
 
             Dispatcher.BeginInvoke(
                 DispatcherPriority.Loaded,
-                new Action(() => FocusNewestSingerNameTextBox(retryCount - 1)));
+                new Action(() => FocusSingerNameTextBox(targetSinger, retryCount - 1)));
+        }
+
+        private static T? FindVisualChildByName<T>(DependencyObject parent, string name) where T : FrameworkElement
+        {
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild && typedChild.Name == name)
+                {
+                    return typedChild;
+                }
+
+                T? descendant = FindVisualChildByName<T>(child, name);
+                if (descendant != null)
+                {
+                    return descendant;
+                }
+            }
+
+            return null;
         }
 
         private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
