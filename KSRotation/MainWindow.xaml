@@ -1,4 +1,4 @@
-<!-- Edited on Sep 18, 2026 @ 09:36:00 -> Select performer name text on add for regular and special singers -->
+<!-- Edited on Sep 19, 2026 @ 08:18:00 -> Add estimated wait time badge to singer queue list -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -851,6 +851,17 @@
                                                                 ToolTip="Special one-time performer - will become inactive after singing"
                                                                 Visibility="{Binding IsSpecial, Converter={StaticResource BoolToVis}}">
                                                             <TextBlock Text="⭐ SPECIAL" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                                                        </Border>
+                                                        <Border Background="#1E3A5F"
+                                                                BorderBrush="#0EA5E9"
+                                                                BorderThickness="1"
+                                                                CornerRadius="4"
+                                                                Padding="4,2"
+                                                                Margin="0,0,4,0"
+                                                                VerticalAlignment="Center"
+                                                                ToolTip="{Binding EstimatedWaitMinutes, StringFormat='Estimated wait: ~{0} min'}"
+                                                                Visibility="{Binding HasEstimatedWait, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock Text="{Binding EstimatedWaitMinutes, StringFormat='⏳ {0}m'}" FontSize="10" FontWeight="Bold" Foreground="#0EA5E9" VerticalAlignment="Center" />
                                                         </Border>
                                                     </StackPanel>
                                                     <TextBox
@@ -3709,7 +3720,13 @@
                                     <BulletDecorator.Bullet>
                                         <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
                                     </BulletDecorator.Bullet>
-                                    <TextBlock Text="▲ / ▼ (Reorder): Moves a singer up or down in the rotation list to adjust the queue manually." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Text="▲ / ▼ (Reorder): Moves a singer up or down in the rotation list to adjust the queue manually. Estimated wait times and audience displays are recalculated and updated immediately based on their new position." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="⏳ Estimated Wait Time Badges: Each performer row displays an estimated wait time badge (e.g. '⏳ 15m') when enabled in Settings, dynamically updating whenever performers sing, skip, or change queue positions." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 </BulletDecorator>
                                 <BulletDecorator Margin="0,2">
                                     <BulletDecorator.Bullet>

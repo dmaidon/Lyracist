@@ -1,4 +1,4 @@
-// Edited on Sep 3, 2026 @ 23:57:00 -> Add unit tests for Last Round rotation behavior
+// Edited on Sep 19, 2026 @ 08:20:00 -> Add unit tests for MoveSinger wait time recalculations
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -1927,7 +1927,70 @@ public class MainViewModelTests
         Assert.Single(vm.Singers, s => s.IsRotationStart);
         Assert.True(vm.Singers[0].IsRotationStart);
     }
+
+    [Fact]
+    public void MoveSingerUp_RecalculatesWaitTimesCorrectly_WhenSingerMovedFromPosition7ToPosition3()
+    {
+        // Setup 8 singers with 300s (5 min) each
+        // Singer 1 is current (wait: 0 min)
+        // Singer 7 is at index 6 (position 7) -> wait: 6 * 5 min = 30 min
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+        vm.ShowEstimatedWaitTime = true;
+        vm.DefaultSongLengthMinutes = 5.0;
+
+        for (int i = 1; i <= 8; i++)
+        {
+            var s = new SingerEntry { Name = $"Singer{i}", EstimatedPerformanceSeconds = 300 };
+            vm.Singers.Add(s);
+        }
+
+        vm.Singers[0].IsCurrent = true;
+        RotationHelpers.RecalculateEstimatedWaits(vm.Singers, enabled: true, defaultEstimatedPerformanceSeconds: 300);
+
+        // Before move: Singer 7 has a 30-minute wait at index 6 (position 7)
+        var singer7 = vm.Singers[6];
+        Assert.Equal("Singer7", singer7.Name);
+        Assert.Equal(30, singer7.EstimatedWaitMinutes);
+
+        // Move Singer 7 up 4 times to land at index 2 (position 3)
+        vm.MoveSingerUp(singer7); // to index 5
+        vm.MoveSingerUp(singer7); // to index 4
+        vm.MoveSingerUp(singer7); // to index 3
+        vm.MoveSingerUp(singer7); // to index 2 (position 3)
+
+        Assert.Equal(2, vm.Singers.IndexOf(singer7));
+        Assert.Equal(10, singer7.EstimatedWaitMinutes); // 2 * 5 min = 10 min
+    }
+
+    [Fact]
+    public void MoveSingerDown_RecalculatesWaitTimesCorrectly()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+        vm.ShowEstimatedWaitTime = true;
+        vm.DefaultSongLengthMinutes = 5.0;
+
+        for (int i = 1; i <= 5; i++)
+        {
+            var s = new SingerEntry { Name = $"Singer{i}", EstimatedPerformanceSeconds = 300 };
+            vm.Singers.Add(s);
+        }
+
+        vm.Singers[0].IsCurrent = true;
+        RotationHelpers.RecalculateEstimatedWaits(vm.Singers, enabled: true, defaultEstimatedPerformanceSeconds: 300);
+
+        var singer2 = vm.Singers[1];
+        Assert.Equal(5, singer2.EstimatedWaitMinutes); // index 1 = 5 min
+
+        // Move singer 2 down to index 2
+        vm.MoveSingerDown(singer2);
+
+        Assert.Equal(2, vm.Singers.IndexOf(singer2));
+        Assert.Equal(10, singer2.EstimatedWaitMinutes); // index 2 = 10 min
+    }
 }
+
 
 
 

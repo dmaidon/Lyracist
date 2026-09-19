@@ -1,9 +1,20 @@
-<!-- Edited on Sep 18, 2026 @ 09:37:00 -> Document immediate performer name text selection on add -->
-Last Edit: Sep 18, 2026 - Performer Name Auto-Select on Add
+<!-- Edited on Sep 19, 2026 @ 08:24:00 -> Document estimated wait time recalculation on singer move up/down -->
+Last Edit: Sep 19, 2026 - Wait Time Recalculation on Singer Move
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.19.0] - 2026-09-19
+
+### Fixed
+- **Estimated Wait Time Recalculation & Display Synchronization on Singer Move (`KSRotation`, `Shared`)**:
+  - Fixed an issue where moving a performer up or down in the rotation (e.g. moving a singer with a 30-minute wait at position #7 up to position #3) retained the stale wait time and failed to recalculate queue wait times.
+  - Added `RotationHelpers.RecalculateEstimatedWaits` invocation inside `OnSingersCollectionChanged` in `MainViewModel`, ensuring that any structural collection changes (manual moves, list moves, drag-and-drops, remote DJ commands, removals) immediately compute fresh wait times before updating display surfaces.
+  - Updated `MoveSingerUp` and `MoveSingerDown` commands in `MainViewModel` to explicitly invoke `RefreshBillboardState()` and `_displayWindowService.Update(Singers)` after wait times are recalculated, pushing updated position numbers and `{mm}` wait time badges to `SingerDisplayWindow` and audience billboard displays.
+  - Added `RefreshBillboardState()` to `SetCurrentSinger` ensuring audience views refresh immediately upon singer selection.
+  - Added an estimated wait time indicator badge (`⏳ {0}m`) with tooltip to the desktop singer queue rows in `MainWindow.xaml` so the DJ can monitor live wait estimates directly in the primary console.
+  - Added unit test coverage in `KSRotation.Tests/RotationTests.cs` validating wait time recalculations when moving performers up and down the rotation queue.
 
 ## [26.9.18.0] - 2026-09-18
 

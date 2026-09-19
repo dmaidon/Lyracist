@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 09:36:00 -> Add SingerInsertedForEditing event to notify view to select performer name on add
+// Edited on Sep 19, 2026 @ 08:18:00 -> Recalculate wait times and update display service on singer move and collection change
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -1971,6 +1971,11 @@ namespace KSRotation.ViewModels
                 RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
                 RebuildRotationJsonCacheNow();
                 QueueSaveDatabase();
+                RefreshBillboardState();
+                if (IsDisplayEnabled)
+                {
+                    _displayWindowService.Update(Singers);
+                }
             }
         }
 
@@ -1984,6 +1989,11 @@ namespace KSRotation.ViewModels
                 RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
                 RebuildRotationJsonCacheNow();
                 QueueSaveDatabase();
+                RefreshBillboardState();
+                if (IsDisplayEnabled)
+                {
+                    _displayWindowService.Update(Singers);
+                }
             }
         }
 
@@ -2066,6 +2076,7 @@ namespace KSRotation.ViewModels
             {
                 _displayWindowService.Update(Singers);
             }
+            RefreshBillboardState();
         }
 
         /// <summary>
@@ -2219,6 +2230,7 @@ namespace KSRotation.ViewModels
             {
                 RotationHelpers.EnsureRotationStartFlag(Singers);
                 UpdateNextSingerHighlight();
+                RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
 
                 // EnforceLinkedAdjacency can itself Move/RemoveAt+Insert on Singers, which
                 // ObservableCollection forbids while still inside the dispatch of this very
