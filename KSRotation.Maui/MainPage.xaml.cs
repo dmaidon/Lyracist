@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 09:36:00 -> Focus and select performer name in MAUI Add and Edit overlays
+// Edited on Sep 19, 2026 @ 18:05:00 -> Add Switch Device overlay handlers and deep link processing
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -49,6 +49,81 @@ public partial class MainPage : ContentPage
         if (Application.Current != null)
         {
             ThemeBtn.Text = Application.Current.UserAppTheme == AppTheme.Light ? "🌙 Dark Mode" : "☀️ Light Mode";
+        }
+
+        // Covers the "app already open" case: Android redelivers the Intent via OnNewIntent
+        // without re-navigating to this page, so OnAppearing (below) never re-fires for it.
+        // MainPage is created once for the life of the app, so this subscription is never removed.
+        App.HandoffUriReceived += OnHandoffUriReceived;
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        _ = CheckPendingHandoffDeepLinkAsync();
+    }
+
+    private void OnHandoffUriReceived(Uri uri)
+    {
+        Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            // This event delivery is about to handle the link itself, so clear the cold-start
+            // slot too - otherwise a later OnAppearing (e.g. after backgrounding/foregrounding)
+            // would find it still set and re-prompt for a link that was already handled.
+            App.PendingHandoffUri = null;
+            if (BindingContext is KSRotation.ViewModels.MainViewModel vm)
+            {
+                await HandleHandoffUriAsync(uri, vm);
+            }
+        });
+    }
+
+    private async Task CheckPendingHandoffDeepLinkAsync()
+    {
+        if (App.PendingHandoffUri != null && BindingContext is KSRotation.ViewModels.MainViewModel vm)
+        {
+            var uri = App.PendingHandoffUri;
+            App.PendingHandoffUri = null;
+            await HandleHandoffUriAsync(uri, vm);
+        }
+    }
+
+    public async Task HandleHandoffUriAsync(Uri uri, KSRotation.ViewModels.MainViewModel vm)
+    {
+        if (uri == null) return;
+        try
+        {
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            string host = query["host"] ?? "";
+            string portStr = query["port"] ?? "5000";
+            int.TryParse(portStr, out int port);
+            if (port == 0) port = 5000;
+            string pin = query["pin"] ?? "";
+
+            if (string.IsNullOrWhiteSpace(host)) return;
+
+            bool confirm = await DisplayAlertAsync(
+                "Transfer Session",
+                $"Incoming session handoff from {host}:{port}.\n\nImport this session and take over the rotation on this tablet?",
+                "Yes, Import",
+                "Cancel");
+
+            if (confirm)
+            {
+                var (success, error) = await vm.PullSessionFromHostAsync(host, port, pin);
+                if (success)
+                {
+                    await DisplayAlertAsync("Handoff Complete", "Session transferred successfully! The rotation is now active on this tablet.", "OK");
+                }
+                else
+                {
+                    await DisplayAlertAsync("Transfer Failed", $"Could not transfer session:\n{error}", "OK");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            KSRotation.Services.LoggerService.LogError("MainPage.HandleHandoffUriAsync", ex);
         }
     }
 
@@ -1039,6 +1114,8 @@ public partial class MainPage : ContentPage
                 Grid.SetColumnSpan(LegendOverlay, 1);
                 Grid.SetRowSpan(BillboardOverlay, 2);
                 Grid.SetColumnSpan(BillboardOverlay, 1);
+                Grid.SetRowSpan(SwitchDeviceOverlay, 2);
+                Grid.SetColumnSpan(SwitchDeviceOverlay, 1);
             }
             else
             {
@@ -1091,6 +1168,8 @@ public partial class MainPage : ContentPage
                 Grid.SetColumnSpan(LegendOverlay, 2);
                 Grid.SetRowSpan(BillboardOverlay, 1);
                 Grid.SetColumnSpan(BillboardOverlay, 2);
+                Grid.SetRowSpan(SwitchDeviceOverlay, 1);
+                Grid.SetColumnSpan(SwitchDeviceOverlay, 2);
             }
         }
         catch (Exception ex)
@@ -1100,6 +1179,117 @@ public partial class MainPage : ContentPage
             // per branch), the layout is left half-updated with zero diagnostic trail. LoggerService
             // writes to the same persistent, on-device log file the rest of the app already uses.
             KSRotation.Services.LoggerService.LogError("MainPage.UpdateOrientationLayout", ex);
+        }
+    }
+
+    private void OnSwitchDeviceClicked(object? sender, EventArgs e)
+    {
+        SwitchDeviceOverlay.IsVisible = true;
+    }
+
+    private void OnCloseSwitchDeviceClicked(object? sender, EventArgs e)
+    {
+        SwitchDeviceOverlay.IsVisible = false;
+    }
+
+    private void OnHandoffTabReceiveClicked(object? sender, EventArgs e)
+    {
+        HandoffReceivePanel.IsVisible = true;
+        HandoffSendPanel.IsVisible = false;
+        HandoffTabReceiveBtn.BackgroundColor = Color.FromArgb("#8B5CF6");
+        HandoffTabReceiveBtn.TextColor = Colors.White;
+        HandoffTabSendBtn.BackgroundColor = Colors.Transparent;
+        HandoffTabSendBtn.TextColor = Color.FromArgb("#9CA3AF");
+    }
+
+    private void OnHandoffTabSendClicked(object? sender, EventArgs e)
+    {
+        HandoffReceivePanel.IsVisible = false;
+        HandoffSendPanel.IsVisible = true;
+        HandoffTabSendBtn.BackgroundColor = Color.FromArgb("#8B5CF6");
+        HandoffTabSendBtn.TextColor = Colors.White;
+        HandoffTabReceiveBtn.BackgroundColor = Colors.Transparent;
+        HandoffTabReceiveBtn.TextColor = Color.FromArgb("#9CA3AF");
+    }
+
+    private async void OnScanHandoffPeersClicked(object? sender, EventArgs e)
+    {
+        if (BindingContext is not KSRotation.ViewModels.MainViewModel vm) return;
+
+        HandoffNoPeersLabel.Text = "Scanning Wi-Fi for devices...";
+        HandoffPeersStack.Children.Clear();
+        HandoffPeersStack.Children.Add(HandoffNoPeersLabel);
+
+        try
+        {
+            await vm.DiscoverPeersOnLanAsync();
+            HandoffPeersStack.Children.Clear();
+
+            if (vm.DiscoveredPeers.Count == 0)
+            {
+                HandoffNoPeersLabel.Text = "No devices detected. Enter IP manually below.";
+                HandoffPeersStack.Children.Add(HandoffNoPeersLabel);
+            }
+            else
+            {
+                foreach (var peer in vm.DiscoveredPeers)
+                {
+                    var btn = new Button
+                    {
+                        Text = $"{peer.VenueName} ({peer.Host}) - {peer.SingerCount} singers",
+                        FontSize = 11,
+                        HeightRequest = 32,
+                        BackgroundColor = Color.FromArgb("#1E293B"),
+                        TextColor = Color.FromArgb("#F8FAFC"),
+                        CornerRadius = 6,
+                        Margin = new Thickness(0, 2)
+                    };
+                    btn.Clicked += (_, _) =>
+                    {
+                        HandoffHostEntry.Text = peer.Host;
+                    };
+                    HandoffPeersStack.Children.Add(btn);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            HandoffNoPeersLabel.Text = $"Scan error: {ex.Message}";
+            HandoffPeersStack.Children.Clear();
+            HandoffPeersStack.Children.Add(HandoffNoPeersLabel);
+        }
+    }
+
+    private async void OnExecutePullSessionClicked(object? sender, EventArgs e)
+    {
+        if (BindingContext is not KSRotation.ViewModels.MainViewModel vm) return;
+
+        string host = HandoffHostEntry.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(host) || host == "192.168.1.")
+        {
+            await DisplayAlertAsync("Invalid Host", "Please enter a valid Host IP address.", "OK");
+            return;
+        }
+
+        string pin = HandoffPinEntry.Text?.Trim() ?? string.Empty;
+
+        bool confirm = await DisplayAlertAsync(
+            "Transfer Session",
+            $"Importing session from {host} will replace the current rotation and performance history on this tablet.\n\nContinue?",
+            "Yes, Import",
+            "Cancel");
+
+        if (!confirm) return;
+
+        var (success, error) = await vm.PullSessionFromHostAsync(host, 5000, pin);
+        if (success)
+        {
+            SwitchDeviceOverlay.IsVisible = false;
+            await DisplayAlertAsync("Handoff Complete", "Session transferred successfully! You may now continue the show on this tablet.", "OK");
+        }
+        else
+        {
+            await DisplayAlertAsync("Transfer Failed", $"Could not transfer session:\n{error}", "OK");
         }
     }
 }

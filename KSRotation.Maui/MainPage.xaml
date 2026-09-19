@@ -1,4 +1,4 @@
-<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer badge, button, and popup options in MainPage.xaml -->
+<!-- Edited on Sep 19, 2026 @ 17:58:00 -> Add Switch Device button and SwitchDeviceOverlay in MainPage.xaml -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -50,6 +50,7 @@
                                 </DataTrigger>
                             </Button.Triggers>
                         </Button>
+                        <Button Text="🔄 Switch Device" Clicked="OnSwitchDeviceClicked" BackgroundColor="#8B5CF6" TextColor="White" FontAttributes="Bold" FontSize="10" Padding="8,2" HeightRequest="26" VerticalOptions="Center" />
                         <Button Text="ⓘ About" Clicked="OnAboutClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
                     </HorizontalStackLayout>
                 </ScrollView>
@@ -1044,6 +1045,82 @@
                         <Button Grid.Column="0" Text="🔄 Rescan" Clicked="OnRescanCastDevicesClicked" BackgroundColor="{AppThemeBinding Light=#EDE9FE, Dark=#312E81}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontAttributes="Bold" FontSize="12" HeightRequest="36" CornerRadius="6" />
                         <Button Grid.Column="1" Text="Close" Clicked="OnCloseCastDialogClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="12" HeightRequest="36" CornerRadius="6" />
                     </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- SWITCH DEVICE / SESSION HANDOFF OVERLAY -->
+        <Grid x:Name="SwitchDeviceOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="#99000000" IsVisible="False" ZIndex="210">
+            <Border StrokeShape="RoundRectangle 16" BackgroundColor="{AppThemeBinding Light=White, Dark=#151D2A}" StrokeThickness="0" Padding="20" WidthRequest="360" MaximumHeightRequest="560" HorizontalOptions="Center" VerticalOptions="Center">
+                <Grid RowDefinitions="Auto, Auto, *, Auto" RowSpacing="12">
+                    <!-- Title Header -->
+                    <VerticalStackLayout Grid.Row="0" Spacing="4">
+                        <Label Text="🔄 SWITCH DEVICE" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="14" FontAttributes="Bold" CharacterSpacing="1.2" HorizontalOptions="Center" />
+                        <Label Text="Seamless session transfer between devices" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontSize="11" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+
+                    <!-- Mode Toggle Tabs (Receive vs Send) -->
+                    <Border Grid.Row="1" StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#0F172A}" Padding="4" HorizontalOptions="Center">
+                        <HorizontalStackLayout Spacing="6">
+                            <Button x:Name="HandoffTabReceiveBtn" Text="📥 Receive from Laptop" Clicked="OnHandoffTabReceiveClicked" BackgroundColor="#8B5CF6" TextColor="White" FontAttributes="Bold" FontSize="11" HeightRequest="32" Padding="12,0" CornerRadius="6"/>
+                            <Button x:Name="HandoffTabSendBtn" Text="📤 Send to Laptop" Clicked="OnHandoffTabSendClicked" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light=#64748B, Dark=#9CA3AF}" FontAttributes="Bold" FontSize="11" HeightRequest="32" Padding="12,0" CornerRadius="6"/>
+                        </HorizontalStackLayout>
+                    </Border>
+
+                    <!-- Body Content -->
+                    <Grid Grid.Row="2">
+                        <!-- RECEIVE PANEL -->
+                        <VerticalStackLayout x:Name="HandoffReceivePanel" Spacing="10" IsVisible="True">
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Label Text="Nearby Devices on Wi-Fi" FontSize="11" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#1E293B, Dark=White}" VerticalOptions="Center"/>
+                                <Button Text="Scan Wi-Fi" Clicked="OnScanHandoffPeersClicked" BackgroundColor="{AppThemeBinding Light=#EDE9FE, Dark=#312E81}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" FontAttributes="Bold" HeightRequest="26" Padding="8,0" CornerRadius="4"/>
+                            </HorizontalStackLayout>
+
+                            <!-- Discovered Devices List -->
+                            <Border StrokeShape="RoundRectangle 8" Stroke="{AppThemeBinding Light=#E2E8F0, Dark=#243247}" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0B0F19}" Padding="6" HeightRequest="100">
+                                <ScrollView>
+                                    <VerticalStackLayout x:Name="HandoffPeersStack" Spacing="4">
+                                        <Label x:Name="HandoffNoPeersLabel" Text="Tap 'Scan Wi-Fi' to find laptop" FontSize="11" TextColor="{AppThemeBinding Light=#94A3B8, Dark=#64748B}" HorizontalOptions="Center" Margin="0,30,0,0"/>
+                                    </VerticalStackLayout>
+                                </ScrollView>
+                            </Border>
+
+                            <!-- Manual Host / Port / PIN Inputs -->
+                            <VerticalStackLayout Spacing="6">
+                                <Grid ColumnDefinitions="2*, *">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2" Margin="0,0,4,0">
+                                        <Label Text="Host IP Address" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}"/>
+                                        <Entry x:Name="HandoffHostEntry" Text="192.168.1." FontSize="12" HeightRequest="36" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E293B}"/>
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                        <Label Text="DJ PIN" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}"/>
+                                        <Entry x:Name="HandoffPinEntry" Text="" FontSize="12" HeightRequest="36" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E293B}"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </VerticalStackLayout>
+
+                            <Button Text="📥 Import &amp; Take Over Session" Clicked="OnExecutePullSessionClicked" BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" FontSize="12" HeightRequest="38" CornerRadius="8"/>
+                        </VerticalStackLayout>
+
+                        <!-- SEND PANEL (Tablet -> Laptop) -->
+                        <VerticalStackLayout x:Name="HandoffSendPanel" Spacing="10" IsVisible="False" HorizontalOptions="Center">
+                            <!-- Large QR Code -->
+                            <Border StrokeShape="RoundRectangle 10" BackgroundColor="White" Stroke="#8B5CF6" StrokeThickness="2" WidthRequest="180" HeightRequest="180" Padding="4" HorizontalOptions="Center">
+                                <Image Source="{Binding HandoffQrCodeImage}" Aspect="AspectFit"/>
+                            </Border>
+
+                            <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                                <Label Text="Tablet Handoff URL" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}" HorizontalOptions="Center"/>
+                                <Label Text="{Binding HandoffConnectionUrl}" FontSize="11" FontAttributes="Bold" TextColor="#38BDF8" HorizontalOptions="Center"/>
+                                <Label Text="{Binding DjPin, StringFormat='DJ PIN: {0}'}" FontSize="13" FontAttributes="Bold" TextColor="#F59E0B" HorizontalOptions="Center" Margin="0,4,0,0"/>
+                            </VerticalStackLayout>
+
+                            <Label Text="On the laptop, open Switch Device -> Receive, then tap this tablet or enter the IP." FontSize="10" TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}" HorizontalTextAlignment="Center" LineBreakMode="WordWrap"/>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Footer Close Button -->
+                    <Button Grid.Row="3" Text="Close" Clicked="OnCloseSwitchDeviceClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="12" HeightRequest="36" CornerRadius="6" HorizontalOptions="Center" WidthRequest="120" Margin="0,4,0,0"/>
                 </Grid>
             </Border>
         </Grid>

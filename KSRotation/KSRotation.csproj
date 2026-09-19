@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.9.19.626</AssemblyVersion>
-    <FileVersion>26.9.19.626</FileVersion>
+    <AssemblyVersion>26.9.19.627</AssemblyVersion>
+    <FileVersion>26.9.19.627</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -80,6 +80,7 @@
     <EmbeddedResource Include="Resources\dj.html" />
     <EmbeddedResource Include="Resources\kiosk.html" />
     <EmbeddedResource Include="Resources\billboard.html" />
+    <EmbeddedResource Include="Resources\handoff.html" />
   </ItemGroup>
 
   <ItemGroup>

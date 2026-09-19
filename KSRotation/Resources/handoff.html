@@ -1,0 +1,355 @@
+<!-- Created on Sep 19, 2026 @ 17:42:00 -> Web portal for karaoke session device handoff -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSRotation - Device Handoff</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0B0F19;
+            --card-bg: #151D2A;
+            --accent-purple: #8B5CF6;
+            --accent-hover: #7C3AED;
+            --accent-glow: rgba(139, 92, 246, 0.35);
+            --gold: #F59E0B;
+            --green: #10B981;
+            --blue: #3B82F6;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: radial-gradient(circle at 50% 10%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 90%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px var(--accent-glow);
+            text-align: center;
+            backdrop-filter: blur(12px);
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid var(--accent-purple);
+            color: #C4B5FD;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .badge-pill .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #FFFFFF 30%, #C4B5FD 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 22px;
+        }
+
+        .session-card {
+            background: rgba(11, 15, 25, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .session-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .session-row:last-child {
+            border-bottom: none;
+        }
+
+        .row-label {
+            color: var(--text-muted);
+        }
+
+        .row-val {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .row-val.gold {
+            color: var(--gold);
+        }
+
+        .row-val.green {
+            color: var(--green);
+        }
+
+        .btn-primary {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-hover));
+            color: white;
+            text-decoration: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            background: transparent;
+            color: #C4B5FD;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            transition: all 0.2s;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: var(--accent-purple);
+        }
+
+        .instructions {
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .pin-box {
+            display: inline-block;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-top: 4px;
+        }
+
+        .pin-entry {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .pin-entry label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .pin-entry input {
+            width: 100%;
+            background: rgba(11, 15, 25, 0.7);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-align: center;
+        }
+
+        .pin-entry input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="badge-pill">
+            <span class="pulse-dot"></span> Live Session Ready
+        </div>
+
+        <h1>Switch Device</h1>
+        <p class="subtitle">Transfer this live event seamlessly to your tablet.</p>
+
+        <div class="session-card">
+            <div class="session-row">
+                <span class="row-label">Venue</span>
+                <span class="row-val" id="valVenue">Loading...</span>
+            </div>
+            <div class="session-row">
+                <span class="row-label">Host / DJ</span>
+                <span class="row-val" id="valDj">Loading...</span>
+            </div>
+            <div class="session-row">
+                <span class="row-label">Singers in Rotation</span>
+                <span class="row-val green" id="valSingers">0</span>
+            </div>
+            <div class="session-row">
+                <span class="row-label">Currently Singing</span>
+                <span class="row-val gold" id="valCurrent">None</span>
+            </div>
+        </div>
+
+        <div class="pin-entry">
+            <label for="pinInput">Enter the DJ PIN shown on the host device</label>
+            <input type="text" id="pinInput" inputmode="numeric" autocomplete="off" placeholder="••••" maxlength="12">
+        </div>
+
+        <a href="#" id="openAppBtn" class="btn-primary">
+            🚀 Open in KSRotation MAUI
+        </a>
+
+        <div>
+            <button id="downloadKsrBtn" class="btn-secondary">
+                💾 Download Session File (.ksr)
+            </button>
+        </div>
+
+        <div class="instructions">
+            <p>If KSRotation MAUI does not open automatically, open the app on your tablet and tap <strong>Switch Device</strong> &rarr; <strong>Receive</strong>.</p>
+            <div style="margin-top: 10px;">
+                <span>Host IP: <strong id="valHost">...</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const host = window.location.hostname;
+        const port = window.location.port || '5000';
+
+        document.getElementById('valHost').textContent = `${host}:${port}`;
+
+        // The PIN is never put in this page's URL or shown in plaintext on load - it is only
+        // ever what the person standing at this screen types in, so a QR code or link pointing
+        // here never leaks the DJ's PIN to whoever scans/opens it.
+        function currentPin() {
+            return document.getElementById('pinInput').value.trim();
+        }
+
+        document.getElementById('openAppBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const pin = currentPin();
+            const deepLink = `ksrotation://handoff?host=${encodeURIComponent(host)}&port=${encodeURIComponent(port)}&pin=${encodeURIComponent(pin)}`;
+            window.location.href = deepLink;
+        });
+
+        async function fetchSessionPreview() {
+            try {
+                const infoRes = await fetch('/api/info');
+                if (infoRes.ok) {
+                    const info = await infoRes.json();
+                    document.getElementById('valVenue').textContent = info.venue || 'Karaoke Night';
+                    document.getElementById('valDj').textContent = info.dj || 'Guest DJ';
+                }
+
+                const rotRes = await fetch('/api/rotation');
+                if (rotRes.ok) {
+                    const singers = await rotRes.json();
+                    const activeCount = singers.filter(s => !s.isInactive).length;
+                    document.getElementById('valSingers').textContent = activeCount;
+                    const cur = singers.find(s => s.isCurrent);
+                    if (cur) {
+                        document.getElementById('valCurrent').textContent = `${cur.name} (${cur.song || 'Song'})`;
+                    } else {
+                        document.getElementById('valCurrent').textContent = 'None';
+                    }
+                }
+            } catch (err) {
+                console.warn('Error loading session preview:', err);
+            }
+        }
+
+        document.getElementById('downloadKsrBtn').addEventListener('click', async () => {
+            try {
+                const pin = currentPin();
+                const res = await fetch(`/api/session/handoff?pin=${encodeURIComponent(pin)}`);
+                if (!res.ok) {
+                    alert('Could not download session. PIN may be required.');
+                    return;
+                }
+                const data = await res.text();
+                const blob = new Blob([data], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `ksrotation_session_${new Date().toISOString().slice(0, 10)}.ksr`;
+                a.click();
+            } catch (e) {
+                alert('Download failed: ' + e.message);
+            }
+        });
+
+        fetchSessionPreview();
+        setInterval(fetchSessionPreview, 5000);
+    </script>
+</body>
+</html>

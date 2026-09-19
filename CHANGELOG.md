@@ -1,11 +1,24 @@
-<!-- Edited on Sep 19, 2026 @ 08:24:00 -> Document estimated wait time recalculation on singer move up/down -->
-Last Edit: Sep 19, 2026 - Wait Time Recalculation on Singer Move
+<!-- Edited on Sep 19, 2026 @ 17:50:00 -> Document seamless bidirectional device switching and session handoff -->
+Last Edit: Sep 19, 2026 - Seamless Bidirectional Device Switching & Session Handoff
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [26.9.19.0] - 2026-09-19
+
+### Added
+- **Seamless Bidirectional Device Switching & Live Session Handoff (`KSRotation`, `KSRotation.Maui`, `Shared`, Web Portal)**:
+  - Added full live session migration allowing DJs and hosts to transfer an ongoing karaoke event between a laptop (`KSRotation`) and a mobile tablet (`KSRotation.Maui` on Android or Windows) without losing a single singer, queue position, or performance record.
+  - **Complete State Preservation**: Serializes and transfers the entire active singer list, current performer (`IsCurrent`), up-next singer (`IsNext`), rotation start anchor (`IsRotationStart`), paused and inactive performers, queued songs, linked duet pairs, completed song checkmarks (rounds 1–10), tonight's performance history with original timestamps, pending patron requests, venue/DJ branding, and session duplicate rules.
+  - **Dedicated Switch Device QR Code & Web Portal (`handoff.html`)**: The host device generates a high-resolution QR code pointing to `http://<host-ip>:<port>/handoff`. Scanning via phone/tablet camera opens a responsive, themed portal displaying live stats (venue, DJ, active singers, now performing) with a 1-tap "Open in KSRotation MAUI" deep link button, host/PIN details, and a `.ksr` backup file download button.
+  - **Native Deep Linking (`ksrotation://handoff`)**: Scanning the QR code or clicking the portal button on Android/Windows tablets directly opens `KSRotation.Maui`, parses host IP, port, and security PIN, and prompts the DJ to take over the session with one tap.
+  - **One-Tap Wi-Fi Auto-Discovery**: Built-in 1-second subnet sweeper (`DiscoverPeersOnLanAsync` on port 5000 via `/api/device/probe`) detects active host peers on local venue Wi-Fi with zero manual IP entry required.
+  - **Bidirectional Transfer**: Full round-trip support allowing the host to hand off from laptop to tablet when stepping away, and seamlessly pull from tablet back to the laptop when returning.
+  - **Desktop UI (`DeviceHandoffWindow.xaml`)**: Added dual-tab "Switch Device / Handoff" window in `KSRotation` with QR code display, LAN auto-detection list, manual endpoint inputs, and live pull/push progress.
+  - **Tablet UI (`MainPage.xaml`, `SwitchDeviceOverlay`)**: Added toolbar action button, transfer modal overlay, and deep-link intent handler in `KSRotation.Maui`.
+  - **HTTP Endpoints (`PatronRequestServer`)**: Added `/handoff`, `/handoff.html`, `/api/session/handoff` (GET & POST), and `/api/device/probe`.
+  - **Unit Tests**: Added comprehensive round-trip serialization and property verification in `KSRotation.Tests/PersistenceTests.cs`.
 
 ### Fixed
 - **Estimated Wait Time Recalculation & Display Synchronization on Singer Move (`KSRotation`, `Shared`)**:

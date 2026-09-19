@@ -150,6 +150,17 @@ namespace System.Windows
 
 namespace KSRotation.Services
 {
+    /// <summary>
+    /// MAUI-side counterpart to KSRotation/Services/ConfirmationService.cs (that file is WPF-only and
+    /// not linked into this project) - same signature so shared code (e.g. MainViewModel's session
+    /// handoff import) can call KSRotation.Services.ConfirmationService.ShowYesNoAsync on either platform.
+    /// </summary>
+    public static class ConfirmationService
+    {
+        public static Task<bool> ShowYesNoAsync(string message, string caption) =>
+            System.Windows.MessageBox.ShowConfirmAsync(message, caption);
+    }
+
     public class DisplayWindowService
     {
         public void Show(ObservableCollection<SingerEntry> rotation) { }

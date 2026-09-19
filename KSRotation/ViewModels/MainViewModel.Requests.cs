@@ -1,16 +1,20 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add toggle-special web action, serialize isSpecial, and route isSpecial through HandleDjAction
+// Edited on Sep 19, 2026 @ 19:20:00 -> Require confirmation on handoff import, drop unused push path, share LAN probe HttpClient
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
 using QRCoder;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 #if !MAUI
@@ -61,6 +65,20 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial bool IsBillboardQrVisible { get; set; }
+
+        [ObservableProperty]
+        public partial string HandoffConnectionUrl { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial ImageSource? HandoffQrCodeImage { get; set; }
+
+        public ObservableCollection<DiscoveredPeer> DiscoveredPeers { get; } = [];
+
+        [ObservableProperty]
+        public partial DiscoveredPeer? SelectedDiscoveredPeer { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsSearchingForPeers { get; set; }
 
         [ObservableProperty]
         public partial string DjPin { get; set; } = string.Empty;
@@ -208,7 +226,10 @@ namespace KSRotation.ViewModels
                         GetVenueInfoJson,
                         (song, artist) => BlockDuplicateSongsInSession && IsSongInCurrentSession(song, artist),
                         () => IsRequestSubmissionAllowed(out string r) ? null : r,
-                        OnVenueLocationSyncedFromPeer);
+                        OnVenueLocationSyncedFromPeer,
+                        ExportSessionHandoffPayload,
+                        payload => ImportSessionHandoffPayloadAsync(payload),
+                        GetDiscoveredPeerInfo);
                     _requestServer.Start();
                     activePort = p;
                     started = true;
@@ -247,12 +268,22 @@ namespace KSRotation.ViewModels
                 ? $"http://{host}:{activePort}/billboard.html"
                 : "";
 
+            // The PIN deliberately does NOT go in this URL/QR - the handoff page it points to
+            // is unauthenticated (anyone can scan/open it), and embedding the PIN here would
+            // display the DJ's master credential in plaintext to anyone who scans the code.
+            // The receiving side enters the PIN itself, either in the /handoff page or in the
+            // app's own Switch Device screen.
+            HandoffConnectionUrl = started
+                ? $"http://{host}:{activePort}/handoff"
+                : "";
+
             _activeServerPort = activePort;
  
             QrCodeImage = started ? GenerateQRCode(ConnectionUrl) : null;
             DjQrCodeImage = started ? GenerateQRCode(DjConnectionUrl) : null;
             KioskQrCodeImage = started ? GenerateQRCode(KioskConnectionUrl) : null;
             BillboardQrCodeImage = started ? GenerateQRCode(BillboardConnectionUrl) : null;
+            HandoffQrCodeImage = started ? GenerateQRCode(HandoffConnectionUrl) : null;
             string startSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
             string startPass = !string.IsNullOrWhiteSpace(startSsid) ? WifiPasswordStore.GetPasswordForSsid(startSsid) : string.Empty;
             string startWifiPayload = $"WIFI:S:{startSsid};T:{(string.IsNullOrWhiteSpace(startPass) ? "nopass" : "WPA")};P:{startPass};;";
@@ -273,10 +304,12 @@ namespace KSRotation.ViewModels
             DjConnectionUrl = $"http://{host}:{_activeServerPort}/dj.html";
             KioskConnectionUrl = $"http://{host}:{_activeServerPort}/kiosk.html";
             BillboardConnectionUrl = $"http://{host}:{_activeServerPort}/billboard.html";
+            HandoffConnectionUrl = $"http://{host}:{_activeServerPort}/handoff";
             QrCodeImage = GenerateQRCode(ConnectionUrl);
             DjQrCodeImage = GenerateQRCode(DjConnectionUrl);
             KioskQrCodeImage = GenerateQRCode(KioskConnectionUrl);
             BillboardQrCodeImage = GenerateQRCode(BillboardConnectionUrl);
+            HandoffQrCodeImage = GenerateQRCode(HandoffConnectionUrl);
             string refreshSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
             string refreshPass = !string.IsNullOrWhiteSpace(refreshSsid) ? WifiPasswordStore.GetPasswordForSsid(refreshSsid) : string.Empty;
             string refreshWifiPayload = $"WIFI:S:{refreshSsid};T:{(string.IsNullOrWhiteSpace(refreshPass) ? "nopass" : "WPA")};P:{refreshPass};;";
@@ -929,6 +962,145 @@ namespace KSRotation.ViewModels
             {
                 AcceptRequest(req);
             }
+        }
+
+        public DiscoveredPeer GetDiscoveredPeerInfo()
+        {
+            var cur = RotationHelpers.GetCurrentSinger(Singers);
+            return new DiscoveredPeer
+            {
+                Host = ResolveConnectionHost(),
+                Port = _activeServerPort,
+                AppName = "KSRotation",
+                DeviceName = Environment.MachineName,
+                VenueName = VenueName,
+                DjName = DjName,
+                SingerCount = Singers.Count(s => !s.IsInactive),
+                CurrentSinger = cur != null ? $"{cur.Name} - {cur.Song}" : "None"
+            };
+        }
+
+        public async Task<(bool Success, string? Error)> PullSessionFromHostAsync(string host, int port, string pin)
+        {
+            if (string.IsNullOrWhiteSpace(host))
+            {
+                return (false, "Host address cannot be empty.");
+            }
+
+            try
+            {
+                using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+                client.DefaultRequestHeaders.Add("X-DJ-PIN", pin ?? string.Empty);
+                string url = $"http://{host.Trim()}:{port}/api/session/handoff?pin={Uri.EscapeDataString(pin ?? string.Empty)}";
+                var response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        return (false, "Unauthorized: Incorrect DJ PIN.");
+                    }
+                    return (false, $"Server returned error: {response.StatusCode}");
+                }
+
+                string json = await response.Content.ReadAsStringAsync();
+                var payload = JsonSerializer.Deserialize<SessionHandoffPayload>(json, AppJsonContext.Default.SessionHandoffPayload);
+                if (payload == null)
+                {
+                    return (false, "Received invalid or empty session payload.");
+                }
+
+                // requireConfirmation: false - the caller (Switch Device UI on WPF and MAUI) already
+                // showed its own "this will replace..." confirmation before calling this method.
+                string? importError = await ImportSessionHandoffPayloadAsync(payload, requireConfirmation: false);
+                if (!string.IsNullOrEmpty(importError))
+                {
+                    return (false, importError);
+                }
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogError("MainViewModel.PullSessionFromHostAsync", ex);
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task DiscoverPeersOnLanAsync()
+        {
+            if (IsSearchingForPeers) return;
+            IsSearchingForPeers = true;
+            DiscoveredPeers.Clear();
+
+            try
+            {
+                var localIp = LocalNetworkHelper.GetLocalIPv4Address();
+                if (localIp == null) return;
+
+                byte[] ipBytes = localIp.GetAddressBytes();
+                string subnetPrefix = $"{ipBytes[0]}.{ipBytes[1]}.{ipBytes[2]}.";
+                int myLastOctet = ipBytes[3];
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(4));
+                var tasks = new List<Task<DiscoveredPeer?>>();
+
+                for (int i = 1; i <= 254; i++)
+                {
+                    if (i == myLastOctet) continue;
+                    string candidateIp = subnetPrefix + i;
+                    tasks.Add(ProbePeerAsync(candidateIp, _activeServerPort, cts.Token));
+                }
+
+                var results = await Task.WhenAll(tasks);
+                foreach (var peer in results)
+                {
+                    if (peer != null)
+                    {
+                        DiscoveredPeers.Add(peer);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogError("MainViewModel.DiscoverPeersOnLanAsync", ex);
+            }
+            finally
+            {
+                IsSearchingForPeers = false;
+            }
+        }
+
+        // Shared across the whole LAN sweep instead of a fresh HttpClient per candidate IP - a
+        // /24 scan can probe up to 253 addresses, and standing up a new client (and its socket
+        // handler) for each one is wasteful churn on a tablet's already-constrained connection
+        // pool. Per-probe timeout is enforced with a linked CancellationTokenSource below instead
+        // of HttpClient.Timeout, since that's an instance-level setting.
+        private static readonly HttpClient s_peerProbeClient = new();
+
+        private static async Task<DiscoveredPeer?> ProbePeerAsync(string ip, int port, CancellationToken token)
+        {
+            try
+            {
+                using var probeTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                probeTimeoutCts.CancelAfter(TimeSpan.FromMilliseconds(500));
+                string url = $"http://{ip}:{port}/api/device/probe";
+                var res = await s_peerProbeClient.GetAsync(url, probeTimeoutCts.Token);
+                if (res.IsSuccessStatusCode)
+                {
+                    string json = await res.Content.ReadAsStringAsync(token);
+                    var peer = JsonSerializer.Deserialize<DiscoveredPeer>(json, AppJsonContext.Default.DiscoveredPeer);
+                    if (peer != null)
+                    {
+                        peer.Host = ip;
+                        peer.Port = port;
+                        return peer;
+                    }
+                }
+            }
+            catch
+            {
+                // Inevitable timeout / socket failure for nonexistent hosts
+            }
+            return null;
         }
     }
 }

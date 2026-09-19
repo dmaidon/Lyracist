@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:39:00 -> Fix xUnit2033 return values of Assert.Single
+// Edited on Sep 19, 2026 @ 18:09:00 -> Add unit test for SessionHandoffPayload serialization round-trip
 using KSRotation.Models;
 using KSRotation.Services;
 
@@ -78,5 +78,102 @@ public class PersistenceTests
 
         Assert.Empty(afterFlush.ActiveQueue);
         Assert.Empty(afterFlush.PerformanceHistory);
+    }
+
+    [Fact]
+    public void SessionHandoffPayload_RoundTripsAllProperties()
+    {
+        var singer1 = new SingerEntry
+        {
+            Name = "Alice",
+            Song = "Hey Jude",
+            Artist = "The Beatles",
+            IsCurrent = true,
+            IsRotationStart = true,
+            Song1Completed = true,
+            QueuedSongs = [new QueuedSong("Yesterday", "The Beatles")]
+        };
+        var singer2 = new SingerEntry
+        {
+            Name = "Bob",
+            Song = "Hotel California",
+            Artist = "Eagles",
+            IsNext = true,
+            LinkedSingerId = singer1.Id
+        };
+        var history = new List<SongPerformance>
+        {
+            new()
+            {
+                SingerId = singer1.Id,
+                SingerName = "Alice",
+                SongTitle = "Hey Jude",
+                ArtistName = "The Beatles",
+                Round = 1,
+                Timestamp = new DateTime(2026, 9, 19, 20, 0, 0)
+            }
+        };
+        var requests = new List<PatronRequest>
+        {
+            new()
+            {
+                Name = "Charlie",
+                Song = "Wonderwall",
+                Artist = "Oasis"
+            }
+        };
+
+        var original = new SessionHandoffPayload
+        {
+            Version = 1,
+            ExportedAt = new DateTime(2026, 9, 19, 21, 30, 0),
+            SourceDevice = "Laptop-DJ",
+            VenueName = "The Rusty Anchor",
+            DjName = "DJ Mike",
+            DjPin = "4321",
+            IsLastRound = true,
+            EnableSessionSchedule = true,
+            SessionStartTime = "9:00 PM",
+            SessionStopTime = "1:00 AM",
+            FloatCurrentSingerToTop = true,
+            ShowEstimatedWaitTime = true,
+            DefaultSongLengthMinutes = 5.0,
+            Singers = [singer1, singer2],
+            PerformanceHistory = history,
+            IncomingRequests = requests
+        };
+
+        string json = System.Text.Json.JsonSerializer.Serialize(original, AppJsonContext.Default.SessionHandoffPayload);
+        Assert.NotNull(json);
+
+        var restored = System.Text.Json.JsonSerializer.Deserialize<SessionHandoffPayload>(json, AppJsonContext.Default.SessionHandoffPayload);
+        Assert.NotNull(restored);
+
+        Assert.Equal(original.VenueName, restored.VenueName);
+        Assert.Equal(original.DjName, restored.DjName);
+        Assert.Equal(original.DjPin, restored.DjPin);
+        Assert.True(restored.IsLastRound);
+        Assert.Equal(2, restored.Singers.Count);
+
+        var restoredSinger1 = restored.Singers[0];
+        Assert.Equal(singer1.Id, restoredSinger1.Id);
+        Assert.Equal("Alice", restoredSinger1.Name);
+        Assert.True(restoredSinger1.IsCurrent);
+        Assert.True(restoredSinger1.Song1Completed);
+        Assert.Single(restoredSinger1.QueuedSongs);
+
+        var restoredSinger2 = restored.Singers[1];
+        Assert.Equal(singer2.Id, restoredSinger2.Id);
+        Assert.Equal("Bob", restoredSinger2.Name);
+        Assert.True(restoredSinger2.IsNext);
+        Assert.Equal(singer1.Id, restoredSinger2.LinkedSingerId);
+
+        var restoredHistory = Assert.Single(restored.PerformanceHistory);
+        Assert.Equal(singer1.Id, restoredHistory.SingerId);
+        Assert.Equal("Hey Jude", restoredHistory.SongTitle);
+
+        var restoredReq = Assert.Single(restored.IncomingRequests);
+        Assert.Equal("Charlie", restoredReq.Name);
+        Assert.Equal("Wonderwall", restoredReq.Song);
     }
 }

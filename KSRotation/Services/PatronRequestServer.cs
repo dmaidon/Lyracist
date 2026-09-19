@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Pass isSpecial to onHandleDjAction from JSON
+// Edited on Sep 19, 2026 @ 17:45:00 -> Add session handoff endpoints and probe API for device switching
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,7 +30,10 @@ namespace KSRotation.Services
         Func<string>? onGetVenueInfoJson = null,
         Func<string, string, bool>? onCheckDuplicateSong = null,
         Func<string?>? onCheckRequestAllowed = null,
-        Action<string, double, double>? onVenueLocationSynced = null)
+        Action<string, double, double>? onVenueLocationSynced = null,
+        Func<SessionHandoffPayload>? onExportSession = null,
+        Func<SessionHandoffPayload, Task<string?>>? onImportSession = null,
+        Func<DiscoveredPeer>? onGetProbeInfo = null)
     {
         private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
         private const int MaxAvatarImageBytes = 2_097_152; // 2 MB - a profile avatar has no business being larger
@@ -56,6 +59,9 @@ namespace KSRotation.Services
         private readonly Func<string, string, bool>? _onCheckDuplicateSong = onCheckDuplicateSong;
         private readonly Func<string?>? _onCheckRequestAllowed = onCheckRequestAllowed;
         private readonly Action<string, double, double>? _onVenueLocationSynced = onVenueLocationSynced;
+        private readonly Func<SessionHandoffPayload>? _onExportSession = onExportSession;
+        private readonly Func<SessionHandoffPayload, Task<string?>>? _onImportSession = onImportSession;
+        private readonly Func<DiscoveredPeer>? _onGetProbeInfo = onGetProbeInfo;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
 
         // Serializes the /api/singer/login check-then-write sequence (find-by-name, then insert or
@@ -264,6 +270,38 @@ namespace KSRotation.Services
                         else if (path == "/billboard" || path == "/billboard.html")
                         {
                             await SendHtmlResponseAsync(stream, GetBillboardHtmlContent());
+                        }
+                        else if (path == "/handoff" || path == "/handoff.html" || path == "/switch")
+                        {
+                            await SendHtmlResponseAsync(stream, GetHandoffHtmlContent());
+                        }
+                        else if (path.StartsWith("/api/session/handoff", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (!TryAuthorizeDj(clientIp, pin, out bool lockedOut))
+                            {
+                                if (lockedOut)
+                                {
+                                    await SendTooManyRequestsAsync(stream);
+                                }
+                                else
+                                {
+                                    await SendUnauthorizedAsync(stream);
+                                }
+                                return;
+                            }
+                            var payload = _onExportSession?.Invoke();
+                            string json = payload != null ? JsonSerializer.Serialize(payload, AppJsonContext.Default.SessionHandoffPayload) : "{}";
+                            await SendJsonResponseAsync(stream, json);
+                        }
+                        else if (path.StartsWith("/api/device/probe", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var probe = _onGetProbeInfo?.Invoke() ?? new DiscoveredPeer
+                            {
+                                AppName = "KSRotation",
+                                DeviceName = Environment.MachineName
+                            };
+                            string json = JsonSerializer.Serialize(probe, AppJsonContext.Default.DiscoveredPeer);
+                            await SendJsonResponseAsync(stream, json);
                         }
                         else if (path.StartsWith("/api/info", StringComparison.OrdinalIgnoreCase))
                         {
@@ -566,6 +604,54 @@ namespace KSRotation.Services
                         }
                         catch (Exception ex)
                         {
+                            await SendBadRequestAsync(stream, $"{{\"error\":\"{JsonEncodedText.Encode(ex.Message)}\"}}");
+                        }
+                    }
+                    else if (method.Equals("POST", StringComparison.OrdinalIgnoreCase) && path.StartsWith("/api/session/handoff", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!TryAuthorizeDj(clientIp, pin, out bool lockedOut))
+                        {
+                            if (lockedOut)
+                            {
+                                await SendTooManyRequestsAsync(stream);
+                            }
+                            else
+                            {
+                                await SendUnauthorizedAsync(stream);
+                            }
+                            return;
+                        }
+
+                        byte[] bodyBytes = await ReadBodyBytesAsync(readStream, contentLength, readTimeoutCts.Token);
+                        string body = Encoding.UTF8.GetString(bodyBytes);
+
+                        try
+                        {
+                            var payload = JsonSerializer.Deserialize<SessionHandoffPayload>(body, AppJsonContext.Default.SessionHandoffPayload);
+                            if (payload == null)
+                            {
+                                await SendBadRequestAsync(stream, "{\"error\":\"Invalid session handoff payload.\"}");
+                                return;
+                            }
+
+                            string? error = null;
+                            if (_onImportSession != null)
+                            {
+                                error = await _onImportSession(payload);
+                            }
+
+                            if (string.IsNullOrEmpty(error))
+                            {
+                                await SendJsonResponseAsync(stream, "{\"success\":true}");
+                            }
+                            else
+                            {
+                                await SendBadRequestAsync(stream, $"{{\"error\":\"{JsonEncodedText.Encode(error)}\"}}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LoggerService.LogError("PatronRequestServer.ImportHandoff", ex);
                             await SendBadRequestAsync(stream, $"{{\"error\":\"{JsonEncodedText.Encode(ex.Message)}\"}}");
                         }
                     }
@@ -1219,15 +1305,17 @@ namespace KSRotation.Services
             return buffer;
         }
 
-        // The portal markup lives in Resources/PatronPortal.html, Resources/kiosk.html, Resources/dj.html, and Resources/billboard.html (embedded resources); loaded once on first request.
+        // The portal markup lives in Resources/PatronPortal.html, Resources/kiosk.html, Resources/dj.html, Resources/billboard.html, and Resources/handoff.html (embedded resources); loaded once on first request.
         private static readonly Lazy<string> CachedHtml = new(LoadHtmlContent);
         private static readonly Lazy<string> CachedDjHtml = new(LoadDjHtmlContent);
         private static readonly Lazy<string> CachedKioskHtml = new(LoadKioskHtmlContent);
         private static readonly Lazy<string> CachedBillboardHtml = new(LoadBillboardHtmlContent);
+        private static readonly Lazy<string> CachedHandoffHtml = new(LoadHandoffHtmlContent);
 
         private static string GetHtmlContent() => CachedHtml.Value;
         private static string GetDjHtmlContent() => CachedDjHtml.Value;
         private static string GetKioskHtmlContent() => CachedKioskHtml.Value;
+        private static string GetHandoffHtmlContent() => CachedHandoffHtml.Value;
         private string GetBillboardHtmlContent()
         {
             string html = CachedBillboardHtml.Value;
@@ -1356,6 +1444,29 @@ namespace KSRotation.Services
                 "PatronRequestServer.LoadBillboardHtmlContent",
                 new InvalidOperationException("Embedded resource 'billboard.html' was not found."));
             return "<!DOCTYPE html><html><body><h1>KSRotation</h1><p>Billboard portal resource missing.</p></body></html>";
+        }
+
+        private static string LoadHandoffHtmlContent()
+        {
+            Assembly assembly = typeof(PatronRequestServer).Assembly;
+            string? resourceName = Array.Find(
+                assembly.GetManifestResourceNames(),
+                n => n.EndsWith("handoff.html", StringComparison.OrdinalIgnoreCase));
+
+            if (resourceName != null)
+            {
+                using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+                if (stream != null)
+                {
+                    using StreamReader reader = new(stream, Encoding.UTF8);
+                    return reader.ReadToEnd();
+                }
+            }
+
+            LoggerService.LogError(
+                "PatronRequestServer.LoadHandoffHtmlContent",
+                new InvalidOperationException("Embedded resource 'handoff.html' was not found."));
+            return "<!DOCTYPE html><html><body><h1>KSRotation</h1><p>Handoff portal resource missing.</p></body></html>";
         }
     }
 }

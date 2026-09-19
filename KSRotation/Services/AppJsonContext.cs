@@ -1,4 +1,4 @@
-// Edited on Sep 3, 2026 @ 08:21:00 -> Add VenueInfoResponseDto to AppJsonContext
+// Edited on Sep 19, 2026 @ 17:41:00 -> Add SessionHandoffPayload and DiscoveredPeer to AppJsonContext
 using KSRotation.Models;
 using Lyracist.Shared;
 using System.Collections.Generic;
@@ -25,5 +25,9 @@ namespace KSRotation.Services
     [JsonSerializable(typeof(RequestedSong))]
     [JsonSerializable(typeof(List<RequestedSong>))]
     [JsonSerializable(typeof(VenueInfoResponseDto))]
+    [JsonSerializable(typeof(SessionHandoffPayload))]
+    [JsonSerializable(typeof(DiscoveredPeer))]
+    [JsonSerializable(typeof(List<DiscoveredPeer>))]
     public partial class AppJsonContext : JsonSerializerContext;
 }
+

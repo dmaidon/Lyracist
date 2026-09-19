@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 09:25:00 -> Update documentation for special singer placement at top of list as current singer
+// Edited on Sep 19, 2026 @ 17:49:00 -> Add documentation update test for seamless bidirectional device switching and session handoff
 using System;
 using System.IO;
 using Xunit;
@@ -1873,6 +1873,129 @@ Section: Special Singer (One-Time Performance) (Updated Sep 18, 2026)
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " SpecialSingerCurrentTopPlacement";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForDeviceHandoff()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Seamless Bidirectional Device Switching & Session Handoff (Updated Sep 19, 2026)
+- Live Karaoke Session Continuity: Allows a host or DJ to transition an ongoing karaoke event between a laptop (running KSRotation) and a tablet (running KSRotation.Maui on Android or Windows) without losing a single singer, queue position, or performance record.
+- Complete State Preservation: The handoff payload completely transfers the active singer queue, currently performing singer ('IsCurrent'), next-up singer ('IsNext'), round rotation anchor ('IsRotationStart'), paused/inactive singers, queued future songs, linked duet pairs, completed song checkmarks (rounds 1-10), tonight's performance history with original timestamps, pending patron requests, venue/DJ branding, and session schedule/duplicate rules.
+- Dedicated Switch Device QR Code & Web Portal: The hosting device generates a high-resolution QR code pointing to http://<host-ip>:<port>/handoff. Scanning this QR code using any smartphone or tablet camera displays a live session summary with active singer counts, current performer name, and a one-tap 'Open in KSRotation MAUI' action button.
+- Native Deep Linking (ksrotation://handoff): When scanned or tapped on mobile/tablet, the system deep-links directly into KSRotation.Maui, pre-fills the host parameters, and prompts for one-tap confirmation to take over the event.
+- One-Tap Wi-Fi Auto-Discovery: Both KSRotation and KSRotation.Maui feature an inline 'Scan Wi-Fi' network discovery tool that sweeps the local subnet to detect active peers in seconds, eliminating manual IP address entry.
+- Bidirectional Handoff (Laptop <-> Tablet): Supports transferring from Laptop to Tablet when leaving the venue, and transferring from Tablet back to Laptop when returning or setting up the main rig.
+- Failsafe Manual Entry & Session Backup (.ksr): If local router client isolation is enabled, DJs can enter the IP and DJ PIN manually, or download/export a standalone session backup file (.ksr) directly from the portal.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Seamless Bidirectional Device Switching & Session Handoff"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Seamless Bidirectional Device Switching & Session Handoff"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Seamless Bidirectional Device Switching & Session Handoff")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SeamlessDeviceSwitchingHandoff"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Seamless Bidirectional Device Switching & Session Handoff", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                                double yPos = 70;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                    yPos += 15;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " SeamlessDeviceSwitchingHandoff";
                                 doc.Save(pdfPath);
                             }
                         }

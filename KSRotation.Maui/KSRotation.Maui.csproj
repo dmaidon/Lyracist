@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 12:07:30 -> Link WindowsLocationService.cs for shared types -->
+<!-- Edited on Sep 19, 2026 @ 17:43:00 -> Link handoff.html embedded resource for session device handoff -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -97,9 +97,9 @@
 		<Compile Include="..\KSRotation\Models\*.cs" Link="Models\%(Filename)%(Extension)" />
 
 		<!-- Wildcard so newly-added WPF services are picked up automatically instead of requiring a manual
-		     edit here. Excludes the three services that have MAUI-specific replacements in Shims\WpfShims.cs
+		     edit here. Excludes the services that have MAUI-specific replacements in Shims\WpfShims.cs
 		     (compiling both would be a duplicate-type error). -->
-		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs;..\KSRotation\Services\DjBannerWindowService.cs;..\KSRotation\Services\CastingService.cs;..\KSRotation\Services\BrowserCastServer.cs;..\KSRotation\Services\ChromecastSender.cs;..\KSRotation\Services\MiracastController.cs;..\KSRotation\Services\RotationRenderer.cs;..\KSRotation\Services\IRotationRenderer.cs;..\KSRotation\Services\ICastingService.cs" Link="Services\%(Filename)%(Extension)" />
+		<Compile Include="..\KSRotation\Services\*.cs" Exclude="..\KSRotation\Services\DisplayWindowService.cs;..\KSRotation\Services\ThemeService.cs;..\KSRotation\Services\RotationReportService.cs;..\KSRotation\Services\DjBannerWindowService.cs;..\KSRotation\Services\CastingService.cs;..\KSRotation\Services\BrowserCastServer.cs;..\KSRotation\Services\ChromecastSender.cs;..\KSRotation\Services\MiracastController.cs;..\KSRotation\Services\RotationRenderer.cs;..\KSRotation\Services\IRotationRenderer.cs;..\KSRotation\Services\ICastingService.cs;..\KSRotation\Services\ConfirmationService.cs" Link="Services\%(Filename)%(Extension)" />
 
 
 		<Compile Include="..\KSRotation\ViewModels\MainViewModel.cs" Link="ViewModels\MainViewModel.cs" />
@@ -113,6 +113,7 @@
 		<EmbeddedResource Include="..\KSRotation\Resources\dj.html" Link="Resources\dj.html" />
 		<EmbeddedResource Include="..\KSRotation\Resources\kiosk.html" Link="Resources\kiosk.html" />
 		<EmbeddedResource Include="..\KSRotation\Resources\billboard.html" Link="Resources\billboard.html" />
+		<EmbeddedResource Include="..\KSRotation\Resources\handoff.html" Link="Resources\handoff.html" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="..\Lyracist\Assets\rotation_m.png" Link="rotation_m.png">

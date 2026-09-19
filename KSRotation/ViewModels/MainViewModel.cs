@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 08:18:00 -> Recalculate wait times and update display service on singer move and collection change
+// Edited on Sep 19, 2026 @ 17:47:00 -> Add session handoff export and import logic for seamless device switching
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -2636,6 +2636,168 @@ namespace KSRotation.ViewModels
                         IsMusic = p.IsMusic
                     })
                 ];
+            }
+        }
+
+        public SessionHandoffPayload ExportSessionHandoffPayload()
+        {
+            return new SessionHandoffPayload
+            {
+                Version = 1,
+                ExportedAt = DateTime.Now,
+                SourceDevice = Environment.MachineName,
+                VenueName = VenueName,
+                DjName = DjName,
+                DjPin = DjPin,
+                IsLastRound = IsLastRound,
+                EnableSessionSchedule = EnableSessionSchedule,
+                SessionStartTime = SessionStartTime,
+                SessionStopTime = SessionStopTime,
+                EnableLastRequestTime = EnableLastRequestTime,
+                LastRequestTime = LastRequestTime,
+                BlockDuplicateSongsInSession = BlockDuplicateSongsInSession,
+                FloatCurrentSingerToTop = FloatCurrentSingerToTop,
+                ShowEstimatedWaitTime = ShowEstimatedWaitTime,
+                DefaultSongLengthMinutes = DefaultSongLengthMinutes,
+                ActiveSpecialEvent = ActiveSpecialEvent,
+                Singers = [.. Singers],
+                PerformanceHistory = GetPerformanceHistorySnapshot(),
+                IncomingRequests = [.. IncomingRequests]
+            };
+        }
+
+        /// <summary>
+        /// Applies an incoming session handoff. <paramref name="requireConfirmation"/> defaults to true
+        /// because this is also the delegate the network server invokes directly on an authenticated
+        /// POST /api/session/handoff (see MainViewModel.Requests.cs's server wiring) - without an
+        /// explicit prompt here, anyone who has the DJ PIN could silently wipe and replace the live
+        /// rotation on this device with no warning. Callers that already confirmed with the user
+        /// locally before initiating the transfer (e.g. PullSessionFromHostAsync, invoked only after
+        /// the Switch Device UI's own "this will replace..." dialog) pass false to avoid a redundant
+        /// second prompt.
+        /// </summary>
+        public async Task<string?> ImportSessionHandoffPayloadAsync(SessionHandoffPayload payload, bool requireConfirmation = true)
+        {
+            if (payload == null) return "Payload was null.";
+
+            if (requireConfirmation)
+            {
+                string source = string.IsNullOrWhiteSpace(payload.SourceDevice) ? "another device" : payload.SourceDevice;
+                string venue = string.IsNullOrWhiteSpace(payload.VenueName) ? "" : $" ({payload.VenueName})";
+                string message =
+                    $"Incoming session handoff from \"{source}\"{venue} with {payload.Singers?.Count ?? 0} singer(s).\n\n" +
+                    "This will REPLACE the current singer rotation and performance history on this device.\n\n" +
+                    "Accept this transfer?";
+
+                // Bounded so a client waiting on the HTTP response (which is what's actually
+                // blocked while this prompt is up) doesn't hang forever if nobody's looking at
+                // the screen - an unanswered prompt is treated as a decline.
+                Task<bool> confirmTask = ConfirmationService.ShowYesNoAsync(message, "Incoming Session Handoff");
+                Task completed = await Task.WhenAny(confirmTask, Task.Delay(TimeSpan.FromSeconds(30)));
+                if (completed != confirmTask || !await confirmTask)
+                {
+                    return "Transfer was declined or timed out on the receiving device.";
+                }
+            }
+
+            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                ImportSessionHandoffPayloadInternal(payload);
+            });
+
+            return null;
+        }
+
+        public void ImportSessionHandoffPayloadInternal(SessionHandoffPayload payload)
+        {
+            if (payload == null) return;
+
+            // 1. Session Settings
+            if (!string.IsNullOrWhiteSpace(payload.VenueName))
+            {
+                VenueName = payload.VenueName;
+                if (!Venues.Any(v => string.Equals(v, payload.VenueName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    Venues.Add(payload.VenueName);
+                    VenueService.Save(Venues);
+                }
+                SelectedVenue = payload.VenueName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(payload.DjName))
+            {
+                DjName = payload.DjName;
+                if (!Djs.Any(d => string.Equals(d, payload.DjName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    Djs.Add(payload.DjName);
+                    DjService.Save(Djs);
+                }
+                SelectedDj = payload.DjName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(payload.DjPin))
+            {
+                DjPin = payload.DjPin;
+            }
+
+            IsLastRound = payload.IsLastRound;
+            EnableSessionSchedule = payload.EnableSessionSchedule;
+            if (!string.IsNullOrWhiteSpace(payload.SessionStartTime)) SessionStartTime = payload.SessionStartTime;
+            if (!string.IsNullOrWhiteSpace(payload.SessionStopTime)) SessionStopTime = payload.SessionStopTime;
+            EnableLastRequestTime = payload.EnableLastRequestTime;
+            if (!string.IsNullOrWhiteSpace(payload.LastRequestTime)) LastRequestTime = payload.LastRequestTime;
+            BlockDuplicateSongsInSession = payload.BlockDuplicateSongsInSession;
+            FloatCurrentSingerToTop = payload.FloatCurrentSingerToTop;
+            ShowEstimatedWaitTime = payload.ShowEstimatedWaitTime;
+            DefaultSongLengthMinutes = payload.DefaultSongLengthMinutes;
+            if (!string.IsNullOrWhiteSpace(payload.ActiveSpecialEvent)) ActiveSpecialEvent = payload.ActiveSpecialEvent;
+
+            // 2. Clear and Restore Singers
+            Singers.Clear();
+            if (payload.Singers != null)
+            {
+                foreach (var s in payload.Singers)
+                {
+                    Singers.Add(s);
+                }
+            }
+
+            // Ensure start flag invariant
+            RotationHelpers.EnsureRotationStartFlag(Singers);
+            RefreshLinkedPartnerNames();
+            UpdateNextSingerHighlight();
+
+            // 3. Performance History
+            lock (_performanceHistoryLock)
+            {
+                _performanceHistory.Clear();
+                if (payload.PerformanceHistory != null)
+                {
+                    _performanceHistory.AddRange(payload.PerformanceHistory);
+                }
+            }
+
+            // 4. Incoming Requests
+            IncomingRequests.Clear();
+            if (payload.IncomingRequests != null)
+            {
+                foreach (var r in payload.IncomingRequests)
+                {
+                    IncomingRequests.Add(r);
+                }
+            }
+
+            // 5. Recalculate wait times, refresh UI, rebuild cache, and save immediately
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0, enabled: ShowEstimatedWaitTime);
+            RefreshBillboardState();
+            RebuildRotationJsonCacheNow();
+            SaveDatabaseNow();
+            SaveSettingsNow();
+            RefreshConnectionInfo();
+
+            if (IsDisplayEnabled)
+            {
+                _displayWindowService.Update(Singers);
             }
         }
 

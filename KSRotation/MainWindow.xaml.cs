@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 09:36:00 -> Select performer name text on add and wire SingerInsertedForEditing event
+// Edited on Sep 19, 2026 @ 17:55:00 -> Add OnDeviceHandoffButtonClicked to open DeviceHandoffWindow
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
@@ -88,6 +88,19 @@ namespace KSRotation
             if (DataContext is ViewModels.MainViewModel vm)
             {
                 var popout = new Windows.KioskQrCodePopoutWindow
+                {
+                    Owner = this,
+                    DataContext = vm
+                };
+                popout.ShowDialog();
+            }
+        }
+
+        private void OnDeviceHandoffButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.MainViewModel vm)
+            {
+                var popout = new Windows.DeviceHandoffWindow
                 {
                     Owner = this,
                     DataContext = vm

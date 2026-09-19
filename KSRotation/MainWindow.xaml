@@ -1,4 +1,4 @@
-<!-- Edited on Sep 19, 2026 @ 08:18:00 -> Add estimated wait time badge to singer queue list -->
+<!-- Edited on Sep 19, 2026 @ 17:56:00 -> Add Switch Device button to patron/DJ portal card -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1210,20 +1210,35 @@
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
-                                        <Button HorizontalAlignment="Right"
-                                                Style="{StaticResource MaterialDesignOutlinedButton}"
-                                                Padding="6,1"
-                                                Height="20"
-                                                BorderThickness="0.8"
-                                                BorderBrush="#8B5CF6"
-                                                Foreground="#8B5CF6"
-                                                Click="OnKioskQrCodeButtonClicked"
-                                                ToolTip="Open Tablet Kiosk QR Code and Link">
-                                            <StackPanel Orientation="Horizontal">
-                                                <materialDesign:PackIcon Kind="Tablet" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0" />
-                                                <TextBlock Text="Kiosk" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                    Padding="6,1"
+                                                    Height="20"
+                                                    BorderThickness="0.8"
+                                                    BorderBrush="#10B981"
+                                                    Foreground="#10B981"
+                                                    Click="OnDeviceHandoffButtonClicked"
+                                                    ToolTip="Switch Device / Transfer Session between Laptop and Tablet"
+                                                    Margin="0,0,6,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="SwapHorizontalBold" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0" />
+                                                    <TextBlock Text="Switch Device" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                    Padding="6,1"
+                                                    Height="20"
+                                                    BorderThickness="0.8"
+                                                    BorderBrush="#8B5CF6"
+                                                    Foreground="#8B5CF6"
+                                                    Click="OnKioskQrCodeButtonClicked"
+                                                    ToolTip="Open Tablet Kiosk QR Code and Link">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="Tablet" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0" />
+                                                    <TextBlock Text="Kiosk" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                        </StackPanel>
                                     </Grid>
                                     <TextBlock FontSize="11"
                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
