@@ -114,6 +114,7 @@ public partial class MainViewModel : ObservableObject
 
         RefreshStats();
         Search();
+        RefreshReadinessCounts();
     }
 
     [RelayCommand]
