@@ -1,9 +1,32 @@
-<!-- Edited on Sep 19, 2026 @ 17:50:00 -> Document seamless bidirectional device switching and session handoff -->
-Last Edit: Sep 19, 2026 - Seamless Bidirectional Device Switching & Session Handoff
+<!-- Edited on Sep 20, 2026 @ 07:15:00 -> Document fix for session handoff HTTP 401 stream copy truncation and PIN validation -->
+Last Edit: Sep 20, 2026 - Device Handoff Stream Copy Exception Fix & PIN Auto-Focus
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.20.0] - 2026-09-20
+
+### Added
+- **Automated Transition to In-App Remote DJ Controller on Handoff (`KSRotation`, `KSRotation.Maui`, `dj.html`, `PatronRequestServer`)**:
+  - **Automatic Handshake**: When the desktop host pulls an active session from a tablet running `KSRotation.Maui`, the desktop sends its own IP address, web server port, and DJ PIN via `GET /api/session/handoff?pin=...&hostIp=...&hostPort=...&djPin=...`.
+  - **In-App Embedded Remote DJ Overlay**: `KSRotation.Maui` automatically transitions into a full-screen embedded `WebView` displaying the host's `dj.html`, keeping the DJ within the native tablet app without having to switch to an external browser.
+  - **Instant PIN Pre-Authentication**: Updated `dj.html` to parse `?pin=...` query parameters upon loading, auto-storing the credential in `sessionStorage` and unlocking the dashboard immediately with zero manual typing required.
+  - **Header Controls & Mode Switching**: Embedded Remote DJ overlay includes a persistent top toolbar displaying host connection status, a 1-tap `🔄 Reload` button, and an `Exit Remote DJ` button to return to standalone hosting mode if needed.
+  - **Switch Device & Settings Controls**: Added an `Auto-switch to Remote DJ (dj.html) on handoff` toggle directly in the Switch Device dialog and in `AppSettings.cs` (enabled by default). Also added a manual `🎧 Remote DJ` connection button to connect to any active laptop host at any time.
+
+### Fixed
+- **Device Handoff Wi-Fi Scan & Stream Copy Exception (`PatronRequestServer`, `KSRotation`, `KSRotation.Maui`)**:
+  - Resolved `could not import session. error while copying content to a stream` when pulling a session from a discovered peer over Wi-Fi.
+  - Fixed hardcoded HTTP response `Content-Length: 25` in `PatronRequestServer.SendUnauthorizedAsync`, which sent a 24-byte payload (`{"error":"Unauthorized"}`), causing `HttpClient` to truncate and throw an I/O stream copy exception. Replaced with dynamic UTF-8 byte counting (`Encoding.UTF8.GetByteCount(json)`).
+  - Added explicit `await stream.FlushAsync()` calls across all HTTP server responses (`SendHtmlResponseAsync`, `SendJsonResponseAsync`, `SendImageResponseAsync`, `SendUnauthorizedAsync`, etc.) before stream disposal to ensure full socket frame transmission.
+  - Added auto-focus and text select-all on the DJ PIN input field immediately upon selecting a discovered peer from the LAN scanner list in both desktop (`DeviceHandoffWindow.xaml.cs`) and tablet (`MainPage.xaml.cs`).
+  - Added proactive input validation preventing session pull attempts when the DJ PIN has not been entered, prompting the user with clear instructions rather than generating a silent network rejection.
+  - Enhanced error messaging in `MainViewModel.Requests.cs` for HTTP 401 Unauthorized (incorrect/missing PIN) and HTTP 429 Too Many Requests (rate-limited PIN attempts).
+- **Patron Web Portal Header & Button Layout Refinement (`KSRotation`)**:
+  - Relocated the "Switch Device" and "Kiosk" action buttons to a dedicated row beneath the "PATRON WEB PORTAL" / "⚠️ DJ CONTROL PORTAL" header in `MainWindow.xaml`.
+  - Resolved text overlap where the "Switch Device" button impinged on the portal title text in compact sidebar views.
+  - Allowed the incoming requests list container to naturally flex and adjust height to accommodate the updated portal header.
 
 ## [26.9.19.0] - 2026-09-19
 

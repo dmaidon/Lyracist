@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 18:05:00 -> Add Switch Device overlay handlers and deep link processing
+// Edited on Sep 20, 2026 @ 07:13:00 -> Validate DJ PIN and focus Pin entry when selecting peer
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +11,11 @@ namespace KSRotation.Maui;
 public partial class MainPage : ContentPage
 {
     private KSRotation.Models.SingerEntry? _editingSinger;
+
+    // Port of the peer last selected from the discovered-peers list, so Import/Remote DJ connect
+    // to the port that device's server actually bound to (StartRequestServer can fall back to
+    // 5001/5002 if 5000 is taken) instead of always assuming 5000.
+    private int _selectedPeerPort = 5000;
 
     public MainPage(KSRotation.ViewModels.MainViewModel vm)
     {
@@ -55,6 +60,7 @@ public partial class MainPage : ContentPage
         // without re-navigating to this page, so OnAppearing (below) never re-fires for it.
         // MainPage is created once for the life of the app, so this subscription is never removed.
         App.HandoffUriReceived += OnHandoffUriReceived;
+        vm.SessionHandedOffToPeer += OnSessionHandedOffToPeer;
     }
 
     protected override void OnAppearing()
@@ -1247,6 +1253,8 @@ public partial class MainPage : ContentPage
                     btn.Clicked += (_, _) =>
                     {
                         HandoffHostEntry.Text = peer.Host;
+                        _selectedPeerPort = peer.Port > 0 ? peer.Port : 5000;
+                        HandoffPinEntry.Focus();
                     };
                     HandoffPeersStack.Children.Add(btn);
                 }
@@ -1272,6 +1280,12 @@ public partial class MainPage : ContentPage
         }
 
         string pin = HandoffPinEntry.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(pin))
+        {
+            await DisplayAlertAsync("DJ PIN Required", "Please enter the 4-digit DJ PIN displayed on the source device.", "OK");
+            HandoffPinEntry.Focus();
+            return;
+        }
 
         bool confirm = await DisplayAlertAsync(
             "Transfer Session",
@@ -1281,7 +1295,7 @@ public partial class MainPage : ContentPage
 
         if (!confirm) return;
 
-        var (success, error) = await vm.PullSessionFromHostAsync(host, 5000, pin);
+        var (success, error) = await vm.PullSessionFromHostAsync(host, _selectedPeerPort, pin);
         if (success)
         {
             SwitchDeviceOverlay.IsVisible = false;
@@ -1290,6 +1304,82 @@ public partial class MainPage : ContentPage
         else
         {
             await DisplayAlertAsync("Transfer Failed", $"Could not transfer session:\n{error}", "OK");
+        }
+    }
+
+    private void OnSessionHandedOffToPeer(string peerHost, int peerPort, string peerPin)
+    {
+        Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            if (BindingContext is not KSRotation.ViewModels.MainViewModel vm) return;
+
+            if (vm.AutoSwitchToRemoteDjOnHandoff)
+            {
+                SwitchToRemoteDjView(peerHost, peerPort, peerPin);
+            }
+            else
+            {
+                bool answer = await DisplayAlertAsync(
+                    "Session Transferred",
+                    $"Your session was transferred to laptop ({peerHost}:{peerPort}).\n\nWould you like to switch this tablet to Remote DJ mode?",
+                    "Switch to Remote DJ",
+                    "Stay in Host Mode");
+
+                if (answer)
+                {
+                    SwitchToRemoteDjView(peerHost, peerPort, peerPin);
+                }
+            }
+        });
+    }
+
+    private void SwitchToRemoteDjView(string host, int port, string pin)
+    {
+        SwitchDeviceOverlay.IsVisible = false;
+
+        string targetUrl = $"http://{host}:{port}/dj.html?pin={Uri.EscapeDataString(pin)}";
+        RemoteDjHostLabel.Text = $"Connected to {host}:{port}";
+        RemoteDjWebView.Source = new UrlWebViewSource { Url = targetUrl };
+        RemoteDjOverlay.IsVisible = true;
+    }
+
+    private void OnConnectAsRemoteDjClicked(object? sender, EventArgs e)
+    {
+        string host = HandoffHostEntry.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(host) || host == "192.168.1.")
+        {
+            _ = DisplayAlertAsync("Invalid Host", "Please enter a valid Host IP address.", "OK");
+            return;
+        }
+
+        string pin = HandoffPinEntry.Text?.Trim() ?? string.Empty;
+        SwitchToRemoteDjView(host, _selectedPeerPort, pin);
+    }
+
+    private void OnHandoffHostEntryTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        // The tracked port only applies to the peer it was captured from - once the host field
+        // is hand-edited it no longer necessarily refers to that peer, so fall back to the default.
+        _selectedPeerPort = 5000;
+    }
+
+    private void OnRefreshRemoteDjClicked(object? sender, EventArgs e)
+    {
+        RemoteDjWebView.Reload();
+    }
+
+    private async void OnExitRemoteDjClicked(object? sender, EventArgs e)
+    {
+        bool confirm = await DisplayAlertAsync(
+            "Exit Remote DJ Mode",
+            "Do you want to exit Remote DJ mode and return to Standalone Host mode?",
+            "Yes, Exit",
+            "Cancel");
+
+        if (confirm)
+        {
+            RemoteDjOverlay.IsVisible = false;
+            RemoteDjWebView.Source = null;
         }
     }
 }

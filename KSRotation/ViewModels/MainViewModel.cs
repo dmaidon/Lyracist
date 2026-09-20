@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 17:47:00 -> Add session handoff export and import logic for seamless device switching
+// Edited on Sep 20, 2026 @ 06:35:30 -> Add SessionHandedOffToPeer and AutoSwitchToRemoteDjOnHandoff to MainViewModel
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -18,6 +18,9 @@ namespace KSRotation.ViewModels
         private readonly DjBannerWindowService _djBannerWindowService = new();
         private readonly List<SingerEntry> _subscribedSingers = [];
         private readonly DispatcherTimer _saveDebounceTimer;
+
+        /// <summary>Fired when this device's active session is exported/handed off to another peer on the LAN.</summary>
+        public event Action<string, int, string>? SessionHandedOffToPeer;
         private readonly DispatcherTimer _dbDebounceTimer;
         private readonly DispatcherTimer _jsonCacheDebounceTimer;
         private readonly DispatcherTimer _requestsJsonCacheDebounceTimer;
@@ -188,6 +191,16 @@ namespace KSRotation.ViewModels
         /// DJs prefer not to display wait estimates to the audience; defaults on.</summary>
         [ObservableProperty]
         public partial bool ShowEstimatedWaitTime { get; set; } = true;
+
+        /// <summary>When true, this device automatically switches to the in-app Remote DJ view (dj.html) when its session is transferred to or pulled by a peer.</summary>
+        [ObservableProperty]
+        public partial bool AutoSwitchToRemoteDjOnHandoff { get; set; } = true;
+
+        partial void OnAutoSwitchToRemoteDjOnHandoffChanged(bool value)
+        {
+            if (_isInitializing) return;
+            QueueSaveSettings();
+        }
 
         partial void OnShowEstimatedWaitTimeChanged(bool value)
         {
@@ -1056,6 +1069,7 @@ namespace KSRotation.ViewModels
             SessionStopTime = string.IsNullOrWhiteSpace(settings.SessionStopTime) ? "2:00 AM" : settings.SessionStopTime;
             EnableLastRequestTime = settings.EnableLastRequestTime;
             LastRequestTime = string.IsNullOrWhiteSpace(settings.LastRequestTime) ? "1:30 AM" : settings.LastRequestTime;
+            AutoSwitchToRemoteDjOnHandoff = settings.AutoSwitchToRemoteDjOnHandoff;
             _displayWindowService.SetShowEstimatedWaitTime(ShowEstimatedWaitTime);
             _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
             SelectedProjectionView = "Normal List";
@@ -2840,7 +2854,8 @@ namespace KSRotation.ViewModels
                 SessionStartTime = SessionStartTime,
                 SessionStopTime = SessionStopTime,
                 EnableLastRequestTime = EnableLastRequestTime,
-                LastRequestTime = LastRequestTime
+                LastRequestTime = LastRequestTime,
+                AutoSwitchToRemoteDjOnHandoff = AutoSwitchToRemoteDjOnHandoff
             };
 
             try

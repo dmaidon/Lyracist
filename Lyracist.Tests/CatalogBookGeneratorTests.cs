@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 17:49:00 -> Add documentation update test for seamless bidirectional device switching and session handoff
+// Edited on Sep 20, 2026 @ 06:38:30 -> Add documentation update test for automated transition to in-app Remote DJ view on handoff
 using System;
 using System.IO;
 using Xunit;
@@ -1996,6 +1996,128 @@ Section: Seamless Bidirectional Device Switching & Session Handoff (Updated Sep 
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " SeamlessDeviceSwitchingHandoff";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForAutoRemoteDjHandoff()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Automated Transition to In-App Remote DJ Controller on Handoff (Updated Sep 20, 2026)
+- Automatic Tablet Remote DJ Transition: When the host arrives and pulls an active karaoke session from the DJ's tablet using KSRotation desktop ('Pull Session from Device'), the tablet running KSRotation.Maui automatically switches into an in-app Remote DJ View (dj.html).
+- Complete In-App Experience: The DJ remains inside the native KSRotation.Maui application, where an embedded full-screen Remote DJ controller renders the live rotation, queue management tools, round checkmarks, last round toggles, and singer addition modals.
+- Automatic PIN Pre-Authentication: The desktop host securely passes its connection address, port, and DJ PIN during the handoff pull, allowing the tablet's embedded web view to authenticate automatically without requiring the DJ to re-enter credentials.
+- Top Header Controls & Standalone Exit: The in-app Remote DJ view features a dedicated header toolbar with live connection indicators, a 'Reload' button for instantaneous refreshes, and an 'Exit Remote DJ' button allowing hosts to safely return the tablet to native standalone hosting mode whenever needed.
+- Configurable Auto-Switch Setting: An 'Auto-switch to Remote DJ (dj.html) on handoff' toggle is available directly on the Switch Device dialog and within application settings (enabled by default). When disabled, the tablet prompts the DJ with an optional confirmation before transitioning.
+- Manual Remote DJ Connection: DJs can also tap the 'Connect as Remote DJ' button directly from the Switch Device dialog to connect to any active host machine on the Wi-Fi network at any time.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Automated Transition to In-App Remote DJ Controller on Handoff"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Automated Transition to In-App Remote DJ Controller on Handoff"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Automated Transition to In-App Remote DJ Controller on Handoff")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("AutoRemoteDjHandoff"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 14, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 10, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Automated Transition to In-App Remote DJ Controller on Handoff", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(40, 40, 532, 20), leftAlign);
+
+                                double yPos = 70;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    gfx.DrawString(line, bodyFont, PdfSharp.Drawing.XBrushes.Black, new PdfSharp.Drawing.XRect(40, yPos, 532, 15), leftAlign);
+                                    yPos += 15;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " AutoRemoteDjHandoff";
                                 doc.Save(pdfPath);
                             }
                         }

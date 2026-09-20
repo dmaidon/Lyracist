@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 18:07:00 -> Disambiguate WPF types (Clipboard, MessageBox, Brushes) for WinForms compatibility
+// Edited on Sep 20, 2026 @ 07:12:00 -> Validate DJ PIN and auto-focus PinTextBox when selecting discovered peer
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using System;
@@ -103,6 +103,8 @@ namespace KSRotation.Windows
             {
                 HostIpTextBox.Text = peer.Host;
                 PortTextBox.Text = peer.Port.ToString();
+                PinTextBox.Focus();
+                PinTextBox.SelectAll();
             }
         }
 
@@ -123,6 +125,12 @@ namespace KSRotation.Windows
             }
 
             string pin = PinTextBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(pin))
+            {
+                WpfMessageBox.Show("Please enter the 4-digit DJ PIN displayed on the source device.", "DJ PIN Required", MessageBoxButton.OK, MessageBoxImage.Warning);
+                PinTextBox.Focus();
+                return;
+            }
 
             var confirm = WpfMessageBox.Show(
                 $"Importing session from {host}:{port} will replace the current singer rotation and history on this device.\n\nDo you want to proceed?",

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add Special Singer badge, checkbox, and toggle button to remote DJ board -->
+<!-- Edited on Sep 20, 2026 @ 06:34:00 -> Support auto PIN login via URL query parameter for seamless handoff -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -823,9 +823,19 @@
 
     <script>
                 let pollInterval = null;
-                // Auto-check PIN in sessionStorage on page load
+                // Auto-check PIN in query string or sessionStorage on page load
                 window.addEventListener('load', () => {
                     updateThemeToggleLabel();
+
+                    try {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const queryPin = urlParams.get('pin');
+                        if (queryPin) {
+                            sessionStorage.setItem("dj_pin", queryPin);
+                        }
+                    } catch (e) {
+                        console.warn("Could not parse query parameters", e);
+                    }
 
                     const savedPin = sessionStorage.getItem("dj_pin");
                     if (savedPin) {

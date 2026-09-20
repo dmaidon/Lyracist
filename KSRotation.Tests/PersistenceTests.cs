@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 18:09:00 -> Add unit test for SessionHandoffPayload serialization round-trip
+// Edited on Sep 20, 2026 @ 06:37:45 -> Add unit test for AutoSwitchToRemoteDjOnHandoff setting in PersistenceTests
 using KSRotation.Models;
 using KSRotation.Services;
 
@@ -175,5 +175,15 @@ public class PersistenceTests
         var restoredReq = Assert.Single(restored.IncomingRequests);
         Assert.Equal("Charlie", restoredReq.Name);
         Assert.Equal("Wonderwall", restoredReq.Song);
+    }
+
+    [Fact]
+    public void AppSettings_AutoSwitchToRemoteDjOnHandoff_DefaultsToTrue()
+    {
+        var settings = new AppSettings();
+        Assert.True(settings.AutoSwitchToRemoteDjOnHandoff);
+
+        var toggled = settings with { AutoSwitchToRemoteDjOnHandoff = false };
+        Assert.False(toggled.AutoSwitchToRemoteDjOnHandoff);
     }
 }

@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 17:45:00 -> Add session handoff endpoints and probe API for device switching
+// Edited on Sep 20, 2026 @ 07:11:00 -> Fix Content-Length byte count in SendUnauthorizedAsync and add FlushAsync to all HTTP responses
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,7 +33,8 @@ namespace KSRotation.Services
         Action<string, double, double>? onVenueLocationSynced = null,
         Func<SessionHandoffPayload>? onExportSession = null,
         Func<SessionHandoffPayload, Task<string?>>? onImportSession = null,
-        Func<DiscoveredPeer>? onGetProbeInfo = null)
+        Func<DiscoveredPeer>? onGetProbeInfo = null,
+        Action<string, int, string>? onSessionExportedToPeer = null)
     {
         private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
         private const int MaxAvatarImageBytes = 2_097_152; // 2 MB - a profile avatar has no business being larger
@@ -62,6 +63,7 @@ namespace KSRotation.Services
         private readonly Func<SessionHandoffPayload>? _onExportSession = onExportSession;
         private readonly Func<SessionHandoffPayload, Task<string?>>? _onImportSession = onImportSession;
         private readonly Func<DiscoveredPeer>? _onGetProbeInfo = onGetProbeInfo;
+        private readonly Action<string, int, string>? _onSessionExportedToPeer = onSessionExportedToPeer;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
 
         // Serializes the /api/singer/login check-then-write sequence (find-by-name, then insert or
@@ -219,6 +221,7 @@ namespace KSRotation.Services
                     string rawPath = parts[1];
                     string path = rawPath;
                     string queryPin = "";
+                    var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                     int qIdx = rawPath.IndexOf('?');
                     if (qIdx >= 0)
                     {
@@ -227,9 +230,15 @@ namespace KSRotation.Services
                         foreach (string param in query.Split('&'))
                         {
                             string[] kv = param.Split('=');
-                            if (kv.Length == 2 && kv[0].Equals("pin", StringComparison.OrdinalIgnoreCase))
+                            if (kv.Length == 2)
                             {
-                                queryPin = WebUtility.UrlDecode(kv[1]);
+                                string decodedKey = WebUtility.UrlDecode(kv[0]);
+                                string decodedVal = WebUtility.UrlDecode(kv[1]);
+                                queryParams[decodedKey] = decodedVal;
+                                if (decodedKey.Equals("pin", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    queryPin = decodedVal;
+                                }
                             }
                         }
                     }
@@ -274,6 +283,37 @@ namespace KSRotation.Services
                         else if (path == "/handoff" || path == "/handoff.html" || path == "/switch")
                         {
                             await SendHtmlResponseAsync(stream, GetHandoffHtmlContent());
+                        }
+                        else if (path.StartsWith("/api/session/handoff/ack", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Called by the peer only after it has successfully imported the payload
+                            // from the /api/session/handoff response below - this is what actually
+                            // signals a completed handoff, not the mere sending of the export. The
+                            // pin is re-checked (not just trusted from the earlier request) so this
+                            // endpoint can't be used to spoof a handoff notification on its own. The
+                            // peer's address is taken from the live TCP connection (clientIp), not
+                            // from a caller-supplied query value, so this can't be used to redirect
+                            // the exporting device's UI to an arbitrary host.
+                            if (!TryAuthorizeDj(clientIp, pin, out bool ackLockedOut))
+                            {
+                                if (ackLockedOut)
+                                {
+                                    await SendTooManyRequestsAsync(stream);
+                                }
+                                else
+                                {
+                                    await SendUnauthorizedAsync(stream);
+                                }
+                                return;
+                            }
+
+                            int ackPeerPort = queryParams.TryGetValue("hostPort", out var ahpStr) && int.TryParse(ahpStr, out int ahp) && ahp is > 0 and <= 65535
+                                ? ahp
+                                : 5000;
+                            string ackPeerPin = queryParams.TryGetValue("djPin", out var adPin) ? adPin : string.Empty;
+                            _onSessionExportedToPeer?.Invoke(clientIp, ackPeerPort, ackPeerPin);
+
+                            await SendJsonResponseAsync(stream, "{\"ok\":true}");
                         }
                         else if (path.StartsWith("/api/session/handoff", StringComparison.OrdinalIgnoreCase))
                         {
@@ -1008,6 +1048,7 @@ namespace KSRotation.Services
                 "Connection: close\r\n\r\n" +
                 html);
             await stream.WriteAsync(responseBytes);
+            await stream.FlushAsync();
         }
 
         private static async Task SendJsonResponseAsync(NetworkStream stream, string json)
@@ -1020,6 +1061,7 @@ namespace KSRotation.Services
                 "Connection: close\r\n\r\n" +
                 json);
             await stream.WriteAsync(responseBytes);
+            await stream.FlushAsync();
         }
 
         private static async Task SendImageResponseAsync(NetworkStream stream, byte[] imageBytes, string contentType = "image/png")
@@ -1033,6 +1075,7 @@ namespace KSRotation.Services
                 "Connection: close\r\n\r\n");
             await stream.WriteAsync(headerBytes);
             await stream.WriteAsync(imageBytes);
+            await stream.FlushAsync();
         }
 
         private static string ParseQueryParam(string url, string paramName)
@@ -1060,23 +1103,27 @@ namespace KSRotation.Services
                 "Access-Control-Allow-Headers: Content-Type, X-DJ-PIN\r\n" +
                 "Connection: close\r\n\r\n");
             await stream.WriteAsync(responseBytes);
+            await stream.FlushAsync();
         }
 
         private static async Task SendNotFoundAsync(NetworkStream stream)
         {
             byte[] responseBytes = Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
             await stream.WriteAsync(responseBytes);
+            await stream.FlushAsync();
         }
 
         private static async Task SendUnauthorizedAsync(NetworkStream stream)
         {
+            const string json = "{\"error\":\"Unauthorized\"}";
             byte[] responseBytes = Encoding.UTF8.GetBytes(
                 "HTTP/1.1 401 Unauthorized\r\n" +
                 "Content-Type: application/json; charset=utf-8\r\n" +
-                "Content-Length: 25\r\n" +
+                $"Content-Length: {Encoding.UTF8.GetByteCount(json)}\r\n" +
                 "Connection: close\r\n\r\n" +
-                "{\"error\":\"Unauthorized\"}");
+                json);
             await stream.WriteAsync(responseBytes);
+            await stream.FlushAsync();
         }
 
         private static async Task SendTooManyRequestsAsync(NetworkStream stream)
@@ -1089,6 +1136,7 @@ namespace KSRotation.Services
                 "Connection: close\r\n\r\n" +
                 json);
             await stream.WriteAsync(responseBytes);
+            await stream.FlushAsync();
         }
 
         private static async Task SendRedirectResponseAsync(NetworkStream stream, string redirectUrl)
@@ -1272,6 +1320,7 @@ namespace KSRotation.Services
                 "Connection: close\r\n\r\n" +
                 jsonError);
             await stream.WriteAsync(responseBytes);
+            await stream.FlushAsync();
         }
 
         private static string ParseHeader(string[] headerLines, string headerName)

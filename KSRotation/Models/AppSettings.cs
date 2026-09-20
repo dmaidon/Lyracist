@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 11:15:30 -> Add ListDjAndVenueOnBillboard property to AppSettings
+// Edited on Sep 20, 2026 @ 06:34:30 -> Add AutoSwitchToRemoteDjOnHandoff property to AppSettings
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -110,6 +110,9 @@ namespace KSRotation.Models
 
         /// <summary>Cutoff time for receiving new song requests (e.g. "1:30 AM" or "01:30").</summary>
         public string LastRequestTime { get; init; } = "1:30 AM";
+
+        /// <summary>When true, this device automatically switches to the in-app Remote DJ view (dj.html) when its session is transferred to or pulled by a peer.</summary>
+        public bool AutoSwitchToRemoteDjOnHandoff { get; init; } = true;
     }
 }
 

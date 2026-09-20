@@ -1,4 +1,4 @@
-<!-- Edited on Sep 19, 2026 @ 17:56:00 -> Add Switch Device button to patron/DJ portal card -->
+<!-- Edited on Sep 20, 2026 @ 06:23:00 -> Move Switch Device and Kiosk buttons to dedicated row below portal title -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -1190,56 +1190,55 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                    <Grid Margin="0,0,0,4">
-                                        <TextBlock FontWeight="Bold"
-                                                    FontSize="11"
-                                                    Cursor="Hand"
-                                                    VerticalAlignment="Center"
-                                                    ToolTip="Click to toggle DJ/Patron QR code mode"
-                                                    PreviewMouseLeftButtonDown="OnPortalTitleClicked">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="PATRON WEB PORTAL" />
-                                                    <Setter Property="Foreground" Value="{DynamicResource AppHeaderBrush}" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
-                                                            <Setter Property="Text" Value="⚠️ DJ CONTROL PORTAL" />
-                                                            <Setter Property="Foreground" Value="#EF4444" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                                                    Padding="6,1"
-                                                    Height="20"
-                                                    BorderThickness="0.8"
-                                                    BorderBrush="#10B981"
-                                                    Foreground="#10B981"
-                                                    Click="OnDeviceHandoffButtonClicked"
-                                                    ToolTip="Switch Device / Transfer Session between Laptop and Tablet"
-                                                    Margin="0,0,6,0">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <materialDesign:PackIcon Kind="SwapHorizontalBold" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0" />
-                                                    <TextBlock Text="Switch Device" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
-                                                </StackPanel>
-                                            </Button>
-                                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                                                    Padding="6,1"
-                                                    Height="20"
-                                                    BorderThickness="0.8"
-                                                    BorderBrush="#8B5CF6"
-                                                    Foreground="#8B5CF6"
-                                                    Click="OnKioskQrCodeButtonClicked"
-                                                    ToolTip="Open Tablet Kiosk QR Code and Link">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <materialDesign:PackIcon Kind="Tablet" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0" />
-                                                    <TextBlock Text="Kiosk" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
-                                                </StackPanel>
-                                            </Button>
-                                        </StackPanel>
-                                    </Grid>
+                                    <TextBlock FontWeight="Bold"
+                                               FontSize="11"
+                                               Cursor="Hand"
+                                               VerticalAlignment="Center"
+                                               ToolTip="Click to toggle DJ/Patron QR code mode"
+                                               PreviewMouseLeftButtonDown="OnPortalTitleClicked"
+                                               Margin="0,0,0,4">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="PATRON WEB PORTAL" />
+                                                <Setter Property="Foreground" Value="{DynamicResource AppHeaderBrush}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDjQrVisible}" Value="True">
+                                                        <Setter Property="Text" Value="⚠️ DJ CONTROL PORTAL" />
+                                                        <Setter Property="Foreground" Value="#EF4444" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                Padding="6,1"
+                                                Height="20"
+                                                BorderThickness="0.8"
+                                                BorderBrush="#10B981"
+                                                Foreground="#10B981"
+                                                Click="OnDeviceHandoffButtonClicked"
+                                                ToolTip="Switch Device / Transfer Session between Laptop and Tablet"
+                                                Margin="0,0,6,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="SwapHorizontalBold" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0" />
+                                                <TextBlock Text="Switch Device" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                Padding="6,1"
+                                                Height="20"
+                                                BorderThickness="0.8"
+                                                BorderBrush="#8B5CF6"
+                                                Foreground="#8B5CF6"
+                                                Click="OnKioskQrCodeButtonClicked"
+                                                ToolTip="Open Tablet Kiosk QR Code and Link">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="Tablet" Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0" />
+                                                <TextBlock Text="Kiosk" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
                                     <TextBlock FontSize="11"
                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
                                                 Margin="0,0,0,4">

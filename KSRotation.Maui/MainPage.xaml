@@ -1,4 +1,4 @@
-<!-- Edited on Sep 19, 2026 @ 17:58:00 -> Add Switch Device button and SwitchDeviceOverlay in MainPage.xaml -->
+<!-- Edited on Sep 20, 2026 @ 06:36:30 -> Add RemoteDjOverlay and AutoSwitchToRemoteDjOnHandoff checkbox in MainPage.xaml -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -1090,7 +1090,7 @@
                                 <Grid ColumnDefinitions="2*, *">
                                     <VerticalStackLayout Grid.Column="0" Spacing="2" Margin="0,0,4,0">
                                         <Label Text="Host IP Address" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}"/>
-                                        <Entry x:Name="HandoffHostEntry" Text="192.168.1." FontSize="12" HeightRequest="36" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E293B}"/>
+                                        <Entry x:Name="HandoffHostEntry" Text="192.168.1." FontSize="12" HeightRequest="36" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E293B}" TextChanged="OnHandoffHostEntryTextChanged"/>
                                     </VerticalStackLayout>
                                     <VerticalStackLayout Grid.Column="1" Spacing="2">
                                         <Label Text="DJ PIN" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}"/>
@@ -1099,7 +1099,10 @@
                                 </Grid>
                             </VerticalStackLayout>
 
-                            <Button Text="📥 Import &amp; Take Over Session" Clicked="OnExecutePullSessionClicked" BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" FontSize="12" HeightRequest="38" CornerRadius="8"/>
+                            <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+                                <Button Grid.Column="0" Text="📥 Import Session" Clicked="OnExecutePullSessionClicked" BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" FontSize="11" HeightRequest="38" CornerRadius="8"/>
+                                <Button Grid.Column="1" Text="🎧 Remote DJ" Clicked="OnConnectAsRemoteDjClicked" BackgroundColor="#8B5CF6" TextColor="White" FontAttributes="Bold" FontSize="11" HeightRequest="38" CornerRadius="8"/>
+                            </Grid>
                         </VerticalStackLayout>
 
                         <!-- SEND PANEL (Tablet -> Laptop) -->
@@ -1119,10 +1122,39 @@
                         </VerticalStackLayout>
                     </Grid>
 
-                    <!-- Footer Close Button -->
-                    <Button Grid.Row="3" Text="Close" Clicked="OnCloseSwitchDeviceClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="12" HeightRequest="36" CornerRadius="6" HorizontalOptions="Center" WidthRequest="120" Margin="0,4,0,0"/>
+                    <!-- Auto-Switch Checkbox & Footer Close Button -->
+                    <VerticalStackLayout Grid.Row="3" Spacing="6" HorizontalOptions="Center" Margin="0,4,0,0">
+                        <HorizontalStackLayout Spacing="6" HorizontalOptions="Center">
+                            <CheckBox IsChecked="{Binding AutoSwitchToRemoteDjOnHandoff}" Color="#8B5CF6" Scale="0.8" VerticalOptions="Center"/>
+                            <Label Text="Auto-switch to Remote DJ (dj.html) on handoff" FontSize="11" TextColor="{AppThemeBinding Light=#475569, Dark=#94A3B8}" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                        <Button Text="Close" Clicked="OnCloseSwitchDeviceClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#CBD5E1, Dark=#4B5563}" BorderWidth="1" TextColor="{AppThemeBinding Light=#475569, Dark=White}" FontSize="12" HeightRequest="36" CornerRadius="6" HorizontalOptions="Center" WidthRequest="120"/>
+                    </VerticalStackLayout>
                 </Grid>
             </Border>
+        </Grid>
+
+        <!-- IN-APP EMBEDDED REMOTE DJ (dj.html) OVERLAY -->
+        <Grid x:Name="RemoteDjOverlay" Grid.Column="0" Grid.ColumnSpan="2" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#0B0F19}" IsVisible="False" ZIndex="250">
+            <Grid RowDefinitions="Auto, *">
+                <!-- Header Toolbar -->
+                <Border Grid.Row="0" BackgroundColor="{AppThemeBinding Light=#EDE9FE, Dark=#151D2A}" Stroke="{AppThemeBinding Light=#DDD6FE, Dark=#243247}" StrokeThickness="1" Padding="12,8">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                            <Label Text="🎧 REMOTE DJ CONTROLLER" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.2" VerticalOptions="Center"/>
+                            <Label x:Name="RemoteDjHostLabel" Text="Connected to Laptop" TextColor="{AppThemeBinding Light=#64748B, Dark=#94A3B8}" FontSize="11" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center">
+                            <Button Text="🔄 Reload" Clicked="OnRefreshRemoteDjClicked" BackgroundColor="{AppThemeBinding Light=#EDE9FE, Dark=#312E81}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="11" FontAttributes="Bold" HeightRequest="30" Padding="10,0" CornerRadius="6"/>
+                            <Button Text="Exit Remote DJ" Clicked="OnExitRemoteDjClicked" BackgroundColor="Transparent" BorderColor="#EF4444" BorderWidth="1" TextColor="#EF4444" FontSize="11" FontAttributes="Bold" HeightRequest="30" Padding="10,0" CornerRadius="6"/>
+                        </HorizontalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Embedded WebView -->
+                <WebView x:Name="RemoteDjWebView" Grid.Row="1" HorizontalOptions="Fill" VerticalOptions="Fill"/>
+            </Grid>
         </Grid>
     </Grid>
 </ContentPage>

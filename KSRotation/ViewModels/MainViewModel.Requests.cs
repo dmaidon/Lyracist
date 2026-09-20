@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 19:20:00 -> Require confirmation on handoff import, drop unused push path, share LAN probe HttpClient
+// Edited on Sep 20, 2026 @ 07:14:00 -> Validate DJ PIN and refine error responses in PullSessionFromHostAsync
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -229,7 +229,8 @@ namespace KSRotation.ViewModels
                         OnVenueLocationSyncedFromPeer,
                         ExportSessionHandoffPayload,
                         payload => ImportSessionHandoffPayloadAsync(payload),
-                        GetDiscoveredPeerInfo);
+                        GetDiscoveredPeerInfo,
+                        OnSessionExportedToPeer);
                     _requestServer.Start();
                     activePort = p;
                     started = true;
@@ -987,17 +988,30 @@ namespace KSRotation.ViewModels
                 return (false, "Host address cannot be empty.");
             }
 
+            if (string.IsNullOrWhiteSpace(pin))
+            {
+                return (false, "DJ PIN is required.");
+            }
+
             try
             {
                 using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
                 client.DefaultRequestHeaders.Add("X-DJ-PIN", pin ?? string.Empty);
+
+                int localPort = _activeServerPort > 0 ? _activeServerPort : ServerPort;
+                string localPin = DjPin ?? string.Empty;
+
                 string url = $"http://{host.Trim()}:{port}/api/session/handoff?pin={Uri.EscapeDataString(pin ?? string.Empty)}";
                 var response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     if (response.StatusCode == HttpStatusCode.Unauthorized)
                     {
-                        return (false, "Unauthorized: Incorrect DJ PIN.");
+                        return (false, "Unauthorized: Incorrect or missing DJ PIN.");
+                    }
+                    if (response.StatusCode == (HttpStatusCode)429)
+                    {
+                        return (false, "Too many PIN attempts. Please wait 1 minute before trying again.");
                     }
                     return (false, $"Server returned error: {response.StatusCode}");
                 }
@@ -1016,6 +1030,22 @@ namespace KSRotation.ViewModels
                 {
                     return (false, importError);
                 }
+
+                // Only now that the import has actually succeeded locally do we tell the source
+                // device the handoff is complete - that's what drives its auto-switch into Remote
+                // DJ mode, so firing it any earlier (e.g. right after the export GET above) could
+                // leave the source device switched away from its own host UI even though this
+                // device never actually took over the session.
+                try
+                {
+                    string ackUrl = $"http://{host.Trim()}:{port}/api/session/handoff/ack?pin={Uri.EscapeDataString(pin ?? string.Empty)}&hostPort={localPort}&djPin={Uri.EscapeDataString(localPin)}";
+                    await client.GetAsync(ackUrl);
+                }
+                catch (Exception ackEx)
+                {
+                    LoggerService.LogError("MainViewModel.PullSessionFromHostAsync.Ack", ackEx);
+                }
+
                 return (true, null);
             }
             catch (Exception ex)
@@ -1023,6 +1053,11 @@ namespace KSRotation.ViewModels
                 LoggerService.LogError("MainViewModel.PullSessionFromHostAsync", ex);
                 return (false, ex.Message);
             }
+        }
+
+        private void OnSessionExportedToPeer(string peerHost, int peerPort, string peerPin)
+        {
+            SessionHandedOffToPeer?.Invoke(peerHost, peerPort, peerPin);
         }
 
         public async Task DiscoverPeersOnLanAsync()
