@@ -1,4 +1,4 @@
-// Edited on Sep 20, 2026 @ 06:35:30 -> Add SessionHandedOffToPeer and AutoSwitchToRemoteDjOnHandoff to MainViewModel
+// Edited on Sep 20, 2026 @ 08:05:00 -> Add Device Switching & Live Handoff topic to HelpTopics
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -832,11 +832,11 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial string SelectedHelpTopic { get; set; } = "🚀 Getting Started";
 
-// Edited on Aug 17, 2026 @ 16:18:00 -> Add Trivia Night Pro topic to HelpTopics
         public List<string> HelpTopics { get; } =
         [
             "🚀 Getting Started",
             "🎤 Rotation Management",
+            "🔄 Device Switching & Live Handoff",
             "📺 Display Projection",
             "⚙️ Settings & Venues",
             "📺 Display & DJ Banners",

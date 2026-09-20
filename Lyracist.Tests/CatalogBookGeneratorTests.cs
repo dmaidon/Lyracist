@@ -1,4 +1,4 @@
-// Edited on Sep 20, 2026 @ 06:38:30 -> Add documentation update test for automated transition to in-app Remote DJ view on handoff
+// Edited on Sep 20, 2026 @ 08:08:00 -> Add documentation update test for Device Handoff flow diagram, Kiosk station, and TV billboard
 using System;
 using System.IO;
 using Xunit;
@@ -2118,6 +2118,192 @@ Section: Automated Transition to In-App Remote DJ Controller on Handoff (Updated
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " AutoRemoteDjHandoff";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForDeviceHandoffAndFlowDiagram()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string flowDiagram =
+@"[Architectural Flow: Live Session Handoff & Remote DJ Takeover]
++------------------------------------------------------------------------+
+|        ARCHITECTURAL FLOW: LIVE SESSION HANDOFF & REMOTE DJ TAKEOVER   |
++------------------------------------------------------------------------+
+
+    DJ (Tablet: KSRotation.Maui)             KJ Host (Laptop: KSRotation)
+    +---------------------------+           +----------------------------+
+    | Active rotation on tablet |           | Arrives at venue & opens   |
+    | Serves requests & portal  |           | 'Switch Device' on laptop  |
+    +-------------+-------------+           +--------------+-------------+
+                  |                                        |
+                  |                                 [1] Wi-Fi Scan or IP
+                  |                                     Selects tablet
+                  |                                        |
+                  |<------- 1. GET /api/session/handoff ---+
+                  |         (Sends Laptop IP, Port & PIN)  |
+                  |                                        |
+                  +------- 2. 200 OK + Full Session JSON ->|
+                  |        (Queue, Checkmarks, History)    |
+                  |                                 [2] Imports session
+                  |                                     Takes over host
+                  |                                        |
+  [3] Auto-switches to in-app                             |
+      Remote DJ (dj.html)                                  |
+      Pre-authenticated with PIN                           |
+                  |                                        |
+  [4] DJ manages show from floor via embedded tablet UI    |
+      =====================================================+===============
+      Seamless bi-directional synchronization over venue Wi-Fi!";
+
+                string updateText = @"
+Section: Device Switching, Live Session Handoff & Architecture Flow (Updated Sep 20, 2026)
+
+" + flowDiagram + @"
+
+[Key Capabilities & Workflow]
+1. Zero-Beat Live Session Migration:
+   - Completely transfers active queue, current performer, up-next performer, rotation start anchor, round checkmarks (1-10), tonight's performance history with original timestamps, pending patron requests, and venue/DJ branding between laptop and tablet.
+2. Automated In-App Remote DJ Transition:
+   - When the host laptop takes over, the DJ's tablet automatically transitions into an embedded full-screen Remote DJ controller (dj.html), pre-authenticated with the host's credentials so the DJ can immediately manage queue order and mark songs finished from the floor.
+3. One-Tap Wi-Fi Auto-Discovery:
+   - Sweeps the venue subnet in 1 second to detect active instances on port 5000. Selecting a discovered peer auto-populates the host IP and port, and focuses the DJ PIN field for instant entry.
+4. Dedicated Switch Device QR Code & Deep Linking:
+   - Generating a QR code to /handoff allows instant camera scanning, opening a mobile landing page with a 1-tap 'Open in KSRotation MAUI' deep link (ksrotation://handoff).
+5. Dedicated Kiosk Request Station (kiosk.html):
+   - Mount an Android or iOS tablet in landscape mode at the bar or near the stage. When idle, an attractive attractor screen greets patrons, inviting them to search songs and submit requests directly into the DJ's approval queue.
+6. Audience Billboard & Chromecast Web-Casting (billboard.html):
+   - Stream the live audience billboard directly to Google Cast / Chromecast displays from KSRotation.Maui, featuring a dedicated full-height rotation column and side-by-side QR codes.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Device Switching, Live Session Handoff & Architecture Flow"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Device Switching, Live Session Handoff & Architecture Flow"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Device Switching, Live Session Handoff & Architecture Flow")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        bool isDiagramLine = line.Contains("+--") || line.Contains("|") || line.Contains("===") || line.Contains("-->");
+                                        var runProps = new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = isDiagramLine ? "18" : "22" }
+                                        );
+                                        if (isDiagramLine)
+                                        {
+                                            runProps.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.RunFonts() { Ascii = "Courier New", HighAnsi = "Courier New" });
+                                        }
+
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                runProps,
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("DeviceHandoffFlowArch"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XFont monoFont = new PdfSharp.Drawing.XFont("Arial", 7.5, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Device Switching, Live Session Handoff & Architecture Flow", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
+
+                                double yPos = 58;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    bool isDiagram = line.Contains("+--") || line.Contains("|") || line.Contains("===") || line.Contains("-->");
+                                    var font = isDiagram ? monoFont : bodyFont;
+                                    var brush = isDiagram ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
+                                    double lineHeight = isDiagram ? 9.5 : 12;
+
+                                    if (yPos + lineHeight > 750)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.Letter;
+                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                        yPos = 36;
+                                    }
+
+                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
+                                    yPos += lineHeight;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " DeviceHandoffFlowArch";
                                 doc.Save(pdfPath);
                             }
                         }

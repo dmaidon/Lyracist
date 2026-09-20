@@ -1,4 +1,4 @@
-<!-- Edited on Sep 20, 2026 @ 06:23:00 -> Move Switch Device and Kiosk buttons to dedicated row below portal title -->
+<!-- Edited on Sep 20, 2026 @ 08:06:00 -> Add Device Switching & Live Handoff Help topic panel with architectural flow diagram -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -3775,7 +3775,104 @@
                                 </Border>
                             </StackPanel>
 
-                            <!-- Topic 3: Display Projection -->
+                            <!-- Topic 3: Device Switching & Live Handoff -->
+                            <StackPanel x:Name="DeviceHandoffPanel">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="🔄 Device Switching &amp; Live Handoff">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Device Switching &amp; Live Session Handoff" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="Seamlessly migrate an ongoing karaoke show between a Windows laptop (KSRotation) and a mobile tablet (KSRotation.Maui on Android or Windows) without losing singer positions, completed rounds, or performance history."
+                                           FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16" LineHeight="20" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                <!-- Architectural Flow Graphic / Diagram Card -->
+                                <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource PrimaryHueMidBrush}" BorderThickness="2" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <TextBlock Text="📐 Architectural Flow: Live Session Handoff &amp; Remote DJ Takeover" FontWeight="Bold" FontSize="16" Margin="0,0,0,12" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <Border Background="#1E1E2E" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                                            <TextBlock FontFamily="Consolas, Cascadia Code, Courier New" FontSize="12" Foreground="#89DDFF" TextWrapping="NoWrap" LineHeight="18">
+                                                <Run Text="┌────────────────────────────────────────────────────────────────────────┐&#x0a;" />
+                                                <Run Text="│        ARCHITECTURAL FLOW: LIVE SESSION HANDOFF &amp; REMOTE DJ TAKEOVER   │&#x0a;" />
+                                                <Run Text="└────────────────────────────────────────────────────────────────────────┘&#x0a;&#x0a;" />
+                                                <Run Foreground="#C792EA" Text="    DJ (Tablet: KSRotation.Maui)             KJ Host (Laptop: KSRotation)&#x0a;" />
+                                                <Run Foreground="#C792EA" Text="    ┌───────────────────────────┐           ┌────────────────────────────┐&#x0a;" />
+                                                <Run Foreground="#C792EA" Text="    │ Active rotation on tablet │           │ Arrives at venue &amp; opens   │&#x0a;" />
+                                                <Run Foreground="#C792EA" Text="    │ Serves requests &amp; portal  │           │ 'Switch Device' on laptop  │&#x0a;" />
+                                                <Run Foreground="#C792EA" Text="    └─────────────┬─────────────┘           └──────────────┬─────────────┘&#x0a;" />
+                                                <Run Text="                  │                                        │&#x0a;" />
+                                                <Run Foreground="#82AAFF" Text="                  │                                 [1] Wi-Fi Scan or IP&#x0a;" />
+                                                <Run Foreground="#82AAFF" Text="                  │                                     Selects tablet&#x0a;" />
+                                                <Run Text="                  │                                        │&#x0a;" />
+                                                <Run Foreground="#FFCB6B" Text="                  │&lt;─────── 1. GET /api/session/handoff ───┤&#x0a;" />
+                                                <Run Foreground="#FFCB6B" Text="                  │         (Sends Laptop IP, Port &amp; PIN)  │&#x0a;" />
+                                                <Run Text="                  │                                        │&#x0a;" />
+                                                <Run Foreground="#C3E88D" Text="                  ├─────── 2. 200 OK + Full Session JSON ─&gt;│&#x0a;" />
+                                                <Run Foreground="#C3E88D" Text="                  │        (Queue, Checkmarks, History)    │&#x0a;" />
+                                                <Run Text="                  │                                        │&#x0a;" />
+                                                <Run Foreground="#82AAFF" Text="                  │                                 [2] Imports session&#x0a;" />
+                                                <Run Foreground="#82AAFF" Text="                  │                                     Takes over host&#x0a;" />
+                                                <Run Text="                  │                                        │&#x0a;" />
+                                                <Run Foreground="#F78C6C" Text="  [3] Auto-switches to in-app                             │&#x0a;" />
+                                                <Run Foreground="#F78C6C" Text="      Remote DJ (dj.html)                                  │&#x0a;" />
+                                                <Run Foreground="#F78C6C" Text="      Pre-authenticated with PIN                           │&#x0a;" />
+                                                <Run Text="                  │                                        │&#x0a;" />
+                                                <Run Foreground="#C3E88D" Text="  [4] DJ manages show from floor via embedded tablet UI    │&#x0a;" />
+                                                <Run Foreground="#89DDFF" Text="      ═════════════════════════════════════════════════════╪═══════════════&#x0a;" />
+                                                <Run Foreground="#89DDFF" Text="      Seamless bi-directional synchronization over venue Wi-Fi!&#x0a;" />
+                                            </TextBlock>
+                                        </Border>
+                                        <TextBlock Text="The entire handoff process executes in under 2 seconds, migrating all live singers, historical data, and patron requests without skipping a beat."
+                                                   FontSize="12" FontStyle="Italic" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Key Features List -->
+                                <TextBlock Text="Key Capabilities &amp; Workflow" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" Foreground="{DynamicResource AppHeaderBrush}" />
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="Zero-Beat Live Migration: Migrates the entire active queue, current singer, up-next singer, rotation start anchor, round checkmarks (rounds 1-10), tonight's performance history with original timestamps, pending patron requests, and venue/DJ branding." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="Automated In-App Remote DJ Transition: When the laptop pulls the session, the tablet automatically flips into an embedded full-screen Remote DJ controller (dj.html). The tablet securely receives the laptop's IP, port, and DJ PIN, auto-authenticating so the DJ never leaves the app." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="1-Click Wi-Fi Discovery: The 'Scan Wi-Fi' feature sweeps the local venue subnet in 1 second to find running instances on port 5000. Selecting a discovered peer auto-populates the host address and focuses the DJ PIN field for instant entry." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="Deep Linking &amp; QR Portal: A dedicated Switch Device QR code points to http://&lt;ip&gt;:5000/handoff. Scanning with a mobile camera opens a themed portal with a 1-tap 'Open in KSRotation MAUI' deep link (ksrotation://handoff)." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="Kiosk Request Station (kiosk.html): Mount an Android/iPad tablet at the bar or near the stage in landscape mode. When idle, an attractive attractor screen greets patrons, inviting them to search songs and submit requests directly." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="Chromecast TV Billboard (billboard.html): Stream the live stage billboard to Google Cast / Chromecast displays directly from KSRotation.Maui, featuring a dedicated full-height rotation queue and side-by-side QR code cards." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                            </StackPanel>
+
+                            <!-- Topic 4: Display Projection -->
                             <StackPanel x:Name="DisplayPanel">
                                 <StackPanel.Style>
                                     <Style TargetType="StackPanel">

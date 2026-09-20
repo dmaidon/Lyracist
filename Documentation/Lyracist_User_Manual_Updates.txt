@@ -1958,3 +1958,49 @@ Section: Automated Transition to In-App Remote DJ Controller on Handoff (Updated
 - Top Header Controls & Standalone Exit: The in-app Remote DJ view features a dedicated header toolbar with live connection indicators, a 'Reload' button for instantaneous refreshes, and an 'Exit Remote DJ' button allowing hosts to safely return the tablet to native standalone hosting mode whenever needed.
 - Configurable Auto-Switch Setting: An 'Auto-switch to Remote DJ (dj.html) on handoff' toggle is available directly on the Switch Device dialog and within application settings (enabled by default). When disabled, the tablet prompts the DJ with an optional confirmation before transitioning.
 - Manual Remote DJ Connection: DJs can also tap the 'Connect as Remote DJ' button directly from the Switch Device dialog to connect to any active host machine on the Wi-Fi network at any time.
+
+Section: Device Switching, Live Session Handoff & Architecture Flow (Updated Sep 20, 2026)
+
+[Architectural Flow: Live Session Handoff & Remote DJ Takeover]
++------------------------------------------------------------------------+
+|        ARCHITECTURAL FLOW: LIVE SESSION HANDOFF & REMOTE DJ TAKEOVER   |
++------------------------------------------------------------------------+
+
+    DJ (Tablet: KSRotation.Maui)             KJ Host (Laptop: KSRotation)
+    +---------------------------+           +----------------------------+
+    | Active rotation on tablet |           | Arrives at venue & opens   |
+    | Serves requests & portal  |           | 'Switch Device' on laptop  |
+    +-------------+-------------+           +--------------+-------------+
+                  |                                        |
+                  |                                 [1] Wi-Fi Scan or IP
+                  |                                     Selects tablet
+                  |                                        |
+                  |<------- 1. GET /api/session/handoff ---+
+                  |         (Sends Laptop IP, Port & PIN)  |
+                  |                                        |
+                  +------- 2. 200 OK + Full Session JSON ->|
+                  |        (Queue, Checkmarks, History)    |
+                  |                                 [2] Imports session
+                  |                                     Takes over host
+                  |                                        |
+  [3] Auto-switches to in-app                             |
+      Remote DJ (dj.html)                                  |
+      Pre-authenticated with PIN                           |
+                  |                                        |
+  [4] DJ manages show from floor via embedded tablet UI    |
+      =====================================================+===============
+      Seamless bi-directional synchronization over venue Wi-Fi!
+
+[Key Capabilities & Workflow]
+1. Zero-Beat Live Session Migration:
+   - Completely transfers active queue, current performer, up-next performer, rotation start anchor, round checkmarks (1-10), tonight's performance history with original timestamps, pending patron requests, and venue/DJ branding between laptop and tablet.
+2. Automated In-App Remote DJ Transition:
+   - When the host laptop takes over, the DJ's tablet automatically transitions into an embedded full-screen Remote DJ controller (dj.html), pre-authenticated with the host's credentials so the DJ can immediately manage queue order and mark songs finished from the floor.
+3. One-Tap Wi-Fi Auto-Discovery:
+   - Sweeps the venue subnet in 1 second to detect active instances on port 5000. Selecting a discovered peer auto-populates the host IP and port, and focuses the DJ PIN field for instant entry.
+4. Dedicated Switch Device QR Code & Deep Linking:
+   - Generating a QR code to /handoff allows instant camera scanning, opening a mobile landing page with a 1-tap 'Open in KSRotation MAUI' deep link (ksrotation://handoff).
+5. Dedicated Kiosk Request Station (kiosk.html):
+   - Mount an Android or iOS tablet in landscape mode at the bar or near the stage. When idle, an attractive attractor screen greets patrons, inviting them to search songs and submit requests directly into the DJ's approval queue.
+6. Audience Billboard & Chromecast Web-Casting (billboard.html):
+   - Stream the live audience billboard directly to Google Cast / Chromecast displays from KSRotation.Maui, featuring a dedicated full-height rotation column and side-by-side QR codes.

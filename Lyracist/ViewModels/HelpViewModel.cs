@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 08:26:00 -> Update Help Topic 2 for estimated wait time recalculation on reorder
+// Edited on Sep 20, 2026 @ 08:04:00 -> Add Help Topics 27-29 for Device Handoff flow graphic, Kiosk station, and Chromecast TV billboard
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -207,6 +207,66 @@ public partial class HelpViewModel : ObservableObject
                 AccentColor = "#107C41",
                 DescriptionHeader = "Hybrid GPS & Wi-Fi Geotagging, Travel Router Immunity & Tablet GPS Sync",
                 DescriptionContent = "• Hybrid GPS & Wi-Fi Matching: Automatically identifies known performance venues using a 150-meter GPS proximity circle (calculated via Haversine spherical distance). Known venues in Settings/venues.json or ksrotation_venues.json are selected automatically on launch.\n\n• Travel Router Immunity: When using a portable travel router with a static SSID across different venues, flag the network as a 'Travel Router'. Flagged SSIDs are registered in ksrotation_travel_routers.json and excluded from Wi-Fi matching, preventing false venue detection.\n\n• Tablet-to-Laptop GPS Bridging: Laptops lacking dedicated satellite GPS hardware receive real-time peer GPS coordinates from companion Android tablets running KSRotation.Maui via POST /api/venue/location, enabling precision venue auto-location on desktop PCs.\n\n• 1-Click '📍 Tag GPS' Geotagging: Instantly bind current satellite coordinates and Wi-Fi SSID to the active venue name across Lyracist, KSRotation, and KSRotation.Maui with automatic database persistence."
+            },
+            new() {
+                Title = "27. Device Switching & Live Session Handoff",
+                Icon = "ArrowSync24",
+                AccentColor = "#3B82F6",
+                DescriptionHeader = "Zero-Beat Show Migration Between Laptop & Tablet with Automated Remote DJ Mode",
+                DescriptionContent = "• Live Show Migration: Transfer an ongoing karaoke session between a Windows laptop (KSRotation) and a mobile tablet (KSRotation.Maui on Android/Windows) without losing singer positions, completed rounds, or performance history.\n\n" +
+                                     "• Architectural Flow Diagram:\n" +
+                                     "┌────────────────────────────────────────────────────────────────────────┐\n" +
+                                     "│        ARCHITECTURAL FLOW: LIVE SESSION HANDOFF & REMOTE DJ TAKEOVER   │\n" +
+                                     "└────────────────────────────────────────────────────────────────────────┘\n\n" +
+                                     "    DJ (Tablet: KSRotation.Maui)             KJ Host (Laptop: KSRotation)\n" +
+                                     "    ┌───────────────────────────┐           ┌────────────────────────────┐\n" +
+                                     "    │ Active rotation on tablet │           │ Arrives at venue & opens   │\n" +
+                                     "    │ Serves requests & portal  │           │ 'Switch Device' on laptop  │\n" +
+                                     "    └─────────────┬─────────────┘           └──────────────┬─────────────┘\n" +
+                                     "                  │                                        │\n" +
+                                     "                  │                                 [1] Wi-Fi Scan or IP\n" +
+                                     "                  │                                     Selects tablet\n" +
+                                     "                  │                                        │\n" +
+                                     "                  │<─────── 1. GET /api/session/handoff ───┤\n" +
+                                     "                  │         (Sends Laptop IP, Port & PIN)  │\n" +
+                                     "                  │                                        │\n" +
+                                     "                  ├─────── 2. 200 OK + Full Session JSON ─>│\n" +
+                                     "                  │        (Queue, Checkmarks, History)    │\n" +
+                                     "                  │                                 [2] Imports session\n" +
+                                     "                  │                                     Takes over host\n" +
+                                     "                  │                                        │\n" +
+                                     "  [3] Auto-switches to in-app                             │\n" +
+                                     "      Remote DJ (dj.html)                                  │\n" +
+                                     "      Pre-authenticated with PIN                           │\n" +
+                                     "                  │                                        │\n" +
+                                     "  [4] DJ manages show from floor via embedded tablet UI    │\n" +
+                                     "      ═════════════════════════════════════════════════════╪═══════════════\n" +
+                                     "      Seamless bi-directional synchronization over venue Wi-Fi!\n\n" +
+                                     "• Automated In-App Remote DJ Transition: When the laptop pulls the session, the tablet automatically flips into an embedded full-screen Remote DJ controller (dj.html). The tablet securely receives the laptop's IP, port, and DJ PIN, auto-authenticating so the DJ never leaves the app.\n\n" +
+                                     "• 1-Click Wi-Fi Discovery: The 'Scan Wi-Fi' feature sweeps the local venue subnet in 1 second to find running instances on port 5000. Selecting a discovered peer auto-populates the host address and focuses the DJ PIN field for instant entry.\n\n" +
+                                     "• Complete State Preservation: Serializes active singers, current performer, on-deck singer, rotation anchor, completed checkmarks (rounds 1-10), tonight's performance history with original timestamps, pending requests, and venue/DJ branding.\n\n" +
+                                     "• Deep Linking & QR Portal: A dedicated Switch Device QR code points to http://<ip>:5000/handoff. Scanning with a mobile camera opens a themed portal with a 1-tap 'Open in KSRotation MAUI' deep link (ksrotation://handoff)."
+            },
+            new() {
+                Title = "28. Kiosk Request Station & Landscape Attractor",
+                Icon = "Tablet24",
+                AccentColor = "#10B981",
+                DescriptionHeader = "Dedicated Patron Self-Service Request Station with PWA Fullscreen Support",
+                DescriptionContent = "• Kiosk Request Portal (kiosk.html): A dedicated, landscape-optimized tablet station designed for venues where patrons walk up to a stationary tablet (e.g. at the bar or near the stage) to search the song library and submit requests.\n\n" +
+                                     "• Welcome & Attractor Screen: When idle, the kiosk displays an eye-catching animated Attractor screen inviting patrons to touch the screen to start searching.\n\n" +
+                                     "• High-Touch Search & Filters: Large, accessible on-screen touch targets, alphabetical filtering, instant keyword search, and separate Karaoke vs. Music tabs.\n\n" +
+                                     "• Direct KJ Queue Ingestion: Submitted requests stream directly into the host's Incoming Requests queue with glowing visual indicator bulbs and real-time badge counters.\n\n" +
+                                     "• PWA Fullscreen Support: Can be installed as a Progressive Web App (PWA) on Android and iOS tablets for a distraction-free, browser-chrome-free kiosk experience."
+            },
+            new() {
+                Title = "29. Audience Billboard & Chromecast Web-Casting",
+                Icon = "Tv24",
+                AccentColor = "#8B5CF6",
+                DescriptionHeader = "Full-Height Stage Rotation Column & Built-in Google Cast Streaming",
+                DescriptionContent = "• Built-in Chromecast / Google TV Casting: Directly stream the live audience billboard (billboard.html) from KSRotation.Maui on Android tablets or Windows PCs to any Chromecast or Google TV device on the network.\n\n" +
+                                     "• Full-Height Rotation Column: The upcoming singer queue occupies the entire full-height right column, ensuring performer names, song titles, and queue position numbers remain completely legible from across the room on 720p, 1080p, and 4K venue displays.\n\n" +
+                                     "• Side-by-Side QR Cards: The 'Song Requests' QR code and 'Wi-Fi Join' QR code are positioned side-by-side beneath Now Performing and Up Next in the left column for easy scanning.\n\n" +
+                                     "• Persistent Host & Venue Branding: Configure Host DJ Name and Venue Name in the About dialog with a persistent toggle to display or hide branding on the billboard screen."
             }
         ];
 

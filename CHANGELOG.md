@@ -1,5 +1,5 @@
-<!-- Edited on Sep 20, 2026 @ 07:15:00 -> Document fix for session handoff HTTP 401 stream copy truncation and PIN validation -->
-Last Edit: Sep 20, 2026 - Device Handoff Stream Copy Exception Fix & PIN Auto-Focus
+<!-- Edited on Sep 20, 2026 @ 08:10:00 -> Add Help System and User Manuals expansion with architectural flow diagram -->
+Last Edit: Sep 20, 2026 - Help System & User Manuals Flow Diagram & Architecture Guide
 
 # Changelog
 
@@ -8,6 +8,11 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.20.0] - 2026-09-20
 
 ### Added
+- **Comprehensive In-App Help System & User Manuals Expansion (`HelpViewModel.cs`, `MainWindow.xaml`, `CatalogBookGeneratorTests.cs`, `Lyracist_User_Manual.docx`, `Lyracist_User_Manual.pdf`)**:
+  - **Help Topics Expansion**: Added Topics 27 ("Device Switching & Live Session Handoff"), 28 ("Kiosk Request Station & Landscape Attractor"), and 29 ("Audience Billboard & Chromecast Web-Casting") to Lyracist's in-app Help System (`HelpViewModel.cs`).
+  - **Architectural Flow Graphic & Sequence Diagram**: Embedded a rich, structured visual flow diagram in Topic 27 (and in `KSRotation/MainWindow.xaml` under the "🔄 Device Switching & Live Handoff" topic) showing the full step-by-step communication handshake between the DJ Tablet (`KSRotation.Maui`) and the KJ Host Laptop (`KSRotation`), illustrating Wi-Fi auto-discovery, payload migration, and automatic transition to embedded Remote DJ (`dj.html`).
+  - **KSRotation Help Panel**: Added a dedicated `DeviceHandoffPanel` in `MainWindow.xaml` featuring the dark-contrast, color-coded architectural diagram box, quick-start directions, Wi-Fi discovery tips, and kiosk/billboard guidelines.
+  - **User Manual Documentation Updates**: Updated `Lyracist_User_Manual.docx`, `Lyracist_User_Manual.pdf`, and `Lyracist_User_Manual_Updates.txt` via automated test harness `CatalogBookGeneratorTests.cs`, rendering the architectural flow diagram and feature overviews into the official user manual distribution.
 - **Automated Transition to In-App Remote DJ Controller on Handoff (`KSRotation`, `KSRotation.Maui`, `dj.html`, `PatronRequestServer`)**:
   - **Automatic Handshake**: When the desktop host pulls an active session from a tablet running `KSRotation.Maui`, the desktop sends its own IP address, web server port, and DJ PIN via `GET /api/session/handoff?pin=...&hostIp=...&hostPort=...&djPin=...`.
   - **In-App Embedded Remote DJ Overlay**: `KSRotation.Maui` automatically transitions into a full-screen embedded `WebView` displaying the host's `dj.html`, keeping the DJ within the native tablet app without having to switch to an external browser.

@@ -1,4 +1,4 @@
-<!-- Edited on Sep 20, 2026 @ 07:16:00 -> Update device handoff Wi-Fi scanning with PIN auto-focus and stream transmission fix -->
+<!-- Edited on Sep 20, 2026 @ 08:12:00 -> Add Architectural Flow Diagram and Help System expansion to README.md -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -9,6 +9,37 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 
 ### 🔄 Seamless Bidirectional Device Switching & Live Session Handoff (`KSRotation`, `KSRotation.Maui`, Web Portal)
 - **Zero-Beat Event Handover**: Seamlessly transfer an active karaoke show between a Windows laptop running `KSRotation` and a mobile tablet running `KSRotation.Maui` (Android or Windows) when the host needs to leave with the laptop or return to the main DJ booth.
+- **Architectural Flow: Live Session Handoff & Remote DJ Takeover**:
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│        ARCHITECTURAL FLOW: LIVE SESSION HANDOFF & REMOTE DJ TAKEOVER   │
+└────────────────────────────────────────────────────────────────────────┘
+
+    DJ (Tablet: KSRotation.Maui)             KJ Host (Laptop: KSRotation)
+    ┌───────────────────────────┐           ┌────────────────────────────┐
+    │ Active rotation on tablet │           │ Arrives at venue & opens   │
+    │ Serves requests & portal  │           │ 'Switch Device' on laptop  │
+    └─────────────┬─────────────┘           └──────────────┬─────────────┘
+                  │                                        │
+                  │                                 [1] Wi-Fi Scan or IP
+                  │                                     Selects tablet
+                  │                                        │
+                  │<─────── 1. GET /api/session/handoff ───┤
+                  │         (Sends Laptop IP, Port & PIN)  │
+                  │                                        │
+                  ├─────── 2. 200 OK + Full Session JSON ─>│
+                  │        (Queue, Checkmarks, History)    │
+                  │                                 [2] Imports session
+                  │                                     Takes over host
+                  │                                        │
+  [3] Auto-switches to in-app                             │
+      Remote DJ (dj.html)                                  │
+      Pre-authenticated with PIN                           │
+                  │                                        │
+  [4] DJ manages show from floor via embedded tablet UI    │
+      ═════════════════════════════════════════════════════╪═══════════════
+      Seamless bi-directional synchronization over venue Wi-Fi!
+```
 - **Automated In-App Remote DJ Transition**: When the desktop host pulls an active session from the DJ's tablet, `KSRotation.Maui` automatically transitions into a full-screen embedded in-app Remote DJ controller (`dj.html`), pre-authenticated with the host's credentials so the DJ never leaves the native app and can immediately continue queue management from the floor.
 - **Complete State Preservation**: Transmits the entire active queue, currently performing singer (`IsCurrent`), on-deck singer (`IsNext`), rotation start anchor (`IsRotationStart`), paused and inactive performers, queued tracks, linked duet pairs, completed round checkmarks (rounds 1–10), tonight's performance history with original timestamps, and pending patron requests.
 - **Dedicated Switch Device QR Code & Web Portal (`handoff.html`)**: Generates a dedicated high-resolution QR code (`/handoff`). Scanning with any camera opens a sleek mobile landing page showing live venue stats, current singer, active queue counts, and a 1-tap "Open in KSRotation MAUI" button.
