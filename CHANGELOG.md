@@ -1,5 +1,5 @@
-<!-- Edited on Sep 20, 2026 @ 08:10:00 -> Add Help System and User Manuals expansion with architectural flow diagram -->
-Last Edit: Sep 20, 2026 - Help System & User Manuals Flow Diagram & Architecture Guide
+<!-- Edited on Sep 20, 2026 @ 08:19:00 -> Bump build revision to 26.9.20.631 across solution projects -->
+Last Edit: Sep 20, 2026 - Revision Bump 26.9.20.631 & Help System Enhancements
 
 # Changelog
 
@@ -8,6 +8,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.20.0] - 2026-09-20
 
 ### Added
+- **Solution Build Revision Bump (`26.9.20.631`)**: Synchronized project assembly and file version metadata across all solution libraries, applications, and test harnesses.
 - **Comprehensive In-App Help System & User Manuals Expansion (`HelpViewModel.cs`, `MainWindow.xaml`, `CatalogBookGeneratorTests.cs`, `Lyracist_User_Manual.docx`, `Lyracist_User_Manual.pdf`)**:
   - **Help Topics Expansion**: Added Topics 27 ("Device Switching & Live Session Handoff"), 28 ("Kiosk Request Station & Landscape Attractor"), and 29 ("Audience Billboard & Chromecast Web-Casting") to Lyracist's in-app Help System (`HelpViewModel.cs`).
   - **Architectural Flow Graphic & Sequence Diagram**: Embedded a rich, structured visual flow diagram in Topic 27 (and in `KSRotation/MainWindow.xaml` under the "🔄 Device Switching & Live Handoff" topic) showing the full step-by-step communication handshake between the DJ Tablet (`KSRotation.Maui`) and the KJ Host Laptop (`KSRotation`), illustrating Wi-Fi auto-discovery, payload migration, and automatic transition to embedded Remote DJ (`dj.html`).
