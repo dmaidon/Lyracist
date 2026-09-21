@@ -1,5 +1,5 @@
-<!-- Edited on Sep 21, 2026 @ 12:11:00 -> Add Dynamic Round Completion Estimation and Duration Notice release notes -->
-Last Edit: Sep 21, 2026 - Dynamic Round Completion Estimation & Duration Notice
+<!-- Edited on Sep 21, 2026 @ 13:00:00 -> Bump build revision to 26.9.21 across remaining solution projects -->
+Last Edit: Sep 21, 2026 - Revision Bump 26.9.21 & Dynamic Round Completion Estimation
 
 # Changelog
 
@@ -8,6 +8,7 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.21.0] - 2026-09-21
 
 ### Added
+- **Solution Build Revision Bump (`26.9.21`)**: Synchronized project assembly and file version metadata across all remaining solution libraries, applications, and test harnesses that weren't already on the 26.9.21 cycle.
 - **Dynamic Round Completion Estimation & Full Round Duration Notice (`dj.html`, `KSRotation`, `KSRotation.Maui`, `Lyracist`, `Shared`)**:
   - **Shared Timing Calculation (`RotationHelpers.cs`)**: Added pure shared computation `CalculateRoundEstimation<T>` returning `RoundEstimationInfo` (performers remaining, remaining seconds, projected completion clock time, full round duration, and formatted notices) shared seamlessly across desktop, mobile, and web.
   - **Remote DJ Controller (`dj.html`)**: Docked a color-accented status banner directly beneath the Last Round banner at the top of the queue panel displaying remaining performers in the round, remaining minutes, projected clock completion time (e.g. `ends ~11:42 PM`), and full round duration. Automatically refreshes every 15 seconds and recalculates immediately upon singer reorder, additions, or status toggles.
