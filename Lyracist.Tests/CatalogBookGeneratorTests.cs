@@ -1,4 +1,4 @@
-// Edited on Sep 20, 2026 @ 08:08:00 -> Add documentation update test for Device Handoff flow diagram, Kiosk station, and TV billboard
+// Edited on Sep 21, 2026 @ 12:10:30 -> Add documentation update test for Round Completion Estimation and Duration Notice
 using System;
 using System.IO;
 using Xunit;
@@ -2304,6 +2304,169 @@ Section: Device Switching, Live Session Handoff & Architecture Flow (Updated Sep
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " DeviceHandoffFlowArch";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForRoundCompletionEstimationNotice()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Dynamic Round Completion Estimation & Full Round Duration Notice (Updated Sep 21, 2026)
+
+[Overview & DJ Benefits]
+• End-of-Night Round Timing:
+  - During live karaoke shows, knowing whether there is sufficient venue time remaining for another full round before closing or last call is critical for smooth show operations.
+  - The Dynamic Round Completion Estimation system tracks the remaining performers in the active round, calculates remaining minutes based on individual or default song lengths, and projects the exact estimated completion clock time (ETA).
+
+[Cross-App Availability & Displays]
+1. Remote DJ Controller (dj.html):
+   - A prominent, color-accented status banner is docked directly beneath the Last Round banner at the top of the queue panel.
+   - Shows real-time performer count left in the round, remaining minutes, projected clock completion time (e.g. 'ends ~11:42 PM'), and full round duration.
+   - Updates dynamically every 15 seconds, and recalculates immediately on queue modifications (singer add, reorder, status toggle).
+2. Desktop Karaoke Station (KSRotation):
+   - Styled badge beside active singer counts in the main Rotation header toolbar: '⏱️ Round: 4 singers left • ~20m (ends ~11:42 PM) | Full round: ~25m (5 singers)'.
+3. Mobile Tablet App (KSRotation.Maui):
+   - Pinned estimation banner above the singer rotation list on Android and Windows tablets.
+4. Lyracist Pro (Rotation Page):
+   - Pinned estimation banner above the singer queue on the Rotation management page.
+
+[Smart Round Mechanics]
+• Dynamic Recalculation:
+  - Updates as performers finish songs, new singers are added, or songs are reordered.
+• Last Round Awareness:
+  - In 'Last Round' mode, filters strictly for performers who have not yet sung in the final round ('!HasSungInLastRound'), showing the exact countdown of remaining performances until the show concludes.
+• Singer Status Filtering:
+  - Automatically excludes paused, skipped, inactive performers, and filler background music tracks so timing projections reflect true active vocalists.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Dynamic Round Completion Estimation & Full Round Duration Notice"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Dynamic Round Completion Estimation & Full Round Duration Notice"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Dynamic Round Completion Estimation & Full Round Duration Notice")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        var runProps = new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = line.StartsWith("[") ? "24" : "22" }
+                                        );
+                                        if (line.StartsWith("["))
+                                        {
+                                            runProps.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Bold());
+                                        }
+
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                runProps,
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("RoundEstimateDocNotice"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.5, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.5, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Dynamic Round Completion Estimation & Full Round Duration Notice", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
+
+                                double yPos = 60;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    bool isSection = line.StartsWith("[");
+                                    var font = isSection ? sectionFont : bodyFont;
+                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
+                                    double lineHeight = isSection ? 15 : 12.5;
+
+                                    if (yPos + lineHeight > 750)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.Letter;
+                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                        yPos = 36;
+                                    }
+
+                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
+                                    yPos += lineHeight;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " RoundEstimateDocNotice";
                                 doc.Save(pdfPath);
                             }
                         }

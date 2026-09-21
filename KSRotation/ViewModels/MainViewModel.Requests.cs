@@ -1,4 +1,4 @@
-// Edited on Sep 20, 2026 @ 07:14:00 -> Validate DJ PIN and refine error responses in PullSessionFromHostAsync
+// Edited on Sep 21, 2026 @ 11:58:20 -> Include defaultSongLengthMinutes in VenueInfoResponseDto for DJ remote estimation
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -504,7 +504,8 @@ namespace KSRotation.ViewModels
                 wifiPassword = pass,
                 isLastRound = IsLastRound,
                 showQrCode = ShowQrCodeOnRotationScreen,
-                listDjAndVenue = ListDjAndVenueOnBillboard
+                listDjAndVenue = ListDjAndVenueOnBillboard,
+                defaultSongLengthMinutes = DefaultSongLengthMinutes
             };
             return JsonSerializer.Serialize(dto, AppJsonContext.Default.VenueInfoResponseDto);
         }

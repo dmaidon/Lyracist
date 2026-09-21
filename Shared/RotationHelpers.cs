@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:45:00 -> Add Special Singer support to AdvanceRotationAfterFinished, EnsureRotationStartFlag, and HandleSingerRetiredOrRemoved
+// Edited on Sep 21, 2026 @ 11:58:00 -> Add CalculateRoundEstimation and RoundEstimationInfo for round duration and completion ETA calculations
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -1272,6 +1272,207 @@ namespace Lyracist.Shared
             MoveSingerInList(singers, index, index + 1);
             return true;
         }
+
+        /// <summary>
+        /// Calculates the remaining performers in the active round, the estimated time to complete the round,
+        /// the projected clock completion time, and the full round duration.
+        /// </summary>
+        public static RoundEstimationInfo CalculateRoundEstimation<T>(
+            IList<T> singers,
+            bool isLastRound = false,
+            double defaultEstimatedPerformanceSeconds = DefaultEstimatedPerformanceSeconds,
+            DateTime? now = null) where T : class, IRotationSinger
+        {
+            DateTime currentTime = now ?? DateTime.Now;
+
+            if (singers == null || singers.Count == 0)
+            {
+                return new RoundEstimationInfo
+                {
+                    PerformersRemaining = 0,
+                    TotalActivePerformers = 0,
+                    RemainingSeconds = 0,
+                    EstimatedCompletionTime = currentTime,
+                    FullRoundSeconds = 0,
+                    SummaryText = "No performers in rotation",
+                    ShortSummaryText = "0 performers"
+                };
+            }
+
+            int count = singers.Count;
+
+            // Compute total active performers (and full round duration)
+            int totalActive = 0;
+            double fullRoundSeconds = 0;
+            for (int i = 0; i < count; i++)
+            {
+                T s = singers[i];
+                if (!s.IsInactive && !s.IsPaused && !s.IsMusic)
+                {
+                    totalActive++;
+                    fullRoundSeconds += ResolveEstimatedSeconds(s, defaultEstimatedPerformanceSeconds);
+                }
+            }
+
+            if (totalActive == 0)
+            {
+                return new RoundEstimationInfo
+                {
+                    PerformersRemaining = 0,
+                    TotalActivePerformers = 0,
+                    RemainingSeconds = 0,
+                    EstimatedCompletionTime = currentTime,
+                    FullRoundSeconds = 0,
+                    SummaryText = "No active performers in rotation",
+                    ShortSummaryText = "0 performers"
+                };
+            }
+
+            var remainingSingers = new List<T>();
+
+            if (isLastRound)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    T s = singers[i];
+                    if (!s.IsInactive && !s.IsPaused && !s.IsSkipped && !s.IsMusic && !s.HasSungInLastRound)
+                    {
+                        remainingSingers.Add(s);
+                    }
+                }
+            }
+            else
+            {
+                T? current = GetCurrentSinger(singers);
+                int anchorIndex = -1;
+                for (int i = 0; i < count; i++)
+                {
+                    if (singers[i].IsRotationStart && !singers[i].IsInactive)
+                    {
+                        anchorIndex = i;
+                        break;
+                    }
+                }
+                if (anchorIndex == -1) anchorIndex = 0;
+
+                if (current == null)
+                {
+                    // No current singer designated: the entire round of eligible singers is ahead
+                    for (int i = 0; i < count; i++)
+                    {
+                        T s = singers[i];
+                        if (!s.IsInactive && !s.IsPaused && !s.IsSkipped && !s.IsMusic)
+                        {
+                            remainingSingers.Add(s);
+                        }
+                    }
+                }
+                else
+                {
+                    int currentIdx = singers.IndexOf(current);
+                    if (currentIdx >= 0)
+                    {
+                        // Current singer is currently performing this round
+                        if (!current.IsInactive && !current.IsPaused && !current.IsSkipped && !current.IsMusic)
+                        {
+                            remainingSingers.Add(current);
+                        }
+
+                        // Walk subsequent singers until reaching anchor (start of next round)
+                        for (int step = 1; step < count; step++)
+                        {
+                            int candidateIdx = (currentIdx + step) % count;
+
+                            // When current singer is the anchor, the round just started with them, so subsequent
+                            // singers are all in this round until wrapping back to current
+                            if (!current.IsRotationStart && candidateIdx == anchorIndex)
+                            {
+                                break;
+                            }
+
+                            T candidate = singers[candidateIdx];
+                            if (!candidate.IsInactive && !candidate.IsPaused && !candidate.IsSkipped && !candidate.IsMusic)
+                            {
+                                remainingSingers.Add(candidate);
+                            }
+                        }
+                    }
+                }
+            }
+
+            double remainingSeconds = 0;
+            for (int i = 0; i < remainingSingers.Count; i++)
+            {
+                remainingSeconds += ResolveEstimatedSeconds(remainingSingers[i], defaultEstimatedPerformanceSeconds);
+            }
+
+            DateTime completionTime = currentTime.AddSeconds(remainingSeconds);
+            int remainingMinutes = (int)Math.Round(remainingSeconds / 60.0, MidpointRounding.AwayFromZero);
+            int fullRoundMinutes = (int)Math.Round(fullRoundSeconds / 60.0, MidpointRounding.AwayFromZero);
+            string timeStr = completionTime.ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture);
+
+            int remainingCount = remainingSingers.Count;
+            string singerWord = remainingCount == 1 ? "singer" : "singers";
+            string totalSingerWord = totalActive == 1 ? "singer" : "singers";
+
+            string summary;
+            string shortSummary;
+
+            if (isLastRound)
+            {
+                if (remainingCount > 0)
+                {
+                    summary = $"★ Last Round: {remainingCount} {singerWord} left • ~{remainingMinutes}m (ends ~{timeStr})";
+                    shortSummary = $"{remainingCount} left (ends ~{timeStr})";
+                }
+                else
+                {
+                    summary = "★ Last Round Complete • All performers have sung";
+                    shortSummary = "Last round complete";
+                }
+            }
+            else
+            {
+                if (remainingCount > 0)
+                {
+                    summary = $"Round: {remainingCount} {singerWord} left • ~{remainingMinutes}m (ends ~{timeStr}) | Full round: ~{fullRoundMinutes}m ({totalActive} {totalSingerWord})";
+                    shortSummary = $"{remainingCount} left • ~{remainingMinutes}m (ends ~{timeStr})";
+                }
+                else
+                {
+                    summary = $"Round complete • Next round: ~{fullRoundMinutes}m ({totalActive} {totalSingerWord})";
+                    shortSummary = $"Next round: ~{fullRoundMinutes}m";
+                }
+            }
+
+            return new RoundEstimationInfo
+            {
+                PerformersRemaining = remainingCount,
+                TotalActivePerformers = totalActive,
+                RemainingSeconds = remainingSeconds,
+                EstimatedCompletionTime = completionTime,
+                FullRoundSeconds = fullRoundSeconds,
+                SummaryText = summary,
+                ShortSummaryText = shortSummary
+            };
+        }
+    }
+
+    /// <summary>
+    /// Encapsulates rotation round duration, remaining performer counts, and estimated completion time (ETA).
+    /// </summary>
+    public sealed record RoundEstimationInfo
+    {
+        public int PerformersRemaining { get; init; }
+        public int TotalActivePerformers { get; init; }
+        public double RemainingSeconds { get; init; }
+        public int RemainingMinutes => (int)Math.Round(RemainingSeconds / 60.0, MidpointRounding.AwayFromZero);
+        public DateTime EstimatedCompletionTime { get; init; }
+        public double FullRoundSeconds { get; init; }
+        public int FullRoundMinutes => (int)Math.Round(FullRoundSeconds / 60.0, MidpointRounding.AwayFromZero);
+        public string SummaryText { get; init; } = string.Empty;
+        public string ShortSummaryText { get; init; } = string.Empty;
+        public bool HasActivePerformers => TotalActivePerformers > 0;
     }
 }
 

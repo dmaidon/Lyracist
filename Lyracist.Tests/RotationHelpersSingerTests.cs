@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 09:23:00 -> Add unit tests for Special Singer placement at top as current and resumption
+// Edited on Sep 21, 2026 @ 12:04:00 -> Add unit tests for CalculateRoundEstimation
 using Lyracist.Models;
 using Lyracist.Shared;
 
@@ -919,5 +919,123 @@ public class RotationHelpersSingerTests
         Assert.True(alice.IsNext);
         Assert.False(bob.IsNext);
     }
+
+    [Fact]
+    public void CalculateRoundEstimation_StandardRotation_CalculatesRemainingAndDurationCorrectly()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true, IsRotationStart = true, EstimatedPerformanceSeconds = 300 };
+        var bob = new Singer { Name = "Bob", EstimatedPerformanceSeconds = 300 };
+        var carol = new Singer { Name = "Carol", EstimatedPerformanceSeconds = 300 };
+        var dave = new Singer { Name = "Dave", EstimatedPerformanceSeconds = 300 };
+        var singers = new List<Singer> { alice, bob, carol, dave };
+
+        var now = new DateTime(2026, 9, 21, 20, 0, 0);
+        var result = RotationHelpers.CalculateRoundEstimation(singers, isLastRound: false, defaultEstimatedPerformanceSeconds: 300, now: now);
+
+        Assert.Equal(4, result.PerformersRemaining);
+        Assert.Equal(1200, result.RemainingSeconds);
+        Assert.Equal(1200, result.FullRoundSeconds);
+        Assert.Equal(20, result.RemainingMinutes);
+        Assert.Equal(20, result.FullRoundMinutes);
+        Assert.Equal(new DateTime(2026, 9, 21, 20, 20, 0), result.EstimatedCompletionTime);
+        Assert.Contains("4 singers left", result.SummaryText);
+        Assert.Contains("~20m", result.SummaryText);
+        Assert.Contains("ends ~8:20 PM", result.SummaryText);
+        Assert.Contains("Full round: ~20m", result.SummaryText);
+    }
+
+    [Fact]
+    public void CalculateRoundEstimation_MidRound_CalculatesOnlyRemainingUntilAnchor()
+    {
+        var alice = new Singer { Name = "Alice", IsRotationStart = true, EstimatedPerformanceSeconds = 300 };
+        var bob = new Singer { Name = "Bob", IsCurrent = true, EstimatedPerformanceSeconds = 300 };
+        var carol = new Singer { Name = "Carol", EstimatedPerformanceSeconds = 300 };
+        var dave = new Singer { Name = "Dave", EstimatedPerformanceSeconds = 300 };
+        var singers = new List<Singer> { alice, bob, carol, dave };
+
+        var now = new DateTime(2026, 9, 21, 20, 0, 0);
+        var result = RotationHelpers.CalculateRoundEstimation(singers, isLastRound: false, defaultEstimatedPerformanceSeconds: 300, now: now);
+
+        // Bob, Carol, Dave remaining until round loops back to Alice
+        Assert.Equal(3, result.PerformersRemaining);
+        Assert.Equal(900, result.RemainingSeconds);
+        Assert.Equal(1200, result.FullRoundSeconds);
+        Assert.Equal(15, result.RemainingMinutes);
+        Assert.Equal(20, result.FullRoundMinutes);
+        Assert.Equal(new DateTime(2026, 9, 21, 20, 15, 0), result.EstimatedCompletionTime);
+        Assert.Contains("3 singers left", result.SummaryText);
+    }
+
+    [Fact]
+    public void CalculateRoundEstimation_WrappedRound_WhenCurrentAfterAnchor()
+    {
+        // Anchor is Bob (index 1), Current is Dave (index 3).
+        // Remaining until anchor: Dave (index 3), Alice (index 0).
+        var alice = new Singer { Name = "Alice", EstimatedPerformanceSeconds = 300 };
+        var bob = new Singer { Name = "Bob", IsRotationStart = true, EstimatedPerformanceSeconds = 300 };
+        var carol = new Singer { Name = "Carol", EstimatedPerformanceSeconds = 300 };
+        var dave = new Singer { Name = "Dave", IsCurrent = true, EstimatedPerformanceSeconds = 300 };
+        var singers = new List<Singer> { alice, bob, carol, dave };
+
+        var now = new DateTime(2026, 9, 21, 20, 0, 0);
+        var result = RotationHelpers.CalculateRoundEstimation(singers, isLastRound: false, defaultEstimatedPerformanceSeconds: 300, now: now);
+
+        Assert.Equal(2, result.PerformersRemaining);
+        Assert.Equal(600, result.RemainingSeconds);
+        Assert.Equal(10, result.RemainingMinutes);
+        Assert.Equal(new DateTime(2026, 9, 21, 20, 10, 0), result.EstimatedCompletionTime);
+    }
+
+    [Fact]
+    public void CalculateRoundEstimation_ExcludesPausedSkippedInactiveAndMusic()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true, IsRotationStart = true, EstimatedPerformanceSeconds = 300 };
+        var bob = new Singer { Name = "Bob", IsPaused = true, EstimatedPerformanceSeconds = 300 };
+        var carol = new Singer { Name = "Music Track", IsMusic = true, EstimatedPerformanceSeconds = 300 };
+        var dave = new Singer { Name = "Dave", EstimatedPerformanceSeconds = 300 };
+        var eve = new Singer { Name = "Eve", IsInactive = true, EstimatedPerformanceSeconds = 300 };
+        var singers = new List<Singer> { alice, bob, carol, dave, eve };
+
+        var now = new DateTime(2026, 9, 21, 20, 0, 0);
+        var result = RotationHelpers.CalculateRoundEstimation(singers, isLastRound: false, defaultEstimatedPerformanceSeconds: 300, now: now);
+
+        // Only Alice and Dave should count
+        Assert.Equal(2, result.PerformersRemaining);
+        Assert.Equal(600, result.RemainingSeconds);
+        Assert.Equal(600, result.FullRoundSeconds);
+    }
+
+    [Fact]
+    public void CalculateRoundEstimation_LastRound_ConsidersHasSungInLastRound()
+    {
+        var alice = new Singer { Name = "Alice", IsCurrent = true, HasSungInLastRound = false, EstimatedPerformanceSeconds = 300 };
+        var bob = new Singer { Name = "Bob", HasSungInLastRound = true, EstimatedPerformanceSeconds = 300 };
+        var carol = new Singer { Name = "Carol", HasSungInLastRound = false, EstimatedPerformanceSeconds = 300 };
+        var dave = new Singer { Name = "Dave", HasSungInLastRound = false, EstimatedPerformanceSeconds = 300 };
+        var singers = new List<Singer> { alice, bob, carol, dave };
+
+        var now = new DateTime(2026, 9, 21, 20, 0, 0);
+        var result = RotationHelpers.CalculateRoundEstimation(singers, isLastRound: true, defaultEstimatedPerformanceSeconds: 300, now: now);
+
+        // Bob has already sung in the last round, so 3 remain: Alice, Carol, Dave
+        Assert.Equal(3, result.PerformersRemaining);
+        Assert.Equal(900, result.RemainingSeconds);
+        Assert.Equal(15, result.RemainingMinutes);
+        Assert.Contains("3 singers left", result.SummaryText);
+        Assert.Contains("Last Round", result.SummaryText);
+    }
+
+    [Fact]
+    public void CalculateRoundEstimation_EmptyOrAllInactive_ReturnsZeroNotice()
+    {
+        var singers = new List<Singer>();
+        var result = RotationHelpers.CalculateRoundEstimation(singers, isLastRound: false, defaultEstimatedPerformanceSeconds: 300);
+
+        Assert.Equal(0, result.PerformersRemaining);
+        Assert.Equal(0, result.RemainingSeconds);
+        Assert.Equal(0, result.FullRoundSeconds);
+        Assert.Contains("No performers", result.SummaryText);
+    }
 }
+
 

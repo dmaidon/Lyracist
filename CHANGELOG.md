@@ -1,11 +1,23 @@
-<!-- Edited on Sep 20, 2026 @ 08:19:00 -> Bump build revision to 26.9.20.631 across solution projects -->
-Last Edit: Sep 20, 2026 - Revision Bump 26.9.20.631 & Help System Enhancements
+<!-- Edited on Sep 21, 2026 @ 12:11:00 -> Add Dynamic Round Completion Estimation and Duration Notice release notes -->
+Last Edit: Sep 21, 2026 - Dynamic Round Completion Estimation & Duration Notice
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [26.9.20.0] - 2026-09-20
+## [26.9.21.0] - 2026-09-21
+
+### Added
+- **Dynamic Round Completion Estimation & Full Round Duration Notice (`dj.html`, `KSRotation`, `KSRotation.Maui`, `Lyracist`, `Shared`)**:
+  - **Shared Timing Calculation (`RotationHelpers.cs`)**: Added pure shared computation `CalculateRoundEstimation<T>` returning `RoundEstimationInfo` (performers remaining, remaining seconds, projected completion clock time, full round duration, and formatted notices) shared seamlessly across desktop, mobile, and web.
+  - **Remote DJ Controller (`dj.html`)**: Docked a color-accented status banner directly beneath the Last Round banner at the top of the queue panel displaying remaining performers in the round, remaining minutes, projected clock completion time (e.g. `ends ~11:42 PM`), and full round duration. Automatically refreshes every 15 seconds and recalculates immediately upon singer reorder, additions, or status toggles.
+  - **Desktop Karaoke Station (`KSRotation/MainWindow.xaml`, `MainViewModel.cs`)**: Added a styled badge (`⏱️ {Binding RoundEstimateNoticeText}`) in the primary Rotation header toolbar next to active singer counts, providing at-a-glance round completion projections for the KJ.
+  - **Mobile Tablet App (`KSRotation.Maui/MainPage.xaml`)**: Added a pinned estimation banner above the singer rotation list on Android and Windows tablets.
+  - **Lyracist Pro Suite (`Lyracist/Views/Pages/RotationPage.xaml`, `RotationViewModel.cs`)**: Added a styled estimation banner above the singer queue on the Rotation management page.
+  - **End-of-Night Decision Support**: Helps the KJ/DJ determine whether there is sufficient venue time remaining for another full round before last call or venue closing.
+  - **Smart Round Mechanics**: Traces circular rotation from current performer to the rotation anchor (`IsRotationStart`), respects "Last Round" mode counting only performers who have not yet sung (`!HasSungInLastRound`), and automatically filters out paused, skipped, inactive performers, and filler background music tracks.
+  - **Venue Info API (`VenueInfoResponseDto.cs`, `MainViewModel.Requests.cs`)**: Added `defaultSongLengthMinutes` to `/api/info` so client portals accurately calculate timing based on host settings.
+  - **In-App Help & User Manual Documentation**: Updated Topic 2 in `HelpViewModel.cs`, and updated `Lyracist_User_Manual.docx`, `Lyracist_User_Manual.pdf`, and `Lyracist_User_Manual_Updates.txt`.
 
 ### Added
 - **Solution Build Revision Bump (`26.9.20.631`)**: Synchronized project assembly and file version metadata across all solution libraries, applications, and test harnesses.

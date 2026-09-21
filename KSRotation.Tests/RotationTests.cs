@@ -1,4 +1,4 @@
-// Edited on Sep 19, 2026 @ 08:20:00 -> Add unit tests for MoveSinger wait time recalculations
+// Edited on Sep 21, 2026 @ 12:04:30 -> Add unit tests for RoundEstimation and notice text in MainViewModel
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -1990,6 +1990,54 @@ public class MainViewModelTests
         Assert.Equal(10, singer2.EstimatedWaitMinutes); // index 2 = 10 min
     }
 }
+
+public class RoundEstimationTests
+{
+    [Fact]
+    public void MainViewModel_RoundEstimateNoticeText_UpdatesOnCollectionChanged()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+        vm.DefaultSongLengthMinutes = 5.0;
+
+        Assert.Contains("No", vm.RoundEstimateNoticeText);
+
+        var s1 = new SingerEntry { Name = "Singer 1", IsCurrent = true, IsRotationStart = true, EstimatedPerformanceSeconds = 300 };
+        var s2 = new SingerEntry { Name = "Singer 2", EstimatedPerformanceSeconds = 300 };
+
+        vm.Singers.Add(s1);
+        vm.Singers.Add(s2);
+
+        Assert.Equal(2, vm.RoundRemainingPerformersCount);
+        Assert.Equal(10, vm.RoundRemainingMinutes);
+        Assert.Contains("2 singers left", vm.RoundEstimateNoticeText);
+        Assert.Contains("~10m", vm.RoundEstimateNoticeText);
+        Assert.Contains("Full round: ~10m", vm.RoundEstimateNoticeText);
+    }
+
+    [Fact]
+    public void MainViewModel_RoundEstimateNoticeText_RespectsLastRound()
+    {
+        var vm = new KSRotation.ViewModels.MainViewModel { IsTestMode = true };
+        vm.Singers.Clear();
+        vm.DefaultSongLengthMinutes = 5.0;
+
+        var s1 = new SingerEntry { Name = "Singer 1", IsCurrent = true, EstimatedPerformanceSeconds = 300 };
+        var s2 = new SingerEntry { Name = "Singer 2", EstimatedPerformanceSeconds = 300 };
+        vm.Singers.Add(s1);
+        vm.Singers.Add(s2);
+
+        vm.IsLastRound = true;
+        s1.HasSungInLastRound = true;
+
+        // In last round, only s2 hasn't sung yet
+        Assert.Equal(1, vm.RoundRemainingPerformersCount);
+        Assert.Equal(5, vm.RoundRemainingMinutes);
+        Assert.Contains("1 singer left", vm.RoundEstimateNoticeText);
+        Assert.Contains("Last Round", vm.RoundEstimateNoticeText);
+    }
+}
+
 
 
 

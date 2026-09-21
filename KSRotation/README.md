@@ -1,4 +1,4 @@
-<!-- Edited on Sep 18, 2026 @ 09:26:00 -> Update Special Singer top of list placement and current singer promotion in KSRotation README.md -->
+<!-- Edited on Sep 21, 2026 @ 12:24:30 -> Update Rotation tab summary with Dynamic Round Completion Estimation -->
 
 # KSRotation
 
@@ -6,7 +6,7 @@ KSRotation ("Karaoke Singer Rotation") is a WPF (.NET, C#, Material Design in XA
 
 ## Tabs
 
-- **Rotation** — Manages the singer rotation queue for the night, including current performer floating, linked singers, round anchor designation, singer pause/inactive states, round-scoped Singer Skip, and one-time Special Singers.
+- **Rotation** — Manages the singer rotation queue for the night, including current performer floating, linked singers, round anchor designation, dynamic round completion estimation and duration notices, singer pause/inactive states, round-scoped Singer Skip, and one-time Special Singers.
 - **Users** — Centralized user, performer, and staff management with high-DPI quick-search, profile management, and history.
 - **Settings** — Venue, DJ, banner, and general app settings (theme, etc.).
 - **Display** — Controls the audience-facing display window(s)/monitor output.

@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 11:15:45 -> Add listDjAndVenue property to VenueInfoResponseDto
+// Edited on Sep 21, 2026 @ 11:58:15 -> Add defaultSongLengthMinutes property to VenueInfoResponseDto
 namespace KSRotation.Models
 {
     /// <summary>
@@ -15,6 +15,7 @@ namespace KSRotation.Models
         public bool isLastRound { get; set; }
         public bool showQrCode { get; set; } = true;
         public bool listDjAndVenue { get; set; } = true;
+        public double defaultSongLengthMinutes { get; set; } = 4.75;
     }
 }
 

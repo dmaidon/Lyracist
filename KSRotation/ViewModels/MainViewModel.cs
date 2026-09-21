@@ -1,4 +1,4 @@
-// Edited on Sep 20, 2026 @ 08:05:00 -> Add Device Switching & Live Handoff topic to HelpTopics
+// Edited on Sep 21, 2026 @ 11:58:45 -> Add RoundEstimateNoticeText and RecalculateRoundEstimation for real-time round duration and ETA tracking
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -18,6 +18,8 @@ namespace KSRotation.ViewModels
         private readonly DjBannerWindowService _djBannerWindowService = new();
         private readonly List<SingerEntry> _subscribedSingers = [];
         private readonly DispatcherTimer _saveDebounceTimer;
+        private readonly DispatcherTimer _roundEstimateTimer;
+        private RoundEstimationInfo _roundEstimation = new();
 
         /// <summary>Fired when this device's active session is exported/handed off to another peer on the LAN.</summary>
         public event Action<string, int, string>? SessionHandedOffToPeer;
@@ -170,6 +172,7 @@ namespace KSRotation.ViewModels
             {
                 _displayWindowService.Update(Singers);
             }
+            RecalculateRoundEstimation();
         }
 
         [RelayCommand]
@@ -186,6 +189,14 @@ namespace KSRotation.ViewModels
         /// wait time" badge whenever a queued song's actual duration isn't known/resolvable.</summary>
         [ObservableProperty]
         public partial double DefaultSongLengthMinutes { get; set; } = 4.75;
+
+        partial void OnDefaultSongLengthMinutesChanged(double value)
+        {
+            if (_isInitializing) return;
+            RotationHelpers.RecalculateEstimatedWaits(Singers, isLastRound: IsLastRound, defaultEstimatedPerformanceSeconds: value * 60.0, enabled: ShowEstimatedWaitTime);
+            RecalculateRoundEstimation();
+            QueueSaveSettings();
+        }
 
         /// <summary>Whether the rotation-screen "estimated wait time" badge is shown at all. Some
         /// DJs prefer not to display wait estimates to the audience; defaults on.</summary>
@@ -861,6 +872,32 @@ namespace KSRotation.ViewModels
         /// <summary>Count of active karaoke singers in the rotation, excluding background music entries (<see cref="SingerEntry.IsMusic"/>) and inactive singers (<see cref="SingerEntry.IsInactive"/>).</summary>
         public int SingersInRotationCount => Singers.Count(s => !s.IsMusic && !s.IsInactive);
 
+        /// <summary>Summary notice of remaining round duration, performer counts, and estimated completion time (ETA).</summary>
+        public string RoundEstimateNoticeText => _roundEstimation.SummaryText;
+
+        /// <summary>Short summary notice of remaining round duration and ETA.</summary>
+        public string RoundEstimateShortNoticeText => _roundEstimation.ShortSummaryText;
+
+        /// <summary>Performers remaining in the current active round.</summary>
+        public int RoundRemainingPerformersCount => _roundEstimation.PerformersRemaining;
+
+        /// <summary>Estimated minutes remaining in the current round.</summary>
+        public int RoundRemainingMinutes => _roundEstimation.RemainingMinutes;
+
+        /// <summary>Recalculates the round estimation and notifies bindings.</summary>
+        public void RecalculateRoundEstimation()
+        {
+            _roundEstimation = RotationHelpers.CalculateRoundEstimation(
+                Singers,
+                isLastRound: IsLastRound,
+                defaultEstimatedPerformanceSeconds: DefaultSongLengthMinutes * 60.0);
+
+            OnPropertyChanged(nameof(RoundEstimateNoticeText));
+            OnPropertyChanged(nameof(RoundEstimateShortNoticeText));
+            OnPropertyChanged(nameof(RoundRemainingPerformersCount));
+            OnPropertyChanged(nameof(RoundRemainingMinutes));
+        }
+
         /// <summary>Whether "Load Test Data" is safe to use — false once a real, in-progress queue exists, so an accidental tap can't wipe it.</summary>
         public bool CanLoadTestData => Singers.Count == 0;
 
@@ -939,6 +976,7 @@ namespace KSRotation.ViewModels
             _jsonCacheDebounceTimer = new DispatcherTimer();
             _requestsJsonCacheDebounceTimer = new DispatcherTimer();
             _connectBannerDebounceTimer = new DispatcherTimer();
+            _roundEstimateTimer = new DispatcherTimer();
 
             if (IsInDesignMode)
             {
@@ -996,6 +1034,16 @@ namespace KSRotation.ViewModels
                 _connectBannerDebounceTimer.Stop();
                 RefreshConnectInstructionsBanner();
             };
+
+            _roundEstimateTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(15)
+            };
+            _roundEstimateTimer.Tick += (s, e) =>
+            {
+                RecalculateRoundEstimation();
+            };
+            _roundEstimateTimer.Start();
 
             Singers.CollectionChanged += OnSingersCollectionChanged;
             // All IncomingRequests mutations happen on the UI thread (see HandleRequestReceived/HandleDjAction),
@@ -2273,6 +2321,7 @@ namespace KSRotation.ViewModels
             RebuildRotationJsonCacheNow();
             OnPropertyChanged(nameof(SingersInRotationCount));
             OnPropertyChanged(nameof(CanLoadTestData));
+            RecalculateRoundEstimation();
             RefreshBillboardState();
         }
 
@@ -2516,6 +2565,21 @@ namespace KSRotation.ViewModels
             {
                 OnPropertyChanged(nameof(SingersInRotationCount));
             }
+
+            if (e.PropertyName == nameof(SingerEntry.IsInactive)
+                || e.PropertyName == nameof(SingerEntry.IsMusic)
+                || e.PropertyName == nameof(SingerEntry.IsCurrent)
+                || e.PropertyName == nameof(SingerEntry.IsNext)
+                || e.PropertyName == nameof(SingerEntry.IsPaused)
+                || e.PropertyName == nameof(SingerEntry.IsSkipped)
+                || e.PropertyName == nameof(SingerEntry.IsSpecial)
+                || e.PropertyName == nameof(SingerEntry.IsRotationStart)
+                || e.PropertyName == nameof(SingerEntry.HasSungInLastRound)
+                || e.PropertyName == nameof(SingerEntry.EstimatedPerformanceSeconds))
+            {
+                RecalculateRoundEstimation();
+            }
+
             RefreshBillboardState();
         }
 

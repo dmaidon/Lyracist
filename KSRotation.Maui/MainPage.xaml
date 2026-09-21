@@ -1,4 +1,4 @@
-<!-- Edited on Sep 20, 2026 @ 06:36:30 -> Add RemoteDjOverlay and AutoSwitchToRemoteDjOnHandoff checkbox in MainPage.xaml -->
+<!-- Edited on Sep 21, 2026 @ 11:59:15 -> Add Round Completion Estimation and Duration Notice to Active Rotation Queue -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:KSRotation.ViewModels"
@@ -15,7 +15,7 @@
         <Grid x:Name="RotationSectionGrid" Grid.Column="0" Grid.Row="0" RowDefinitions="*" RowSpacing="12">
 
             <!-- Rotation List View -->
-            <Grid Grid.Row="0" RowDefinitions="Auto, *">
+            <Grid Grid.Row="0" RowDefinitions="Auto, Auto, *">
                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="0,0,0,6">
                     <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                         <Label Text="ACTIVE ROTATION" TextColor="{AppThemeBinding Light=#7C3AED, Dark=#C4B5FD}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1.5" VerticalOptions="Center" />
@@ -54,7 +54,24 @@
                         <Button Text="ⓘ About" Clicked="OnAboutClicked" BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" TextColor="{AppThemeBinding Light=#6D28D9, Dark=#C4B5FD}" FontSize="10" Padding="8,2" HeightRequest="26" BorderWidth="1" VerticalOptions="Center" />
                     </HorizontalStackLayout>
                 </ScrollView>
-                <ScrollView Grid.Row="1">
+                <!-- Round Completion Estimation Notice -->
+                <Border Grid.Row="1"
+                        StrokeShape="RoundRectangle 6"
+                        StrokeThickness="1"
+                        Stroke="{AppThemeBinding Light=#CBD5E1, Dark=#334155}"
+                        BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#1E2230}"
+                        Padding="10,6"
+                        Margin="0,0,0,8">
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Label Text="⏱️" FontSize="13" VerticalOptions="Center" />
+                        <Label Text="{Binding RoundEstimateNoticeText}"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#1E293B, Dark=#F8FAFC}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+                <ScrollView Grid.Row="2">
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Singers}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:SingerEntry">

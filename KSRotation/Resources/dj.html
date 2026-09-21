@@ -1,4 +1,4 @@
-<!-- Edited on Sep 20, 2026 @ 06:34:00 -> Support auto PIN login via URL query parameter for seamless handoff -->
+<!-- Edited on Sep 21, 2026 @ 11:58:30 -> Add dynamic round completion estimation notice with remaining performers and ETA to Remote DJ Board -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -689,6 +689,50 @@
             opacity: 0.65;
             border-left: 4px solid #059669;
         }
+
+        .round-estimate-notice {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+            border: 1px solid #334155;
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+            font-size: 0.88rem;
+        }
+
+        :root[data-theme="light"] .round-estimate-notice {
+            background: linear-gradient(135deg, #F8FAFC, #EFF6FF);
+            border-color: #CBD5E1;
+            border-left-color: var(--primary);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .round-estimate-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .round-estimate-icon {
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .round-estimate-main {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .round-estimate-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            padding-left: 28px;
+        }
     </style>
 </head>
 <body>
@@ -733,6 +777,13 @@
                     </div>
                     <div id="last-round-banner" class="last-round-banner" style="display: none;">
                         ★ THE LAST ROUND FOR THE NIGHT IS CURRENTLY UNDERWAY ★
+                    </div>
+                    <div id="round-estimate-notice" class="round-estimate-notice" style="display: none;">
+                        <div class="round-estimate-content">
+                            <span class="round-estimate-icon">⏱️</span>
+                            <span id="round-estimate-main" class="round-estimate-main">Current Round: Calculating...</span>
+                        </div>
+                        <div id="round-estimate-sub" class="round-estimate-sub"></div>
                     </div>
                     <div id="queue-list" class="queue-list">
                         <div class="no-data">Loading rotation queue...</div>
@@ -823,6 +874,10 @@
 
     <script>
                 let pollInterval = null;
+                let roundEstimationClockTimer = null;
+                let cachedRotation = [];
+                let cachedIsLastRound = false;
+                let cachedDefaultSongLengthMinutes = 4.75;
                 // Auto-check PIN in query string or sessionStorage on page load
                 window.addEventListener('load', () => {
                     updateThemeToggleLabel();
@@ -907,12 +962,17 @@
                     stopPolling();
                     loadData();
                     pollInterval = setInterval(loadData, 3000);
+                    roundEstimationClockTimer = setInterval(updateRoundEstimation, 15000);
                 }
 
                 function stopPolling() {
                     if (pollInterval) {
                         clearInterval(pollInterval);
                         pollInterval = null;
+                    }
+                    if (roundEstimationClockTimer) {
+                        clearInterval(roundEstimationClockTimer);
+                        roundEstimationClockTimer = null;
                     }
                 }
 
@@ -930,6 +990,7 @@
                             return;
                         }
                         const rotation = await rotResponse.json();
+                        cachedRotation = rotation || [];
                         renderQueue(rotation);
 
                         // Fetch Incoming Requests
@@ -948,8 +1009,13 @@
                         const infoResponse = await fetch(`/api/info${querySuffix}`, { headers });
                         if (infoResponse.ok) {
                             const info = await infoResponse.json();
+                            cachedIsLastRound = !!info.isLastRound;
+                            if (info.defaultSongLengthMinutes && info.defaultSongLengthMinutes > 0) {
+                                cachedDefaultSongLengthMinutes = info.defaultSongLengthMinutes;
+                            }
                             updateLastRoundState(info.isLastRound);
                         }
+                        updateRoundEstimation();
 
                     } catch (err) {
                         console.error("Connection error loading DJ data", err);
@@ -987,6 +1053,118 @@
                     const banner = document.getElementById("last-round-banner");
                     if (banner) {
                         banner.style.display = isRoundActive ? "block" : "none";
+                    }
+                    updateRoundEstimation();
+                }
+
+                function updateRoundEstimation() {
+                    const noticeEl = document.getElementById("round-estimate-notice");
+                    const mainEl = document.getElementById("round-estimate-main");
+                    const subEl = document.getElementById("round-estimate-sub");
+                    if (!noticeEl || !mainEl || !subEl) return;
+
+                    const singers = cachedRotation || [];
+                    if (!singers || singers.length === 0) {
+                        noticeEl.style.display = "none";
+                        return;
+                    }
+
+                    const defaultSec = (cachedDefaultSongLengthMinutes || 4.75) * 60;
+
+                    // Filter active performers in rotation (exclude inactive, paused, music)
+                    let totalActive = 0;
+                    let fullRoundSec = 0;
+                    singers.forEach(s => {
+                        if (!s.isInactive && !s.isPaused && !s.isMusic) {
+                            totalActive++;
+                            const songSec = (s.estimatedPerformanceSeconds && s.estimatedPerformanceSeconds > 0)
+                                ? s.estimatedPerformanceSeconds
+                                : defaultSec;
+                            fullRoundSec += songSec;
+                        }
+                    });
+
+                    if (totalActive === 0) {
+                        noticeEl.style.display = "flex";
+                        mainEl.textContent = "No active performers in rotation";
+                        subEl.textContent = "Add performers to calculate round times";
+                        return;
+                    }
+
+                    noticeEl.style.display = "flex";
+                    const remainingSingers = [];
+
+                    if (cachedIsLastRound) {
+                        singers.forEach(s => {
+                            if (!s.isInactive && !s.isPaused && !s.isSkipped && !s.isMusic && !s.hasSungInLastRound) {
+                                remainingSingers.push(s);
+                            }
+                        });
+                    } else {
+                        const cur = singers.find(s => s.isCurrent);
+                        let anchorIdx = singers.findIndex(s => s.isRotationStart && !s.isInactive);
+                        if (anchorIdx === -1) anchorIdx = 0;
+
+                        if (!cur) {
+                            singers.forEach(s => {
+                                if (!s.isInactive && !s.isPaused && !s.isSkipped && !s.isMusic) {
+                                    remainingSingers.push(s);
+                                }
+                            });
+                        } else {
+                            const curIdx = singers.indexOf(cur);
+                            if (curIdx >= 0) {
+                                if (!cur.isInactive && !cur.isPaused && !cur.isSkipped && !cur.isMusic) {
+                                    remainingSingers.push(cur);
+                                }
+                                for (let step = 1; step < singers.length; step++) {
+                                    const candIdx = (curIdx + step) % singers.length;
+                                    if (!cur.isRotationStart && candIdx === anchorIdx) {
+                                        break;
+                                    }
+                                    const cand = singers[candIdx];
+                                    if (!cand.isInactive && !cand.isPaused && !cand.isSkipped && !cand.isMusic) {
+                                        remainingSingers.push(cand);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    let remainingSec = 0;
+                    remainingSingers.forEach(s => {
+                        const songSec = (s.estimatedPerformanceSeconds && s.estimatedPerformanceSeconds > 0)
+                            ? s.estimatedPerformanceSeconds
+                            : defaultSec;
+                        remainingSec += songSec;
+                    });
+
+                    const now = new Date();
+                    const completionDate = new Date(now.getTime() + remainingSec * 1000);
+                    const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+                    const etaStr = completionDate.toLocaleTimeString([], timeOptions);
+
+                    const remainingMins = Math.round(remainingSec / 60);
+                    const fullRoundMins = Math.round(fullRoundSec / 60);
+                    const remainingCount = remainingSingers.length;
+                    const performerWord = remainingCount === 1 ? "performer" : "performers";
+
+                    if (cachedIsLastRound) {
+                        if (remainingCount > 0) {
+                            mainEl.innerHTML = `<span style="color: #38BDF8;">★ Last Round:</span> <strong>${remainingCount} ${performerWord} left</strong> • ~${remainingMins} min${remainingMins === 1 ? '' : 's'} (ends ~${etaStr})`;
+                            subEl.textContent = `All other performers finished • Last round ends tonight's rotation`;
+                        } else {
+                            mainEl.innerHTML = `<span style="color: #10B981;">★ Last Round Complete</span> • All performers finished`;
+                            subEl.textContent = `Rotation for the night is completed`;
+                        }
+                    } else {
+                        if (remainingCount > 0) {
+                            mainEl.innerHTML = `<strong>Current Round:</strong> ${remainingCount} ${performerWord} left • ~${remainingMins} min${remainingMins === 1 ? '' : 's'} (ends ~${etaStr})`;
+                            subEl.textContent = `Full round: ~${fullRoundMins} mins (${totalActive} performers) • Helps verify if another round fits`;
+                        } else {
+                            mainEl.innerHTML = `<strong>Round Complete</strong> • Next round ready`;
+                            subEl.textContent = `Next full round: ~${fullRoundMins} mins (${totalActive} performers)`;
+                        }
                     }
                 }
 

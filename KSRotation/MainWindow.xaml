@@ -1,4 +1,4 @@
-<!-- Edited on Sep 20, 2026 @ 08:06:00 -> Add Device Switching & Live Handoff Help topic panel with architectural flow diagram -->
+<!-- Edited on Sep 21, 2026 @ 12:24:45 -> Add Round Completion Estimation Notice to Help Topic 2 in MainWindow.xaml -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -702,6 +702,23 @@
                             VerticalAlignment="Center"
                             Style="{StaticResource ModernTextBoxStyle}"
                             Focusable="False" />
+                            <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                                    BorderBrush="{DynamicResource AppHeaderBrush}"
+                                    BorderThickness="1.5"
+                                    CornerRadius="6"
+                                    Padding="10,4"
+                                    Margin="24,0,0,0"
+                                    VerticalAlignment="Center"
+                                    ToolTip="Estimated time to complete current round, projected completion time, and full round duration">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="⏱️" FontSize="14" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding RoundEstimateNoticeText}"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource MaterialDesignBody}"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
                             <TextBlock
                             Text="Theme:"
                             FontSize="16"
@@ -3741,6 +3758,12 @@
                                         <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
                                     </BulletDecorator.Bullet>
                                     <TextBlock Text="⏳ Estimated Wait Time Badges: Each performer row displays an estimated wait time badge (e.g. '⏳ 15m') when enabled in Settings, dynamically updating whenever performers sing, skip, or change queue positions." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                </BulletDecorator>
+                                <BulletDecorator Margin="0,2">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource MaterialDesignBodyLight}" />
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="⏱️ Round Completion Estimation Notice: A live status badge in the Rotation header (and on dj.html, tablet, and Lyracist) displays remaining performers, remaining round minutes, projected completion clock time (e.g. 'ends ~11:42 PM'), and full round duration. Updates dynamically every 15 seconds and recalculates on singer additions, reorders, skips, or finishes, providing vital end-of-night planning to know if there is time for another round." Margin="10,0,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 </BulletDecorator>
                                 <BulletDecorator Margin="0,2">
                                     <BulletDecorator.Bullet>

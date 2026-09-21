@@ -1,6 +1,17 @@
-<!-- Edited on Sep 18, 2026 @ 09:26:00 -> Update Special Singer top of list placement and current singer promotion in KSRotation Changelog -->
+<!-- Edited on Sep 21, 2026 @ 12:11:30 -> Add Dynamic Round Completion Estimation and Duration Notice -->
 
 # Changelog
+
+## 2026-09-21
+
+- **Dynamic Round Completion Estimation & Full Round Duration Notice (`dj.html`, `MainWindow.xaml`, `MainViewModel.cs`, `KSRotation.Maui`)**:
+  - Added live estimation of remaining round time, performer count, projected completion clock time, and full round duration.
+  - **Remote DJ Portal (`dj.html`)**: Integrated a styled, color-accented status banner directly below the Last Round banner displaying performers left in round, remaining minutes, projected finish time (e.g. `ends ~11:42 PM`), and full round duration. Automatically refreshes every 15 seconds and recalculates immediately upon queue additions, reorders, or status changes.
+  - **Desktop App (`MainWindow.xaml`)**: Added a styled badge (`⏱️ {Binding RoundEstimateNoticeText}`) directly beside the active singer count in the Rotation tab header toolbar.
+  - **Mobile Tablet App (`KSRotation.Maui/MainPage.xaml`)**: Added a pinned estimation banner above the singer rotation list on Android and Windows tablets.
+  - **End-of-Night Planning**: Enables the DJ to immediately determine if there is sufficient time remaining for another full rotation before venue closing or last call.
+  - **Smart Calculation**: Respects circular rotation to the round anchor (`IsRotationStart`), handles Last Round mode (`!HasSungInLastRound`), and excludes paused, skipped, inactive performers, and filler music tracks.
+  - **Venue Info API**: Added `defaultSongLengthMinutes` to `/api/info` response.
 
 ## 2026-09-18
 
