@@ -1,5 +1,5 @@
-<!-- Edited on Sep 22, 2026 @ 15:10:00 -> Document distinct-layout redesign of the 4 new projection views, NextSingers count bump, and Jumbotron sponsor banner -->
-Last Edit: Sep 22, 2026 - Projection View Redesign, 6-Singer Queue, & Jumbotron Sponsor Banner
+<!-- Edited on Sep 22, 2026 @ 18:40:00 -> Document Movie Theater scrolling film-strip redesign and Jumbotron sponsor box refinements -->
+Last Edit: Sep 22, 2026 - Movie Theater Film-Strip Reel & Jumbotron Sponsor Box Refinements
 
 # Changelog
 
@@ -58,6 +58,13 @@ All notable changes to the Lyracist project are documented here. The format is b
   - **Selectable Sponsor Banner**: Added a new "Stadium Jumbotron Sponsor Banner" picker in Settings (`SelectedJumbotronBannerPath` in `AppSettings.cs` / `SelectedJumbotronBannerPath` in `DisplayPreferences.cs`), populated from the same banner library as the DJ Banner Screen plus a "(None - show tip message)" option. Selection persists and pushes live to the projection window via `DisplayWindowService.SetJumbotronBanner` (`KSRotation`) / `DisplayService.SetJumbotronBanner` (`Lyracist`).
   - **Image & Video Support**: The bottom sponsor box renders the selected banner as a static image or a looping, muted `.mp4` video (via a new `MediaElement` + `MediaEnded` loop handler), matching the DJ Banner Screen's supported formats.
   - **Tip Reminder Fallback**: When no sponsor banner is selected, the box shows "🍻 Don't forget, tip your bartenders and DJ! 🎧" instead of sitting empty.
+  - **Sponsor Box Fills The Full Remaining Height**: Reworked the panel's row sizing so the roster sizes to its content (`Auto`) and the sponsor box takes all remaining space (`*`, 150px floor) instead of a small fixed strip, and enlarged the fallback tip text (24 -> 40) to match.
+  - **KSRotation.Maui Build Fix**: Added the missing `SetJumbotronBanner` no-op stub to the hand-maintained `DisplayWindowService` shim in `KSRotation.Maui/Shims/WpfShims.cs` - the Maui project excludes the real WPF `DisplayWindowService.cs` and links a stub in its place, so the new method broke the Android/Windows tablet build until backfilled there too.
+- **Movie Theater 'Now Showing' - Scrolling Film-Strip Reel (`KSRotation`, `Lyracist`)**: Replaced the static "Coming Attractions" poster row with an actual scrolling 35mm filmstrip.
+  - **Vertical Film-Frame Loop**: Each cycle is a "🎬 COMING ATTRACTIONS 🎬" title frame, one film frame per upcoming singer (sprocket-hole rails down both edges, ANCHOR badge support), then a blank leader/divider frame (`• • •`) - then it repeats. Scrolls continuously upward like film feeding through a projector rather than the old horizontal poster carousel.
+  - **Seamless, Uninterrupted Loop**: Built entirely in code-behind (`BuildTheaterFilmStrip` in `SingerDisplayWindow.xaml.cs` / `RotationWindow.xaml.cs`) as two full cycles stacked back-to-back, scrolled by exactly one cycle's height and looped, so the wrap point is invisible. Guards the rebuild with a content signature (singer texts/order + strip width) so routine data refreshes that leave the queue unchanged no longer reset the scroll to the top - only a genuine add/remove/reorder restarts it.
+  - **Narrow Projector Column**: Capped the strip at a fixed 380px, centered column (bordered "projector gate") instead of stretching full width, so it reads as a projected filmstrip rather than a banner.
+  - **Layout Fix**: Fixed a `MaxWidth`-on-a-`Canvas` bug along the way - a `Canvas` always measures to zero size regardless of its children, so pairing `HorizontalAlignment="Center"` with `MaxWidth` collapsed the strip down to a hairline; switched to a fixed `Width` instead.
 
 ## [26.9.21.0] - 2026-09-21
 

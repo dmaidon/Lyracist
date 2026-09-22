@@ -310,6 +310,11 @@ namespace KSRotation.Windows
         {
             RebuildBanner();
             RestartCrawlIfActive();
+
+            if (_vm?.SelectedProjectionView == "Movie Theater 'Now Showing'" && TheaterPanel.Visibility == Visibility.Visible)
+            {
+                BuildTheaterFilmStrip();
+            }
         }
 
         // Crawl picks up updated rotation data on its next natural loop iteration.
@@ -488,6 +493,7 @@ namespace KSRotation.Windows
                     TheaterPanel.Visibility = Visibility.Visible;
                     StartTheater();
                     Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildTheaterProjectorBeam);
+                    Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildTheaterFilmStrip);
                     break;
 
                 default:
@@ -1866,6 +1872,233 @@ namespace KSRotation.Windows
         {
             TheaterLeaderSweep.BeginAnimation(RotateTransform.AngleProperty, null);
             TheaterLeaderSweepRight.BeginAnimation(RotateTransform.AngleProperty, null);
+            StopTheaterFilmStrip();
+        }
+
+        // ── Movie Theater film-frame strip ──────────────────────────────────
+        // Scrolls a vertical filmstrip: a "COMING ATTRACTIONS" title frame, one frame per
+        // upcoming singer, then a blank leader/divider frame, repeating. Built entirely in
+        // code (like the other views' particle/beam canvases) because each cycle mixes 3
+        // different frame kinds rather than one repeated data-bound template.
+        private const double TheaterTitleFrameHeight = 110;
+        private const double TheaterSingerFrameHeight = 130;
+        private const double TheaterDividerFrameHeight = 60;
+
+        // Content signature from the last build (singer texts/order + strip width). Routine data
+        // refreshes rebuild NextSingers with the exact same entries far more often than the queue
+        // actually changes; rebuilding the strip on every one of those would restart the scroll
+        // animation from the top and look like it stutters/pauses. Skipping the rebuild when
+        // nothing actually changed keeps the loop running uninterrupted.
+        private string? _theaterFilmStripSignature;
+
+        private void TheaterFilmStripCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (_vm?.SelectedProjectionView == "Movie Theater 'Now Showing'" && TheaterPanel.Visibility == Visibility.Visible)
+            {
+                BuildTheaterFilmStrip();
+            }
+        }
+
+        private void BuildTheaterFilmStrip()
+        {
+            double w = TheaterFilmStripCanvas.ActualWidth;
+            if (w <= 0 || _vm == null) return;
+
+            var singers = _vm.NextSingers.ToList();
+
+            string signature = w.ToString("F0") + "|" + string.Join("|", singers.Select(s => s.Text + (s.IsRotationStart ? "#A" : "")));
+            if (signature == _theaterFilmStripSignature && TheaterFilmStripCanvas.Children.Count > 0)
+            {
+                // Same content already scrolling - leave the running animation alone.
+                return;
+            }
+            _theaterFilmStripSignature = signature;
+
+            StopTheaterFilmStrip();
+            TheaterFilmStripCanvas.Children.Clear();
+
+            double setHeight = TheaterTitleFrameHeight + (singers.Count * TheaterSingerFrameHeight) + TheaterDividerFrameHeight;
+            if (setHeight <= 0) return;
+
+            // Two full copies of the set, stacked back-to-back, so looping the scroll by
+            // exactly one copy's height wraps seamlessly.
+            for (int copy = 0; copy < 2; copy++)
+            {
+                double y = copy * setHeight;
+
+                var title = BuildTheaterTitleFrame(w);
+                Canvas.SetLeft(title, 0);
+                Canvas.SetTop(title, y);
+                TheaterFilmStripCanvas.Children.Add(title);
+                y += TheaterTitleFrameHeight;
+
+                foreach (var singer in singers)
+                {
+                    var frame = BuildTheaterSingerFrame(singer, w);
+                    Canvas.SetLeft(frame, 0);
+                    Canvas.SetTop(frame, y);
+                    TheaterFilmStripCanvas.Children.Add(frame);
+                    y += TheaterSingerFrameHeight;
+                }
+
+                var divider = BuildTheaterDividerFrame(w);
+                Canvas.SetLeft(divider, 0);
+                Canvas.SetTop(divider, y);
+                TheaterFilmStripCanvas.Children.Add(divider);
+            }
+
+            var translate = new TranslateTransform();
+            TheaterFilmStripCanvas.RenderTransform = translate;
+
+            double durationSeconds = Math.Max(10, setHeight / 40.0); // ~40px/sec steady projector crawl
+            var scroll = new DoubleAnimation(0, -setHeight, TimeSpan.FromSeconds(durationSeconds))
+            {
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+            translate.BeginAnimation(TranslateTransform.YProperty, scroll);
+        }
+
+        private void StopTheaterFilmStrip()
+        {
+            if (TheaterFilmStripCanvas.RenderTransform is TranslateTransform t)
+            {
+                t.BeginAnimation(TranslateTransform.YProperty, null);
+            }
+        }
+
+        // Shared frame shell: sprocket-hole rails down the left/right edges around a black
+        // film cel. Returns the outer Grid; the cel Border is handed back for the caller to
+        // style and fill with content.
+        // Note: types below are fully qualified with System.Windows.* because this project also
+        // references System.Windows.Forms/System.Drawing (UseWindowsForms), which otherwise makes
+        // Color/Orientation/Brushes/HorizontalAlignment ambiguous.
+        private static Grid BuildTheaterFrameShell(double width, double height, out Border cel)
+        {
+            var root = new Grid
+            {
+                Width = width,
+                Height = height,
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x0A, 0x0A, 0x0A))
+            };
+            root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(26) });
+            root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(26) });
+
+            var leftRail = BuildTheaterSprocketRail(height);
+            Grid.SetColumn(leftRail, 0);
+            root.Children.Add(leftRail);
+
+            var rightRail = BuildTheaterSprocketRail(height);
+            Grid.SetColumn(rightRail, 2);
+            root.Children.Add(rightRail);
+
+            cel = new Border
+            {
+                Margin = new Thickness(2, 8, 2, 8),
+                CornerRadius = new CornerRadius(4),
+                BorderThickness = new Thickness(3)
+            };
+            Grid.SetColumn(cel, 1);
+            root.Children.Add(cel);
+
+            return root;
+        }
+
+        private static StackPanel BuildTheaterSprocketRail(double frameHeight)
+        {
+            var panel = new StackPanel
+            {
+                Orientation = System.Windows.Controls.Orientation.Vertical,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center
+            };
+            int holeCount = Math.Max(2, (int)(frameHeight / 40));
+            for (int i = 0; i < holeCount; i++)
+            {
+                panel.Children.Add(new Border
+                {
+                    Width = 14,
+                    Height = 10,
+                    CornerRadius = new CornerRadius(3),
+                    Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE8, 0xD9, 0xB0)),
+                    Margin = new Thickness(0, 6, 0, 6)
+                });
+            }
+            return panel;
+        }
+
+        private static Grid BuildTheaterTitleFrame(double width)
+        {
+            var root = BuildTheaterFrameShell(width, TheaterTitleFrameHeight, out var cel);
+            cel.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xE8, 0xB0));
+            cel.Background = new LinearGradientBrush(
+                System.Windows.Media.Color.FromRgb(0x3D, 0x24, 0x06), System.Windows.Media.Color.FromRgb(0x1C, 0x0D, 0x10),
+                new System.Windows.Point(0, 0), new System.Windows.Point(1, 1));
+            cel.Child = new TextBlock
+            {
+                Text = "🎬 COMING ATTRACTIONS 🎬",
+                FontSize = 26,
+                FontWeight = FontWeights.Black,
+                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xE8, 0xB0)),
+                TextAlignment = TextAlignment.Center,
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Effect = new DropShadowEffect { Color = System.Windows.Media.Color.FromRgb(0xFF, 0xE8, 0xB0), BlurRadius = 18, ShadowDepth = 0, Opacity = 0.8 }
+            };
+            return root;
+        }
+
+        private static Grid BuildTheaterSingerFrame(DisplayViewModel.NextSingerDisplay singer, double width)
+        {
+            var root = BuildTheaterFrameShell(width, TheaterSingerFrameHeight, out var cel);
+            cel.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xE8, 0xB0));
+            cel.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1C, 0x0D, 0x10));
+
+            var stack = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = System.Windows.HorizontalAlignment.Center };
+            if (singer.IsRotationStart)
+            {
+                stack.Children.Add(new Border
+                {
+                    Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xDC, 0x26, 0x26)),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(6, 2, 6, 2),
+                    Margin = new Thickness(0, 0, 0, 6),
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                    ToolTip = "Rotation Anchor (marks where a round begins)",
+                    Child = new TextBlock { Text = "⚓ ANCHOR", FontSize = 11, FontWeight = FontWeights.ExtraBold, Foreground = System.Windows.Media.Brushes.White }
+                });
+            }
+            stack.Children.Add(new TextBlock { Text = "🎬", FontSize = 24, HorizontalAlignment = System.Windows.HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 4) });
+            stack.Children.Add(new TextBlock
+            {
+                Text = singer.Text,
+                FontSize = 17,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xFA, 0xF0)),
+                TextAlignment = TextAlignment.Center,
+                TextWrapping = TextWrapping.Wrap,
+                MaxWidth = Math.Max(60, width - 90)
+            });
+
+            cel.Child = stack;
+            return root;
+        }
+
+        private static Grid BuildTheaterDividerFrame(double width)
+        {
+            var root = BuildTheaterFrameShell(width, TheaterDividerFrameHeight, out var cel);
+            cel.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3A, 0x3A, 0x3A));
+            cel.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x05, 0x05, 0x05));
+            cel.Child = new TextBlock
+            {
+                Text = "• • •",
+                FontSize = 16,
+                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x66, 0xFF, 0xE8, 0xB0)),
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            return root;
         }
 
         private void TheaterBeamCanvas_SizeChanged(object sender, SizeChangedEventArgs e)

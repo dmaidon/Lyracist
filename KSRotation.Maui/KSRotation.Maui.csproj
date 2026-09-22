@@ -1,4 +1,4 @@
-<!-- Edited on Sep 19, 2026 @ 17:43:00 -> Link handoff.html embedded resource for session device handoff -->
+<!-- Edited on Sep 22, 2026 @ 13:43:00 -> Fix XARDF7024 by bypassing RemoveDirFixed on _AndroidLibrayProjectIntermediatePath during Clean -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -46,9 +46,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyVersion>26.9.21.288</AssemblyVersion>
+		<AssemblyVersion>26.9.22.292</AssemblyVersion>
 
-		<FileVersion>26.9.21.288</FileVersion>
+		<FileVersion>26.9.22.292</FileVersion>
 
 		<Authors>Dennis N. Maidon</Authors>
 
@@ -206,10 +206,20 @@
 	<!-- Workaround for XARDF7024 / XARLP7000: Handle Xamarin.Android directory lock issue when _CleanMonoAndroidIntermediateDir or Clean runs -->
 	<Target Name="AndroidCleanWorkaround" BeforeTargets="Clean;_CleanMonoAndroidIntermediateDir">
 		<PropertyGroup>
-			<AndroidObjDir>obj\Debug\net10.0-android</AndroidObjDir>
-			<AndroidObjDirRelease>obj\Release\net10.0-android</AndroidObjDirRelease>
+			<!-- Clear _AndroidLibrayProjectIntermediatePath before _CleanMonoAndroidIntermediateDir runs so
+			     RemoveDirFixed at line 2891 is skipped and cannot throw XARDF7024 ("The directory is not empty"). -->
+			<_SavedAndroidLibraryPath>$(_AndroidLibrayProjectIntermediatePath)</_SavedAndroidLibraryPath>
+			<_AndroidLibrayProjectIntermediatePath></_AndroidLibrayProjectIntermediatePath>
 		</PropertyGroup>
-		<Exec Command="powershell -Command &quot;foreach ($dir in @('$(IntermediateOutputPath)lp', '$(IntermediateOutputPath)android', '$(IntermediateOutputPath)resizetizer', '$(IntermediateOutputPath)designtime')) { if (Test-Path $dir) { try { Get-ChildItem -Path $dir -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue; if (Test-Path $dir) { Rename-Item -Path $dir -NewName (($dir | Split-Path -Leaf) + '_stale_' + [System.Guid]::NewGuid().ToString('N')) -ErrorAction SilentlyContinue } } catch { } } }; Get-ChildItem -Path '$(IntermediateOutputPath)' -Filter '*_stale_*' -Directory -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue; exit 0&quot;" ContinueOnError="true" Condition="Exists('$(IntermediateOutputPath)')" />
+		<Exec Command="powershell -Command &quot;foreach ($dir in @('$(IntermediateOutputPath)lp', '$(IntermediateOutputPath)android', '$(IntermediateOutputPath)resizetizer', '$(IntermediateOutputPath)designtime')) { if (Test-Path $dir) { try { Get-ChildItem -Path $dir -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue; Remove-Item -LiteralPath $dir -Force -Recurse -ErrorAction SilentlyContinue; if (Test-Path $dir) { Rename-Item -Path $dir -NewName (($dir | Split-Path -Leaf) + '_stale_' + [System.Guid]::NewGuid().ToString('N')) -ErrorAction SilentlyContinue } } catch { } } }; Get-ChildItem -Path '$(IntermediateOutputPath)' -Filter '*_stale_*' -Directory -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue; exit 0&quot;" ContinueOnError="true" Condition="Exists('$(IntermediateOutputPath)')" />
+	</Target>
+
+	<Target Name="ResetAndroidLibraryPath" AfterTargets="_CleanMonoAndroidIntermediateDir">
+		<PropertyGroup>
+			<!-- Restore _AndroidLibrayProjectIntermediatePath for subsequent build steps -->
+			<_AndroidLibrayProjectIntermediatePath Condition="'$(_SavedAndroidLibraryPath)' != ''">$(_SavedAndroidLibraryPath)</_AndroidLibrayProjectIntermediatePath>
+			<_AndroidLibrayProjectIntermediatePath Condition="'$(_AndroidLibrayProjectIntermediatePath)' == ''">$(IntermediateOutputPath)lp\</_AndroidLibrayProjectIntermediatePath>
+		</PropertyGroup>
 	</Target>
 
 	<!-- Workaround: VS's Android debug launcher (DotNetDebugLaunchProvider) doesn't reliably tear down
