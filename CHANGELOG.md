@@ -1,5 +1,5 @@
-<!-- Edited on Sep 22, 2026 @ 18:40:00 -> Document Movie Theater scrolling film-strip redesign and Jumbotron sponsor box refinements -->
-Last Edit: Sep 22, 2026 - Movie Theater Film-Strip Reel & Jumbotron Sponsor Box Refinements
+<!-- Edited on Sep 22, 2026 @ 20:15:00 -> Document review fixes: film-strip freeze, Festival tier bug, Jumbotron video guards, frozen brushes -->
+Last Edit: Sep 22, 2026 - Movie Theater Film-Strip & Jumbotron Correctness/Resource Fixes
 
 # Changelog
 
@@ -65,6 +65,15 @@ All notable changes to the Lyracist project are documented here. The format is b
   - **Seamless, Uninterrupted Loop**: Built entirely in code-behind (`BuildTheaterFilmStrip` in `SingerDisplayWindow.xaml.cs` / `RotationWindow.xaml.cs`) as two full cycles stacked back-to-back, scrolled by exactly one cycle's height and looped, so the wrap point is invisible. Guards the rebuild with a content signature (singer texts/order + strip width) so routine data refreshes that leave the queue unchanged no longer reset the scroll to the top - only a genuine add/remove/reorder restarts it.
   - **Narrow Projector Column**: Capped the strip at a fixed 380px, centered column (bordered "projector gate") instead of stretching full width, so it reads as a projected filmstrip rather than a banner.
   - **Layout Fix**: Fixed a `MaxWidth`-on-a-`Canvas` bug along the way - a `Canvas` always measures to zero size regardless of its children, so pairing `HorizontalAlignment="Center"` with `MaxWidth` collapsed the strip down to a hairline; switched to a fixed `Width` instead.
+
+### Fixed
+- **Movie Theater Film-Strip Correctness & Long-Show Resource Fixes (`KSRotation`, `Lyracist`)**: A same-day multi-angle review of the projection-view work above surfaced and fixed 6 issues, none of which had shipped yet:
+  - **Film Strip Froze Permanently After a View Round-Trip**: `StopTheaterFilmStrip()` stopped the scroll animation but never cleared the canvas or reset the rebuild-skip content signature, so switching away from Movie Theater and back again with an unchanged queue left the strip visibly stuck at whatever position it stopped at - the "no-op rebuild" guard from the earlier stutter fix now wrongly treated the frozen strip as still-running. Fixed by invalidating the signature whenever the strip is stopped, so the next display always does a real rebuild.
+  - **Concert Festival Lineup Tier Font Bug**: The pre-existing "support acts" list's `AlternationCount="5"` was never updated when this session bumped the shared next-singer queue to 6, so the 6th singer wrapped to `AlternationIndex` 0 and rendered at the largest "headliner" font instead of the smallest. Bumped to `AlternationCount="6"`.
+  - **Jumbotron Sponsor Video Could Loop Forever Off-Screen**: `MediaEnded` had no active-view guard (unlike the rest of the Jumbotron banner code), so a video reaching its natural loop point right as the DJ switches away could restart playback and keep re-triggering itself indefinitely on a hidden `MediaElement`, burning decode/GPU resources for the rest of the show. Added the same `SelectedProjectionView` guard used elsewhere.
+  - **Jumbotron Sponsor Video Loaded Unnecessarily**: `MediaElement.Source` was bound directly in XAML, so every banner selection opened the file through the media pipeline regardless of whether Stadium Jumbotron was even the active view or the file was a video at all. Moved `Source` assignment to code-behind (`UpdateJumbotronBanner`), set only when actually needed - consistent with the existing `DjBannerWindow` pattern.
+  - **Film-Strip Rebuild-Skip Signature Collision Risk**: The signature that gates redundant film-strip rebuilds joined free-text singer/song titles with a literal `|`, which a title containing that character could theoretically collide on. Switched to a control character (`\u0001`) that can never appear in display text.
+  - **Unfrozen Brushes/Effects in the Film-Strip Builders**: The frame-builder methods constructed fresh, unfrozen `SolidColorBrush`/`LinearGradientBrush`/`DropShadowEffect` instances on every rebuild. Hoisted the repeated ones into frozen, shared static instances to cut GC pressure and render-thread overhead on a screen meant to run continuously for hours.
 
 ## [26.9.21.0] - 2026-09-21
 

@@ -1767,17 +1767,24 @@ namespace KSRotation.Windows
 
             if (_vm.IsJumbotronBannerVideo)
             {
+                JumbotronBannerVideo.Source = new Uri(_vm.JumbotronBannerPath);
                 JumbotronBannerVideo.Position = TimeSpan.Zero;
                 JumbotronBannerVideo.Play();
             }
             else
             {
                 JumbotronBannerVideo.Stop();
+                JumbotronBannerVideo.Source = null;
             }
         }
 
         private void JumbotronBannerVideo_MediaEnded(object sender, RoutedEventArgs e)
         {
+            // A MediaEnded event dispatched right as the DJ switches away can arrive after
+            // StopJumbotron() already called Stop() - without this guard it would restart
+            // playback of a now-hidden, irrelevant video and keep re-triggering itself forever.
+            if (_vm?.SelectedProjectionView != "Stadium Jumbotron") return;
+
             JumbotronBannerVideo.Position = TimeSpan.Zero;
             JumbotronBannerVideo.Play();
         }
@@ -1906,7 +1913,10 @@ namespace KSRotation.Windows
 
             var singers = _vm.NextSingers.ToList();
 
-            string signature = w.ToString("F0") + "|" + string.Join("|", singers.Select(s => s.Text + (s.IsRotationStart ? "#A" : "")));
+            // Joined with U+0001 (a control character that can never appear in singer/song display
+            // text) rather than a printable delimiter, so free-text titles can't collide two
+            // different queues onto the same signature.
+            string signature = w.ToString("F0") + "\u0001" + string.Join("\u0001", singers.Select(s => s.Text + (s.IsRotationStart ? "#A" : "")));
             if (signature == _theaterFilmStripSignature && TheaterFilmStripCanvas.Children.Count > 0)
             {
                 // Same content already scrolling - leave the running animation alone.
@@ -1960,6 +1970,11 @@ namespace KSRotation.Windows
 
         private void StopTheaterFilmStrip()
         {
+            // Invalidate the signature so the next BuildTheaterFilmStrip() call (e.g. when the DJ
+            // switches back into this view) always does a real rebuild and restarts the animation,
+            // even if the queue is unchanged - otherwise the guard below would see a matching
+            // signature and leave the strip frozen at whatever position it stopped at.
+            _theaterFilmStripSignature = null;
             if (TheaterFilmStripCanvas.RenderTransform is TranslateTransform t)
             {
                 t.BeginAnimation(TranslateTransform.YProperty, null);
@@ -1972,13 +1987,60 @@ namespace KSRotation.Windows
         // Note: types below are fully qualified with System.Windows.* because this project also
         // references System.Windows.Forms/System.Drawing (UseWindowsForms), which otherwise makes
         // Color/Orientation/Brushes/HorizontalAlignment ambiguous.
+        // Shared, frozen brushes/effect for the film-strip frame builders below. Frozen Freezables
+        // are immutable and safe to reuse across many elements at once, so hoisting these out of
+        // the per-frame builder methods avoids allocating (and change-tracking) 30-60+ throwaway
+        // Brush/Effect objects on every rebuild - up to 12 singer frames alone per rebuild (2
+        // copies x up to 6 singers).
+        private static readonly SolidColorBrush TheaterCelBgBrush = FrozenBrush(0x0A, 0x0A, 0x0A);
+        private static readonly SolidColorBrush TheaterSprocketHoleBrush = FrozenBrush(0xE8, 0xD9, 0xB0);
+        private static readonly SolidColorBrush TheaterGoldBrush = FrozenBrush(0xFF, 0xE8, 0xB0);
+        private static readonly SolidColorBrush TheaterSingerCelBgBrush = FrozenBrush(0x1C, 0x0D, 0x10);
+        private static readonly SolidColorBrush TheaterAnchorBadgeBgBrush = FrozenBrush(0xDC, 0x26, 0x26);
+        private static readonly SolidColorBrush TheaterSingerTextBrush = FrozenBrush(0xFF, 0xFA, 0xF0);
+        private static readonly SolidColorBrush TheaterDividerBorderBrush = FrozenBrush(0x3A, 0x3A, 0x3A);
+        private static readonly SolidColorBrush TheaterDividerBgBrush = FrozenBrush(0x05, 0x05, 0x05);
+        private static readonly SolidColorBrush TheaterDividerTextBrush = FrozenBrush(0x66, 0xFF, 0xE8, 0xB0);
+        private static readonly LinearGradientBrush TheaterTitleGradientBrush = FrozenTitleGradient();
+        private static readonly DropShadowEffect TheaterTitleGlowEffect = FrozenGlow();
+
+        private static SolidColorBrush FrozenBrush(byte r, byte g, byte b)
+        {
+            var brush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(r, g, b));
+            brush.Freeze();
+            return brush;
+        }
+
+        private static SolidColorBrush FrozenBrush(byte a, byte r, byte g, byte b)
+        {
+            var brush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(a, r, g, b));
+            brush.Freeze();
+            return brush;
+        }
+
+        private static LinearGradientBrush FrozenTitleGradient()
+        {
+            var brush = new LinearGradientBrush(
+                System.Windows.Media.Color.FromRgb(0x3D, 0x24, 0x06), System.Windows.Media.Color.FromRgb(0x1C, 0x0D, 0x10),
+                new System.Windows.Point(0, 0), new System.Windows.Point(1, 1));
+            brush.Freeze();
+            return brush;
+        }
+
+        private static DropShadowEffect FrozenGlow()
+        {
+            var effect = new DropShadowEffect { Color = System.Windows.Media.Color.FromRgb(0xFF, 0xE8, 0xB0), BlurRadius = 18, ShadowDepth = 0, Opacity = 0.8 };
+            effect.Freeze();
+            return effect;
+        }
+
         private static Grid BuildTheaterFrameShell(double width, double height, out Border cel)
         {
             var root = new Grid
             {
                 Width = width,
                 Height = height,
-                Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x0A, 0x0A, 0x0A))
+                Background = TheaterCelBgBrush
             };
             root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(26) });
             root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -2020,7 +2082,7 @@ namespace KSRotation.Windows
                     Width = 14,
                     Height = 10,
                     CornerRadius = new CornerRadius(3),
-                    Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE8, 0xD9, 0xB0)),
+                    Background = TheaterSprocketHoleBrush,
                     Margin = new Thickness(0, 6, 0, 6)
                 });
             }
@@ -2030,21 +2092,19 @@ namespace KSRotation.Windows
         private static Grid BuildTheaterTitleFrame(double width)
         {
             var root = BuildTheaterFrameShell(width, TheaterTitleFrameHeight, out var cel);
-            cel.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xE8, 0xB0));
-            cel.Background = new LinearGradientBrush(
-                System.Windows.Media.Color.FromRgb(0x3D, 0x24, 0x06), System.Windows.Media.Color.FromRgb(0x1C, 0x0D, 0x10),
-                new System.Windows.Point(0, 0), new System.Windows.Point(1, 1));
+            cel.BorderBrush = TheaterGoldBrush;
+            cel.Background = TheaterTitleGradientBrush;
             cel.Child = new TextBlock
             {
                 Text = "🎬 COMING ATTRACTIONS 🎬",
                 FontSize = 26,
                 FontWeight = FontWeights.Black,
-                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xE8, 0xB0)),
+                Foreground = TheaterGoldBrush,
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap,
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
-                Effect = new DropShadowEffect { Color = System.Windows.Media.Color.FromRgb(0xFF, 0xE8, 0xB0), BlurRadius = 18, ShadowDepth = 0, Opacity = 0.8 }
+                Effect = TheaterTitleGlowEffect
             };
             return root;
         }
@@ -2052,15 +2112,15 @@ namespace KSRotation.Windows
         private static Grid BuildTheaterSingerFrame(DisplayViewModel.NextSingerDisplay singer, double width)
         {
             var root = BuildTheaterFrameShell(width, TheaterSingerFrameHeight, out var cel);
-            cel.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xE8, 0xB0));
-            cel.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1C, 0x0D, 0x10));
+            cel.BorderBrush = TheaterGoldBrush;
+            cel.Background = TheaterSingerCelBgBrush;
 
             var stack = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = System.Windows.HorizontalAlignment.Center };
             if (singer.IsRotationStart)
             {
                 stack.Children.Add(new Border
                 {
-                    Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xDC, 0x26, 0x26)),
+                    Background = TheaterAnchorBadgeBgBrush,
                     CornerRadius = new CornerRadius(4),
                     Padding = new Thickness(6, 2, 6, 2),
                     Margin = new Thickness(0, 0, 0, 6),
@@ -2075,7 +2135,7 @@ namespace KSRotation.Windows
                 Text = singer.Text,
                 FontSize = 17,
                 FontWeight = FontWeights.Bold,
-                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xFA, 0xF0)),
+                Foreground = TheaterSingerTextBrush,
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap,
                 MaxWidth = Math.Max(60, width - 90)
@@ -2088,13 +2148,13 @@ namespace KSRotation.Windows
         private static Grid BuildTheaterDividerFrame(double width)
         {
             var root = BuildTheaterFrameShell(width, TheaterDividerFrameHeight, out var cel);
-            cel.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3A, 0x3A, 0x3A));
-            cel.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x05, 0x05, 0x05));
+            cel.BorderBrush = TheaterDividerBorderBrush;
+            cel.Background = TheaterDividerBgBrush;
             cel.Child = new TextBlock
             {
                 Text = "• • •",
                 FontSize = 16,
-                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x66, 0xFF, 0xE8, 0xB0)),
+                Foreground = TheaterDividerTextBrush,
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             };

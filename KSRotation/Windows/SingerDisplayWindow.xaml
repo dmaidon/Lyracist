@@ -960,7 +960,7 @@
                 </StackPanel>
 
                 <!-- Support acts, largest-to-smallest poster typography (AlternationIndex drives tier size) -->
-                <ItemsControl ItemsSource="{Binding NextSingers}" HorizontalAlignment="Center" AlternationCount="5">
+                <ItemsControl ItemsSource="{Binding NextSingers}" HorizontalAlignment="Center" AlternationCount="6">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center" />
@@ -1655,7 +1655,10 @@
                                                 </Style>
                                             </Image.Style>
                                         </Image>
-                                        <MediaElement x:Name="JumbotronBannerVideo" Source="{Binding JumbotronBannerPath}" Stretch="Uniform"
+                                        <!-- Source is set imperatively in UpdateJumbotronBanner (not bound here) so picking an
+                                             image, or picking any banner while a different view is showing, never opens this
+                                             file through the video pipeline. -->
+                                        <MediaElement x:Name="JumbotronBannerVideo" Stretch="Uniform"
                                                       LoadedBehavior="Manual" UnloadedBehavior="Manual" IsMuted="True" MediaEnded="JumbotronBannerVideo_MediaEnded"
                                                       Visibility="{Binding IsJumbotronBannerVideo, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     </Grid>
