@@ -1,4 +1,4 @@
-// Edited on Sep 3, 2026 @ 23:55:00 -> Add SetLastRound method to IDisplayService
+// Edited on Sep 22, 2026 @ 07:56:00 -> Add SetAutoRotateDurationSeconds to IDisplayService
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -51,6 +51,7 @@ public interface IDisplayService
     void SetLastRound(bool isLastRound);
     void SetRotationViewMode(string mode);
     void SetAutoRotateProjectionViews(bool enabled);
+    void SetAutoRotateDurationSeconds(int seconds);
     void SetProjectionRotationSchedule(System.Collections.Generic.List<ProjectionRotationEntry> schedule);
     void SetCrawlBannerText(string text);
     void SetShowEstimatedWaitTime(bool show);

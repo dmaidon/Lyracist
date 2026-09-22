@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 16:45:00 -> Update close/hide/escape events to toggle active status in DisplayService
+// Edited on Sep 22, 2026 @ 08:46:30 -> Set BannerImage.Source directly and listen to BannerImage property changes
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -23,9 +23,17 @@ public partial class DjBannerWindow : Window
 
     private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(DjBannerWindowViewModel.BannerPath))
+        if (e.PropertyName == nameof(DjBannerWindowViewModel.BannerPath) ||
+            e.PropertyName == nameof(DjBannerWindowViewModel.BannerImage))
         {
-            UpdateBannerView();
+            if (Dispatcher.CheckAccess())
+            {
+                UpdateBannerView();
+            }
+            else
+            {
+                Dispatcher.Invoke(UpdateBannerView);
+            }
         }
     }
 
@@ -56,7 +64,7 @@ public partial class DjBannerWindow : Window
             BannerVideo.Source = null;
             BannerVideo.Visibility = Visibility.Collapsed;
             BannerImage.Visibility = Visibility.Visible;
-            // The viewmodel handles loading BannerImage for standard image formats
+            BannerImage.Source = _vm.BannerImage;
         }
     }
 

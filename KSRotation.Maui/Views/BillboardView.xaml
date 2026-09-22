@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!-- Edited on Sep 18, 2026 @ 08:46:00 -> Add SPECIAL badge to billboard queue and now singing in BillboardView.xaml -->
+<!-- Edited on Sep 22, 2026 @ 11:00:00 -> Upsize font by 2 sizes on right side upcoming queue and up next card in BillboardView.xaml -->
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:KSRotation.ViewModels;assembly=KSRotation"
@@ -151,7 +150,7 @@
                                     StrokeThickness="0"
                                     Padding="8,2">
                                 <Label Text="⏭️ UP NEXT"
-                                       FontSize="10"
+                                       FontSize="12"
                                        FontAttributes="Bold"
                                        TextColor="White"
                                        CharacterSpacing="1" />
@@ -162,7 +161,7 @@
                                     BackgroundColor="#DC2626"
                                     StrokeThickness="0"
                                     Padding="8,2">
-                                <Label Text="⚓ ANCHOR" FontSize="10" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                                <Label Text="⚓ ANCHOR" FontSize="12" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
                             </Border>
                             <Border HorizontalOptions="Start"
                                     IsVisible="{Binding NextSingerIsSpecial}"
@@ -170,18 +169,18 @@
                                     BackgroundColor="#8B5CF6"
                                     StrokeThickness="0"
                                     Padding="8,2">
-                                <Label Text="⭐ SPECIAL" FontSize="10" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
+                                <Label Text="⭐ SPECIAL" FontSize="12" FontAttributes="Bold" TextColor="White" CharacterSpacing="1" />
                             </Border>
                         </HorizontalStackLayout>
 
                         <Label Text="{Binding NextSingerNameDisplay}"
-                               FontSize="17"
+                               FontSize="19"
                                FontAttributes="Bold"
                                TextColor="White"
                                LineBreakMode="TailTruncation" />
 
                         <Label Text="{Binding NextSingerSongDisplay, StringFormat='&quot;{0}&quot;'}"
-                               FontSize="13"
+                               FontSize="15"
                                FontAttributes="Italic"
                                TextColor="#93C5FD"
                                LineBreakMode="TailTruncation" />
@@ -295,12 +294,12 @@
                 <Grid RowDefinitions="Auto,*" RowSpacing="10">
                     <HorizontalStackLayout Grid.Row="0" Spacing="6" VerticalOptions="Center">
                         <Label Text="UPCOMING IN ROTATION"
-                               FontSize="12"
+                               FontSize="14"
                                FontAttributes="Bold"
                                TextColor="#64748B"
                                CharacterSpacing="1.5" />
                         <Label Text="( {N} = Est. wait )"
-                               FontSize="11"
+                               FontSize="13"
                                TextColor="#475569"
                                IsVisible="{Binding ShowEstimatedWaitTime}" />
                     </HorizontalStackLayout>
@@ -313,7 +312,7 @@
                                 <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6" Padding="20">
                                     <Label Text="📋" FontSize="28" HorizontalTextAlignment="Center" />
                                     <Label Text="Rotation is open. Submit your song to take the stage!"
-                                           FontSize="12"
+                                           FontSize="14"
                                            TextColor="#64748B"
                                            HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
@@ -336,10 +335,10 @@
                                                         StrokeThickness="0"
                                                         Padding="4,1"
                                                         VerticalOptions="Center">
-                                                    <Label Text="⚓ ANCHOR" FontSize="9" FontAttributes="Bold" TextColor="White" />
+                                                    <Label Text="⚓ ANCHOR" FontSize="11" FontAttributes="Bold" TextColor="White" />
                                                 </Border>
                                                 <Label Text="{Binding DisplayNameWithDuet}"
-                                                       FontSize="14"
+                                                       FontSize="16"
                                                        FontAttributes="Bold"
                                                        TextColor="White"
                                                        LineBreakMode="TailTruncation" />
@@ -350,11 +349,11 @@
                                                         StrokeThickness="1"
                                                         Padding="4,1"
                                                         VerticalOptions="Center">
-                                                    <Label Text="{Binding EstimatedWaitMinutes, StringFormat='{}{{{0}}}'}" FontSize="9" FontAttributes="Bold" TextColor="#0EA5E9" />
+                                                    <Label Text="{Binding EstimatedWaitMinutes, StringFormat='{}{{{0}}}'}" FontSize="11" FontAttributes="Bold" TextColor="#0EA5E9" />
                                                 </Border>
                                             </HorizontalStackLayout>
                                             <Label Text="{Binding Song}"
-                                                   FontSize="12"
+                                                   FontSize="14"
                                                    FontAttributes="Italic"
                                                    TextColor="#94A3B8"
                                                    LineBreakMode="TailTruncation" />
@@ -367,21 +366,21 @@
                                                     BackgroundColor="#8B5CF6"
                                                     StrokeThickness="0"
                                                     Padding="6,2">
-                                                <Label Text="⭐ SPECIAL" FontSize="9" FontAttributes="Bold" TextColor="White" />
+                                                <Label Text="⭐ SPECIAL" FontSize="11" FontAttributes="Bold" TextColor="White" />
                                             </Border>
                                             <Border IsVisible="{Binding IsSkipped}"
                                                     StrokeShape="RoundRectangle 4"
                                                     BackgroundColor="#D97706"
                                                     StrokeThickness="0"
                                                     Padding="6,2">
-                                                <Label Text="SKIP" FontSize="9" FontAttributes="Bold" TextColor="White" />
+                                                <Label Text="SKIP" FontSize="11" FontAttributes="Bold" TextColor="White" />
                                             </Border>
                                             <Border IsVisible="{Binding IsPaused}"
                                                     StrokeShape="RoundRectangle 4"
                                                     BackgroundColor="#475569"
                                                     StrokeThickness="0"
                                                     Padding="6,2">
-                                                <Label Text="PAUSED" FontSize="9" FontAttributes="Bold" TextColor="White" />
+                                                <Label Text="PAUSED" FontSize="11" FontAttributes="Bold" TextColor="White" />
                                             </Border>
                                         </HorizontalStackLayout>
                                     </Grid>

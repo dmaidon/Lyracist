@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:38:00 -> Fix RCS1118 const inset and RCS1001 if braces
+// Edited on Sep 22, 2026 @ 00:04:00 -> Implement 4 new projection views (Casino Slot Reels, Jukebox, Stadium Jumbotron, Movie Theater 'Now Showing')
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -116,6 +116,34 @@ namespace KSRotation.Windows
             System.Windows.Media.Color.FromRgb(0xFF, 0xE0, 0x6B),
             System.Windows.Media.Color.FromRgb(0x6B, 0xFF, 0xC4),
         ];
+
+        // ── Casino Slot Reels state ──────────────────────────────────────────
+        private readonly List<UIElement> _slotCoins = [];
+        private static readonly System.Windows.Media.Color[] SlotParticlePalette =
+        [
+            System.Windows.Media.Color.FromRgb(0xFF, 0xF2, 0xA3),
+            System.Windows.Media.Color.FromRgb(0xFF, 0xD7, 0x00),
+            System.Windows.Media.Color.FromRgb(0xFF, 0xC4, 0x00),
+            System.Windows.Media.Color.FromRgb(0xFF, 0xA5, 0x00),
+            System.Windows.Media.Color.FromRgb(0xFF, 0xFF, 0xFF),
+        ];
+
+        // ── Jukebox state ───────────────────────────────────────────────────
+        private readonly List<UIElement> _jukeboxBubbles = [];
+        private static readonly System.Windows.Media.Color[] JukeboxBubblePalette =
+        [
+            System.Windows.Media.Color.FromRgb(0x00, 0xE5, 0xFF),
+            System.Windows.Media.Color.FromRgb(0xFF, 0x35, 0x7E),
+            System.Windows.Media.Color.FromRgb(0xFF, 0xD2, 0x69),
+            System.Windows.Media.Color.FromRgb(0x8E, 0x44, 0xAD),
+            System.Windows.Media.Color.FromRgb(0x00, 0xFF, 0xCC),
+        ];
+
+        // ── Stadium Jumbotron state ─────────────────────────────────────────
+        private readonly List<RotateTransform> _jumbotronSpotlightRotates = [];
+
+        // ── Movie Theater state ─────────────────────────────────────────────
+        private readonly List<UIElement> _theaterBeams = [];
 
         // VisualBrush source canvas declared in XAML (CrawlSourceCanvas) wrapped in a 0x0 clipped Grid
         // to keep layout and render passes active during animations while remaining invisible on screen.
@@ -258,6 +286,15 @@ namespace KSRotation.Windows
                     StartAnimation();   // restart marquee at new speed without rebuilding inlines
                     break;
 
+                case nameof(DisplayViewModel.CurrentSingerName):
+                    if (_vm?.SelectedProjectionView == "Casino Slot Reels" && SlotReelsPanel.Visibility == Visibility.Visible)
+                    {
+                        StartSlotReels();
+                    }
+                    RebuildBanner();
+                    RestartCrawlIfActive();
+                    break;
+
                 default:
                     RebuildBanner();
                     RestartCrawlIfActive();
@@ -367,6 +404,14 @@ namespace KSRotation.Windows
             StopSynthGrid();
             StopFestivalBeams();
             StopFestivalSparkles();
+            StopSlotReels();
+            StopSlotParticles();
+            StopJukebox();
+            StopJukeboxBubbles();
+            StopJumbotron();
+            StopJumbotronSpotlights();
+            StopTheater();
+            StopTheaterProjectorBeam();
 
             NormalPanel.Visibility = Visibility.Collapsed;
             CrawlPanel.Visibility = Visibility.Collapsed;
@@ -375,6 +420,10 @@ namespace KSRotation.Windows
             DiscoPanel.Visibility = Visibility.Collapsed;
             SynthwavePanel.Visibility = Visibility.Collapsed;
             FestivalPanel.Visibility = Visibility.Collapsed;
+            SlotReelsPanel.Visibility = Visibility.Collapsed;
+            JukeboxPanel.Visibility = Visibility.Collapsed;
+            JumbotronPanel.Visibility = Visibility.Collapsed;
+            TheaterPanel.Visibility = Visibility.Collapsed;
 
             switch (_vm.SelectedProjectionView)
             {
@@ -382,8 +431,6 @@ namespace KSRotation.Windows
                     CrawlPanel.Visibility = Visibility.Visible;
                     Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)StartCrawl);
                     break;
-
-
 
                 case "Vegas Marquee":
                     MarqueePanel.Visibility = Visibility.Visible;
@@ -412,6 +459,30 @@ namespace KSRotation.Windows
                     FestivalPanel.Visibility = Visibility.Visible;
                     Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildFestivalBeams);
                     Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildFestivalSparkles);
+                    break;
+
+                case "Casino Slot Reels":
+                    SlotReelsPanel.Visibility = Visibility.Visible;
+                    StartSlotReels();
+                    Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildSlotParticles);
+                    break;
+
+                case "Jukebox":
+                    JukeboxPanel.Visibility = Visibility.Visible;
+                    StartJukebox();
+                    Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildJukeboxBubbles);
+                    break;
+
+                case "Stadium Jumbotron":
+                    JumbotronPanel.Visibility = Visibility.Visible;
+                    StartJumbotron();
+                    Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildJumbotronSpotlights);
+                    break;
+
+                case "Movie Theater 'Now Showing'":
+                    TheaterPanel.Visibility = Visibility.Visible;
+                    StartTheater();
+                    Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildTheaterProjectorBeam);
                     break;
 
                 default:
@@ -1417,6 +1488,399 @@ namespace KSRotation.Windows
 
             panel.Children.Add(new Border { Height = 300 }); // trailing space
             return panel;
+        }
+
+        // ── Casino Slot Reels ───────────────────────────────────────────────
+        private void StartSlotReels()
+        {
+            var reelSpin = new DoubleAnimation(-180, 0, TimeSpan.FromSeconds(1.1))
+            {
+                EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut, Exponent = 4 }
+            };
+            SlotReelTranslate.BeginAnimation(TranslateTransform.YProperty, reelSpin);
+
+            var pulse = new DoubleAnimation(18, 40, TimeSpan.FromSeconds(0.75))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+            SlotJackpotGlow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, pulse);
+        }
+
+        private void StopSlotReels()
+        {
+            SlotReelTranslate.BeginAnimation(TranslateTransform.YProperty, null);
+            SlotJackpotGlow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, null);
+        }
+
+        private void SlotParticleCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (_vm?.SelectedProjectionView == "Casino Slot Reels" && SlotReelsPanel.Visibility == Visibility.Visible)
+            {
+                BuildSlotParticles();
+            }
+        }
+
+        private void BuildSlotParticles()
+        {
+            StopSlotParticles();
+            SlotParticleCanvas.Children.Clear();
+
+            double w = SlotParticleCanvas.ActualWidth;
+            double h = SlotParticleCanvas.ActualHeight;
+            if (w <= 0 || h <= 0) return;
+
+            int count = 28;
+            for (int i = 0; i < count; i++)
+            {
+                double size = (_rng.NextDouble() * 14) + 10;
+                var color = SlotParticlePalette[i % SlotParticlePalette.Length];
+
+                Shape particle;
+                if (i % 2 == 0)
+                {
+                    particle = new Ellipse
+                    {
+                        Width = size,
+                        Height = size,
+                        Fill = new RadialGradientBrush
+                        {
+                            GradientStops =
+                            {
+                                new GradientStop(System.Windows.Media.Color.FromArgb(0xEE, 0xFF, 0xFF, 0xFF), 0.0),
+                                new GradientStop(System.Windows.Media.Color.FromArgb(0xDD, color.R, color.G, color.B), 0.5),
+                                new GradientStop(System.Windows.Media.Color.FromArgb(0xAA, 0x8B, 0x65, 0x08), 1.0)
+                            }
+                        }
+                    };
+                }
+                else
+                {
+                    particle = new Polygon
+                    {
+                        Points =
+                        [
+                            new System.Windows.Point(size / 2, 0),
+                            new System.Windows.Point(size * 0.65, size * 0.35),
+                            new System.Windows.Point(size, size / 2),
+                            new System.Windows.Point(size * 0.65, size * 0.65),
+                            new System.Windows.Point(size / 2, size),
+                            new System.Windows.Point(size * 0.35, size * 0.65),
+                            new System.Windows.Point(0, size / 2),
+                            new System.Windows.Point(size * 0.35, size * 0.35)
+                        ],
+                        Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0xCC, color.R, color.G, color.B))
+                    };
+                }
+
+                double left = _rng.NextDouble() * w;
+                double top = _rng.NextDouble() * h;
+                Canvas.SetLeft(particle, left);
+                Canvas.SetTop(particle, top);
+
+                var translate = new TranslateTransform();
+                particle.RenderTransform = translate;
+
+                double driftY = -((_rng.NextDouble() * 80) + 40);
+                double driftX = (_rng.NextDouble() * 40) - 20;
+                double duration = (_rng.NextDouble() * 2.5) + 2.0;
+                double begin = _rng.NextDouble() * 2.0;
+
+                translate.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, driftY, TimeSpan.FromSeconds(duration))
+                {
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever,
+                    BeginTime = TimeSpan.FromSeconds(begin)
+                });
+                translate.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(-driftX, driftX, TimeSpan.FromSeconds(duration * 1.3))
+                {
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever,
+                    BeginTime = TimeSpan.FromSeconds(begin)
+                });
+                particle.BeginAnimation(OpacityProperty, new DoubleAnimation(0.2, 0.95, TimeSpan.FromSeconds(duration))
+                {
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever,
+                    BeginTime = TimeSpan.FromSeconds(begin)
+                });
+
+                SlotParticleCanvas.Children.Add(particle);
+                _slotCoins.Add(particle);
+            }
+        }
+
+        private void StopSlotParticles()
+        {
+            foreach (var elem in _slotCoins)
+            {
+                elem.BeginAnimation(OpacityProperty, null);
+                if (elem.RenderTransform is TranslateTransform t)
+                {
+                    t.BeginAnimation(TranslateTransform.XProperty, null);
+                    t.BeginAnimation(TranslateTransform.YProperty, null);
+                }
+            }
+            SlotParticleCanvas.Children.Clear();
+            _slotCoins.Clear();
+        }
+
+        // ── Jukebox ─────────────────────────────────────────────────────────
+        private void StartJukebox()
+        {
+        }
+
+        private void StopJukebox()
+        {
+        }
+
+        private void JukeboxBubbleCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (_vm?.SelectedProjectionView == "Jukebox" && JukeboxPanel.Visibility == Visibility.Visible)
+            {
+                BuildJukeboxBubbles();
+            }
+        }
+
+        private void BuildJukeboxBubbles()
+        {
+            StopJukeboxBubbles();
+            JukeboxBubbleCanvas.Children.Clear();
+
+            double w = JukeboxBubbleCanvas.ActualWidth;
+            double h = JukeboxBubbleCanvas.ActualHeight;
+            if (w <= 0 || h <= 0) return;
+
+            int bubblesPerTube = 18;
+            for (int side = 0; side < 2; side++)
+            {
+                double tubeLeft = side == 0 ? 12 : w - 48;
+                for (int i = 0; i < bubblesPerTube; i++)
+                {
+                    double size = (_rng.NextDouble() * 10) + 6;
+                    var color = JukeboxBubblePalette[_rng.Next(JukeboxBubblePalette.Length)];
+
+                    var bubble = new Ellipse
+                    {
+                        Width = size,
+                        Height = size,
+                        Fill = new RadialGradientBrush
+                        {
+                            GradientStops =
+                            {
+                                new GradientStop(System.Windows.Media.Color.FromArgb(0xEE, 0xFF, 0xFF, 0xFF), 0.0),
+                                new GradientStop(System.Windows.Media.Color.FromArgb(0x88, color.R, color.G, color.B), 0.6),
+                                new GradientStop(System.Windows.Media.Color.FromArgb(0x22, color.R, color.G, color.B), 1.0)
+                            }
+                        }
+                    };
+
+                    double startX = tubeLeft + (_rng.NextDouble() * 24);
+                    double startY = h - (_rng.NextDouble() * (h * 0.3));
+                    Canvas.SetLeft(bubble, startX);
+                    Canvas.SetTop(bubble, startY);
+
+                    var translate = new TranslateTransform();
+                    bubble.RenderTransform = translate;
+
+                    double duration = (_rng.NextDouble() * 2.5) + 3.0;
+                    double begin = _rng.NextDouble() * 3.0;
+
+                    translate.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, -h, TimeSpan.FromSeconds(duration))
+                    {
+                        RepeatBehavior = RepeatBehavior.Forever,
+                        BeginTime = TimeSpan.FromSeconds(begin)
+                    });
+                    bubble.BeginAnimation(OpacityProperty, new DoubleAnimation(0.3, 0.95, TimeSpan.FromSeconds(duration * 0.5))
+                    {
+                        AutoReverse = true,
+                        RepeatBehavior = RepeatBehavior.Forever,
+                        BeginTime = TimeSpan.FromSeconds(begin)
+                    });
+
+                    JukeboxBubbleCanvas.Children.Add(bubble);
+                    _jukeboxBubbles.Add(bubble);
+                }
+            }
+        }
+
+        private void StopJukeboxBubbles()
+        {
+            foreach (var elem in _jukeboxBubbles)
+            {
+                elem.BeginAnimation(OpacityProperty, null);
+                if (elem.RenderTransform is TranslateTransform t)
+                {
+                    t.BeginAnimation(TranslateTransform.YProperty, null);
+                }
+            }
+            JukeboxBubbleCanvas.Children.Clear();
+            _jukeboxBubbles.Clear();
+        }
+
+        // ── Stadium Jumbotron ───────────────────────────────────────────────
+        private void StartJumbotron()
+        {
+        }
+
+        private void StopJumbotron()
+        {
+        }
+
+        private void JumbotronSpotlightCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (_vm?.SelectedProjectionView == "Stadium Jumbotron" && JumbotronPanel.Visibility == Visibility.Visible)
+            {
+                BuildJumbotronSpotlights();
+            }
+        }
+
+        private void BuildJumbotronSpotlights()
+        {
+            StopJumbotronSpotlights();
+            JumbotronSpotlightCanvas.Children.Clear();
+
+            double w = JumbotronSpotlightCanvas.ActualWidth;
+            double h = JumbotronSpotlightCanvas.ActualHeight;
+            if (w <= 0 || h <= 0) return;
+
+            double beamLength = Math.Sqrt((w * w) + (h * h)) * 0.9;
+            double spread = 45;
+
+            for (int i = 0; i < 2; i++)
+            {
+                bool isLeft = i == 0;
+                double originX = isLeft ? w * 0.08 : w * 0.92;
+                double originY = h * 0.95;
+
+                var polygon = new Polygon
+                {
+                    Points = [new System.Windows.Point(0, 0), new System.Windows.Point(-spread, -beamLength), new System.Windows.Point(spread, -beamLength)],
+                    RenderTransformOrigin = new System.Windows.Point(0.5, 1.0)
+                };
+
+                var gradient = new LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0.5, 1.0),
+                    EndPoint = new System.Windows.Point(0.5, 0.0),
+                    GradientStops =
+                    {
+                        new GradientStop(System.Windows.Media.Color.FromArgb(0x44, 0xFF, 0xE0, 0x82), 0.0),
+                        new GradientStop(System.Windows.Media.Color.FromArgb(0x22, 0x80, 0xD8, 0xFF), 0.5),
+                        new GradientStop(System.Windows.Media.Color.FromArgb(0x00, 0x00, 0x00, 0x00), 1.0)
+                    }
+                };
+                polygon.Fill = gradient;
+
+                double baseAngle = isLeft ? 25 : -25;
+                var rotate = new RotateTransform(baseAngle);
+                polygon.RenderTransform = rotate;
+
+                Canvas.SetLeft(polygon, originX - spread);
+                Canvas.SetTop(polygon, originY - beamLength);
+                JumbotronSpotlightCanvas.Children.Add(polygon);
+                _jumbotronSpotlightRotates.Add(rotate);
+
+                double swing = 30;
+                double duration = isLeft ? 6.5 : 7.8;
+                var sweep = new DoubleAnimation(baseAngle - swing, baseAngle + swing, TimeSpan.FromSeconds(duration))
+                {
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever
+                };
+                rotate.BeginAnimation(RotateTransform.AngleProperty, sweep);
+            }
+        }
+
+        private void StopJumbotronSpotlights()
+        {
+            foreach (var rot in _jumbotronSpotlightRotates)
+            {
+                rot.BeginAnimation(RotateTransform.AngleProperty, null);
+            }
+            JumbotronSpotlightCanvas.Children.Clear();
+            _jumbotronSpotlightRotates.Clear();
+        }
+
+        // ── Movie Theater 'Now Showing' ─────────────────────────────────────
+        private void StartTheater()
+        {
+            var sweep = new DoubleAnimation(0, 360, TimeSpan.FromSeconds(2.0))
+            {
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+            TheaterLeaderSweep.BeginAnimation(RotateTransform.AngleProperty, sweep);
+            TheaterLeaderSweepRight.BeginAnimation(RotateTransform.AngleProperty, sweep);
+        }
+
+        private void StopTheater()
+        {
+            TheaterLeaderSweep.BeginAnimation(RotateTransform.AngleProperty, null);
+            TheaterLeaderSweepRight.BeginAnimation(RotateTransform.AngleProperty, null);
+        }
+
+        private void TheaterBeamCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (_vm?.SelectedProjectionView == "Movie Theater 'Now Showing'" && TheaterPanel.Visibility == Visibility.Visible)
+            {
+                BuildTheaterProjectorBeam();
+            }
+        }
+
+        private void BuildTheaterProjectorBeam()
+        {
+            StopTheaterProjectorBeam();
+            TheaterBeamCanvas.Children.Clear();
+
+            double w = TheaterBeamCanvas.ActualWidth;
+            double h = TheaterBeamCanvas.ActualHeight;
+            if (w <= 0 || h <= 0) return;
+
+            double topWidth = 60;
+            double bottomWidth = w * 0.75;
+            double centerX = w / 2;
+
+            var cone = new Polygon
+            {
+                Points =
+                [
+                    new System.Windows.Point(centerX - (topWidth / 2), 0),
+                    new System.Windows.Point(centerX + (topWidth / 2), 0),
+                    new System.Windows.Point(centerX + (bottomWidth / 2), h),
+                    new System.Windows.Point(centerX - (bottomWidth / 2), h)
+                ],
+                Fill = new LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0.5, 0.0),
+                    EndPoint = new System.Windows.Point(0.5, 1.0),
+                    GradientStops =
+                    {
+                        new GradientStop(System.Windows.Media.Color.FromArgb(0x30, 0xFF, 0xF0, 0xD0), 0.0),
+                        new GradientStop(System.Windows.Media.Color.FromArgb(0x15, 0xFF, 0xE8, 0xB0), 0.4),
+                        new GradientStop(System.Windows.Media.Color.FromArgb(0x00, 0x00, 0x00, 0x00), 1.0)
+                    }
+                }
+            };
+
+            var flicker = new DoubleAnimation(0.7, 1.0, TimeSpan.FromSeconds(0.12))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+            cone.BeginAnimation(OpacityProperty, flicker);
+
+            TheaterBeamCanvas.Children.Add(cone);
+            _theaterBeams.Add(cone);
+        }
+
+        private void StopTheaterProjectorBeam()
+        {
+            foreach (var beam in _theaterBeams)
+            {
+                beam.BeginAnimation(OpacityProperty, null);
+            }
+            TheaterBeamCanvas.Children.Clear();
+            _theaterBeams.Clear();
         }
 
         public System.Windows.Media.Imaging.BitmapSource CaptureBitmap()

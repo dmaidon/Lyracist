@@ -1,4 +1,4 @@
-// Edited on Aug 8, 2026 @ 16:43:00 -> Add active status properties to KaraokeViewModel.Screens
+// Edited on Sep 22, 2026 @ 08:49:30 -> Auto-toggle between DJ Banner and Rotation when on the same screen
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -30,6 +30,13 @@ public partial class KaraokeViewModel
         {
             if (_displayService.IsRotationActive != value)
             {
+                if (value && _displayService.IsDjBannerActive &&
+                    _displayService.GetPreferences().RotationScreenIndex.HasValue &&
+                    _displayService.GetPreferences().RotationScreenIndex == _displayService.GetPreferences().DjBannerScreenIndex)
+                {
+                    _displayService.IsDjBannerActive = false;
+                    OnPropertyChanged(nameof(IsDjBannerActive));
+                }
                 _displayService.IsRotationActive = value;
                 OnPropertyChanged(nameof(IsRotationActive));
             }
@@ -43,6 +50,13 @@ public partial class KaraokeViewModel
         {
             if (_displayService.IsDjBannerActive != value)
             {
+                if (value && _displayService.IsRotationActive &&
+                    _displayService.GetPreferences().DjBannerScreenIndex.HasValue &&
+                    _displayService.GetPreferences().DjBannerScreenIndex == _displayService.GetPreferences().RotationScreenIndex)
+                {
+                    _displayService.IsRotationActive = false;
+                    OnPropertyChanged(nameof(IsRotationActive));
+                }
                 _displayService.IsDjBannerActive = value;
                 OnPropertyChanged(nameof(IsDjBannerActive));
             }
@@ -88,7 +102,7 @@ public partial class KaraokeViewModel
         }
     }
 
-    public List<string> ProjectionViews { get; } = ["Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable"];
+    public List<string> ProjectionViews { get; } = [.. SettingsViewModel.AllProjectionViews];
 
     public string SelectedProjectionView
     {
@@ -152,6 +166,11 @@ public partial class KaraokeViewModel
             OnPropertyChanged(nameof(IsLyricsActive));
             OnPropertyChanged(nameof(IsRotationActive));
             OnPropertyChanged(nameof(IsDjBannerActive));
+
+            if (SelectedDjBanner?.FullPath != prefs.SelectedDjBannerPath)
+            {
+                SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == prefs.SelectedDjBannerPath);
+            }
         });
     }
 

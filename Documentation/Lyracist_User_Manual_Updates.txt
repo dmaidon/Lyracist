@@ -1,4 +1,27 @@
-// Edited on Sep 17, 2026 @ 12:16:30 -> Document hybrid GPS venue auto-location, travel router immunity, and tablet GPS sync
+// Edited on Sep 22, 2026 @ 11:22:00 -> Document rotation banner Up Next font upsize and vinyl turntable cue dot removal
+Lyracist Pro Suite & KSRotation: Rotation Billboard Up Next Typography Upsize & Vinyl Turntable Cue Dot Removal (`Lyracist`, `KSRotation`, `KSRotation.Maui`, Web Billboard) - (September 2026)
+
+Section: Lyracist & KSRotation / Audience Billboard Projection / Screen Themes & Typography
+
+[Overview & Purpose]
+To ensure optimal legibility across venue monitors, stage televisions, and projector screens viewed from audience seating distances, all rotation billboard banners now feature upsized typography across their right-side upcoming performer queue sections ("Up Next" / "On Deck"). Additionally, the artificial black marker cue dot on the spinning 45 RPM record label has been removed in favor of a clean, authentic vinyl aesthetic where rotation is naturally and continuously communicated by the spinning performer and song title text.
+
+[Key Capabilities & Adjustments]
+1. Right-Side Upcoming Queue Font Upsizing:
+   - All right-column headers, queue position indicators, performer names, song titles, estimated wait badges, and round anchor tags have been increased by 2 font sizes across all 7 right-column audience billboard projection themes:
+     - Vinyl Turntable: ON DECK header (18 -> 20), active singer count badge (12 -> 14), round anchor tag (10 -> 12), and queue entry text (22 -> 24).
+     - Disco Ball: UP NEXT header (16 -> 18), count (10 -> 12), anchor (9 -> 11), and upcoming performer text (16 -> 18).
+     - Synthwave Grid: UP NEXT header (16 -> 18), count (10 -> 12), anchor (9 -> 11), and upcoming performer text (16 -> 18).
+     - Casino Slot Reels: NEXT SPINS header (16 -> 18), count (11 -> 13), wait badge (13 -> 15), anchor (10 -> 12), slot icon (13 -> 15), and reel text (16 -> 18).
+     - Jukebox: SELECTOR STRIPS header (16 -> 18), count (11 -> 13), wait badge (13 -> 15), anchor (10 -> 12), PUSH indicator (9 -> 11), and strip title (16 -> 18).
+     - Stadium Jumbotron: ON DECK header (16 -> 18), count (11 -> 13), wait badge (13 -> 15), anchor (10 -> 12), arrow indicator (14 -> 16), and roster text (16 -> 18).
+     - Movie Theater 'Now Showing': COMING ATTRACTIONS header (16 -> 18), count (11 -> 13), wait badge (13 -> 15), anchor (10 -> 12), reel icon (14 -> 16), and marquee card text (16 -> 18).
+   - Mobile and Web Billboards: Full-height upcoming rotation queue and stage spotlight cards upsized identically in `BillboardView.xaml` (`KSRotation.Maui`) and `billboard.html` (Web Billboard).
+2. Vinyl Turntable Label Refinement:
+   - The small black marker cue dot previously rendered near the top edge of the golden center label has been removed from `RotationWindow.xaml` and `SingerDisplayWindow.xaml`.
+   - The spinning performer name, song title, and radial vinyl sheen communicate active turntable rotation cleanly and authentically without an artificial dot.
+
+
 Lyracist Pro Suite & KSRotation: Hybrid GPS & Wi-Fi Venue Auto-Location (`KSRotation`, `KSRotation.Maui`, `Lyracist`) - (September 2026)
 
 Section: Lyracist & KSRotation / Venue Management / Hybrid GPS & Wi-Fi Venue Auto-Location
@@ -2050,3 +2073,48 @@ Section: Active Singers Count Display on Vegas Billboard and Vinyl Record Banner
 [Smart Filtering]
 • Pure Vocalist Tracking:
   - Excludes paused, skipped, and inactive singers, as well as background music filler tracks, so patrons and the KJ see the exact count of active singers in the rotation cycle.
+
+Section: Four New Dynamic Rotation Billboard Projection Views (Updated Sep 22, 2026)
+
+[Overview & Audience Display Options]
+Lyracist Pro and KSRotation now feature eleven distinct, high-impact projection themes for the audience-facing Singer Rotation Billboard screen. Four new animated themes have been added with 100% visual and behavioral parity across both applications:
+1. Casino Slot Reels:
+   - Experience high-roller casino excitement with each rotation slot rendered as a spinning slot machine reel.
+   - When a performance starts, the hero performer reel rapidly spins and clunks to a decelerated stop on the payline.
+   - The current singer receives a celebratory "JACKPOT" flourish complete with a pulsating golden drop-shadow glow and a dynamic burst of drifting gold coins and star sparkles.
+2. Jukebox:
+   - Transports the venue to a classic 1950s rock-and-roll diner cabinet.
+   - Features a chrome-trimmed neon arch header, glowing illuminated song-selection pushbuttons for the upcoming queue, and dual animated rising bubble tubes that drift continuously up the left and right cabinet pillars.
+3. Stadium Jumbotron:
+   - Delivers a massive arena sports-and-concert experience with an authentic LED scoreboard aesthetic.
+   - Performer names and song titles are presented with high-visibility dot-matrix typography while twin sweeping stadium floodlights crisscross the arena backdrop.
+4. Movie Theater 'Now Showing':
+   - An elegant vintage Hollywood premiere presentation.
+   - Begins with a classic 35mm film leader countdown sweep (3...2...1) and a flickering cinematic projector light cone that cascades over the feature performer card.
+   - Upcoming singers are showcased on vintage marquee coming-attractions lobby cards.
+
+[Full Feature Parity & Controls]
+• Complete Badge Support:
+  - All four new views fully support performer avatars/selfies, ⭐ SPECIAL performer badges, ⚓ ANCHOR round-start markers, and {N} estimated wait-time badges.
+• Automatic Cycling & Rotation Schedule:
+  - All eleven projection views are dynamically integrated into the Screen Rotation schedule under Settings -> Display -> Screen Rotation.
+  - DJs can check which views to include and configure custom display durations (in seconds) for hands-free, automated cycling throughout the show.
+• View Mode Help & Descriptions:
+  - Complete descriptions for all eleven themes are accessible directly within KSRotation (Help Topic 3) and Lyracist Pro (Settings -> Display -> Billboard View Mode -> View Mode Descriptions & Themes expander).
+
+Section: Screen Rotation and Display Tab Layout Reorganization (Updated Sep 22, 2026)
+
+[Overview & Layout Redesign]
+The Display configuration experience in KSRotation and Lyracist Pro has been streamlined for enhanced operational clarity and fast setup:
+1. Two-Column Optimized Layout:
+   - Target Monitor (Display & Projection), Connect & Request Instructions, and Casting Controls are consolidated into Column 0 on the left.
+   - The entire Column 1 on the right is dedicated to the Screen Rotation settings, providing a clean, uncluttered interface.
+2. Unified Rotation Interval (Single Time Setting):
+   - Eliminated tedious individual per-screen duration inputs in favor of a single global duration setting (e.g., 'Change screen every: 180 sec').
+   - DJs and KJs no longer have to manually set the seconds on every individual view.
+3. Random Screen Cycling:
+   - When automatic screen rotation is active, the billboard projection now randomly cycles among the enabled views at every configured interval.
+   - When multiple screens are enabled, the random picker automatically avoids immediately repeating the current screen, delivering dynamic and fresh visual variety to the audience.
+4. One-Click 'Select All' & 'Clear All' Controls:
+   - Added instant '✓ Select All' and '✗ Clear All' action buttons above the screen list.
+   - Hosts can enable all 11 billboard views with a single click or clear the selection instantly to focus on just their favorites.

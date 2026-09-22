@@ -1,4 +1,4 @@
-// Edited on Aug 10, 2026 @ 12:59:00 -> Default projection active flags to false on app load
+// Edited on Sep 22, 2026 @ 07:55:00 -> Add AutoRotateDurationSeconds to DisplayPreferences
 using Lyracist.Shared;
 
 namespace Lyracist.Services.Display;
@@ -21,9 +21,11 @@ public class DisplayPreferences
     /// <see cref="ProjectionRotationSchedule"/> instead of staying on one fixed screen.</summary>
     public bool AutoRotateProjectionViews { get; set; }
 
-    /// <summary>Which projection views participate in the automatic rotation and how long each stays
-    /// up. One entry per known view; entries the DJ hasn't opted into stay disabled with a default 30s
-    /// duration.</summary>
+    /// <summary>How many seconds each randomly chosen screen stays up during automatic screen rotation.</summary>
+    public int AutoRotateDurationSeconds { get; set; } = 180;
+
+    /// <summary>Which projection views participate in the automatic rotation.
+    /// One entry per known view; entries the DJ hasn't opted into stay disabled.</summary>
     public List<ProjectionRotationEntry> ProjectionRotationSchedule { get; set; } = [];
 }
 

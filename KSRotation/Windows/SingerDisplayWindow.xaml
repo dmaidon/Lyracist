@@ -1,4 +1,4 @@
-<!-- Edited on Sep 21, 2026 @ 19:55:30 -> Show active singers in rotation on Vegas billboard and Vinyl record banners -->
+<!-- Edited on Sep 22, 2026 @ 11:13:30 -> Remove marker dot from spinning vinyl record in rotation banner -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -432,9 +432,6 @@
                                        Text="{Binding CurrentSongTitle}"
                                        FontSize="16" FontStyle="Italic" Foreground="#FF3A2608" />
 
-                            <!-- Marker dot near the label edge (rotation cue) -->
-                            <Ellipse Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,116,0,0" Fill="#FF2A1A05" />
-
                             <!-- Large 45 RPM center hole -->
                             <Ellipse Width="46" Height="46" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="#FF120D0A" Stroke="#66000000" StrokeThickness="1.5" />
                         </Grid>
@@ -536,17 +533,17 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
                         <TextBlock Text="ON DECK"
-                                   FontSize="18"
+                                   FontSize="20"
                                    FontWeight="Bold"
                                    Foreground="#FFB98A3A" />
                         <Border Background="#22E0A93B" BorderBrush="#66E0A93B" BorderThickness="1"
                                 CornerRadius="10" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center"
                                 Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock Text="{Binding ActiveSingerCountText}"
-                                       FontSize="12" FontWeight="Bold" Foreground="#FFE8BC52" />
+                                       FontSize="14" FontWeight="Bold" Foreground="#FFE8BC52" />
                         </Border>
                         <TextBlock Text=" : {} = Estimated wait time"
-                                   FontSize="18"
+                                   FontSize="20"
                                    FontWeight="Bold"
                                    Foreground="#FFB98A3A"
                                    Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -558,10 +555,10 @@
                                     <Border Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,6,0" VerticalAlignment="Center"
                                             ToolTip="Rotation Anchor (marks where a round begins)"
                                             Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <TextBlock Text="⚓ ANCHOR" FontSize="11" FontWeight="ExtraBold" Foreground="White" />
+                                        <TextBlock Text="⚓ ANCHOR" FontSize="13" FontWeight="ExtraBold" Foreground="White" />
                                     </Border>
                                     <TextBlock Text="{Binding Text}"
-                                               FontSize="22"
+                                               FontSize="24"
                                                Foreground="#FFE6D6B8" />
                                 </StackPanel>
                             </DataTemplate>
@@ -713,13 +710,13 @@
                     <!-- Up next: deliberately smaller/dimmer than the current singer so attention stays there -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0" Opacity="0.82">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <TextBlock Text="UP NEXT" FontSize="16" FontWeight="Bold" Foreground="#AA9FC7E8" />
+                            <TextBlock Text="UP NEXT" FontSize="18" FontWeight="Bold" Foreground="#AA9FC7E8" />
                             <Border Background="#1833CCFF" BorderBrush="#4433CCFF" BorderThickness="1" CornerRadius="10" Padding="7,1" Margin="8,0,0,0" VerticalAlignment="Center"
                                     Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="10" FontWeight="Bold" Foreground="#AA9FC7E8" />
+                                <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="12" FontWeight="Bold" Foreground="#AA9FC7E8" />
                             </Border>
                             <TextBlock Text=" : {} = Estimated wait time"
-                                       FontSize="14"
+                                       FontSize="16"
                                        FontWeight="Bold"
                                        Foreground="#AA9FC7E8"
                                        Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -733,9 +730,9 @@
                                             <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,6,0" VerticalAlignment="Center"
                                                     ToolTip="Rotation Anchor (marks where a round begins)"
                                                     Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <TextBlock Text="⚓ ANCHOR" FontSize="10" FontWeight="ExtraBold" Foreground="White"/>
+                                                <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
                                             </Border>
-                                            <TextBlock Text="{Binding Text}" FontSize="16" Foreground="#CCE6DCFF" />
+                                            <TextBlock Text="{Binding Text}" FontSize="18" Foreground="#CCE6DCFF" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -858,13 +855,13 @@
                 <!-- Up next: deliberately smaller/dimmer than the current singer so attention stays there -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0" Opacity="0.82">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="UP NEXT" FontSize="16" FontWeight="Bold" Foreground="#AA9FE8E0" />
+                        <TextBlock Text="UP NEXT" FontSize="18" FontWeight="Bold" Foreground="#AA9FE8E0" />
                         <Border Background="#1833D4FF" BorderBrush="#4433D4FF" BorderThickness="1" CornerRadius="10" Padding="7,1" Margin="8,0,0,0" VerticalAlignment="Center"
                                 Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="10" FontWeight="Bold" Foreground="#AA9FE8E0" />
+                            <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="12" FontWeight="Bold" Foreground="#AA9FE8E0" />
                         </Border>
                         <TextBlock Text=" : {} = Estimated wait time"
-                                   FontSize="14"
+                                   FontSize="16"
                                    FontWeight="Bold"
                                    Foreground="#AA9FE8E0"
                                    Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -878,9 +875,9 @@
                                         <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,6,0" VerticalAlignment="Center"
                                                 ToolTip="Rotation Anchor (marks where a round begins)"
                                                 Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <TextBlock Text="⚓ ANCHOR" FontSize="10" FontWeight="ExtraBold" Foreground="White"/>
+                                            <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
                                         </Border>
-                                        <TextBlock Text="{Binding Text}" FontSize="16" Foreground="#CCE0F0FF" />
+                                        <TextBlock Text="{Binding Text}" FontSize="18" Foreground="#CCE0F0FF" />
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>
@@ -989,6 +986,636 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </StackPanel>
+        </Grid>
+
+        <!-- Row 1i: Casino Slot Reels panel -->
+        <Grid Grid.Row="1" x:Name="SlotReelsPanel" Visibility="Collapsed" ClipToBounds="True">
+            <!-- Casino velvet green backdrop with rich radial depth -->
+            <Grid.Background>
+                <RadialGradientBrush GradientOrigin="0.5,0.35" Center="0.5,0.35" RadiusX="1.1" RadiusY="1.1">
+                    <GradientStop Color="#FF1E402B" Offset="0.0" />
+                    <GradientStop Color="#FF0E2316" Offset="0.55" />
+                    <GradientStop Color="#FF040B07" Offset="1.0" />
+                </RadialGradientBrush>
+            </Grid.Background>
+
+            <!-- Floating gold coins and sparkle particles (animated in code-behind) -->
+            <Canvas x:Name="SlotParticleCanvas" SizeChanged="SlotParticleCanvas_SizeChanged" ClipToBounds="True" Panel.ZIndex="1" />
+
+            <!-- Main slot machine cabinet -->
+            <Grid Margin="48,16" Panel.ZIndex="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Flashing / Glowing JACKPOT Marquee Topper -->
+                <Border Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,14" CornerRadius="14" Padding="24,6" BorderThickness="3">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FFFFF2A3" Offset="0.0" />
+                            <GradientStop Color="#FFFFB700" Offset="0.5" />
+                            <GradientStop Color="#FFFF8000" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#FF3D0B0B" Offset="0.0" />
+                            <GradientStop Color="#FF1A0404" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="🎰 777" FontSize="20" FontWeight="Black" Foreground="#FFFFD700" Margin="0,0,16,0" VerticalAlignment="Center" />
+                        <TextBlock Text="★ JACKPOT PERFORMER ★" FontSize="24" FontWeight="Black" Foreground="#FFFFFAF0" VerticalAlignment="Center">
+                            <TextBlock.Effect>
+                                <DropShadowEffect x:Name="SlotJackpotGlow" Color="#FFFFD700" BlurRadius="25" ShadowDepth="0" Opacity="0.9" />
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        <TextBlock Text="777 🎰" FontSize="20" FontWeight="Black" Foreground="#FFFFD700" Margin="16,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Slot reel windows: Left = Hero Jackpot Reel, Right = Up Next Reels -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left Column: Hero Jackpot Reel Window -->
+                    <Border Grid.Column="0" Margin="0,0,16,0" CornerRadius="18" BorderThickness="3" Padding="24,18">
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#FFFFF0A0" Offset="0.0" />
+                                <GradientStop Color="#FFD4AF37" Offset="0.5" />
+                                <GradientStop Color="#FF8B6508" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#FF0B120E" Offset="0.0" />
+                                <GradientStop Color="#FF040806" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Grid ClipToBounds="True">
+                            <!-- Payline indicator line -->
+                            <Rectangle Height="2" VerticalAlignment="Center" Fill="#44FFD700" Margin="0,0,0,0" />
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                                <StackPanel.RenderTransform>
+                                    <TranslateTransform x:Name="SlotReelTranslate" />
+                                </StackPanel.RenderTransform>
+
+                                <!-- Performer Avatar with golden coin laurel ring -->
+                                <Border Width="130" Height="130" CornerRadius="65" BorderThickness="5" HorizontalAlignment="Center" Margin="0,0,0,14"
+                                        Visibility="{Binding HasCurrentSingerAvatar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Border.BorderBrush>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#FFFFF0A0" Offset="0.0" />
+                                            <GradientStop Color="#FFFFD700" Offset="0.5" />
+                                            <GradientStop Color="#FFC48800" Offset="1.0" />
+                                        </LinearGradientBrush>
+                                    </Border.BorderBrush>
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#FFFFD700" BlurRadius="28" ShadowDepth="0" Opacity="0.85" />
+                                    </Border.Effect>
+                                    <Border CornerRadius="65" ClipToBounds="True">
+                                        <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                                    </Border>
+                                </Border>
+
+                                <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                        ToolTip="Rotation Anchor (marks where a round begins)"
+                                        Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="⚓ ANCHOR" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                                </Border>
+                                <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                        ToolTip="Special Performer (One-Time)"
+                                        Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="⭐ SPECIAL" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                                </Border>
+
+                                <TextBlock Text="{Binding CurrentSingerName}"
+                                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                           FontSize="78" FontWeight="Black" Foreground="#FFFFFAF0" TextOptions.TextFormattingMode="Ideal">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect Color="#FFFFD700" BlurRadius="30" ShadowDepth="0" Opacity="0.85" />
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                                <TextBlock Text="{Binding CurrentSingerSong}"
+                                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                           Margin="0,10,0,0" FontSize="30" FontStyle="Italic" Foreground="#FFFFDF70" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Right Column: Up Next Reels -->
+                    <Border Grid.Column="1" Margin="16,0,0,0" CornerRadius="18" BorderThickness="2" Padding="20,16">
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#88D4AF37" Offset="0.0" />
+                                <GradientStop Color="#448B6508" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#E6080E0A" Offset="0.0" />
+                                <GradientStop Color="#E6020503" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="🎰 NEXT SPINS" FontSize="18" FontWeight="Bold" Foreground="#FFFFDF70" />
+                                <Border Background="#33FFD700" BorderBrush="#66FFD700" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center"
+                                        Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="13" FontWeight="Bold" Foreground="#FFFFDF70" />
+                                </Border>
+                                <TextBlock Text=" : {} = Estimated wait time"
+                                           FontSize="15" FontWeight="Bold" Foreground="#AAFFDF70" VerticalAlignment="Center"
+                                           Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </StackPanel>
+
+                            <ItemsControl ItemsSource="{Binding NextSingers}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,4" Padding="12,7" CornerRadius="10" Background="#18FFFFFF" BorderBrush="#33FFDF70" BorderThickness="1">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                        ToolTip="Rotation Anchor (marks where a round begins)"
+                                                        Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                </Border>
+                                                <TextBlock Text="🎰 " FontSize="15" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding Text}" FontSize="18" Foreground="#FFFFF0D0" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Row 1j: Jukebox panel -->
+        <Grid Grid.Row="1" x:Name="JukeboxPanel" Visibility="Collapsed" ClipToBounds="True">
+            <!-- 1950s Jukebox club ambiance backdrop -->
+            <Grid.Background>
+                <RadialGradientBrush GradientOrigin="0.5,0.2" Center="0.5,0.2" RadiusX="1.2" RadiusY="1.2">
+                    <GradientStop Color="#FF241236" Offset="0.0" />
+                    <GradientStop Color="#FF12081C" Offset="0.55" />
+                    <GradientStop Color="#FF06020A" Offset="1.0" />
+                </RadialGradientBrush>
+            </Grid.Background>
+
+            <!-- Animated rising bubble-tube lights along cabinet sides -->
+            <Canvas x:Name="JukeboxBubbleCanvas" SizeChanged="JukeboxBubbleCanvas_SizeChanged" ClipToBounds="True" Panel.ZIndex="1" />
+
+            <!-- Jukebox Cabinet -->
+            <Grid Margin="54,16" Panel.ZIndex="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Arch Header with Chrome & Neon -->
+                <Border Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,14" CornerRadius="16" Padding="28,6" BorderThickness="3">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FFFF357E" Offset="0.0" />
+                            <GradientStop Color="#FFFFD269" Offset="0.5" />
+                            <GradientStop Color="#FF00E5FF" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#FF2A1038" Offset="0.0" />
+                            <GradientStop Color="#FF12051A" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <TextBlock Text="🎶  JUKEBOX HIT SELECTION  🎶" FontSize="22" FontWeight="Bold" Foreground="#FFFF79C6" TextOptions.TextFormattingMode="Display">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#FFFF357E" BlurRadius="25" ShadowDepth="0" Opacity="0.9" />
+                        </TextBlock.Effect>
+                    </TextBlock>
+                </Border>
+
+                <!-- Cabinet Body: Left = Center Spin Selection, Right = Push-Button Song Strips -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Current Performer Spotlight -->
+                    <Border Grid.Column="0" Margin="0,0,16,0" CornerRadius="20" BorderThickness="2.5" Padding="24,18">
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#FFFF357E" Offset="0.0" />
+                                <GradientStop Color="#FF8E44AD" Offset="0.5" />
+                                <GradientStop Color="#FF00E5FF" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#E6150A22" Offset="0.0" />
+                                <GradientStop Color="#E608030F" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <!-- Performer Avatar with illuminated chrome vinyl ring -->
+                            <Border Width="130" Height="130" CornerRadius="65" BorderThickness="5" HorizontalAlignment="Center" Margin="0,0,0,14"
+                                    Visibility="{Binding HasCurrentSingerAvatar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Border.BorderBrush>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#FFFF357E" Offset="0.0" />
+                                        <GradientStop Color="#FF00E5FF" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </Border.BorderBrush>
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#FFFF357E" BlurRadius="28" ShadowDepth="0" Opacity="0.85" />
+                                </Border.Effect>
+                                <Border CornerRadius="65" ClipToBounds="True">
+                                    <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                                </Border>
+                            </Border>
+
+                            <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                    ToolTip="Rotation Anchor (marks where a round begins)"
+                                    Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="⚓ ANCHOR" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                            </Border>
+                            <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                    ToolTip="Special Performer (One-Time)"
+                                    Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="⭐ SPECIAL" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                            </Border>
+
+                            <TextBlock Text="{Binding CurrentSingerName}"
+                                       HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                       FontSize="76" FontWeight="Black" Foreground="White" TextOptions.TextFormattingMode="Ideal">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="#FFFF357E" BlurRadius="30" ShadowDepth="0" Opacity="0.85" />
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock Text="{Binding CurrentSingerSong}"
+                                       HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                       Margin="0,10,0,0" FontSize="30" FontStyle="Italic" Foreground="#FF00E5FF" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Right: Illuminated Selector Title Strips -->
+                    <Border Grid.Column="1" Margin="16,0,0,0" CornerRadius="20" BorderThickness="2" Padding="20,16">
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#8800E5FF" Offset="0.0" />
+                                <GradientStop Color="#44FF357E" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#E610071C" Offset="0.0" />
+                                <GradientStop Color="#E605020A" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="🔘 SELECTOR STRIPS" FontSize="18" FontWeight="Bold" Foreground="#FF00E5FF" />
+                                <Border Background="#3300E5FF" BorderBrush="#6600E5FF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center"
+                                        Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="13" FontWeight="Bold" Foreground="#FF00E5FF" />
+                                </Border>
+                                <TextBlock Text=" : {} = Estimated wait time"
+                                           FontSize="15" FontWeight="Bold" Foreground="#AA00E5FF" VerticalAlignment="Center"
+                                           Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </StackPanel>
+
+                            <ItemsControl ItemsSource="{Binding NextSingers}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,4" Padding="12,7" CornerRadius="8" Background="#26FFE4B5" BorderBrush="#55FF357E" BorderThickness="1">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                        ToolTip="Rotation Anchor (marks where a round begins)"
+                                                        Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                </Border>
+                                                <Border Background="#FFD700" CornerRadius="4" Padding="4,1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="PUSH" FontSize="11" FontWeight="Black" Foreground="#FF12081C" />
+                                                </Border>
+                                                <TextBlock Text="{Binding Text}" FontSize="18" Foreground="#FFFFFAF0" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Row 1k: Stadium Jumbotron panel -->
+        <Grid Grid.Row="1" x:Name="JumbotronPanel" Visibility="Collapsed" ClipToBounds="True">
+            <!-- Stadium arena dark night backdrop -->
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#FF0B1526" Offset="0.0" />
+                    <GradientStop Color="#FF060D18" Offset="0.5" />
+                    <GradientStop Color="#FF02050A" Offset="1.0" />
+                </LinearGradientBrush>
+            </Grid.Background>
+
+            <!-- Sweeping stadium arena spotlights (animated in code-behind) -->
+            <Canvas x:Name="JumbotronSpotlightCanvas" SizeChanged="JumbotronSpotlightCanvas_SizeChanged" ClipToBounds="True" Panel.ZIndex="1" />
+
+            <!-- Stadium Scoreboard / Jumbotron Frame -->
+            <Grid Margin="48,16" Panel.ZIndex="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Steel Truss Scoreboard Header -->
+                <Border Grid.Row="0" Margin="0,0,0,14" CornerRadius="10" Padding="20,8" BorderThickness="2" BorderBrush="#FF4B5E78" Background="#FF131C28">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🏟️ ARENA LIVE" FontSize="18" FontWeight="Black" Foreground="#FFFFB000" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="STADIUM JUMBOTRON SCOREBOARD" FontSize="20" FontWeight="Black" Foreground="#FFFFFAF0" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="PERIOD: KARAOKE" FontSize="16" FontWeight="Black" Foreground="#FF00FF88" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- LED Scoreboard Screen Area with dot-matrix overlay -->
+                <Border Grid.Row="1" CornerRadius="12" BorderThickness="3" BorderBrush="#FF334155" Background="#FF070C12" Padding="24,18">
+                    <Grid>
+                        <!-- LED Dot-Matrix Texture -->
+                        <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Opacity="0.14">
+                            <Rectangle.Fill>
+                                <DrawingBrush TileMode="Tile" Viewport="0,0,6,6" ViewportUnits="Absolute">
+                                    <DrawingBrush.Drawing>
+                                        <GeometryDrawing Brush="#FFFFFFFF">
+                                            <GeometryDrawing.Geometry>
+                                                <EllipseGeometry Center="3,3" RadiusX="1.2" RadiusY="1.2" />
+                                            </GeometryDrawing.Geometry>
+                                        </GeometryDrawing>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*" />
+                                <ColumnDefinition Width="2*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left Column: NOW AT BAT / ON STAGE -->
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,16,0">
+                                <Border Background="#FF1E293B" BorderBrush="#FFFFB000" BorderThickness="1.5" CornerRadius="8" Padding="14,4" HorizontalAlignment="Center" Margin="0,0,0,12">
+                                    <TextBlock Text="⚡ NOW ON STAGE" FontSize="18" FontWeight="Black" Foreground="#FFFFB000" />
+                                </Border>
+
+                                <!-- Avatar with LED Scoreboard Border -->
+                                <Border Width="130" Height="130" CornerRadius="65" BorderThickness="5" BorderBrush="#FFFFB000" HorizontalAlignment="Center" Margin="0,0,0,14"
+                                        Visibility="{Binding HasCurrentSingerAvatar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#FFFFB000" BlurRadius="26" ShadowDepth="0" Opacity="0.85" />
+                                    </Border.Effect>
+                                    <Border CornerRadius="65" ClipToBounds="True">
+                                        <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                                    </Border>
+                                </Border>
+
+                                <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                        ToolTip="Rotation Anchor (marks where a round begins)"
+                                        Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="⚓ ANCHOR" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                                </Border>
+                                <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                        ToolTip="Special Performer (One-Time)"
+                                        Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="⭐ SPECIAL" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                                </Border>
+
+                                <TextBlock Text="{Binding CurrentSingerName}"
+                                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                           FontSize="78" FontWeight="Black" Foreground="#FFFFB000" FontFamily="Consolas, Segoe UI">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect Color="#FFFFB000" BlurRadius="30" ShadowDepth="0" Opacity="0.9" />
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                                <TextBlock Text="{Binding CurrentSingerSong}"
+                                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                           Margin="0,10,0,0" FontSize="30" FontWeight="Bold" Foreground="#FF00FF88" FontFamily="Consolas, Segoe UI" />
+                            </StackPanel>
+
+                            <!-- Right Column: ON DECK / IN THE HOLE -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <TextBlock Text="⚾ ON DECK" FontSize="18" FontWeight="Bold" Foreground="#FFFFB000" />
+                                    <Border Background="#33FFB000" BorderBrush="#66FFB000" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center"
+                                            Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="13" FontWeight="Bold" Foreground="#FFFFB000" />
+                                    </Border>
+                                    <TextBlock Text=" : {} = Estimated wait time"
+                                               FontSize="15" FontWeight="Bold" Foreground="#AAFFB000" VerticalAlignment="Center"
+                                               Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+
+                                <ItemsControl ItemsSource="{Binding NextSingers}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="0,4" Padding="12,7" CornerRadius="6" Background="#1A1E293B" BorderBrush="#4400FF88" BorderThickness="1">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                            ToolTip="Rotation Anchor (marks where a round begins)"
+                                                            Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                    </Border>
+                                                    <TextBlock Text="▶ " FontSize="16" Foreground="#FF00FF88" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding Text}" FontSize="18" Foreground="#FF00FF88" FontFamily="Consolas, Segoe UI" FontWeight="Bold" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Row 1l: Movie Theater 'Now Showing' panel -->
+        <Grid Grid.Row="1" x:Name="TheaterPanel" Visibility="Collapsed" ClipToBounds="True">
+            <!-- Vintage cinema theater velvet ambiance backdrop -->
+            <Grid.Background>
+                <RadialGradientBrush GradientOrigin="0.5,0.25" Center="0.5,0.25" RadiusX="1.1" RadiusY="1.1">
+                    <GradientStop Color="#FF261418" Offset="0.0" />
+                    <GradientStop Color="#FF14080B" Offset="0.55" />
+                    <GradientStop Color="#FF080304" Offset="1.0" />
+                </RadialGradientBrush>
+            </Grid.Background>
+
+            <!-- Projector light cone from top (animated in code-behind) -->
+            <Canvas x:Name="TheaterBeamCanvas" SizeChanged="TheaterBeamCanvas_SizeChanged" ClipToBounds="True" Panel.ZIndex="1" />
+
+            <!-- Movie theater layout -->
+            <Grid Margin="48,16" Panel.ZIndex="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Film Leader & Marquee Header Bar -->
+                <Grid Grid.Row="0" Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Film-Reel Countdown Leader Widget (Left) -->
+                    <Viewbox Grid.Column="0" Width="56" Height="56" Margin="0,0,16,0" VerticalAlignment="Center">
+                        <Canvas Width="100" Height="100">
+                            <!-- Outer Leader Circle -->
+                            <Ellipse Width="96" Height="96" Canvas.Left="2" Canvas.Top="2" Stroke="#FFFFE8B0" StrokeThickness="3" Fill="#22000000" />
+                            <!-- Inner Ring -->
+                            <Ellipse Width="64" Height="64" Canvas.Left="18" Canvas.Top="18" Stroke="#AAFFE8B0" StrokeThickness="2" />
+                            <!-- Crosshairs -->
+                            <Line X1="50" Y1="0" X2="50" Y2="100" Stroke="#AAFFE8B0" StrokeThickness="1.5" />
+                            <Line X1="0" Y1="50" X2="100" Y2="50" Stroke="#AAFFE8B0" StrokeThickness="1.5" />
+                            <!-- Rotating Sweep Line -->
+                            <Line X1="50" Y1="50" X2="50" Y2="4" Stroke="#FFFFE8B0" StrokeThickness="3" RenderTransformOrigin="0.5,0.5">
+                                <Line.RenderTransform>
+                                    <RotateTransform x:Name="TheaterLeaderSweep" CenterX="50" CenterY="50" />
+                                </Line.RenderTransform>
+                            </Line>
+                        </Canvas>
+                    </Viewbox>
+
+                    <!-- Title Header -->
+                    <Border Grid.Column="1" HorizontalAlignment="Center" CornerRadius="12" Padding="28,6" BorderThickness="2" BorderBrush="#FFFFE8B0" Background="#FF1C0D10">
+                        <TextBlock Text="🎬  NOW SHOWING: FEATURE PRESENTATION  🎬" FontSize="22" FontWeight="Black" Foreground="#FFFFE8B0" VerticalAlignment="Center">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#FFFFE8B0" BlurRadius="22" ShadowDepth="0" Opacity="0.85" />
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </Border>
+
+                    <!-- Film-Reel Countdown Leader Widget (Right) -->
+                    <Viewbox Grid.Column="2" Width="56" Height="56" Margin="16,0,0,0" VerticalAlignment="Center">
+                        <Canvas Width="100" Height="100">
+                            <Ellipse Width="96" Height="96" Canvas.Left="2" Canvas.Top="2" Stroke="#FFFFE8B0" StrokeThickness="3" Fill="#22000000" />
+                            <Ellipse Width="64" Height="64" Canvas.Left="18" Canvas.Top="18" Stroke="#AAFFE8B0" StrokeThickness="2" />
+                            <Line X1="50" Y1="0" X2="50" Y2="100" Stroke="#AAFFE8B0" StrokeThickness="1.5" />
+                            <Line X1="0" Y1="50" X2="100" Y2="50" Stroke="#AAFFE8B0" StrokeThickness="1.5" />
+                            <Line X1="50" Y1="50" X2="50" Y2="4" Stroke="#FFFFE8B0" StrokeThickness="3" RenderTransformOrigin="0.5,0.5">
+                                <Line.RenderTransform>
+                                    <RotateTransform x:Name="TheaterLeaderSweepRight" CenterX="50" CenterY="50" />
+                                </Line.RenderTransform>
+                            </Line>
+                        </Canvas>
+                    </Viewbox>
+                </Grid>
+
+                <!-- Theater Presentation Body: Left = Feature Film Card, Right = Coming Attractions -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Current Performer Feature Presentation -->
+                    <Border Grid.Column="0" Margin="0,0,16,0" CornerRadius="18" BorderThickness="2.5" BorderBrush="#AAFFE8B0" Padding="24,18">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#E61A0B0F" Offset="0.0" />
+                                <GradientStop Color="#E60A0406" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <!-- Performer Avatar inside a 35mm film cell frame -->
+                            <Border BorderBrush="#FFFFE8B0" BorderThickness="3" CornerRadius="8" Padding="6" Background="#FF100608" HorizontalAlignment="Center" Margin="0,0,0,14"
+                                    Visibility="{Binding HasCurrentSingerAvatar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#FFFFE8B0" BlurRadius="24" ShadowDepth="0" Opacity="0.8" />
+                                </Border.Effect>
+                                <Border Width="130" Height="130" CornerRadius="4" ClipToBounds="True">
+                                    <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                                </Border>
+                            </Border>
+
+                            <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                    ToolTip="Rotation Anchor (marks where a round begins)"
+                                    Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="⚓ ANCHOR" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                            </Border>
+                            <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                                    ToolTip="Special Performer (One-Time)"
+                                    Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="⭐ SPECIAL" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                            </Border>
+
+                            <TextBlock Text="{Binding CurrentSingerName}"
+                                       HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                       FontSize="78" FontWeight="Black" Foreground="#FFFFFAF0">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="#FFFFE8B0" BlurRadius="30" ShadowDepth="0" Opacity="0.85" />
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock Text="{Binding CurrentSingerSong}"
+                                       HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                       Margin="0,10,0,0" FontSize="30" FontStyle="Italic" Foreground="#FFFFD27F" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Right: Coming Attractions Poster Lobby Cards -->
+                    <Border Grid.Column="1" Margin="16,0,0,0" CornerRadius="18" BorderThickness="2" BorderBrush="#66FFE8B0" Padding="20,16">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#E615080C" Offset="0.0" />
+                                <GradientStop Color="#E6080305" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="🎟️ COMING ATTRACTIONS" FontSize="18" FontWeight="Bold" Foreground="#FFFFE8B0" />
+                                <Border Background="#33FFE8B0" BorderBrush="#66FFE8B0" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center"
+                                        Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="13" FontWeight="Bold" Foreground="#FFFFE8B0" />
+                                </Border>
+                                <TextBlock Text=" : {} = Estimated wait time"
+                                           FontSize="15" FontWeight="Bold" Foreground="#AAFFE8B0" VerticalAlignment="Center"
+                                           Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </StackPanel>
+
+                            <ItemsControl ItemsSource="{Binding NextSingers}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,4" Padding="12,7" CornerRadius="8" Background="#18FFFFFF" BorderBrush="#33FFE8B0" BorderThickness="1">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                        ToolTip="Rotation Anchor (marks where a round begins)"
+                                                        Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                </Border>
+                                                <TextBlock Text="📽️ " FontSize="16" Foreground="#FFFFE8B0" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding Text}" FontSize="18" Foreground="#FFFFFAF0" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
         </Grid>
 
         <!-- Floating QR Code Overlay for audience scanning (shown on top of all projection panels) -->

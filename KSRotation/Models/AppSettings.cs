@@ -1,4 +1,4 @@
-// Edited on Sep 20, 2026 @ 06:34:30 -> Add AutoSwitchToRemoteDjOnHandoff property to AppSettings
+// Edited on Sep 22, 2026 @ 07:51:00 -> Add AutoRotateDurationSeconds to AppSettings
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -119,9 +119,11 @@ namespace KSRotation.Models
         /// fixed screen.</summary>
         public bool AutoRotateProjectionViews { get; init; }
 
-        /// <summary>Which projection views participate in the automatic rotation and how long each
-        /// stays up. Populated with one entry per known view (see MainViewModel.ProjectionViews);
-        /// entries the DJ hasn't opted into stay disabled with a default 30s duration.</summary>
+        /// <summary>How many seconds each randomly chosen screen stays up during automatic screen rotation.</summary>
+        public int AutoRotateDurationSeconds { get; init; } = 180;
+
+        /// <summary>Which projection views participate in the automatic rotation.
+        /// Populated with one entry per known view (see MainViewModel.ProjectionViews).</summary>
         public System.Collections.Generic.List<ProjectionRotationEntry> ProjectionRotationSchedule { get; init; } = [];
     }
 }

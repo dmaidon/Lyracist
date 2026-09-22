@@ -1,4 +1,4 @@
-<!-- Edited on Aug 2, 2026 @ 10:06:00 -> Add MediaElement for looping MP4 video support and name Image element -->
+<!-- Edited on Sep 22, 2026 @ 08:46:00 -> Set BannerImage explicitly in code-behind matching KSRotation implementation -->
 <Window x:Class="Lyracist.Windows.DjBannerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -12,7 +12,7 @@
         MouseDoubleClick="OnMouseDoubleClick">
 
     <Grid>
-        <Image x:Name="BannerImage" Source="{Binding BannerImage}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Image x:Name="BannerImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
         <MediaElement x:Name="BannerVideo" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" LoadedBehavior="Manual" UnloadedBehavior="Stop" Visibility="Collapsed" MediaEnded="BannerVideo_MediaEnded" />
     </Grid>
 </Window>

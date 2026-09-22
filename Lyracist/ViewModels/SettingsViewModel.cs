@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 08:49:00 -> Inject LyricsWindowViewModel for lyrics screen QR code setting synchronization
+// Edited on Sep 22, 2026 @ 07:58:00 -> Initialize _autoRotateDurationSeconds from DisplayPreferences in SettingsViewModel
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -261,6 +261,7 @@ public partial class SettingsViewModel : BaseViewModel
         _isLyricsMirrored = prefs.IsLyricsMirrored;
         _selectedProjectionView = prefs.RotationViewMode ?? "Normal List";
         _autoRotateProjectionViews = prefs.AutoRotateProjectionViews;
+        _autoRotateDurationSeconds = prefs.AutoRotateDurationSeconds > 0 ? prefs.AutoRotateDurationSeconds : 180;
         LoadProjectionRotationSchedule(prefs.ProjectionRotationSchedule);
 
         // Dynamic audio device list using LibVLC

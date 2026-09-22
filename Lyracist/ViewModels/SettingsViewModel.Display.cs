@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 08:49:00 -> Add ShowQrCodeOnLyricsScreen property to sync lyrics projection screen QR code visibility
+// Edited on Sep 22, 2026 @ 08:49:00 -> Auto-toggle between DJ Banner and Rotation when on the same screen
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -36,6 +36,13 @@ public partial class SettingsViewModel
         {
             if (_display.IsRotationActive != value)
             {
+                if (value && _display.IsDjBannerActive &&
+                    _display.GetPreferences().RotationScreenIndex.HasValue &&
+                    _display.GetPreferences().RotationScreenIndex == _display.GetPreferences().DjBannerScreenIndex)
+                {
+                    _display.IsDjBannerActive = false;
+                    OnPropertyChanged(nameof(IsDjBannerActive));
+                }
                 _display.IsRotationActive = value;
                 OnPropertyChanged(nameof(IsRotationActive));
             }
@@ -49,6 +56,13 @@ public partial class SettingsViewModel
         {
             if (_display.IsDjBannerActive != value)
             {
+                if (value && _display.IsRotationActive &&
+                    _display.GetPreferences().DjBannerScreenIndex.HasValue &&
+                    _display.GetPreferences().DjBannerScreenIndex == _display.GetPreferences().RotationScreenIndex)
+                {
+                    _display.IsRotationActive = false;
+                    OnPropertyChanged(nameof(IsRotationActive));
+                }
                 _display.IsDjBannerActive = value;
                 OnPropertyChanged(nameof(IsDjBannerActive));
             }
@@ -135,6 +149,11 @@ public partial class SettingsViewModel
             OnPropertyChanged(nameof(IsLyricsActive));
             OnPropertyChanged(nameof(IsRotationActive));
             OnPropertyChanged(nameof(IsDjBannerActive));
+
+            if (SelectedDjBanner?.FullPath != prefs.SelectedDjBannerPath)
+            {
+                SelectedDjBanner = DjBanners.FirstOrDefault(b => b.FullPath == prefs.SelectedDjBannerPath);
+            }
         });
     }
     // Display
@@ -168,16 +187,22 @@ public partial class SettingsViewModel
     [ObservableProperty]
     private ScreenInfo? _djBannerScreen;
 
-    public List<string> ProjectionViews { get; } = ["Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable", "Disco Ball", "Synthwave Grid", "Concert Festival Lineup"];
-    // TODO (future): "Casino Slot Reels" — each queue slot is a spinning slot-machine reel that
-    //                clunks to a stop on the singer's name; current singer gets a "JACKPOT" flourish.
-    // TODO (future): "Jukebox" — a glowing 50s jukebox with the singer list as illuminated selection
-    //                buttons, bubble-tube light animation along the frame.
-    // TODO (future): "Stadium Jumbotron" — dot-matrix/LED scoreboard look, singer names "typing on"
-    //                pixel-by-pixel like a stadium screen, spotlight sweep in the background.
-    // TODO (future): "Movie Theater 'Now Showing'" — film reel countdown leader ticking down to the
-    //                current singer, marquee-style poster cards for the next few up (distinct from
-    //                Vegas Marquee by leaning into film-reel/countdown motion rather than chase lights).
+    public static readonly IReadOnlyList<string> AllProjectionViews =
+    [
+        "Normal List",
+        "Star Wars Crawl",
+        "Vegas Marquee",
+        "Vinyl Turntable",
+        "Disco Ball",
+        "Synthwave Grid",
+        "Concert Festival Lineup",
+        "Casino Slot Reels",
+        "Jukebox",
+        "Stadium Jumbotron",
+        "Movie Theater 'Now Showing'"
+    ];
+
+    public List<string> ProjectionViews { get; } = [.. AllProjectionViews];
 
     [ObservableProperty]
     private string _selectedProjectionView = "Normal List";
@@ -190,6 +215,36 @@ public partial class SettingsViewModel
     partial void OnAutoRotateProjectionViewsChanged(bool value)
     {
         _display.SetAutoRotateProjectionViews(value);
+    }
+
+    /// <summary>Single duration (in seconds) that each randomly chosen screen stays visible before automatically changing.</summary>
+    [ObservableProperty]
+    private int _autoRotateDurationSeconds = 180;
+
+    partial void OnAutoRotateDurationSecondsChanged(int value)
+    {
+        if (value < 5) AutoRotateDurationSeconds = 5;
+        _display.SetAutoRotateDurationSeconds(AutoRotateDurationSeconds);
+    }
+
+    [RelayCommand]
+    private void SelectAllProjectionScreens()
+    {
+        foreach (var entry in ProjectionRotationSchedule)
+        {
+            entry.IsEnabled = true;
+        }
+        _display.SetProjectionRotationSchedule([.. ProjectionRotationSchedule]);
+    }
+
+    [RelayCommand]
+    private void ClearAllProjectionScreens()
+    {
+        foreach (var entry in ProjectionRotationSchedule)
+        {
+            entry.IsEnabled = false;
+        }
+        _display.SetProjectionRotationSchedule([.. ProjectionRotationSchedule]);
     }
 
     /// <summary>DJ-configured schedule of which projection views participate in the automatic rotation

@@ -1,4 +1,4 @@
-// Edited on Sep 11, 2026 @ 07:47:00 -> Remove redundant re-sync calls delegated to OnActiveSpecialEventChanged
+// Edited on Sep 22, 2026 @ 08:48:00 -> Reset ActiveSpecialEvent when SelectedDjBanner changes
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -37,6 +37,14 @@ public partial class KaraokeViewModel
 
     partial void OnSelectedDjBannerChanged(Lyracist.Shared.DjBannerItem? value)
     {
+        if (value != null && !string.IsNullOrEmpty(value.FullPath))
+        {
+            if (ActiveSpecialEvent != "None")
+            {
+                ActiveSpecialEvent = "None";
+                RebuildSpecialEventOptions();
+            }
+        }
         _displayService.UpdateDjBanner(value?.FullPath ?? string.Empty);
     }
 

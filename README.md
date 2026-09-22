@@ -1,4 +1,4 @@
-<!-- Edited on Sep 21, 2026 @ 20:03:30 -> Document Active Singer Count on Vegas Billboard & Vinyl Record Banners -->
+<!-- Edited on Sep 22, 2026 @ 11:15:30 -> Document removal of vinyl record marker dot in rotation banners -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -273,6 +273,19 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - On the Broadway/Vegas marquee rotation screen, a high-resolution circular framed photo with gold neon glow effect is prominently rendered right above the singer's name on the big screen.
 - **Vinyl Record ("Now Spinning") Turntable Display**:
   - On the turntable rotation screen, the circular framed photo is showcased beside the "♪ NOW SPINNING" banner and singer title while the vinyl record spins.
+
+### 🎨 DJ Banners & Special Event Display System (`Lyracist` & `KSRotation`)
+- **Independent DJ Banner Multi-Monitor Projection**:
+  - Projects customized DJ promotional graphics and looping MP4 video animations (`Banners/KSRotation/DJBanners`) to any dedicated secondary monitor, stage TV, or patron display screen.
+  - Supports automatic looping for animated video banners with soundless background playback (`BannerVideo_MediaEnded` rewind loop).
+- **Live In-App Visual Previews**:
+  - Live preview cards embedded directly under the DJ Banner selector in both the **Display Settings** tab (`SettingsPage.xaml`) and **Karaoke Control Center** (`KaraokePage.xaml`).
+  - Displays instant scaled visual previews for image files (`.png`, `.jpg`, `.jpeg`, `.gif`, `.bmp`), dedicated animated video badges for `.mp4` video files, and fallback indicators when no banner is selected.
+- **Intelligent Same-Screen Deconfliction & Seamless Auto-Toggle**:
+  - When the DJ Banner and Singer Rotation Billboard share the same physical display output, toggling the DJ Banner ON automatically steps down Rotation, immediately projecting the selected banner to the screen without manual multi-step configuration.
+- **Special Event Overrides & Safe Precedence**:
+  - Supports quick-switch special event overlays ("Birthday", "Last Song", "Anniversary", "Custom") with instant revert back to the chosen DJ banner when switched to "None".
+  - Selecting any standard DJ banner automatically clears prior special event states, ensuring the DJ's selection takes immediate effect on stage displays.
 
 ### 🎤 Per-Singer Key/Tempo Recall & Mic Level/EQ Recall (`Lyracist`)
 - **Dual-Tier Key & Playback Speed Memory**:
@@ -628,11 +641,24 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Dedicated 4-Column Display Tab**: Structured into 4 equal columns (*Monitors & Screen Assignments*, *DJ & Event Banners*, *Star Wars Crawl & Spaceship*, *Connect & Request Instructions*) matching KsRotation.
 - **Screen Activation Checkboxes**: Explicit checkboxes for "Enable Lyrics Projection Screen", "Enable Singer Rotation Billboard Screen", and "Enable DJ Banner Screen".
 - **Dual-Window Projection**: Supports launching standalone windows for **Lyrics Projection**, **Singer Rotation Billboard**, and **DJ Banner**.
-- **Four Dynamic Billboard View Modes**:
+- **Eleven Dynamic Billboard View Modes**:
   - **Normal List**: A standard listing of the current singer and upcoming rotation queue.
   - **Star Wars Crawl**: High-fidelity 3D projection rendering a starry night sky with cool/warm twinkling star layers, and a 3D-angled text block crawling upward in space.
   - **Vegas Marquee**: Theatrical Broadway stage layout displaying the current performer's name in glowing letters inside a brass frame ringed by lavender/purple "marching ants" chase bulb animations.
-  - **Vinyl Turntable**: Classic warm DJ-booth theme with a dynamic rotating vinyl 45 record, tonearm, and center label showing the current singer and song metadata.
+  - **Vinyl Turntable**: Classic warm DJ-booth theme with a dynamic rotating vinyl 45 record, tonearm, and clean center label showing the current singer and song metadata.
+  - **Disco Ball**: A mirror-ball dance club spectacle featuring rotating mirror-ball facets, floating reflected floor spots, sweeping stage light beams, and a bold neon hero performer card.
+  - **Synthwave Grid**: Retro 80s outrun aesthetic with an animated perspective horizon grid in neon cyan and magenta, a glowing retro sun backdrop, and synth-styled typography.
+  - **Concert Festival Lineup**: Main-stage music festival poster vibe featuring towering stage trusses, drifting golden concert sparkles, and dynamic sweeping spotlights framing the headlining performer.
+  - **Casino Slot Reels**: High-roller casino excitement with spinning slot-machine reels that clunk to a stop on paylines, accompanied by a glittering jackpot coin flourish and golden glow.
+  - **Jukebox**: Classic 1950s rock-and-roll diner cabinet with glowing chrome arches, animated rising bubble-tube light columns, and illuminated selector pushbuttons for upcoming song selections.
+  - **Stadium Jumbotron**: Massive arena LED scoreboard with sweeping stadium floodlights crisscrossing the venue as the headlining singer is announced like a stadium superstar.
+  - **Movie Theater 'Now Showing'**: Vintage Hollywood premiere aesthetic featuring a vintage 35mm film leader countdown (3...2...1) sweep, flickering cinematic projector beam, and marquee coming-attraction lobby poster cards.
+- **High-Visibility Queue Typography (Up Next / Right Column)**: All right-side upcoming performer queue sections, headers, position numbers, wait time badges, round anchor tags, and "Up Next" / "On Deck" cards are rendered 2 font sizes larger across all 7 right-column audience projection themes, mobile tablet billboards (`BillboardView.xaml`), and web projection displays (`billboard.html`) for clear legibility across large venue monitors.
+- **Automated Random Screen Rotation (`KSRotation`, `Lyracist`)**:
+  - **Single Unified Interval Setting**: Replaced per-row time inputs with a single global setting (e.g., `180` seconds) to dictate how often the display rotates.
+  - **Intelligent Random Cycling**: Automatically and randomly cycles among enabled screens at each interval, avoiding immediate repetition of the active screen when multiple views are selected.
+  - **One-Click "✓ Select All" and "✗ Clear All"**: Quickly toggles all 11 projection themes with a single button click.
+  - **Optimized Two-Column Display Layout**: Reorganized `KSRotation` Display tab so Target Monitor, Connect Instructions, and Casting Controls are conveniently grouped in Column 0 on the left, while Screen Rotation occupies Column 1 on the right.
 - **Dynamic Chroma-Keying**: Automatically strips standard `.cdg` file backgrounds and borders (pixel index `0,0`) in real time to render lyrics transparent.
 - **GPU-Accelerated 4K Backdrops**: Beautiful, responsive vector backdrops layered behind transparent lyrics, wrapped in Viewbox controls to fit HD and 4K displays.
 - **Flexible Monitor Assignment & Dropdowns**: Direct dropdown selection in the KJ interface to target specific connected monitors for both the Rotation Display and DJ Banner windows, with real-time dynamic window relocation and automatic fallback to secondary/primary screens if unplugged.

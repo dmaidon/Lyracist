@@ -68,7 +68,7 @@
                 <ui:NavigationViewItem Content="Requests" Icon="{ui:SymbolIcon MailInboxArrowDown20}" TargetPageType="{x:Type pages:RequestsPage}" />
                 <ui:NavigationViewItem Content="Store" Icon="{ui:SymbolIcon ShoppingBag24}" TargetPageType="{x:Type pages:StorePage}" />
                 <ui:NavigationViewItem Content="Users" Icon="{ui:SymbolIcon Person24}" TargetPageType="{x:Type pages:UsersPage}" />
-                <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}" TargetPageType="{x:Type pages:SettingsPage}" />
+                <ui:NavigationViewItem Content="Settings" Icon="{ui:SymbolIcon Settings24}" TargetPageType="{x:Type pages:SettingsPage}" Background="#FF9ECAED" />
                 <ui:NavigationViewItem Content="Trivia Settings" Icon="{ui:SymbolIcon Settings24}" TargetPageType="{x:Type pages:TriviaSettingsPage}" />
                 <ui:NavigationViewItem Content="Casting" Icon="{ui:SymbolIcon Cast24}" TargetPageType="{x:Type pages:CastingPage}" />
                 <ui:NavigationViewItem Content="Help" Icon="{ui:SymbolIcon QuestionCircle24}" TargetPageType="{x:Type pages:HelpPage}" />

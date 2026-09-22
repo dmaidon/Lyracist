@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 20:01:30 -> Add documentation update test for active singers count on Vegas billboard and Vinyl record banners
+// Edited on Sep 22, 2026 @ 07:56:00 -> Add documentation update test for unified screen rotation duration, random cycling, Select All, and Display tab layout reorganization
 using System;
 using System.IO;
 using Xunit;
@@ -2622,6 +2622,323 @@ Section: Active Singers Count Display on Vegas Billboard and Vinyl Record Banner
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " ActiveSingersBannersNotice";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForFourNewRotationBillboardViews()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Four New Dynamic Rotation Billboard Projection Views (Updated Sep 22, 2026)
+
+[Overview & Audience Display Options]
+Lyracist Pro and KSRotation now feature eleven distinct, high-impact projection themes for the audience-facing Singer Rotation Billboard screen. Four new animated themes have been added with 100% visual and behavioral parity across both applications:
+1. Casino Slot Reels:
+   - Experience high-roller casino excitement with each rotation slot rendered as a spinning slot machine reel.
+   - When a performance starts, the hero performer reel rapidly spins and clunks to a decelerated stop on the payline.
+   - The current singer receives a celebratory ""JACKPOT"" flourish complete with a pulsating golden drop-shadow glow and a dynamic burst of drifting gold coins and star sparkles.
+2. Jukebox:
+   - Transports the venue to a classic 1950s rock-and-roll diner cabinet.
+   - Features a chrome-trimmed neon arch header, glowing illuminated song-selection pushbuttons for the upcoming queue, and dual animated rising bubble tubes that drift continuously up the left and right cabinet pillars.
+3. Stadium Jumbotron:
+   - Delivers a massive arena sports-and-concert experience with an authentic LED scoreboard aesthetic.
+   - Performer names and song titles are presented with high-visibility dot-matrix typography while twin sweeping stadium floodlights crisscross the arena backdrop.
+4. Movie Theater 'Now Showing':
+   - An elegant vintage Hollywood premiere presentation.
+   - Begins with a classic 35mm film leader countdown sweep (3...2...1) and a flickering cinematic projector light cone that cascades over the feature performer card.
+   - Upcoming singers are showcased on vintage marquee coming-attractions lobby cards.
+
+[Full Feature Parity & Controls]
+• Complete Badge Support:
+  - All four new views fully support performer avatars/selfies, ⭐ SPECIAL performer badges, ⚓ ANCHOR round-start markers, and {N} estimated wait-time badges.
+• Automatic Cycling & Rotation Schedule:
+  - All eleven projection views are dynamically integrated into the Screen Rotation schedule under Settings -> Display -> Screen Rotation.
+  - DJs can check which views to include and configure custom display durations (in seconds) for hands-free, automated cycling throughout the show.
+• View Mode Help & Descriptions:
+  - Complete descriptions for all eleven themes are accessible directly within KSRotation (Help Topic 3) and Lyracist Pro (Settings -> Display -> Billboard View Mode -> View Mode Descriptions & Themes expander).";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Four New Dynamic Rotation Billboard Projection Views"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Four New Dynamic Rotation Billboard Projection Views"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Four New Dynamic Rotation Billboard Projection Views")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        var runProps = new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = line.StartsWith("[") ? "24" : "22" }
+                                        );
+                                        if (line.StartsWith("["))
+                                        {
+                                            runProps.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Bold());
+                                        }
+
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                runProps,
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("FourNewBillboardViewsNotice"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Four New Dynamic Rotation Billboard Projection Views", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
+
+                                double yPos = 60;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    bool isSection = line.StartsWith("[");
+                                    var font = isSection ? sectionFont : bodyFont;
+                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
+                                    double lineHeight = isSection ? 15 : 12.0;
+
+                                    if (yPos + lineHeight > 750)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.Letter;
+                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                        yPos = 36;
+                                    }
+
+                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
+                                    yPos += lineHeight;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " FourNewBillboardViewsNotice";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForUnifiedScreenRotationAndDisplayLayout()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Screen Rotation and Display Tab Layout Reorganization (Updated Sep 22, 2026)
+
+[Overview & Layout Redesign]
+The Display configuration experience in KSRotation and Lyracist Pro has been streamlined for enhanced operational clarity and fast setup:
+1. Two-Column Optimized Layout:
+   - Target Monitor (Display & Projection), Connect & Request Instructions, and Casting Controls are consolidated into Column 0 on the left.
+   - The entire Column 1 on the right is dedicated to the Screen Rotation settings, providing a clean, uncluttered interface.
+2. Unified Rotation Interval (Single Time Setting):
+   - Eliminated tedious individual per-screen duration inputs in favor of a single global duration setting (e.g., 'Change screen every: 180 sec').
+   - DJs and KJs no longer have to manually set the seconds on every individual view.
+3. Random Screen Cycling:
+   - When automatic screen rotation is active, the billboard projection now randomly cycles among the enabled views at every configured interval.
+   - When multiple screens are enabled, the random picker automatically avoids immediately repeating the current screen, delivering dynamic and fresh visual variety to the audience.
+4. One-Click 'Select All' & 'Clear All' Controls:
+   - Added instant '✓ Select All' and '✗ Clear All' action buttons above the screen list.
+   - Hosts can enable all 11 billboard views with a single click or clear the selection instantly to focus on just their favorites.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Screen Rotation and Display Tab Layout Reorganization"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Screen Rotation and Display Tab Layout Reorganization"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Screen Rotation and Display Tab Layout Reorganization")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        var runProps = new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = line.StartsWith("[") ? "24" : "22" }
+                                        );
+                                        if (line.StartsWith("["))
+                                        {
+                                            runProps.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Bold());
+                                        }
+
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                runProps,
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("UnifiedScreenRotationNotice"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Screen Rotation and Display Tab Layout Reorganization", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
+
+                                double yPos = 60;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    bool isSection = line.StartsWith("[");
+                                    var font = isSection ? sectionFont : bodyFont;
+                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
+                                    double lineHeight = isSection ? 15 : 12.0;
+
+                                    if (yPos + lineHeight > 750)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.Letter;
+                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                        yPos = 36;
+                                    }
+
+                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
+                                    yPos += lineHeight;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " UnifiedScreenRotationNotice";
                                 doc.Save(pdfPath);
                             }
                         }

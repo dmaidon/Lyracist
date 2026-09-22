@@ -1,4 +1,4 @@
-<!-- Edited on Sep 21, 2026 @ 12:24:45 -> Add Round Completion Estimation Notice to Help Topic 2 in MainWindow.xaml -->
+<!-- Edited on Sep 22, 2026 @ 07:54:00 -> Move Target Monitor and Connect Instructions to Column 0; Screen Rotation in Column 1 with single duration and Select All -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -2025,58 +2025,9 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <GroupBox Header="Casting Controls"
-                                  Style="{StaticResource PurpleSettingsGroupBoxStyle}"
-                                  Grid.Column="0"
-                                  VerticalAlignment="Top"
-                                  Margin="0,0,0,12">
-                            <StackPanel Orientation="Vertical" Margin="20">
-                                <TextBlock Text="Cast Rotation To:"
-                                           FontSize="18"
-                                           Margin="0,0,0,10"
-                                           Foreground="{DynamicResource AppHeaderBrush}" />
-
-                                <ComboBox ItemsSource="{Binding AvailableDisplayTargets}"
-                                          SelectedItem="{Binding RotationTarget, UpdateSourceTrigger=PropertyChanged}"
-                                          Style="{StaticResource ModernComboBoxStyle}"
-                                          Width="250"
-                                          FontSize="16"
-                                          HorizontalAlignment="Left"
-                                          Margin="0,0,0,15" />
-
-                                <!-- Chromecast Device Selection Dropdown -->
-                                <StackPanel Visibility="{Binding IsChromecastSelectionVisible, Converter={StaticResource BoolToVis}}" Margin="0,0,0,20">
-                                    <TextBlock Text="Target Chromecast Device" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="8" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" ItemsSource="{Binding AvailableChromecasts}" SelectedItem="{Binding SelectedChromecast, Mode=TwoWay}" DisplayMemberPath="Name" Style="{StaticResource ModernComboBoxStyle}" />
-                                        <Button Grid.Column="2" Content="Rescan" Command="{Binding DiscoverChromecastsCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Margin="8,0,0,0" VerticalAlignment="Center" Padding="8,4" Height="32" />
-                                    </Grid>
-                                </StackPanel>
-
-                                <Button Content="Cast Rotation"
-                                        Command="{Binding CastCommand}"
-                                        Width="200"
-                                        Margin="0,10,0,10"
-                                        FontSize="16"
-                                        Style="{StaticResource ModernButtonStyle}"
-                                        HorizontalAlignment="Left" />
-
-                                <Button Content="Stop Casting"
-                                        Command="{Binding StopCommand}"
-                                        Width="200"
-                                        FontSize="16"
-                                        Style="{StaticResource ModernSecondaryButtonStyle}"
-                                        HorizontalAlignment="Left" />
-                            </StackPanel>
-                        </GroupBox>
-
-                        <!-- Column 1: Display & Projection + Connect Instructions -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="15,0,0,12">
+                        <!-- Column 0: Target Monitor, Connect & Request Instructions, Casting Controls -->
+                        <StackPanel Grid.Column="0" VerticalAlignment="Top" Margin="0,0,0,12">
+                            <!-- Display & Projection (Target Monitor) -->
                             <GroupBox Header="Display &amp; Projection" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,0,0,12">
                                 <StackPanel Margin="0,4,0,0">
                                     <TextBlock Text="Target Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
@@ -2115,60 +2066,8 @@
                                 </StackPanel>
                             </GroupBox>
 
-                            <!-- Screen Rotation GroupBox -->
-                            <GroupBox Header="🔀 Screen Rotation" Style="{StaticResource NavySettingsGroupBoxStyle}" Margin="0,0,0,12">
-                                <StackPanel Margin="0,4,0,0">
-                                    <CheckBox
-                                        Content="Automatically rotate through screens"
-                                        IsChecked="{Binding AutoRotateProjectionViews, UpdateSourceTrigger=PropertyChanged}"
-                                        Style="{StaticResource ModernCheckBoxStyle}"
-                                        Margin="0,0,0,8"
-                                        ToolTip="When enabled, the projection display automatically cycles through the checked screens below, each for its own configured duration, instead of staying on one fixed screen." />
-                                    <TextBlock Text="Check which screens to include, and set how many seconds each stays up:"
-                                               TextWrapping="Wrap"
-                                               FontSize="12"
-                                               Margin="0,0,0,8"
-                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                    <ItemsControl ItemsSource="{Binding ProjectionRotationSchedule}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid Margin="0,3">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="46" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <CheckBox Grid.Column="0"
-                                                              IsChecked="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"
-                                                              Style="{StaticResource ModernCheckBoxStyle}"
-                                                              VerticalAlignment="Center"
-                                                              Margin="0,0,8,0" />
-                                                    <TextBlock Grid.Column="1"
-                                                               Text="{Binding ViewName}"
-                                                               VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource MaterialDesignBody}" />
-                                                    <TextBox Grid.Column="2"
-                                                             Text="{Binding DurationSeconds, UpdateSourceTrigger=LostFocus}"
-                                                             Style="{StaticResource ModernTextBoxStyle}"
-                                                             Height="26"
-                                                             Padding="4,1"
-                                                             TextAlignment="Center" />
-                                                    <TextBlock Grid.Column="3"
-                                                               Text="sec"
-                                                               VerticalAlignment="Center"
-                                                               Margin="4,0,0,0"
-                                                               FontSize="11"
-                                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </GroupBox>
-
                             <!-- Connect & Request Instructions GroupBox -->
-                            <GroupBox Header="Connect &amp; Request Instructions" Style="{StaticResource GreenSettingsGroupBoxStyle}">
+                            <GroupBox Header="Connect &amp; Request Instructions" Style="{StaticResource GreenSettingsGroupBoxStyle}" Margin="0,0,0,12">
                                 <StackPanel Margin="0,4,0,0">
                                     <TextBlock Text="Target Screen / Monitor" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
                                     <ComboBox
@@ -2193,6 +2092,145 @@
                                             Command="{Binding PreviewConnectInstructionsCommand}"
                                             Style="{StaticResource ModernSecondaryButtonStyle}"
                                             Height="30" Padding="12,2" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </GroupBox>
+
+                            <!-- Casting Controls GroupBox -->
+                            <GroupBox Header="Casting Controls"
+                                      Style="{StaticResource PurpleSettingsGroupBoxStyle}"
+                                      Margin="0,0,0,12">
+                                <StackPanel Orientation="Vertical" Margin="0,4,0,0">
+                                    <TextBlock Text="Cast Rotation To:"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,8"
+                                               Foreground="{DynamicResource AppHeaderBrush}" />
+
+                                    <ComboBox ItemsSource="{Binding AvailableDisplayTargets}"
+                                              SelectedItem="{Binding RotationTarget, UpdateSourceTrigger=PropertyChanged}"
+                                              Style="{StaticResource ModernComboBoxStyle}"
+                                              FontSize="14"
+                                              HorizontalAlignment="Stretch"
+                                              Margin="0,0,0,12" />
+
+                                    <!-- Chromecast Device Selection Dropdown -->
+                                    <StackPanel Visibility="{Binding IsChromecastSelectionVisible, Converter={StaticResource BoolToVis}}" Margin="0,0,0,14">
+                                        <TextBlock Text="Target Chromecast Device" FontWeight="SemiBold" Margin="0,0,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="8" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ComboBox Grid.Column="0" ItemsSource="{Binding AvailableChromecasts}" SelectedItem="{Binding SelectedChromecast, Mode=TwoWay}" DisplayMemberPath="Name" Style="{StaticResource ModernComboBoxStyle}" />
+                                            <Button Grid.Column="2" Content="Rescan" Command="{Binding DiscoverChromecastsCommand}" Style="{StaticResource ModernSecondaryButtonStyle}" Margin="8,0,0,0" VerticalAlignment="Center" Padding="8,4" Height="32" />
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Button Content="Cast Rotation"
+                                                Command="{Binding CastCommand}"
+                                                Width="140"
+                                                Height="32"
+                                                FontSize="14"
+                                                Style="{StaticResource ModernButtonStyle}"
+                                                Margin="0,0,10,0" />
+
+                                        <Button Content="Stop Casting"
+                                                Command="{Binding StopCommand}"
+                                                Width="140"
+                                                Height="32"
+                                                FontSize="14"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+
+                        <!-- Column 1: Screen Rotation -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="15,0,0,12">
+                            <!-- Screen Rotation GroupBox -->
+                            <GroupBox Header="🔀 Screen Rotation" Style="{StaticResource NavySettingsGroupBoxStyle}">
+                                <StackPanel Margin="0,4,0,0">
+                                    <CheckBox
+                                        Content="Automatically rotate through screens"
+                                        IsChecked="{Binding AutoRotateProjectionViews, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource ModernCheckBoxStyle}"
+                                        Margin="0,0,0,10"
+                                        ToolTip="When enabled, the projection display automatically randomly changes through the selected screens below every configured interval, instead of staying on one fixed screen." />
+
+                                    <!-- Single Duration Setting -->
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Change screen every:"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AppHeaderBrush}" />
+                                        <TextBox Grid.Column="1"
+                                                 Text="{Binding AutoRotateDurationSeconds, UpdateSourceTrigger=LostFocus}"
+                                                 Style="{StaticResource ModernTextBoxStyle}"
+                                                 Width="60"
+                                                 Height="28"
+                                                 Padding="4,2"
+                                                 TextAlignment="Center"
+                                                 VerticalAlignment="Center"
+                                                 Margin="8,0,4,0" />
+                                        <TextBlock Grid.Column="2"
+                                                   Text="sec"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    </Grid>
+
+                                    <!-- Select All / Clear All Buttons -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <Button Content="✓ Select All"
+                                                Command="{Binding SelectAllProjectionScreensCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Height="26"
+                                                Padding="10,2"
+                                                Margin="0,0,8,0"
+                                                ToolTip="Select all projection screens with a single click" />
+                                        <Button Content="✗ Clear All"
+                                                Command="{Binding ClearAllProjectionScreensCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Height="26"
+                                                Padding="10,2"
+                                                ToolTip="Deselect all projection screens" />
+                                    </StackPanel>
+
+                                    <TextBlock Text="Check which screens to randomly rotate through:"
+                                               TextWrapping="Wrap"
+                                               FontSize="12"
+                                               Margin="0,0,0,8"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <ItemsControl ItemsSource="{Binding ProjectionRotationSchedule}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <CheckBox Grid.Column="0"
+                                                              IsChecked="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                                              VerticalAlignment="Center"
+                                                              Margin="0,0,8,0" />
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding ViewName}"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource MaterialDesignBody}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </StackPanel>
                             </GroupBox>
                         </StackPanel>
@@ -3970,23 +4008,51 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="170" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Text="Normal View" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
                                     <TextBlock Grid.Column="1" Text="Displays active singers in clean, high-contrast, self-wrapping columns. The active singer is highlighted in crimson." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
 
-                                    <TextBlock Grid.Row="1" Text="Vegas Marquee" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="A Vegas/Broadway theater marquee: the current singer's name in giant glowing letters inside a brass frame ringed by purple 'marching ants' light bulbs that chase around the border, with an Up Next strip below. The biggest crowd-pleaser." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Grid.Row="1" Text="Star Wars Crawl" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="Animates the rotation queue in a 3D perspective scroll, moving up over a gorgeous twinkling starfield with distant galaxies. Ideal for breaks or dramatic rotation reveals!" Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
 
-                                    <TextBlock Grid.Row="2" Text="Vinyl Turntable" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="A 'Now Spinning' turntable: a continuously spinning 45 single (big center hole) with the current singer's name and song title on the gold label, a tonearm resting on it, and a now-playing side panel listing who's On Deck." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Grid.Row="2" Text="Vegas Marquee" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="A Vegas/Broadway theater marquee: the current singer's name in giant glowing letters inside a brass frame ringed by purple 'marching ants' light bulbs that chase around the border, with an Up Next strip below. The biggest crowd-pleaser." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
 
-                                    <TextBlock Grid.Row="3" Text="Star Wars Crawl" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="Animates the rotation queue in a 3D perspective scroll, moving up over a gorgeous twinkling starfield with distant galaxies. Ideal for breaks or dramatic rotation reveals!" Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Grid.Row="3" Text="Vinyl Turntable" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="A 'Now Spinning' turntable: a continuously spinning 45 single (big center hole) with the current singer's name and song title on the gold label, a tonearm resting on it, and a now-playing side panel listing who's On Deck." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="4" Text="Disco Ball" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="A mirror-ball dance club spectacle: rotating facets cast drifting light spots and sweeping colored stage beams across the venue floor with a bold neon hero performer card." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="5" Text="Synthwave Grid" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="Retro 80s outrun aesthetic: animated perspective horizon grid bathed in neon cyan and magenta, featuring a glowing retro sun backdrop and synth-styled typography." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="6" Text="Concert Festival Lineup" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="Main-stage music festival poster vibe: towering stage trusses, drifting golden concert sparkles, and dynamic sweeping spotlights framing the headlining performer." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="7" Text="Casino Slot Reels" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="7" Grid.Column="1" Text="High-roller casino excitement: singer names spin rapidly on slot-machine reels that clunk to a stop on paylines, accompanied by a glittering jackpot coin flourish and golden glow." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="8" Text="Jukebox" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="8" Grid.Column="1" Text="Classic 1950s rock-and-roll diner cabinet: glowing chrome arches, animated rising bubble-tube light columns, and illuminated selector pushbuttons for upcoming song selections." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="9" Text="Stadium Jumbotron" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="9" Grid.Column="1" Text="Massive arena LED scoreboard: sweeping stadium floodlights crisscross the arena as the headlining singer is announced like a stadium superstar." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+
+                                    <TextBlock Grid.Row="10" Text="Movie Theater 'Now Showing'" FontWeight="SemiBold" Margin="0,4" Foreground="{DynamicResource MaterialDesignBody}" />
+                                    <TextBlock Grid.Row="10" Grid.Column="1" Text="Vintage Hollywood premiere aesthetic: vintage 35mm film leader countdown (3...2...1) sweep, flickering cinematic projector beam, and marquee coming-attraction lobby poster cards." Margin="0,4" TextWrapping="Wrap" Foreground="{DynamicResource MaterialDesignBodyLight}" />
                                 </Grid>
 
                                 <Border Background="{DynamicResource MaterialDesignCardBackground}" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8" Padding="12">

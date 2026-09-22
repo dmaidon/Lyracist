@@ -1,9 +1,49 @@
-<!-- Edited on Sep 21, 2026 @ 20:02:30 -> Add Active Singer Count on Vegas Billboard and Vinyl Record Banners -->
-Last Edit: Sep 21, 2026 - Active Singer Count on Vegas Billboard and Vinyl Record Banners
+<!-- Edited on Sep 22, 2026 @ 11:15:00 -> Document removal of vinyl record marker dot in rotation banners -->
+Last Edit: Sep 22, 2026 - Vinyl Turntable Dot Removal & Rotation Banner Up Next Font Upsize
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.22.0] - 2026-09-22
+
+### Added
+- **Vinyl Turntable Banner Marker Dot Removal (`Lyracist`, `KSRotation`)**:
+  - **Clean Vinyl Label Aesthetic**: Removed the artificial black marker dot from the spinning vinyl disc group in `RotationWindow.xaml` (`Lyracist`) and `SingerDisplayWindow.xaml` (`KSRotation`). The continuously rotating performer name, song title, and radial vinyl sheen communicate active disc spinning cleanly without an unnecessary visual cue dot.
+- **Rotation Banners Up Next / Right-Side Font Upsizing (`Lyracist`, `KSRotation`, `KSRotation.Maui`, Web Billboard)**:
+  - **High-Visibility Monitor Readability**: Upsized typography by 2 sizes across all right-side upcoming performer queue sections, headers, position numbers, wait time badges, round anchor tags, and "Up Next" / "On Deck" cards to ensure clear readability on large venue monitors and projection screens from distance.
+  - **Comprehensive Multi-Theme Parity**: Updated across all 7 right-column audience projection themes in both WPF applications (`RotationWindow.xaml` in `Lyracist` and `SingerDisplayWindow.xaml` in `KSRotation`):
+    - *Vinyl Turntable*: On Deck header (18 -> 20), count (12 -> 14), anchor (10 -> 12), and upcoming singer text (22 -> 24).
+    - *Disco Ball*: Up Next header (16 -> 18), count (10 -> 12), anchor (9 -> 11), and singer text (16 -> 18).
+    - *Synthwave Grid*: Up Next header (16 -> 18), count (10 -> 12), anchor (9 -> 11), and singer text (16 -> 18).
+    - *Casino Slot Reels*: Next Spins header (16 -> 18), count (11 -> 13), wait badge (13 -> 15), anchor (10 -> 12), icon (13 -> 15), and reel text (16 -> 18).
+    - *Jukebox*: Selector Strips header (16 -> 18), count (11 -> 13), wait badge (13 -> 15), anchor (10 -> 12), push indicator (9 -> 11), and strip title (16 -> 18).
+    - *Stadium Jumbotron*: On Deck header (16 -> 18), count (11 -> 13), wait badge (13 -> 15), anchor (10 -> 12), arrow indicator (14 -> 16), and roster text (16 -> 18).
+    - *Movie Theater 'Now Showing'*: Coming Attractions header (16 -> 18), count (11 -> 13), wait badge (13 -> 15), anchor (10 -> 12), reel icon (14 -> 16), and marquee text (16 -> 18).
+  - **Mobile Tablet & Web Parity**: Upsized upcoming rotation queue headers, badges, position counters, singer names, and song titles in `BillboardView.xaml` (`KSRotation.Maui`) and the full-height queue & up-next card in `billboard.html`.
+- **DJ Banner Projection & In-App Preview Fixes (`Lyracist`)**:
+  - **DjBannerWindow Code-Behind Direct Assignment**: Eliminated binding overwrite issue in `DjBannerWindow.xaml.cs` by assigning `BannerImage.Source = _vm.BannerImage;` directly and subscribing to `BannerImage` change notifications with dispatcher thread-safety.
+  - **ViewModel Decoded Image Preparation**: Updated `DjBannerWindowViewModel.UpdateBanner()` to set `BannerImage` before updating `BannerPath`, ensuring the decoded bitmap is fully initialized and frozen prior to window consumption.
+  - **Special Event Clearing on DJ Banner Selection**: Resolved issue where prior active special events (e.g. Birthday, Last Song) permanently overrode the selected DJ Banner in `DisplayService.cs` and `KaraokeViewModel.DjBanner.cs`. Selecting a DJ banner now resets active special event to "None".
+  - **Same-Screen Deconfliction Auto-Toggle**: Synchronized `SettingsViewModel.Display.cs` and `KaraokeViewModel.Screens.cs` so toggling the DJ Banner display ON automatically deactivates Rotation if both share the same target monitor, preventing silent projection suppression.
+  - **Live In-App DJ Banner Preview Cards**: Added responsive 80px preview cards to both the Display Settings tab (`SettingsPage.xaml`) and Karaoke control panel (`KaraokePage.xaml`) displaying image previews, animated video badges for MP4 files, and fallback notices when no banner is selected.
+
+- **Display Tab Layout Reorganization & Unified Screen Rotation (`KSRotation`, `Lyracist`)**:
+  - **Display Tab Two-Column Organization (`KSRotation`)**: Moved "Target Monitor" (`Display & Projection`) and "Connect & Request Instructions" to Column 0 on the left (stacked cleanly above "Casting Controls"), while dedicating Column 1 on the right entirely to "Screen Rotation".
+  - **Single Global Rotation Duration**: Replaced per-individual-screen duration inputs with a single global interval setting (`Change screen every: [180] sec`) to simplify configuration and avoid per-screen maintenance.
+  - **Intelligent Random Screen Cycling**: When automatic screen rotation is enabled, the billboard projection now randomly cycles through the selected screens at each configured interval. When two or more screens are enabled, it prevents consecutive repeats to keep audience displays visually dynamic.
+  - **One-Click 'Select All' and 'Clear All' Buttons**: Added instant "✓ Select All" and "✗ Clear All" buttons to quickly toggle all 11 billboard projection themes with a single click.
+  - **100% Solution Parity (`Lyracist`)**: Synchronized `DisplayPreferences`, `IDisplayService`, `DisplayService`, `SettingsViewModel`, and `SettingsPage.xaml` in `Lyracist` with the single rotation interval, random view cycling, and Select All / Clear All commands.
+  - **Lyracist Display Tab Column 3 Reorganization & Scroll Prevention**: Moved "🔀 Screen Rotation" GroupBox to Column 3 (above Connect Instructions) and relocated "Session Schedule & Request Cutoff" to Column 1 (below DJ & Event Banners). This balances the height of all 4 columns evenly (each $\le$ 640px), completely preventing vertical page scrolling on standard displays.
+- **Four New Rotation Billboard Projection Views (`KSRotation`, `Lyracist`)**:
+  - **100% Feature & Visual Parity Across Desktop Apps**: Implemented 4 brand-new, high-fidelity audience billboard projection view modes across both `KSRotation` (`SingerDisplayWindow.xaml`, `SingerDisplayWindow.xaml.cs`) and `Lyracist` (`RotationWindow.xaml`, `RotationWindow.xaml.cs`):
+    - **Casino Slot Reels**: Each queue slot renders as a spinning slot-machine reel that rapidly rotates and clunks to a decelerated stop on paylines. Current performer gets a celebratory "JACKPOT" flourish with a pulsating golden glow and floating coin/star particle bursts.
+    - **Jukebox**: A glowing 1950s rock-and-roll diner jukebox cabinet featuring neon arch headers, glowing selection buttons, and dual animated rising bubble-tube light strips drifting upward along the cabinet frame.
+    - **Stadium Jumbotron**: A high-impact LED arena dot-matrix scoreboard with high-contrast typography and dynamic crisscrossing stage spotlights sweeping across the venue background.
+    - **Movie Theater 'Now Showing'**: Vintage Hollywood premiere presentation featuring a synchronized 35mm film leader countdown (3...2...1) sweep, a flickering cinematic projector beam cone, and marquee-styled coming-attractions lobby poster cards.
+  - **Comprehensive Badge & Plaque Support**: All 4 new projection views fully support singer avatars/selfies, `⭐ SPECIAL` performer chips, `⚓ ANCHOR` round start badges, `{N}` estimated wait time indicators, and venue/active-singer count badges.
+  - **Full Projection View Synchronization**: Updated `MainViewModel.cs` in `KSRotation` and synced `SettingsViewModel.Display.cs` and `KaraokeViewModel.Screens.cs` in `Lyracist` with all 11 views, automatically populating the `ProjectionRotationSchedule` auto-rotate sequence.
+  - **Settings UI & Help Backfill**: Backfilled descriptions for `Disco Ball`, `Synthwave Grid`, and `Concert Festival Lineup` alongside the 4 new views in `KSRotation/MainWindow.xaml` (Help Topic 3 grid expanded to 11 rows), `Lyracist/Views/Pages/SettingsPage.xaml` (View Mode Descriptions expander), and `Lyracist/ViewModels/HelpViewModel.cs` (Topic 5).
 
 ## [26.9.21.0] - 2026-09-21
 

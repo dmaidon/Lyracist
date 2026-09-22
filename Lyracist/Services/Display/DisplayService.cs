@@ -1,4 +1,4 @@
-// Edited on Sep 3, 2026 @ 23:55:00 -> Add SetLastRound method to DisplayService
+// Edited on Sep 22, 2026 @ 08:47:00 -> Clear SelectedSpecialEvent on UpdateDjBanner and fix ShowDjBannerWindowInternal VM update
 using Lyracist.Core.Interfaces;
 using Lyracist.Models;
 using Lyracist.ViewModels;
@@ -181,7 +181,8 @@ public class DisplayService : IDisplayService
             _djBannerWindow = _serviceProvider.GetRequiredService<DjBannerWindow>();
         }
         _djBannerWindow!.Show();
-        UpdateDjBanner(_preferences.SelectedDjBannerPath);
+        var vm = _serviceProvider.GetService<DjBannerWindowViewModel>();
+        vm?.UpdateBanner(ResolveActiveBannerPath());
     }
 
     private void HideDjBannerWindowInternal()
@@ -279,10 +280,17 @@ public class DisplayService : IDisplayService
     public void UpdateDjBanner(string path)
     {
         _preferences.SelectedDjBannerPath = path;
+        _preferences.SelectedSpecialEvent = "None";
         DisplayPreferencesStore.Save(_preferences);
 
         var vm = _serviceProvider.GetService<DjBannerWindowViewModel>();
-        vm?.UpdateBanner(ResolveActiveBannerPath());
+        vm?.UpdateBanner(path);
+        UpdateRotationLastSongBanner();
+        if (_preferences.IsDjBannerActive)
+        {
+            UpdateWindowVisibilities();
+        }
+        ScreenAssignmentsChanged?.Invoke();
     }
 
     public void UpdateSpecialEvent(string eventName)
@@ -541,6 +549,13 @@ public class DisplayService : IDisplayService
         RestartProjectionRotationTimer();
     }
 
+    public void SetAutoRotateDurationSeconds(int seconds)
+    {
+        _preferences.AutoRotateDurationSeconds = seconds < 5 ? 5 : seconds;
+        DisplayPreferencesStore.Save(_preferences);
+        RestartProjectionRotationTimer();
+    }
+
     public void SetProjectionRotationSchedule(List<ProjectionRotationEntry> schedule)
     {
         _preferences.ProjectionRotationSchedule = schedule;
@@ -548,30 +563,49 @@ public class DisplayService : IDisplayService
         RestartProjectionRotationTimer();
     }
 
-    /// <summary>Stops any in-flight rotation and, if enabled with at least one checked view, jumps to
-    /// the first enabled view and restarts the advance timer from there. Called on load and whenever
-    /// the DJ toggles the master switch or edits a schedule row, so a mid-rotation edit takes effect
-    /// immediately rather than waiting for the current view's timer to expire.</summary>
+    private static readonly Random _rotationRng = new();
+
+    private static ProjectionRotationEntry? PickRandomProjectionView(List<ProjectionRotationEntry> enabled, string? currentView)
+    {
+        if (enabled.Count == 0) return null;
+        if (enabled.Count == 1) return enabled[0];
+
+        var candidates = enabled.Where(e => e.ViewName != currentView).ToList();
+        if (candidates.Count == 0) candidates = enabled;
+
+        int idx = _rotationRng.Next(candidates.Count);
+        return candidates[idx];
+    }
+
+    /// <summary>Stops any in-flight rotation and, if enabled with at least one checked view, picks a
+    /// random enabled view and restarts the advance timer. Called on load and whenever the DJ
+    /// toggles the master switch or edits settings, taking effect immediately.</summary>
     private void RestartProjectionRotationTimer()
     {
         _projectionRotationTimer?.Stop();
         _projectionRotationTimer = null;
         if (!_preferences.AutoRotateProjectionViews) return;
 
-        var first = _preferences.ProjectionRotationSchedule.FirstOrDefault(e => e.IsEnabled);
-        if (first == null) return;
+        var enabled = _preferences.ProjectionRotationSchedule.Where(e => e.IsEnabled).ToList();
+        if (enabled.Count == 0) return;
 
-        SetRotationViewMode(first.ViewName);
+        var initial = PickRandomProjectionView(enabled, null);
+        if (initial != null)
+        {
+            SetRotationViewMode(initial.ViewName);
+        }
+
+        int duration = _preferences.AutoRotateDurationSeconds > 0 ? _preferences.AutoRotateDurationSeconds : 180;
         _projectionRotationTimer = new System.Windows.Threading.DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(first.DurationSeconds)
+            Interval = TimeSpan.FromSeconds(duration)
         };
         _projectionRotationTimer.Tick += (_, _) => AdvanceProjectionRotation();
         _projectionRotationTimer.Start();
     }
 
-    /// <summary>Advances to the next enabled view after the current one, wrapping back to the first.
-    /// Re-reads the enabled set on every tick (rather than caching indices) so edits made mid-night are
+    /// <summary>Randomly advances to another enabled view every configured interval.
+    /// Re-reads the enabled set on every tick so edits made mid-night are
     /// picked up without needing a full restart.</summary>
     private void AdvanceProjectionRotation()
     {
@@ -583,14 +617,16 @@ public class DisplayService : IDisplayService
             return;
         }
 
-        int currentIndex = enabled.FindIndex(e => e.ViewName == _preferences.RotationViewMode);
-        var next = enabled[(currentIndex + 1) % enabled.Count];
-
-        SetRotationViewMode(next.ViewName);
+        var next = PickRandomProjectionView(enabled, _preferences.RotationViewMode);
+        if (next != null)
+        {
+            SetRotationViewMode(next.ViewName);
+        }
 
         if (_projectionRotationTimer != null)
         {
-            _projectionRotationTimer.Interval = TimeSpan.FromSeconds(next.DurationSeconds);
+            int duration = _preferences.AutoRotateDurationSeconds > 0 ? _preferences.AutoRotateDurationSeconds : 180;
+            _projectionRotationTimer.Interval = TimeSpan.FromSeconds(duration);
         }
     }
 

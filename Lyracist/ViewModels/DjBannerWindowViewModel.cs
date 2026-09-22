@@ -1,4 +1,4 @@
-// Edited on Aug 13, 2026 @ 13:46:21 -> Use BitmapCacheOption.OnDemand for the width probe so it no longer forces a full eager decode
+// Edited on Sep 22, 2026 @ 08:45:00 -> Set BannerImage before BannerPath so decoded image is ready when path changes
 using System;
 using System.IO;
 using System.Windows.Media.Imaging;
@@ -16,11 +16,10 @@ public partial class DjBannerWindowViewModel : ObservableObject
 
     public void UpdateBanner(string? path)
     {
-        BannerPath = path;
-
         if (string.IsNullOrEmpty(path) || !File.Exists(path))
         {
             BannerImage = null;
+            BannerPath = path;
             return;
         }
 
@@ -28,6 +27,7 @@ public partial class DjBannerWindowViewModel : ObservableObject
         if (ext == ".mp4")
         {
             BannerImage = null;
+            BannerPath = path;
             return;
         }
 
@@ -46,11 +46,13 @@ public partial class DjBannerWindowViewModel : ObservableObject
             image.EndInit();
             image.Freeze();
             BannerImage = image;
+            BannerPath = path;
         }
         catch (Exception ex)
         {
             Lyracist.Shared.Globals.LogError("Lyracist", "Failed to load DJ banner", ex);
             BannerImage = null;
+            BannerPath = path;
         }
     }
 
