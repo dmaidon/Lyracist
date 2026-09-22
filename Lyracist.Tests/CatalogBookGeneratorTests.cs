@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 12:10:30 -> Add documentation update test for Round Completion Estimation and Duration Notice
+// Edited on Sep 21, 2026 @ 20:01:30 -> Add documentation update test for active singers count on Vegas billboard and Vinyl record banners
 using System;
 using System.IO;
 using Xunit;
@@ -2467,6 +2467,161 @@ Section: Dynamic Round Completion Estimation & Full Round Duration Notice (Updat
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " RoundEstimateDocNotice";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManualsForActiveSingersOnVegasAndVinylBanners()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Active Singers Count Display on Vegas Billboard and Vinyl Record Banners (Updated Sep 21, 2026)
+
+[Overview & Audience Display Enhancements]
+• Live Rotation Count Visibility:
+  - Both the Vegas Marquee ('Vegas Billboard') and the Vinyl Turntable ('Vinyl Record') projection banners prominently display the live count of active performers currently in the rotation queue (e.g. '5 Singers in Rotation').
+  - The badge reflects real-time rotation state, instantly updating as singers are added, reordered, marked inactive, or when a final round is underway.
+
+[Display Locations & Styling]
+1. Vegas Marquee ('Vegas Billboard'):
+   - Top Header: A sleek, gold-bordered glowing badge ('🎤 {N} Singers in Rotation') is anchored in the top-right corner of the brass marquee frame.
+   - Up Next Section: A matching pill badge sits directly alongside the 'UP NEXT' label above the upcoming singer chips.
+2. Vinyl Turntable ('Vinyl Record'):
+   - Now Spinning Header: A glowing gold badge ('🎤 {N} Singers in Rotation') is positioned alongside the '♪ NOW SPINNING' / '♪ NOW PLAYING' header.
+   - On Deck Section: A matching pill badge sits directly alongside the 'ON DECK' queue label.
+
+[Smart Filtering]
+• Pure Vocalist Tracking:
+  - Excludes paused, skipped, and inactive singers, as well as background music filler tracks, so patrons and the KJ see the exact count of active singers in the rotation cycle.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Active Singers Count Display on Vegas Billboard and Vinyl Record Banners"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Active Singers Count Display on Vegas Billboard and Vinyl Record Banners"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Active Singers Count Display on Vegas Billboard and Vinyl Record Banners")
+                                        )
+                                    ));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        var runProps = new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = line.StartsWith("[") ? "24" : "22" }
+                                        );
+                                        if (line.StartsWith("["))
+                                        {
+                                            runProps.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Bold());
+                                        }
+
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                            new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                runProps,
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                            )
+                                        ));
+                                    }
+                                    doc.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("ActiveSingersBannersNotice"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.5, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.5, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Active Singers Count Display on Vegas Billboard and Vinyl Record Banners", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
+
+                                double yPos = 60;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    bool isSection = line.StartsWith("[");
+                                    var font = isSection ? sectionFont : bodyFont;
+                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
+                                    double lineHeight = isSection ? 15 : 12.5;
+
+                                    if (yPos + lineHeight > 750)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.Letter;
+                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                        yPos = 36;
+                                    }
+
+                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
+                                    yPos += lineHeight;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " ActiveSingersBannersNotice";
                                 doc.Save(pdfPath);
                             }
                         }

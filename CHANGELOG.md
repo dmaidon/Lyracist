@@ -1,5 +1,5 @@
-<!-- Edited on Sep 21, 2026 @ 13:00:00 -> Bump build revision to 26.9.21 across remaining solution projects -->
-Last Edit: Sep 21, 2026 - Revision Bump 26.9.21 & Dynamic Round Completion Estimation
+<!-- Edited on Sep 21, 2026 @ 20:02:30 -> Add Active Singer Count on Vegas Billboard and Vinyl Record Banners -->
+Last Edit: Sep 21, 2026 - Active Singer Count on Vegas Billboard and Vinyl Record Banners
 
 # Changelog
 
@@ -8,6 +8,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.21.0] - 2026-09-21
 
 ### Added
+- **Active Singer Count on Vegas Billboard & Vinyl Record Banners (`KSRotation`, `Lyracist`)**:
+  - **Live Audience Projection Badging**: Added glowing gold badge pills (`🎤 {ActiveSingerCountText}`) displaying the number of active singers in the current rotation on both the Broadway / Vegas Marquee and Vinyl Turntable projection screens (`SingerDisplayWindow.xaml` in `KSRotation` and `RotationWindow.xaml` in `Lyracist`).
+  - **Header & Section Badges**: Featured prominently in the top header (alongside now-spinning and venue marquee headers) as well as beside the "UP NEXT" / "ON DECK" section banners.
+  - **Smart Formatting & Filtering**: Accurately counts active non-music singers (`!s.IsMusic`), provides proper singular/plural grammar (`1 Singer in Rotation` vs `{N} Singers in Rotation`), respects "Last Round" mode, and automatically toggles visibility (`HasActiveSingers`).
 - **Solution Build Revision Bump (`26.9.21`)**: Synchronized project assembly and file version metadata across all remaining solution libraries, applications, and test harnesses that weren't already on the 26.9.21 cycle.
 - **Dynamic Round Completion Estimation & Full Round Duration Notice (`dj.html`, `KSRotation`, `KSRotation.Maui`, `Lyracist`, `Shared`)**:
   - **Shared Timing Calculation (`RotationHelpers.cs`)**: Added pure shared computation `CalculateRoundEstimation<T>` returning `RoundEstimationInfo` (performers remaining, remaining seconds, projected completion clock time, full round duration, and formatted notices) shared seamlessly across desktop, mobile, and web.

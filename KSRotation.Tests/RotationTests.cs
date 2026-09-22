@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 12:04:30 -> Add unit tests for RoundEstimation and notice text in MainViewModel
+// Edited on Sep 21, 2026 @ 19:59:30 -> Add unit tests for DisplayViewModel ActiveSingerCountText
 using KSRotation.Models;
 using KSRotation.Services;
 using Lyracist.Shared;
@@ -2036,7 +2036,50 @@ public class RoundEstimationTests
         Assert.Contains("1 singer left", vm.RoundEstimateNoticeText);
         Assert.Contains("Last Round", vm.RoundEstimateNoticeText);
     }
+
+    [Fact]
+    public void DisplayViewModel_ActiveSingerCountText_ReflectsActiveNonMusicSingers()
+    {
+        var dvm = new KSRotation.ViewModels.DisplayViewModel();
+        var singers = new ObservableCollection<SingerEntry>();
+
+        dvm.UpdateFromRotation(singers);
+        Assert.Equal(0, dvm.ActiveSingerCount);
+        Assert.False(dvm.HasActiveSingers);
+        Assert.Equal("0 Singers in Rotation", dvm.ActiveSingerCountText);
+
+        var s1 = new SingerEntry { Name = "Alice", IsCurrent = true };
+        singers.Add(s1);
+
+        dvm.UpdateFromRotation(singers);
+        Assert.Equal(1, dvm.ActiveSingerCount);
+        Assert.True(dvm.HasActiveSingers);
+        Assert.Equal("1 Singer in Rotation", dvm.ActiveSingerCountText);
+
+        var s2 = new SingerEntry { Name = "Bob" };
+        var s3 = new SingerEntry { Name = "Charlie", IsPaused = true };
+        var s4 = new SingerEntry { Name = "BGM", IsMusic = true };
+        var s5 = new SingerEntry { Name = "Dave", IsInactive = true };
+        singers.Add(s2);
+        singers.Add(s3);
+        singers.Add(s4);
+        singers.Add(s5);
+
+        dvm.UpdateFromRotation(singers);
+        // Only Alice and Bob are active vocalists (Charlie paused, BGM music, Dave inactive)
+        Assert.Equal(2, dvm.ActiveSingerCount);
+        Assert.True(dvm.HasActiveSingers);
+        Assert.Equal("2 Singers in Rotation", dvm.ActiveSingerCountText);
+
+        // Test LastRound exclusion
+        dvm.IsLastRound = true;
+        s1.HasSungInLastRound = true;
+        dvm.UpdateFromRotation(singers);
+        Assert.Equal(1, dvm.ActiveSingerCount);
+        Assert.Equal("1 Singer in Rotation", dvm.ActiveSingerCountText);
+    }
 }
+
 
 
 

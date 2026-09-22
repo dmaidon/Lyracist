@@ -1,9 +1,13 @@
-<!-- Edited on Sep 21, 2026 @ 12:11:30 -> Add Dynamic Round Completion Estimation and Duration Notice -->
+<!-- Edited on Sep 21, 2026 @ 20:03:00 -> Add Active Singer Count on Vegas Billboard and Vinyl Record Banners -->
 
 # Changelog
 
 ## 2026-09-21
 
+- **Active Singer Count on Vegas Billboard & Vinyl Record Banners (`SingerDisplayWindow.xaml`, `DisplayViewModel.cs`)**:
+  - Added glowing gold badge pills (`🎤 {ActiveSingerCountText}`) displaying the count of active singers in the current rotation on the Broadway / Vegas Marquee and Vinyl Turntable projection screens.
+  - Positioned in both the top header (alongside now-spinning and venue marquee headers) and beside the "UP NEXT" / "ON DECK" section banners.
+  - Dynamically calculates active non-music singers (`!s.IsMusic`), handles singular/plural phrasing (`1 Singer in Rotation` vs `{N} Singers in Rotation`), and respects Last Round mode.
 - **Dynamic Round Completion Estimation & Full Round Duration Notice (`dj.html`, `MainWindow.xaml`, `MainViewModel.cs`, `KSRotation.Maui`)**:
   - Added live estimation of remaining round time, performer count, projected completion clock time, and full round duration.
   - **Remote DJ Portal (`dj.html`)**: Integrated a styled, color-accented status banner directly below the Last Round banner displaying performers left in round, remaining minutes, projected finish time (e.g. `ends ~11:42 PM`), and full round duration. Automatically refreshes every 15 seconds and recalculates immediately upon queue additions, reorders, or status changes.

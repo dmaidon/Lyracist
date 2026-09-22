@@ -2031,3 +2031,22 @@ Section: Dynamic Round Completion Estimation & Full Round Duration Notice (Updat
   - In 'Last Round' mode, filters strictly for performers who have not yet sung in the final round ('!HasSungInLastRound'), showing the exact countdown of remaining performances until the show concludes.
 • Singer Status Filtering:
   - Automatically excludes paused, skipped, inactive performers, and filler background music tracks so timing projections reflect true active vocalists.
+
+Section: Active Singers Count Display on Vegas Billboard and Vinyl Record Banners (Updated Sep 21, 2026)
+
+[Overview & Audience Display Enhancements]
+• Live Rotation Count Visibility:
+  - Both the Vegas Marquee ('Vegas Billboard') and the Vinyl Turntable ('Vinyl Record') projection banners prominently display the live count of active performers currently in the rotation queue (e.g. '5 Singers in Rotation').
+  - The badge reflects real-time rotation state, instantly updating as singers are added, reordered, marked inactive, or when a final round is underway.
+
+[Display Locations & Styling]
+1. Vegas Marquee ('Vegas Billboard'):
+   - Top Header: A sleek, gold-bordered glowing badge ('🎤 {N} Singers in Rotation') is anchored in the top-right corner of the brass marquee frame.
+   - Up Next Section: A matching pill badge sits directly alongside the 'UP NEXT' label above the upcoming singer chips.
+2. Vinyl Turntable ('Vinyl Record'):
+   - Now Spinning Header: A glowing gold badge ('🎤 {N} Singers in Rotation') is positioned alongside the '♪ NOW SPINNING' / '♪ NOW PLAYING' header.
+   - On Deck Section: A matching pill badge sits directly alongside the 'ON DECK' queue label.
+
+[Smart Filtering]
+• Pure Vocalist Tracking:
+  - Excludes paused, skipped, and inactive singers, as well as background music filler tracks, so patrons and the KJ see the exact count of active singers in the rotation cycle.

@@ -57,6 +57,26 @@ public partial class RotationWindow : Window, ICaptureSource
     private const int MarqueeLitPeriod = 3;
     private const double MarqueeDimOpacity = 0.18;
 
+    private readonly List<RotateTransform> _discoBeamRotates = [];
+    private readonly List<Ellipse> _discoLightSpots = [];
+    private static readonly System.Windows.Media.Color[] DiscoBeamPalette =
+    [
+        System.Windows.Media.Color.FromRgb(0xFF, 0x2F, 0xE0),
+        System.Windows.Media.Color.FromRgb(0x33, 0xD4, 0xFF),
+        System.Windows.Media.Color.FromRgb(0x9B, 0x5C, 0xFF),
+        System.Windows.Media.Color.FromRgb(0xFF, 0xD8, 0x4D),
+        System.Windows.Media.Color.FromRgb(0x4C, 0xFF, 0xB0),
+        System.Windows.Media.Color.FromRgb(0xFF, 0x8A, 0x3D),
+    ];
+    private static readonly System.Windows.Media.Color[] DiscoLightPalette =
+    [
+        System.Windows.Media.Color.FromRgb(0xFF, 0x6B, 0xE8),
+        System.Windows.Media.Color.FromRgb(0x6B, 0xD4, 0xFF),
+        System.Windows.Media.Color.FromRgb(0xC1, 0x8B, 0xFF),
+        System.Windows.Media.Color.FromRgb(0xFF, 0xE0, 0x6B),
+        System.Windows.Media.Color.FromRgb(0x6B, 0xFF, 0xC4),
+    ];
+
     private RotationWindowViewModel? _vm;
     private int _crawlGen;   // incremented to invalidate in-flight loops
     private VisualBrush? _crawlBrush;
@@ -188,6 +208,9 @@ public partial class RotationWindow : Window, ICaptureSource
             StopMarqueeChase();
             StopVinylSpin();
             StopSpaceshipTimer();
+            StopDiscoBall();
+            StopDiscoBeams();
+            StopDiscoLightSpots();
         }
     }
 
@@ -282,11 +305,15 @@ public partial class RotationWindow : Window, ICaptureSource
         StopMarqueeChase();
         StopVinylSpin();
         StopSpaceshipTimer();
+        StopDiscoBall();
+        StopDiscoBeams();
+        StopDiscoLightSpots();
 
         NormalPanel.Visibility = Visibility.Collapsed;
         CrawlPanel.Visibility = Visibility.Collapsed;
         MarqueePanel.Visibility = Visibility.Collapsed;
         VinylPanel.Visibility = Visibility.Collapsed;
+        DiscoPanel.Visibility = Visibility.Collapsed;
 
         switch (_vm.SelectedProjectionView)
         {
@@ -304,6 +331,13 @@ public partial class RotationWindow : Window, ICaptureSource
             case "Vinyl Turntable":
                 VinylPanel.Visibility = Visibility.Visible;
                 StartVinylSpin();
+                break;
+
+            case "Disco Ball":
+                DiscoPanel.Visibility = Visibility.Visible;
+                StartDiscoBall();
+                Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildDiscoBeams);
+                Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildDiscoLightSpots);
                 break;
 
             default:
@@ -847,6 +881,191 @@ public partial class RotationWindow : Window, ICaptureSource
     private void StopVinylSpin()
     {
         VinylRotate.BeginAnimation(RotateTransform.AngleProperty, null);
+    }
+
+    private void StartDiscoBall()
+    {
+        var spin = new DoubleAnimation(0, 360, TimeSpan.FromSeconds(9))
+        {
+            RepeatBehavior = RepeatBehavior.Forever
+        };
+        DiscoBallRotate.BeginAnimation(RotateTransform.AngleProperty, spin);
+    }
+
+    private void StopDiscoBall()
+    {
+        DiscoBallRotate.BeginAnimation(RotateTransform.AngleProperty, null);
+    }
+
+    private void DiscoBeamCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_vm?.SelectedProjectionView == "Disco Ball" && DiscoPanel.Visibility == Visibility.Visible)
+        {
+            BuildDiscoBeams();
+        }
+    }
+
+    // Sweeping colored spotlight beams fanned out from the ball, each an independently
+    // rotating wedge - alternating spin direction/duration per beam is what makes the sweep
+    // read as chaotic disco lighting rather than a single synchronized rotation.
+    private void BuildDiscoBeams()
+    {
+        StopDiscoBeams();
+        DiscoBeamCanvas.Children.Clear();
+
+        double w = DiscoBeamCanvas.ActualWidth;
+        double h = DiscoBeamCanvas.ActualHeight;
+        if (w <= 0 || h <= 0) return;
+
+        double anchorX = w / 2.0;
+        double anchorY = h * 0.18;
+        double length = h * 1.15;
+        int beamCount = DiscoBeamPalette.Length;
+
+        for (int i = 0; i < beamCount; i++)
+        {
+            double spreadHalf = 34 + (i % 2 == 0 ? 6 : 0);
+            var color = DiscoBeamPalette[i];
+
+            // Points are relative to the apex (0,0) so RenderTransformOrigin="0.5,0" (the
+            // horizontal midpoint of the triangle's bounding box, at its top edge) lands exactly
+            // on the apex - that's what lets the RotateTransform below sweep the beam around the
+            // ball instead of around the triangle's centroid.
+            var polygon = new Polygon
+            {
+                Points = [new System.Windows.Point(0, 0), new System.Windows.Point(-spreadHalf, length), new System.Windows.Point(spreadHalf, length)],
+                RenderTransformOrigin = new System.Windows.Point(0.5, 0.0)
+            };
+
+            var gradient = new LinearGradientBrush
+            {
+                StartPoint = new System.Windows.Point(0.5, 0),
+                EndPoint = new System.Windows.Point(0.5, 1),
+                GradientStops =
+                {
+                    new GradientStop(System.Windows.Media.Color.FromArgb(0x55, color.R, color.G, color.B), 0.0),
+                    new GradientStop(System.Windows.Media.Color.FromArgb(0x00, color.R, color.G, color.B), 1.0)
+                }
+            };
+            gradient.Freeze();
+            polygon.Fill = gradient;
+
+            var rotate = new RotateTransform((360.0 / beamCount) * i);
+            polygon.RenderTransform = rotate;
+
+            Canvas.SetLeft(polygon, anchorX - spreadHalf);
+            Canvas.SetTop(polygon, anchorY);
+            DiscoBeamCanvas.Children.Add(polygon);
+            _discoBeamRotates.Add(rotate);
+
+            bool clockwise = i % 2 == 0;
+            double duration = 9 + (i * 2.3);
+            var spin = new DoubleAnimation(
+                rotate.Angle,
+                rotate.Angle + (clockwise ? 360 : -360),
+                TimeSpan.FromSeconds(duration))
+            {
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+            rotate.BeginAnimation(RotateTransform.AngleProperty, spin);
+        }
+    }
+
+    private void StopDiscoBeams()
+    {
+        foreach (var rotate in _discoBeamRotates)
+        {
+            rotate.BeginAnimation(RotateTransform.AngleProperty, null);
+        }
+        DiscoBeamCanvas.Children.Clear();
+        _discoBeamRotates.Clear();
+    }
+
+    private void DiscoLightCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_vm?.SelectedProjectionView == "Disco Ball" && DiscoPanel.Visibility == Visibility.Visible)
+        {
+            BuildDiscoLightSpots();
+        }
+    }
+
+    // Small colored dots drifting and twinkling across the dance floor, standing in for the
+    // ball's reflected light spots - reuses the same wobble-and-twinkle technique as the Star
+    // Wars crawl's star field (independent looping animations with randomized phase/duration).
+    private void BuildDiscoLightSpots()
+    {
+        StopDiscoLightSpots();
+        DiscoLightCanvas.Children.Clear();
+
+        double w = DiscoLightCanvas.ActualWidth;
+        double h = DiscoLightCanvas.ActualHeight;
+        if (w <= 0 || h <= 0) return;
+
+        int spotCount = (int)Math.Clamp(w * h / 26000.0, 14, 36);
+
+        for (int i = 0; i < spotCount; i++)
+        {
+            double size = (_rng.NextDouble() * 5) + 3;
+            var color = DiscoLightPalette[_rng.Next(DiscoLightPalette.Length)];
+            var brush = new SolidColorBrush(color);
+            brush.Freeze();
+
+            var dot = new Ellipse
+            {
+                Width = size,
+                Height = size,
+                Fill = brush,
+                RenderTransform = new TranslateTransform()
+            };
+
+            double x = _rng.NextDouble() * w;
+            double y = _rng.NextDouble() * h;
+            Canvas.SetLeft(dot, x);
+            Canvas.SetTop(dot, y);
+            DiscoLightCanvas.Children.Add(dot);
+            _discoLightSpots.Add(dot);
+
+            var transform = (TranslateTransform)dot.RenderTransform;
+            double ampX = (_rng.NextDouble() * 60) + 20;
+            double ampY = (_rng.NextDouble() * 60) + 20;
+            double durX = (_rng.NextDouble() * 3) + 3;
+            double durY = (_rng.NextDouble() * 3) + 3;
+            double begin = _rng.NextDouble() * 4;
+
+            transform.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(-ampX, ampX, TimeSpan.FromSeconds(durX))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                BeginTime = TimeSpan.FromSeconds(begin)
+            });
+            transform.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(-ampY, ampY, TimeSpan.FromSeconds(durY))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                BeginTime = TimeSpan.FromSeconds(begin)
+            });
+            dot.BeginAnimation(OpacityProperty, new DoubleAnimation(0.15, 0.95, TimeSpan.FromSeconds((_rng.NextDouble() * 1.5) + 1.2))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                BeginTime = TimeSpan.FromSeconds(begin)
+            });
+        }
+    }
+
+    private void StopDiscoLightSpots()
+    {
+        foreach (var dot in _discoLightSpots)
+        {
+            dot.BeginAnimation(OpacityProperty, null);
+            if (dot.RenderTransform is TranslateTransform t)
+            {
+                t.BeginAnimation(TranslateTransform.XProperty, null);
+                t.BeginAnimation(TranslateTransform.YProperty, null);
+            }
+        }
+        DiscoLightCanvas.Children.Clear();
+        _discoLightSpots.Clear();
     }
 
     private void MarqueeBulbCanvas_SizeChanged(object sender, SizeChangedEventArgs e)

@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add CurrentSingerIsSpecial property for audience rotation display
+// Edited on Sep 21, 2026 @ 19:56:00 -> Add ActiveSingerCount and ActiveSingerCountText for Vegas and Vinyl banners
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -236,6 +236,15 @@ public partial class RotationWindowViewModel : BaseViewModel
     public ObservableCollection<NextSingerDisplay> NextSingers { get; } = [];
 
     [ObservableProperty]
+    private int _activeSingerCount;
+
+    [ObservableProperty]
+    private string _activeSingerCountText = string.Empty;
+
+    [ObservableProperty]
+    private bool _hasActiveSingers;
+
+    [ObservableProperty]
     private bool _hasDesignatedCurrentSinger;
 
     public ObservableCollection<Singer> FullRotation { get; } = [];
@@ -341,6 +350,11 @@ public partial class RotationWindowViewModel : BaseViewModel
         // POPULATE FullRotation exactly like KSRotation does!
         FullRotation.Clear();
         var activeRotation = visibleSingers.Where(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped).ToList();
+        int activeCount = activeRotation.Count(s => !s.IsMusic);
+        ActiveSingerCount = activeCount;
+        ActiveSingerCountText = activeCount == 1 ? "1 Singer in Rotation" : $"{activeCount} Singers in Rotation";
+        HasActiveSingers = activeCount > 0;
+
         HasDesignatedCurrentSinger = Lyracist.Shared.RotationHelpers.HasActiveCurrentSinger(visibleSingers);
 
         var currentSingerForCrawl = Lyracist.Shared.RotationHelpers.GetCurrentSinger(visibleSingers)

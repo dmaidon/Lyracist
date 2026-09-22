@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Add IsSpecial to DisplayRotationEntry for audience display
+// Edited on Sep 21, 2026 @ 19:55:00 -> Add ActiveSingerCount and ActiveSingerCountText for Vegas and Vinyl banners
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -13,6 +13,15 @@ namespace KSRotation.ViewModels
     {
         [ObservableProperty]
         public partial bool IsLastRound { get; set; }
+
+        [ObservableProperty]
+        public partial int ActiveSingerCount { get; set; }
+
+        [ObservableProperty]
+        public partial string ActiveSingerCountText { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial bool HasActiveSingers { get; set; }
 
         [ObservableProperty]
         public partial string CurrentSinger { get; set; } = "No singer selected";
@@ -125,6 +134,9 @@ namespace KSRotation.ViewModels
                 CurrentSingerIsSpecial = false;
                 CurrentSingerAvatar = null;
                 HasCurrentSingerAvatar = false;
+                ActiveSingerCount = 0;
+                ActiveSingerCountText = "0 Singers in Rotation";
+                HasActiveSingers = false;
                 NextSingers.Clear();
                 RotationEntries.Clear();
                 FullRotation.Clear();
@@ -143,6 +155,10 @@ namespace KSRotation.ViewModels
             }
 
             List<SingerEntry> activeRotation = [.. rotation.Where(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound))];
+            int activeCount = activeRotation.Count(s => !s.IsMusic);
+            ActiveSingerCount = activeCount;
+            ActiveSingerCountText = activeCount == 1 ? "1 Singer in Rotation" : $"{activeCount} Singers in Rotation";
+            HasActiveSingers = activeCount > 0;
 
             if (current == null)
             {
