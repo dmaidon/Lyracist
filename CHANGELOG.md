@@ -1,5 +1,5 @@
-<!-- Edited on Sep 22, 2026 @ 20:15:00 -> Document review fixes: film-strip freeze, Festival tier bug, Jumbotron video guards, frozen brushes -->
-Last Edit: Sep 22, 2026 - Movie Theater Film-Strip & Jumbotron Correctness/Resource Fixes
+<!-- Edited on Sep 22, 2026 @ 21:30:00 -> Document in-progress film-strip loop work: divider removal and wait-badge signature fix (not yet confirmed working) -->
+Last Edit: Sep 22, 2026 - Movie Theater Film-Strip Loop (In Progress)
 
 # Changelog
 
@@ -74,8 +74,9 @@ All notable changes to the Lyracist project are documented here. The format is b
   - **Jumbotron Sponsor Video Loaded Unnecessarily**: `MediaElement.Source` was bound directly in XAML, so every banner selection opened the file through the media pipeline regardless of whether Stadium Jumbotron was even the active view or the file was a video at all. Moved `Source` assignment to code-behind (`UpdateJumbotronBanner`), set only when actually needed - consistent with the existing `DjBannerWindow` pattern.
   - **Film-Strip Rebuild-Skip Signature Collision Risk**: The signature that gates redundant film-strip rebuilds joined free-text singer/song titles with a literal `|`, which a title containing that character could theoretically collide on. Switched to a control character (`\u0001`) that can never appear in display text.
   - **Unfrozen Brushes/Effects in the Film-Strip Builders**: The frame-builder methods constructed fresh, unfrozen `SolidColorBrush`/`LinearGradientBrush`/`DropShadowEffect` instances on every rebuild. Hoisted the repeated ones into frozen, shared static instances to cut GC pressure and render-thread overhead on a screen meant to run continuously for hours.
-
-## [26.9.21.0] - 2026-09-21
+- **Movie Theater Film-Strip Loop - In-Progress Work (`KSRotation`, `Lyracist`)** ⚠️ *not yet confirmed working end-to-end*:
+  - **Removed the Blank Divider/Leader Frame**: The loop was title, 6 singers, blank leader, repeat; per feedback it should be title, 6 singers, title, 6 singers with no gap. Removed `BuildTheaterDividerFrame` and its dedicated height/brushes from the per-cycle build in both apps.
+  - **Signature Now Ignores the Estimated-Wait-Time Badge**: `DisplayViewModel`'s `NextSingerDisplay.Text` bakes a `" {12}"`-style wait-time badge directly into the string, and that number ticks down independently of whether the actual queue changes. Because the rebuild-skip signature previously hashed the raw text, a wait-time tick alone was enough to make the guard think the queue had genuinely changed, tearing down and rebuilding the strip - visible as "shows the 6 singers, then the strip redraws and restarts" rather than a continuous scroll. The signature now strips that badge (`\s*\{\d+\}`) before hashing, in both apps, so only a real change to who's queued or their order restarts the loop. Reported by the user as still not matching the requested behavior as of this commit; left in place as the current best diagnosis pending further verification.
 
 ### Added
 - **Active Singer Count on Vegas Billboard & Vinyl Record Banners (`KSRotation`, `Lyracist`)**:

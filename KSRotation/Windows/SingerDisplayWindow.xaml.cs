@@ -6,6 +6,7 @@ using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -1885,11 +1886,10 @@ namespace KSRotation.Windows
         // ── Movie Theater film-frame strip ──────────────────────────────────
         // Scrolls a vertical filmstrip: a "COMING ATTRACTIONS" title frame, one frame per
         // upcoming singer, then a blank leader/divider frame, repeating. Built entirely in
-        // code (like the other views' particle/beam canvases) because each cycle mixes 3
+        // code (like the other views' particle/beam canvases) because each cycle mixes 2
         // different frame kinds rather than one repeated data-bound template.
         private const double TheaterTitleFrameHeight = 110;
         private const double TheaterSingerFrameHeight = 130;
-        private const double TheaterDividerFrameHeight = 60;
 
         // Content signature from the last build (singer texts/order + strip width). Routine data
         // refreshes rebuild NextSingers with the exact same entries far more often than the queue
@@ -1906,6 +1906,13 @@ namespace KSRotation.Windows
             }
         }
 
+        // Matches the " {12}" estimated-wait-time badge that DisplayViewModel bakes directly into
+        // NextSingerDisplay.Text (e.g. "Dennis {12} - Sweet Caroline"). That number ticks down on
+        // its own as the show runs, with no change to who's actually queued or in what order - the
+        // film-strip signature below strips it out so a wait-time tick doesn't count as a "real"
+        // queue change and restart the scroll.
+        private static readonly Regex TheaterWaitBadgePattern = new(@"\s*\{\d+\}", RegexOptions.Compiled);
+
         private void BuildTheaterFilmStrip()
         {
             double w = TheaterFilmStripCanvas.ActualWidth;
@@ -1916,10 +1923,12 @@ namespace KSRotation.Windows
             // Joined with U+0001 (a control character that can never appear in singer/song display
             // text) rather than a printable delimiter, so free-text titles can't collide two
             // different queues onto the same signature.
-            string signature = w.ToString("F0") + "\u0001" + string.Join("\u0001", singers.Select(s => s.Text + (s.IsRotationStart ? "#A" : "")));
+            string signature = w.ToString("F0") + "\u0001" + string.Join("\u0001",
+                singers.Select(s => TheaterWaitBadgePattern.Replace(s.Text, string.Empty) + (s.IsRotationStart ? "#A" : "")));
             if (signature == _theaterFilmStripSignature && TheaterFilmStripCanvas.Children.Count > 0)
             {
-                // Same content already scrolling - leave the running animation alone.
+                // Same content (ignoring wait-time countdown) already scrolling - leave the
+                // running animation alone so the loop never visibly restarts mid-show.
                 return;
             }
             _theaterFilmStripSignature = signature;
@@ -1927,11 +1936,13 @@ namespace KSRotation.Windows
             StopTheaterFilmStrip();
             TheaterFilmStripCanvas.Children.Clear();
 
-            double setHeight = TheaterTitleFrameHeight + (singers.Count * TheaterSingerFrameHeight) + TheaterDividerFrameHeight;
+            double setHeight = TheaterTitleFrameHeight + (singers.Count * TheaterSingerFrameHeight);
             if (setHeight <= 0) return;
 
             // Two full copies of the set, stacked back-to-back, so looping the scroll by
-            // exactly one copy's height wraps seamlessly.
+            // exactly one copy's height wraps seamlessly. Each set is just the title frame
+            // followed directly by the singer frames - no divider - so the loop reads as
+            // "Coming Attractions, 1, 2, 3, 4, 5, 6, Coming Attractions, 1, 2, ..." with no gap.
             for (int copy = 0; copy < 2; copy++)
             {
                 double y = copy * setHeight;
@@ -1950,11 +1961,6 @@ namespace KSRotation.Windows
                     TheaterFilmStripCanvas.Children.Add(frame);
                     y += TheaterSingerFrameHeight;
                 }
-
-                var divider = BuildTheaterDividerFrame(w);
-                Canvas.SetLeft(divider, 0);
-                Canvas.SetTop(divider, y);
-                TheaterFilmStripCanvas.Children.Add(divider);
             }
 
             var translate = new TranslateTransform();
@@ -1998,22 +2004,12 @@ namespace KSRotation.Windows
         private static readonly SolidColorBrush TheaterSingerCelBgBrush = FrozenBrush(0x1C, 0x0D, 0x10);
         private static readonly SolidColorBrush TheaterAnchorBadgeBgBrush = FrozenBrush(0xDC, 0x26, 0x26);
         private static readonly SolidColorBrush TheaterSingerTextBrush = FrozenBrush(0xFF, 0xFA, 0xF0);
-        private static readonly SolidColorBrush TheaterDividerBorderBrush = FrozenBrush(0x3A, 0x3A, 0x3A);
-        private static readonly SolidColorBrush TheaterDividerBgBrush = FrozenBrush(0x05, 0x05, 0x05);
-        private static readonly SolidColorBrush TheaterDividerTextBrush = FrozenBrush(0x66, 0xFF, 0xE8, 0xB0);
         private static readonly LinearGradientBrush TheaterTitleGradientBrush = FrozenTitleGradient();
         private static readonly DropShadowEffect TheaterTitleGlowEffect = FrozenGlow();
 
         private static SolidColorBrush FrozenBrush(byte r, byte g, byte b)
         {
             var brush = new SolidColorBrush(System.Windows.Media.Color.FromRgb(r, g, b));
-            brush.Freeze();
-            return brush;
-        }
-
-        private static SolidColorBrush FrozenBrush(byte a, byte r, byte g, byte b)
-        {
-            var brush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(a, r, g, b));
             brush.Freeze();
             return brush;
         }
@@ -2142,22 +2138,6 @@ namespace KSRotation.Windows
             });
 
             cel.Child = stack;
-            return root;
-        }
-
-        private static Grid BuildTheaterDividerFrame(double width)
-        {
-            var root = BuildTheaterFrameShell(width, TheaterDividerFrameHeight, out var cel);
-            cel.BorderBrush = TheaterDividerBorderBrush;
-            cel.Background = TheaterDividerBgBrush;
-            cel.Child = new TextBlock
-            {
-                Text = "• • •",
-                FontSize = 16,
-                Foreground = TheaterDividerTextBrush,
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
             return root;
         }
 
