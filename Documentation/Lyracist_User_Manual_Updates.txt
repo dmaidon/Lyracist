@@ -1,4 +1,19 @@
-// Edited on Sep 22, 2026 @ 11:22:00 -> Document rotation banner Up Next font upsize and vinyl turntable cue dot removal
+// Edited on Sep 22, 2026 @ 12:21:00 -> Document Android deployment enablement across solution files
+KSRotation.Maui: Visual Studio Android F5 Deployment Enablement (`Lyracist.slnx`, `KSRotation.slnx`, `KSRotation.Maui.slnx`) - (September 2026)
+
+Section: KSRotation.Maui / Build & Development / Android Deployment Configuration
+
+[Overview & Purpose]
+When developing or debugging KSRotation.Maui on connected physical Android tablets (such as the Samsung SM-X230), Visual Studio's modern `.slnx` solution format requires explicit `<Deploy>` entries in the solution file to keep the deployment checkbox active in Configuration Manager. Previously, `Lyracist.slnx` excluded KSRotation.Maui from default builds with `Build=false`, causing Visual Studio to abort launch attempts with a "The project cannot be launched for Android" modal. All solution files now include active Deploy directives for both Debug and Release configurations.
+
+[Key Adjustments]
+1. Solution File Parity:
+   - `Lyracist.slnx`: Removed the `Build Solution="*|*" Project="false"` exclusion and added `<Deploy Solution="Debug|*" />` and `<Deploy Solution="Release|*" />`.
+   - `KSRotation.slnx` and `KSRotation.Maui.slnx`: Added `<Deploy Solution="Debug|*" />` and `<Deploy Solution="Release|*" />` directives.
+2. Hardware Deployment Stability:
+   - Restores one-click F5 execution to attached Android tablets directly from within the main multi-project development environments without requiring manual Configuration Manager adjustments.
+
+
 Lyracist Pro Suite & KSRotation: Rotation Billboard Up Next Typography Upsize & Vinyl Turntable Cue Dot Removal (`Lyracist`, `KSRotation`, `KSRotation.Maui`, Web Billboard) - (September 2026)
 
 Section: Lyracist & KSRotation / Audience Billboard Projection / Screen Themes & Typography

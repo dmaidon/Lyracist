@@ -1,5 +1,5 @@
-<!-- Edited on Sep 22, 2026 @ 11:15:00 -> Document removal of vinyl record marker dot in rotation banners -->
-Last Edit: Sep 22, 2026 - Vinyl Turntable Dot Removal & Rotation Banner Up Next Font Upsize
+<!-- Edited on Sep 22, 2026 @ 12:19:00 -> Document Android deployment enablement across solution files -->
+Last Edit: Sep 22, 2026 - Android Solution Deployment Enablement & Vinyl Dot Removal
 
 # Changelog
 
@@ -8,6 +8,8 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.22.0] - 2026-09-22
 
 ### Added
+- **Android Multi-Project Solution Deployment Enablement (`Lyracist.slnx`, `KSRotation.slnx`, `KSRotation.Maui.slnx`)**:
+  - **Visual Studio F5 Launch Resolution**: Removed the `Build=false` exclusion from `Lyracist.slnx` and integrated explicit `<Deploy Solution="Debug|*" />` and `<Deploy Solution="Release|*" />` directives across `Lyracist.slnx`, `KSRotation.slnx`, and `KSRotation.Maui.slnx`. This resolves Visual Studio's "The project cannot be launched for Android. Please check the error list for more details" modal by ensuring Visual Studio's Configuration Manager keeps the Deploy checkbox enabled for `KSRotation.Maui` when launching onto connected physical Android tablets (e.g. Samsung SM-X230).
 - **Vinyl Turntable Banner Marker Dot Removal (`Lyracist`, `KSRotation`)**:
   - **Clean Vinyl Label Aesthetic**: Removed the artificial black marker dot from the spinning vinyl disc group in `RotationWindow.xaml` (`Lyracist`) and `SingerDisplayWindow.xaml` (`KSRotation`). The continuously rotating performer name, song title, and radial vinyl sheen communicate active disc spinning cleanly without an unnecessary visual cue dot.
 - **Rotation Banners Up Next / Right-Side Font Upsizing (`Lyracist`, `KSRotation`, `KSRotation.Maui`, Web Billboard)**:

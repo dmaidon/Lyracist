@@ -1,5 +1,8 @@
 <Solution>
   <Project Path="KSRotation/KSRotation.csproj" />
-  <Project Path="KSRotation.Maui/KSRotation.Maui.csproj" />
+  <Project Path="KSRotation.Maui/KSRotation.Maui.csproj">
+    <Deploy Solution="Debug|*" />
+    <Deploy Solution="Release|*" />
+  </Project>
   <Project Path="KSRotation.Tests/KSRotation.Tests.csproj" />
 </Solution>

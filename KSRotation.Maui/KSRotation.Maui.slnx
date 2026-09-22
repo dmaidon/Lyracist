@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="KSRotation.Maui.csproj">
     <Deploy Solution="Debug|*" />
+    <Deploy Solution="Release|*" />
   </Project>
 </Solution>
