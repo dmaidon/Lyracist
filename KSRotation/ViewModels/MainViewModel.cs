@@ -541,7 +541,8 @@ namespace KSRotation.ViewModels
             "Star Wars Crawl",
             "Vegas Marquee",
             "Vinyl Turntable",
-            "Disco Ball"
+            "Disco Ball",
+            "Synthwave Grid"
             // TODO (future): "Jumbotron" — full-bleed stadium scoreboard style with huge singer name
             //                on a bright LED matrix background, scrolling ticker at the bottom.
             // TODO (future): "Neon Bar Sign" — dark brick-wall backdrop with a glowing neon-tube

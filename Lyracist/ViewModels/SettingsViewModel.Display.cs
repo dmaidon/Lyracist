@@ -168,7 +168,7 @@ public partial class SettingsViewModel
     [ObservableProperty]
     private ScreenInfo? _djBannerScreen;
 
-    public List<string> ProjectionViews { get; } = ["Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable", "Disco Ball"];
+    public List<string> ProjectionViews { get; } = ["Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable", "Disco Ball", "Synthwave Grid"];
 
     [ObservableProperty]
     private string _selectedProjectionView = "Normal List";

@@ -57,6 +57,14 @@ public partial class RotationWindow : Window, ICaptureSource
     private const int MarqueeLitPeriod = 3;
     private const double MarqueeDimOpacity = 0.18;
 
+    private DispatcherTimer? _synthGridTimer;
+    private readonly List<System.Windows.Media.Color> _synthLineColors =
+    [
+        System.Windows.Media.Color.FromRgb(0x33, 0xD4, 0xFF),
+        System.Windows.Media.Color.FromRgb(0xFF, 0x2F, 0xE0),
+    ];
+    private int _synthLineColorIndex;
+
     private readonly List<RotateTransform> _discoBeamRotates = [];
     private readonly List<Ellipse> _discoLightSpots = [];
     private static readonly System.Windows.Media.Color[] DiscoBeamPalette =
@@ -211,6 +219,7 @@ public partial class RotationWindow : Window, ICaptureSource
             StopDiscoBall();
             StopDiscoBeams();
             StopDiscoLightSpots();
+            StopSynthGrid();
         }
     }
 
@@ -308,12 +317,14 @@ public partial class RotationWindow : Window, ICaptureSource
         StopDiscoBall();
         StopDiscoBeams();
         StopDiscoLightSpots();
+        StopSynthGrid();
 
         NormalPanel.Visibility = Visibility.Collapsed;
         CrawlPanel.Visibility = Visibility.Collapsed;
         MarqueePanel.Visibility = Visibility.Collapsed;
         VinylPanel.Visibility = Visibility.Collapsed;
         DiscoPanel.Visibility = Visibility.Collapsed;
+        SynthwavePanel.Visibility = Visibility.Collapsed;
 
         switch (_vm.SelectedProjectionView)
         {
@@ -338,6 +349,12 @@ public partial class RotationWindow : Window, ICaptureSource
                 StartDiscoBall();
                 Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildDiscoBeams);
                 Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildDiscoLightSpots);
+                break;
+
+            case "Synthwave Grid":
+                SynthwavePanel.Visibility = Visibility.Visible;
+                Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildSynthGridStatic);
+                StartSynthGrid();
                 break;
 
             default:
@@ -1066,6 +1083,125 @@ public partial class RotationWindow : Window, ICaptureSource
         }
         DiscoLightCanvas.Children.Clear();
         _discoLightSpots.Clear();
+    }
+
+    private void SynthGridCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_vm?.SelectedProjectionView == "Synthwave Grid" && SynthwavePanel.Visibility == Visibility.Visible)
+        {
+            BuildSynthGridStatic();
+        }
+    }
+
+    /// <summary>Static fan of converging vertical lines from the horizon's vanishing point out to the
+    /// bottom edge - the fixed "rails" of the perspective floor. Rebuilt on resize; the moving
+    /// horizontal lines are handled separately by <see cref="StartSynthGrid"/>.</summary>
+    private void BuildSynthGridStatic()
+    {
+        SynthGridCanvas.Children.Clear();
+
+        double w = SynthGridCanvas.ActualWidth;
+        double h = SynthGridCanvas.ActualHeight;
+        if (w <= 0 || h <= 0) return;
+
+        double vanishX = w / 2.0;
+        double vanishY = h * 0.42;
+        const int rayCount = 15;
+
+        for (int i = 0; i <= rayCount; i++)
+        {
+            double t = (double)i / rayCount;
+            double bottomX = (-0.15 * w) + (t * (1.3 * w));
+            var line = new Line
+            {
+                X1 = vanishX,
+                Y1 = vanishY,
+                X2 = bottomX,
+                Y2 = h,
+                StrokeThickness = 1.5,
+                Stroke = i % 2 == 0
+                    ? new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x55, 0x33, 0xD4, 0xFF))
+                    : new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x55, 0xFF, 0x2F, 0xE0))
+            };
+            SynthGridCanvas.Children.Add(line);
+        }
+    }
+
+    /// <summary>Spawns a horizontal grid line at the horizon every tick and animates it racing toward
+    /// the viewer (growing wider, accelerating via an ease-in curve, fading out near the bottom) -
+    /// reuses the same spawn/animate/self-remove shape as <see cref="SpawnSpaceship"/>.</summary>
+    private void StartSynthGrid()
+    {
+        StopSynthGrid();
+        _synthGridTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(320) };
+        _synthGridTimer.Tick += (_, _) => SpawnSynthGridLine();
+        _synthGridTimer.Start();
+    }
+
+    private void StopSynthGrid()
+    {
+        _synthGridTimer?.Stop();
+        _synthGridTimer = null;
+        SynthGridCanvas.Children.Clear();
+    }
+
+    private void SpawnSynthGridLine()
+    {
+        if (_vm?.SelectedProjectionView != "Synthwave Grid" || SynthwavePanel.Visibility != Visibility.Visible) return;
+
+        double w = SynthGridCanvas.ActualWidth;
+        double h = SynthGridCanvas.ActualHeight;
+        if (w <= 0 || h <= 0) return;
+
+        double vanishX = w / 2.0;
+        double horizonY = h * 0.42;
+        double maxWidth = w * 1.1;
+
+        var color = _synthLineColors[_synthLineColorIndex++ % _synthLineColors.Count];
+        var brush = new SolidColorBrush(color);
+        brush.Freeze();
+
+        var rect = new System.Windows.Shapes.Rectangle
+        {
+            Height = 2,
+            Fill = brush,
+            Effect = new DropShadowEffect { Color = color, BlurRadius = 12, ShadowDepth = 0, Opacity = 0.8 }
+        };
+        Canvas.SetTop(rect, horizonY);
+        Canvas.SetLeft(rect, vanishX);
+        rect.Width = 0;
+        SynthGridCanvas.Children.Add(rect);
+
+        double duration = 2.2;
+        var ease = new PowerEase { EasingMode = EasingMode.EaseIn, Power = 2.5 };
+        var storyboard = new Storyboard();
+
+        var topAnim = new DoubleAnimation(horizonY, h, TimeSpan.FromSeconds(duration)) { EasingFunction = ease };
+        Storyboard.SetTarget(topAnim, rect);
+        Storyboard.SetTargetProperty(topAnim, new PropertyPath(Canvas.TopProperty));
+        storyboard.Children.Add(topAnim);
+
+        var widthAnim = new DoubleAnimation(0, maxWidth, TimeSpan.FromSeconds(duration)) { EasingFunction = ease };
+        Storyboard.SetTarget(widthAnim, rect);
+        Storyboard.SetTargetProperty(widthAnim, new PropertyPath(System.Windows.Shapes.Rectangle.WidthProperty));
+        storyboard.Children.Add(widthAnim);
+
+        var leftAnim = new DoubleAnimation(vanishX, vanishX - (maxWidth / 2.0), TimeSpan.FromSeconds(duration)) { EasingFunction = ease };
+        Storyboard.SetTarget(leftAnim, rect);
+        Storyboard.SetTargetProperty(leftAnim, new PropertyPath(Canvas.LeftProperty));
+        storyboard.Children.Add(leftAnim);
+
+        var opacityAnim = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromSeconds(duration) };
+        opacityAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, KeyTime.FromPercent(0.0)));
+        opacityAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.9, KeyTime.FromPercent(0.12)));
+        opacityAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.9, KeyTime.FromPercent(0.8)));
+        opacityAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, KeyTime.FromPercent(1.0)));
+        Storyboard.SetTarget(opacityAnim, rect);
+        Storyboard.SetTargetProperty(opacityAnim, new PropertyPath(UIElement.OpacityProperty));
+        storyboard.Children.Add(opacityAnim);
+
+        storyboard.Completed += (s, e) => SynthGridCanvas.Children.Remove(rect);
+        storyboard.Begin();
     }
 
     private void MarqueeBulbCanvas_SizeChanged(object sender, SizeChangedEventArgs e)

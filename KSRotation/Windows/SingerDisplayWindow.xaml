@@ -711,13 +711,13 @@
                     <!-- Up next: deliberately smaller/dimmer than the current singer so attention stays there -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0" Opacity="0.82">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <TextBlock Text="UP NEXT" FontSize="14" FontWeight="Bold" Foreground="#AA9FC7E8" />
+                            <TextBlock Text="UP NEXT" FontSize="16" FontWeight="Bold" Foreground="#AA9FC7E8" />
                             <Border Background="#1833CCFF" BorderBrush="#4433CCFF" BorderThickness="1" CornerRadius="10" Padding="7,1" Margin="8,0,0,0" VerticalAlignment="Center"
                                     Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="10" FontWeight="Bold" Foreground="#AA9FC7E8" />
                             </Border>
                             <TextBlock Text=" : {} = Estimated wait time"
-                                       FontSize="11"
+                                       FontSize="14"
                                        FontWeight="Bold"
                                        Foreground="#AA9FC7E8"
                                        Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -731,9 +731,9 @@
                                             <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,6,0" VerticalAlignment="Center"
                                                     ToolTip="Rotation Anchor (marks where a round begins)"
                                                     Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <TextBlock Text="⚓ ANCHOR" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                                                <TextBlock Text="⚓ ANCHOR" FontSize="10" FontWeight="ExtraBold" Foreground="White"/>
                                             </Border>
-                                            <TextBlock Text="{Binding Text}" FontSize="13" Foreground="#CCE6DCFF" />
+                                            <TextBlock Text="{Binding Text}" FontSize="16" Foreground="#CCE6DCFF" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -741,6 +741,150 @@
                         </ItemsControl>
                     </StackPanel>
                 </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Row 1g: Synthwave Grid panel -->
+        <Grid Grid.Row="1" x:Name="SynthwavePanel" Visibility="Collapsed" ClipToBounds="True">
+            <!-- Retro sunset sky (fixed colors – themed scene, not a UI surface). -->
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#FF1A0B2E" Offset="0.0" />
+                    <GradientStop Color="#FF3B0F5C" Offset="0.32" />
+                    <GradientStop Color="#FFB0219E" Offset="0.58" />
+                    <GradientStop Color="#FFFF6B4A" Offset="0.76" />
+                    <GradientStop Color="#FFFFC24A" Offset="0.9" />
+                    <GradientStop Color="#FF1A0B2E" Offset="1.0" />
+                </LinearGradientBrush>
+            </Grid.Background>
+
+            <!-- Sun, fixed position/size, drawn entirely in XAML -->
+            <Viewbox Panel.ZIndex="1" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Top" Height="200" Margin="0,20,0,0">
+                <Canvas Width="300" Height="300">
+                    <Ellipse Width="260" Height="260" Canvas.Left="20" Canvas.Top="20">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush GradientOrigin="0.5,0.4" Center="0.5,0.4">
+                                <GradientStop Color="#FFFFF3B0" Offset="0.0" />
+                                <GradientStop Color="#FFFFC24A" Offset="0.35" />
+                                <GradientStop Color="#FFFF6B4A" Offset="0.65" />
+                                <GradientStop Color="#FFE8398A" Offset="1.0" />
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                        <Ellipse.Effect>
+                            <DropShadowEffect Color="#FFFF6B9E" BlurRadius="60" ShadowDepth="0" Opacity="0.85" />
+                        </Ellipse.Effect>
+                    </Ellipse>
+                    <!-- Retro "blinds" stripes across the lower half of the sun only -->
+                    <Rectangle Width="260" Height="130" Canvas.Left="20" Canvas.Top="150">
+                        <Rectangle.Clip>
+                            <EllipseGeometry Center="130,0" RadiusX="130" RadiusY="130" />
+                        </Rectangle.Clip>
+                        <Rectangle.Fill>
+                            <DrawingBrush TileMode="Tile" Viewport="0,0,260,14" ViewportUnits="Absolute">
+                                <DrawingBrush.Drawing>
+                                    <GeometryDrawing Brush="#991A0B2E">
+                                        <GeometryDrawing.Geometry>
+                                            <RectangleGeometry Rect="0,0,260,6" />
+                                        </GeometryDrawing.Geometry>
+                                    </GeometryDrawing>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </Canvas>
+            </Viewbox>
+
+            <!-- Perspective grid floor: static converging verticals + streaming horizontals (built/animated in code-behind) -->
+            <Canvas x:Name="SynthGridCanvas" SizeChanged="SynthGridCanvas_SizeChanged" ClipToBounds="True" Panel.ZIndex="2" />
+
+            <!-- Now performing / up next content -->
+            <Grid Margin="48,20" Panel.ZIndex="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Current singer -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="🌆  NOW PERFORMING..." FontSize="24" FontWeight="Bold" Foreground="#FF6BE8FF" TextOptions.TextFormattingMode="Display"
+                               HorizontalAlignment="Center" Margin="0,0,0,12"/>
+
+                    <!-- Performer Selfie / Avatar -->
+                    <Border Width="130" Height="130" CornerRadius="65" BorderThickness="5" BorderBrush="#FFFF6BE0" HorizontalAlignment="Center" Margin="0,0,0,16"
+                            Visibility="{Binding HasCurrentSingerAvatar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#FFFF6BE0" BlurRadius="30" ShadowDepth="0" Opacity="0.85" />
+                        </Border.Effect>
+                        <Border CornerRadius="65" ClipToBounds="True">
+                            <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                        </Border>
+                    </Border>
+
+                    <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                            ToolTip="Rotation Anchor (marks where a round begins)"
+                            Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                    </Border>
+                    <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                            ToolTip="Special Performer (One-Time)"
+                            Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="⭐ SPECIAL" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                    </Border>
+
+                    <TextBlock Text="{Binding CurrentSingerName}"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               FontSize="82"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               TextOptions.TextFormattingMode="Ideal">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="#FFFF6BE0" BlurRadius="30" ShadowDepth="0" Opacity="0.85" />
+                        </TextBlock.Effect>
+                    </TextBlock>
+                    <TextBlock Text="{Binding CurrentSingerSong}"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               Margin="0,12,0,0"
+                               FontSize="32"
+                               FontStyle="Italic"
+                               Foreground="#FF6BE8FF" />
+                </StackPanel>
+
+                <!-- Up next: deliberately smaller/dimmer than the current singer so attention stays there -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0" Opacity="0.82">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="UP NEXT" FontSize="14" FontWeight="Bold" Foreground="#AA9FE8E0" />
+                        <Border Background="#1833D4FF" BorderBrush="#4433D4FF" BorderThickness="1" CornerRadius="10" Padding="7,1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="10" FontWeight="Bold" Foreground="#AA9FE8E0" />
+                        </Border>
+                        <TextBlock Text=" : {} = Estimated wait time"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="#AA9FE8E0"
+                                   Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </StackPanel>
+
+                    <ItemsControl ItemsSource="{Binding NextSingers}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,3" Padding="10,6" CornerRadius="10" Background="#12FFFFFF" BorderBrush="#22FFFFFF" BorderThickness="1">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                ToolTip="Rotation Anchor (marks where a round begins)"
+                                                Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <TextBlock Text="⚓ ANCHOR" FontSize="10" FontWeight="ExtraBold" Foreground="White"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding Text}" FontSize="16" Foreground="#CCE0F0FF" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
             </Grid>
         </Grid>
 
