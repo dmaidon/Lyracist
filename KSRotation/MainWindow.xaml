@@ -2115,6 +2115,58 @@
                                 </StackPanel>
                             </GroupBox>
 
+                            <!-- Screen Rotation GroupBox -->
+                            <GroupBox Header="🔀 Screen Rotation" Style="{StaticResource NavySettingsGroupBoxStyle}" Margin="0,0,0,12">
+                                <StackPanel Margin="0,4,0,0">
+                                    <CheckBox
+                                        Content="Automatically rotate through screens"
+                                        IsChecked="{Binding AutoRotateProjectionViews, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource ModernCheckBoxStyle}"
+                                        Margin="0,0,0,8"
+                                        ToolTip="When enabled, the projection display automatically cycles through the checked screens below, each for its own configured duration, instead of staying on one fixed screen." />
+                                    <TextBlock Text="Check which screens to include, and set how many seconds each stays up:"
+                                               TextWrapping="Wrap"
+                                               FontSize="12"
+                                               Margin="0,0,0,8"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <ItemsControl ItemsSource="{Binding ProjectionRotationSchedule}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="46" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <CheckBox Grid.Column="0"
+                                                              IsChecked="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                                              Style="{StaticResource ModernCheckBoxStyle}"
+                                                              VerticalAlignment="Center"
+                                                              Margin="0,0,8,0" />
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding ViewName}"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource MaterialDesignBody}" />
+                                                    <TextBox Grid.Column="2"
+                                                             Text="{Binding DurationSeconds, UpdateSourceTrigger=LostFocus}"
+                                                             Style="{StaticResource ModernTextBoxStyle}"
+                                                             Height="26"
+                                                             Padding="4,1"
+                                                             TextAlignment="Center" />
+                                                    <TextBlock Grid.Column="3"
+                                                               Text="sec"
+                                                               VerticalAlignment="Center"
+                                                               Margin="4,0,0,0"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </GroupBox>
+
                             <!-- Connect & Request Instructions GroupBox -->
                             <GroupBox Header="Connect &amp; Request Instructions" Style="{StaticResource GreenSettingsGroupBoxStyle}">
                                 <StackPanel Margin="0,4,0,0">

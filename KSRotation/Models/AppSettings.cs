@@ -113,6 +113,16 @@ namespace KSRotation.Models
 
         /// <summary>When true, this device automatically switches to the in-app Remote DJ view (dj.html) when its session is transferred to or pulled by a peer.</summary>
         public bool AutoSwitchToRemoteDjOnHandoff { get; init; } = true;
+
+        /// <summary>When true, the projection display automatically cycles through the enabled entries
+        /// in <see cref="ProjectionRotationSchedule"/> throughout the night instead of staying on one
+        /// fixed screen.</summary>
+        public bool AutoRotateProjectionViews { get; init; }
+
+        /// <summary>Which projection views participate in the automatic rotation and how long each
+        /// stays up. Populated with one entry per known view (see MainViewModel.ProjectionViews);
+        /// entries the DJ hasn't opted into stay disabled with a default 30s duration.</summary>
+        public System.Collections.Generic.List<ProjectionRotationEntry> ProjectionRotationSchedule { get; init; } = [];
     }
 }
 

@@ -50,6 +50,8 @@ public interface IDisplayService
     void SetRotationAnnouncement(string message, bool visible);
     void SetLastRound(bool isLastRound);
     void SetRotationViewMode(string mode);
+    void SetAutoRotateProjectionViews(bool enabled);
+    void SetProjectionRotationSchedule(System.Collections.Generic.List<ProjectionRotationEntry> schedule);
     void SetCrawlBannerText(string text);
     void SetShowEstimatedWaitTime(bool show);
     void UpdateDjBanner(string path);

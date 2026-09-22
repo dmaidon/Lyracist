@@ -505,6 +505,50 @@
                                 </StackPanel>
                             </GroupBox>
 
+                            <GroupBox Header="🔀 Screen Rotation" Style="{StaticResource NavySettingsGroupBoxStyle}" Margin="0,12,0,0">
+                                <StackPanel>
+                                    <CheckBox Content="Automatically rotate through screens"
+                                              IsChecked="{Binding AutoRotateProjectionViews, Mode=TwoWay}"
+                                              Margin="0,0,0,8"
+                                              ToolTip="When enabled, the rotation display automatically cycles through the checked screens below, each for its own configured duration, instead of staying on one fixed screen." />
+                                    <TextBlock Text="Check which screens to include, and set how many seconds each stays up:"
+                                               TextWrapping="Wrap"
+                                               FontSize="11"
+                                               Margin="0,0,0,8"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <ItemsControl ItemsSource="{Binding ProjectionRotationSchedule}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="46" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <CheckBox Grid.Column="0"
+                                                              IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                              VerticalAlignment="Center"
+                                                              Margin="0,0,8,0" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding ViewName}" VerticalAlignment="Center" />
+                                                    <TextBox Grid.Column="2"
+                                                             Text="{Binding DurationSeconds, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                             Height="26"
+                                                             Padding="4,1"
+                                                             TextAlignment="Center" />
+                                                    <TextBlock Grid.Column="3"
+                                                               Text="sec"
+                                                               VerticalAlignment="Center"
+                                                               Margin="4,0,0,0"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </GroupBox>
+
                             <GroupBox Header="Session Schedule &amp; Request Cutoff" Style="{StaticResource BlueSettingsGroupBoxStyle}" Margin="0,12,0,0">
                                 <StackPanel>
                                     <CheckBox Content="Enable Session Schedule" IsChecked="{Binding EnableSessionSchedule, Mode=TwoWay}" Margin="0,0,0,8" ToolTip="Restrict patron portal and kiosk requests to the scheduled session timeframe." />

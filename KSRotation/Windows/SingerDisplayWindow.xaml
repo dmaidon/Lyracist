@@ -6,6 +6,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:KSRotation.ViewModels"
+    xmlns:conv="clr-namespace:KSRotation.Converters"
     mc:Ignorable="d"
     Title="Singer Display"
     Width="450"
@@ -22,6 +23,7 @@
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <conv:FestivalTierFontSizeConverter x:Key="FestivalTierFontSizeConverter" />
     </Window.Resources>
 
     <Grid>
@@ -856,7 +858,7 @@
                 <!-- Up next: deliberately smaller/dimmer than the current singer so attention stays there -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0,0,0" Opacity="0.82">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="UP NEXT" FontSize="14" FontWeight="Bold" Foreground="#AA9FE8E0" />
+                        <TextBlock Text="UP NEXT" FontSize="16" FontWeight="Bold" Foreground="#AA9FE8E0" />
                         <Border Background="#1833D4FF" BorderBrush="#4433D4FF" BorderThickness="1" CornerRadius="10" Padding="7,1" Margin="8,0,0,0" VerticalAlignment="Center"
                                 Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="10" FontWeight="Bold" Foreground="#AA9FE8E0" />
@@ -886,6 +888,107 @@
                     </ItemsControl>
                 </StackPanel>
             </Grid>
+        </Grid>
+
+        <!-- Row 1h: Concert Festival Lineup panel -->
+        <Grid Grid.Row="1" x:Name="FestivalPanel" Visibility="Collapsed" ClipToBounds="True">
+            <!-- Night-sky backdrop behind the stage (fixed colors – themed scene, not a UI surface). -->
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#FF120A24" Offset="0.0" />
+                    <GradientStop Color="#FF1E0F3A" Offset="0.5" />
+                    <GradientStop Color="#FF05030C" Offset="1.0" />
+                </LinearGradientBrush>
+            </Grid.Background>
+
+            <!-- Twinkling night-sky sparkles (built/animated in code-behind) -->
+            <Canvas x:Name="FestivalSparkleCanvas" SizeChanged="FestivalSparkleCanvas_SizeChanged" ClipToBounds="True" Panel.ZIndex="1" />
+
+            <!-- Sweeping stage light beams from below (built/animated in code-behind) -->
+            <Canvas x:Name="FestivalBeamCanvas" SizeChanged="FestivalBeamCanvas_SizeChanged" ClipToBounds="True" Panel.ZIndex="2" />
+
+            <!-- Poster content -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Panel.ZIndex="3" Margin="48,20">
+                <Border Background="#33FFC24A" BorderBrush="#66FFC24A" BorderThickness="1.5" CornerRadius="14" Padding="14,5" HorizontalAlignment="Center" Margin="0,0,0,16">
+                    <TextBlock Text="🎪 TONIGHT'S LINEUP" FontSize="16" FontWeight="Bold" Foreground="#FFFFC24A" TextOptions.TextFormattingMode="Display"/>
+                </Border>
+
+                <!-- Performer Selfie / Avatar -->
+                <Border Width="120" Height="120" CornerRadius="60" BorderThickness="5" BorderBrush="#FFFFC24A" HorizontalAlignment="Center" Margin="0,0,0,14"
+                        Visibility="{Binding HasCurrentSingerAvatar, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#FFFFC24A" BlurRadius="28" ShadowDepth="0" Opacity="0.85" />
+                    </Border.Effect>
+                    <Border CornerRadius="60" ClipToBounds="True">
+                        <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                    </Border>
+                </Border>
+
+                <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                        ToolTip="Rotation Anchor (marks where a round begins)"
+                        Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="⚓ ANCHOR" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                </Border>
+                <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
+                        ToolTip="Special Performer (One-Time)"
+                        Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="⭐ SPECIAL" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                </Border>
+
+                <TextBlock Text="{Binding CurrentSingerName}"
+                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                           FontSize="86" FontWeight="Black" Foreground="White" TextOptions.TextFormattingMode="Ideal">
+                    <TextBlock.Effect>
+                        <DropShadowEffect Color="#FFFFC24A" BlurRadius="32" ShadowDepth="0" Opacity="0.85" />
+                    </TextBlock.Effect>
+                </TextBlock>
+                <TextBlock Text="{Binding CurrentSingerSong}"
+                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                           Margin="0,10,0,0" FontSize="28" FontStyle="Italic" Foreground="#FFFF8A6B" />
+
+                <!-- Ticket-style divider -->
+                <Rectangle Width="220" Height="1.5" Fill="#55FFC24A" Margin="0,20,0,14" HorizontalAlignment="Center" />
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                    <TextBlock Text="ALSO PERFORMING" FontSize="16" FontWeight="Bold" Foreground="#AAFFC24A" />
+                    <Border Background="#33FFC24A" BorderBrush="#66FFC24A" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center"
+                            Visibility="{Binding HasActiveSingers, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="{Binding ActiveSingerCountText}" FontSize="11" FontWeight="Bold" Foreground="#FFFFC24A" />
+                    </Border>
+                    <TextBlock Text=" : {} = Estimated wait time"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Foreground="#AAFFC24A"
+                               Visibility="{Binding ShowEstimatedWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </StackPanel>
+
+                <!-- Support acts, largest-to-smallest poster typography (AlternationIndex drives tier size) -->
+                <ItemsControl ItemsSource="{Binding NextSingers}" HorizontalAlignment="Center" AlternationCount="5">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,3">
+                                <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,8,0" VerticalAlignment="Center"
+                                        ToolTip="Rotation Anchor (marks where a round begins)"
+                                        Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="⚓" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                </Border>
+                                <TextBlock Text="{Binding Text}" Foreground="#FFF0E0FF" FontWeight="SemiBold" TextAlignment="Center">
+                                    <TextBlock.FontSize>
+                                        <Binding RelativeSource="{RelativeSource AncestorType=ContentPresenter}"
+                                                 Path="(ItemsControl.AlternationIndex)"
+                                                 Converter="{StaticResource FestivalTierFontSizeConverter}" />
+                                    </TextBlock.FontSize>
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </Grid>
 
         <!-- Floating QR Code Overlay for audience scanning (shown on top of all projection panels) -->

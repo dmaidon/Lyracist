@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.9.22.642</AssemblyVersion>
-    <FileVersion>26.9.22.642</FileVersion>
+    <AssemblyVersion>26.9.22.643</AssemblyVersion>
+    <FileVersion>26.9.22.643</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -128,6 +128,7 @@
     <Compile Include="..\Shared\MonitorDpiHelper.cs" Link="MonitorDpiHelper.cs" />
     <Compile Include="..\Shared\DjBannerItem.cs" Link="DjBannerItem.cs" />
     <Compile Include="..\Shared\SpecialEventConfig.cs" Link="SpecialEventConfig.cs" />
+    <Compile Include="..\Shared\ProjectionRotationEntry.cs" Link="ProjectionRotationEntry.cs" />
     <Compile Include="..\Shared\DjBannerFileManager.cs" Link="DjBannerFileManager.cs" />
     <Compile Include="..\Shared\WindowPositioner.cs" Link="WindowPositioner.cs" />
     <Compile Include="..\Shared\MonitorInfo.cs" Link="MonitorInfo.cs" />

@@ -20,6 +20,7 @@ namespace KSRotation.ViewModels
         private readonly DispatcherTimer _saveDebounceTimer;
         private readonly DispatcherTimer _roundEstimateTimer;
         private RoundEstimationInfo _roundEstimation = new();
+        private DispatcherTimer? _projectionRotationTimer;
 
         /// <summary>Fired when this device's active session is exported/handed off to another peer on the LAN.</summary>
         public event Action<string, int, string>? SessionHandedOffToPeer;
@@ -542,15 +543,43 @@ namespace KSRotation.ViewModels
             "Vegas Marquee",
             "Vinyl Turntable",
             "Disco Ball",
-            "Synthwave Grid"
-            // TODO (future): "Jumbotron" — full-bleed stadium scoreboard style with huge singer name
-            //                on a bright LED matrix background, scrolling ticker at the bottom.
+            "Synthwave Grid",
+            "Concert Festival Lineup"
+            // TODO (future): "Casino Slot Reels" — each queue slot is a spinning slot-machine reel
+            //                that clunks to a stop on the singer's name; current singer gets a
+            //                "JACKPOT" flourish.
+            // TODO (future): "Jukebox" — a glowing 50s jukebox with the singer list as illuminated
+            //                selection buttons, bubble-tube light animation along the frame.
+            // TODO (future): "Stadium Jumbotron" — dot-matrix/LED scoreboard look, singer names
+            //                "typing on" pixel-by-pixel like a stadium screen, spotlight sweep in
+            //                the background.
+            // TODO (future): "Movie Theater 'Now Showing'" — film reel countdown leader ticking down
+            //                to the current singer, marquee-style poster cards for the next few up
+            //                (distinct from Vegas Marquee by leaning into film-reel/countdown motion
+            //                rather than chase lights).
             // TODO (future): "Neon Bar Sign" — dark brick-wall backdrop with a glowing neon-tube
             //                sign rendering the singer name in flickering neon colors.
         ];
 
         [ObservableProperty]
         public partial string SelectedProjectionView { get; set; } = "Normal List";
+
+        /// <summary>When true, the projection display automatically cycles through the enabled entries
+        /// in <see cref="ProjectionRotationSchedule"/> instead of staying on one fixed screen.</summary>
+        [ObservableProperty]
+        public partial bool AutoRotateProjectionViews { get; set; }
+
+        partial void OnAutoRotateProjectionViewsChanged(bool value)
+        {
+            if (_isInitializing) return;
+            QueueSaveSettings();
+            RestartProjectionRotationTimer();
+        }
+
+        /// <summary>DJ-configured schedule of which projection views participate in the automatic
+        /// rotation and how long each stays up. Always has exactly one entry per <see cref="ProjectionViews"/>
+        /// (see <see cref="LoadProjectionRotationSchedule"/>), so the settings UI can bind a fixed row list.</summary>
+        public ObservableCollection<ProjectionRotationEntry> ProjectionRotationSchedule { get; } = [];
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(WindowTitle))]
@@ -900,6 +929,89 @@ namespace KSRotation.ViewModels
             OnPropertyChanged(nameof(RoundRemainingMinutes));
         }
 
+        /// <summary>Rebuilds <see cref="ProjectionRotationSchedule"/> with exactly one row per known
+        /// projection view, carrying over the DJ's saved enabled/duration choices by view name (so a
+        /// newly-added view like "Disco Ball" picks up a sane default instead of being dropped).</summary>
+        private void LoadProjectionRotationSchedule(List<ProjectionRotationEntry>? saved)
+        {
+            saved ??= [];
+
+            foreach (var existingEntry in ProjectionRotationSchedule)
+            {
+                existingEntry.PropertyChanged -= ProjectionRotationEntry_PropertyChanged;
+            }
+            ProjectionRotationSchedule.Clear();
+
+            foreach (string viewName in ProjectionViews)
+            {
+                var match = saved.FirstOrDefault(e => e.ViewName == viewName);
+                var entry = new ProjectionRotationEntry
+                {
+                    ViewName = viewName,
+                    IsEnabled = match?.IsEnabled ?? false,
+                    DurationSeconds = match?.DurationSeconds > 0 ? match.DurationSeconds : 30
+                };
+                entry.PropertyChanged += ProjectionRotationEntry_PropertyChanged;
+                ProjectionRotationSchedule.Add(entry);
+            }
+
+            RestartProjectionRotationTimer();
+        }
+
+        private void ProjectionRotationEntry_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (_isInitializing) return;
+            QueueSaveSettings();
+            RestartProjectionRotationTimer();
+        }
+
+        /// <summary>Stops any in-flight rotation and, if enabled with at least one checked view, jumps to
+        /// the first enabled view and restarts the advance timer from there. Called whenever the DJ
+        /// toggles the master switch or edits a row, so a mid-rotation edit takes effect immediately
+        /// rather than waiting for the current view's timer to expire.</summary>
+        private void RestartProjectionRotationTimer()
+        {
+            StopProjectionRotationTimer();
+            if (!AutoRotateProjectionViews) return;
+
+            var first = ProjectionRotationSchedule.FirstOrDefault(e => e.IsEnabled);
+            if (first == null) return;
+
+            SelectedProjectionView = first.ViewName;
+            _projectionRotationTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(first.DurationSeconds) };
+            _projectionRotationTimer.Tick += (_, _) => AdvanceProjectionRotation();
+            _projectionRotationTimer.Start();
+        }
+
+        private void StopProjectionRotationTimer()
+        {
+            _projectionRotationTimer?.Stop();
+            _projectionRotationTimer = null;
+        }
+
+        /// <summary>Advances to the next enabled view after the current one, wrapping back to the first.
+        /// Re-reads the enabled set on every tick (rather than caching indices) so edits made mid-night
+        /// are picked up without needing a full restart.</summary>
+        private void AdvanceProjectionRotation()
+        {
+            var enabled = ProjectionRotationSchedule.Where(e => e.IsEnabled).ToList();
+            if (enabled.Count == 0)
+            {
+                StopProjectionRotationTimer();
+                return;
+            }
+
+            int currentIndex = enabled.FindIndex(e => e.ViewName == SelectedProjectionView);
+            var next = enabled[(currentIndex + 1) % enabled.Count];
+
+            SelectedProjectionView = next.ViewName;
+
+            if (_projectionRotationTimer != null)
+            {
+                _projectionRotationTimer.Interval = TimeSpan.FromSeconds(next.DurationSeconds);
+            }
+        }
+
         /// <summary>Whether "Load Test Data" is safe to use — false once a real, in-progress queue exists, so an accidental tap can't wipe it.</summary>
         public bool CanLoadTestData => Singers.Count == 0;
 
@@ -1120,6 +1232,8 @@ namespace KSRotation.ViewModels
             EnableLastRequestTime = settings.EnableLastRequestTime;
             LastRequestTime = string.IsNullOrWhiteSpace(settings.LastRequestTime) ? "1:30 AM" : settings.LastRequestTime;
             AutoSwitchToRemoteDjOnHandoff = settings.AutoSwitchToRemoteDjOnHandoff;
+            AutoRotateProjectionViews = settings.AutoRotateProjectionViews;
+            LoadProjectionRotationSchedule(settings.ProjectionRotationSchedule);
             _displayWindowService.SetShowEstimatedWaitTime(ShowEstimatedWaitTime);
             _displayWindowService.SetWatermarkOpacity(WatermarkOpacity);
             SelectedProjectionView = "Normal List";
@@ -2921,7 +3035,9 @@ namespace KSRotation.ViewModels
                 SessionStopTime = SessionStopTime,
                 EnableLastRequestTime = EnableLastRequestTime,
                 LastRequestTime = LastRequestTime,
-                AutoSwitchToRemoteDjOnHandoff = AutoSwitchToRemoteDjOnHandoff
+                AutoSwitchToRemoteDjOnHandoff = AutoSwitchToRemoteDjOnHandoff,
+                AutoRotateProjectionViews = AutoRotateProjectionViews,
+                ProjectionRotationSchedule = [.. ProjectionRotationSchedule]
             };
 
             try

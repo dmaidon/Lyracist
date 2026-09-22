@@ -168,10 +168,65 @@ public partial class SettingsViewModel
     [ObservableProperty]
     private ScreenInfo? _djBannerScreen;
 
-    public List<string> ProjectionViews { get; } = ["Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable", "Disco Ball", "Synthwave Grid"];
+    public List<string> ProjectionViews { get; } = ["Normal List", "Star Wars Crawl", "Vegas Marquee", "Vinyl Turntable", "Disco Ball", "Synthwave Grid", "Concert Festival Lineup"];
+    // TODO (future): "Casino Slot Reels" — each queue slot is a spinning slot-machine reel that
+    //                clunks to a stop on the singer's name; current singer gets a "JACKPOT" flourish.
+    // TODO (future): "Jukebox" — a glowing 50s jukebox with the singer list as illuminated selection
+    //                buttons, bubble-tube light animation along the frame.
+    // TODO (future): "Stadium Jumbotron" — dot-matrix/LED scoreboard look, singer names "typing on"
+    //                pixel-by-pixel like a stadium screen, spotlight sweep in the background.
+    // TODO (future): "Movie Theater 'Now Showing'" — film reel countdown leader ticking down to the
+    //                current singer, marquee-style poster cards for the next few up (distinct from
+    //                Vegas Marquee by leaning into film-reel/countdown motion rather than chase lights).
 
     [ObservableProperty]
     private string _selectedProjectionView = "Normal List";
+
+    /// <summary>When true, the rotation display automatically cycles through the enabled entries in
+    /// <see cref="ProjectionRotationSchedule"/> instead of staying on one fixed screen.</summary>
+    [ObservableProperty]
+    private bool _autoRotateProjectionViews;
+
+    partial void OnAutoRotateProjectionViewsChanged(bool value)
+    {
+        _display.SetAutoRotateProjectionViews(value);
+    }
+
+    /// <summary>DJ-configured schedule of which projection views participate in the automatic rotation
+    /// and how long each stays up. Always has exactly one row per <see cref="ProjectionViews"/> entry.</summary>
+    public ObservableCollection<ProjectionRotationEntry> ProjectionRotationSchedule { get; } = [];
+
+    /// <summary>Rebuilds <see cref="ProjectionRotationSchedule"/> from the saved schedule, carrying over
+    /// the DJ's enabled/duration choices by view name so a newly-added view (e.g. "Disco Ball") picks
+    /// up a sane default instead of being dropped.</summary>
+    private void LoadProjectionRotationSchedule(List<ProjectionRotationEntry>? saved)
+    {
+        saved ??= [];
+
+        foreach (var existingEntry in ProjectionRotationSchedule)
+        {
+            existingEntry.PropertyChanged -= ProjectionRotationEntry_PropertyChanged;
+        }
+        ProjectionRotationSchedule.Clear();
+
+        foreach (string viewName in ProjectionViews)
+        {
+            var match = saved.FirstOrDefault(e => e.ViewName == viewName);
+            var entry = new ProjectionRotationEntry
+            {
+                ViewName = viewName,
+                IsEnabled = match?.IsEnabled ?? false,
+                DurationSeconds = match?.DurationSeconds > 0 ? match.DurationSeconds : 30
+            };
+            entry.PropertyChanged += ProjectionRotationEntry_PropertyChanged;
+            ProjectionRotationSchedule.Add(entry);
+        }
+    }
+
+    private void ProjectionRotationEntry_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        _display.SetProjectionRotationSchedule([.. ProjectionRotationSchedule]);
+    }
 
     partial void OnSelectedRotationTargetChanged(DisplayTarget value)
     {

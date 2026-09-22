@@ -57,6 +57,25 @@ public partial class RotationWindow : Window, ICaptureSource
     private const int MarqueeLitPeriod = 3;
     private const double MarqueeDimOpacity = 0.18;
 
+    private readonly List<RotateTransform> _festivalBeamRotates = [];
+    private readonly List<Ellipse> _festivalSparkles = [];
+    private static readonly System.Windows.Media.Color[] FestivalBeamPalette =
+    [
+        System.Windows.Media.Color.FromRgb(0xFF, 0xF0, 0xC8),
+        System.Windows.Media.Color.FromRgb(0xFF, 0xC2, 0x4A),
+        System.Windows.Media.Color.FromRgb(0xFF, 0x4A, 0x4A),
+        System.Windows.Media.Color.FromRgb(0xFF, 0x8A, 0x3D),
+        System.Windows.Media.Color.FromRgb(0xFF, 0xD8, 0x4D),
+        System.Windows.Media.Color.FromRgb(0xFF, 0x6B, 0x9E),
+    ];
+    private static readonly System.Windows.Media.Color[] FestivalSparklePalette =
+    [
+        System.Windows.Media.Color.FromRgb(0xFF, 0xF3, 0xB0),
+        System.Windows.Media.Color.FromRgb(0xFF, 0xE0, 0x6B),
+        System.Windows.Media.Color.FromRgb(0xFF, 0xFF, 0xFF),
+        System.Windows.Media.Color.FromRgb(0xFF, 0xC2, 0x4A),
+    ];
+
     private DispatcherTimer? _synthGridTimer;
     private readonly List<System.Windows.Media.Color> _synthLineColors =
     [
@@ -220,6 +239,8 @@ public partial class RotationWindow : Window, ICaptureSource
             StopDiscoBeams();
             StopDiscoLightSpots();
             StopSynthGrid();
+            StopFestivalBeams();
+            StopFestivalSparkles();
         }
     }
 
@@ -318,6 +339,8 @@ public partial class RotationWindow : Window, ICaptureSource
         StopDiscoBeams();
         StopDiscoLightSpots();
         StopSynthGrid();
+        StopFestivalBeams();
+        StopFestivalSparkles();
 
         NormalPanel.Visibility = Visibility.Collapsed;
         CrawlPanel.Visibility = Visibility.Collapsed;
@@ -325,6 +348,7 @@ public partial class RotationWindow : Window, ICaptureSource
         VinylPanel.Visibility = Visibility.Collapsed;
         DiscoPanel.Visibility = Visibility.Collapsed;
         SynthwavePanel.Visibility = Visibility.Collapsed;
+        FestivalPanel.Visibility = Visibility.Collapsed;
 
         switch (_vm.SelectedProjectionView)
         {
@@ -355,6 +379,12 @@ public partial class RotationWindow : Window, ICaptureSource
                 SynthwavePanel.Visibility = Visibility.Visible;
                 Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildSynthGridStatic);
                 StartSynthGrid();
+                break;
+
+            case "Concert Festival Lineup":
+                FestivalPanel.Visibility = Visibility.Visible;
+                Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildFestivalBeams);
+                Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildFestivalSparkles);
                 break;
 
             default:
@@ -1202,6 +1232,173 @@ public partial class RotationWindow : Window, ICaptureSource
 
         storyboard.Completed += (s, e) => SynthGridCanvas.Children.Remove(rect);
         storyboard.Begin();
+    }
+
+    private void FestivalBeamCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_vm?.SelectedProjectionView == "Concert Festival Lineup" && FestivalPanel.Visibility == Visibility.Visible)
+        {
+            BuildFestivalBeams();
+        }
+    }
+
+    /// <summary>Warm stage-light wedges fanned upward from below the poster, same rotating-wedge
+    /// mechanism as <see cref="BuildDiscoBeams"/> but anchored at the bottom edge instead of the top
+    /// (each wedge's apex/RenderTransformOrigin is flipped to the bottom of its own bounding box).</summary>
+    private void BuildFestivalBeams()
+    {
+        StopFestivalBeams();
+        FestivalBeamCanvas.Children.Clear();
+
+        double w = FestivalBeamCanvas.ActualWidth;
+        double h = FestivalBeamCanvas.ActualHeight;
+        if (w <= 0 || h <= 0) return;
+
+        double anchorX = w / 2.0;
+        double anchorY = h;
+        double length = h * 1.1;
+        int beamCount = FestivalBeamPalette.Length;
+
+        for (int i = 0; i < beamCount; i++)
+        {
+            double spreadHalf = 30 + (i % 2 == 0 ? 8 : 0);
+            var color = FestivalBeamPalette[i];
+
+            var polygon = new Polygon
+            {
+                Points = [new System.Windows.Point(0, 0), new System.Windows.Point(-spreadHalf, -length), new System.Windows.Point(spreadHalf, -length)],
+                RenderTransformOrigin = new System.Windows.Point(0.5, 1.0)
+            };
+
+            var gradient = new LinearGradientBrush
+            {
+                StartPoint = new System.Windows.Point(0.5, 1),
+                EndPoint = new System.Windows.Point(0.5, 0),
+                GradientStops =
+                {
+                    new GradientStop(System.Windows.Media.Color.FromArgb(0x50, color.R, color.G, color.B), 0.0),
+                    new GradientStop(System.Windows.Media.Color.FromArgb(0x00, color.R, color.G, color.B), 1.0)
+                }
+            };
+            gradient.Freeze();
+            polygon.Fill = gradient;
+
+            var rotate = new RotateTransform((360.0 / beamCount) * i);
+            polygon.RenderTransform = rotate;
+
+            Canvas.SetLeft(polygon, anchorX - spreadHalf);
+            Canvas.SetTop(polygon, anchorY - length);
+            FestivalBeamCanvas.Children.Add(polygon);
+            _festivalBeamRotates.Add(rotate);
+
+            bool clockwise = i % 2 == 0;
+            double duration = 10 + (i * 2.1);
+            var spin = new DoubleAnimation(
+                rotate.Angle,
+                rotate.Angle + (clockwise ? 360 : -360),
+                TimeSpan.FromSeconds(duration))
+            {
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+            rotate.BeginAnimation(RotateTransform.AngleProperty, spin);
+        }
+    }
+
+    private void StopFestivalBeams()
+    {
+        foreach (var rotate in _festivalBeamRotates)
+        {
+            rotate.BeginAnimation(RotateTransform.AngleProperty, null);
+        }
+        FestivalBeamCanvas.Children.Clear();
+        _festivalBeamRotates.Clear();
+    }
+
+    private void FestivalSparkleCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_vm?.SelectedProjectionView == "Concert Festival Lineup" && FestivalPanel.Visibility == Visibility.Visible)
+        {
+            BuildFestivalSparkles();
+        }
+    }
+
+    /// <summary>Sparse twinkling gold/white dots standing in for a starlit night sky above the stage -
+    /// same drift-and-twinkle technique as <see cref="BuildDiscoLightSpots"/>, just recolored and less
+    /// dense so it reads as a night sky rather than a dance floor.</summary>
+    private void BuildFestivalSparkles()
+    {
+        StopFestivalSparkles();
+        FestivalSparkleCanvas.Children.Clear();
+
+        double w = FestivalSparkleCanvas.ActualWidth;
+        double h = FestivalSparkleCanvas.ActualHeight;
+        if (w <= 0 || h <= 0) return;
+
+        int spotCount = (int)Math.Clamp(w * h / 40000.0, 12, 28);
+
+        for (int i = 0; i < spotCount; i++)
+        {
+            double size = (_rng.NextDouble() * 4) + 2;
+            var color = FestivalSparklePalette[_rng.Next(FestivalSparklePalette.Length)];
+            var brush = new SolidColorBrush(color);
+            brush.Freeze();
+
+            var dot = new Ellipse
+            {
+                Width = size,
+                Height = size,
+                Fill = brush,
+                RenderTransform = new TranslateTransform()
+            };
+
+            double x = _rng.NextDouble() * w;
+            double y = _rng.NextDouble() * h * 0.6;
+            Canvas.SetLeft(dot, x);
+            Canvas.SetTop(dot, y);
+            FestivalSparkleCanvas.Children.Add(dot);
+            _festivalSparkles.Add(dot);
+
+            var transform = (TranslateTransform)dot.RenderTransform;
+            double ampX = (_rng.NextDouble() * 20) + 5;
+            double ampY = (_rng.NextDouble() * 20) + 5;
+            double durX = (_rng.NextDouble() * 4) + 4;
+            double durY = (_rng.NextDouble() * 4) + 4;
+            double begin = _rng.NextDouble() * 5;
+
+            transform.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(-ampX, ampX, TimeSpan.FromSeconds(durX))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                BeginTime = TimeSpan.FromSeconds(begin)
+            });
+            transform.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(-ampY, ampY, TimeSpan.FromSeconds(durY))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                BeginTime = TimeSpan.FromSeconds(begin)
+            });
+            dot.BeginAnimation(OpacityProperty, new DoubleAnimation(0.1, 0.9, TimeSpan.FromSeconds((_rng.NextDouble() * 2) + 1.5))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                BeginTime = TimeSpan.FromSeconds(begin)
+            });
+        }
+    }
+
+    private void StopFestivalSparkles()
+    {
+        foreach (var dot in _festivalSparkles)
+        {
+            dot.BeginAnimation(OpacityProperty, null);
+            if (dot.RenderTransform is TranslateTransform t)
+            {
+                t.BeginAnimation(TranslateTransform.XProperty, null);
+                t.BeginAnimation(TranslateTransform.YProperty, null);
+            }
+        }
+        FestivalSparkleCanvas.Children.Clear();
+        _festivalSparkles.Clear();
     }
 
     private void MarqueeBulbCanvas_SizeChanged(object sender, SizeChangedEventArgs e)

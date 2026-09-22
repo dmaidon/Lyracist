@@ -25,6 +25,7 @@ public class DisplayService : IDisplayService
     private TriviaGameEngine? _triviaEngine;
     private readonly DisplayPreferences _preferences;
     private bool _rotationHadSingers;
+    private System.Windows.Threading.DispatcherTimer? _projectionRotationTimer;
 
     public void SetTriviaGameEngine(TriviaGameEngine? engine) => _triviaEngine = engine;
     public TriviaGameEngine? GetTriviaGameEngine() => _triviaEngine;
@@ -42,6 +43,7 @@ public class DisplayService : IDisplayService
         _mediaEngine = mediaEngine;
         _casting = casting;
         _preferences = DisplayPreferencesStore.Load();
+        RestartProjectionRotationTimer();
 
         // Auto-subscribe to the MediaEngine's frame tick events to sync with the LyricsWindow VM
         _mediaEngine.FrameReady += OnMediaFrameReady;
@@ -530,6 +532,66 @@ public class DisplayService : IDisplayService
 
         var vm = _serviceProvider.GetService<RotationWindowViewModel>();
         vm?.SelectedProjectionView = mode;
+    }
+
+    public void SetAutoRotateProjectionViews(bool enabled)
+    {
+        _preferences.AutoRotateProjectionViews = enabled;
+        DisplayPreferencesStore.Save(_preferences);
+        RestartProjectionRotationTimer();
+    }
+
+    public void SetProjectionRotationSchedule(List<ProjectionRotationEntry> schedule)
+    {
+        _preferences.ProjectionRotationSchedule = schedule;
+        DisplayPreferencesStore.Save(_preferences);
+        RestartProjectionRotationTimer();
+    }
+
+    /// <summary>Stops any in-flight rotation and, if enabled with at least one checked view, jumps to
+    /// the first enabled view and restarts the advance timer from there. Called on load and whenever
+    /// the DJ toggles the master switch or edits a schedule row, so a mid-rotation edit takes effect
+    /// immediately rather than waiting for the current view's timer to expire.</summary>
+    private void RestartProjectionRotationTimer()
+    {
+        _projectionRotationTimer?.Stop();
+        _projectionRotationTimer = null;
+        if (!_preferences.AutoRotateProjectionViews) return;
+
+        var first = _preferences.ProjectionRotationSchedule.FirstOrDefault(e => e.IsEnabled);
+        if (first == null) return;
+
+        SetRotationViewMode(first.ViewName);
+        _projectionRotationTimer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(first.DurationSeconds)
+        };
+        _projectionRotationTimer.Tick += (_, _) => AdvanceProjectionRotation();
+        _projectionRotationTimer.Start();
+    }
+
+    /// <summary>Advances to the next enabled view after the current one, wrapping back to the first.
+    /// Re-reads the enabled set on every tick (rather than caching indices) so edits made mid-night are
+    /// picked up without needing a full restart.</summary>
+    private void AdvanceProjectionRotation()
+    {
+        var enabled = _preferences.ProjectionRotationSchedule.Where(e => e.IsEnabled).ToList();
+        if (enabled.Count == 0)
+        {
+            _projectionRotationTimer?.Stop();
+            _projectionRotationTimer = null;
+            return;
+        }
+
+        int currentIndex = enabled.FindIndex(e => e.ViewName == _preferences.RotationViewMode);
+        var next = enabled[(currentIndex + 1) % enabled.Count];
+
+        SetRotationViewMode(next.ViewName);
+
+        if (_projectionRotationTimer != null)
+        {
+            _projectionRotationTimer.Interval = TimeSpan.FromSeconds(next.DurationSeconds);
+        }
     }
 
     public void SetCrawlBannerText(string text)

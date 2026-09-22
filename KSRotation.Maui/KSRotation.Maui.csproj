@@ -159,6 +159,7 @@
 		<Compile Include="..\Shared\DisplayTarget.cs" Link="DisplayTarget.cs" />
 		<Compile Include="..\Shared\DjBannerItem.cs" Link="DjBannerItem.cs" />
 		<Compile Include="..\Shared\SpecialEventConfig.cs" Link="SpecialEventConfig.cs" />
+		<Compile Include="..\Shared\ProjectionRotationEntry.cs" Link="ProjectionRotationEntry.cs" />
 		<Compile Include="..\Shared\DjBannerFileManager.cs" Link="DjBannerFileManager.cs" />
 		<Compile Include="..\Shared\AtomicJsonFile.cs" Link="AtomicJsonFile.cs" />
 		<Compile Include="..\Shared\WifiHelper.cs" Link="WifiHelper.cs" />

@@ -260,6 +260,8 @@ public partial class SettingsViewModel : BaseViewModel
             : Screens.FirstOrDefault(s => s.Index == -1);
         _isLyricsMirrored = prefs.IsLyricsMirrored;
         _selectedProjectionView = prefs.RotationViewMode ?? "Normal List";
+        _autoRotateProjectionViews = prefs.AutoRotateProjectionViews;
+        LoadProjectionRotationSchedule(prefs.ProjectionRotationSchedule);
 
         // Dynamic audio device list using LibVLC
         var devList = new List<AudioDeviceItem>
