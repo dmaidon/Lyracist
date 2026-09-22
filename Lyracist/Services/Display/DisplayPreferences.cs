@@ -11,6 +11,10 @@ public class DisplayPreferences
     public string RotationViewMode { get; set; } = "Normal List";
     public int? DjBannerScreenIndex { get; set; }
     public string SelectedDjBannerPath { get; set; } = string.Empty;
+
+    /// <summary>DJ banner (image or video) optionally shown in the Stadium Jumbotron
+    /// projection view's bottom sponsor box. Empty shows a "tip your bartenders and DJ" notice instead.</summary>
+    public string SelectedJumbotronBannerPath { get; set; } = string.Empty;
     public string SelectedSpecialEvent { get; set; } = "None";
     public DisplayTarget RotationTarget { get; set; } = DisplayTarget.Monitor;
     public bool IsLyricsActive { get; set; } = false;

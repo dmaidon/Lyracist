@@ -2322,6 +2322,15 @@
                                         Style="{StaticResource ModernCheckBoxStyle}"
                                         Margin="0,8,0,4" />
 
+                                    <TextBlock Text="Stadium Jumbotron Sponsor Banner" FontWeight="SemiBold" Margin="0,12,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
+                                    <ComboBox
+                                            ItemsSource="{Binding JumbotronBannerOptions}"
+                                            SelectedValue="{Binding SelectedJumbotronBannerPath, UpdateSourceTrigger=PropertyChanged}"
+                                            SelectedValuePath="FullPath"
+                                            DisplayMemberPath="FileName"
+                                            Style="{StaticResource ModernComboBoxStyle}"
+                                            ToolTip="Optional banner shown in the bottom sponsor box of the Stadium Jumbotron projection view. When 'None' is selected, a tip-your-bartenders-and-DJ reminder shows instead." />
+
                                     <Separator Style="{StaticResource MaterialDesignSeparator}" Margin="0,8,0,12" />
                                     <Grid Margin="0,0,0,6">
                                         <Grid.ColumnDefinitions>

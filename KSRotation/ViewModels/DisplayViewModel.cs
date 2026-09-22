@@ -87,6 +87,18 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial double WatermarkOpacity { get; set; } = 0.06;
 
+        /// <summary>File path of the DJ banner (image or .mp4) the DJ picked to display in the
+        /// Stadium Jumbotron's bottom sponsor box. Empty when none is selected.</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasJumbotronBanner))]
+        [NotifyPropertyChangedFor(nameof(IsJumbotronBannerVideo))]
+        public partial string JumbotronBannerPath { get; set; } = string.Empty;
+
+        public bool HasJumbotronBanner => !string.IsNullOrEmpty(JumbotronBannerPath) && File.Exists(JumbotronBannerPath);
+
+        public bool IsJumbotronBannerVideo => HasJumbotronBanner
+            && Path.GetExtension(JumbotronBannerPath).Equals(".mp4", StringComparison.OrdinalIgnoreCase);
+
         [ObservableProperty]
         public partial bool HasDesignatedCurrentSinger { get; set; }
 
@@ -281,7 +293,7 @@ namespace KSRotation.ViewModels
                 int currentIndex = activeRotation.IndexOf(current);
                 int count = activeRotation.Count;
 
-                for (int offset = 1; offset < count && NextSingers.Count < 5; offset++)
+                for (int offset = 1; offset < count && NextSingers.Count < 6; offset++)
                 {
                     SingerEntry singer = activeRotation[(currentIndex + offset) % count];
 
@@ -305,7 +317,7 @@ namespace KSRotation.ViewModels
             }
             else
             {
-                foreach (SingerEntry singer in activeRotation.Take(5))
+                foreach (SingerEntry singer in activeRotation.Take(6))
                 {
                     if (singer.IsMusic)
                     {

@@ -56,6 +56,7 @@ public interface IDisplayService
     void SetCrawlBannerText(string text);
     void SetShowEstimatedWaitTime(bool show);
     void UpdateDjBanner(string path);
+    void SetJumbotronBanner(string path);
     void UpdateSpecialEvent(string eventName);
     void HideDjBannerWindow();
 

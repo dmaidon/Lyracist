@@ -1,5 +1,5 @@
-<!-- Edited on Sep 22, 2026 @ 12:19:00 -> Document Android deployment enablement across solution files -->
-Last Edit: Sep 22, 2026 - Android Solution Deployment Enablement & Vinyl Dot Removal
+<!-- Edited on Sep 22, 2026 @ 15:10:00 -> Document distinct-layout redesign of the 4 new projection views, NextSingers count bump, and Jumbotron sponsor banner -->
+Last Edit: Sep 22, 2026 - Projection View Redesign, 6-Singer Queue, & Jumbotron Sponsor Banner
 
 # Changelog
 
@@ -46,6 +46,18 @@ All notable changes to the Lyracist project are documented here. The format is b
   - **Comprehensive Badge & Plaque Support**: All 4 new projection views fully support singer avatars/selfies, `⭐ SPECIAL` performer chips, `⚓ ANCHOR` round start badges, `{N}` estimated wait time indicators, and venue/active-singer count badges.
   - **Full Projection View Synchronization**: Updated `MainViewModel.cs` in `KSRotation` and synced `SettingsViewModel.Display.cs` and `KaraokeViewModel.Screens.cs` in `Lyracist` with all 11 views, automatically populating the `ProjectionRotationSchedule` auto-rotate sequence.
   - **Settings UI & Help Backfill**: Backfilled descriptions for `Disco Ball`, `Synthwave Grid`, and `Concert Festival Lineup` alongside the 4 new views in `KSRotation/MainWindow.xaml` (Help Topic 3 grid expanded to 11 rows), `Lyracist/Views/Pages/SettingsPage.xaml` (View Mode Descriptions expander), and `Lyracist/ViewModels/HelpViewModel.cs` (Topic 5).
+- **Structurally Distinct Redesign of the 4 New Projection Views (`KSRotation`, `Lyracist`)**:
+  - **Casino Slot Reels**: Replaced the reused hero-card layout with an actual 3-reel slot machine cabinet - three independently spinning reel windows cycling casino symbols (🎤🍒🔔💎7️⃣⭐🍋), chrome/gold cabinet frame with corner bolts and a red pull-handle lever, a payline indicator, a "winner payout ticket" for the current performer, and a horizontal ticket-stub roll for upcoming singers.
+  - **Jukebox**: Replaced the plain avatar card with an arch-topped cabinet housing a real spinning vinyl record (concentric grooves, rotating avatar label), and the next-up list became a 2-column grid of chunky backlit push-buttons.
+  - **Stadium Jumbotron**: Restructured from a left/right split into a stacked layout - a wide "NOW ON STAGE" strip on top and a wrap-grid of square jersey-number scoreboard tiles below, replacing the identical vertical list used by every other view.
+  - **Movie Theater 'Now Showing'**: Added red velvet curtain polygons flanking a letterboxed cinema screen (black bars top/bottom) for the current performer, and the next-up list became a horizontal row of portrait movie-poster cards with a diagonal "COMING SOON" ribbon.
+  - Each view keeps the shared furniture (ANCHOR/SPECIAL badges, active-singer count, QR overlay, rating display) - only the layout metaphor that was previously identical across all 4 is now distinct.
+- **Upcoming Singer Count Raised to 6 for Themed Projection Views (`KSRotation`, `Lyracist`)**: Increased the shared `NextSingers` queue from 5 to 6 entries in `DisplayViewModel.cs` (`KSRotation`) and `RotationWindowViewModel.cs` (`Lyracist`, both the live-refresh and `HighlightSinger` population paths). Applies to Vegas Marquee, Vinyl Turntable, Disco Ball, Synthwave Grid, Concert Festival Lineup, Casino Slot Reels, Jukebox, Stadium Jumbotron, and Movie Theater; Normal List and Star Wars Crawl are unaffected since they source their text from separate data (a ticker built from a 5-item slice, and the full rotation list, respectively).
+- **Stadium Jumbotron Sponsor Banner Box (`KSRotation`, `Lyracist`)**:
+  - **Larger Roster Tiles**: Enlarged the next-singer scoreboard tiles from 150x100 to 230x150 to use the panel's previously unused real estate, with matching badge/text upsizing.
+  - **Selectable Sponsor Banner**: Added a new "Stadium Jumbotron Sponsor Banner" picker in Settings (`SelectedJumbotronBannerPath` in `AppSettings.cs` / `SelectedJumbotronBannerPath` in `DisplayPreferences.cs`), populated from the same banner library as the DJ Banner Screen plus a "(None - show tip message)" option. Selection persists and pushes live to the projection window via `DisplayWindowService.SetJumbotronBanner` (`KSRotation`) / `DisplayService.SetJumbotronBanner` (`Lyracist`).
+  - **Image & Video Support**: The bottom sponsor box renders the selected banner as a static image or a looping, muted `.mp4` video (via a new `MediaElement` + `MediaEnded` loop handler), matching the DJ Banner Screen's supported formats.
+  - **Tip Reminder Fallback**: When no sponsor banner is selected, the box shows "🍻 Don't forget, tip your bartenders and DJ! 🎧" instead of sitting empty.
 
 ## [26.9.21.0] - 2026-09-21
 

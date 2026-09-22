@@ -587,6 +587,10 @@
                                     </Border>
                                     <CheckBox Content="Show request QR Code overlay on DJ Banner" IsChecked="{Binding IsDjBannerQrCodeEnabled, Mode=TwoWay}" Margin="0,4,0,12" ToolTip="Displays the patron request portal QR code overlay directly on the active DJ Banner." />
 
+                                    <TextBlock Text="Stadium Jumbotron Sponsor Banner" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding JumbotronBanners}" SelectedItem="{Binding SelectedJumbotronBanner, Mode=TwoWay}" DisplayMemberPath="FileName" HorizontalAlignment="Stretch" Margin="0,0,0,12"
+                                              ToolTip="Optional banner shown in the bottom sponsor box of the Stadium Jumbotron projection view. When 'None' is selected, a tip-your-bartenders-and-DJ reminder shows instead." />
+
                                     <Separator Margin="0,4,0,12" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
 
                                     <!-- Special Event Banners Configuration -->

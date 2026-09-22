@@ -15,6 +15,13 @@ public partial class SettingsViewModel
     [ObservableProperty]
     private DjBannerItem? _selectedDjBanner;
 
+    /// <summary>Selectable items for the Jumbotron banner picker: a "None" sentinel (empty
+    /// path, shows the "tip your bartenders and DJ" notice) followed by every banner in <see cref="DjBanners"/>.</summary>
+    public ObservableCollection<DjBannerItem> JumbotronBanners { get; } = [];
+
+    [ObservableProperty]
+    private DjBannerItem? _selectedJumbotronBanner;
+
     private void RefreshDjBanners()
     {
         DjBanners.Clear();
@@ -32,11 +39,29 @@ public partial class SettingsViewModel
         {
             SelectedDjBanner = DjBanners.FirstOrDefault();
         }
+
+        JumbotronBanners.Clear();
+        JumbotronBanners.Add(new DjBannerItem { FileName = "(None - show tip message)", FullPath = string.Empty });
+        foreach (var item in DjBanners)
+        {
+            JumbotronBanners.Add(item);
+        }
+
+        // Unlike SelectedDjBanner, an empty Jumbotron selection is a valid, deliberate "None"
+        // choice - only re-resolve it from saved preferences here, never default to the first banner.
+        SelectedJumbotronBanner = string.IsNullOrEmpty(prefs.SelectedJumbotronBannerPath)
+            ? JumbotronBanners[0]
+            : (JumbotronBanners.FirstOrDefault(b => b.FullPath == prefs.SelectedJumbotronBannerPath) ?? JumbotronBanners[0]);
     }
 
     partial void OnSelectedDjBannerChanged(DjBannerItem? value)
     {
         _display.UpdateDjBanner(value?.FullPath ?? string.Empty);
+    }
+
+    partial void OnSelectedJumbotronBannerChanged(DjBannerItem? value)
+    {
+        _display.SetJumbotronBanner(value?.FullPath ?? string.Empty);
     }
 
     [RelayCommand]

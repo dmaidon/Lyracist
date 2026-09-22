@@ -56,6 +56,10 @@ namespace KSRotation.Models
 
         public string SelectedDjBannerPath { get; init; } = string.Empty;
 
+        /// <summary>DJ banner (image or video) optionally shown in the Stadium Jumbotron
+        /// projection view's bottom sponsor box. Empty shows a "tip your bartenders and DJ" notice instead.</summary>
+        public string SelectedJumbotronBannerPath { get; init; } = string.Empty;
+
         public bool IsDjBannerEnabled { get; init; } = false;
 
         public bool IsDjBannerQrCodeEnabled { get; init; } = true;

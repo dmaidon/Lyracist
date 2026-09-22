@@ -286,6 +286,10 @@ namespace KSRotation.Windows
                     StartAnimation();   // restart marquee at new speed without rebuilding inlines
                     break;
 
+                case nameof(DisplayViewModel.JumbotronBannerPath):
+                    UpdateJumbotronBanner();
+                    break;
+
                 case nameof(DisplayViewModel.CurrentSingerName):
                     if (_vm?.SelectedProjectionView == "Casino Slot Reels" && SlotReelsPanel.Visibility == Visibility.Visible)
                     {
@@ -477,6 +481,7 @@ namespace KSRotation.Windows
                     JumbotronPanel.Visibility = Visibility.Visible;
                     StartJumbotron();
                     Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildJumbotronSpotlights);
+                    UpdateJumbotronBanner();
                     break;
 
                 case "Movie Theater 'Now Showing'":
@@ -1491,13 +1496,16 @@ namespace KSRotation.Windows
         }
 
         // ── Casino Slot Reels ───────────────────────────────────────────────
+        // Each reel strip holds its 7-symbol set duplicated back-to-back (14 rows of
+        // 140px), so looping the Y-translate linearly from 0 to -980 (one full set)
+        // forever wraps seamlessly - a continuous idle-spin like a real cabinet.
+        private const double SlotReelSetHeight = 980;
+
         private void StartSlotReels()
         {
-            var reelSpin = new DoubleAnimation(-180, 0, TimeSpan.FromSeconds(1.1))
-            {
-                EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut, Exponent = 4 }
-            };
-            SlotReelTranslate.BeginAnimation(TranslateTransform.YProperty, reelSpin);
+            SpinReel(SlotReel1Translate, 1.3);
+            SpinReel(SlotReel2Translate, 1.6);
+            SpinReel(SlotReel3Translate, 1.9);
 
             var pulse = new DoubleAnimation(18, 40, TimeSpan.FromSeconds(0.75))
             {
@@ -1507,9 +1515,20 @@ namespace KSRotation.Windows
             SlotJackpotGlow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, pulse);
         }
 
+        private static void SpinReel(TranslateTransform reel, double secondsPerSet)
+        {
+            var spin = new DoubleAnimation(0, -SlotReelSetHeight, TimeSpan.FromSeconds(secondsPerSet))
+            {
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+            reel.BeginAnimation(TranslateTransform.YProperty, spin);
+        }
+
         private void StopSlotReels()
         {
-            SlotReelTranslate.BeginAnimation(TranslateTransform.YProperty, null);
+            SlotReel1Translate.BeginAnimation(TranslateTransform.YProperty, null);
+            SlotReel2Translate.BeginAnimation(TranslateTransform.YProperty, null);
+            SlotReel3Translate.BeginAnimation(TranslateTransform.YProperty, null);
             SlotJackpotGlow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, null);
         }
 
@@ -1628,10 +1647,16 @@ namespace KSRotation.Windows
         // ── Jukebox ─────────────────────────────────────────────────────────
         private void StartJukebox()
         {
+            var spin = new DoubleAnimation(0, 360, TimeSpan.FromSeconds(4))
+            {
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+            JukeboxRecordRotate.BeginAnimation(RotateTransform.AngleProperty, spin);
         }
 
         private void StopJukebox()
         {
+            JukeboxRecordRotate.BeginAnimation(RotateTransform.AngleProperty, null);
         }
 
         private void JukeboxBubbleCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -1725,6 +1750,30 @@ namespace KSRotation.Windows
 
         private void StopJumbotron()
         {
+            JumbotronBannerVideo.Stop();
+        }
+
+        // Loads the DJ's chosen sponsor banner (image or video) into the Jumbotron's bottom box.
+        // No-op unless the Jumbotron is the active view - MediaElement only needs to play while visible.
+        private void UpdateJumbotronBanner()
+        {
+            if (_vm == null || _vm.SelectedProjectionView != "Stadium Jumbotron") return;
+
+            if (_vm.IsJumbotronBannerVideo)
+            {
+                JumbotronBannerVideo.Position = TimeSpan.Zero;
+                JumbotronBannerVideo.Play();
+            }
+            else
+            {
+                JumbotronBannerVideo.Stop();
+            }
+        }
+
+        private void JumbotronBannerVideo_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            JumbotronBannerVideo.Position = TimeSpan.Zero;
+            JumbotronBannerVideo.Play();
         }
 
         private void JumbotronSpotlightCanvas_SizeChanged(object sender, SizeChangedEventArgs e)

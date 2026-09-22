@@ -159,6 +159,7 @@ public class DisplayService : IDisplayService
             {
                 vm.SelectedProjectionView = _preferences.RotationViewMode ?? "Normal List";
                 vm.CrawlBannerText = Core.Helpers.AppSettings.GetActiveCrawlBannerTemplate();
+                vm.JumbotronBannerPath = _preferences.SelectedJumbotronBannerPath ?? string.Empty;
             }
         }
         _rotationWindow!.Show();
@@ -634,6 +635,15 @@ public class DisplayService : IDisplayService
     {
         var vm = _serviceProvider.GetService<RotationWindowViewModel>();
         vm?.CrawlBannerText = text;
+    }
+
+    public void SetJumbotronBanner(string path)
+    {
+        _preferences.SelectedJumbotronBannerPath = path ?? string.Empty;
+        DisplayPreferencesStore.Save(_preferences);
+
+        var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+        vm?.JumbotronBannerPath = _preferences.SelectedJumbotronBannerPath;
     }
 
     public void SetShowEstimatedWaitTime(bool show)

@@ -222,6 +222,18 @@ public partial class RotationWindowViewModel : BaseViewModel
     [ObservableProperty]
     private string _crawlBannerText = string.Empty;
 
+    /// <summary>File path of the DJ banner (image or .mp4) the DJ picked to display in the
+    /// Stadium Jumbotron's bottom sponsor box. Empty when none is selected.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasJumbotronBanner))]
+    [NotifyPropertyChangedFor(nameof(IsJumbotronBannerVideo))]
+    private string _jumbotronBannerPath = string.Empty;
+
+    public bool HasJumbotronBanner => !string.IsNullOrEmpty(JumbotronBannerPath) && System.IO.File.Exists(JumbotronBannerPath);
+
+    public bool IsJumbotronBannerVideo => HasJumbotronBanner
+        && System.IO.Path.GetExtension(JumbotronBannerPath).Equals(".mp4", System.StringComparison.OrdinalIgnoreCase);
+
     [ObservableProperty]
     private string _currentSingerSong = string.Empty;
 
@@ -330,7 +342,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         NextSingers.Clear();
         if (now != null)
         {
-            var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(visibleSingers, now, 5, isLastRound: IsLastRound);
+            var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(visibleSingers, now, 6, isLastRound: IsLastRound);
             foreach (var candidate in nextActiveSingers)
             {
                 string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
@@ -339,7 +351,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         }
         else
         {
-            var activeSingers = visibleSingers.Where(s => !s.IsPaused && !s.IsInactive && !s.IsSkipped).Take(5).ToList();
+            var activeSingers = visibleSingers.Where(s => !s.IsPaused && !s.IsInactive && !s.IsSkipped).Take(6).ToList();
             foreach (var singer in activeSingers)
             {
                 string display = string.IsNullOrEmpty(singer.SongTitle) ? singer.Name : $"{singer.Name} (\"{singer.SongTitle}\")";
@@ -427,7 +439,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         NextSingers.Clear();
         if (currentMatch != null)
         {
-            var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(Rotation.ToList(), currentMatch, 5, isLastRound: IsLastRound);
+            var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(Rotation.ToList(), currentMatch, 6, isLastRound: IsLastRound);
             foreach (var candidate in nextActiveSingers)
             {
                 string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
@@ -436,7 +448,7 @@ public partial class RotationWindowViewModel : BaseViewModel
         }
         else
         {
-            var activeSingers = Rotation.Where(s => !s.IsPaused && !s.IsInactive && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound)).Take(5).ToList();
+            var activeSingers = Rotation.Where(s => !s.IsPaused && !s.IsInactive && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound)).Take(6).ToList();
             foreach (var s in activeSingers)
             {
                 string display = string.IsNullOrEmpty(s.SongTitle) ? s.Name : $"{s.Name} (\"{s.SongTitle}\")";

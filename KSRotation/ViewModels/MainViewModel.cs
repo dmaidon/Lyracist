@@ -431,6 +431,11 @@ namespace KSRotation.ViewModels
                     RebuildRotationJsonCacheNow();
                     break;
 
+                case nameof(SelectedJumbotronBannerPath):
+                    _displayWindowService.SetJumbotronBanner(SelectedJumbotronBannerPath);
+                    QueueSaveSettings();
+                    break;
+
                 case nameof(ActiveSpecialEvent):
                     SyncSpecialEventOptions(ActiveSpecialEvent);
                     UpdateDjBannerPath();
@@ -685,6 +690,15 @@ namespace KSRotation.ViewModels
 
         [ObservableProperty]
         public partial string SelectedDjBannerPath { get; set; } = string.Empty;
+
+        /// <summary>DJ banner (image or video) optionally shown in the Stadium Jumbotron
+        /// projection view's bottom sponsor box. Empty shows a "tip your bartenders and DJ" notice instead.</summary>
+        [ObservableProperty]
+        public partial string SelectedJumbotronBannerPath { get; set; } = string.Empty;
+
+        /// <summary>Selectable items for the Jumbotron banner picker: a "None" sentinel (empty
+        /// path, shows the tip notice) followed by every banner in <see cref="AvailableDjBanners"/>.</summary>
+        public ObservableCollection<DjBannerItem> JumbotronBannerOptions { get; } = [];
 
         [ObservableProperty]
         public partial bool IsDjBannerEnabled { get; set; } = false;
@@ -1306,6 +1320,7 @@ namespace KSRotation.ViewModels
 // Edited on Aug 11, 2026 -> Suppress Wi-Fi password auto-population when running under Visual Studio Debugger, but retain in the field
             DjBannerMonitorDevice = settings.DjBannerMonitorDevice ?? string.Empty;
             SelectedDjBannerPath = settings.SelectedDjBannerPath ?? string.Empty;
+            SelectedJumbotronBannerPath = settings.SelectedJumbotronBannerPath ?? string.Empty;
             ConnectInstructionsScreen = string.IsNullOrWhiteSpace(settings.ConnectInstructionsScreen)
                 ? "All Screens / Monitors"
                 : settings.ConnectInstructionsScreen;
@@ -1350,6 +1365,7 @@ namespace KSRotation.ViewModels
             UpdateLastSongState();
 
             RefreshAvailableDjBanners();
+            _displayWindowService.SetJumbotronBanner(SelectedJumbotronBannerPath);
 
             if (IsDjBannerEnabled)
             {
@@ -3066,6 +3082,7 @@ namespace KSRotation.ViewModels
                 DjBannerMonitorDevice = DjBannerMonitorDevice,
                 ConnectInstructionsScreen = ConnectInstructionsScreen,
                 SelectedDjBannerPath = SelectedDjBannerPath,
+                SelectedJumbotronBannerPath = SelectedJumbotronBannerPath,
                 IsDjBannerEnabled = IsDjBannerEnabled,
                 IsDjBannerQrCodeEnabled = IsDjBannerQrCodeEnabled,
                 ShowQrCodeOnRotationScreen = ShowQrCodeOnRotationScreen,
@@ -3126,6 +3143,20 @@ namespace KSRotation.ViewModels
             else
             {
                 SelectedDjBannerPath = AvailableDjBanners.FirstOrDefault()?.FullPath ?? string.Empty;
+            }
+
+            JumbotronBannerOptions.Clear();
+            JumbotronBannerOptions.Add(new DjBannerItem { FileName = "(None - show tip message)", FullPath = string.Empty });
+            foreach (var item in AvailableDjBanners)
+            {
+                JumbotronBannerOptions.Add(item);
+            }
+
+            // Unlike SelectedDjBannerPath, an empty Jumbotron selection is a valid, deliberate
+            // "None" choice - only clear it if it pointed at a banner that no longer exists.
+            if (!string.IsNullOrEmpty(SelectedJumbotronBannerPath) && !AvailableDjBanners.Any(b => b.FullPath == SelectedJumbotronBannerPath))
+            {
+                SelectedJumbotronBannerPath = string.Empty;
             }
         }
 

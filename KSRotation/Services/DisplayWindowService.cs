@@ -313,6 +313,14 @@ namespace KSRotation.Services
         }
 
         /// <summary>
+        /// Sets the DJ banner file (image or video) shown in the Stadium Jumbotron's sponsor box.
+        /// </summary>
+        public void SetJumbotronBanner(string? path)
+        {
+            _viewModel.JumbotronBannerPath = path ?? string.Empty;
+        }
+
+        /// <summary>
         /// Updates popup banner text, resolving the {venue} and {dj} variables.
         /// </summary>
         /// <param name="template">Raw banner text; may contain {venue} and {dj}.</param>
