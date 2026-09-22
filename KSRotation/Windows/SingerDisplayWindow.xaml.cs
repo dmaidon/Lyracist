@@ -1884,10 +1884,10 @@ namespace KSRotation.Windows
         }
 
         // ── Movie Theater film-frame strip ──────────────────────────────────
-        // Scrolls a vertical filmstrip: a "COMING ATTRACTIONS" title frame, one frame per
-        // upcoming singer, then a blank leader/divider frame, repeating. Built entirely in
-        // code (like the other views' particle/beam canvases) because each cycle mixes 2
-        // different frame kinds rather than one repeated data-bound template.
+        // Scrolls a vertical filmstrip: a "COMING ATTRACTIONS" title frame followed directly by
+        // one frame per upcoming singer, then repeating with no gap. Built entirely in code (like
+        // the other views' particle/beam canvases) because each cycle mixes 2 different frame
+        // kinds rather than one repeated data-bound template.
         private const double TheaterTitleFrameHeight = 110;
         private const double TheaterSingerFrameHeight = 130;
 
@@ -1897,6 +1897,17 @@ namespace KSRotation.Windows
         // animation from the top and look like it stutters/pauses. Skipping the rebuild when
         // nothing actually changed keeps the loop running uninterrupted.
         private string? _theaterFilmStripSignature;
+
+        // Drives the scroll directly off a running clock every rendered frame (see
+        // TheaterFilmStrip_OnRendering) instead of a WPF Timeline with RepeatBehavior.Forever - the
+        // position is always computed fresh from elapsed time modulo one set's height, so there is no
+        // Timeline "wrap" instant for any engine-level hitch to occur at. _theaterFilmStripTranslate is
+        // non-null exactly while the strip is actively scrolling.
+        private TranslateTransform? _theaterFilmStripTranslate;
+        private double _theaterFilmStripSetHeight;
+        private double _theaterFilmStripPxPerSecond;
+        private readonly System.Diagnostics.Stopwatch _theaterFilmStripClock = new();
+        private bool _theaterFilmStripRenderingHooked;
 
         private void TheaterFilmStripCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -1916,14 +1927,19 @@ namespace KSRotation.Windows
         private void BuildTheaterFilmStrip()
         {
             double w = TheaterFilmStripCanvas.ActualWidth;
+            double viewportHeight = TheaterFilmStripCanvas.ActualHeight;
             if (w <= 0 || _vm == null) return;
 
             var singers = _vm.NextSingers.ToList();
 
             // Joined with U+0001 (a control character that can never appear in singer/song display
             // text) rather than a printable delimiter, so free-text titles can't collide two
-            // different queues onto the same signature.
-            string signature = w.ToString("F0") + "\u0001" + string.Join("\u0001",
+            // different queues onto the same signature. Viewport height is included alongside width
+            // because it drives the stacked-copy count below - a pure height change (e.g. the DJ
+            // resizing the projection window) must still force a rebuild even when the queue itself
+            // is unchanged, or the strip would keep scrolling with a copy count sized for the old
+            // viewport.
+            string signature = w.ToString("F0") + "\u0001" + viewportHeight.ToString("F0") + "\u0001" + string.Join("\u0001",
                 singers.Select(s => TheaterWaitBadgePattern.Replace(s.Text, string.Empty) + (s.IsRotationStart ? "#A" : "")));
             if (signature == _theaterFilmStripSignature && TheaterFilmStripCanvas.Children.Count > 0)
             {
@@ -1931,19 +1947,29 @@ namespace KSRotation.Windows
                 // running animation alone so the loop never visibly restarts mid-show.
                 return;
             }
-            _theaterFilmStripSignature = signature;
-
+            // Stop the old animation before recording the new signature - StopTheaterFilmStrip()
+            // unconditionally nulls the signature (so a real external stop always forces a rebuild
+            // next time), so it must run *before* the assignment below or it would immediately wipe
+            // out the very value the no-op-refresh guard above depends on.
             StopTheaterFilmStrip();
+            _theaterFilmStripSignature = signature;
             TheaterFilmStripCanvas.Children.Clear();
 
             double setHeight = TheaterTitleFrameHeight + (singers.Count * TheaterSingerFrameHeight);
             if (setHeight <= 0) return;
 
-            // Two full copies of the set, stacked back-to-back, so looping the scroll by
-            // exactly one copy's height wraps seamlessly. Each set is just the title frame
-            // followed directly by the singer frames - no divider - so the loop reads as
-            // "Coming Attractions, 1, 2, 3, 4, 5, 6, Coming Attractions, 1, 2, ..." with no gap.
-            for (int copy = 0; copy < 2; copy++)
+            // Stack enough full copies of the set, back-to-back, that the visible viewport is always
+            // covered by real content even at the scroll's far extreme (offset -setHeight) - just 2
+            // copies only wraps seamlessly if the viewport is no taller than one set. On a display
+            // where this panel (an unconstrained Height="*" row) ends up taller than that - a big
+            // TV/projector, or a compact hero section leaving more room below - a fixed 2-copy stack
+            // runs out of real content near the bottom of the viewport right as the loop wraps,
+            // which is visible as a "pop"/redraw once per cycle instead of a seamless loop. Each set
+            // is just the title frame followed directly by the singer frames - no divider - so the
+            // loop reads as "Coming Attractions, 1, 2, 3, 4, 5, 6, Coming Attractions, 1, 2, ..."
+            // with no gap.
+            int copies = Math.Max(2, (int)Math.Ceiling((viewportHeight + setHeight) / setHeight));
+            for (int copy = 0; copy < copies; copy++)
             {
                 double y = copy * setHeight;
 
@@ -1966,25 +1992,44 @@ namespace KSRotation.Windows
             var translate = new TranslateTransform();
             TheaterFilmStripCanvas.RenderTransform = translate;
 
-            double durationSeconds = Math.Max(10, setHeight / 40.0); // ~40px/sec steady projector crawl
-            var scroll = new DoubleAnimation(0, -setHeight, TimeSpan.FromSeconds(durationSeconds))
+            double durationSeconds = Math.Max(10, setHeight / 40.0); // ~40px/sec steady projector crawl, slower floor for tiny queues
+            _theaterFilmStripTranslate = translate;
+            _theaterFilmStripSetHeight = setHeight;
+            _theaterFilmStripPxPerSecond = setHeight / durationSeconds;
+            _theaterFilmStripClock.Restart();
+            if (!_theaterFilmStripRenderingHooked)
             {
-                RepeatBehavior = RepeatBehavior.Forever
-            };
-            translate.BeginAnimation(TranslateTransform.YProperty, scroll);
+                CompositionTarget.Rendering += TheaterFilmStrip_OnRendering;
+                _theaterFilmStripRenderingHooked = true;
+            }
+        }
+
+        // Runs on every rendered frame while the strip is scrolling. Computes the scroll offset
+        // directly from elapsed wall-clock time modulo one set's height, rather than letting a WPF
+        // Timeline "restart" itself - the position is always a pure function of elapsed time, so
+        // there's no separate wrap/restart instant in the animation engine for a hitch to hide in.
+        private void TheaterFilmStrip_OnRendering(object? sender, EventArgs e)
+        {
+            if (_theaterFilmStripTranslate == null || _theaterFilmStripSetHeight <= 0) return;
+            double distance = _theaterFilmStripClock.Elapsed.TotalSeconds * _theaterFilmStripPxPerSecond;
+            _theaterFilmStripTranslate.Y = -(distance % _theaterFilmStripSetHeight);
         }
 
         private void StopTheaterFilmStrip()
         {
+            if (_theaterFilmStripRenderingHooked)
+            {
+                CompositionTarget.Rendering -= TheaterFilmStrip_OnRendering;
+                _theaterFilmStripRenderingHooked = false;
+            }
+            _theaterFilmStripTranslate = null;
+            _theaterFilmStripClock.Reset();
+
             // Invalidate the signature so the next BuildTheaterFilmStrip() call (e.g. when the DJ
-            // switches back into this view) always does a real rebuild and restarts the animation,
+            // switches back into this view) always does a real rebuild and restarts the scroll,
             // even if the queue is unchanged - otherwise the guard below would see a matching
             // signature and leave the strip frozen at whatever position it stopped at.
             _theaterFilmStripSignature = null;
-            if (TheaterFilmStripCanvas.RenderTransform is TranslateTransform t)
-            {
-                t.BeginAnimation(TranslateTransform.YProperty, null);
-            }
         }
 
         // Shared frame shell: sprocket-hole rails down the left/right edges around a black

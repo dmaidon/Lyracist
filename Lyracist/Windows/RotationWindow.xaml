@@ -2147,7 +2147,12 @@
                                  code-behind, see BuildTheaterFilmStrip. -->
                             <Border Grid.Row="1" CornerRadius="6" BorderThickness="2" BorderBrush="#66FFE8B0" Background="#FF050202" ClipToBounds="True"
                                     HorizontalAlignment="Center" Width="380">
-                                <Canvas x:Name="TheaterFilmStripCanvas" ClipToBounds="True" SizeChanged="TheaterFilmStripCanvas_SizeChanged" />
+                                <!-- ClipToBounds is intentionally NOT set here (only on the fixed Border above) - a
+                                     RenderTransform-scrolled element's own ClipToBounds clips its children to its own
+                                     layout bounds BEFORE the transform is applied, permanently discarding any content
+                                     positioned beyond that height regardless of how many "copies" are stacked below it.
+                                     The outer Border's clip is what should window the (already-transformed) result. -->
+                                <Canvas x:Name="TheaterFilmStripCanvas" SizeChanged="TheaterFilmStripCanvas_SizeChanged" />
                             </Border>
                         </Grid>
                     </Border>
