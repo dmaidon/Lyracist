@@ -347,6 +347,7 @@ public partial class RotationWindow : Window, ICaptureSource
 
             case nameof(RotationWindowViewModel.JumbotronBannerPath):
                 UpdateJumbotronBanner();
+                UpdateSlotBanner();
                 break;
         }
     }
@@ -456,6 +457,7 @@ public partial class RotationWindow : Window, ICaptureSource
                 SlotReelsPanel.Visibility = Visibility.Visible;
                 StartSlotReels();
                 Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildSlotParticles);
+                UpdateSlotBanner();
                 break;
 
             case "Jukebox":
@@ -1954,16 +1956,73 @@ public partial class RotationWindow : Window, ICaptureSource
     }
 
     // ── Casino Slot Reels ───────────────────────────────────────────────
-    // Each reel strip holds its 7-symbol set duplicated back-to-back (14 rows of
-    // 140px), so looping the Y-translate linearly from 0 to -980 (one full set)
-    // forever wraps seamlessly - a continuous idle-spin like a real cabinet.
-    private const double SlotReelSetHeight = 980;
+    // Each reel strip holds its 7-symbol set duplicated back-to-back (14 rows of 140px =
+    // 980px one full set). The scroll position is driven by elapsed wall-clock time modulo
+    // the set height - the same technique used to fix the Movie Theater film strip (see
+    // TheaterFilmStrip_OnRendering: CompositionTarget.Rendering instead of a WPF Timeline
+    // with RepeatBehavior.Forever) - so the fast "blur" spin loops seamlessly with no
+    // Timeline wrap instant for a hitch or pop to hide in, and all three reels spin at the
+    // same speed (instead of three permanently mismatched speeds, which read as chaotic).
+    // After a staggered free-spin window (left reel stops first, like a real cabinet) each
+    // reel eases to a stop with its 💎 resting on the payline.
+    private const double SlotSymbolHeight = 140;
+    private const double SlotReelSetHeight = SlotSymbolHeight * 7; // 980 - one full 7-symbol set
+    private const double SlotPaylineY = 95; // center of the 190px-tall reel window (matches the XAML arrow markers)
+    private const double SlotSpinPxPerSecond = 500;
+
+    private static double NormalizedMod(double value, double modulus) => ((value % modulus) + modulus) % modulus;
+
+    // The D%980 "forward distance" value at which each reel's 💎 symbol sits exactly on the
+    // payline - see the symbol order in the XAML: Reel 1 = 🎤 🍒 🔔 💎 ... (💎 at index 3),
+    // Reel 2 = 💎 ⭐ 🎤 ... (index 0), Reel 3 = ⭐ 🍋 💎 ... (index 2). A symbol's own center
+    // sits at index*140 + 70 within the strip.
+    private static readonly double[] SlotReelLandingDistanceMod =
+    [
+        NormalizedMod(3 * SlotSymbolHeight + SlotSymbolHeight / 2 - SlotPaylineY, SlotReelSetHeight),
+        NormalizedMod(0 * SlotSymbolHeight + SlotSymbolHeight / 2 - SlotPaylineY, SlotReelSetHeight),
+        NormalizedMod(2 * SlotSymbolHeight + SlotSymbolHeight / 2 - SlotPaylineY, SlotReelSetHeight),
+    ];
+
+    private sealed class SlotReelState
+    {
+        public TranslateTransform Translate = null!;
+        public double SpinSeconds;
+        public double LandingDistanceMod;
+        public readonly System.Diagnostics.Stopwatch Clock = new();
+        public bool IsLanding;
+        public bool IsLanded;
+        public double LandingFromDistance;
+        public double LandingToDistance;
+        public double LandingDurationSeconds;
+    }
+
+    private SlotReelState[]? _slotReels;
+    private bool _slotReelsRenderingHooked;
+    private bool _slotJackpotCelebrated;
+    private DispatcherTimer? _slotJackpotCleanupTimer;
 
     private void StartSlotReels()
     {
-        SpinReel(SlotReel1Translate, 1.3);
-        SpinReel(SlotReel2Translate, 1.6);
-        SpinReel(SlotReel3Translate, 1.9);
+        _slotReels =
+        [
+            new SlotReelState { Translate = SlotReel1Translate, SpinSeconds = 3.0, LandingDistanceMod = SlotReelLandingDistanceMod[0] },
+            new SlotReelState { Translate = SlotReel2Translate, SpinSeconds = 4.0, LandingDistanceMod = SlotReelLandingDistanceMod[1] },
+            new SlotReelState { Translate = SlotReel3Translate, SpinSeconds = 5.0, LandingDistanceMod = SlotReelLandingDistanceMod[2] },
+        ];
+        foreach (var reel in _slotReels)
+        {
+            reel.Clock.Restart();
+        }
+
+        _slotJackpotCelebrated = false;
+        _slotJackpotCleanupTimer?.Stop();
+        SlotJackpotBurstCanvas.Children.Clear();
+
+        if (!_slotReelsRenderingHooked)
+        {
+            CompositionTarget.Rendering += SlotReels_OnRendering;
+            _slotReelsRenderingHooked = true;
+        }
 
         var pulse = new DoubleAnimation(18, 40, TimeSpan.FromSeconds(0.75))
         {
@@ -1973,21 +2032,228 @@ public partial class RotationWindow : Window, ICaptureSource
         SlotJackpotGlow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, pulse);
     }
 
-    private static void SpinReel(TranslateTransform reel, double secondsPerSet)
+    // Fixed duration for every reel's landing glide, regardless of how far it has to travel to
+    // bring its 💎 to the payline. An earlier version derived the duration from the remaining
+    // distance (3x the average speed, to match the spin speed exactly at the start of the ease)
+    // - but that distance is essentially random (0-980px depending on when the free spin happens
+    // to end), so the derived duration ranged from under a second to over seven, meaning some
+    // reels were still visibly gliding long after they were expected to have landed. A fixed
+    // duration trades a barely-perceptible speed mismatch at the transition for a predictable,
+    // consistent stop every time.
+    private const double SlotLandingDurationSeconds = 1.0;
+
+    // Runs on every rendered frame while any reel is still moving. Position is always a pure
+    // function of elapsed time modulo one set's height (see comment above), and once a reel's
+    // free-spin window elapses it eases from its current *distance* to a further distance whose
+    // modulo lands the 💎 on the payline - taking the modulo of the eased distance (rather than
+    // lerping the on-screen Y directly) so the deceleration still passes through any symbol-set
+    // wrap without a visible pop.
+    private void SlotReels_OnRendering(object? sender, EventArgs e)
     {
-        var spin = new DoubleAnimation(0, -SlotReelSetHeight, TimeSpan.FromSeconds(secondsPerSet))
+        if (_slotReels == null) return;
+
+        bool allLanded = true;
+        foreach (var reel in _slotReels)
         {
-            RepeatBehavior = RepeatBehavior.Forever
+            if (reel.IsLanded)
+            {
+                continue;
+            }
+
+            double elapsed = reel.Clock.Elapsed.TotalSeconds;
+
+            if (!reel.IsLanding && elapsed >= reel.SpinSeconds)
+            {
+                double distanceAtStop = reel.SpinSeconds * SlotSpinPxPerSecond;
+                double currentMod = NormalizedMod(distanceAtStop, SlotReelSetHeight);
+                double forward = NormalizedMod(reel.LandingDistanceMod - currentMod, SlotReelSetHeight);
+
+                reel.IsLanding = true;
+                reel.LandingFromDistance = distanceAtStop;
+                reel.LandingToDistance = distanceAtStop + forward;
+                reel.LandingDurationSeconds = SlotLandingDurationSeconds;
+            }
+
+            double distance;
+            if (reel.IsLanding)
+            {
+                double t = (elapsed - reel.SpinSeconds) / reel.LandingDurationSeconds;
+                if (t >= 1.0)
+                {
+                    distance = reel.LandingToDistance;
+                    reel.IsLanded = true;
+                }
+                else
+                {
+                    double eased = 1 - Math.Pow(1 - t, 3); // ease-out cubic
+                    distance = reel.LandingFromDistance + (reel.LandingToDistance - reel.LandingFromDistance) * eased;
+                }
+            }
+            else
+            {
+                distance = elapsed * SlotSpinPxPerSecond;
+            }
+
+            reel.Translate.Y = -NormalizedMod(distance, SlotReelSetHeight);
+
+            if (!reel.IsLanded)
+            {
+                allLanded = false;
+            }
+        }
+
+        if (allLanded)
+        {
+            if (!_slotJackpotCelebrated)
+            {
+                _slotJackpotCelebrated = true;
+                TriggerSlotJackpotCelebration();
+            }
+            StopSlotReelsRendering();
+        }
+    }
+
+    private void StopSlotReelsRendering()
+    {
+        if (_slotReelsRenderingHooked)
+        {
+            CompositionTarget.Rendering -= SlotReels_OnRendering;
+            _slotReelsRenderingHooked = false;
+        }
+    }
+
+    // One-shot sparkle burst + expanding shockwave ring, fired from the center of the reel row
+    // once all three 💎s land on the payline. Purely decorative - StartSlotReels() clears it
+    // (and stops this cleanup timer) before the next spin, so it never lingers or double-fires.
+    private void TriggerSlotJackpotCelebration()
+    {
+        SlotJackpotBurstCanvas.Children.Clear();
+
+        double w = SlotJackpotBurstCanvas.ActualWidth;
+        double h = SlotJackpotBurstCanvas.ActualHeight;
+        if (w <= 0 || h <= 0) return;
+
+        double centerX = w / 2;
+        double centerY = h / 2;
+
+        // Width/Height/Canvas.Left/Top are animated directly (not a RenderTransform scale) so the
+        // 4px stroke stays a crisp thin ring throughout - scaling the whole element via
+        // ScaleTransform would scale the stroke thickness right along with it, turning the ring
+        // into a thick glowing blob by the time it's grown a few times its starting size. The
+        // final diameter is also kept well inside the reel row's own 190px height so the ring
+        // reads as centered on the reels, not ballooning out past the cabinet into the banner.
+        var ring = new Ellipse
+        {
+            Width = 20,
+            Height = 20,
+            Stroke = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0xD7, 0x00)),
+            StrokeThickness = 4,
         };
-        reel.BeginAnimation(TranslateTransform.YProperty, spin);
+        Canvas.SetLeft(ring, centerX - 10);
+        Canvas.SetTop(ring, centerY - 10);
+        SlotJackpotBurstCanvas.Children.Add(ring);
+
+        const double ringFinalDiameter = 220;
+        var ringEase = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+        ring.BeginAnimation(Ellipse.WidthProperty, new DoubleAnimation(20, ringFinalDiameter, TimeSpan.FromSeconds(0.8)) { EasingFunction = ringEase });
+        ring.BeginAnimation(Ellipse.HeightProperty, new DoubleAnimation(20, ringFinalDiameter, TimeSpan.FromSeconds(0.8)) { EasingFunction = ringEase });
+        ring.BeginAnimation(Canvas.LeftProperty, new DoubleAnimation(centerX - 10, centerX - ringFinalDiameter / 2, TimeSpan.FromSeconds(0.8)) { EasingFunction = ringEase });
+        ring.BeginAnimation(Canvas.TopProperty, new DoubleAnimation(centerY - 10, centerY - ringFinalDiameter / 2, TimeSpan.FromSeconds(0.8)) { EasingFunction = ringEase });
+        ring.BeginAnimation(OpacityProperty, new DoubleAnimation(0.9, 0, TimeSpan.FromSeconds(0.8)));
+
+        const int count = 36;
+        for (int i = 0; i < count; i++)
+        {
+            double angle = _rng.NextDouble() * Math.PI * 2;
+            double distance = (_rng.NextDouble() * 50) + 50;
+            double size = (_rng.NextDouble() * 10) + 8;
+            var color = SlotParticlePalette[_rng.Next(SlotParticlePalette.Length)];
+            var brush = new SolidColorBrush(color);
+
+            // Alternate round sparkles and 8-point glint stars, same shape family as the ambient
+            // SlotParticleCanvas coins/sparkles (see BuildSlotParticles).
+            Shape particle = i % 2 == 0
+                ? new Ellipse { Width = size, Height = size, Fill = brush }
+                : new Polygon
+                {
+                    Points =
+                    [
+                        new System.Windows.Point(size / 2, 0),
+                        new System.Windows.Point(size * 0.6, size * 0.4),
+                        new System.Windows.Point(size, size / 2),
+                        new System.Windows.Point(size * 0.6, size * 0.6),
+                        new System.Windows.Point(size / 2, size),
+                        new System.Windows.Point(size * 0.4, size * 0.6),
+                        new System.Windows.Point(0, size / 2),
+                        new System.Windows.Point(size * 0.4, size * 0.4)
+                    ],
+                    Fill = brush
+                };
+
+            Canvas.SetLeft(particle, centerX - size / 2);
+            Canvas.SetTop(particle, centerY - size / 2);
+
+            var translate = new TranslateTransform();
+            particle.RenderTransform = translate;
+            SlotJackpotBurstCanvas.Children.Add(particle);
+
+            double duration = (_rng.NextDouble() * 0.5) + 0.9;
+            var burstEase = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+            translate.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(0, Math.Cos(angle) * distance, TimeSpan.FromSeconds(duration)) { EasingFunction = burstEase });
+            translate.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, Math.Sin(angle) * distance, TimeSpan.FromSeconds(duration)) { EasingFunction = burstEase });
+            particle.BeginAnimation(OpacityProperty, new DoubleAnimation(1, 0, TimeSpan.FromSeconds(duration * 0.6)) { BeginTime = TimeSpan.FromSeconds(duration * 0.4) });
+        }
+
+        _slotJackpotCleanupTimer?.Stop();
+        _slotJackpotCleanupTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1.6) };
+        _slotJackpotCleanupTimer.Tick += (_, _) =>
+        {
+            SlotJackpotBurstCanvas.Children.Clear();
+            _slotJackpotCleanupTimer!.Stop();
+        };
+        _slotJackpotCleanupTimer.Start();
     }
 
     private void StopSlotReels()
     {
-        SlotReel1Translate.BeginAnimation(TranslateTransform.YProperty, null);
-        SlotReel2Translate.BeginAnimation(TranslateTransform.YProperty, null);
-        SlotReel3Translate.BeginAnimation(TranslateTransform.YProperty, null);
+        StopSlotReelsRendering();
+        _slotReels = null;
+        _slotJackpotCleanupTimer?.Stop();
+        SlotJackpotBurstCanvas.Children.Clear();
         SlotJackpotGlow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, null);
+        SlotBannerVideo.Stop();
+    }
+
+    // Loads the DJ's chosen sponsor banner (image or video) into the Slot Machine's bottom box.
+    // Reuses the same JumbotronBannerPath/IsJumbotronBannerVideo selection as the Stadium
+    // Jumbotron - see UpdateJumbotronBanner. No-op unless Casino Slot Reels is the active view -
+    // MediaElement only needs to play while visible.
+    private void UpdateSlotBanner()
+    {
+        if (_vm == null || _vm.SelectedProjectionView != "Casino Slot Reels") return;
+
+        if (_vm.IsJumbotronBannerVideo)
+        {
+            SlotBannerVideo.Source = new Uri(_vm.JumbotronBannerPath);
+            SlotBannerVideo.Position = TimeSpan.Zero;
+            SlotBannerVideo.Play();
+        }
+        else
+        {
+            SlotBannerVideo.Stop();
+            SlotBannerVideo.Source = null;
+        }
+    }
+
+    private void SlotBannerVideo_MediaEnded(object sender, RoutedEventArgs e)
+    {
+        // A MediaEnded event dispatched right as the DJ switches away can arrive after
+        // StopSlotReels() already called Stop() - without this guard it would restart
+        // playback of a now-hidden, irrelevant video and keep re-triggering itself forever.
+        if (_vm?.SelectedProjectionView != "Casino Slot Reels") return;
+
+        SlotBannerVideo.Position = TimeSpan.Zero;
+        SlotBannerVideo.Play();
     }
 
     private void SlotParticleCanvas_SizeChanged(object sender, SizeChangedEventArgs e)

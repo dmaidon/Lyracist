@@ -1072,26 +1072,33 @@
                         <!-- Reel 1 -->
                         <Border Grid.Column="1" Width="150" Height="190" Margin="6,0" CornerRadius="10" BorderThickness="5" BorderBrush="#FFD4AF37" Background="#FF04140A" ClipToBounds="True">
                             <Grid>
-                                <StackPanel x:Name="SlotReel1Strip" RenderTransformOrigin="0.5,0.5">
-                                    <StackPanel.RenderTransform>
+                                <!-- Canvas, not StackPanel: a StackPanel here would sit inside this fixed-190-tall
+                                     Border and get its Arrange size clamped to the Border's small content box - WPF
+                                     then auto-clips anything beyond that BEFORE the RenderTransform below ever runs,
+                                     so only the first ~180px of the 1960px stacked strip could ever render, no matter
+                                     how far the translate then shifted it (the same class of bug fixed for the Movie
+                                     Theater film strip - see TheaterFilmStripCanvas). A Canvas is never resized by its
+                                     parent, so each symbol renders at its full size at its Canvas.Top slot. -->
+                                <Canvas x:Name="SlotReel1Strip" RenderTransformOrigin="0.5,0.5">
+                                    <Canvas.RenderTransform>
                                         <TranslateTransform x:Name="SlotReel1Translate" />
-                                    </StackPanel.RenderTransform>
-                                    <TextBlock Text="🎤" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍒" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🔔" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="💎" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="7️⃣" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="⭐" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍋" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Canvas.RenderTransform>
+                                    <TextBlock Text="🎤" FontSize="96" Width="140" Height="140" Canvas.Top="0" Foreground="#FFE8E8E8" TextAlignment="Center" />
+                                    <TextBlock Text="🍒" FontSize="96" Width="140" Height="140" Canvas.Top="140" Foreground="#FFDC2626" TextAlignment="Center" />
+                                    <TextBlock Text="🔔" FontSize="96" Width="140" Height="140" Canvas.Top="280" Foreground="#FFFFC107" TextAlignment="Center" />
+                                    <TextBlock Text="💎" FontSize="96" Width="140" Height="140" Canvas.Top="420" Foreground="#FFB9F2FF" TextAlignment="Center" />
+                                    <TextBlock Text="7️⃣" FontSize="96" Width="140" Height="140" Canvas.Top="560" Foreground="#FFFF6F00" TextAlignment="Center" />
+                                    <TextBlock Text="⭐" FontSize="96" Width="140" Height="140" Canvas.Top="700" Foreground="#FFFFD700" TextAlignment="Center" />
+                                    <TextBlock Text="🍋" FontSize="96" Width="140" Height="140" Canvas.Top="840" Foreground="#FFFFEE58" TextAlignment="Center" />
                                     <!-- Duplicate set so the Y-loop wraps seamlessly -->
-                                    <TextBlock Text="🎤" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍒" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🔔" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="💎" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="7️⃣" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="⭐" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍋" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </StackPanel>
+                                    <TextBlock Text="🎤" FontSize="96" Width="140" Height="140" Canvas.Top="980" Foreground="#FFE8E8E8" TextAlignment="Center" />
+                                    <TextBlock Text="🍒" FontSize="96" Width="140" Height="140" Canvas.Top="1120" Foreground="#FFDC2626" TextAlignment="Center" />
+                                    <TextBlock Text="🔔" FontSize="96" Width="140" Height="140" Canvas.Top="1260" Foreground="#FFFFC107" TextAlignment="Center" />
+                                    <TextBlock Text="💎" FontSize="96" Width="140" Height="140" Canvas.Top="1400" Foreground="#FFB9F2FF" TextAlignment="Center" />
+                                    <TextBlock Text="7️⃣" FontSize="96" Width="140" Height="140" Canvas.Top="1540" Foreground="#FFFF6F00" TextAlignment="Center" />
+                                    <TextBlock Text="⭐" FontSize="96" Width="140" Height="140" Canvas.Top="1680" Foreground="#FFFFD700" TextAlignment="Center" />
+                                    <TextBlock Text="🍋" FontSize="96" Width="140" Height="140" Canvas.Top="1820" Foreground="#FFFFEE58" TextAlignment="Center" />
+                                </Canvas>
                                 <!-- Glass reflection + top/bottom shadow mask -->
                                 <Rectangle Fill="#33000000" Height="24" VerticalAlignment="Top" />
                                 <Rectangle Fill="#33000000" Height="24" VerticalAlignment="Bottom" />
@@ -1101,26 +1108,26 @@
                         <!-- Reel 2 -->
                         <Border Grid.Column="2" Width="150" Height="190" Margin="6,0" CornerRadius="10" BorderThickness="5" BorderBrush="#FFD4AF37" Background="#FF04140A" ClipToBounds="True">
                             <Grid>
-                                <StackPanel x:Name="SlotReel2Strip" RenderTransformOrigin="0.5,0.5">
-                                    <StackPanel.RenderTransform>
+                                <Canvas x:Name="SlotReel2Strip" RenderTransformOrigin="0.5,0.5">
+                                    <Canvas.RenderTransform>
                                         <TranslateTransform x:Name="SlotReel2Translate" />
-                                    </StackPanel.RenderTransform>
-                                    <TextBlock Text="💎" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="⭐" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🎤" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍋" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🔔" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="7️⃣" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍒" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Canvas.RenderTransform>
+                                    <TextBlock Text="💎" FontSize="96" Width="140" Height="140" Canvas.Top="0" Foreground="#FFB9F2FF" TextAlignment="Center" />
+                                    <TextBlock Text="⭐" FontSize="96" Width="140" Height="140" Canvas.Top="140" Foreground="#FFFFD700" TextAlignment="Center" />
+                                    <TextBlock Text="🎤" FontSize="96" Width="140" Height="140" Canvas.Top="280" Foreground="#FFE8E8E8" TextAlignment="Center" />
+                                    <TextBlock Text="🍋" FontSize="96" Width="140" Height="140" Canvas.Top="420" Foreground="#FFFFEE58" TextAlignment="Center" />
+                                    <TextBlock Text="🔔" FontSize="96" Width="140" Height="140" Canvas.Top="560" Foreground="#FFFFC107" TextAlignment="Center" />
+                                    <TextBlock Text="7️⃣" FontSize="96" Width="140" Height="140" Canvas.Top="700" Foreground="#FFFF6F00" TextAlignment="Center" />
+                                    <TextBlock Text="🍒" FontSize="96" Width="140" Height="140" Canvas.Top="840" Foreground="#FFDC2626" TextAlignment="Center" />
                                     <!-- Duplicate set so the Y-loop wraps seamlessly -->
-                                    <TextBlock Text="💎" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="⭐" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🎤" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍋" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🔔" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="7️⃣" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍒" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </StackPanel>
+                                    <TextBlock Text="💎" FontSize="96" Width="140" Height="140" Canvas.Top="980" Foreground="#FFB9F2FF" TextAlignment="Center" />
+                                    <TextBlock Text="⭐" FontSize="96" Width="140" Height="140" Canvas.Top="1120" Foreground="#FFFFD700" TextAlignment="Center" />
+                                    <TextBlock Text="🎤" FontSize="96" Width="140" Height="140" Canvas.Top="1260" Foreground="#FFE8E8E8" TextAlignment="Center" />
+                                    <TextBlock Text="🍋" FontSize="96" Width="140" Height="140" Canvas.Top="1400" Foreground="#FFFFEE58" TextAlignment="Center" />
+                                    <TextBlock Text="🔔" FontSize="96" Width="140" Height="140" Canvas.Top="1540" Foreground="#FFFFC107" TextAlignment="Center" />
+                                    <TextBlock Text="7️⃣" FontSize="96" Width="140" Height="140" Canvas.Top="1680" Foreground="#FFFF6F00" TextAlignment="Center" />
+                                    <TextBlock Text="🍒" FontSize="96" Width="140" Height="140" Canvas.Top="1820" Foreground="#FFDC2626" TextAlignment="Center" />
+                                </Canvas>
                                 <Rectangle Fill="#33000000" Height="24" VerticalAlignment="Top" />
                                 <Rectangle Fill="#33000000" Height="24" VerticalAlignment="Bottom" />
                             </Grid>
@@ -1129,26 +1136,26 @@
                         <!-- Reel 3 -->
                         <Border Grid.Column="3" Width="150" Height="190" Margin="6,0" CornerRadius="10" BorderThickness="5" BorderBrush="#FFD4AF37" Background="#FF04140A" ClipToBounds="True">
                             <Grid>
-                                <StackPanel x:Name="SlotReel3Strip" RenderTransformOrigin="0.5,0.5">
-                                    <StackPanel.RenderTransform>
+                                <Canvas x:Name="SlotReel3Strip" RenderTransformOrigin="0.5,0.5">
+                                    <Canvas.RenderTransform>
                                         <TranslateTransform x:Name="SlotReel3Translate" />
-                                    </StackPanel.RenderTransform>
-                                    <TextBlock Text="⭐" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍋" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="💎" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍒" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🎤" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🔔" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="7️⃣" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Canvas.RenderTransform>
+                                    <TextBlock Text="⭐" FontSize="96" Width="140" Height="140" Canvas.Top="0" Foreground="#FFFFD700" TextAlignment="Center" />
+                                    <TextBlock Text="🍋" FontSize="96" Width="140" Height="140" Canvas.Top="140" Foreground="#FFFFEE58" TextAlignment="Center" />
+                                    <TextBlock Text="💎" FontSize="96" Width="140" Height="140" Canvas.Top="280" Foreground="#FFB9F2FF" TextAlignment="Center" />
+                                    <TextBlock Text="🍒" FontSize="96" Width="140" Height="140" Canvas.Top="420" Foreground="#FFDC2626" TextAlignment="Center" />
+                                    <TextBlock Text="🎤" FontSize="96" Width="140" Height="140" Canvas.Top="560" Foreground="#FFE8E8E8" TextAlignment="Center" />
+                                    <TextBlock Text="🔔" FontSize="96" Width="140" Height="140" Canvas.Top="700" Foreground="#FFFFC107" TextAlignment="Center" />
+                                    <TextBlock Text="7️⃣" FontSize="96" Width="140" Height="140" Canvas.Top="840" Foreground="#FFFF6F00" TextAlignment="Center" />
                                     <!-- Duplicate set so the Y-loop wraps seamlessly -->
-                                    <TextBlock Text="⭐" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍋" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="💎" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🍒" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🎤" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="🔔" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Text="7️⃣" FontSize="96" Height="140" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </StackPanel>
+                                    <TextBlock Text="⭐" FontSize="96" Width="140" Height="140" Canvas.Top="980" Foreground="#FFFFD700" TextAlignment="Center" />
+                                    <TextBlock Text="🍋" FontSize="96" Width="140" Height="140" Canvas.Top="1120" Foreground="#FFFFEE58" TextAlignment="Center" />
+                                    <TextBlock Text="💎" FontSize="96" Width="140" Height="140" Canvas.Top="1260" Foreground="#FFB9F2FF" TextAlignment="Center" />
+                                    <TextBlock Text="🍒" FontSize="96" Width="140" Height="140" Canvas.Top="1400" Foreground="#FFDC2626" TextAlignment="Center" />
+                                    <TextBlock Text="🎤" FontSize="96" Width="140" Height="140" Canvas.Top="1540" Foreground="#FFE8E8E8" TextAlignment="Center" />
+                                    <TextBlock Text="🔔" FontSize="96" Width="140" Height="140" Canvas.Top="1680" Foreground="#FFFFC107" TextAlignment="Center" />
+                                    <TextBlock Text="7️⃣" FontSize="96" Width="140" Height="140" Canvas.Top="1820" Foreground="#FFFF6F00" TextAlignment="Center" />
+                                </Canvas>
                                 <Rectangle Fill="#33000000" Height="24" VerticalAlignment="Top" />
                                 <Rectangle Fill="#33000000" Height="24" VerticalAlignment="Bottom" />
                             </Grid>
@@ -1165,12 +1172,20 @@
                             <Rectangle Width="8" Height="74" Fill="#FFB0B0B0" HorizontalAlignment="Center" RadiusX="4" RadiusY="4" />
                             <Ellipse Width="18" Height="18" Fill="#FFD4AF37" HorizontalAlignment="Center" Margin="0,-4,0,0" />
                         </StackPanel>
+
+                        <!-- Jackpot celebration burst - empty/idle until TriggerSlotJackpotCelebration
+                             fills it, once all three reels land on the diamond. Last child of this
+                             Grid so the sparkle/shockwave burst renders on top of the reel row, but
+                             ClipToBounds keeps it confined to the reel row itself instead of ballooning
+                             up into the marquee header above or sideways past the cabinet edges. -->
+                        <Canvas x:Name="SlotJackpotBurstCanvas" Grid.Column="1" Grid.ColumnSpan="3" Height="190" ClipToBounds="True" IsHitTestVisible="False" />
                     </Grid>
                 </Border>
 
-                <!-- Winner ticket (current singer) + horizontal ticket roll of next spins -->
+                <!-- Winner ticket (current singer), horizontal ticket roll of next spins, and DJ sponsor banner -->
                 <Grid Grid.Row="2">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
@@ -1231,8 +1246,9 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Horizontal ticket roll of upcoming spins -->
-                    <Border Grid.Row="1" CornerRadius="14" BorderThickness="2" Padding="16,12">
+                    <!-- Horizontal ticket roll of upcoming spins - Auto-height so the ticket-stub
+                         chips size to their content instead of stretching to fill the panel. -->
+                    <Border Grid.Row="1" Margin="0,0,0,12" CornerRadius="14" BorderThickness="2" Padding="16,12">
                         <Border.BorderBrush>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                 <GradientStop Color="#88D4AF37" Offset="0.0" />
@@ -1248,7 +1264,7 @@
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
                                 <TextBlock Text="🎟️ NEXT SPINS" FontSize="18" FontWeight="Bold" Foreground="#FFFFDF70" />
@@ -1270,10 +1286,11 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <!-- Ticket-stub styled chip with a dashed perforation edge -->
+                                            <!-- Ticket-stub styled chip with a dashed perforation edge. Fixed height
+                                                 (instead of stretching to the row's height) keeps it a compact chip. -->
                                             <Border Margin="0,0,10,0" Padding="14,10" CornerRadius="8" Background="#18FFFFFF"
-                                                    BorderBrush="#55FFDF70" BorderThickness="1.5" MinWidth="150">
-                                                <StackPanel HorizontalAlignment="Center">
+                                                    BorderBrush="#55FFDF70" BorderThickness="1.5" MinWidth="150" Height="120" VerticalAlignment="Top">
+                                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                                     <TextBlock Text="🎰" FontSize="22" HorizontalAlignment="Center" Margin="0,0,0,4" />
                                                     <Border Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,0,4" HorizontalAlignment="Center"
                                                             ToolTip="Rotation Anchor (marks where a round begins)"
@@ -1287,6 +1304,67 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <!-- Sponsor box - shows the DJ's chosen banner (image or video), or a tip
+                         reminder when none is selected. Reuses the same JumbotronBannerPath /
+                         HasJumbotronBanner / IsJumbotronBannerVideo selection as the Stadium
+                         Jumbotron screen (one DJ banner picker, shared by every projection view
+                         that has a sponsor box) - no separate Slot Machine banner setting to dupe. -->
+                    <Border Grid.Row="2" MinHeight="150" CornerRadius="14" BorderThickness="2" BorderBrush="#66D4AF37" Background="#E6060B08" Padding="4">
+                        <Grid>
+                            <Grid ClipToBounds="True">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasJumbotronBanner}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <Image Stretch="Uniform">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Setter Property="Source" Value="{Binding JumbotronBannerPath}" />
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsJumbotronBannerVideo}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                                <!-- Source is set imperatively in UpdateSlotBanner (not bound here), mirroring the
+                                     Jumbotron's MediaElement handling, so picking an image never opens this file
+                                     through the video pipeline. -->
+                                <MediaElement x:Name="SlotBannerVideo" Stretch="Uniform"
+                                              LoadedBehavior="Manual" UnloadedBehavior="Manual" IsMuted="True" MediaEnded="SlotBannerVideo_MediaEnded"
+                                              Visibility="{Binding IsJumbotronBannerVideo, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Grid>
+
+                            <!-- Fallback tip reminder shown when no sponsor banner is selected -->
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasJumbotronBanner}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="🍻 Don't forget, tip your bartenders and DJ! 🎧" FontSize="34" FontWeight="Black" Foreground="#FFFFD700"
+                                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect Color="#FFFFD700" BlurRadius="22" ShadowDepth="0" Opacity="0.7" />
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </Grid>
