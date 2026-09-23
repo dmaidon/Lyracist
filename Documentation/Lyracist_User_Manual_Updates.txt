@@ -1,4 +1,19 @@
-// Edited on Sep 22, 2026 @ 12:21:00 -> Document Android deployment enablement across solution files
+// Edited on Sep 23, 2026 @ 10:14:00 -> Document KSRotation.Maui solution rebuild exclusion
+KSRotation.Maui: Rebuild Solution Exclusion in Main Solution (`Lyracist.slnx`) - (September 2026)
+
+Section: KSRotation.Maui / Build & Development / Solution Build Configuration
+
+[Overview & Purpose]
+When performing a "Rebuild Solution" or "Build Solution" across the main Lyracist multi-project solution (`Lyracist.slnx`), `KSRotation.Maui` is configured with `<Build Solution="*|*" Project="false" />` so it is not built with the other desktop applications. This prevents lengthy multi-target and Android toolchain rebuilds during standard desktop development. `KSRotation.Maui` is built separately via its dedicated standalone solution (`KSRotation.Maui.slnx`) or by right-clicking the project in Solution Explorer and selecting Build.
+
+[Key Adjustments]
+1. Main Solution Configuration (`Lyracist.slnx`):
+   - Configured `<Build Solution="*|*" Project="false" />` for `KSRotation.Maui.csproj` alongside `<Deploy Solution="Debug|*" />` and `<Deploy Solution="Release|*" />`.
+   - Rebuilding or building `Lyracist.slnx` compiles all desktop WPF apps, test projects, and shared libraries without compiling `KSRotation.Maui`.
+2. Standalone MAUI Workflow:
+   - `KSRotation.Maui` continues to build, debug, and deploy independently via `KSRotation.Maui/KSRotation.Maui.slnx` or direct project build commands.
+
+
 KSRotation.Maui: Visual Studio Android F5 Deployment Enablement (`Lyracist.slnx`, `KSRotation.slnx`, `KSRotation.Maui.slnx`) - (September 2026)
 
 Section: KSRotation.Maui / Build & Development / Android Deployment Configuration

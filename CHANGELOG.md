@@ -1,9 +1,18 @@
-<!-- Edited on Sep 22, 2026 @ 19:23:20 -> Movie Theater film-strip loop: found and fixed the actual root cause via an isolated repro - the scrolling Canvas's own ClipToBounds was discarding all content beyond its own height before the RenderTransform ever ran -->
-Last Edit: Sep 22, 2026 - Movie Theater Film-Strip Loop Fixed
+<!-- Edited on Sep 23, 2026 @ 10:14:00 -> Exclude KSRotation.Maui from default solution rebuilds in Lyracist.slnx -->
+Last Edit: Sep 23, 2026 - KSRotation.Maui Solution Rebuild Exclusion
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.23.0] - 2026-09-23
+
+### Changed
+- **KSRotation.Maui Solution Rebuild Exclusion (`Lyracist.slnx`)**:
+  - **Standalone Rebuild Separation**: Configured `<Build Solution="*|*" Project="false" />` on `KSRotation.Maui` in `Lyracist.slnx`. When rebuilding or building the solution, `KSRotation.Maui` is excluded from the build so it is not compiled alongside the desktop applications (`Lyracist`, `KSRotation`, `LyracistDbEditor`, `ScaryokeWheel`, `KnockoutTrivia`, `TriviaDbCreator`).
+  - **Dedicated Build Workflow**: `KSRotation.Maui` is built separately using its dedicated standalone solution (`KSRotation.Maui/KSRotation.Maui.slnx`) or by building the project directly.
+- **Version Increment Across Solution**:
+  - Incremented assembly and file version numbers across all solution projects and test suites to `26.9.23.*`.
 
 ## [26.9.22.0] - 2026-09-22
 
