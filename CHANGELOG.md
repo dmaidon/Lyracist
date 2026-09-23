@@ -1,11 +1,18 @@
-<!-- Edited on Sep 23, 2026 @ 10:14:00 -> Exclude KSRotation.Maui from default solution rebuilds in Lyracist.slnx -->
-Last Edit: Sep 23, 2026 - KSRotation.Maui Solution Rebuild Exclusion
+<!-- Edited on Sep 23, 2026 @ 12:46:00 -> Update Scaryoke.Unity 3D pointed flapper needle and vibrant visuals -->
+Last Edit: Sep 23, 2026 - Scaryoke.Unity Pointed Flapper Needle & 3D Wheel Improvements
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [26.9.23.0] - 2026-09-23
+
+### Added
+- **Scaryoke.Unity Standalone 3D Carnival Wheel Project**:
+  - **3D Physics & Procedural Mesh**: Added a new standalone Unity 3D engine project `Scaryoke.Unity` to the solution. Implements dynamic procedural 3D mesh wedge generation from `Settings/scaryoke_settings.json`, spring-damped flapper needle collisions, physical perimeter pegs, and velocity-modulated audio clicks with fallback procedural waveform generation.
+  - **Pointed 3D Arrowhead Flapper Needle**: Replaced blunt box flapper with a procedurally generated 3D faceted chisel needle pointer featuring a sharp downward arrowhead tip, vibrant neon orange finish with facet contrast highlights, and a polished brass hinge pivot bolt.
+  - **Multi-Monitor HDMI & TV Casting**: Built-in support for physical secondary monitor targeting (HDMI, DisplayPort, USB-C via `DisplayManager.cs`), Windows Miracast wireless display discovery, and an internal HTTP server (port 5007) serving live status and WebGL receiver payloads compatible with Chromecast (`ChromecastSender` / DashCast) and Smart TV browsers.
+  - **Solution Integration & Independent Build Protection**: Added `Scaryoke.Unity/Scaryoke.Unity.csproj` to `Lyracist.slnx` with `<Build Solution="*|*" Project="false" />` to enable script editing and IntelliSense in Visual Studio while preventing any impact on solution rebuild speeds.
 
 ### Changed
 - **KSRotation.Maui Solution Rebuild Exclusion (`Lyracist.slnx`)**:

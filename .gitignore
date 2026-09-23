@@ -389,3 +389,26 @@ Data/*.db
 Data/*.json
 Settings/*.json
 !Settings/VenueGraphics/
+
+# Unity generated folders, caches, and standalone build outputs
+**/[Ll]ibrary/
+**/[Tt]emp/
+**/[Oo]bj/
+**/[Bb]uild/
+**/[Bb]uilds/
+**/[Ll]ogs/
+**/[Mm]emoryCaptures/
+**/UserSettings/
+**/Recordings/
+**/[Aa]ssembly-CSharp*.csproj
+Scaryoke.Unity/Scaryoke/*.slnx
+Scaryoke.Unity/Scaryoke_Data/
+Scaryoke.Unity/Scaryoke_BackUpThisFolder_ButDontShipItWithYourGame/
+Scaryoke.Unity/MonoBleedingEdge/
+Scaryoke.Unity/D3D12/
+Scaryoke.Unity/*.exe
+Scaryoke.Unity/*.dll
+!Scaryoke.Unity/Packages/manifest.json
+!Scaryoke.Unity/Packages/packages-lock.json
+!Scaryoke.Unity/Scaryoke/Packages/manifest.json
+!Scaryoke.Unity/Scaryoke/Packages/packages-lock.json

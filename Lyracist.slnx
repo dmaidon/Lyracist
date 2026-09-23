@@ -1,10 +1,13 @@
-<!-- Edited on Sep 23, 2026 @ 10:12:00 -> Exclude KSRotation.Maui from default solution rebuilds -->
+<!-- Edited on Sep 23, 2026 @ 11:42:00 -> Add Scaryoke.Unity project to solution -->
 <Solution>
   <Project Path="Lyracist.Data/Lyracist.Data.csproj" />
   <Project Path="Lyracist/Lyracist.csproj" />
   <Project Path="KSRotation/KSRotation.csproj" />
   <Project Path="LyracistDbEditor/LyracistDbEditor.csproj" Id="46565c60-fa0a-4967-b35a-eda261064d4a" />
   <Project Path="ScaryokeWheel/ScaryokeWheel.csproj" Id="2a544b5d-6e94-4b4b-99b5-0978ae21ff2f" />
+  <Project Path="Scaryoke.Unity/Scaryoke.Unity.csproj">
+    <Build Solution="*|*" Project="false" />
+  </Project>
   <Project Path="KnockoutTrivia/KnockoutTrivia.csproj" Id="ff3b4abf-6734-4fea-bd3c-b210914713c8" />
   <Project Path="KSRotation.Maui/KSRotation.Maui.csproj">
     <Build Solution="*|*" Project="false" />

@@ -1,0 +1,27 @@
+<!-- Edited on Sep 23, 2026 @ 12:15:00 -> Update Scaryoke.Unity project to target Scaryoke/Assets/Scripts -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>11.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <RootNamespace>Scaryoke.Unity</RootNamespace>
+    <AssemblyName>Scaryoke.Unity</AssemblyName>
+    <AssemblyVersion>26.9.23.100</AssemblyVersion>
+    <FileVersion>26.9.23.100</FileVersion>
+    <Authors>Dennis N. Maidon</Authors>
+    <Company>Lyracist</Company>
+    <Product>Scaryoke Wheel 3D</Product>
+    <Copyright>Copyright © 2026 Dennis N. Maidon. All rights reserved.</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Scaryoke/Assets/Scripts/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33" />
+  </ItemGroup>
+
+</Project>
