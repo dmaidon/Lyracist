@@ -69,6 +69,31 @@ namespace KSRotation.ViewModels
 
         public ObservableCollection<NextSingerDisplay> NextSingers { get; } = [];
 
+        // Eight themed panels each bind an ItemsControl to NextSingers (collapsed ones still regenerate
+        // their item templates), so Clear()+Add() on every rotation update rebuilt ~50 templates even
+        // when the queue hadn't changed. Diffing by record value only touches entries that did change.
+        private static void SyncNextSingers(ObservableCollection<NextSingerDisplay> target, List<NextSingerDisplay> source)
+        {
+            for (int i = 0; i < source.Count; i++)
+            {
+                if (i < target.Count)
+                {
+                    if (!target[i].Equals(source[i]))
+                    {
+                        target[i] = source[i];
+                    }
+                }
+                else
+                {
+                    target.Add(source[i]);
+                }
+            }
+            while (target.Count > source.Count)
+            {
+                target.RemoveAt(target.Count - 1);
+            }
+        }
+
         public ObservableCollection<DisplayRotationEntry> RotationEntries { get; } = [];
 
         // Full ordered rotation – used by the Star Wars crawl.
@@ -286,14 +311,14 @@ namespace KSRotation.ViewModels
 
             // Build the next-up list in true rotation order:
             // start immediately after current singer and wrap to the beginning.
-            NextSingers.Clear();
+            var nextSingers = new List<NextSingerDisplay>();
 
             if (current != null)
             {
                 int currentIndex = activeRotation.IndexOf(current);
                 int count = activeRotation.Count;
 
-                for (int offset = 1; offset < count && NextSingers.Count < 6; offset++)
+                for (int offset = 1; offset < count && nextSingers.Count < 6; offset++)
                 {
                     SingerEntry singer = activeRotation[(currentIndex + offset) % count];
 
@@ -304,12 +329,12 @@ namespace KSRotation.ViewModels
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
                             ? singer.Song
                             : $"{singer.Song} – {singer.Artist}";
-                        NextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart));
+                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
-                        NextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
+                        nextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
                             ? $"{sName}{waitBadge}"
                             : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart));
                     }
@@ -324,17 +349,18 @@ namespace KSRotation.ViewModels
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
                             ? singer.Song
                             : $"{singer.Song} – {singer.Artist}";
-                        NextSingers.Add(new NextSingerDisplay($"[MUSIC] {songText}", singer.IsRotationStart));
+                        nextSingers.Add(new NextSingerDisplay($"[MUSIC] {songText}", singer.IsRotationStart));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
-                        NextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
+                        nextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
                             ? sName
                             : $"{sName} - {singer.Song}", singer.IsRotationStart));
                     }
                 }
             }
+            SyncNextSingers(NextSingers, nextSingers);
 
             // Reorder so current singer is always index 0 (crawl treats i==0 as "NOW SINGING").
             FullRotation.Clear();

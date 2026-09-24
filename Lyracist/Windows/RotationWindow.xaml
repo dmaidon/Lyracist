@@ -1314,7 +1314,10 @@
                                      how far the translate then shifted it (the same class of bug fixed for the Movie
                                      Theater film strip - see TheaterFilmStripCanvas). A Canvas is never resized by its
                                      parent, so each symbol renders at its full size at its Canvas.Top slot. -->
-                                <Canvas x:Name="SlotReel1Strip" RenderTransformOrigin="0.5,0.5">
+                                <!-- BitmapCache: the strip's content never changes while it spins, so rasterize
+                                     it once and let the GPU slide the finished bitmap every frame instead of
+                                     re-rendering 14 large glyphs per reel per frame. -->
+                                <Canvas x:Name="SlotReel1Strip" RenderTransformOrigin="0.5,0.5" CacheMode="BitmapCache">
                                     <Canvas.RenderTransform>
                                         <TranslateTransform x:Name="SlotReel1Translate" />
                                     </Canvas.RenderTransform>
@@ -1342,7 +1345,7 @@
                         <!-- Reel 2 -->
                         <Border Grid.Column="2" Width="150" Height="190" Margin="6,0" CornerRadius="10" BorderThickness="5" BorderBrush="#FFD4AF37" Background="#FF04140A" ClipToBounds="True">
                             <Grid>
-                                <Canvas x:Name="SlotReel2Strip" RenderTransformOrigin="0.5,0.5">
+                                <Canvas x:Name="SlotReel2Strip" RenderTransformOrigin="0.5,0.5" CacheMode="BitmapCache">
                                     <Canvas.RenderTransform>
                                         <TranslateTransform x:Name="SlotReel2Translate" />
                                     </Canvas.RenderTransform>
@@ -1370,7 +1373,7 @@
                         <!-- Reel 3 -->
                         <Border Grid.Column="3" Width="150" Height="190" Margin="6,0" CornerRadius="10" BorderThickness="5" BorderBrush="#FFD4AF37" Background="#FF04140A" ClipToBounds="True">
                             <Grid>
-                                <Canvas x:Name="SlotReel3Strip" RenderTransformOrigin="0.5,0.5">
+                                <Canvas x:Name="SlotReel3Strip" RenderTransformOrigin="0.5,0.5" CacheMode="BitmapCache">
                                     <Canvas.RenderTransform>
                                         <TranslateTransform x:Name="SlotReel3Translate" />
                                     </Canvas.RenderTransform>
@@ -2230,7 +2233,10 @@
                                      layout bounds BEFORE the transform is applied, permanently discarding any content
                                      positioned beyond that height regardless of how many "copies" are stacked below it.
                                      The outer Border's clip is what should window the (already-transformed) result. -->
-                                <Canvas x:Name="TheaterFilmStripCanvas" SizeChanged="TheaterFilmStripCanvas_SizeChanged" />
+                                <!-- BitmapCache: the frames (including the glow-effect titles) only change when
+                                     the queue does, so rasterize them once per rebuild and let the GPU slide the
+                                     cached bitmap each frame rather than re-rendering every frame and blur. -->
+                                <Canvas x:Name="TheaterFilmStripCanvas" SizeChanged="TheaterFilmStripCanvas_SizeChanged" CacheMode="BitmapCache" />
                             </Border>
                         </Grid>
                     </Border>

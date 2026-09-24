@@ -26,7 +26,6 @@ public partial class RotationWindow : Window, ICaptureSource
 
     private static readonly SolidColorBrush CrawlGold;
     private static readonly SolidColorBrush CrawlDimGold;
-    private static readonly RadialGradientBrush MarqueeBulbBrush;
     private static readonly System.Windows.Media.Color MarqueeBulbGlow = System.Windows.Media.Color.FromRgb(0xA8, 0x55, 0xF7);
 
     static RotationWindow()
@@ -36,17 +35,29 @@ public partial class RotationWindow : Window, ICaptureSource
         CrawlDimGold = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xA0, 0x00));
         CrawlDimGold.Freeze();
 
-        MarqueeBulbBrush = new RadialGradientBrush
+        // Bulb core + halo in one brush. The ellipse is drawn MarqueeBulbGlowScale times the bulb's
+        // size; the stops out to `core` (the bulb's own radius) are the lit bulb, and the rest fades
+        // the glow color out to transparent. Replaces a per-bulb DropShadowEffect: ~100 separate
+        // blur shaders re-rendered every time the chase pattern flipped a bulb's opacity (every
+        // 110ms), the most GPU-expensive thing on screen.
+        const double core = 1.0 / MarqueeBulbGlowScale;
+        MarqueeBulbGlowBrush = new RadialGradientBrush
         {
             GradientStops =
             {
                 new GradientStop(System.Windows.Media.Color.FromRgb(0xF3, 0xE8, 0xFF), 0.0),
-                new GradientStop(System.Windows.Media.Color.FromRgb(0xA8, 0x55, 0xF7), 0.55),
-                new GradientStop(System.Windows.Media.Color.FromRgb(0x7C, 0x3A, 0xED), 1.0)
+                new GradientStop(System.Windows.Media.Color.FromRgb(0xA8, 0x55, 0xF7), core * 0.55),
+                new GradientStop(System.Windows.Media.Color.FromRgb(0x7C, 0x3A, 0xED), core),
+                new GradientStop(System.Windows.Media.Color.FromArgb(0xB0, MarqueeBulbGlow.R, MarqueeBulbGlow.G, MarqueeBulbGlow.B), core + 0.02),
+                new GradientStop(System.Windows.Media.Color.FromArgb(0x40, MarqueeBulbGlow.R, MarqueeBulbGlow.G, MarqueeBulbGlow.B), core + ((1 - core) * 0.4)),
+                new GradientStop(System.Windows.Media.Color.FromArgb(0x00, MarqueeBulbGlow.R, MarqueeBulbGlow.G, MarqueeBulbGlow.B), 1.0)
             }
         };
-        MarqueeBulbBrush.Freeze();
+        MarqueeBulbGlowBrush.Freeze();
     }
+
+    private const double MarqueeBulbGlowScale = 1.8;
+    private static readonly RadialGradientBrush MarqueeBulbGlowBrush;
 
     private const double PanelWidth = 800;
     private const double ViewH = 1200;
@@ -352,20 +363,57 @@ public partial class RotationWindow : Window, ICaptureSource
         }
     }
 
+    // UpdateRotation rebuilds FullRotation with Clear() + one Add() per singer, so a single rotation
+    // update fires N+1 CollectionChanged events. Reacting to each one rebuilt the ticker, the crawl
+    // and the film strip N+1 times; instead the first event schedules one refresh that runs after
+    // the whole update has finished.
+    private bool _rotationRefreshPending;
+
     private void Rotation_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        RebuildBanner();
-        RestartCrawlIfActive();
-
-        if (_vm?.SelectedProjectionView == "Movie Theater 'Now Showing'" && TheaterPanel.Visibility == Visibility.Visible)
+        if (_rotationRefreshPending) return;
+        _rotationRefreshPending = true;
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
         {
-            BuildTheaterFilmStrip();
+            _rotationRefreshPending = false;
+            RebuildBanner();
+            RestartCrawlIfActive();
+
+            if (_vm?.SelectedProjectionView == "Movie Theater 'Now Showing'" && TheaterPanel.Visibility == Visibility.Visible)
+            {
+                BuildTheaterFilmStrip();
+            }
+        }));
+    }
+
+    // Content key of the crawl currently scrolling. Rotation updates that don't change what the
+    // crawl would show (e.g. a singer's rating ticking up) leave it running instead of restarting
+    // it from the bottom. Null whenever the crawl isn't running, so the next start always builds.
+    private string? _crawlSignature;
+
+    private string BuildCrawlSignature()
+    {
+        if (_vm == null) return string.Empty;
+        var sb = new System.Text.StringBuilder();
+        sb.Append(ReplaceVariables(_vm.CrawlBannerText)).Append('\u0001')
+          .Append(_vm.HasDesignatedCurrentSinger).Append('\u0001')
+          .Append(_vm.ShowEstimatedWaitTime);
+        foreach (var s in _vm.FullRotation)
+        {
+            sb.Append('\u0001').Append(s.Name).Append('\u0002').Append(s.SongTitle).Append('\u0002')
+              .Append(s.Artist).Append('\u0002').Append(s.IsRotationStart).Append('\u0002').Append(s.EstimatedWaitMinutes);
         }
+        return sb.ToString();
     }
 
     private void RestartCrawlIfActive()
     {
         if (_vm?.SelectedProjectionView != "Star Wars Crawl" || CrawlPanel.Visibility != Visibility.Visible)
+        {
+            return;
+        }
+
+        if (_crawlSignature != null && _crawlSignature == BuildCrawlSignature())
         {
             return;
         }
@@ -380,6 +428,7 @@ public partial class RotationWindow : Window, ICaptureSource
 
         // Stop animations and clear crawl canvas
         _crawlGen++;
+        _crawlSignature = null;
         CrawlStarCanvas.Children.Clear();
         _crawlSource.Children.Clear();
         CrawlMaterial.Brush = null;
@@ -710,6 +759,7 @@ public partial class RotationWindow : Window, ICaptureSource
         if (_vm == null || _vm.SelectedProjectionView != "Star Wars Crawl" || _vm.FullRotation.Count == 0) return;
 
         int gen = ++_crawlGen;
+        _crawlSignature = BuildCrawlSignature();
 
         if (CrawlStarCanvas.Children.Count == 0)
         {
@@ -918,72 +968,85 @@ public partial class RotationWindow : Window, ICaptureSource
         StartAnimation();
     }
 
+    // Text of the ticker currently scrolling. Rebuilding the Inlines restarts the scroll from the
+    // right edge, so an update that leaves the ticker text unchanged must not touch it - otherwise
+    // every rotation refresh made the ticker visibly jump back to the start.
+    private string? _bannerSignature;
+
     private void RebuildBanner()
     {
         if (_vm == null) return;
 
-        BannerTextBlock.Inlines.Clear();
         string separator = "    •    ";
+        var runs = new List<Run>();
 
         // Prepend announcement banner if visible
         if (_vm.IsAnnouncementVisible && !string.IsNullOrWhiteSpace(_vm.AnnouncementBanner))
         {
             string parsedBanner = ReplaceVariables(_vm.AnnouncementBanner);
-            BannerTextBlock.Inlines.Add(new Run(parsedBanner) { Foreground = System.Windows.Media.Brushes.Orange, FontWeight = FontWeights.Bold });
-            BannerTextBlock.Inlines.Add(new Run(separator) { Foreground = System.Windows.Media.Brushes.White });
+            runs.Add(new Run(parsedBanner) { Foreground = System.Windows.Media.Brushes.Orange, FontWeight = FontWeights.Bold });
+            runs.Add(new Run(separator) { Foreground = System.Windows.Media.Brushes.White });
         }
 
         var activeSingers = _vm.Rotation.Where(s => !s.IsPaused).ToList();
         if (activeSingers.Count == 0)
         {
             string emptyText = ReplaceVariables("Lyracist - No Singers in Queue");
-            BannerTextBlock.Inlines.Add(new Run(emptyText) { Foreground = System.Windows.Media.Brushes.White });
-            StartAnimation();
+            runs.Add(new Run(emptyText) { Foreground = System.Windows.Media.Brushes.White });
+        }
+        else
+        {
+            // Find current singer (either IsCurrent or the first active one)
+            var current = activeSingers.FirstOrDefault(s => s.IsCurrent) ?? activeSingers[0];
+
+            // Highlight the current performer
+            string currentSingerText = $"Current Performer: {current.Name}";
+            if (!string.IsNullOrWhiteSpace(current.SongTitle))
+            {
+                currentSingerText += $" (\"{current.SongTitle}\")";
+            }
+            runs.Add(new Run(currentSingerText)
+            {
+                Foreground = System.Windows.Media.Brushes.Yellow,
+                FontWeight = FontWeights.Bold
+            });
+
+            // Get the next 5 performers in rotation (wrap around if needed, or just take the subsequent ones)
+            int currentIndex = activeSingers.IndexOf(current);
+            int count = activeSingers.Count;
+
+            string[] ordinals = ["Next", "2nd", "3rd", "4th", "5th"];
+
+            int addedCount = 0;
+            for (int offset = 1; offset < count && addedCount < 5; offset++)
+            {
+                var singer = activeSingers[(currentIndex + offset) % count];
+                string label = offset <= ordinals.Length ? ordinals[offset - 1] : $"#{offset + 1}";
+                string singerText = $"{label}: {singer.Name}";
+                if (singer.EstimatedWaitMinutes > 0)
+                {
+                    singerText += $" {{{singer.EstimatedWaitMinutes}}}";
+                }
+                if (!string.IsNullOrWhiteSpace(singer.SongTitle))
+                {
+                    singerText += $" (\"{singer.SongTitle}\")";
+                }
+
+                runs.Add(new Run(separator) { Foreground = System.Windows.Media.Brushes.White });
+                runs.Add(new Run(singerText) { Foreground = System.Windows.Media.Brushes.Cyan });
+                addedCount++;
+            }
+        }
+
+        string signature = string.Join("\u0001", runs.Select(r => r.Text));
+        if (signature == _bannerSignature && BannerTextBlock.Inlines.Count > 0)
+        {
             return;
         }
+        _bannerSignature = signature;
 
-        // Find current singer (either IsCurrent or the first active one)
-        var current = activeSingers.FirstOrDefault(s => s.IsCurrent) ?? activeSingers.FirstOrDefault();
-        if (current == null) return;
-
-        // Highlight the current performer
-        string currentSingerText = $"Current Performer: {current.Name}";
-        if (!string.IsNullOrWhiteSpace(current.SongTitle))
-        {
-            currentSingerText += $" (\"{current.SongTitle}\")";
-        }
-        BannerTextBlock.Inlines.Add(new Run(currentSingerText)
-        {
-            Foreground = System.Windows.Media.Brushes.Yellow,
-            FontWeight = FontWeights.Bold
-        });
-
-        // Get the next 5 performers in rotation (wrap around if needed, or just take the subsequent ones)
-        int currentIndex = activeSingers.IndexOf(current);
-        int count = activeSingers.Count;
-
-        string[] ordinals = ["Next", "2nd", "3rd", "4th", "5th"];
-
-        int addedCount = 0;
-        for (int offset = 1; offset < count && addedCount < 5; offset++)
-        {
-            var singer = activeSingers[(currentIndex + offset) % count];
-            string label = offset <= ordinals.Length ? ordinals[offset - 1] : $"#{offset + 1}";
-            string singerText = $"{label}: {singer.Name}";
-            if (singer.EstimatedWaitMinutes > 0)
-            {
-                singerText += $" {{{singer.EstimatedWaitMinutes}}}";
-            }
-            if (!string.IsNullOrWhiteSpace(singer.SongTitle))
-            {
-                singerText += $" (\"{singer.SongTitle}\")";
-            }
-
-            BannerTextBlock.Inlines.Add(new Run(separator) { Foreground = System.Windows.Media.Brushes.White });
-            BannerTextBlock.Inlines.Add(new Run(singerText) { Foreground = System.Windows.Media.Brushes.Cyan });
-            addedCount++;
-        }
-
+        BannerTextBlock.Inlines.Clear();
+        BannerTextBlock.Inlines.AddRange(runs);
         StartAnimation();
     }
 
@@ -1524,23 +1587,17 @@ public partial class RotationWindow : Window, ICaptureSource
 
         if (positions.Count == 0) return;
 
+        const double glow = bulb * MarqueeBulbGlowScale;
         foreach (var pos in positions)
         {
             var dot = new Ellipse
             {
-                Width = bulb,
-                Height = bulb,
-                Fill = MarqueeBulbBrush,
-                Effect = new System.Windows.Media.Effects.DropShadowEffect
-                {
-                    Color = MarqueeBulbGlow,
-                    BlurRadius = 22,
-                    ShadowDepth = 0,
-                    Opacity = 0.95
-                }
+                Width = glow,
+                Height = glow,
+                Fill = MarqueeBulbGlowBrush
             };
-            Canvas.SetLeft(dot, pos.X - (bulb / 2));
-            Canvas.SetTop(dot, pos.Y - (bulb / 2));
+            Canvas.SetLeft(dot, pos.X - (glow / 2));
+            Canvas.SetTop(dot, pos.Y - (glow / 2));
             MarqueeBulbCanvas.Children.Add(dot);
             _marqueeBulbs.Add(dot);
         }

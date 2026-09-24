@@ -27,11 +27,13 @@ namespace KSRotation.Windows
         private static readonly SolidColorBrush CrawlGold;
         private static readonly SolidColorBrush CrawlDimGold;
 
-        // Glowing bulb fill for the Marquee frame: bright lavender core fading to purple.
-        private static readonly RadialGradientBrush MarqueeBulbBrush;
-
         private static readonly System.Windows.Media.Color MarqueeBulbGlow =
             System.Windows.Media.Color.FromRgb(0xA8, 0x55, 0xF7);
+
+        private const double MarqueeBulbGlowScale = 1.8;
+
+        // Glowing bulb for the Marquee frame: bright lavender core fading to purple, plus its halo.
+        private static readonly RadialGradientBrush MarqueeBulbGlowBrush;
 
         static SingerDisplayWindow()
         {
@@ -40,16 +42,25 @@ namespace KSRotation.Windows
             CrawlDimGold = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCC, 0xA0, 0x00));
             CrawlDimGold.Freeze();
 
-            MarqueeBulbBrush = new RadialGradientBrush
+            // Bulb core + halo in one brush. The ellipse is drawn MarqueeBulbGlowScale times the bulb's
+            // size; the stops out to `core` (the bulb's own radius) are the lit bulb, and the rest fades
+            // the glow color out to transparent. Replaces a per-bulb DropShadowEffect: ~100 separate
+            // blur shaders re-rendered every time the chase pattern flipped a bulb's opacity (every
+            // 110ms), the most GPU-expensive thing on screen.
+            const double core = 1.0 / MarqueeBulbGlowScale;
+            MarqueeBulbGlowBrush = new RadialGradientBrush
             {
                 GradientStops =
                 {
                     new GradientStop(System.Windows.Media.Color.FromRgb(0xF3, 0xE8, 0xFF), 0.0),
-                    new GradientStop(System.Windows.Media.Color.FromRgb(0xA8, 0x55, 0xF7), 0.55),
-                    new GradientStop(System.Windows.Media.Color.FromRgb(0x7C, 0x3A, 0xED), 1.0)
+                    new GradientStop(System.Windows.Media.Color.FromRgb(0xA8, 0x55, 0xF7), core * 0.55),
+                    new GradientStop(System.Windows.Media.Color.FromRgb(0x7C, 0x3A, 0xED), core),
+                    new GradientStop(System.Windows.Media.Color.FromArgb(0xB0, MarqueeBulbGlow.R, MarqueeBulbGlow.G, MarqueeBulbGlow.B), core + 0.02),
+                    new GradientStop(System.Windows.Media.Color.FromArgb(0x40, MarqueeBulbGlow.R, MarqueeBulbGlow.G, MarqueeBulbGlow.B), core + ((1 - core) * 0.4)),
+                    new GradientStop(System.Windows.Media.Color.FromArgb(0x00, MarqueeBulbGlow.R, MarqueeBulbGlow.G, MarqueeBulbGlow.B), 1.0)
                 }
             };
-            MarqueeBulbBrush.Freeze();
+            MarqueeBulbGlowBrush.Freeze();
         }
 
         // Source-space dimensions for the VisualBrush.
@@ -297,33 +308,72 @@ namespace KSRotation.Windows
                     {
                         StartSlotReels();
                     }
-                    RebuildBanner();
-                    RestartCrawlIfActive();
+                    ScheduleRotationRefresh();
                     break;
 
                 default:
-                    RebuildBanner();
-                    RestartCrawlIfActive();
+                    ScheduleRotationRefresh();
                     break;
             }
         }
 
         private void NextSingers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            RebuildBanner();
-            RestartCrawlIfActive();
-
-            if (_vm?.SelectedProjectionView == "Movie Theater 'Now Showing'" && TheaterPanel.Visibility == Visibility.Visible)
-            {
-                BuildTheaterFilmStrip();
-            }
+            ScheduleRotationRefresh();
         }
 
-        // Crawl picks up updated rotation data on its next natural loop iteration.
+        // A single UpdateFromRotation sets ~15 view-model properties and rebuilds NextSingers, each
+        // of which used to rebuild the ticker, the crawl and the film strip on the spot - 20+
+        // rebuilds for one rotation change, with the film strip rebuilt from partial lists mid-way.
+        // The first event now schedules one refresh that runs after the whole update has finished.
+        private bool _rotationRefreshPending;
+
+        private void ScheduleRotationRefresh()
+        {
+            if (_rotationRefreshPending) return;
+            _rotationRefreshPending = true;
+            Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)(() =>
+            {
+                _rotationRefreshPending = false;
+                RebuildBanner();
+                RestartCrawlIfActive();
+
+                if (_vm?.SelectedProjectionView == "Movie Theater 'Now Showing'" && TheaterPanel.Visibility == Visibility.Visible)
+                {
+                    BuildTheaterFilmStrip();
+                }
+            }));
+        }
+
+        // Content key of the crawl currently scrolling. Updates that don't change what the crawl
+        // would show leave it running instead of restarting it from the bottom. Null whenever the
+        // crawl isn't running, so the next start always builds.
+        private string? _crawlSignature;
+
+        private string BuildCrawlSignature()
+        {
+            if (_vm == null) return string.Empty;
+            var sb = new System.Text.StringBuilder();
+            sb.Append(_vm.CrawlBannerText).Append('\u0001')
+              .Append(_vm.HasDesignatedCurrentSinger).Append('\u0001')
+              .Append(_vm.ShowEstimatedWaitTime);
+            foreach (var s in _vm.FullRotation)
+            {
+                sb.Append('\u0001').Append(s.Name).Append('\u0002').Append(s.Song).Append('\u0002')
+                  .Append(s.Artist).Append('\u0002').Append(s.IsMusic).Append('\u0002')
+                  .Append(s.IsRotationStart).Append('\u0002').Append(s.EstimatedWaitMinutes);
+            }
+            return sb.ToString();
+        }
 
         private void RestartCrawlIfActive()
         {
             if (_vm?.SelectedProjectionView != "Star Wars Crawl" || CrawlPanel.Visibility != Visibility.Visible)
+            {
+                return;
+            }
+
+            if (_crawlSignature != null && _crawlSignature == BuildCrawlSignature())
             {
                 return;
             }
@@ -335,22 +385,27 @@ namespace KSRotation.Windows
         // ── Marquee banner ────────────────────────────────────────────────────
         private void BannerBorder_SizeChanged(object sender, SizeChangedEventArgs e) => StartAnimation();
 
+        // Text of the ticker currently scrolling. Rebuilding the Inlines restarts the scroll from the
+        // right edge, so an update that leaves the ticker text unchanged must not touch it - otherwise
+        // every rotation refresh made the ticker visibly jump back to the start.
+        private string? _bannerSignature;
+
         private void RebuildBanner()
         {
             if (_vm == null) return;
 
-            BannerTextBlock.Inlines.Clear();
+            var runs = new List<Run>();
 
             if (!string.IsNullOrWhiteSpace(_vm.BannerText))
             {
-                BannerTextBlock.Inlines.Add(new Run(_vm.BannerText));
-                BannerTextBlock.Inlines.Add(new Run(Separator));
+                runs.Add(new Run(_vm.BannerText));
+                runs.Add(new Run(Separator));
             }
 
             string currentSingerLabel = _vm.HasDesignatedCurrentSinger ? "Current Singer" : "First Performer";
             string currentSingerFlag = _vm.CurrentSingerIsRotationStart ? "⚓ " : string.Empty;
 
-            BannerTextBlock.Inlines.Add(new Run($"{currentSingerLabel}: {currentSingerFlag}{_vm.CurrentSinger}")
+            runs.Add(new Run($"{currentSingerLabel}: {currentSingerFlag}{_vm.CurrentSinger}")
             {
                 Foreground = System.Windows.Media.Brushes.Yellow,
                 FontWeight = FontWeights.Bold
@@ -360,12 +415,21 @@ namespace KSRotation.Windows
             int i = 0;
             foreach (var next in _vm.NextSingers.Take(5))
             {
-                BannerTextBlock.Inlines.Add(new Run(Separator));
+                runs.Add(new Run(Separator));
                 string nextFlag = next.IsRotationStart ? "⚓ " : string.Empty;
-                BannerTextBlock.Inlines.Add(new Run($"{ordinals[i]}: {nextFlag}{next.Text}"));
+                runs.Add(new Run($"{ordinals[i]}: {nextFlag}{next.Text}"));
                 i++;
             }
 
+            string signature = string.Join("\u0001", runs.Select(r => r.Text));
+            if (signature == _bannerSignature && BannerTextBlock.Inlines.Count > 0)
+            {
+                return;
+            }
+            _bannerSignature = signature;
+
+            BannerTextBlock.Inlines.Clear();
+            BannerTextBlock.Inlines.AddRange(runs);
             StartAnimation();
         }
 
@@ -400,6 +464,7 @@ namespace KSRotation.Windows
 
             // Stop animations and clear crawl canvas
             _crawlGen++;
+            _crawlSignature = null;
             CrawlStarCanvas.Children.Clear();
             _crawlSource.Children.Clear();
             CrawlMaterial?.Brush = null;
@@ -1026,23 +1091,17 @@ namespace KSRotation.Windows
 
             if (positions.Count == 0) return;
 
+            const double glow = bulb * MarqueeBulbGlowScale;
             foreach (var pos in positions)
             {
                 var dot = new Ellipse
                 {
-                    Width = bulb,
-                    Height = bulb,
-                    Fill = MarqueeBulbBrush,
-                    Effect = new DropShadowEffect
-                    {
-                        Color = MarqueeBulbGlow,
-                        BlurRadius = 22,
-                        ShadowDepth = 0,
-                        Opacity = 0.95
-                    }
+                    Width = glow,
+                    Height = glow,
+                    Fill = MarqueeBulbGlowBrush
                 };
-                Canvas.SetLeft(dot, pos.X - (bulb / 2));
-                Canvas.SetTop(dot, pos.Y - (bulb / 2));
+                Canvas.SetLeft(dot, pos.X - (glow / 2));
+                Canvas.SetTop(dot, pos.Y - (glow / 2));
                 MarqueeBulbCanvas.Children.Add(dot);
                 _marqueeBulbs.Add(dot);
             }
@@ -1285,6 +1344,7 @@ namespace KSRotation.Windows
             if (_vm == null || _vm.SelectedProjectionView != "Star Wars Crawl" || _vm.FullRotation.Count == 0) return;
 
             int gen = ++_crawlGen;
+            _crawlSignature = BuildCrawlSignature();
 
             // Stars - generate once if not already present
             if (CrawlStarCanvas.Children.Count == 0)

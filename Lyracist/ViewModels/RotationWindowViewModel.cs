@@ -247,6 +247,31 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     public ObservableCollection<NextSingerDisplay> NextSingers { get; } = [];
 
+    // Eight themed panels each bind an ItemsControl to NextSingers (collapsed ones still regenerate
+    // their item templates), so Clear()+Add() on every rotation update rebuilt ~50 templates even
+    // when the queue hadn't changed. Diffing by record value only touches entries that did change.
+    private static void SyncNextSingers(ObservableCollection<NextSingerDisplay> target, List<NextSingerDisplay> source)
+    {
+        for (int i = 0; i < source.Count; i++)
+        {
+            if (i < target.Count)
+            {
+                if (!target[i].Equals(source[i]))
+                {
+                    target[i] = source[i];
+                }
+            }
+            else
+            {
+                target.Add(source[i]);
+            }
+        }
+        while (target.Count > source.Count)
+        {
+            target.RemoveAt(target.Count - 1);
+        }
+    }
+
     [ObservableProperty]
     private int _activeSingerCount;
 
@@ -339,14 +364,14 @@ public partial class RotationWindowViewModel : BaseViewModel
 
         // Build NextSingers queue starting with designated next singer if available,
         // followed sequentially starting after them (wrapping around).
-        NextSingers.Clear();
+        var nextSingers = new List<NextSingerDisplay>();
         if (now != null)
         {
             var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(visibleSingers, now, 6, isLastRound: IsLastRound);
             foreach (var candidate in nextActiveSingers)
             {
                 string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
-                NextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart));
+                nextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart));
             }
         }
         else
@@ -355,9 +380,10 @@ public partial class RotationWindowViewModel : BaseViewModel
             foreach (var singer in activeSingers)
             {
                 string display = string.IsNullOrEmpty(singer.SongTitle) ? singer.Name : $"{singer.Name} (\"{singer.SongTitle}\")";
-                NextSingers.Add(new NextSingerDisplay(display, singer.IsRotationStart));
+                nextSingers.Add(new NextSingerDisplay(display, singer.IsRotationStart));
             }
         }
+        SyncNextSingers(NextSingers, nextSingers);
 
         // POPULATE FullRotation exactly like KSRotation does!
         FullRotation.Clear();
@@ -436,14 +462,14 @@ public partial class RotationWindowViewModel : BaseViewModel
         PerformerHeaderText = "NOW SINGING";
 
         // Build NextSingers queue sequentially starting after currentMatch
-        NextSingers.Clear();
+        var nextSingers = new List<NextSingerDisplay>();
         if (currentMatch != null)
         {
             var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(Rotation.ToList(), currentMatch, 6, isLastRound: IsLastRound);
             foreach (var candidate in nextActiveSingers)
             {
                 string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
-                NextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart));
+                nextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart));
             }
         }
         else
@@ -452,9 +478,10 @@ public partial class RotationWindowViewModel : BaseViewModel
             foreach (var s in activeSingers)
             {
                 string display = string.IsNullOrEmpty(s.SongTitle) ? s.Name : $"{s.Name} (\"{s.SongTitle}\")";
-                NextSingers.Add(new NextSingerDisplay(display, s.IsRotationStart));
+                nextSingers.Add(new NextSingerDisplay(display, s.IsRotationStart));
             }
         }
+        SyncNextSingers(NextSingers, nextSingers);
         // POPULATE FullRotation exactly like KSRotation does!
         FullRotation.Clear();
         var activeRotation = Rotation.Where(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound)).ToList();

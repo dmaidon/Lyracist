@@ -2488,7 +2488,10 @@ namespace KSRotation.ViewModels
                 }));
             }
 
-            if (IsDisplayEnabled)
+            // Skipped mid-reorder for the same reason as the block above: each _isFinishingSong
+            // operation pushes one display update itself once its RemoveAt+Insert pairs are done,
+            // so updating here too just rebuilt the projection screen on half-reordered data.
+            if (IsDisplayEnabled && !_isFinishingSong)
             {
                 _displayWindowService.Update(Singers);
             }
