@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.9.24.686</AssemblyVersion>
-    <FileVersion>26.9.24.686</FileVersion>
+    <AssemblyVersion>26.9.24.687</AssemblyVersion>
+    <FileVersion>26.9.24.687</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -152,6 +152,7 @@
     <Compile Include="..\Shared\WindowsLocationService.cs" Link="WindowsLocationService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\KnockoutTrivia\KnockoutTrivia.csproj" />
     <ProjectReference Include="..\Lyracist.Data\Lyracist.Data.csproj" />
     <ProjectReference Include="..\Lyracist.Trivia.Core\Lyracist.Trivia.Core.csproj" />
   </ItemGroup>

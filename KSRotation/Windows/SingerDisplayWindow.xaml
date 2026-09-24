@@ -661,7 +661,7 @@
                     <!-- Current singer -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <TextBlock Text="🪩  NOW PERFORMING..." FontSize="24" FontWeight="Bold" Foreground="#FFE86BFF" TextOptions.TextFormattingMode="Display"
-                                   HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                   HorizontalAlignment="Center" Margin="0,0,0,12" />
 
                         <!-- Performer Selfie / Avatar -->
                         <Border Width="130" Height="130" CornerRadius="65" BorderThickness="5" BorderBrush="#FFE86BFF" HorizontalAlignment="Center" Margin="0,0,0,16"
@@ -677,12 +677,12 @@
                         <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                                 ToolTip="Rotation Anchor (marks where a round begins)"
                                 Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                            <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
                         </Border>
                         <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                                 ToolTip="Special Performer (One-Time)"
                                 Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="⭐ SPECIAL" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                            <TextBlock Text="⭐ SPECIAL" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
                         </Border>
 
                         <TextBlock Text="{Binding CurrentSingerName}"
@@ -730,7 +730,7 @@
                                             <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,6,0" VerticalAlignment="Center"
                                                     ToolTip="Rotation Anchor (marks where a round begins)"
                                                     Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                             </Border>
                                             <TextBlock Text="{Binding Text}" FontSize="18" Foreground="#CCE6DCFF" />
                                         </StackPanel>
@@ -806,7 +806,7 @@
                 <!-- Current singer -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock Text="🌆  NOW PERFORMING..." FontSize="24" FontWeight="Bold" Foreground="#FF6BE8FF" TextOptions.TextFormattingMode="Display"
-                               HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                               HorizontalAlignment="Center" Margin="0,0,0,12" />
 
                     <!-- Performer Selfie / Avatar -->
                     <Border Width="130" Height="130" CornerRadius="65" BorderThickness="5" BorderBrush="#FFFF6BE0" HorizontalAlignment="Center" Margin="0,0,0,16"
@@ -822,12 +822,12 @@
                     <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                             ToolTip="Rotation Anchor (marks where a round begins)"
                             Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                        <TextBlock Text="⚓ ANCHOR" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
                     </Border>
                     <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                             ToolTip="Special Performer (One-Time)"
                             Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock Text="⭐ SPECIAL" FontSize="22" FontWeight="ExtraBold" Foreground="White"/>
+                        <TextBlock Text="⭐ SPECIAL" FontSize="22" FontWeight="ExtraBold" Foreground="White" />
                     </Border>
 
                     <TextBlock Text="{Binding CurrentSingerName}"
@@ -875,7 +875,7 @@
                                         <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,6,0" VerticalAlignment="Center"
                                                 ToolTip="Rotation Anchor (marks where a round begins)"
                                                 Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                            <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                         </Border>
                                         <TextBlock Text="{Binding Text}" FontSize="18" Foreground="#CCE0F0FF" />
                                     </StackPanel>
@@ -907,7 +907,7 @@
             <!-- Poster content -->
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Panel.ZIndex="3" Margin="48,20">
                 <Border Background="#33FFC24A" BorderBrush="#66FFC24A" BorderThickness="1.5" CornerRadius="14" Padding="14,5" HorizontalAlignment="Center" Margin="0,0,0,16">
-                    <TextBlock Text="🎪 TONIGHT'S LINEUP" FontSize="16" FontWeight="Bold" Foreground="#FFFFC24A" TextOptions.TextFormattingMode="Display"/>
+                    <TextBlock Text="🎪 TONIGHT'S LINEUP" FontSize="16" FontWeight="Bold" Foreground="#FFFFC24A" TextOptions.TextFormattingMode="Display" />
                 </Border>
 
                 <!-- Performer Selfie / Avatar -->
@@ -924,12 +924,12 @@
                 <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                         ToolTip="Rotation Anchor (marks where a round begins)"
                         Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock Text="⚓ ANCHOR" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                    <TextBlock Text="⚓ ANCHOR" FontSize="20" FontWeight="ExtraBold" Foreground="White" />
                 </Border>
                 <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
                         ToolTip="Special Performer (One-Time)"
                         Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TextBlock Text="⭐ SPECIAL" FontSize="20" FontWeight="ExtraBold" Foreground="White"/>
+                    <TextBlock Text="⭐ SPECIAL" FontSize="20" FontWeight="ExtraBold" Foreground="White" />
                 </Border>
 
                 <TextBlock Text="{Binding CurrentSingerName}"
@@ -972,7 +972,7 @@
                                 <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,8,0" VerticalAlignment="Center"
                                         ToolTip="Rotation Anchor (marks where a round begins)"
                                         Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <TextBlock Text="⚓" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                    <TextBlock Text="⚓" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                 </Border>
                                 <TextBlock Text="{Binding Text}" Foreground="#FFF0E0FF" FontWeight="SemiBold" TextAlignment="Center">
                                     <TextBlock.FontSize>
@@ -1229,12 +1229,12 @@
                                     <Border Background="#DC2626" CornerRadius="6" Padding="8,3" Margin="0,0,8,0"
                                             ToolTip="Rotation Anchor (marks where a round begins)"
                                             Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <TextBlock Text="⚓ ANCHOR" FontSize="14" FontWeight="ExtraBold" Foreground="White"/>
+                                        <TextBlock Text="⚓ ANCHOR" FontSize="14" FontWeight="ExtraBold" Foreground="White" />
                                     </Border>
                                     <Border Background="#8B5CF6" CornerRadius="6" Padding="8,3"
                                             ToolTip="Special Performer (One-Time)"
                                             Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <TextBlock Text="⭐ SPECIAL" FontSize="14" FontWeight="ExtraBold" Foreground="White"/>
+                                        <TextBlock Text="⭐ SPECIAL" FontSize="14" FontWeight="ExtraBold" Foreground="White" />
                                     </Border>
                                 </StackPanel>
                                 <TextBlock Text="{Binding CurrentSingerName}"
@@ -1298,7 +1298,7 @@
                                                     <Border Background="#DC2626" CornerRadius="4" Padding="4,1" Margin="0,0,0,4" HorizontalAlignment="Center"
                                                             ToolTip="Rotation Anchor (marks where a round begins)"
                                                             Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                        <TextBlock Text="⚓ ANCHOR" FontSize="11" FontWeight="ExtraBold" Foreground="White"/>
+                                                        <TextBlock Text="⚓ ANCHOR" FontSize="11" FontWeight="ExtraBold" Foreground="White" />
                                                     </Border>
                                                     <TextBlock Text="{Binding Text}" FontSize="16" FontWeight="Bold" Foreground="#FFFFF0D0" TextAlignment="Center" TextWrapping="Wrap" />
                                                 </StackPanel>
@@ -1468,12 +1468,12 @@
                             <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,8" HorizontalAlignment="Center"
                                     ToolTip="Rotation Anchor (marks where a round begins)"
                                     Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="⚓ ANCHOR" FontSize="16" FontWeight="ExtraBold" Foreground="White"/>
+                                <TextBlock Text="⚓ ANCHOR" FontSize="16" FontWeight="ExtraBold" Foreground="White" />
                             </Border>
                             <Border Background="#8B5CF6" CornerRadius="8" Padding="10,4" Margin="0,0,0,8" HorizontalAlignment="Center"
                                     ToolTip="Special Performer (One-Time)"
                                     Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="⭐ SPECIAL" FontSize="16" FontWeight="ExtraBold" Foreground="White"/>
+                                <TextBlock Text="⭐ SPECIAL" FontSize="16" FontWeight="ExtraBold" Foreground="White" />
                             </Border>
 
                             <TextBlock Text="{Binding CurrentSingerName}"
@@ -1485,7 +1485,7 @@
                             </TextBlock>
                             <TextBlock Text="{Binding CurrentSingerSong}"
                                        HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
-                                       Margin="0,6,0,0" FontSize="20" FontStyle="Italic" Foreground="#FF00E5FF" />
+                                       Margin="0,6,0,0" FontSize="24" FontStyle="Italic" Foreground="#FF00E5FF" />
                         </StackPanel>
                     </Border>
 
@@ -1549,7 +1549,7 @@
                                                     <Border Background="#DC2626" CornerRadius="5" Padding="5,3" VerticalAlignment="Center"
                                                             ToolTip="Rotation Anchor (marks where a round begins)"
                                                             Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                        <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                        <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                                     </Border>
                                                 </StackPanel>
 
@@ -1656,12 +1656,12 @@
                                             <Border Background="#DC2626" CornerRadius="6" Padding="8,2" Margin="0,0,8,0"
                                                     ToolTip="Rotation Anchor (marks where a round begins)"
                                                     Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                             </Border>
                                             <Border Background="#8B5CF6" CornerRadius="6" Padding="8,2"
                                                     ToolTip="Special Performer (One-Time)"
                                                     Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <TextBlock Text="⭐ SPECIAL" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                <TextBlock Text="⭐ SPECIAL" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                             </Border>
                                         </StackPanel>
                                         <TextBlock Text="{Binding CurrentSingerName}"
@@ -1713,7 +1713,7 @@
                                                     <Border Grid.Row="0" Background="#DC2626" CornerRadius="4" Padding="4,2" HorizontalAlignment="Left" Margin="0,0,0,4"
                                                             ToolTip="Rotation Anchor (marks where a round begins)"
                                                             Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                        <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                        <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                                     </Border>
                                                     <TextBlock Grid.Row="1" Text="{Binding Text}" FontSize="23" Foreground="#FF00FF88" FontFamily="Consolas, Segoe UI" FontWeight="Bold"
                                                                TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" />
@@ -1920,12 +1920,12 @@
                                             <Border Background="#DC2626" CornerRadius="6" Padding="8,2" Margin="0,0,8,0"
                                                     ToolTip="Rotation Anchor (marks where a round begins)"
                                                     Visibility="{Binding CurrentSingerIsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                             </Border>
                                             <Border Background="#8B5CF6" CornerRadius="6" Padding="8,2"
                                                     ToolTip="Special Performer (One-Time)"
                                                     Visibility="{Binding CurrentSingerIsSpecial, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <TextBlock Text="⭐ SPECIAL" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                <TextBlock Text="⭐ SPECIAL" FontSize="12" FontWeight="ExtraBold" Foreground="White" />
                                             </Border>
                                         </StackPanel>
                                         <TextBlock Text="{Binding CurrentSingerName}"
