@@ -1,13 +1,39 @@
-<!-- Edited on Sep 23, 2026 @ 12:46:00 -> Update Scaryoke.Unity 3D pointed flapper needle and vibrant visuals -->
-Last Edit: Sep 23, 2026 - Scaryoke.Unity Pointed Flapper Needle & 3D Wheel Improvements
+<!-- Edited on Sep 24, 2026 @ 10:30:00 -> Add projection-screen performance fixes and Casino Slot Reels rework -->
+Last Edit: Sep 24, 2026 - Projection Screen Performance Fixes (Lyracist & KSRotation)
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [26.9.24.0] - 2026-09-24
+
+### Fixed
+- **Projection Screen Rebuild Storms (`RotationWindow`, `SingerDisplayWindow`, `RotationWindowViewModel`, `DisplayViewModel`, KSRotation `MainViewModel`)**:
+  - **Coalesced Refresh**: A single rotation update used to rebuild the scrolling ticker, Star Wars crawl, and Movie Theater film strip once per collection/property change event (N+1 times in Lyracist, 20+ in KSRotation). Each window now schedules one refresh that runs after the whole update has finished.
+  - **No More Ticker Jumps**: The ticker and crawl only restart when their text actually changes; previously the ticker snapped back to the right edge on every rotation refresh.
+  - **Diffed Up-Next Queue**: `NextSingers` is updated in place by value instead of cleared and refilled, so the eight themed panels bound to it no longer regenerate their item templates for an unchanged queue.
+  - **KSRotation Mid-Reorder Updates**: Display updates are no longer pushed while a finish-song/skip reorder is half-applied; each such operation pushes one update when it completes.
+- **Vegas Marquee Bulb GPU Cost (`Lyracist`, `KSRotation`)**: Replaced ~100 per-bulb `DropShadowEffect` blur shaders (re-rendered on every 110ms chase step) with a single frozen radial gradient that bakes in the glow, tuned to match the original look.
+- **Cached Scrolling Content (`Lyracist`, `KSRotation`)**: The Movie Theater film strip and Casino Slot Reels strips use `CacheMode="BitmapCache"`, so the GPU slides a cached bitmap instead of re-rendering text and glow every frame. The 3D Star Wars crawl is intentionally left uncached (its perspective scaling would blur a cached bitmap).
+- **Synthwave Grid Lines (`Lyracist`, `KSRotation`)**: Lines now grow and travel via render transforms instead of animating `Width`/`Canvas.Left`/`Canvas.Top` (which forced a layout pass per line per frame), and share one frozen brush and glow per color.
+- **Avatar Lookups on the UI Thread (`Lyracist`, `KSRotation`)**: The current singer's avatar is no longer re-queried from SQLite and re-decoded (or re-downloaded from Gravatar) on every rotation update. Database lookups are cached for one minute; decoded images are cached by source and file timestamp, with failed Gravatar downloads evicted for retry. Lyracist's `SingerAvatarConverter` cache also benefits the Karaoke page's avatar images.
+- **Tablet Reactions (`Lyracist`)**: Reactions no longer block the SignalR hub thread (`Invoke` -> `InvokeAsync`) and are capped at 20 on screen at once.
+
+### Changed
+- **Version Increment Across Solution**: Incremented build revisions across solution projects and test suites.
+
 ## [26.9.23.0] - 2026-09-23
 
+### Fixed
+- **Casino Slot Reels Rendering & Spin (`Lyracist`, `KSRotation`)**:
+  - **Full-Size Reel Symbols**: Each reel strip was a `StackPanel` inside a fixed-height `Border`; WPF clamped its arrange size and silently clipped the stacked symbols before the scroll transform ran, so symbols rendered as small slivers. Reel strips are now `Canvas`-based with symbols positioned via `Canvas.Top`.
+  - **Coordinated Spin & Diamond Landing**: All three reels now spin at the same readable speed (driven by `CompositionTarget.Rendering`, like the film strip), then stop left-to-right over several seconds with a fixed 1-second ease-out, landing all three 💎 on the payline.
+  - **Tinted Symbols**: Each reel symbol has its own color instead of inheriting plain white.
+- **Next Spins Ticket Size (`Lyracist`, `KSRotation`)**: Ticket chips no longer stretch to the full panel height.
+
 ### Added
+- **Casino Slot Reels Jackpot Celebration (`Lyracist`, `KSRotation`)**: A sparkle burst and gold shockwave ring fire when all three reels land, clipped to the reel row.
+- **Casino Slot Reels Sponsor Box (`Lyracist`, `KSRotation`)**: DJ banner (image or video) box below the Next Spins queue, reusing the Stadium Jumbotron banner selection rather than a separate picker.
 - **Scaryoke.Unity Standalone 3D Carnival Wheel Project**:
   - **3D Physics & Procedural Mesh**: Added a new standalone Unity 3D engine project `Scaryoke.Unity` to the solution. Implements dynamic procedural 3D mesh wedge generation from `Settings/scaryoke_settings.json`, spring-damped flapper needle collisions, physical perimeter pegs, and velocity-modulated audio clicks with fallback procedural waveform generation.
   - **Pointed 3D Arrowhead Flapper Needle**: Replaced blunt box flapper with a procedurally generated 3D faceted chisel needle pointer featuring a sharp downward arrowhead tip, vibrant neon orange finish with facet contrast highlights, and a polished brass hinge pivot bolt.

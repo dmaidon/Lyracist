@@ -1,6 +1,25 @@
-<!-- Edited on Sep 21, 2026 @ 20:03:00 -> Add Active Singer Count on Vegas Billboard and Vinyl Record Banners -->
+<!-- Edited on Sep 24, 2026 @ 10:30:00 -> Add projection-screen performance fixes and Casino Slot Reels rework -->
 
 # Changelog
+
+## 2026-09-24
+
+- **Projection Screen Performance (`SingerDisplayWindow.xaml(.cs)`, `DisplayViewModel.cs`, `MainViewModel.cs`)**:
+  - A rotation update used to rebuild the ticker, Star Wars crawl, and film strip 20+ times (once per view-model property change and `NextSingers` event); these now coalesce into one refresh after the update, and the ticker/crawl only restart when their text actually changes (no more ticker jumping back to the start).
+  - `NextSingers` is diffed by value instead of cleared and refilled, so unchanged queues no longer regenerate item templates in all eight themed panels.
+  - Display updates are skipped mid-reorder (`_isFinishingSong`); each such operation pushes one final update itself.
+  - Vegas Marquee bulbs use one frozen glow gradient instead of ~100 `DropShadowEffect` shaders.
+  - Film strip and slot reel strips use `CacheMode="BitmapCache"`.
+  - Synthwave grid lines animate via render transforms (no per-frame layout) with shared frozen brushes/glows.
+  - Current-singer avatar: SQLite lookup cached for one minute; decoded/downloaded images cached (no more re-decoding or re-downloading Gravatars on every update).
+
+## 2026-09-23
+
+- **Casino Slot Reels Rework (`SingerDisplayWindow.xaml(.cs)`)**:
+  - Fixed reel symbols rendering as slivers (reel strips switched from `StackPanel` to `Canvas`).
+  - Reels spin together at a readable speed, stop left-to-right, and land all three 💎 on the payline; symbols are individually tinted.
+  - Added a sparkle/shockwave jackpot celebration, clipped to the reel row.
+  - Resized the Next Spins ticket chips and added a DJ sponsor banner box that reuses the Jumbotron banner selection.
 
 ## 2026-09-21
 

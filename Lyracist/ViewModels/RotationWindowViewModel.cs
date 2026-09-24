@@ -288,6 +288,41 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     public ObservableCollection<Singer> Rotation { get; } = [];
 
+    // Avatar type/source looked up by name for singers whose in-memory model has none. UpdateRotation
+    // runs on the UI thread on every rotation change, and querying SQLite each time stalled it.
+    // Entries expire after a minute so an avatar the DJ assigns mid-show still appears.
+    private readonly Dictionary<string, (string? Type, string? Source, DateTime FetchedUtc)> _dbAvatarLookups = new(StringComparer.Ordinal);
+    private static readonly TimeSpan DbAvatarLookupTtl = TimeSpan.FromMinutes(1);
+
+    private (string? Type, string? Source) LookupDbAvatar(string name)
+    {
+        if (_dbAvatarLookups.TryGetValue(name, out var hit) && DateTime.UtcNow - hit.FetchedUtc < DbAvatarLookupTtl)
+        {
+            return (hit.Type, hit.Source);
+        }
+
+        string? type = null;
+        string? source = null;
+        try
+        {
+            using var db = new Lyracist.Data.LyracistDbContext();
+            var dbSinger = db.Singers.FirstOrDefault(s => s.Name == name);
+            if (dbSinger != null)
+            {
+                type = dbSinger.AvatarType;
+                source = dbSinger.AvatarSource;
+            }
+        }
+        catch
+        {
+            // Ignored - cached as "no avatar" until the entry expires, rather than retried every update.
+        }
+
+        if (_dbAvatarLookups.Count >= 256) _dbAvatarLookups.Clear();
+        _dbAvatarLookups[name] = (type, source, DateTime.UtcNow);
+        return (type, source);
+    }
+
     public void UpdateRotation(List<Singer> singers)
     {
         var visibleSingers = IsLastRound ? singers.Where(s => !s.HasSungInLastRound).ToList() : singers;
@@ -315,19 +350,8 @@ public partial class RotationWindowViewModel : BaseViewModel
             var avatar = SingerAvatarConverter.ResolveSingerAvatar(now);
             if (avatar == null && !string.IsNullOrEmpty(now.Name))
             {
-                try
-                {
-                    using var db = new Lyracist.Data.LyracistDbContext();
-                    var dbSinger = db.Singers.FirstOrDefault(s => s.Name == now.Name);
-                    if (dbSinger != null)
-                    {
-                        avatar = SingerAvatarConverter.ResolveAvatarImage(dbSinger.AvatarType, dbSinger.AvatarSource);
-                    }
-                }
-                catch
-                {
-                    // Ignored
-                }
+                var (type, source) = LookupDbAvatar(now.Name);
+                avatar = SingerAvatarConverter.ResolveAvatarImage(type, source);
             }
             CurrentSingerAvatar = avatar;
             HasCurrentSingerAvatar = avatar != null;

@@ -1,5 +1,6 @@
 // Edited on Sep 6, 2026 @ 08:37:30 -> Add static ResolveAvatarImage and ResolveSingerAvatar helpers
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
@@ -52,10 +53,29 @@ public class SingerAvatarConverter : IValueConverter
         }
     }
 
+    // Decoded avatars keyed by source (plus the file's timestamp for uploads, so replacing an
+    // avatar file under the same name is picked up). Every rotation update and every rotation-list
+    // row used to re-read and re-decode the file, or start a fresh Gravatar download. Only used on
+    // the UI thread: Gravatar bitmaps load asynchronously and can't be frozen, so they can't be
+    // shared across threads.
+    private static readonly Dictionary<string, BitmapImage> _imageCache = new(StringComparer.Ordinal);
+    private const int MaxCachedImages = 256;
+
+    private static bool OnUiThread => System.Windows.Application.Current?.Dispatcher.CheckAccess() == true;
+
+    private static void CacheImage(string key, BitmapImage bitmap)
+    {
+        if (!OnUiThread) return;
+        if (_imageCache.Count >= MaxCachedImages) _imageCache.Clear();
+        _imageCache[key] = bitmap;
+    }
+
     public static BitmapImage? ResolveAvatarImage(string? avatarType, string? avatarSource, bool fallbackToDefault = false)
     {
         if (avatarType == "Gravatar" && !string.IsNullOrEmpty(avatarSource))
         {
+            string key = "G\u0001" + avatarSource;
+            if (OnUiThread && _imageCache.TryGetValue(key, out var cached)) return cached;
             try
             {
                 var bitmap = new BitmapImage();
@@ -64,6 +84,9 @@ public class SingerAvatarConverter : IValueConverter
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.EndInit();
                 // Do not freeze remote images as they load asynchronously and cannot be frozen synchronously.
+                // A failed download must not stay cached, or the singer would show a blank avatar until restart.
+                bitmap.DownloadFailed += (_, _) => _imageCache.Remove(key);
+                CacheImage(key, bitmap);
                 return bitmap;
             }
             catch
@@ -78,12 +101,16 @@ public class SingerAvatarConverter : IValueConverter
                 string fullPath = Path.Combine(Globals.AvatarsDir, avatarSource);
                 if (File.Exists(fullPath))
                 {
+                    string key = "U\u0001" + avatarSource + "\u0001" + File.GetLastWriteTimeUtc(fullPath).Ticks;
+                    if (OnUiThread && _imageCache.TryGetValue(key, out var cached)) return cached;
+
                     var bitmap = new BitmapImage();
                     bitmap.BeginInit();
                     bitmap.CacheOption = BitmapCacheOption.OnLoad;
                     bitmap.StreamSource = new MemoryStream(File.ReadAllBytes(fullPath));
                     bitmap.EndInit();
                     bitmap.Freeze();
+                    CacheImage(key, bitmap);
                     return bitmap;
                 }
             }

@@ -69,6 +69,98 @@ namespace KSRotation.ViewModels
 
         public ObservableCollection<NextSingerDisplay> NextSingers { get; } = [];
 
+        // Avatar type/source looked up by name for singers whose rotation entry has none.
+        // UpdateFromRotation runs on the UI thread on every rotation change, and querying SQLite each
+        // time stalled it. Entries expire after a minute so an avatar the DJ assigns mid-show appears.
+        private readonly Dictionary<string, (string? Type, string? Source, DateTime FetchedUtc)> _dbAvatarLookups = new(StringComparer.Ordinal);
+        private static readonly TimeSpan DbAvatarLookupTtl = TimeSpan.FromMinutes(1);
+
+        private (string? Type, string? Source) LookupDbAvatar(string name)
+        {
+            if (_dbAvatarLookups.TryGetValue(name, out var hit) && DateTime.UtcNow - hit.FetchedUtc < DbAvatarLookupTtl)
+            {
+                return (hit.Type, hit.Source);
+            }
+
+            string? type = null;
+            string? source = null;
+            try
+            {
+                using var db = new Lyracist.Data.LyracistDbContext();
+                var dbSinger = db.Singers.FirstOrDefault(s => s.Name == name);
+                if (dbSinger != null)
+                {
+                    type = dbSinger.AvatarType;
+                    source = dbSinger.AvatarSource;
+                }
+            }
+            catch
+            {
+                // Ignored - cached as "no avatar" until the entry expires, rather than retried every update.
+            }
+
+            if (_dbAvatarLookups.Count >= 256) _dbAvatarLookups.Clear();
+            _dbAvatarLookups[name] = (type, source, DateTime.UtcNow);
+            return (type, source);
+        }
+
+        // Decoded avatars keyed by source (plus the file's timestamp for uploads, so replacing an
+        // avatar file under the same name is picked up). Every rotation update used to re-read and
+        // re-decode the file, or start a brand-new Gravatar download, and handed the view a new image
+        // object each time. UI thread only: Gravatar bitmaps load asynchronously and can't be frozen.
+        private readonly Dictionary<string, System.Windows.Media.Imaging.BitmapImage> _avatarImages = new(StringComparer.Ordinal);
+
+        private System.Windows.Media.Imaging.BitmapImage? ResolveAvatarImage(string? avType, string? avSource)
+        {
+            if (string.IsNullOrEmpty(avSource)) return null;
+
+            try
+            {
+                string key;
+                System.Windows.Media.Imaging.BitmapImage bitmap;
+                if (avType == "Gravatar")
+                {
+                    key = "G\u0001" + avSource;
+                    if (_avatarImages.TryGetValue(key, out var cached)) return cached;
+
+                    bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri($"https://www.gravatar.com/avatar/{avSource}?d=identicon&s=150", UriKind.Absolute);
+                    bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    // A failed download must not stay cached, or the singer would show a blank avatar until restart.
+                    bitmap.DownloadFailed += (_, _) => _avatarImages.Remove(key);
+                }
+                else if (avType == "Uploaded")
+                {
+                    string fullPath = Path.Combine(Lyracist.Shared.Globals.AvatarsDir, avSource);
+                    if (!File.Exists(fullPath)) return null;
+
+                    key = "U\u0001" + avSource + "\u0001" + File.GetLastWriteTimeUtc(fullPath).Ticks;
+                    if (_avatarImages.TryGetValue(key, out var cached)) return cached;
+
+                    bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bitmap.StreamSource = new MemoryStream(File.ReadAllBytes(fullPath));
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+                }
+                else
+                {
+                    return null;
+                }
+
+                if (_avatarImages.Count >= 256) _avatarImages.Clear();
+                _avatarImages[key] = bitmap;
+                return bitmap;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         // Eight themed panels each bind an ItemsControl to NextSingers (collapsed ones still regenerate
         // their item templates), so Clear()+Add() on every rotation update rebuilt ~50 templates even
         // when the queue hadn't changed. Diffing by record value only touches entries that did change.
@@ -247,62 +339,15 @@ namespace KSRotation.ViewModels
                             ? current.Song
                             : $"{current.Song} – {current.Artist}");
 
-                    System.Windows.Media.ImageSource? avatar = null;
                     string? avType = current.AvatarType;
                     string? avSource = current.AvatarSource;
 
                     if ((string.IsNullOrEmpty(avSource) || avType == "None") && !string.IsNullOrEmpty(current.Name))
                     {
-                        try
-                        {
-                            using var db = new Lyracist.Data.LyracistDbContext();
-                            var dbSinger = db.Singers.FirstOrDefault(s => s.Name == current.Name);
-                            if (dbSinger != null)
-                            {
-                                avType = dbSinger.AvatarType;
-                                avSource = dbSinger.AvatarSource;
-                            }
-                        }
-                        catch
-                        {
-                            // Ignored
-                        }
+                        (avType, avSource) = LookupDbAvatar(current.Name);
                     }
 
-                    if (!string.IsNullOrEmpty(avSource))
-                    {
-                        if (avType == "Gravatar")
-                        {
-                            try
-                            {
-                                var bitmap = new System.Windows.Media.Imaging.BitmapImage();
-                                bitmap.BeginInit();
-                                bitmap.UriSource = new Uri($"https://www.gravatar.com/avatar/{avSource}?d=identicon&s=150", UriKind.Absolute);
-                                bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-                                bitmap.EndInit();
-                                avatar = bitmap;
-                            }
-                            catch { }
-                        }
-                        else if (avType == "Uploaded")
-                        {
-                            try
-                            {
-                                string fullPath = Path.Combine(Lyracist.Shared.Globals.AvatarsDir, avSource);
-                                if (File.Exists(fullPath))
-                                {
-                                    var bitmap = new System.Windows.Media.Imaging.BitmapImage();
-                                    bitmap.BeginInit();
-                                    bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-                                    bitmap.StreamSource = new MemoryStream(File.ReadAllBytes(fullPath));
-                                    bitmap.EndInit();
-                                    bitmap.Freeze();
-                                    avatar = bitmap;
-                                }
-                            }
-                            catch { }
-                        }
-                    }
+                    var avatar = ResolveAvatarImage(avType, avSource);
 
                     CurrentSingerAvatar = avatar;
                     HasCurrentSingerAvatar = avatar != null;

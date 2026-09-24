@@ -845,50 +845,59 @@ namespace KSRotation.Windows
             double maxWidth = w * 1.1;
 
             var color = _synthLineColors[_synthLineColorIndex++ % _synthLineColors.Count];
-            var brush = new SolidColorBrush(color);
-            brush.Freeze();
+            var (brush, glow) = SynthLineStyle(color);
 
+            // Full-width line whose growth and travel are render transforms (scale X around its center,
+            // translate Y) instead of animated Width/Canvas.Left/Canvas.Top - those are layout
+            // properties, so animating them re-measured and re-arranged every line on every frame.
             var rect = new System.Windows.Shapes.Rectangle
             {
+                Width = maxWidth,
                 Height = 2,
                 Fill = brush,
-                Effect = new DropShadowEffect { Color = color, BlurRadius = 12, ShadowDepth = 0, Opacity = 0.8 }
+                Effect = glow,
+                Opacity = 0
             };
-            Canvas.SetTop(rect, horizonY);
-            Canvas.SetLeft(rect, vanishX);
-            rect.Width = 0;
+            Canvas.SetLeft(rect, vanishX - (maxWidth / 2.0));
+            Canvas.SetTop(rect, 0);
+            var grow = new ScaleTransform(0, 1, maxWidth / 2.0, 0);
+            var travel = new TranslateTransform(0, horizonY);
+            var transforms = new TransformGroup();
+            transforms.Children.Add(grow);
+            transforms.Children.Add(travel);
+            rect.RenderTransform = transforms;
             SynthGridCanvas.Children.Add(rect);
 
-            double duration = 2.2;
+            var duration = TimeSpan.FromSeconds(2.2);
             var ease = new PowerEase { EasingMode = EasingMode.EaseIn, Power = 2.5 };
-            var storyboard = new Storyboard();
+            grow.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(0, 1, duration) { EasingFunction = ease });
+            travel.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(horizonY, h, duration) { EasingFunction = ease });
 
-            var topAnim = new DoubleAnimation(horizonY, h, TimeSpan.FromSeconds(duration)) { EasingFunction = ease };
-            Storyboard.SetTarget(topAnim, rect);
-            Storyboard.SetTargetProperty(topAnim, new PropertyPath(Canvas.TopProperty));
-            storyboard.Children.Add(topAnim);
-
-            var widthAnim = new DoubleAnimation(0, maxWidth, TimeSpan.FromSeconds(duration)) { EasingFunction = ease };
-            Storyboard.SetTarget(widthAnim, rect);
-            Storyboard.SetTargetProperty(widthAnim, new PropertyPath(System.Windows.Shapes.Rectangle.WidthProperty));
-            storyboard.Children.Add(widthAnim);
-
-            var leftAnim = new DoubleAnimation(vanishX, vanishX - (maxWidth / 2.0), TimeSpan.FromSeconds(duration)) { EasingFunction = ease };
-            Storyboard.SetTarget(leftAnim, rect);
-            Storyboard.SetTargetProperty(leftAnim, new PropertyPath(Canvas.LeftProperty));
-            storyboard.Children.Add(leftAnim);
-
-            var opacityAnim = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromSeconds(duration) };
+            var opacityAnim = new DoubleAnimationUsingKeyFrames { Duration = duration };
             opacityAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, KeyTime.FromPercent(0.0)));
             opacityAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.9, KeyTime.FromPercent(0.12)));
             opacityAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.9, KeyTime.FromPercent(0.8)));
             opacityAnim.KeyFrames.Add(new LinearDoubleKeyFrame(0.0, KeyTime.FromPercent(1.0)));
-            Storyboard.SetTarget(opacityAnim, rect);
-            Storyboard.SetTargetProperty(opacityAnim, new PropertyPath(UIElement.OpacityProperty));
-            storyboard.Children.Add(opacityAnim);
+            opacityAnim.Completed += (_, _) => SynthGridCanvas.Children.Remove(rect);
+            rect.BeginAnimation(OpacityProperty, opacityAnim);
+        }
 
-            storyboard.Completed += (s, e) => SynthGridCanvas.Children.Remove(rect);
-            storyboard.Begin();
+        // Frozen brush + glow per grid color, shared by every line of that color, instead of a fresh
+        // brush and DropShadowEffect allocated for each line spawned (one every 320ms).
+        private static readonly Dictionary<System.Windows.Media.Color, (SolidColorBrush Brush, DropShadowEffect Glow)> _synthLineStyles = [];
+
+        private static (SolidColorBrush Brush, DropShadowEffect Glow) SynthLineStyle(System.Windows.Media.Color color)
+        {
+            if (!_synthLineStyles.TryGetValue(color, out var style))
+            {
+                var brush = new SolidColorBrush(color);
+                brush.Freeze();
+                var glow = new DropShadowEffect { Color = color, BlurRadius = 12, ShadowDepth = 0, Opacity = 0.8 };
+                glow.Freeze();
+                style = (brush, glow);
+                _synthLineStyles[color] = style;
+            }
+            return style;
         }
 
         private void FestivalBeamCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
