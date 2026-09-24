@@ -1,5 +1,5 @@
-<!-- Edited on Sep 24, 2026 @ 10:30:00 -> Add projection-screen performance fixes and Casino Slot Reels rework -->
-Last Edit: Sep 24, 2026 - Projection Screen Performance Fixes (Lyracist & KSRotation)
+<!-- Edited on Sep 24, 2026 @ 13:00:00 -> Add shared projection effects, reduced-effects mode, view crossfade, and Lucky 7s slot landing -->
+Last Edit: Sep 24, 2026 - Shared Projection Effects, Reduced-Effects Mode & View Crossfade (Lyracist & KSRotation)
 
 # Changelog
 
@@ -18,8 +18,19 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Synthwave Grid Lines (`Lyracist`, `KSRotation`)**: Lines now grow and travel via render transforms instead of animating `Width`/`Canvas.Left`/`Canvas.Top` (which forced a layout pass per line per frame), and share one frozen brush and glow per color.
 - **Avatar Lookups on the UI Thread (`Lyracist`, `KSRotation`)**: The current singer's avatar is no longer re-queried from SQLite and re-decoded (or re-downloaded from Gravatar) on every rotation update. Database lookups are cached for one minute; decoded images are cached by source and file timestamp, with failed Gravatar downloads evicted for retry. Lyracist's `SingerAvatarConverter` cache also benefits the Karaoke page's avatar images.
 - **Tablet Reactions (`Lyracist`)**: Reactions no longer block the SignalR hub thread (`Invoke` -> `InvokeAsync`) and are capped at 20 on screen at once.
+- **KSRotation Display Window Leak**: Closing the projection display only stopped some of the views' animations; the Movie Theater film strip and slot reels hook `CompositionTarget.Rendering`, so closing while on them kept the closed window alive and rendering every frame, with one more copy per reopen. Closing now stops every view's animations.
+- **Slot Reels Anchor Flag Timing (`Lyracist`)**: The spin now waits for the rotation update to finish before reading whether the current singer is the anchor (it was read before being set).
+- **Repeated View Rebuilds**: View-change requests (load, show, view change, settings toggle) now collapse into one rebuild instead of building and tearing down a view several times in a row.
+
+### Added
+- **Reduced Projection Effects Setting (`Lyracist` Settings page, `KSRotation` Screen Rotation settings)**: For weaker venue PCs - halves particle counts and drops per-line/per-text glow effects and the pulsing jackpot-title glow on the themed projection views. Persisted with the other display settings.
+- **Crossfade Between Projection Views (`Lyracist`, `KSRotation`)**: Switching views (auto-rotation or a manual change) fades the old view out while it keeps animating, then fades the new one in.
+- **Auto-Rotation Skips Empty-Queue Views (`Lyracist`, `KSRotation`)**: The automatic screen rotation no longer picks the Star Wars Crawl while no one is queued (it would be a blank starfield), and moves on immediately if the queue empties while it's showing. The random picker is now shared (`ProjectionRotationPicker` in `Shared/ProjectionRotationEntry.cs`) with unit tests.
+- **Casino Slot Reels "Lucky 7s" (`Lyracist`, `KSRotation`)**: When the rotation's anchor singer (start of a new round) comes up, the reels land on 7️⃣ with a "LUCKY 7s! ⚓ NEW ROUND ⚓" banner; other singers land on 💎 with a "JACKPOT!" banner flash alongside the sparkle burst.
 
 ### Changed
+- **Shared Projection Effects (`Shared/ProjectionEffects.cs`)**: The canvas effects for every themed projection view (starfield, marquee bulbs, disco, synthwave, festival, slot machine, jukebox, jumbotron, movie theater) moved out of `RotationWindow` and `SingerDisplayWindow` into one shared file linked into both apps, so each effect and fix exists once. The two window code-behinds shrank from ~3,000 and ~2,600 lines to ~1,550 and ~1,100. All effect brushes are frozen.
+- **KSRotation Star Wars Crawl Starfield**: Now uses Lyracist's optimized starfield (100-300 stars with gradient halos) instead of up to 600 stars with per-star and per-galaxy blur effects.
 - **Version Increment Across Solution**: Incremented build revisions across solution projects and test suites.
 
 ## [26.9.23.0] - 2026-09-23

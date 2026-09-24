@@ -97,6 +97,10 @@ namespace KSRotation.Models
         /// DJs prefer not to display wait estimates to the audience; defaults on.</summary>
         public bool ShowEstimatedWaitTime { get; init; } = true;
 
+        /// <summary>"Reduced projection effects" for weaker venue PCs: the projection display's themed
+        /// views use fewer particles and skip per-element blur effects.</summary>
+        public bool ReducedProjectionEffects { get; init; }
+
         /// <summary>When true, patrons cannot request songs via the portal that have already been performed or queued in the current session.</summary>
         public bool BlockDuplicateSongsInSession { get; init; } = true;
 

@@ -51,6 +51,7 @@ public interface IDisplayService
     void SetLastRound(bool isLastRound);
     void SetRotationViewMode(string mode);
     void SetAutoRotateProjectionViews(bool enabled);
+    void SetReducedProjectionEffects(bool enabled);
     void SetAutoRotateDurationSeconds(int seconds);
     void SetProjectionRotationSchedule(System.Collections.Generic.List<ProjectionRotationEntry> schedule);
     void SetCrawlBannerText(string text);

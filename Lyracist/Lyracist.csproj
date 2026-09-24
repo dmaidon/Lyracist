@@ -95,6 +95,7 @@
   <ItemGroup>
     <Compile Include="..\Shared\IRotationSinger.cs" Link="IRotationSinger.cs" />
     <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
+    <Compile Include="..\Shared\ProjectionEffects.cs" Link="ProjectionEffects.cs" />
     <Compile Include="..\Shared\ChromecastDiscoveryService.cs" Link="ChromecastDiscoveryService.cs" />
     <Compile Include="..\Shared\ChromecastSender.cs" Link="ChromecastSender.cs" />
     <Compile Include="..\Shared\BrowserCastDiscoveryService.cs" Link="BrowserCastDiscoveryService.cs" />

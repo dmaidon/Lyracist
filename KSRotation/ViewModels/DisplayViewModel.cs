@@ -65,6 +65,11 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool ShowEstimatedWaitTime { get; set; } = true;
 
+        /// <summary>DJ's "reduced projection effects" setting for weaker venue PCs: the projection
+        /// views use fewer particles and skip per-element blur effects.</summary>
+        [ObservableProperty]
+        public partial bool ReducedEffects { get; set; }
+
         public sealed record NextSingerDisplay(string Text, bool IsRotationStart);
 
         public ObservableCollection<NextSingerDisplay> NextSingers { get; } = [];

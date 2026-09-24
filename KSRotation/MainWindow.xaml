@@ -2159,6 +2159,13 @@
                                         Margin="0,0,0,10"
                                         ToolTip="When enabled, the projection display automatically randomly changes through the selected screens below every configured interval, instead of staying on one fixed screen." />
 
+                                    <CheckBox
+                                        Content="Reduced projection effects (slower PCs)"
+                                        IsChecked="{Binding ReducedProjectionEffects, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource ModernCheckBoxStyle}"
+                                        Margin="0,0,0,10"
+                                        ToolTip="Use fewer particles and skip glow/blur effects on the themed projection screens. Turn this on if the projection display stutters on an older laptop or a busy venue PC." />
+
                                     <!-- Single Duration Setting -->
                                     <Grid Margin="0,0,0,10">
                                         <Grid.ColumnDefinitions>

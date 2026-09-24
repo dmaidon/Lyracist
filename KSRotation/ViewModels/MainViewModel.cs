@@ -573,6 +573,18 @@ namespace KSRotation.ViewModels
             RestartProjectionRotationTimer();
         }
 
+        /// <summary>"Reduced projection effects" for weaker venue PCs: fewer particles and no
+        /// per-element blur effects on the projection display's themed views.</summary>
+        [ObservableProperty]
+        public partial bool ReducedProjectionEffects { get; set; }
+
+        partial void OnReducedProjectionEffectsChanged(bool value)
+        {
+            _displayWindowService.SetReducedEffects(value);
+            if (_isInitializing) return;
+            QueueSaveSettings();
+        }
+
         /// <summary>Single duration (in seconds) that each randomly chosen screen stays visible before automatically changing.</summary>
         [ObservableProperty]
         public partial int AutoRotateDurationSeconds { get; set; } = 180;
@@ -1005,19 +1017,10 @@ namespace KSRotation.ViewModels
             RestartProjectionRotationTimer();
         }
 
-        private static readonly Random _rotationRng = new();
-
-        private static ProjectionRotationEntry? PickRandomProjectionView(List<ProjectionRotationEntry> enabled, string? currentView)
-        {
-            if (enabled.Count == 0) return null;
-            if (enabled.Count == 1) return enabled[0];
-
-            var candidates = enabled.Where(e => e.ViewName != currentView).ToList();
-            if (candidates.Count == 0) candidates = enabled;
-
-            int idx = _rotationRng.Next(candidates.Count);
-            return candidates[idx];
-        }
+        // Whether the projection display has anyone to show - views like the Star Wars crawl are skipped
+        // by the automatic rotation while it's empty (see ProjectionRotationPicker).
+        private bool RotationHasActiveSingers() =>
+            Singers.Any(s => !s.IsInactive && !s.IsPaused && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound));
 
         /// <summary>Stops any in-flight rotation and, if enabled with at least one checked view, picks a
         /// random enabled view and restarts the advance timer. Called whenever the DJ
@@ -1030,7 +1033,7 @@ namespace KSRotation.ViewModels
             var enabled = ProjectionRotationSchedule.Where(e => e.IsEnabled).ToList();
             if (enabled.Count == 0) return;
 
-            var initial = PickRandomProjectionView(enabled, null);
+            var initial = ProjectionRotationPicker.Pick(enabled, null, RotationHasActiveSingers());
             if (initial != null)
             {
                 SelectedProjectionView = initial.ViewName;
@@ -1060,7 +1063,7 @@ namespace KSRotation.ViewModels
                 return;
             }
 
-            var next = PickRandomProjectionView(enabled, SelectedProjectionView);
+            var next = ProjectionRotationPicker.Pick(enabled, SelectedProjectionView, RotationHasActiveSingers());
             if (next != null)
             {
                 SelectedProjectionView = next.ViewName;
@@ -1294,6 +1297,7 @@ namespace KSRotation.ViewModels
             LastRequestTime = string.IsNullOrWhiteSpace(settings.LastRequestTime) ? "1:30 AM" : settings.LastRequestTime;
             AutoSwitchToRemoteDjOnHandoff = settings.AutoSwitchToRemoteDjOnHandoff;
             AutoRotateProjectionViews = settings.AutoRotateProjectionViews;
+            ReducedProjectionEffects = settings.ReducedProjectionEffects;
             AutoRotateDurationSeconds = settings.AutoRotateDurationSeconds > 0 ? settings.AutoRotateDurationSeconds : 180;
             LoadProjectionRotationSchedule(settings.ProjectionRotationSchedule);
             _displayWindowService.SetShowEstimatedWaitTime(ShowEstimatedWaitTime);
@@ -2496,6 +2500,15 @@ namespace KSRotation.ViewModels
                 _displayWindowService.Update(Singers);
             }
 
+            // The queue just emptied while the automatic rotation is showing a view that needs singers
+            // (the crawl): move on now rather than leaving a blank screen up until the next timer tick.
+            if (!_isInitializing && _projectionRotationTimer != null
+                && ProjectionRotationPicker.NeedsSingers(SelectedProjectionView)
+                && !RotationHasActiveSingers())
+            {
+                AdvanceProjectionRotation();
+            }
+
             if (!_isInitializing)
             {
                 QueueSaveDatabase();
@@ -3105,6 +3118,7 @@ namespace KSRotation.ViewModels
                 LastRequestTime = LastRequestTime,
                 AutoSwitchToRemoteDjOnHandoff = AutoSwitchToRemoteDjOnHandoff,
                 AutoRotateProjectionViews = AutoRotateProjectionViews,
+                ReducedProjectionEffects = ReducedProjectionEffects,
                 AutoRotateDurationSeconds = AutoRotateDurationSeconds > 0 ? AutoRotateDurationSeconds : 180,
                 ProjectionRotationSchedule = [.. ProjectionRotationSchedule]
             };

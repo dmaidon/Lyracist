@@ -1176,8 +1176,8 @@
                             <Ellipse Width="18" Height="18" Fill="#FFD4AF37" HorizontalAlignment="Center" Margin="0,-4,0,0" />
                         </StackPanel>
 
-                        <!-- Jackpot celebration burst - empty/idle until TriggerSlotJackpotCelebration
-                             fills it, once all three reels land on the diamond. Last child of this
+                        <!-- Jackpot celebration burst - empty/idle until SlotMachineEffect (Shared/ProjectionEffects.cs)
+                             fills it, once all three reels land (💎, or 7️⃣ for the anchor singer). Last child of this
                              Grid so the sparkle/shockwave burst renders on top of the reel row, but
                              ClipToBounds keeps it confined to the reel row itself instead of ballooning
                              up into the marquee header above or sideways past the cabinet edges. -->

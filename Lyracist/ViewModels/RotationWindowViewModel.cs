@@ -222,6 +222,11 @@ public partial class RotationWindowViewModel : BaseViewModel
     [ObservableProperty]
     private string _crawlBannerText = string.Empty;
 
+    /// <summary>DJ's "reduced projection effects" setting for weaker venue PCs: the projection views
+    /// use fewer particles and skip per-element blur effects.</summary>
+    [ObservableProperty]
+    private bool _reducedEffects;
+
     /// <summary>File path of the DJ banner (image or .mp4) the DJ picked to display in the
     /// Stadium Jumbotron's bottom sponsor box. Empty when none is selected.</summary>
     [ObservableProperty]

@@ -1,5 +1,8 @@
 // Created on Sep 22, 2026 @ 10:30:00 -> Add ProjectionRotationEntry for the automatic screen-rotation schedule
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Lyracist.Shared;
@@ -47,4 +50,33 @@ public class ProjectionRotationEntry : INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+}
+
+/// <summary>Picks the next view for the automatic screen rotation. Shared by Lyracist and KSRotation.</summary>
+public static class ProjectionRotationPicker
+{
+    private static readonly Random Rng = new();
+
+    /// <summary>Views that show nothing useful without singers in the rotation - the Star Wars crawl
+    /// only scrolls the queue, so with nobody queued it's a blank starfield.</summary>
+    public static readonly IReadOnlyCollection<string> ViewsNeedingSingers = ["Star Wars Crawl"];
+
+    public static bool NeedsSingers(string? view) => view != null && ViewsNeedingSingers.Contains(view);
+
+    /// <summary>Returns a random enabled view other than <paramref name="currentView"/> (when there's a
+    /// choice), skipping views that need singers while <paramref name="hasSingers"/> is false. Returns
+    /// null when nothing is enabled or nothing enabled can be shown.</summary>
+    public static ProjectionRotationEntry? Pick(IReadOnlyList<ProjectionRotationEntry> enabled, string? currentView, bool hasSingers)
+    {
+        IReadOnlyList<ProjectionRotationEntry> showable = hasSingers
+            ? enabled
+            : enabled.Where(e => !NeedsSingers(e.ViewName)).ToList();
+        if (showable.Count == 0) return null;
+        if (showable.Count == 1) return showable[0];
+
+        var candidates = showable.Where(e => e.ViewName != currentView).ToList();
+        if (candidates.Count == 0) candidates = showable.ToList();
+
+        return candidates[Rng.Next(candidates.Count)];
+    }
 }

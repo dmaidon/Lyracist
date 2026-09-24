@@ -25,6 +25,10 @@ public class DisplayPreferences
     /// <see cref="ProjectionRotationSchedule"/> instead of staying on one fixed screen.</summary>
     public bool AutoRotateProjectionViews { get; set; }
 
+    /// <summary>"Reduced projection effects" for weaker venue PCs: the rotation display's themed views
+    /// use fewer particles and skip per-element blur effects.</summary>
+    public bool ReducedProjectionEffects { get; set; }
+
     /// <summary>How many seconds each randomly chosen screen stays up during automatic screen rotation.</summary>
     public int AutoRotateDurationSeconds { get; set; } = 180;
 

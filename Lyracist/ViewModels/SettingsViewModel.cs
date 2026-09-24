@@ -261,6 +261,7 @@ public partial class SettingsViewModel : BaseViewModel
         _isLyricsMirrored = prefs.IsLyricsMirrored;
         _selectedProjectionView = prefs.RotationViewMode ?? "Normal List";
         _autoRotateProjectionViews = prefs.AutoRotateProjectionViews;
+        _reducedProjectionEffects = prefs.ReducedProjectionEffects;
         _autoRotateDurationSeconds = prefs.AutoRotateDurationSeconds > 0 ? prefs.AutoRotateDurationSeconds : 180;
         LoadProjectionRotationSchedule(prefs.ProjectionRotationSchedule);
 

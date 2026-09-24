@@ -217,6 +217,16 @@ public partial class SettingsViewModel
         _display.SetAutoRotateProjectionViews(value);
     }
 
+    /// <summary>"Reduced projection effects" for weaker venue PCs: fewer particles and no
+    /// per-element blur effects on the rotation display's themed views.</summary>
+    [ObservableProperty]
+    private bool _reducedProjectionEffects;
+
+    partial void OnReducedProjectionEffectsChanged(bool value)
+    {
+        _display.SetReducedProjectionEffects(value);
+    }
+
     /// <summary>Single duration (in seconds) that each randomly chosen screen stays visible before automatically changing.</summary>
     [ObservableProperty]
     private int _autoRotateDurationSeconds = 180;

@@ -160,6 +160,7 @@ public class DisplayService : IDisplayService
                 vm.SelectedProjectionView = _preferences.RotationViewMode ?? "Normal List";
                 vm.CrawlBannerText = Core.Helpers.AppSettings.GetActiveCrawlBannerTemplate();
                 vm.JumbotronBannerPath = _preferences.SelectedJumbotronBannerPath ?? string.Empty;
+                vm.ReducedEffects = _preferences.ReducedProjectionEffects;
             }
         }
         _rotationWindow!.Show();
@@ -469,6 +470,15 @@ public class DisplayService : IDisplayService
         var vm = _serviceProvider.GetService<RotationWindowViewModel>();
         vm?.UpdateRotation(singers);
 
+        // The queue just emptied while the automatic rotation is showing a view that needs singers
+        // (the crawl): move on now rather than leaving a blank screen up until the next timer tick.
+        if (_projectionRotationTimer != null
+            && ProjectionRotationPicker.NeedsSingers(_preferences.RotationViewMode)
+            && !RotationDisplayHasSingers())
+        {
+            AdvanceProjectionRotation();
+        }
+
         bool hasSingers = singers.Count > 0;
         if (_rotationHadSingers && !hasSingers)
         {
@@ -550,6 +560,15 @@ public class DisplayService : IDisplayService
         RestartProjectionRotationTimer();
     }
 
+    public void SetReducedProjectionEffects(bool enabled)
+    {
+        _preferences.ReducedProjectionEffects = enabled;
+        DisplayPreferencesStore.Save(_preferences);
+
+        var vm = _serviceProvider.GetService<RotationWindowViewModel>();
+        vm?.ReducedEffects = enabled;
+    }
+
     public void SetAutoRotateDurationSeconds(int seconds)
     {
         _preferences.AutoRotateDurationSeconds = seconds < 5 ? 5 : seconds;
@@ -564,19 +583,10 @@ public class DisplayService : IDisplayService
         RestartProjectionRotationTimer();
     }
 
-    private static readonly Random _rotationRng = new();
-
-    private static ProjectionRotationEntry? PickRandomProjectionView(List<ProjectionRotationEntry> enabled, string? currentView)
-    {
-        if (enabled.Count == 0) return null;
-        if (enabled.Count == 1) return enabled[0];
-
-        var candidates = enabled.Where(e => e.ViewName != currentView).ToList();
-        if (candidates.Count == 0) candidates = enabled;
-
-        int idx = _rotationRng.Next(candidates.Count);
-        return candidates[idx];
-    }
+    // Whether the rotation display has anyone to show - views like the Star Wars crawl are skipped by
+    // the automatic rotation while it's empty (see ProjectionRotationPicker).
+    private bool RotationDisplayHasSingers() =>
+        _serviceProvider.GetService<RotationWindowViewModel>()?.FullRotation.Count > 0;
 
     /// <summary>Stops any in-flight rotation and, if enabled with at least one checked view, picks a
     /// random enabled view and restarts the advance timer. Called on load and whenever the DJ
@@ -590,7 +600,7 @@ public class DisplayService : IDisplayService
         var enabled = _preferences.ProjectionRotationSchedule.Where(e => e.IsEnabled).ToList();
         if (enabled.Count == 0) return;
 
-        var initial = PickRandomProjectionView(enabled, null);
+        var initial = ProjectionRotationPicker.Pick(enabled, null, RotationDisplayHasSingers());
         if (initial != null)
         {
             SetRotationViewMode(initial.ViewName);
@@ -618,7 +628,7 @@ public class DisplayService : IDisplayService
             return;
         }
 
-        var next = PickRandomProjectionView(enabled, _preferences.RotationViewMode);
+        var next = ProjectionRotationPicker.Pick(enabled, _preferences.RotationViewMode, RotationDisplayHasSingers());
         if (next != null)
         {
             SetRotationViewMode(next.ViewName);

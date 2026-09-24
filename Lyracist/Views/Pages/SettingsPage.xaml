@@ -486,6 +486,8 @@
 
                                     <TextBlock Text="Billboard View Mode" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                     <ComboBox ItemsSource="{Binding ProjectionViews}" SelectedItem="{Binding SelectedProjectionView, Mode=TwoWay}" Margin="0,0,0,6" />
+                                    <CheckBox Content="Reduced projection effects (slower PCs)" IsChecked="{Binding ReducedProjectionEffects, Mode=TwoWay}" Margin="0,0,0,6"
+                                              ToolTip="Use fewer particles and skip glow/blur effects on the themed rotation screens. Turn this on if the rotation display stutters on an older laptop or a busy venue PC." />
                                     <Expander Header="View Mode Descriptions &amp; Themes" Margin="0,0,0,12" IsExpanded="False">
                                         <StackPanel Margin="4,6">
                                             <TextBlock Text="• Normal List: Displays active singers in clean, high-contrast, self-wrapping columns. The active singer is highlighted in crimson." Margin="0,2" TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource AppTextSecondaryBrush}" />

@@ -1,8 +1,15 @@
-<!-- Edited on Sep 24, 2026 @ 10:30:00 -> Add projection-screen performance fixes and Casino Slot Reels rework -->
+<!-- Edited on Sep 24, 2026 @ 13:00:00 -> Add shared projection effects, reduced-effects mode, view crossfade, and Lucky 7s slot landing -->
 
 # Changelog
 
 ## 2026-09-24
+
+- **Shared Projection Effects (`Shared/ProjectionEffects.cs`)**: All themed-view canvas effects now live in one file shared with Lyracist; `SingerDisplayWindow.xaml.cs` went from ~2,600 to ~1,100 lines. The Star Wars crawl starfield switched to the optimized version (no per-star/per-galaxy blur, 100-300 stars).
+- **Display Window Leak Fix**: Closing the projection display now stops every view's animations; the film strip and slot reels previously kept the closed window alive and rendering every frame.
+- **Reduced Projection Effects Setting** (Screen Rotation settings): fewer particles and no per-element glow effects for slower PCs; saved in settings.
+- **View Crossfade**: switching projection views fades out the old view and fades in the new one; view-change requests collapse into a single rebuild.
+- **Auto-Rotation Empty Queue**: skips the Star Wars Crawl while no one is queued and moves on immediately if the queue empties while it's showing.
+- **Casino Slot Reels Lucky 7s**: the anchor singer lands 7️⃣ with a "LUCKY 7s! ⚓ NEW ROUND ⚓" banner; others land 💎 with "JACKPOT!".
 
 - **Projection Screen Performance (`SingerDisplayWindow.xaml(.cs)`, `DisplayViewModel.cs`, `MainViewModel.cs`)**:
   - A rotation update used to rebuild the ticker, Star Wars crawl, and film strip 20+ times (once per view-model property change and `NextSingers` event); these now coalesce into one refresh after the update, and the ticker/crawl only restart when their text actually changes (no more ticker jumping back to the start).

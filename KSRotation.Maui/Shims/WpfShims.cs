@@ -180,6 +180,7 @@ namespace KSRotation.Services
         public void SetShowQrCode(bool show) { }
         public void SetShowEstimatedWaitTime(bool show) { }
         public void SetJumbotronBanner(string? path) { }
+        public void SetReducedEffects(bool enabled) { }
         public void RepositionWindow() { }
         public Task<bool> MoveRotationTo(DisplayTarget target) => Task.FromResult(true);
         public Task StopCastingAsync() => MauiCastingService.Instance.StopCastingAsync();

@@ -321,6 +321,14 @@ namespace KSRotation.Services
         }
 
         /// <summary>
+        /// Turns the "reduced projection effects" mode (fewer particles, no per-element blur) on or off.
+        /// </summary>
+        public void SetReducedEffects(bool enabled)
+        {
+            _viewModel.ReducedEffects = enabled;
+        }
+
+        /// <summary>
         /// Updates popup banner text, resolving the {venue} and {dj} variables.
         /// </summary>
         /// <param name="template">Raw banner text; may contain {venue} and {dj}.</param>
