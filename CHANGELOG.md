@@ -1,5 +1,5 @@
-<!-- Edited on Sep 24, 2026 @ 13:00:00 -> Add shared projection effects, reduced-effects mode, view crossfade, and Lucky 7s slot landing -->
-Last Edit: Sep 24, 2026 - Shared Projection Effects, Reduced-Effects Mode & View Crossfade (Lyracist & KSRotation)
+<!-- Edited on Sep 24, 2026 @ 09:06:00 -> Update Jukebox banner typography, push button dimensions, and split singer/song layout -->
+Last Edit: Sep 24, 2026 - Jukebox Banner Typography & Split Singer/Song Queue Layout (Lyracist & KSRotation)
 
 # Changelog
 
@@ -29,6 +29,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Casino Slot Reels "Lucky 7s" (`Lyracist`, `KSRotation`)**: When the rotation's anchor singer (start of a new round) comes up, the reels land on 7️⃣ with a "LUCKY 7s! ⚓ NEW ROUND ⚓" banner; other singers land on 💎 with a "JACKPOT!" banner flash alongside the sparkle burst.
 
 ### Changed
+- **Jukebox Banner Queue Layout & Push-Button Styling (`Lyracist`, `KSRotation`)**:
+  - **Two-Line Queue Card**: Upcoming singer entries in the Select-A-Song pushbutton panel now display the singer name and estimated wait time `{N}` together on the first line, with the song title displayed on a separate line below in italic cyan text.
+  - **Enlarged PUSH Button Selector**: Increased the chunky illuminated "PUSH" pushbutton badge padding from `4,1` to `12,6` and increased its font size to 15pt bold black on gold with a tactile bevel border, matching the aesthetic of authentic vintage diner jukebox selection buttons.
+  - **Larger Current Singer Typography**: Increased current singer name display in the spinning vinyl dome from 42/44pt to 52pt bold with neon magenta shadow glow.
 - **Shared Projection Effects (`Shared/ProjectionEffects.cs`)**: The canvas effects for every themed projection view (starfield, marquee bulbs, disco, synthwave, festival, slot machine, jukebox, jumbotron, movie theater) moved out of `RotationWindow` and `SingerDisplayWindow` into one shared file linked into both apps, so each effect and fix exists once. The two window code-behinds shrank from ~3,000 and ~2,600 lines to ~1,550 and ~1,100. All effect brushes are frozen.
 - **KSRotation Star Wars Crawl Starfield**: Now uses Lyracist's optimized starfield (100-300 stars with gradient halos) instead of up to 600 stars with per-star and per-galaxy blur effects.
 - **Version Increment Across Solution**: Incremented build revisions across solution projects and test suites.

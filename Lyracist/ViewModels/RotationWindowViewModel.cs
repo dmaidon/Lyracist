@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 19:56:00 -> Add ActiveSingerCount and ActiveSingerCountText for Vegas and Vinyl banners
+// Edited on Sep 24, 2026 @ 09:05:00 -> Add SingerName, Song, and WaitTime properties to NextSingerDisplay for Jukebox banner split-line layout
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -248,7 +248,26 @@ public partial class RotationWindowViewModel : BaseViewModel
     [ObservableProperty]
     private string _performerHeaderText = "NOW SINGING";
 
-    public record NextSingerDisplay(string Text, bool IsRotationStart);
+    public sealed record NextSingerDisplay
+    {
+        public string Text { get; init; }
+        public bool IsRotationStart { get; init; }
+        public string SingerName { get; init; }
+        public string Song { get; init; }
+        public string SongTitle => Song;
+        public string WaitTime { get; init; }
+        public bool HasSong => !string.IsNullOrWhiteSpace(Song);
+        public bool HasWaitTime => !string.IsNullOrWhiteSpace(WaitTime);
+
+        public NextSingerDisplay(string text, bool isRotationStart, string singerName = "", string song = "", string waitTime = "")
+        {
+            Text = text;
+            IsRotationStart = isRotationStart;
+            SingerName = string.IsNullOrWhiteSpace(singerName) ? text : singerName;
+            Song = song;
+            WaitTime = waitTime;
+        }
+    }
 
     public ObservableCollection<NextSingerDisplay> NextSingers { get; } = [];
 
@@ -399,8 +418,15 @@ public partial class RotationWindowViewModel : BaseViewModel
             var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(visibleSingers, now, 6, isLastRound: IsLastRound);
             foreach (var candidate in nextActiveSingers)
             {
-                string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
-                nextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart));
+                string waitBadge = (ShowEstimatedWaitTime && candidate.EstimatedWaitMinutes > 0) ? $" {{{candidate.EstimatedWaitMinutes}}}" : string.Empty;
+                string waitTime = (ShowEstimatedWaitTime && candidate.EstimatedWaitMinutes > 0) ? $"{{{candidate.EstimatedWaitMinutes}}}" : string.Empty;
+                string sName = candidate.IsDuet ? $"{candidate.Name} & {candidate.DuetPartnerName}" : candidate.Name;
+                if (candidate.IsMusic) sName = "[MUSIC]";
+                string songText = candidate.IsMusic
+                    ? (string.IsNullOrWhiteSpace(candidate.Artist) ? candidate.SongTitle : $"{candidate.SongTitle} – {candidate.Artist}")
+                    : candidate.SongTitle;
+                string display = string.IsNullOrEmpty(songText) ? $"{sName}{waitBadge}" : $"{sName}{waitBadge} (\"{songText}\")";
+                nextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart, sName, songText ?? string.Empty, waitTime));
             }
         }
         else
@@ -408,8 +434,15 @@ public partial class RotationWindowViewModel : BaseViewModel
             var activeSingers = visibleSingers.Where(s => !s.IsPaused && !s.IsInactive && !s.IsSkipped).Take(6).ToList();
             foreach (var singer in activeSingers)
             {
-                string display = string.IsNullOrEmpty(singer.SongTitle) ? singer.Name : $"{singer.Name} (\"{singer.SongTitle}\")";
-                nextSingers.Add(new NextSingerDisplay(display, singer.IsRotationStart));
+                string waitBadge = (ShowEstimatedWaitTime && singer.EstimatedWaitMinutes > 0) ? $" {{{singer.EstimatedWaitMinutes}}}" : string.Empty;
+                string waitTime = (ShowEstimatedWaitTime && singer.EstimatedWaitMinutes > 0) ? $"{{{singer.EstimatedWaitMinutes}}}" : string.Empty;
+                string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
+                if (singer.IsMusic) sName = "[MUSIC]";
+                string songText = singer.IsMusic
+                    ? (string.IsNullOrWhiteSpace(singer.Artist) ? singer.SongTitle : $"{singer.SongTitle} – {singer.Artist}")
+                    : singer.SongTitle;
+                string display = string.IsNullOrEmpty(songText) ? $"{sName}{waitBadge}" : $"{sName}{waitBadge} (\"{songText}\")";
+                nextSingers.Add(new NextSingerDisplay(display, singer.IsRotationStart, sName, songText ?? string.Empty, waitTime));
             }
         }
         SyncNextSingers(NextSingers, nextSingers);
@@ -497,8 +530,15 @@ public partial class RotationWindowViewModel : BaseViewModel
             var nextActiveSingers = Lyracist.Shared.RotationHelpers.GetNextActiveSingers(Rotation.ToList(), currentMatch, 6, isLastRound: IsLastRound);
             foreach (var candidate in nextActiveSingers)
             {
-                string display = string.IsNullOrEmpty(candidate.SongTitle) ? candidate.Name : $"{candidate.Name} (\"{candidate.SongTitle}\")";
-                nextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart));
+                string waitBadge = (ShowEstimatedWaitTime && candidate.EstimatedWaitMinutes > 0) ? $" {{{candidate.EstimatedWaitMinutes}}}" : string.Empty;
+                string waitTime = (ShowEstimatedWaitTime && candidate.EstimatedWaitMinutes > 0) ? $"{{{candidate.EstimatedWaitMinutes}}}" : string.Empty;
+                string sName = candidate.IsDuet ? $"{candidate.Name} & {candidate.DuetPartnerName}" : candidate.Name;
+                if (candidate.IsMusic) sName = "[MUSIC]";
+                string songText = candidate.IsMusic
+                    ? (string.IsNullOrWhiteSpace(candidate.Artist) ? candidate.SongTitle : $"{candidate.SongTitle} – {candidate.Artist}")
+                    : candidate.SongTitle;
+                string display = string.IsNullOrEmpty(songText) ? $"{sName}{waitBadge}" : $"{sName}{waitBadge} (\"{songText}\")";
+                nextSingers.Add(new NextSingerDisplay(display, candidate.IsRotationStart, sName, songText ?? string.Empty, waitTime));
             }
         }
         else
@@ -506,8 +546,15 @@ public partial class RotationWindowViewModel : BaseViewModel
             var activeSingers = Rotation.Where(s => !s.IsPaused && !s.IsInactive && !s.IsSkipped && (!IsLastRound || !s.HasSungInLastRound)).Take(6).ToList();
             foreach (var s in activeSingers)
             {
-                string display = string.IsNullOrEmpty(s.SongTitle) ? s.Name : $"{s.Name} (\"{s.SongTitle}\")";
-                nextSingers.Add(new NextSingerDisplay(display, s.IsRotationStart));
+                string waitBadge = (ShowEstimatedWaitTime && s.EstimatedWaitMinutes > 0) ? $" {{{s.EstimatedWaitMinutes}}}" : string.Empty;
+                string waitTime = (ShowEstimatedWaitTime && s.EstimatedWaitMinutes > 0) ? $"{{{s.EstimatedWaitMinutes}}}" : string.Empty;
+                string sName = s.IsDuet ? $"{s.Name} & {s.DuetPartnerName}" : s.Name;
+                if (s.IsMusic) sName = "[MUSIC]";
+                string songText = s.IsMusic
+                    ? (string.IsNullOrWhiteSpace(s.Artist) ? s.SongTitle : $"{s.SongTitle} – {s.Artist}")
+                    : s.SongTitle;
+                string display = string.IsNullOrEmpty(songText) ? $"{sName}{waitBadge}" : $"{sName}{waitBadge} (\"{songText}\")";
+                nextSingers.Add(new NextSingerDisplay(display, s.IsRotationStart, sName, songText ?? string.Empty, waitTime));
             }
         }
         SyncNextSingers(NextSingers, nextSingers);

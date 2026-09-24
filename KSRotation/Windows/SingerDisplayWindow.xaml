@@ -1,4 +1,4 @@
-<!-- Edited on Sep 22, 2026 @ 11:13:30 -> Remove marker dot from spinning vinyl record in rotation banner -->
+<!-- Edited on Sep 24, 2026 @ 09:05:00 -> Enlarge PUSH button and current singer font, separate singer name and song onto distinct lines with wait time inline for Jukebox panel -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -1478,7 +1478,7 @@
 
                             <TextBlock Text="{Binding CurrentSingerName}"
                                        HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
-                                       FontSize="44" FontWeight="Black" Foreground="White" TextOptions.TextFormattingMode="Ideal">
+                                       FontSize="54" FontWeight="Black" Foreground="White" TextOptions.TextFormattingMode="Ideal">
                                 <TextBlock.Effect>
                                     <DropShadowEffect Color="#FFFF357E" BlurRadius="24" ShadowDepth="0" Opacity="0.85" />
                                 </TextBlock.Effect>
@@ -1535,17 +1535,35 @@
                                                     <GradientStop Color="#22FF357E" Offset="1.0" />
                                                 </LinearGradientBrush>
                                             </Border.Background>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Border Background="#FFD700" CornerRadius="4" Padding="4,1" Margin="0,0,8,0" VerticalAlignment="Center">
-                                                    <TextBlock Text="PUSH" FontSize="11" FontWeight="Black" Foreground="#FF12081C" />
-                                                </Border>
-                                                <Border Background="#DC2626" CornerRadius="4" Padding="3,1" Margin="0,0,8,0" VerticalAlignment="Center"
-                                                        ToolTip="Rotation Anchor (marks where a round begins)"
-                                                        Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
-                                                </Border>
-                                                <TextBlock Text="{Binding Text}" FontSize="16" Foreground="#FFFFFAF0" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" />
-                                            </StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Left: Enlarged PUSH button badge + optional rotation anchor -->
+                                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                                                    <Border Background="#FFD700" BorderBrush="#FFF6B024" BorderThickness="1.5" CornerRadius="6" Padding="12,6" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="PUSH" FontSize="15" FontWeight="Black" Foreground="#FF12081C" />
+                                                    </Border>
+                                                    <Border Background="#DC2626" CornerRadius="5" Padding="5,3" VerticalAlignment="Center"
+                                                            ToolTip="Rotation Anchor (marks where a round begins)"
+                                                            Visibility="{Binding IsRotationStart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <TextBlock Text="⚓ ANCHOR" FontSize="12" FontWeight="ExtraBold" Foreground="White"/>
+                                                    </Border>
+                                                </StackPanel>
+
+                                                <!-- Right: Singer details (Line 1: Singer name & estimated wait time; Line 2: Song title) -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding SingerName}" FontSize="20" Foreground="#FFFFFAF0" FontWeight="Bold" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                                        <TextBlock Text="{Binding WaitTime}" FontSize="18" Foreground="#FF00E5FF" FontWeight="Bold" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                                   Visibility="{Binding HasWaitTime, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                    </WrapPanel>
+                                                    <TextBlock Text="{Binding Song}" FontSize="18" FontStyle="Italic" Foreground="#FF00E5FF" TextWrapping="Wrap" Margin="0,3,0,0"
+                                                               Visibility="{Binding HasSong, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                </StackPanel>
+                                            </Grid>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

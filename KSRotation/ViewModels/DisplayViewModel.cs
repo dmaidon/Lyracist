@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 19:55:00 -> Add ActiveSingerCount and ActiveSingerCountText for Vegas and Vinyl banners
+// Edited on Sep 24, 2026 @ 09:05:00 -> Add SingerName, Song, and WaitTime properties to NextSingerDisplay for Jukebox banner split-line layout
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -70,7 +70,26 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool ReducedEffects { get; set; }
 
-        public sealed record NextSingerDisplay(string Text, bool IsRotationStart);
+        public sealed record NextSingerDisplay
+        {
+            public string Text { get; init; }
+            public bool IsRotationStart { get; init; }
+            public string SingerName { get; init; }
+            public string Song { get; init; }
+            public string SongTitle => Song;
+            public string WaitTime { get; init; }
+            public bool HasSong => !string.IsNullOrWhiteSpace(Song);
+            public bool HasWaitTime => !string.IsNullOrWhiteSpace(WaitTime);
+
+            public NextSingerDisplay(string text, bool isRotationStart, string singerName = "", string song = "", string waitTime = "")
+            {
+                Text = text;
+                IsRotationStart = isRotationStart;
+                SingerName = string.IsNullOrWhiteSpace(singerName) ? text : singerName;
+                Song = song;
+                WaitTime = waitTime;
+            }
+        }
 
         public ObservableCollection<NextSingerDisplay> NextSingers { get; } = [];
 
@@ -372,21 +391,22 @@ namespace KSRotation.ViewModels
                 {
                     SingerEntry singer = activeRotation[(currentIndex + offset) % count];
 
-                    string waitBadge = singer.EstimatedWaitMinutes > 0 ? $" {{{singer.EstimatedWaitMinutes}}}" : string.Empty;
+                    string waitBadge = (ShowEstimatedWaitTime && singer.EstimatedWaitMinutes > 0) ? $" {{{singer.EstimatedWaitMinutes}}}" : string.Empty;
+                    string waitTime = (ShowEstimatedWaitTime && singer.EstimatedWaitMinutes > 0) ? $"{{{singer.EstimatedWaitMinutes}}}" : string.Empty;
 
                     if (singer.IsMusic)
                     {
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
-                            ? singer.Song
+                            ? (singer.Song ?? string.Empty)
                             : $"{singer.Song} – {singer.Artist}";
-                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart));
+                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart, "[MUSIC]", songText, waitTime));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                         nextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
                             ? $"{sName}{waitBadge}"
-                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart));
+                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart, sName, singer.Song ?? string.Empty, waitTime));
                     }
                 }
             }
@@ -394,19 +414,22 @@ namespace KSRotation.ViewModels
             {
                 foreach (SingerEntry singer in activeRotation.Take(6))
                 {
+                    string waitBadge = (ShowEstimatedWaitTime && singer.EstimatedWaitMinutes > 0) ? $" {{{singer.EstimatedWaitMinutes}}}" : string.Empty;
+                    string waitTime = (ShowEstimatedWaitTime && singer.EstimatedWaitMinutes > 0) ? $"{{{singer.EstimatedWaitMinutes}}}" : string.Empty;
+
                     if (singer.IsMusic)
                     {
                         string songText = string.IsNullOrWhiteSpace(singer.Artist)
-                            ? singer.Song
+                            ? (singer.Song ?? string.Empty)
                             : $"{singer.Song} – {singer.Artist}";
-                        nextSingers.Add(new NextSingerDisplay($"[MUSIC] {songText}", singer.IsRotationStart));
+                        nextSingers.Add(new NextSingerDisplay($"[MUSIC]{waitBadge} {songText}", singer.IsRotationStart, "[MUSIC]", songText, waitTime));
                     }
                     else
                     {
                         string sName = singer.IsDuet ? $"{singer.Name} & {singer.DuetPartnerName}" : singer.Name;
                         nextSingers.Add(new NextSingerDisplay(string.IsNullOrWhiteSpace(singer.Song)
-                            ? sName
-                            : $"{sName} - {singer.Song}", singer.IsRotationStart));
+                            ? $"{sName}{waitBadge}"
+                            : $"{sName}{waitBadge} - {singer.Song}", singer.IsRotationStart, sName, singer.Song ?? string.Empty, waitTime));
                     }
                 }
             }
