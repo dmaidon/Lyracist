@@ -1,9 +1,23 @@
-<!-- Edited on Sep 24, 2026 @ 09:06:00 -> Update Jukebox banner typography, push button dimensions, and split singer/song layout -->
-Last Edit: Sep 24, 2026 - Jukebox Banner Typography & Split Singer/Song Queue Layout (Lyracist & KSRotation)
+<!-- Edited on Sep 25, 2026 @ 10:56:00 -> Update CHANGELOG for Scaryoke.Unity removal, banner locking, and reference cleanup -->
+Last Edit: Sep 25, 2026 - Remove Scaryoke.Unity Project, Event Banner Locking & Project Reference Cleanup
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.25.0] - 2026-09-25
+
+### Removed
+- **Scaryoke.Unity Standalone Project (`Lyracist.slnx`, `Scaryoke.Unity/`)**:
+  - Removed the `Scaryoke.Unity` project reference from `Lyracist.slnx`.
+  - Completely removed the `Scaryoke.Unity` project directory, Unity assets, scripts, and build artifacts from the repository and disk.
+  - Removed project references from documentation and manual updates.
+
+### Fixed
+- **Concurrent Banner File Generation (`Shared/DjBannerFileManager.cs`)**:
+  - Added synchronization lock (`_bannerInitLock`) around `EnsureStandardEventBanners` and inner fallback exception handling to prevent concurrent file access contention when multiple components initialize standard event banners simultaneously.
+- **Duplicate Project Reference (`KSRotation/KSRotation.csproj`)**:
+  - Removed redundant `KnockoutTrivia` project reference from `KSRotation.csproj` that caused potential type collision warnings.
 
 ## [26.9.24.0] - 2026-09-24
 

@@ -15,8 +15,8 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <PackageIcon>Lyracist_Pro.png</PackageIcon>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.9.23.50</AssemblyVersion>
-    <FileVersion>26.9.23.50</FileVersion>
+    <AssemblyVersion>26.9.24.53</AssemblyVersion>
+    <FileVersion>26.9.24.53</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

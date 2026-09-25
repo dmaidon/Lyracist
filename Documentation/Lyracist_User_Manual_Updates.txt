@@ -1,30 +1,4 @@
-// Edited on Sep 23, 2026 @ 13:14:00 -> Update Scaryoke.Unity pointed needle and front-facing 3D alignment documentation
-Scaryoke.Unity: Standalone 3D Physics Carnival Wheel & Projection (`Scaryoke.Unity`) - (September 2026)
-
-Section: Scaryoke / 3D Wheel Experience / Multi-Display & TV Casting
-
-[Overview & Purpose]
-A brand-new 3D game engine project, `Scaryoke.Unity`, has been added to the Lyracist solution. Building upon the classic 2D vector Scaryoke Wheel, Scaryoke.Unity implements real-time 3D physics, procedural mesh wedge generation, spring-damped flapper needle collisions, dynamic audio pitch shifting, physical secondary monitor projection (HDMI/DisplayPort), and wireless TV casting (Miracast & Web/Chromecast).
-
-[Key Capabilities & Features]
-1. Procedural 3D Mesh Generation & Category Sync:
-   - Dynamically loads categories from `Settings/scaryoke_settings.json` (synchronizing seamlessly with the WPF ScaryokeWheel app).
-   - Generates non-uniform 3D pie wedges and per-slice rim quads on the fly.
-   - Automatically injects 1 regular-sized "Singer's Choice" (Forest Green) and two narrow "DJ's Choice" slivers (Black with Spooky Orange-Red text, 0.15 weight).
-   - Precision Z-plane alignment ensures front face, slice labels, and 3D center hub face the audience camera with zero occlusion.
-2. Physical Pegs & Pointed 3D Flapper Needle Collision:
-   - Spawns 3D cylinder collision pegs around the wheel perimeter on the front face at each slice boundary.
-   - Pointed 3D faceted arrowhead flapper needle with chisel spine, vibrant neon orange finish, and a polished brass pivot bolt.
-   - Spring-damped flapper needle deflects and vibrates naturally on each peg collision.
-   - Velocity-modulated audio clicks: higher angular velocity produces higher-frequency snappy ticks, slowing down realistically as the wheel decelerates.
-3. Multi-Monitor & HDMI Secondary Display Routing:
-   - Native multi-display support (`DisplayManager.cs`) detects connected secondary displays (HDMI, DisplayPort, USB-C).
-   - Supports seamless full-screen secondary monitor projection for audience viewing while preserving DJ controls.
-4. Wireless TV Casting (Miracast & Chromecast):
-   - Miracast integration launches Windows wireless display pairing to smart TVs and wireless monitors.
-   - Integrated lightweight HTTP server (port 5007) serves a live status feed and WebGL receiver compatible with Chromecast (`ChromecastSender` / DashCast) and smart TV browsers.
-5. Independent Solution Build Configuration:
-   - Configured in `Lyracist.slnx` with `<Build Solution="*|*" Project="false" />` so it can be edited in Visual Studio and built via Unity Editor or `dotnet build Scaryoke.Unity/Scaryoke.Unity.csproj` without slowing down solution-wide rebuilds.
+// Edited on Sep 25, 2026 @ 10:54:00 -> Remove Scaryoke.Unity project documentation
 
 
 KSRotation.Maui: Rebuild Solution Exclusion in Main Solution (`Lyracist.slnx`) - (September 2026)

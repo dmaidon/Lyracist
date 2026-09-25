@@ -1,4 +1,4 @@
-// Edited on Aug 30, 2026 @ 08:26:00 -> Support consolidated per-app banner folders
+// Edited on Sep 24, 2026 @ 12:31:00 -> Add synchronization lock and resilient error handling to EnsureStandardEventBanners
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +11,7 @@ namespace Lyracist.Shared;
 /// </summary>
 public static class DjBannerFileManager
 {
+    private static readonly object _bannerInitLock = new();
     private static readonly string[] SupportedExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".mp4"];
     // "Connect Instructions" is deliberately excluded — it's an auto-generated Wi-Fi/QR instructional
     // graphic (see ConnectInstructions.png handling below), not a selectable party/event banner, so it
@@ -26,41 +27,51 @@ public static class DjBannerFileManager
 
     public static void EnsureStandardEventBanners(string directory)
     {
-        if (!Directory.Exists(directory))
+        lock (_bannerInitLock)
         {
-            Directory.CreateDirectory(directory);
-        }
+            if (!Directory.Exists(directory))
+            {
+                try { Directory.CreateDirectory(directory); } catch { return; }
+            }
 
 #if !MAUI
-        string[] standardFiles = ["Birthday.png", "Wedding.png", "Engagement.png", "Anniversary.png", "LastSong.png", "ConnectInstructions.png"];
-        for (int i = 0; i < standardFiles.Length; i++)
-        {
-            string fullPath = Path.Combine(directory, standardFiles[i]);
-            if (!File.Exists(fullPath))
+            string[] standardFiles = ["Birthday.png", "Wedding.png", "Engagement.png", "Anniversary.png", "LastSong.png", "ConnectInstructions.png"];
+            for (int i = 0; i < standardFiles.Length; i++)
             {
-                try
+                string fullPath = Path.Combine(directory, standardFiles[i]);
+                if (!File.Exists(fullPath))
                 {
-                    if (standardFiles[i] == "ConnectInstructions.png")
+                    try
                     {
-                        CreateConnectInstructionsBannerPng(fullPath, string.Empty, string.Empty, string.Empty);
+                        if (standardFiles[i] == "ConnectInstructions.png")
+                        {
+                            CreateConnectInstructionsBannerPng(fullPath, string.Empty, string.Empty, string.Empty);
+                        }
+                        else if (standardFiles[i] == "LastSong.png")
+                        {
+                            CreateLastSongBannerPng(fullPath);
+                        }
+                        else
+                        {
+                            CreateDefaultBannerPng(fullPath, StandardEventNames[i]);
+                        }
                     }
-                    else if (standardFiles[i] == "LastSong.png")
+                    catch
                     {
-                        CreateLastSongBannerPng(fullPath);
+                        // Fallback to empty file if rendering unavailable or contention occurs
+                        try
+                        {
+                            File.WriteAllBytes(fullPath, []);
+                        }
+                        catch
+                        {
+                            // Ignore concurrent file access or permission errors
+                        }
                     }
-                    else
-                    {
-                        CreateDefaultBannerPng(fullPath, StandardEventNames[i]);
-                    }
-                }
-                catch
-                {
-                    // Fallback to empty file if rendering unavailable
-                    File.WriteAllBytes(fullPath, []);
                 }
             }
-        }
 #endif
+        }
     }
 
 #if !MAUI
