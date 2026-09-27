@@ -1,9 +1,21 @@
-<!-- Edited on Sep 25, 2026 @ 10:56:00 -> Update CHANGELOG for Scaryoke.Unity removal, banner locking, and reference cleanup -->
-Last Edit: Sep 25, 2026 - Remove Scaryoke.Unity Project, Event Banner Locking & Project Reference Cleanup
+<!-- Edited on Sep 27, 2026 @ 10:05:00 -> Update CHANGELOG for DJ banner monitor overscan warning tooltip and help system updates -->
+Last Edit: Sep 27, 2026 - DJ Banner Target Monitor TV Overscan Guidance & Tooltip Warning
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.9.25.1] - 2026-09-27
+
+### Added
+- **DJ Banner Target Monitor TV Overscan Guidance & Warning Tooltip (`KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`, `HelpViewModel.cs`)**:
+  - Added a dedicated help icon (``) and informative tooltip warning beside the **Target Monitor** and **DJ Banner Screen** settings in both KSRotation and Lyracist.
+  - Informs DJs broadcasting to external TVs (especially older non-4K displays) that TV hardware defaults may crop/zoom into the banner due to TV overscan, and provides actionable guidance on setting TV aspect ratios to *Just Scan*, *Screen Fit*, or *1:1 Pixel Mapping* (or toggling Overscan off).
+  - Synchronized Topic 5 (*Settings: Display & Projectors*) in Lyracist's in-app help system to document TV picture settings and overscan troubleshooting.
+
+### Changed
+- **Version Increment Across Solution**:
+  - Incremented build and revision versions across all solution projects and test suites to `26.9.25.x`.
 
 ## [26.9.25.0] - 2026-09-25
 

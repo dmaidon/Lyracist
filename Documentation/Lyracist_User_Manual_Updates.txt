@@ -1,4 +1,21 @@
-// Edited on Sep 25, 2026 @ 10:54:00 -> Remove Scaryoke.Unity project documentation
+// Edited on Sep 27, 2026 @ 10:05:00 -> Document TV overscan picture settings guidance for DJ Banner target monitors
+
+
+Lyracist Pro Suite & KSRotation: DJ Banner Target Monitor TV Overscan Guidance (`KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`, `HelpViewModel.cs`) - (September 2026)
+
+Section: Lyracist & KSRotation / Settings & Display Configuration / DJ Banner Screen & Monitor Setup
+
+[Overview & Purpose]
+When displaying the DJ Banner screen on external television monitors (especially older 720p or 1080p HDTVs), television hardware defaults frequently apply "Overscan"—a legacy picture processing behavior that crops the outer 2% to 5% of the display image and zooms in, causing DJ banner logos, margins, and borders to appear cut off at the edges even though the software generates the display at the correct physical resolution. Both Lyracist and KSRotation now provide an in-app help tooltip beside the Target Monitor / DJ Banner Screen selector to guide DJs on adjusting TV picture settings.
+
+[Key Recommendations & TV Settings]
+1. TV Picture & Aspect Ratio Settings:
+   - Access the physical TV's Menu or Picture settings.
+   - Locate the Picture Size / Aspect Ratio / Screen Fit option.
+   - Select "Just Scan", "Screen Fit", "1:1 Pixel Mapping", "Full Pixel", "Dot by Dot", or "Exact".
+   - If a dedicated "Overscan" setting exists, ensure it is toggled to "Off".
+2. In-App Guidance:
+   - A help icon () with tooltip is positioned directly adjacent to the DJ Banner Target Monitor / Screen selection combo box in both Lyracist Settings and KSRotation Settings/Display controls.
 
 
 KSRotation.Maui: Rebuild Solution Exclusion in Main Solution (`Lyracist.slnx`) - (September 2026)

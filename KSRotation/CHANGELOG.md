@@ -1,6 +1,19 @@
-<!-- Edited on Sep 24, 2026 @ 13:00:00 -> Add shared projection effects, reduced-effects mode, view crossfade, and Lucky 7s slot landing -->
+<!-- Edited on Sep 27, 2026 @ 10:05:00 -> Add DJ banner monitor overscan warning tooltip and reference cleanup -->
 
 # Changelog
+
+## 2026-09-27
+
+- **DJ Banner Target Monitor Overscan Warning Tooltip (`MainWindow.xaml`)**:
+  - Added a help icon (``) and warning tooltip next to the Target Monitor combo box in the DJ Banner settings card.
+  - Warns DJs that older TVs may crop and zoom into the banner due to hardware overscan, guiding them to disable overscan or choose *Just Scan*, *Screen Fit*, or *1:1 Pixel Mapping* in TV picture settings.
+
+## 2026-09-25
+
+- **Concurrent Banner File Generation (`Shared/DjBannerFileManager.cs`)**:
+  - Added synchronization lock (`_bannerInitLock`) around `EnsureStandardEventBanners` with fallback handling to prevent file contention when multiple components initialize event banners concurrently.
+- **Reference Cleanup (`KSRotation.csproj`)**:
+  - Cleaned up duplicate project references.
 
 ## 2026-09-24
 
