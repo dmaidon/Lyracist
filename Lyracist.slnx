@@ -1,24 +1,26 @@
 <!-- Edited on Sep 25, 2026 @ 10:54:00 -> Remove Scaryoke.Unity project from solution -->
 <Solution>
-  <Project Path="Lyracist.Data/Lyracist.Data.csproj" />
-  <Project Path="Lyracist/Lyracist.csproj" />
-  <Project Path="KSRotation/KSRotation.csproj" />
-  <Project Path="LyracistDbEditor/LyracistDbEditor.csproj" Id="46565c60-fa0a-4967-b35a-eda261064d4a" />
-  <Project Path="ScaryokeWheel/ScaryokeWheel.csproj" Id="2a544b5d-6e94-4b4b-99b5-0978ae21ff2f" />
+  <Folder Name="/Solution Items/">
+    <File Path="THIRD-PARTY-NOTICES.txt" />
+  </Folder>
+  <Project Path="KnockoutTrivia.Tests/KnockoutTrivia.Tests.csproj" />
   <Project Path="KnockoutTrivia/KnockoutTrivia.csproj" Id="ff3b4abf-6734-4fea-bd3c-b210914713c8" />
   <Project Path="KSRotation.Maui/KSRotation.Maui.csproj">
-    <Build Solution="*|*" Project="false" />
-    <Deploy Solution="Debug|*" />
-    <Deploy Solution="Release|*" />
+    <Build Project="false" />
+    <Deploy />
   </Project>
+  <Project Path="KSRotation.Tests/KSRotation.Tests.csproj" />
+  <Project Path="KSRotation/KSRotation.csproj" />
+  <Project Path="Lyracist.Data/Lyracist.Data.csproj" />
+  <Project Path="Lyracist.Tests/Lyracist.Tests.csproj" />
+  <Project Path="Lyracist.Trivia.Core/Lyracist.Trivia.Core.csproj" />
+  <Project Path="Lyracist.Trivia.Tests/Lyracist.Trivia.Tests.csproj" />
+  <Project Path="Lyracist.Trivia/Lyracist.Trivia.csproj" />
+  <Project Path="Lyracist/Lyracist.csproj" />
+  <Project Path="LyracistDbEditor/LyracistDbEditor.csproj" Id="46565c60-fa0a-4967-b35a-eda261064d4a" />
   <Project Path="LyracistKeyGen/LyracistKeyGen.csproj" Id="3b473078-0abc-42b3-b298-09409882f529">
     <Build Solution="Debug|*" Project="false" />
   </Project>
-  <Project Path="KSRotation.Tests/KSRotation.Tests.csproj" />
-  <Project Path="Lyracist.Tests/Lyracist.Tests.csproj" />
-  <Project Path="Lyracist.Trivia.Core/Lyracist.Trivia.Core.csproj" />
-  <Project Path="Lyracist.Trivia/Lyracist.Trivia.csproj" />
+  <Project Path="ScaryokeWheel/ScaryokeWheel.csproj" Id="2a544b5d-6e94-4b4b-99b5-0978ae21ff2f" />
   <Project Path="TriviaDbCreator/TriviaDbCreator.csproj" />
-  <Project Path="Lyracist.Trivia.Tests/Lyracist.Trivia.Tests.csproj" />
-  <Project Path="KnockoutTrivia.Tests/KnockoutTrivia.Tests.csproj" />
 </Solution>

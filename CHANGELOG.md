@@ -8,6 +8,9 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.9.25.1] - 2026-09-27
 
 ### Added
+- **Third-Party Notices & Acknowledgements (`THIRD-PARTY-NOTICES.txt`, `AboutPage.xaml`, KSRotation `MainWindow.xaml`)**:
+  - Added `THIRD-PARTY-NOTICES.txt` listing bundled components (FFmpeg, LibVLC, SQLite, NuGet packages) with licenses and source links; it ships in the installation folder.
+  - Lyracist About page now points to the notices file, and KSRotation has a new *Acknowledgements* help topic.
 - **DJ Banner Target Monitor TV Overscan Guidance & Warning Tooltip (`KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`, `HelpViewModel.cs`)**:
   - Added a dedicated help icon (``) and informative tooltip warning beside the **Target Monitor** and **DJ Banner Screen** settings in both KSRotation and Lyracist.
   - Informs DJs broadcasting to external TVs (especially older non-4K displays) that TV hardware defaults may crop/zoom into the banner due to TV overscan, and provides actionable guidance on setting TV aspect ratios to *Just Scan*, *Screen Fit*, or *1:1 Pixel Mapping* (or toggling Overscan off).
