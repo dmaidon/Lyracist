@@ -1,0 +1,94 @@
+LYRACIST SUITE - THIRD-PARTY NOTICES
+====================================
+
+The Lyracist suite (Lyracist, KSRotation, Lyracist Pub Trivia, Knockout Trivia,
+Scaryoke Wheel, Trivia DB Creator, Lyracist DB Editor) is built with the open-source
+components below. Thank you to every author and maintainer. Each component remains
+under its own license; nothing here changes those terms.
+
+
+BUNDLED PROGRAMS AND NATIVE LIBRARIES
+-------------------------------------
+
+FFmpeg / FFprobe (ffmpeg.exe, ffprobe.exe)
+  Used for audio loudness analysis, media probing, subtitle detection and conversion.
+  License: GNU General Public License v3 (this build is configured --enable-gpl
+  --enable-version3).
+  Source code and license: https://ffmpeg.org/  and  https://www.gnu.org/licenses/gpl-3.0.html
+  FFmpeg is a trademark of Fabrice Bellard. The FFmpeg binaries are separate programs
+  run as their own processes; their source is available from the link above.
+
+VLC media player engine (libvlc, VideoLAN.LibVLC.Windows 3.0.x)
+  Used for audio/video playback.
+  License: GNU Lesser General Public License v2.1 or later.
+  Source code and license: https://www.videolan.org/vlc/  and  https://code.videolan.org/videolan/vlc
+
+SQLite (via SQLitePCLRaw / e_sqlite3)
+  License: Public domain.  https://www.sqlite.org/copyright.html
+
+.NET runtime and libraries (Microsoft)
+  License: MIT.  https://github.com/dotnet/runtime
+
+
+NUGET PACKAGES
+--------------
+
+MIT License
+  CommunityToolkit.Mvvm            https://github.com/CommunityToolkit/dotnet
+  DocumentFormat.OpenXml           https://github.com/dotnet/Open-XML-SDK
+  Emoji.Wpf                        https://github.com/samhocevar/emoji.wpf
+  FFME.Windows (Unosquare)         https://github.com/unosquare/ffmediaelement
+  MaterialDesignThemes             https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit
+  Microsoft.Data.Sqlite            https://github.com/dotnet/efcore
+  Microsoft.EntityFrameworkCore.*  https://github.com/dotnet/efcore
+  Microsoft.Extensions.Logging.*   https://github.com/dotnet/runtime
+  Microsoft.IO.RecyclableMemoryStream  https://github.com/microsoft/Microsoft.IO.RecyclableMemoryStream
+  PDFsharp                         https://github.com/empira/PDFsharp
+  QRCoder                          https://github.com/codebude/QRCoder
+  SkiaSharp                        https://github.com/mono/SkiaSharp
+  System.Resources.Extensions, System.Security.Cryptography.ProtectedData
+                                   https://github.com/dotnet/runtime
+  WPF-UI (lepo.co)                 https://github.com/lepoco/wpfui
+  WriteableBitmapEx                https://github.com/reneschulte/WriteableBitmapEx
+
+Apache License 2.0   (https://www.apache.org/licenses/LICENSE-2.0)
+  Dapper                           https://github.com/DapperLib/Dapper
+  FlashCap                         https://github.com/kekyo/FlashCap
+  SQLitePCLRaw                     https://github.com/ericsink/SQLitePCL.raw
+
+GNU LGPL v2.1   (https://www.gnu.org/licenses/lgpl-2.1.html)
+  LibVLCSharp                      https://code.videolan.org/videolan/LibVLCSharp
+  TagLibSharp                      https://github.com/mono/taglib-sharp
+
+Full license texts and copyright notices for each package are available at the project
+links above and inside the corresponding NuGet packages.
+
+The standard MIT License text, which applies to each MIT-licensed package above with
+that package's own copyright holder(s):
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this
+  software and associated documentation files (the "Software"), to deal in the Software
+  without restriction, including without limitation the rights to use, copy, modify,
+  merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies
+  or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+REFERENCES AND INSPIRATION
+--------------------------
+
+CD+G format decoding was informed by the public repositories gozzar/karaoke,
+spektor56/KaraokePlayer and nopperl/karaoke-cdg.
+
+
+Lyracist Suite is (c) PAROLE Software. https://maidonww.com/Lyracist

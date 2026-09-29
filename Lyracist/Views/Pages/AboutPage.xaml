@@ -231,6 +231,18 @@
                                     <Bold>CDG Specs &amp; Decoding Reference</Bold> - Acknowledgment to gozzar/karaoke, spektor56/KaraokePlayer, and nopperl/karaoke-cdg repositories.
                                 </TextBlock>
                             </Grid>
+
+                            <!-- Full license notices -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:SymbolIcon Symbol="Document24" Foreground="{DynamicResource UIAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12">
+                                    <Bold>Full license notices</Bold> - See THIRD-PARTY-NOTICES.txt in the installation folder for every library, license and source link.
+                                </TextBlock>
+                            </Grid>
                         </StackPanel>
 
                         <TextBlock Text="{Binding Copyright}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />

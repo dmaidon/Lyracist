@@ -937,6 +937,7 @@ namespace KSRotation.ViewModels
             "📡 Connect & Wi-Fi Instructions",
             "🎯 Trivia Night Pro",
             "❓ FAQ & Shortcuts",
+            "🙏 Acknowledgements",
         ];
 
         public ObservableCollection<string> Themes { get; } =

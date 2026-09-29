@@ -4243,6 +4243,26 @@
                                 </Border>
                             </StackPanel>
 
+                            <!-- Topic 8: Acknowledgements -->
+                            <StackPanel x:Name="AcknowledgementsPanel">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedHelpTopic}" Value="🙏 Acknowledgements">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Acknowledgements" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AppHeaderBrush}" Margin="0,0,0,8" />
+                                <TextBlock Text="KSRotation is built with the help of many open-source projects. Thank you to their authors and maintainers." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                <TextBlock Text="• 🎬 FFmpeg / FFprobe (GPLv3) - audio analysis and media probing." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                <TextBlock Text="• ▶️ VLC / LibVLC and LibVLCSharp (LGPL) - media playback." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                <TextBlock Text="• 🎨 MaterialDesignThemes, CommunityToolkit.Mvvm, QRCoder, SkiaSharp, PDFsharp, DocumentFormat.OpenXml, Dapper, SQLite and the .NET libraries (MIT / Apache-2.0 / public domain)." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                <TextBlock Text="See THIRD-PARTY-NOTICES.txt in the installation folder for the complete list, licenses and source links." Margin="0,8,0,0" FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBody}" TextWrapping="Wrap" />
+                            </StackPanel>
+
                             <!-- Topic 7: FAQ & Shortcuts -->
                             <StackPanel x:Name="FAQPanel">
                                 <StackPanel.Style>
