@@ -14,6 +14,10 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Synchronized Topic 5 (*Settings: Display & Projectors*) in Lyracist's in-app help system to document TV picture settings and overscan troubleshooting.
 
 ### Changed
+- **Consolidated Banners Folder (`Shared/Globals.cs`, `AppPaths.cs`, `TriviaStorageHelper.cs`, `AnnouncementHelper.cs`, `IBannerService.cs`, `.csproj` content links, `.gitignore`)**:
+  - Flattened the per-app `Banners/KSRotation`, `Banners/Lyracist`, `Banners/LyracistTrivia` and `Banners/KnockoutTrivia` folders into a single shared `Banners/` with `DJBanners/`, `EventBanners/`, `Announcements/`, `CategoryBanners/` and `CustomBanners/`.
+  - `Globals` now exposes `DjBannersDir`, `EventBannersDir`, `AnnouncementsDir`, `CategoryBannersDir` and `CustomBannersDir`; the `Get*Dir(appName)` helpers were removed.
+  - Existing installs must move DJ banners and announcements from the old per-app folders into the new ones.
 - **Version Increment Across Solution**:
   - Incremented build and revision versions across all solution projects and test suites to `26.9.25.x`.
 

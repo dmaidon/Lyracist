@@ -2,6 +2,11 @@
 
 # Changelog
 
+## 2026-09-29
+
+- **Consolidated Banners Folder (`AppPaths.cs`, `KSRotation.csproj`)**:
+  - Banners now live directly under `Banners/` (`DJBanners`, `EventBanners`, `Announcements`) instead of `Banners/KSRotation/`. Move existing DJ banners and announcements into the new folders on installed copies.
+
 ## 2026-09-27
 
 - **DJ Banner Target Monitor Overscan Warning Tooltip (`MainWindow.xaml`)**:
