@@ -44,15 +44,11 @@ namespace Lyracist.Shared
         // 6. Banners directory (in Startup Path, structured per application)
         public static string BannersDir => Path.Combine(StartupPath, "Banners");
 
-        public static string GetBannersDir(string appName) => Path.Combine(BannersDir, appName);
-        public static string GetDjBannersDir(string appName) => Path.Combine(GetBannersDir(appName), "DJBanners");
-        public static string GetEventBannersDir(string appName) => Path.Combine(GetBannersDir(appName), "EventBanners");
-        public static string GetAnnouncementsDir(string appName) => Path.Combine(GetBannersDir(appName), "Announcements");
-        public static string GetCategoryBannersDir(string appName = "LyracistTrivia") => Path.Combine(GetBannersDir(appName), "CategoryBanners");
-
-        // Default shared banner directories
-        public static string DjBannersDir => GetDjBannersDir("KSRotation");
-        public static string EventBannersDir => GetEventBannersDir("KSRotation");
+        public static string DjBannersDir => Path.Combine(BannersDir, "DJBanners");
+        public static string EventBannersDir => Path.Combine(BannersDir, "EventBanners");
+        public static string AnnouncementsDir => Path.Combine(BannersDir, "Announcements");
+        public static string CategoryBannersDir => Path.Combine(BannersDir, "CategoryBanners");
+        public static string CustomBannersDir => Path.Combine(BannersDir, "CustomBanners");
 
         // 7. Avatars directory (in Startup Path) - a folder for uploaded performer profile selfies.
         public static string AvatarsDir => Path.Combine(StartupPath, "Avatars");

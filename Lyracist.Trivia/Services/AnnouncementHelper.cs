@@ -41,7 +41,7 @@ public static class AnnouncementHelper
 
     public static string GetAnnouncementsDirectory()
     {
-        string dir = Path.Combine(Globals.StartupPath, "Banners", "LyracistTrivia", "Announcements");
+        string dir = Path.Combine(Globals.StartupPath, "Banners", "Announcements");
         if (!Directory.Exists(dir))
         {
             Directory.CreateDirectory(dir);

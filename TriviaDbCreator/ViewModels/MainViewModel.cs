@@ -847,13 +847,13 @@ In professional pub trivia, correct answers should be evenly distributed:
             DescriptionHeader = "Rendering High-Resolution Widescreen TV Banners",
             DescriptionContent = 
 @"### 16:9 Category Banners Studio:
-During the **70:30 Pre-Game Lobby** in `LyracistTrivia` and `KSRotation`, the left 70% of venue TVs displays a high-resolution 16:9 Category Announcement Graphic (`Banners/LyracistTrivia/CategoryBanners/{pack}.png`).
+During the **70:30 Pre-Game Lobby** in `LyracistTrivia` and `KSRotation`, the left 70% of venue TVs displays a high-resolution 16:9 Category Announcement Graphic (`Banners/CategoryBanners/{pack}.png`).
 
 ### Generating a Banner:
 1. Select your pack from the Left Sidebar.
 2. In the top metadata card, look at the **Banner Preview** box on the right.
 3. Click **'🎨 Generate 16:9 Banner'**.
-4. The application renders a 1920x1080 graphic with modern ambient illumination, pack title, and topic subtitle directly into `Banners/LyracistTrivia/CategoryBanners/{slug}.png`.
+4. The application renders a 1920x1080 graphic with modern ambient illumination, pack title, and topic subtitle directly into `Banners/CategoryBanners/{slug}.png`.
 5. When this pack is selected in `LyracistTrivia`, the big screen TV will immediately project the new graphic."
         });
 
@@ -867,7 +867,7 @@ During the **70:30 Pre-Game Lobby** in `LyracistTrivia` and `KSRotation`, the le
 @"### How Lyracist Shares Trivia Data:
 All applications in the Lyracist suite share centralized folders:
 • `Packs/*.json`: Raw human-readable question pack files.
-• `Banners/LyracistTrivia/CategoryBanners/*.png`: 16:9 category showcase graphics.
+• `Banners/CategoryBanners/*.png`: 16:9 category showcase graphics.
 • `Data/trivia.db`: High-performance SQLite database for fast queries and runtime indexing.
 • `Settings/lyracist_trivia_settings.json`: Game Master timers and scoring preferences.
 

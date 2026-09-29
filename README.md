@@ -281,7 +281,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 
 ### 🎨 DJ Banners & Special Event Display System (`Lyracist` & `KSRotation`)
 - **Independent DJ Banner Multi-Monitor Projection**:
-  - Projects customized DJ promotional graphics and looping MP4 video animations (`Banners/KSRotation/DJBanners`) to any dedicated secondary monitor, stage TV, or patron display screen.
+  - Projects customized DJ promotional graphics and looping MP4 video animations (`Banners/DJBanners`) to any dedicated secondary monitor, stage TV, or patron display screen.
   - Supports automatic looping for animated video banners with soundless background playback (`BannerVideo_MediaEnded` rewind loop).
 - **Live In-App Visual Previews**:
   - Live preview cards embedded directly under the DJ Banner selector in both the **Display Settings** tab (`SettingsPage.xaml`) and **Karaoke Control Center** (`KaraokePage.xaml`).
@@ -365,10 +365,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - `Settings/`: Consolidated application configuration folder with distinct per-app naming (`lyracist_settings.json`, `ksrotation_settings.json`, `knockout_trivia_settings.json`, `lyracist_trivia_settings.json`, `scaryoke_settings.json`, `dbeditor_settings.json`, `keygen_settings.json`, `ksrotation_venues.json`, `ksrotation_djs.json`, `VenueGraphics/`).
   - `Data/`: Centralized database and persistence folder (`lyracist.db`, `trivia.db`, `ksrotation_night_db.json`, `ksrotation_singers.json`, `wifi_passwords.json`, `keygen.db`).
   - `Banners/`: Centralized root banners repository organized into dedicated per-app subdirectories:
-    * `Banners/KSRotation/`: Contains `DJBanners/`, `Announcements/`, and `EventBanners/` (including 16:9 standard event banners).
-    * `Banners/Lyracist/`: Contains `DJBanners/`, `Announcements/`, and `EventBanners/` (including 16:9 standard event banners).
-    * `Banners/LyracistTrivia/`: Contains `CategoryBanners/` (15 themed category graphics) and `Announcements/`.
-    * `Banners/KnockoutTrivia/`: Contains `Announcements/` and `CustomBanners/`.
+    * `Banners/`: shared by every app - `DJBanners/`, `EventBanners/` (including 16:9 standard event banners), `Announcements/`, `CategoryBanners/` (15 themed trivia category graphics) and `CustomBanners/`.
   - `Packs/`: Single shared packs repository containing 16 curated JSON trivia packs used interchangeably across all trivia applications.
   - `Logs/`: Centralized log directory with sanitized app-distinguished logs (`{app}_app_{date}.log` and `{app}_err_{date}.log`).
 - **Transparent Legacy Migration**: All services across all applications automatically check for legacy configuration/data files in `%AppData%`, `%LocalAppData%`, or old subfolders on startup, transparently copying them forward to the consolidated directories without user intervention.
@@ -495,7 +492,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 - **Left Sidebar Pack Explorer**: Auto-discovers and navigates all JSON question packs in `Packs/` with search filtering and question count indicators.
 - **Interactive Question Editor**: Real-time editor with colored option cards (▲ Purple, ◆ Cyan, ● Amber, ■ Rose), correct answer radio toggles, difficulty dropdown, and explanation notes.
 - **1-Click Option Balancing**: Automatically shuffles option positions across all questions in a pack to guarantee an even ~25% distribution across choices A, B, C, and D.
-- **16:9 Banner Studio**: Generates high-resolution 16:9 Category Announcement Banners (`Banners/LyracistTrivia/CategoryBanners/{pack}.png`) with one click.
+- **16:9 Banner Studio**: Generates high-resolution 16:9 Category Announcement Banners (`Banners/CategoryBanners/{pack}.png`) with one click.
 - **Direct SQLite Seeding**: 1-click database synchronization updating `Data/trivia.db`.
 
 ### 🎤 Singer Rotation & Queue Management (`Lyracist`, `KSRotation`, `KSRotation.Maui`)
@@ -553,7 +550,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
     14. **Sports & Athletes** (`sports.json`) - 150 questions
     15. **Pub Trivia All-Stars** (`pub_general_knowledge.json`) - 150 questions
 - **Unified 70:30 Pre-Game Lobby & Category Showcase (`TriviaDisplayWindow`)**:
-  - **70% Left Hero Column**: High-resolution 16:9 Category Announcement Banner (`Banners/LyracistTrivia/CategoryBanners/{pack}.png`) with ambient illuminated border, tonight's category theme title, and topic subtitle. Dynamic cross-pack syncing automatically updates the big screen whenever the Game Master selects a category from the dropdown.
+  - **70% Left Hero Column**: High-resolution 16:9 Category Announcement Banner (`Banners/CategoryBanners/{pack}.png`) with ambient illuminated border, tonight's category theme title, and topic subtitle. Dynamic cross-pack syncing automatically updates the big screen whenever the Game Master selects a category from the dropdown.
   - **30% Right Onboarding Stack**:
     1. **⏱️ Game Start Countdown Clock**: Large digital timer with pulsing amber badge that ticks down to game launch.
     2. **📶 1. Connect to Wi-Fi Card**: Dedicated scan-to-connect Wi-Fi QR code with venue SSID and WPA password.
@@ -562,7 +559,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - **Full-Width Ticker Bar**: Continuous horizontal marquee scrolling venue announcements, host branding, game rules, and buzzer tips.
 - **Single-Click Pre-Game Launch (`🎯 Launch Pre-Game Lobby & Countdown`)**:
   - A single primary action button in the Game Master console that opens/focuses the big screen, locks the category banner, starts the pre-game countdown, and activates the lobby with one click. Accompanied by `"▶ Start Game Now (Skip Countdown)"` for instant kickoff which immediately opens and hydrates the live question projection screen and halts background lobby timers.
-- **16:9 Category Announcement Banners (`Banners/LyracistTrivia/CategoryBanners/`)**:
+- **16:9 Category Announcement Banners (`Banners/CategoryBanners/`)**:
   - Clean 1920x1080 (16:9) graphic banners generated for all 15 categories, focusing on category branding and theme callouts without hardcoded question counts or timers so banners stay accurate regardless of host configuration.
 - **Automated Solution Asset Copying**:
   - Configured `Packs\**\*`, `Banners\**\*`, and `Data\**\*` with `CopyToOutputDirectory=PreserveNewest` across all projects, ensuring category packs, announcement banners, databases, and configuration automatically copy to build outputs.
@@ -600,7 +597,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
   - Automatically progresses through questions with a live 15-second countdown timer on big screen and mobile buzzers.
   - After 15 seconds, incorrect answers sequentially fade out one every 5 seconds until only the correct answer remains illuminated.
   - After showing the correct answer with full explanation, pauses for 5 seconds before automatically advancing to the next question.
-- **Dedicated Solution Folders (`Data/`, `Settings/`, `Packs/`, `Banners/`)**: Centralized repository containing SQLite database `Data/trivia.db`, game settings `Settings/lyracist_trivia_settings.json`, customizable JSON question packs in `Packs/`, and 16:9 high-resolution category announcement banners in `Banners/LyracistTrivia/CategoryBanners/`.
+- **Dedicated Solution Folders (`Data/`, `Settings/`, `Packs/`, `Banners/`)**: Centralized repository containing SQLite database `Data/trivia.db`, game settings `Settings/lyracist_trivia_settings.json`, customizable JSON question packs in `Packs/`, and 16:9 high-resolution category announcement banners in `Banners/CategoryBanners/`.
 - **14 Curated Category Question Databases (1,450 Questions Total, No Duplicates)**:
   - 🏍️ **Bikers & Motorcycle Culture**: 150 high-octane questions covering Harley-Davidson, Indian, classic choppers, engine mechanics, famous biker movies, historic rallies, MC culture, and legendary rides.
   - 🎸 **Rock & Roll**: 100 questions on classic rock, 70s/80s arena bands, iconic albums, guitar legends, and rock history.

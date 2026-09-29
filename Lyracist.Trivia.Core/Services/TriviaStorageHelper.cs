@@ -32,7 +32,7 @@ public static class TriviaStorageHelper
 
     public static string GetBannersDirectory()
     {
-        string dir = Path.Combine(BaseDir, "Banners", "LyracistTrivia", "CategoryBanners");
+        string dir = Path.Combine(BaseDir, "Banners", "CategoryBanners");
         if (!Directory.Exists(dir))
         {
             Directory.CreateDirectory(dir);

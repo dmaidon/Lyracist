@@ -15,13 +15,13 @@ namespace KSRotation.Services
 
         public static string ReportsDirectoryPath => Lyracist.Shared.Globals.KSRotationReportsDir;
 
-        public static string BannersDirectoryPath => Lyracist.Shared.Globals.GetBannersDir("KSRotation");
+        public static string BannersDirectoryPath => Lyracist.Shared.Globals.BannersDir;
 
-        public static string DjBannersDirectoryPath => Lyracist.Shared.Globals.GetDjBannersDir("KSRotation");
+        public static string DjBannersDirectoryPath => Lyracist.Shared.Globals.DjBannersDir;
 
-        public static string EventBannersDirectoryPath => Lyracist.Shared.Globals.GetEventBannersDir("KSRotation");
+        public static string EventBannersDirectoryPath => Lyracist.Shared.Globals.EventBannersDir;
 
-        public static string AnnouncementsDirectoryPath => Lyracist.Shared.Globals.GetAnnouncementsDir("KSRotation");
+        public static string AnnouncementsDirectoryPath => Lyracist.Shared.Globals.AnnouncementsDir;
 
         public static string PacksDirectoryPath => Lyracist.Shared.Globals.PacksDir;
     }

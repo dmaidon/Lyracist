@@ -372,12 +372,10 @@ FodyWeavers.xsd
 # starter/default art. Negation has to un-exclude every level of the path (git won't
 # look inside an excluded parent dir).
 [Bb]anners/*
-![Bb]anners/*/
-[Bb]anners/*/*
-![Bb]anners/KSRotation/EventBanners
-![Bb]anners/KSRotation/EventBanners/**
-![Bb]anners/LyracistTrivia/CategoryBanners
-![Bb]anners/LyracistTrivia/CategoryBanners/**
+![Bb]anners/EventBanners
+![Bb]anners/EventBanners/**
+![Bb]anners/CategoryBanners
+![Bb]anners/CategoryBanners/**
 
 # LocalFiles: solution-root scratch space for content that must never be committed
 # (e.g. DJBanners/Announcements staged here and copied into place by a local script).

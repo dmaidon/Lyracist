@@ -19,7 +19,7 @@ public interface IBannerService
 
 public class BannerService : IBannerService
 {
-    private static readonly string BannersDir = Path.Combine(Globals.GetBannersDir("KnockoutTrivia"), "CustomBanners");
+    private static readonly string BannersDir = Globals.CustomBannersDir;
 
     public BannerService()
     {
