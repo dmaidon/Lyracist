@@ -12,7 +12,8 @@ $LogFile = "C:\Temp\Deploy-Lyracist.log"
 # - Assets       : App branding and UI assets
 # - libvlc       : Media player native libraries
 # - runtimes     : Platform-specific runtime binaries (SQLite, FFmpeg, etc.)
-$Folders = @("TabletClient", "Banners", "Data", "Packs", "Settings", "Assets", "libvlc", "runtimes")
+# - Licenses     : Full GPL/LGPL/Apache license texts (LICENSE + THIRD-PARTY-NOTICES.txt ship as loose files)
+$Folders = @("TabletClient", "Banners", "Data", "Packs", "Settings", "Assets", "libvlc", "runtimes", "Licenses")
 
 function Log($msg) {
     Add-Content -Path $LogFile -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $msg"
