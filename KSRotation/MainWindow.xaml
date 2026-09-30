@@ -4260,6 +4260,7 @@
                                 <TextBlock Text="• 🎬 FFmpeg / FFprobe (GPLv3) - audio analysis and media probing." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 <TextBlock Text="• ▶️ VLC / LibVLC and LibVLCSharp (LGPL) - media playback." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 <TextBlock Text="• 🎨 MaterialDesignThemes, CommunityToolkit.Mvvm, QRCoder, SkiaSharp, PDFsharp, DocumentFormat.OpenXml, Dapper, SQLite and the .NET libraries (MIT / Apache-2.0 / public domain)." Margin="0,3" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
+                                <TextBlock Text="KSRotation is free software licensed under the GNU General Public License v3.0 or later (see LICENSE in the installation folder)." Margin="0,8,0,0" Foreground="{DynamicResource MaterialDesignBodyLight}" TextWrapping="Wrap" />
                                 <TextBlock Text="See THIRD-PARTY-NOTICES.txt in the installation folder for the complete list, licenses and source links." Margin="0,8,0,0" FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBody}" TextWrapping="Wrap" />
                             </StackPanel>
 

@@ -555,7 +555,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
     1. **⏱️ Game Start Countdown Clock**: Large digital timer with pulsing amber badge that ticks down to game launch.
     2. **📶 1. Connect to Wi-Fi Card**: Dedicated scan-to-connect Wi-Fi QR code with venue SSID and WPA password.
     3. **📱 2. Join Trivia Game Card**: Dedicated scan-to-join mobile buzzer QR code pointing to `http://<LAN-IP>:8085/trivia` with direct URL.
-  - **Bottom Connection & Copyright Bar**: Displays mobile buzzer play address, company copyright information (`© 2026 PAROLE Software - All rights reserved.`), and app branding.
+  - **Bottom Connection & Copyright Bar**: Displays mobile buzzer play address, company copyright information (`© 2026 PAROLE Software - Licensed under GPL-3.0-or-later.`), and app branding.
   - **Full-Width Ticker Bar**: Continuous horizontal marquee scrolling venue announcements, host branding, game rules, and buzzer tips.
 - **Single-Click Pre-Game Launch (`🎯 Launch Pre-Game Lobby & Countdown`)**:
   - A single primary action button in the Game Master console that opens/focuses the big screen, locks the category banner, starts the pre-game countdown, and activates the lobby with one click. Accompanied by `"▶ Start Game Now (Skip Countdown)"` for instant kickoff which immediately opens and hydrates the live question projection screen and halts background lobby timers.

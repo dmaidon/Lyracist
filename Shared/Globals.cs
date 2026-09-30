@@ -11,7 +11,7 @@ namespace Lyracist.Shared
         public const string AuthorName = "Dennis Maidon";
 
         // Dynamically compute the copyright year based on current UTC year
-        public static string Copyright => $"© {DateTime.UtcNow.Year} {CompanyName} - All rights reserved.";
+        public static string Copyright => $"© {DateTime.UtcNow.Year} {CompanyName} - Licensed under GPL-3.0-or-later.";
 
         // Application startup folder
         public static string StartupPath =>

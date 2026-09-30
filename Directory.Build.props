@@ -7,4 +7,8 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <NoWarn>$(NoWarn);0436;CA1416;CA1422</NoWarn>
   </PropertyGroup>
+  <ItemGroup Condition="'$(OutputType)' == 'WinExe' And '$(MSBuildProjectName)' != 'LyracistKeyGen'">
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.txt" Link="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

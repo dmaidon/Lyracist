@@ -118,7 +118,7 @@ public partial class MainViewModel : ObservableObject
     public string AppVersion => "26.8.19.1";
     public string Company => "PAROLE Software";
     public string Author => "Dennis N. Maidon";
-    public string Copyright => "Copyright © 2026 PAROLE Software. All rights reserved.";
+    public string Copyright => "Copyright © 2026 PAROLE Software. Licensed under GPL-3.0-or-later.";
     public string AppDescription => "Interactive authoring studio and management tool for Lyracist Live Trivia databases. Create custom category packs, write and edit 4-option questions with explanations, balance answer choices evenly across A/B/C/D, generate matching 16:9 announcement banners, and sync directly into SQLite trivia.db.";
 
     public string[] DifficultyOptions { get; } = ["Easy", "Medium", "Hard"];

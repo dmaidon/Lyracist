@@ -263,7 +263,7 @@
                             
                             <Separator Background="#FF212135" Margin="0,0,0,20"/>
                             
-                            <TextBlock Text="© 2026 PAROLE Software. All rights reserved." FontSize="11" Foreground="#FFAAAAAA" HorizontalAlignment="Center"/>
+                            <TextBlock Text="© 2026 PAROLE Software. Licensed under GPL-3.0-or-later." FontSize="11" Foreground="#FFAAAAAA" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                 </Grid>

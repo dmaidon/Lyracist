@@ -432,7 +432,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public static string AppVersion => "26.8.19.20";
     public static string Company => "PAROLE Software";
     public static string Author => "Dennis N. Maidon";
-    public static string Copyright => "Copyright © 2026 PAROLE Software. All rights reserved.";
+    public static string Copyright => "Copyright © 2026 PAROLE Software. Licensed under GPL-3.0-or-later.";
     public static string AppDescription => "Interactive live pub & bar trivia hosting engine with synchronized mobile player buzzers, dynamic custom database auto-discovery, 14 starter curated category databases (2,100 questions), dual-screen 70:30 pre-game lobby with 16:9 category announcement banners, multi-monitor projection, dynamic speed/streak scoring, and seamless karaoke integration.";
 
     public TriviaGameEngine Engine => _engine;

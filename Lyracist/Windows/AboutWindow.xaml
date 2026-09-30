@@ -127,6 +127,7 @@
                 </StackPanel>
 
                 <Separator Margin="0,8,0,16" Background="#252528"/>
+                <TextBlock Text="Free software licensed under the GNU GPL v3.0 or later. See LICENSE and THIRD-PARTY-NOTICES.txt in the installation folder." FontSize="10" Foreground="#666666" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,6"/>
                 <TextBlock Text="{Binding Copyright}" FontSize="11" Foreground="#666666" HorizontalAlignment="Center"/>
             </StackPanel>
         </ScrollViewer>

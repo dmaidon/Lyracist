@@ -25,12 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\*.mp3">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="..\Shared\Globals.cs" Link="Globals.cs" />
     <Compile Include="..\Shared\TextBoxSelectionHelper.cs" Link="TextBoxSelectionHelper.cs" />
     <Compile Include="..\Shared\NameFormatting.cs" Link="NameFormatting.cs" />

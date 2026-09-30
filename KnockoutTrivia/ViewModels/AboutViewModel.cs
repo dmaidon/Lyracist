@@ -20,7 +20,7 @@ public partial class AboutViewModel : ViewModelBase
     private string _version = "26.8.27.1";
 
     [ObservableProperty]
-    private string _copyright = $"Copyright © {DateTime.UtcNow.Year} PAROLE Software - All rights reserved.";
+    private string _copyright = $"Copyright © {DateTime.UtcNow.Year} PAROLE Software - Licensed under GPL-3.0-or-later.";
 
     [ObservableProperty]
     private string _description = "A premium bar-friendly elimination game module and integral component of the professional Lyracist Suite. Features high-energy tournament elimination, shield token armor, 5-block streak meters, Scaryoke-style rotary Super Streak target wheels, multi-monitor audience projection, and 16:9 auto-scaling game-show presentation.";

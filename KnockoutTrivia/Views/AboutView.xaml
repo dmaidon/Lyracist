@@ -48,6 +48,7 @@
                 </Border>
 
                 <!-- Copyright -->
+                <TextBlock Text="Free software licensed under the GNU GPL v3.0 or later. See LICENSE and THIRD-PARTY-NOTICES.txt in the installation folder." FontSize="10" Foreground="#6B7280" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,6" />
                 <TextBlock Text="{Binding Copyright}" FontSize="11" Foreground="#6B7280" HorizontalAlignment="Center" />
             </StackPanel>
         </Border>

@@ -240,7 +240,7 @@
                                 </Grid.ColumnDefinitions>
                                 <ui:SymbolIcon Symbol="Document24" Foreground="{DynamicResource UIAccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12">
-                                    <Bold>Full license notices</Bold> - See THIRD-PARTY-NOTICES.txt in the installation folder for every library, license and source link.
+                                    <Bold>License</Bold> - Free software under the GNU General Public License v3.0 or later (see LICENSE). <Bold>Full license notices</Bold> - See THIRD-PARTY-NOTICES.txt in the installation folder for every library, license and source link.
                                 </TextBlock>
                             </Grid>
                         </StackPanel>
