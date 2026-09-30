@@ -737,3 +737,9 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 4. Set up monitor assignments under **Display & Projection Monitors** or the main control panel.
 5. Manage backups and database restorations in the **Database Maintenance** section under the **Music Library** group box.
 6. Curate the DJ Name, active Venues catalog list, Billboard View Mode, and Star Wars Crawl Text Template (Dramatic, Comedic, Over-the-Top, or Custom) on the Settings page, with real-time text previews.
+
+## License
+
+The Lyracist suite is free software, licensed under the **GNU General Public License v3.0 or later**
+(`GPL-3.0-or-later`). See [LICENSE](LICENSE). Third-party components remain under their own licenses;
+see [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).

@@ -2,7 +2,8 @@
 <Project>
   <PropertyGroup>
     <Company>PAROLE Software</Company>
-    <Copyright>© $([System.DateTime]::UtcNow.ToString('yyyy')) PAROLE Software - All rights reserved.</Copyright>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <Copyright>© $([System.DateTime]::UtcNow.ToString('yyyy')) PAROLE Software</Copyright>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <NoWarn>$(NoWarn);0436;CA1416;CA1422</NoWarn>
   </PropertyGroup>

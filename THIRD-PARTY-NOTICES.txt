@@ -15,6 +15,9 @@ FFmpeg / FFprobe (ffmpeg.exe, ffprobe.exe)
   License: GNU General Public License v3 (this build is configured --enable-gpl
   --enable-version3).
   Source code and license: https://ffmpeg.org/  and  https://www.gnu.org/licenses/gpl-3.0.html
+  Bundled build: FFmpeg 8.0 "full_build" from https://www.gyan.dev/ffmpeg/builds/ ; the
+  corresponding source is available from https://ffmpeg.org/download.html (release 8.0) and
+  will be provided on request to the address at maidonww.com.
   FFmpeg is a trademark of Fabrice Bellard. The FFmpeg binaries are separate programs
   run as their own processes; their source is available from the link above.
 
@@ -91,4 +94,5 @@ CD+G format decoding was informed by the public repositories gozzar/karaoke,
 spektor56/KaraokePlayer and nopperl/karaoke-cdg.
 
 
-Lyracist Suite is (c) PAROLE Software. https://maidonww.com/Lyracist
+Lyracist Suite is (c) PAROLE Software and is licensed under the GNU General Public
+License v3.0 or later (GPL-3.0-or-later); see the LICENSE file. https://maidonww.com/Lyracist
