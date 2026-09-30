@@ -18,7 +18,10 @@
         <helpers:FestivalTierFontSizeConverter x:Key="FestivalTierFontSizeConverter" />
     </Window.Resources>
 
-    <Grid>
+    <!-- Fixed 1920x1080 design canvas scaled uniformly to the real window: a 1080p TV at 125-150% Windows
+         scaling only offers ~720-864 DIPs of height, which truncated the tall themed panels (esp. Slot Machine). -->
+    <Viewbox Stretch="Uniform">
+    <Grid Width="1920" Height="1080" ClipToBounds="True">
         <!-- Window chrome overlay: fades in when the mouse is over the window. -->
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Right"
@@ -2327,4 +2330,5 @@
                    RenderOptions.BitmapScalingMode="HighQuality" />
         </Grid>
     </Grid>
+    </Viewbox>
 </Window>

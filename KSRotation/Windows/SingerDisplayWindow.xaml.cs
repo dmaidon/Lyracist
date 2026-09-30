@@ -164,7 +164,7 @@ namespace KSRotation.Windows
             if (MarqueeHeader == null || MarqueeSingerName == null || MarqueeSingerSong == null)
                 return;
 
-            double ratio = ActualHeight / 1080.0;
+            double ratio = 1.0; // the XAML root Viewbox already scales a fixed 1920x1080 canvas
             if (ratio <= 0) ratio = 1.0;
 
             MarqueeHeader.FontSize = Math.Max(24, Math.Round(48 * ratio));

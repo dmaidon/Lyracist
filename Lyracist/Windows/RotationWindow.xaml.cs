@@ -180,7 +180,7 @@ public partial class RotationWindow : Window, ICaptureSource
         if (MarqueeHeader == null || MarqueeSingerName == null || MarqueeSingerSong == null)
             return;
 
-        double ratio = ActualHeight / 1080.0;
+        double ratio = 1.0; // the XAML root Viewbox already scales a fixed 1920x1080 canvas
         if (ratio <= 0) ratio = 1.0;
 
         MarqueeHeader.FontSize = Math.Max(24, Math.Round(48 * ratio));
@@ -1260,8 +1260,8 @@ public partial class RotationWindow : Window, ICaptureSource
                 RenderTransform = new TranslateTransform()
             };
 
-            double width = ActualWidth > 0 ? ActualWidth : 800;
-            double height = ActualHeight > 0 ? ActualHeight : 600;
+            double width = 1920; // design-canvas units (root Viewbox)
+            double height = 1080;
 
             // Random entry side: 0=bottom, 1=top, 2=left, 3=right
             int side = _rng.Next(4);
