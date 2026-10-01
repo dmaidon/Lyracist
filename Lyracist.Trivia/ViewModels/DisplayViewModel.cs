@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 10:58:45 -> Update QR code colors to dark purple for Wi-Fi and dark green for Game Arena
+// Edited on Oct 1, 2026 @ 07:10:00 -> Fix #6 restore option opacities when answers are uneliminated on timer reset
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -436,10 +436,12 @@ public partial class DisplayViewModel : ObservableObject, IDisposable
                 OptionC = currentQ.Options.Count > 2 ? currentQ.Options[2] : "";
                 OptionD = currentQ.Options.Count > 3 ? currentQ.Options[3] : "";
 
-                OptionAOpacity = _engine.EliminatedAnswerIndices.Contains(0) ? 0.12 : 1.0;
-                OptionBOpacity = _engine.EliminatedAnswerIndices.Contains(1) ? 0.12 : 1.0;
-                OptionCOpacity = _engine.EliminatedAnswerIndices.Contains(2) ? 0.12 : 1.0;
-                OptionDOpacity = _engine.EliminatedAnswerIndices.Contains(3) ? 0.12 : 1.0;
+                // Snapshot, not the live list: the engine's tick timer edits it on another thread.
+                var eliminated = _engine.GetSnapshot().EliminatedIndices;
+                OptionAOpacity = eliminated.Contains(0) ? 0.12 : 1.0;
+                OptionBOpacity = eliminated.Contains(1) ? 0.12 : 1.0;
+                OptionCOpacity = eliminated.Contains(2) ? 0.12 : 1.0;
+                OptionDOpacity = eliminated.Contains(3) ? 0.12 : 1.0;
 
                 RemainingSeconds = _engine.RemainingSeconds;
                 TotalCountdownSeconds = _engine.TotalCountdownSeconds;
@@ -530,10 +532,10 @@ public partial class DisplayViewModel : ObservableObject, IDisposable
 
     private void HandleAnswersEliminated(List<int> eliminatedIndices)
     {
-        if (eliminatedIndices.Contains(0)) OptionAOpacity = 0.12;
-        if (eliminatedIndices.Contains(1)) OptionBOpacity = 0.12;
-        if (eliminatedIndices.Contains(2)) OptionCOpacity = 0.12;
-        if (eliminatedIndices.Contains(3)) OptionDOpacity = 0.12;
+        OptionAOpacity = eliminatedIndices.Contains(0) ? 0.12 : 1.0;
+        OptionBOpacity = eliminatedIndices.Contains(1) ? 0.12 : 1.0;
+        OptionCOpacity = eliminatedIndices.Contains(2) ? 0.12 : 1.0;
+        OptionDOpacity = eliminatedIndices.Contains(3) ? 0.12 : 1.0;
     }
 
     private void HandleAnswerRevealed(TriviaQuestion q)

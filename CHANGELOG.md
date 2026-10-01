@@ -1,9 +1,25 @@
-<!-- Edited on Sep 27, 2026 @ 10:05:00 -> Update CHANGELOG for DJ banner monitor overscan warning tooltip and help system updates -->
-Last Edit: Sep 27, 2026 - DJ Banner Target Monitor TV Overscan Guidance & Tooltip Warning
+<!-- Edited on Oct 1, 2026 @ 07:15:00 -> Update CHANGELOG for Trivia fixes #3, #4, #5, and #6 -->
+Last Edit: Oct 1, 2026 - Trivia Engine Leaderboard Auto-Advance, Games Played Counter, Question ID Submit Validation & Option Un-fade
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [26.10.1.0] - 2026-10-01
+
+### Fixed
+- **Trivia Auto-Advance after Round Leaderboard (`TriviaGameEngine.cs`, Fix #3)**:
+  - Corrected `ProcessTick()` during `TriviaGameState.RoundLeaderboard`: when the 8-second leaderboard countdown completes and `AutoAdvanceQuestions` is enabled, the engine now calls `AdvanceToNextQuestion()` instead of restarting the question that was just revealed (`StartCurrentQuestion()`), preventing questions from replaying and double scoring.
+- **Games-Played Counter and Run Progression (`TriviaGameEngine.cs`, `MainViewModel.cs`, Fix #4)**:
+  - Added `ResetGamesPlayedCount()` to `TriviaGameEngine` and updated `StartGame()` with an `isAutoRestart` parameter so manual game runs reset the count to 1 while automated multi-game intermission loops correctly increment it.
+  - Reset preloaded question sets and game counters on manual "Start Game" clicks in `MainViewModel`.
+  - Updated `GameProgressText` calculation to accurately show the active game index (`Game X of Y`) on subsequent runs without hitting the game cap prematurely on game 1.
+- **Stale Submission Prevention via Question ID Validation (`TriviaGameEngine.cs`, `TriviaWebServer.cs`, `trivia.html`, Fix #5)**:
+  - Added `QuestionId` to `SubmitRequest` payload and validated question ID in both `TriviaWebServer` and `TriviaGameEngine.SubmitAnswer()` under state synchronization lock.
+  - Mobile client (`trivia.html`) now transmits `currentQuestionId` in the submit payload, preventing in-flight late responses submitted during a question transition from erroneously scoring on the new question.
+- **Restoration of Faded Options on Question Timer Reset (`DisplayViewModel.cs`, `TriviaDisplayViewModel.cs`, `trivia.html`, Fix #6)**:
+  - Fixed TV display view models (`DisplayViewModel.cs` and `TriviaDisplayViewModel.cs`) `HandleAnswersEliminated` to restore opacity to `1.0` for all options when uneliminated (e.g. when `ResetQuestionTimer()` fires with an empty list `[]`).
+  - Updated phone buzzer client (`trivia.html`) `handleStateUpdate` to properly remove the `.eliminated` CSS class and re-enable choices when options are un-eliminated following a timer reset.
 
 ## [26.9.25.1] - 2026-09-27
 

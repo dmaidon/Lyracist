@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:34:00 -> Fix RCS1139 doc comments, S3358 nested ternaries, and S3881 dispose pattern
+// Edited on Oct 1, 2026 @ 07:10:00 -> Fix #3 auto-advance after leaderboard, #4 games-played counter reset, #5 question ID validation on submit, and #6 un-fade on timer reset
 using Lyracist.Trivia.Core.Models;
 using System.Collections.Concurrent;
 using System.Timers;
@@ -109,6 +109,69 @@ public class TriviaGameEngine : IDisposable
         return true;
     }
 
+    // PlayerIds of players the host has kicked. Banned by id (the id each phone keeps in
+    // localStorage and sends on every request), not by display name, so a kicked player can't
+    // simply rejoin - or keep answering - but an unrelated person can still use the same name.
+    // Lasts until the app restarts.
+    private readonly ConcurrentDictionary<string, byte> _kickedPlayerIds = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Removes a player and blocks their device from rejoining or submitting answers. Use this
+    /// for the host's "Kick" action; <see cref="RemovePlayer"/> only deletes the entry, and the
+    /// phone could register again on its next request.
+    /// </summary>
+    public bool KickPlayer(string name)
+    {
+        if (!_players.TryRemove(NormalizePlayerName(name), out var removed)) return false;
+        _kickedPlayerIds[removed.PlayerId] = 0;
+        LeaderboardUpdated?.Invoke(this, GetPlayers());
+        return true;
+    }
+
+    public bool IsKicked(string? playerId) =>
+        !string.IsNullOrEmpty(playerId) && _kickedPlayerIds.ContainsKey(playerId);
+
+    /// <summary>
+    /// Looks up a registered player by (client-supplied) name without scanning/sorting the whole
+    /// roster. Returns null when nobody is registered under that name.
+    /// </summary>
+    public TriviaPlayer? FindPlayer(string? name) =>
+        _players.TryGetValue(NormalizePlayerName(name), out var player) ? player : null;
+
+    /// <summary>
+    /// Everything the phone state endpoint needs from the engine, captured atomically under the
+    /// engine lock. The tick timer mutates these (notably the eliminated-answer list) on another
+    /// thread, so reading them field by field from a web thread could serialize a half-updated
+    /// state or throw "collection was modified".
+    /// </summary>
+    public sealed record EngineSnapshot(
+        TriviaGameState State,
+        TriviaQuestion? Question,
+        int[] EliminatedIndices,
+        int RemainingSeconds,
+        int TotalCountdownSeconds,
+        bool IsPaused,
+        string? PauseReason,
+        int IntermissionSecondsRemaining,
+        bool IsInIntermission);
+
+    public EngineSnapshot GetSnapshot()
+    {
+        lock (_stateLock)
+        {
+            return new EngineSnapshot(
+                State,
+                CurrentSession.CurrentQuestion,
+                [.. EliminatedAnswerIndices],
+                RemainingSeconds,
+                TotalCountdownSeconds,
+                IsPaused,
+                PauseReason,
+                IntermissionSecondsRemaining,
+                IsInIntermission);
+        }
+    }
+
     public TriviaPlayer RegisterPlayer(string name, string teamName = "")
     {
         string trimmed = NormalizePlayerName(name);
@@ -133,11 +196,15 @@ public class TriviaGameEngine : IDisposable
         return player;
     }
 
-    public void StartGame(List<TriviaRound> rounds, string? title = null)
+    public void StartGame(List<TriviaRound> rounds, string? title = null, bool isAutoRestart = false)
     {
         lock (_stateLock)
         {
             _tickTimer.Stop();
+            if (!isAutoRestart)
+            {
+                GamesPlayedCount = 0;
+            }
             GamesPlayedCount++;
             CurrentSession = new TriviaGameSession
             {
@@ -216,7 +283,7 @@ public class TriviaGameEngine : IDisposable
         }
     }
 
-    public bool SubmitAnswer(string playerName, int optionIndex, double responseTimeMs = 0)
+    public bool SubmitAnswer(string playerName, int optionIndex, double responseTimeMs = 0, string? questionId = null)
     {
         lock (_stateLock)
         {
@@ -234,9 +301,17 @@ public class TriviaGameEngine : IDisposable
             var q = CurrentSession.CurrentQuestion;
             if (q == null) return false;
 
+            if (!string.IsNullOrEmpty(questionId) && !string.Equals(q.Id, questionId, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            // Only players who joined (and weren't kicked) can answer. This used to quietly
+            // register any unknown name, which let a kicked player straight back in and let a
+            // scripted client add unlimited leaderboard entries, bypassing the join rate limit.
             if (!_players.TryGetValue(playerName, out var player))
             {
-                player = RegisterPlayer(playerName);
+                return false;
             }
 
             if (player.HasAnsweredCurrentQuestion)
@@ -664,6 +739,14 @@ public class TriviaGameEngine : IDisposable
         }
     }
 
+    public void ResetGamesPlayedCount()
+    {
+        lock (_stateLock)
+        {
+            GamesPlayedCount = 0;
+        }
+    }
+
     /// <summary>
     /// True once Settings.TotalGamesToPlay (if set) has been reached - CompleteGame stops
     /// auto-restarting at that point instead of looping forever.
@@ -775,6 +858,21 @@ public class TriviaGameEngine : IDisposable
 
     private void OnTimerTick(object? sender, ElapsedEventArgs e)
     {
+        // System.Timers.Timer no longer swallows exceptions thrown from Elapsed (since .NET Core),
+        // so anything that escaped here - e.g. a subscriber's event handler - would terminate the
+        // whole process, which is fatal for an unattended show. Log it and keep ticking instead.
+        try
+        {
+            ProcessTick();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError($"TriviaGameEngine tick failed in state {State}: {ex}");
+        }
+    }
+
+    private void ProcessTick()
+    {
         lock (_stateLock)
         {
             switch (State)
@@ -838,14 +936,7 @@ public class TriviaGameEngine : IDisposable
                         _leaderboardCountdownSeconds--;
                         if (_leaderboardCountdownSeconds <= 0)
                         {
-                            if (CurrentSession.CurrentQuestion != null)
-                            {
-                                StartCurrentQuestion();
-                            }
-                            else
-                            {
-                                AdvanceToNextQuestion();
-                            }
+                            AdvanceToNextQuestion();
                         }
                     }
                     break;

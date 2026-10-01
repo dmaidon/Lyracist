@@ -1,4 +1,4 @@
-// Edited on Aug 30, 2026 @ 08:26:00 -> Update help topic path references to consolidated Packs, Data, and Banners directories
+// Edited on Oct 1, 2026 @ 07:10:00 -> Fix #4 games-played counter and progress text on new runs, and fix CS8602 warning
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -69,17 +69,24 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private int _currentQuestionNumber = 1;
 
+    /// <summary>
+    /// True while a game is actually being played (a question is queued, active, or being
+    /// revealed) - as opposed to the lobby before a game or the game-complete screen.
+    /// </summary>
+    private bool IsGameInProgress =>
+        _engine?.CurrentSession?.CurrentRound != null &&
+        _engine.State != TriviaGameState.Lobby &&
+        _engine.State != TriviaGameState.GameComplete;
+
     partial void OnCurrentQuestionNumberChanged(int value)
     {
-        // Guard against reacting to programmatic resets (e.g. UpdateSelectedPacksPreview setting
-        // CurrentQuestionNumber = 1 while the DJ is browsing packs for the *next* game) - only a
-        // live/in-progress session should have question-jump navigation applied to it.
-        if (_engine?.CurrentSession?.CurrentRound != null &&
-            _engine.State != TriviaGameState.Lobby &&
-            _engine.State != TriviaGameState.GameComplete)
+        // Only a live/in-progress session should have question-jump navigation applied to it.
+        // Programmatic changes (pack browsing for the *next* game) are kept away from a live game
+        // by UpdateSelectedPacksPreview, which does nothing while IsGameInProgress.
+        if (IsGameInProgress)
         {
             int targetIdx = value - 1;
-            if (targetIdx >= 0 && targetIdx < _engine.CurrentSession.CurrentRound.Questions.Count && _engine.CurrentSession.CurrentQuestionIndex != targetIdx)
+            if (targetIdx >= 0 && targetIdx < _engine.CurrentSession.CurrentRound?.Questions.Count && _engine.CurrentSession.CurrentQuestionIndex != targetIdx)
             {
                 _engine.GoToQuestion(targetIdx, startTimerImmediately: AutoAdvanceQuestions);
                 ActiveQuestion = _engine.CurrentSession.CurrentQuestion;
@@ -131,7 +138,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private int _preloadedGameIndex;
 
     public string GameProgressText => TotalGamesToPlay > 0
-        ? $"Game {Math.Min(_engine.GamesPlayedCount, TotalGamesToPlay)} of {TotalGamesToPlay}"
+        ? $"Game {Math.Min(Math.Max(1, _engine.GamesPlayedCount), TotalGamesToPlay)} of {TotalGamesToPlay}"
         : string.Empty;
 
     partial void OnTotalGamesToPlayChanged(int value)
@@ -710,6 +717,14 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     private void UpdateSelectedPacksPreview()
     {
+        // This is a preview of the NEXT game (lobby banner, question count, first question). It
+        // resets CurrentQuestionNumber to 1, which during a live game is treated as a jump to
+        // question 1 - restarting the game's current question and letting everyone answer again.
+        // Ticking a pack, changing questions-per-game, or (re)opening the projection window would
+        // all trigger that, so leave a game in progress alone; the lobby refreshes on the next
+        // pass once the game ends.
+        if (IsGameInProgress) return;
+
         var checkedPacks = GetCheckedPacks();
         if (checkedPacks.Count == 0) return;
 
@@ -776,6 +791,13 @@ public partial class MainViewModel : ObservableObject, IDisposable
         WinnerAnnouncement = string.Empty;
         WinningTeamRoster = string.Empty;
 
+        if (!_isIntermissionAutoRestart)
+        {
+            _engine.ResetGamesPlayedCount();
+            _preloadedGameQuestionSets = null;
+            _preloadedGameIndex = 0;
+        }
+
         List<TriviaQuestion> gameQuestions;
         if (TotalGamesToPlay > 1)
         {
@@ -818,7 +840,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
             Questions = gameQuestions
         };
 
-        _engine.StartGame([round], title);
+        _engine.StartGame([round], title, isAutoRestart: _isIntermissionAutoRestart);
         OnPropertyChanged(nameof(GameProgressText));
         CurrentRoundTitle = round.Title;
         TotalQuestionsInRound = round.Questions.Count;
@@ -852,6 +874,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         IntermissionCountdownText = $"{mins:D2}:{secs:D2}";
     }
 
+    private bool _isIntermissionAutoRestart;
+
     private void HandleIntermissionCompleted()
     {
         IsIntermissionActive = false;
@@ -860,7 +884,15 @@ public partial class MainViewModel : ObservableObject, IDisposable
         // Whatever packs are checked stays checked between games - BuildMixedQuestionSet draws a
         // fresh random question set every time it's called, so this alone gives a different game
         // each time without needing to cycle to a different pack.
-        StartGameWithSelectedPack();
+        _isIntermissionAutoRestart = true;
+        try
+        {
+            StartGameWithSelectedPack();
+        }
+        finally
+        {
+            _isIntermissionAutoRestart = false;
+        }
     }
 
     public void OnProjectionOpened()
@@ -1045,7 +1077,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         if (player != null)
         {
-            _engine.RemovePlayer(player.Name);
+            // Kick (not just remove) so the phone can't re-register on its next request.
+            _engine.KickPlayer(player.Name);
             Players.Remove(player);
         }
     }

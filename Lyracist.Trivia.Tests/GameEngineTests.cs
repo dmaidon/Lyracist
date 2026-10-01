@@ -1,4 +1,4 @@
-// Edited on Aug 26, 2026 @ 07:15:00 -> Add unit tests to verify manual DJ flow controls and timer countdown standby mode
+// Edited on Oct 1, 2026 @ 07:10:00 -> Add unit tests for #3 leaderboard auto-advance, #4 games played reset, #5 question ID validation, and #6 un-elimination on reset timer
 using System;
 using System.Collections.Generic;
 using Lyracist.Trivia.Core.Models;
@@ -93,6 +93,56 @@ public class GameEngineTests
         Assert.Equal(TriviaGameState.QuestionActive, engine.State);
         Assert.Equal(15, engine.RemainingSeconds);
         Assert.Equal(15, engine.TotalCountdownSeconds);
+    }
+
+    [Fact]
+    public void SubmitAnswer_UnregisteredName_IsRejectedAndDoesNotCreateAPlayer()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.RegisterPlayer("Alice");
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        bool accepted = engine.SubmitAnswer("Mallory", 1);
+
+        Assert.False(accepted);
+        Assert.Single(engine.GetPlayers());
+        Assert.Null(engine.FindPlayer("Mallory"));
+    }
+
+    [Fact]
+    public void KickPlayer_RemovesPlayerAndBlocksTheirDeviceFromComingBack()
+    {
+        using var engine = new TriviaGameEngine();
+        var alice = engine.RegisterPlayer("Alice");
+        engine.RegisterPlayer("Bob");
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        Assert.True(engine.KickPlayer("Alice"));
+
+        Assert.Null(engine.FindPlayer("Alice"));
+        Assert.True(engine.IsKicked(alice.PlayerId));
+        Assert.False(engine.IsKicked("someone-else"));
+        // The kicked device's next answer no longer re-registers it.
+        Assert.False(engine.SubmitAnswer("Alice", 1));
+        Assert.Null(engine.FindPlayer("Alice"));
+    }
+
+    [Fact]
+    public void GetSnapshot_ReturnsIndependentCopyOfEliminatedIndices()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+        engine.EliminateNextWrongAnswer();
+
+        var snap = engine.GetSnapshot();
+        engine.EliminateNextWrongAnswer();
+
+        Assert.Single(snap.EliminatedIndices);
+        Assert.Equal(2, engine.EliminatedAnswerIndices.Count);
+        Assert.Equal(TriviaGameState.EliminatingAnswers, snap.State);
     }
 
     [Fact]
@@ -916,5 +966,100 @@ public class GameEngineTests
         engine.StartCurrentQuestion();
         Assert.Equal(TriviaGameState.QuestionActive, engine.State);
         Assert.Equal(15, engine.RemainingSeconds);
+    }
+
+    [Fact]
+    public void RoundLeaderboard_AdvancesToNextQuestion_WhenAutoAdvanceEnabled()
+    {
+        var settings = new TriviaSettings
+        {
+            AutoAdvanceQuestions = true
+        };
+        using var engine = new TriviaGameEngine(settings);
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+        Assert.Equal("Q1", engine.CurrentSession.CurrentQuestion?.Id);
+
+        // Show round leaderboard
+        engine.ShowLeaderboard();
+        Assert.Equal(TriviaGameState.RoundLeaderboard, engine.State);
+
+        // Simulate 8 countdown ticks to trigger auto-advance
+        var processTickMethod = typeof(TriviaGameEngine).GetMethod("ProcessTick", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        Assert.NotNull(processTickMethod);
+        for (int i = 0; i < 8; i++)
+        {
+            processTickMethod.Invoke(engine, null);
+        }
+
+        // Must have advanced to question 2 (Q2), NOT replayed question 1 (Q1)
+        Assert.Equal("Q2", engine.CurrentSession.CurrentQuestion?.Id);
+        Assert.Equal(1, engine.CurrentSession.CurrentQuestionIndex);
+    }
+
+    [Fact]
+    public void StartGame_ResetsGamesPlayedCount_OnManualStart_AndPreservesAcrossAutoRestarts()
+    {
+        using var engine = new TriviaGameEngine();
+        Assert.Equal(0, engine.GamesPlayedCount);
+
+        // Game 1 of run 1
+        engine.StartGame([CreateSampleRound()]);
+        Assert.Equal(1, engine.GamesPlayedCount);
+
+        // Game 2 (auto-restart within the run)
+        engine.StartGame([CreateSampleRound()], isAutoRestart: true);
+        Assert.Equal(2, engine.GamesPlayedCount);
+
+        // Brand new manual run starts
+        engine.StartGame([CreateSampleRound()], isAutoRestart: false);
+        Assert.Equal(1, engine.GamesPlayedCount);
+
+        // ResetGamesPlayedCount explicitly
+        engine.ResetGamesPlayedCount();
+        Assert.Equal(0, engine.GamesPlayedCount);
+    }
+
+    [Fact]
+    public void SubmitAnswer_RejectsLateSubmission_WhenQuestionIdDoesNotMatch()
+    {
+        using var engine = new TriviaGameEngine();
+        var alice = engine.RegisterPlayer("Alice");
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+        Assert.Equal("Q1", engine.CurrentSession.CurrentQuestion?.Id);
+
+        // Alice attempts to submit an in-flight answer targeting a different/stale question "OLD_Q"
+        bool acceptedStale = engine.SubmitAnswer("Alice", 1, 2000, questionId: "OLD_Q");
+        Assert.False(acceptedStale);
+        Assert.False(alice.HasAnsweredCurrentQuestion);
+        Assert.Equal(0, alice.TotalScore);
+
+        // Valid submission with matching questionId succeeds
+        bool acceptedValid = engine.SubmitAnswer("Alice", 1, 2000, questionId: "Q1");
+        Assert.True(acceptedValid);
+        Assert.True(alice.HasAnsweredCurrentQuestion);
+    }
+
+    [Fact]
+    public void ResetQuestionTimer_FiresAnswersEliminatedWithEmptyList()
+    {
+        using var engine = new TriviaGameEngine();
+        engine.StartGame([CreateSampleRound()]);
+        engine.StartCurrentQuestion();
+
+        // Trigger progressive elimination so some options are eliminated
+        engine.StartAnswerElimination();
+        Assert.NotEmpty(engine.EliminatedAnswerIndices);
+
+        List<int>? eliminatedReceived = null;
+        engine.AnswersEliminated += (_, list) => eliminatedReceived = list;
+
+        // Reset question timer: must clear eliminated options and fire with empty list
+        engine.ResetQuestionTimer();
+        Assert.Empty(engine.EliminatedAnswerIndices);
+        Assert.NotNull(eliminatedReceived);
+        Assert.Empty(eliminatedReceived);
+        Assert.Equal(TriviaGameState.QuestionActive, engine.State);
     }
 }

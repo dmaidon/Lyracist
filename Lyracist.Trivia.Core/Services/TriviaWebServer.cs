@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1085, CA2016, RCS1261 async disposals, RCS1146, and RCS1118 const in TriviaWebServer.cs
+// Edited on Oct 1, 2026 @ 07:10:00 -> Add questionId to SubmitRequest and validate question ID before scoring to prevent late answers scoring on next question
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -256,6 +256,13 @@ public class TriviaWebServer : IDisposable
                 {
                     string trimmedName = TriviaGameEngine.NormalizePlayerName(joinReq.Name);
 
+                    if (_engine.IsKicked(joinReq.PlayerId))
+                    {
+                        await SendResponseAsync(stream, 403, "application/json; charset=utf-8",
+                            Encoding.UTF8.GetBytes("{\"error\":\"The host has removed you from this game.\",\"kicked\":true}"));
+                        return;
+                    }
+
                     // If someone is already actively connected under this name, only let the join
                     // through if the request carries that same player's PlayerId (a legitimate
                     // reconnect - e.g. a page reload on the same device). Otherwise this is a
@@ -306,25 +313,42 @@ public class TriviaWebServer : IDisposable
                 {
                     string trimmedName = TriviaGameEngine.NormalizePlayerName(subReq.PlayerName);
 
-                    // If this name's PlayerId no longer matches who the caller thinks they are,
-                    // another device has since taken over that name (or the caller's own session
-                    // is stale) - don't let it submit an answer as somebody else.
-                    var existing = _engine.GetPlayers().FirstOrDefault(p => p.Name.Equals(trimmedName, StringComparison.OrdinalIgnoreCase));
-                    if (existing != null && !string.IsNullOrEmpty(subReq.PlayerId) &&
-                        !string.Equals(existing.PlayerId, subReq.PlayerId, StringComparison.OrdinalIgnoreCase))
+                    if (_engine.IsKicked(subReq.PlayerId))
                     {
-                        await SendResponseAsync(stream, 409, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Player identity mismatch - please rejoin.\"}"));
+                        await SendResponseAsync(stream, 403, "application/json; charset=utf-8",
+                            Encoding.UTF8.GetBytes("{\"error\":\"The host has removed you from this game.\",\"kicked\":true}"));
                         return;
                     }
 
-                    int optionCount = _engine.CurrentSession.CurrentQuestion?.Options.Count ?? 4;
+                    // The caller must be a registered player AND prove it with that player's
+                    // PlayerId. A missing/unknown/mismatched id means either nobody joined under
+                    // this name (e.g. the host restarted, or the player was removed), another device
+                    // has since taken the name, or a script is guessing names - none of those may
+                    // submit an answer, and omitting the id must not skip the check.
+                    var existing = _engine.FindPlayer(trimmedName);
+                    if (existing == null || string.IsNullOrEmpty(subReq.PlayerId) ||
+                        !string.Equals(existing.PlayerId, subReq.PlayerId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        await SendResponseAsync(stream, 409, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Please rejoin the game.\",\"rejoin\":true}"));
+                        return;
+                    }
+
+                    var snap = _engine.GetSnapshot();
+                    if (!string.IsNullOrEmpty(subReq.QuestionId) && snap.Question != null &&
+                        !string.Equals(snap.Question.Id, subReq.QuestionId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Question has ended.\",\"staleQuestion\":true}"));
+                        return;
+                    }
+
+                    int optionCount = snap.Question?.Options.Count ?? 4;
                     if (subReq.SelectedOptionIndex < 0 || subReq.SelectedOptionIndex >= optionCount)
                     {
                         await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Invalid answer option.\"}"));
                         return;
                     }
 
-                    bool accepted = _engine.SubmitAnswer(trimmedName, subReq.SelectedOptionIndex, subReq.ResponseTimeMs);
+                    bool accepted = _engine.SubmitAnswer(trimmedName, subReq.SelectedOptionIndex, subReq.ResponseTimeMs, subReq.QuestionId);
                     var resp = new { success = accepted };
                     await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)));
                 }
@@ -360,11 +384,13 @@ public class TriviaWebServer : IDisposable
                 ? allPlayers.FirstOrDefault(p => p.Name.Equals(playerName, StringComparison.OrdinalIgnoreCase))
                 : null;
 
-            // A playerId that doesn't match means another device has since taken over this name
-            // (or this caller's own session is stale) - don't hand back that player's live score,
-            // streak, or hasAnswered state to someone who isn't actually them.
-            if (player != null && !string.IsNullOrEmpty(requestPlayerId) &&
-                !string.Equals(player.PlayerId, requestPlayerId, StringComparison.OrdinalIgnoreCase))
+            // The playerId must match: a missing or different id means another device has taken
+            // over this name (or this caller's session is stale, or nobody is registered under
+            // it) - don't hand back that player's live score, streak, or hasAnswered state to
+            // someone who isn't actually them. Omitting the id must not skip the check.
+            if (player != null &&
+                (string.IsNullOrEmpty(requestPlayerId) ||
+                 !string.Equals(player.PlayerId, requestPlayerId, StringComparison.OrdinalIgnoreCase)))
             {
                 player = null;
             }
@@ -375,33 +401,38 @@ public class TriviaWebServer : IDisposable
                 player.LastSeenAt = DateTime.UtcNow;
             }
 
-            var q = _engine.CurrentSession.CurrentQuestion;
+            // One atomic read of the engine's live state (see TriviaGameEngine.GetSnapshot) -
+            // the tick timer updates it on another thread while this request is being built.
+            var snap = _engine.GetSnapshot();
+            var q = snap.Question;
             bool isCorrect = player != null && q != null && player.LastAnswerIndex == q.CorrectAnswerIndex;
             var gameResult = _engine.GetGameResult(allPlayers);
 
-            int visibleCount = Math.Max(1, (q?.Options.Count ?? 4) - _engine.EliminatedAnswerIndices.Count);
+            int visibleCount = Math.Max(1, (q?.Options.Count ?? 4) - snap.EliminatedIndices.Length);
             int currentPercent = _engine.GetTierPercent(visibleCount);
             int potentialPoints = (int)(_engine.Settings.BasePointsPerQuestion * (currentPercent / 100.0));
 
             var statePayload = new
             {
-                state = _engine.State.ToString(),
-                isPaused = _engine.IsPaused,
-                pauseReason = _engine.PauseReason ?? "",
-                remainingSeconds = _engine.RemainingSeconds,
-                totalSeconds = _engine.TotalCountdownSeconds,
+                state = snap.State.ToString(),
+                registered = player != null,
+                kicked = _engine.IsKicked(requestPlayerId),
+                isPaused = snap.IsPaused,
+                pauseReason = snap.PauseReason ?? "",
+                remainingSeconds = snap.RemainingSeconds,
+                totalSeconds = snap.TotalCountdownSeconds,
                 warningSeconds = _engine.Settings.WarningCountdownSeconds,
                 questionId = q?.Id ?? "",
                 prompt = q?.Prompt ?? "",
                 options = q?.Options ?? [],
-                eliminatedIndices = _engine.EliminatedAnswerIndices,
+                eliminatedIndices = snap.EliminatedIndices,
                 tieredScoringEnabled = _engine.Settings.TieredScoringEnabled,
                 currentValuePercent = currentPercent,
                 currentPotentialPoints = potentialPoints,
                 basePoints = _engine.Settings.BasePointsPerQuestion,
                 visibleOptionsCount = visibleCount,
-                correctIndex = (_engine.State == TriviaGameState.RevealAnswer || _engine.State == TriviaGameState.RoundLeaderboard) ? q?.CorrectAnswerIndex : -1,
-                explanation = (_engine.State == TriviaGameState.RevealAnswer) ? q?.Explanation : "",
+                correctIndex = (snap.State == TriviaGameState.RevealAnswer || snap.State == TriviaGameState.RoundLeaderboard) ? q?.CorrectAnswerIndex : -1,
+                explanation = (snap.State == TriviaGameState.RevealAnswer) ? q?.Explanation : "",
                 isCorrect = isCorrect,
                 pointsEarned = player?.LastPointsEarned ?? 0,
                 playerScore = player?.TotalScore ?? 0,
@@ -413,8 +444,8 @@ public class TriviaWebServer : IDisposable
                 winningScore = gameResult.WinningScore,
                 winningTeamMembers = gameResult.WinningTeamMembers,
                 winningTeamMembersRoster = gameResult.WinningTeamMembersRoster,
-                intermissionSecondsRemaining = _engine.IntermissionSecondsRemaining,
-                isIntermissionActive = _engine.IsInIntermission,
+                intermissionSecondsRemaining = snap.IntermissionSecondsRemaining,
+                isIntermissionActive = snap.IsInIntermission,
                 leaderboard = allPlayers.Take(10).Select((p, idx) => new
                 {
                     rank = idx + 1,
@@ -479,6 +510,7 @@ public class TriviaWebServer : IDisposable
             200 => "OK",
             204 => "No Content",
             400 => "Bad Request",
+            403 => "Forbidden",
             404 => "Not Found",
             409 => "Conflict",
             429 => "Too Many Requests",
@@ -591,5 +623,5 @@ public class TriviaWebServer : IDisposable
     }
 
     private record JoinRequest(string Name, string? TeamName, string? PlayerId);
-    private record SubmitRequest(string PlayerName, int SelectedOptionIndex, double ResponseTimeMs, string? PlayerId);
+    private record SubmitRequest(string PlayerName, int SelectedOptionIndex, double ResponseTimeMs, string? PlayerId, string? QuestionId = null);
 }

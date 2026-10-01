@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:37:00 -> Fix RCS1139 summary tags, RCS1163 unused parameters, RCS1021, and RCS1146
+// Edited on Oct 1, 2026 @ 07:15:00 -> Pass isAutoRestart to StartGame on Trivia intermission completed
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,6 +22,7 @@ namespace KSRotation.ViewModels
         private KSRotation.Windows.TriviaDisplayWindow? _triviaDisplayWindow;
         private TriviaDisplayViewModel? _triviaDisplayVm;
 #endif
+        private bool _isTriviaIntermissionAutoRestart;
 
         [ObservableProperty]
         public partial bool IsTriviaDisplayOpen { get; set; }
@@ -65,7 +66,7 @@ namespace KSRotation.ViewModels
                 _triviaEngine.State != TriviaGameState.GameComplete)
             {
                 int targetIdx = value - 1;
-                if (targetIdx >= 0 && targetIdx < _triviaEngine.CurrentSession.CurrentRound.Questions.Count)
+                if (targetIdx >= 0 && targetIdx < _triviaEngine.CurrentSession.CurrentRound?.Questions.Count)
                 {
                     if (_triviaEngine.CurrentSession.CurrentQuestionIndex != targetIdx)
                     {
@@ -523,7 +524,18 @@ namespace KSRotation.ViewModels
 
             _triviaEngine.IntermissionCompleted += (_, _) =>
             {
-                System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => StartTrivia());
+                System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
+                {
+                    _isTriviaIntermissionAutoRestart = true;
+                    try
+                    {
+                        StartTrivia();
+                    }
+                    finally
+                    {
+                        _isTriviaIntermissionAutoRestart = false;
+                    }
+                });
             };
         }
 
@@ -784,7 +796,7 @@ namespace KSRotation.ViewModels
                 TriviaStorageHelper.SaveSettings(TriviaSettings);
                 _triviaEngine.Settings = TriviaSettings;
 
-                _triviaEngine.StartGame(rounds, rounds[0].Title);
+                _triviaEngine.StartGame(rounds, rounds[0].Title, isAutoRestart: _isTriviaIntermissionAutoRestart);
                 TriviaActiveRoundTitle = rounds[0].Title;
                 TriviaTotalQuestionsInRound = rounds[0].Questions.Count;
                 UpdateTriviaAvailableQuestionNumbers(TriviaTotalQuestionsInRound);
@@ -998,7 +1010,7 @@ namespace KSRotation.ViewModels
         {
             if (player != null)
             {
-                _triviaEngine?.RemovePlayer(player.Name);
+                _triviaEngine?.KickPlayer(player.Name); // kick, so the phone cannot re-register
                 TriviaPlayers.Remove(player);
                 TriviaConnectedPlayerCount = TriviaPlayers.Count(p => p.IsConnected);
             }

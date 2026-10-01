@@ -1,4 +1,4 @@
-// Edited on Sep 5, 2026 @ 09:15:00 -> Add manual question navigation (Prev, Next, Jump), timer adjustment, option elimination, and void commands
+// Edited on Oct 1, 2026 @ 07:15:00 -> Pass isAutoRestart to StartGame on Trivia intermission completed
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,6 +29,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     private TriviaDisplayWindow? _displayWindow;
     private TriviaDisplayViewModel? _displayVm;
     private readonly DispatcherTimer _preGameTimer = new();
+    private bool _isIntermissionAutoRestart;
 
     [ObservableProperty]
     private TriviaSettings _settings;
@@ -368,7 +369,15 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
             {
                 IsIntermissionActive = false;
                 IntermissionSecondsRemaining = 0;
-                StartGame();
+                _isIntermissionAutoRestart = true;
+                try
+                {
+                    StartGame();
+                }
+                finally
+                {
+                    _isIntermissionAutoRestart = false;
+                }
             });
         };
     }
@@ -565,7 +574,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
                 Questions = gameQuestions
             };
 
-            _engine.StartGame([round], title);
+            _engine.StartGame([round], title, isAutoRestart: _isIntermissionAutoRestart);
             ActiveRoundTitle = round.Title;
             TotalQuestionsInRound = gameQuestions.Count;
             UpdateAvailableQuestionNumbers(TotalQuestionsInRound);
@@ -742,7 +751,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     {
         if (player != null)
         {
-            _engine.RemovePlayer(player.Name);
+            _engine.KickPlayer(player.Name); // kick, so the phone can't re-register
             Players.Remove(player);
         }
     }

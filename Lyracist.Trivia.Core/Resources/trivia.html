@@ -1,4 +1,4 @@
-<!-- Edited on Aug 20, 2026 @ 06:26:00 -> Added real-time Tiered Point Multiplier badge (100% / 70% / 40%) and elimination handling to mobile buzzer screen -->
+<!-- Edited on Oct 1, 2026 @ 07:10:00 -> Fix #5 send questionId in submit payload, and #6 restore uneliminated choices on timer reset -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -598,6 +598,22 @@
             localStorage.setItem('lyracist_trivia_player', playerName);
             localStorage.setItem('lyracist_trivia_team', teamName);
 
+            const result = await registerWithServer();
+            if (result.status === 'ok') {
+                showScreen('screen-lobby');
+                updatePlayerBadge();
+                startPolling();
+            } else if (result.status === 'kicked') {
+                handleKicked();
+            } else {
+                alert(result.message);
+            }
+        }
+
+        // Registers (or re-registers) this device with the host. Never pretends success: the server
+        // only accepts answers from registered players, so a fake "joined" screen would just leave
+        // the player unable to answer.
+        async function registerWithServer() {
             try {
                 const res = await fetch('/api/trivia/join', {
                     method: 'POST',
@@ -605,29 +621,48 @@
                     body: JSON.stringify({ name: playerName, teamName: teamName, playerId: playerId })
                 });
 
-                if (res.status === 409) {
-                    const err = await res.json().catch(() => ({}));
-                    alert(err.error || 'That name is already in use this game. Please choose a different name.');
-                    return;
-                }
-
                 if (res.ok) {
                     const data = await res.json().catch(() => ({}));
                     if (data.playerId) {
                         playerId = data.playerId;
                         localStorage.setItem('lyracist_trivia_playerid', playerId);
                     }
-                    showScreen('screen-lobby');
-                    updatePlayerBadge();
-                    startPolling();
+                    return { status: 'ok' };
                 }
+
+                if (res.status === 403) return { status: 'kicked' };
+
+                const err = await res.json().catch(() => ({}));
+                if (res.status === 409) {
+                    return { status: 'conflict', message: err.error || 'That name is already in use this game. Please choose a different name.' };
+                }
+                if (res.status === 429) {
+                    return { status: 'error', message: err.error || 'Too many join attempts. Please try again later.' };
+                }
+                return { status: 'error', message: err.error || 'Could not join the game. Please try again.' };
             } catch (err) {
                 console.error('Join error:', err);
-                // Offline/mock fallback for testing
-                showScreen('screen-lobby');
-                updatePlayerBadge();
-                startPolling();
+                return { status: 'offline', message: "Couldn't reach the game. Check that you're on the venue Wi-Fi and try again." };
             }
+        }
+
+        // The host removed this device. Stop polling and send them back to the join screen; the
+        // server keeps rejecting this device's id, so rejoining won't work until the app restarts.
+        function handleKicked() {
+            if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+            alert('The host has removed you from this game.');
+            showScreen('screen-join');
+        }
+
+        // Called when the server says nobody is registered under our name (host restarted, or the
+        // entry was removed). Re-registers quietly, at most once every 5 seconds.
+        let lastRejoinAttempt = 0;
+        async function tryRejoin() {
+            const now = Date.now();
+            if (now - lastRejoinAttempt < 5000) return;
+            lastRejoinAttempt = now;
+            const result = await registerWithServer();
+            if (result.status === 'kicked') handleKicked();
         }
 
         function updatePlayerBadge() {
@@ -676,6 +711,7 @@
             const payload = JSON.stringify({
                 playerName: playerName,
                 playerId: playerId,
+                questionId: currentQuestionId,
                 selectedOptionIndex: optionIndex,
                 responseTimeMs: responseTimeMs
             });
@@ -684,6 +720,7 @@
             // showing "locked in" while the server never actually received the answer. Retry a
             // few times, and if it still fails, tell the player and let them tap again.
             const maxAttempts = 3;
+            let needsRejoin = false;
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
                     const res = await fetch('/api/trivia/submit', {
@@ -692,6 +729,8 @@
                         body: payload
                     });
                     if (res.ok) return;
+                    if (res.status === 403) { handleKicked(); return; }
+                    if (res.status === 409) { needsRejoin = true; break; }
                 } catch (err) {
                     console.error(`Submit attempt ${attempt} error:`, err);
                 }
@@ -701,6 +740,19 @@
                 }
             }
 
+            if (needsRejoin) {
+                // The host no longer has us registered (it restarted, or removed the entry).
+                // Re-register, then let the player tap their answer again.
+                const result = await registerWithServer();
+                if (result.status === 'kicked') { handleKicked(); return; }
+                errorBanner.textContent = result.status === 'ok'
+                    ? '⚠️ You were reconnected — tap your answer again.'
+                    : '⚠️ Connection issue — your answer didn\'t go through. Tap an option to try again.';
+            }
+
+            if (!needsRejoin) {
+                errorBanner.textContent = '⚠️ Connection issue — your answer didn\'t go through. Tap an option to try again.';
+            }
             hasSubmitted = false;
             errorBanner.style.display = 'block';
             document.querySelectorAll('.btn-buzzer').forEach((btn, idx) => {
@@ -723,6 +775,8 @@
                 if (!res.ok) return;
 
                 const data = await res.json();
+                if (data.kicked) { handleKicked(); return; }
+                if (data.registered === false) { tryRejoin(); }
                 handleStateUpdate(data);
             } catch (err) {
                 // Ignore transient network errors
@@ -804,16 +858,22 @@
                 }
 
                 // Update eliminated choices in real time during countdown
-                if (data.eliminatedIndices && Array.isArray(data.eliminatedIndices)) {
-                    data.eliminatedIndices.forEach(idx => {
-                        const btn = document.querySelector(`.btn-buzzer.opt-${idx}`);
-                        if (btn) {
+                const eliminatedSet = new Set(data.eliminatedIndices || []);
+                for (let i = 0; i < 4; i++) {
+                    const btn = document.querySelector(`.btn-buzzer.opt-${i}`);
+                    if (btn) {
+                        if (eliminatedSet.has(i)) {
                             btn.classList.add('eliminated');
                             if (!hasSubmitted) {
                                 btn.disabled = true;
                             }
+                        } else {
+                            btn.classList.remove('eliminated');
+                            if (!hasSubmitted) {
+                                btn.disabled = false;
+                            }
                         }
-                    });
+                    }
                 }
 
                 // Update countdown bar
