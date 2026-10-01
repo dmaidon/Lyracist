@@ -1,4 +1,4 @@
-<!-- Edited on Oct 1, 2026 @ 07:38:00 -> Add Trivia performance & bottleneck optimizations documentation -->
+<!-- Edited on Oct 1, 2026 @ 07:52:30 -> Document KnockoutTrivia, Lyracist, and KSRotation cross-app trivia enhancements -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -6,6 +6,23 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ---
     
 ## Key Features
+
+### 🥊 Knockout Trivia & Cross-App Hardening (`KnockoutTrivia`, `Lyracist`, `KSRotation`)
+- **Knockout Web Server & Companion Security/Performance**:
+  - Request body buffer capped at 8 KB to prevent slow-body memory exhaustion.
+  - Registration rate limiter raised from 5 to 60 registrations per 5-minute window with automated expired-IP pruning to support packed venue Wi-Fi NAT environments.
+  - Pre-encoded UTF-8 bytes cached for `knockout.html` (`_cachedHtmlBytes`) to avoid redundant encodings on repeated mobile browser hits.
+  - Static `JsonSerializerOptions` reused across endpoints to eliminate allocation overhead during answer rushes.
+  - Added `QuestionId` validation to both the server endpoint (`/api/knockout/submit`) and mobile buzzer client (`knockout.html`), rejecting stale answers submitted during question transitions.
+  - Added in-flight request guard (`isPolling`) to `knockout.html` to eliminate cascading request queues over cellular or high-latency Wi-Fi.
+  - Client join handling hardened against HTTP 429 and 500+ server responses with visual feedback.
+  - Protected `OnTimerTick`, auto-advance timer, and auto-reveal continuations in `GameStateService.cs` with `try / catch` exception guards.
+  - Updated `ConnectViewModel.cs` to accurately track active connected players (`Count(p => p.IsConnected)`).
+- **Universal Wi-Fi QR Reserved Character Escaping**:
+  - Centralized `WifiHelper.EscapeWifiQrValue()` to escape reserved characters (`\`, `;`, `,`, `"`, `:`) in accordance with the MECARD specification across all apps (`KnockoutTrivia`, `Lyracist.Trivia`, `KSRotation`, and `Lyracist`).
+- **Lyracist & KSRotation Trivia Stability & Performance**:
+  - Guarded `OnPreGameTimerTick` in `Lyracist/ViewModels/TriviaViewModel.cs` and `OnTriviaPreGameTimerTick` in `KSRotation/ViewModels/MainViewModel.Trivia.cs` with `try / catch` exception handlers to prevent timer tick exceptions from crashing the host UI dispatcher.
+  - Offloaded synchronous question pack database seeding in `Lyracist/ViewModels/TriviaViewModel.cs` to a background task so UI startup remains instantaneous.
 
 ### 🎯 Interactive Pub & Bar Trivia Pro Enhancements (`Lyracist.Trivia`, `Lyracist.Trivia.Core`)
 - **Leaderboard Auto-Advance Fix (#3)**: Round leaderboard interstitial display automatically advances to the subsequent question (`AdvanceToNextQuestion()`) upon the 8-second countdown expiration when `AutoAdvanceQuestions` is enabled, rather than restarting the previously answered question.

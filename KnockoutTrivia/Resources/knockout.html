@@ -1,4 +1,4 @@
-<!-- Edited on Aug 29, 2026 @ 10:36:30 -> Added session token authentication support for player state and submissions -->
+<!-- Edited on Oct 1, 2026 @ 07:47:30 -> Add polling in-flight guard, questionId submit payload validation, and robust join error handling -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -732,6 +732,16 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, playerId })
                 });
+
+                if (res.status === 429) {
+                    alert('Too many join attempts from this network. Please wait a minute and try again.');
+                    return;
+                }
+                if (!res.ok && res.status >= 500) {
+                    alert('Game server is busy or restarting. Please try again in a few moments.');
+                    return;
+                }
+
                 const data = await res.json();
                 if (data.success) {
                     playerId = data.playerId;
@@ -772,31 +782,48 @@
                 }
             });
 
-            document.getElementById('locked-badge').classList.add('show');
+            const lockedBadge = document.getElementById('locked-badge');
+            if (lockedBadge) {
+                lockedBadge.innerHTML = '<span>🔒</span> ANSWER LOCKED IN • WAITING FOR REVEAL...';
+                lockedBadge.classList.add('show');
+            }
 
             try {
-                await fetch('/api/knockout/submit', {
+                const res = await fetch('/api/knockout/submit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         playerId,
                         sessionToken,
+                        questionId: currentQuestionId,
                         selectedOptionIndex: optionIndex,
                         responseTimeMs: elapsed
                     })
                 });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.success === false && lockedBadge) {
+                        lockedBadge.innerHTML = '<span>⏱️</span> TIME EXPIRED • NOT ACCEPTED';
+                    }
+                }
             } catch(e) {}
         }
 
+        let isPolling = false;
         async function pollState() {
-            if (!playerId) return;
+            if (!playerId || isPolling) return;
+            isPolling = true;
 
             try {
                 const res = await fetch(`/api/knockout/state?playerId=${encodeURIComponent(playerId)}&sessionToken=${encodeURIComponent(sessionToken)}`);
                 if (!res.ok) return;
                 const state = await res.json();
                 renderState(state);
-            } catch (e) {}
+            } catch (e) {
+            } finally {
+                isPolling = false;
+            }
         }
 
         function renderState(state) {

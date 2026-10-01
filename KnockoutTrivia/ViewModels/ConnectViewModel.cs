@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 10:58:00 -> Update QR code colors to dark purple for Wi-Fi and dark green for Game Arena
+// Edited on Oct 1, 2026 @ 07:46:30 -> Escape Wi-Fi QR payload via WifiHelper and accurately track active connected players count
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -57,8 +57,28 @@ public partial class ConnectViewModel : ViewModelBase
         _gameStateService = gameStateService;
         _webServer = webServer;
 
+        foreach (var player in _gameStateService.Players)
+        {
+            player.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(KnockoutPlayer.IsConnected))
+                    UpdatePlayerCount();
+            };
+        }
+
         _gameStateService.Players.CollectionChanged += (s, e) =>
         {
+            if (e.NewItems != null)
+            {
+                foreach (KnockoutPlayer p in e.NewItems)
+                {
+                    p.PropertyChanged += (ps, pe) =>
+                    {
+                        if (pe.PropertyName == nameof(KnockoutPlayer.IsConnected))
+                            UpdatePlayerCount();
+                    };
+                }
+            }
             UpdatePlayerCount();
         };
 
@@ -93,7 +113,7 @@ public partial class ConnectViewModel : ViewModelBase
 
     private void UpdatePlayerCount()
     {
-        ConnectedPlayersCount = _gameStateService.Players.Count;
+        ConnectedPlayersCount = _gameStateService.Players.Count(p => p.IsConnected);
     }
 
     public void UpdateWifiCredentials(string ssid, string password)
@@ -141,8 +161,8 @@ public partial class ConnectViewModel : ViewModelBase
         try
         {
             string payload = string.IsNullOrWhiteSpace(WifiPassword)
-                ? $"WIFI:S:{WifiSsid};T:nopass;;;"
-                : $"WIFI:S:{WifiSsid};T:WPA;P:{WifiPassword};;";
+                ? $"WIFI:S:{WifiHelper.EscapeWifiQrValue(WifiSsid)};T:nopass;;;"
+                : $"WIFI:S:{WifiHelper.EscapeWifiQrValue(WifiSsid)};T:WPA;P:{WifiHelper.EscapeWifiQrValue(WifiPassword)};;";
 
             using var generator = new QRCoder.QRCodeGenerator();
             using var data = generator.CreateQrCode(payload, QRCoder.QRCodeGenerator.ECCLevel.Q);

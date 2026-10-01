@@ -1,11 +1,29 @@
-<!-- Edited on Oct 1, 2026 @ 07:38:00 -> Update CHANGELOG for Trivia performance & bottleneck optimizations -->
-Last Edit: Oct 1, 2026 - Trivia Engine Performance & Bottleneck Optimizations (Debounce, Caching, Allocations, In-Place UI, Background Seeding, Viewbox)
+<!-- Edited on Oct 1, 2026 @ 07:52:00 -> Update CHANGELOG for KnockoutTrivia, Lyracist, and KSRotation cross-app trivia enhancements -->
+Last Edit: Oct 1, 2026 - KnockoutTrivia & Cross-App Trivia Hardening (Wi-Fi QR Escaping, Timer Guards, Rate Limiting, Allocations, In-Flight Guards)
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [26.10.1.0] - 2026-10-01
+
+### Fixed & Hardened Across Applications
+- **KnockoutTrivia Web Server & Companion Security/Performance (`KnockoutWebServer.cs`, `knockout.html`, `GameStateService.cs`, `ConnectViewModel.cs`)**:
+  - Reduced `MaxRequestBodyBytes` from 2 MB down to 8 KB to eliminate slow body memory exhaustion vectors.
+  - Increased `MaxRegistrationsPerWindow` from 5 to 60 per 5-minute window and added `PruneExpiredRegistrations()` to support packed venue Wi-Fi NAT environments while preventing unbounded dictionary growth.
+  - Reused a static `JsonSerializerOptions` instance across `/api/knockout/join`, `/api/knockout/submit`, and `/api/knockout/state` to eliminate GC allocation churn.
+  - Cached pre-encoded UTF-8 bytes for `knockout.html` (`_cachedHtmlBytes`), avoiding repeated string-to-byte re-encoding on every web request.
+  - Added `QuestionId` validation to `SubmitRequest` in `KnockoutWebServer` and client `submitAnswer()` in `knockout.html`, rejecting late submissions from previous questions.
+  - Added `isPolling` in-flight guard to `knockout.html` to avoid overlapping state fetch requests on high-latency venue Wi-Fi networks.
+  - Added HTTP 429 (rate-limited) and 500+ error handling and feedback banners in `knockout.html`.
+  - Protected `OnTimerTick`, auto-advance timer, and auto-reveal continuations in `GameStateService.cs` with `try / catch` exception guards to protect unattended shows against ThreadPool crashes.
+  - Updated `ConnectViewModel.cs` to accurately track active connected players (`Count(p => p.IsConnected)`) with property change event subscriptions.
+- **Unified Wi-Fi QR Reserved Character Escaping (`WifiHelper.cs`, all apps)**:
+  - Added `WifiHelper.EscapeWifiQrValue()` to `Lyracist.Shared` to escape reserved Wi-Fi QR characters (`\`, `;`, `,`, `"`, `:`) per the MECARD specification.
+  - Applied escaping across `KnockoutTrivia` (`ConnectViewModel.cs`), `Lyracist.Trivia` (`DisplayViewModel.cs`), `Shared/TriviaDisplayViewModel.cs` (for `Lyracist` and `KSRotation` trivia projection displays), `KSRotation` (`MainViewModel.Requests.cs`), and `Shared/DjBannerFileManager.cs`.
+- **Lyracist & KSRotation Trivia Stability & Performance (`TriviaViewModel.cs`, `MainViewModel.Trivia.cs`)**:
+  - Wrapped `OnPreGameTimerTick` in `Lyracist/ViewModels/TriviaViewModel.cs` and `OnTriviaPreGameTimerTick` in `KSRotation/ViewModels/MainViewModel.Trivia.cs` with `try / catch` exception guards to prevent timer tick exceptions from terminating the host dispatcher.
+  - Offloaded synchronous pack database seeding (`_dbService.SeedPackIntoDatabase`) in `Lyracist/ViewModels/TriviaViewModel.cs` to a background task so UI startup remains instantaneous.
 
 ### Fixed
 - **Trivia Auto-Advance after Round Leaderboard (`TriviaGameEngine.cs`, Fix #3)**:

@@ -1,4 +1,4 @@
-// Edited on Sep 24, 2026 @ 12:31:00 -> Add synchronization lock and resilient error handling to EnsureStandardEventBanners
+// Edited on Oct 1, 2026 @ 07:46:15 -> Use WifiHelper.EscapeWifiQrValue for standard Wi-Fi QR escaping
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -267,17 +267,7 @@ public static class DjBannerFileManager
         encoder.Save(fs);
     }
 
-    // Escapes the WIFI-QR reserved characters (\, ;, ,, ") per the spec so an SSID/password
-    // containing them doesn't truncate or corrupt the payload at a field boundary.
-    private static string EscapeWifiQrValue(string value)
-    {
-        return value
-            .Replace("\\", "\\\\")
-            .Replace(";", "\\;")
-            .Replace(",", "\\,")
-            .Replace("\"", "\\\"")
-            .Replace(":", "\\:");
-    }
+    private static string EscapeWifiQrValue(string value) => WifiHelper.EscapeWifiQrValue(value);
 
     private static System.Windows.Media.Imaging.BitmapImage? GenerateQrBitmap(string payload, System.Windows.Media.Color darkColor, int pixelsPerModule = 40)
     {

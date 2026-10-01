@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 11:58:20 -> Include defaultSongLengthMinutes in VenueInfoResponseDto for DJ remote estimation
+// Edited on Oct 1, 2026 @ 07:46:00 -> Escape Wi-Fi SSID and password in QR payload via WifiHelper.EscapeWifiQrValue
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -287,7 +287,7 @@ namespace KSRotation.ViewModels
             HandoffQrCodeImage = started ? GenerateQRCode(HandoffConnectionUrl) : null;
             string startSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
             string startPass = !string.IsNullOrWhiteSpace(startSsid) ? WifiPasswordStore.GetPasswordForSsid(startSsid) : string.Empty;
-            string startWifiPayload = $"WIFI:S:{startSsid};T:{(string.IsNullOrWhiteSpace(startPass) ? "nopass" : "WPA")};P:{startPass};;";
+            string startWifiPayload = $"WIFI:S:{WifiHelper.EscapeWifiQrValue(startSsid)};T:{(string.IsNullOrWhiteSpace(startPass) ? "nopass" : "WPA")};P:{WifiHelper.EscapeWifiQrValue(startPass)};;";
             WifiQrCodeImage = started && !string.IsNullOrWhiteSpace(startSsid) ? GenerateQRCode(startWifiPayload) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             RefreshConnectInstructionsBanner();
@@ -313,7 +313,7 @@ namespace KSRotation.ViewModels
             HandoffQrCodeImage = GenerateQRCode(HandoffConnectionUrl);
             string refreshSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
             string refreshPass = !string.IsNullOrWhiteSpace(refreshSsid) ? WifiPasswordStore.GetPasswordForSsid(refreshSsid) : string.Empty;
-            string refreshWifiPayload = $"WIFI:S:{refreshSsid};T:{(string.IsNullOrWhiteSpace(refreshPass) ? "nopass" : "WPA")};P:{refreshPass};;";
+            string refreshWifiPayload = $"WIFI:S:{WifiHelper.EscapeWifiQrValue(refreshSsid)};T:{(string.IsNullOrWhiteSpace(refreshPass) ? "nopass" : "WPA")};P:{WifiHelper.EscapeWifiQrValue(refreshPass)};;";
             WifiQrCodeImage = !string.IsNullOrWhiteSpace(refreshSsid) ? GenerateQRCode(refreshWifiPayload) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             // Debounced — this runs on every keystroke of PreferredHostIp (UpdateSourceTrigger=PropertyChanged),

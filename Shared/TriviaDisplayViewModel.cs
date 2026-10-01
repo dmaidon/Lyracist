@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:35:00 -> Performance: in-place TopPlayers updates and conditional MarqueeSummaryText updates to avoid animation restarts
+// Edited on Oct 1, 2026 @ 07:45:30 -> Escape Wi-Fi SSID and password in QR payload via WifiHelper.EscapeWifiQrValue
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -268,8 +268,8 @@ public partial class TriviaDisplayViewModel : ObservableObject
         try
         {
             string payload = string.IsNullOrWhiteSpace(password)
-                ? $"WIFI:S:{WifiSsid};T:nopass;;;"
-                : $"WIFI:S:{WifiSsid};T:WPA;P:{password};;";
+                ? $"WIFI:S:{WifiHelper.EscapeWifiQrValue(WifiSsid)};T:nopass;;;"
+                : $"WIFI:S:{WifiHelper.EscapeWifiQrValue(WifiSsid)};T:WPA;P:{WifiHelper.EscapeWifiQrValue(password)};;";
 
             using var qrGenerator = new QRCoder.QRCodeGenerator();
             using var qrCodeData = qrGenerator.CreateQrCode(payload, QRCoder.QRCodeGenerator.ECCLevel.Q);

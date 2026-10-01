@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:36:00 -> Performance: add asynchronous read with 1s timeout to netsh fallback to prevent UI thread freezing
+// Edited on Oct 1, 2026 @ 07:45:00 -> Add EscapeWifiQrValue for robust Wi-Fi QR payload escaping across apps
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -235,4 +235,19 @@ public static class WifiHelper
     }
 
     #endregion
+
+    /// <summary>
+    /// Escapes WIFI-QR reserved characters (\, ;, ,, ", :) per the ZXing/MECARD Wi-Fi spec
+    /// so an SSID or password containing them does not truncate or corrupt the QR payload.
+    /// </summary>
+    public static string EscapeWifiQrValue(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return string.Empty;
+        return value
+            .Replace("\\", "\\\\")
+            .Replace(";", "\\;")
+            .Replace(",", "\\,")
+            .Replace("\"", "\\\"")
+            .Replace(":", "\\:");
+    }
 }

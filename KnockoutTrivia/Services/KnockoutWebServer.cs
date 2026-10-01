@@ -1,4 +1,4 @@
-// Edited on Aug 29, 2026 @ 10:36:00 -> Added session token authentication and payload validation for companion endpoints
+// Edited on Oct 1, 2026 @ 07:48:00 -> Reduce body cap to 8KB, optimize rate limiter (60/5m with pruning), cache HTML bytes, static JsonOptions, and add QuestionId validation
 using System;
 using System.IO;
 using System.Linq;
@@ -17,19 +17,19 @@ namespace KnockoutTrivia.Services;
 
 public class KnockoutWebServer : IKnockoutWebServer
 {
-    private const int MaxRequestBodyBytes = 2_097_152; // 2 MB
+    private const int MaxRequestBodyBytes = 8_192; // 8 KB
     private const int MaxConcurrentConnections = 64;
     private static readonly TimeSpan RequestReadTimeout = TimeSpan.FromSeconds(15);
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     // Caps how many brand-new players a single IP can register (via /api/knockout/join with a
     // name that doesn't match an existing connected/reconnectable player - see RouteRequestAsync).
-    // Without this, an unauthenticated script on the venue WiFi can insert an unbounded number of
-    // rows into the live player/leaderboard list in a few minutes. A legitimate phone joins once
-    // per session, so 5 per 10 minutes comfortably covers a handful of real players sharing an IP
-    // while still blocking a scripted flood.
-    private const int MaxRegistrationsPerWindow = 5;
-    private static readonly TimeSpan RegistrationWindow = TimeSpan.FromMinutes(10);
+    // Raised to 60 per 5 minutes to accommodate large groups sharing venue Wi-Fi NAT IPs
+    // while still preventing malicious unbounded bot floods.
+    private const int MaxRegistrationsPerWindow = 60;
+    private static readonly TimeSpan RegistrationWindow = TimeSpan.FromMinutes(5);
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string, RegistrationRateState> _registrationsByIp = new();
+    private DateTime _lastPruneUtc = DateTime.UtcNow;
 
     private sealed class RegistrationRateState
     {
@@ -37,15 +37,32 @@ public class KnockoutWebServer : IKnockoutWebServer
         public DateTime WindowStartUtc;
     }
 
+    private void PruneExpiredRegistrations(DateTime now)
+    {
+        if (now - _lastPruneUtc < TimeSpan.FromMinutes(2)) return;
+        _lastPruneUtc = now;
+
+        foreach (var kvp in _registrationsByIp)
+        {
+            if (now - kvp.Value.WindowStartUtc > RegistrationWindow * 2)
+            {
+                _registrationsByIp.TryRemove(kvp.Key, out _);
+            }
+        }
+    }
+
     private bool TryAllowRegistration(string clientIp)
     {
-        var state = _registrationsByIp.GetOrAdd(clientIp, _ => new RegistrationRateState { WindowStartUtc = DateTime.UtcNow });
+        var now = DateTime.UtcNow;
+        PruneExpiredRegistrations(now);
+
+        var state = _registrationsByIp.GetOrAdd(clientIp, _ => new RegistrationRateState { WindowStartUtc = now });
 
         lock (state)
         {
-            if (DateTime.UtcNow - state.WindowStartUtc > RegistrationWindow)
+            if (now - state.WindowStartUtc > RegistrationWindow)
             {
-                state.WindowStartUtc = DateTime.UtcNow;
+                state.WindowStartUtc = now;
                 state.Count = 0;
             }
 
@@ -64,7 +81,7 @@ public class KnockoutWebServer : IKnockoutWebServer
 
     private TcpListener? _listener;
     private CancellationTokenSource? _cts;
-    private string? _cachedHtml;
+    private byte[]? _cachedHtmlBytes;
     private bool _disposed;
 
     public bool IsRunning { get; private set; }
@@ -272,7 +289,7 @@ public class KnockoutWebServer : IKnockoutWebServer
         {
             try
             {
-                var joinReq = JsonSerializer.Deserialize<JoinRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var joinReq = JsonSerializer.Deserialize<JoinRequest>(body, JsonOptions);
                 if (joinReq != null && !string.IsNullOrWhiteSpace(joinReq.Name))
                 {
                     // Only rate-limit genuinely new registrations - a returning player (known
@@ -300,7 +317,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                         strikes = player.StrikeCount,
                         score = player.Score
                     };
-                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)));
+                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp, JsonOptions)));
                 }
                 else
                 {
@@ -318,12 +335,20 @@ public class KnockoutWebServer : IKnockoutWebServer
         {
             try
             {
-                var subReq = JsonSerializer.Deserialize<SubmitRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var subReq = JsonSerializer.Deserialize<SubmitRequest>(body, JsonOptions);
                 if (subReq != null && !string.IsNullOrWhiteSpace(subReq.PlayerId))
                 {
+                    var currentQ = _gameStateService.CurrentQuestion;
+                    if (!string.IsNullOrEmpty(subReq.QuestionId) && currentQ != null &&
+                        !string.Equals(currentQ.Id, subReq.QuestionId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        await SendResponseAsync(stream, 400, "application/json; charset=utf-8", Encoding.UTF8.GetBytes("{\"error\":\"Question has ended.\",\"staleQuestion\":true,\"success\":false}"));
+                        return;
+                    }
+
                     bool accepted = _gameStateService.SubmitPlayerAnswer(subReq.PlayerId, subReq.SelectedOptionIndex, (int)subReq.ResponseTimeMs, subReq.SessionToken);
                     var resp = new { success = accepted };
-                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp)));
+                    await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(resp, JsonOptions)));
                 }
                 else
                 {
@@ -424,7 +449,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                     })
             };
 
-            await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(statePayload)));
+            await SendResponseAsync(stream, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(statePayload, JsonOptions)));
             return;
         }
 
@@ -434,29 +459,31 @@ public class KnockoutWebServer : IKnockoutWebServer
 
     private async Task<byte[]> GetHtmlBytesAsync()
     {
-        if (_cachedHtml == null)
+        if (_cachedHtmlBytes == null)
         {
+            string html;
             var asm = Assembly.GetExecutingAssembly();
             await using var stream = asm.GetManifestResourceStream("KnockoutTrivia.Resources.knockout.html");
             if (stream != null)
             {
                 using var reader = new StreamReader(stream);
-                _cachedHtml = await reader.ReadToEndAsync();
+                html = await reader.ReadToEndAsync();
             }
             else
             {
                 string diskPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "knockout.html");
                 if (File.Exists(diskPath))
                 {
-                    _cachedHtml = await File.ReadAllTextAsync(diskPath);
+                    html = await File.ReadAllTextAsync(diskPath);
                 }
                 else
                 {
-                    _cachedHtml = "<html><body><h1>Knockout Trivia</h1><p>knockout.html resource not found.</p></body></html>";
+                    html = "<html><body><h1>Knockout Trivia</h1><p>knockout.html resource not found.</p></body></html>";
                 }
             }
+            _cachedHtmlBytes = Encoding.UTF8.GetBytes(html);
         }
-        return Encoding.UTF8.GetBytes(_cachedHtml);
+        return _cachedHtmlBytes;
     }
 
     private static async Task SendCorsPreflightResponseAsync(NetworkStream stream)
@@ -581,5 +608,5 @@ public class KnockoutWebServer : IKnockoutWebServer
     }
 
     private record JoinRequest(string Name, string? PlayerId);
-    private record SubmitRequest(string PlayerId, int SelectedOptionIndex, double ResponseTimeMs, string? SessionToken = null);
+    private record SubmitRequest(string PlayerId, int SelectedOptionIndex, double ResponseTimeMs, string? SessionToken = null, string? QuestionId = null);
 }

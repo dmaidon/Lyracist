@@ -1,4 +1,4 @@
-// Edited on Aug 29, 2026 @ 10:35:00 -> Fixed UI dispatch for auto-reveal, eliminated deadlock hazard, hardened player registration and answers, and added Fisher-Yates shuffle
+// Edited on Oct 1, 2026 @ 07:50:00 -> Add try/catch exception guards to timer callbacks to protect unattended shows
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KnockoutTrivia.Models;
+using Lyracist.Shared;
 
 namespace KnockoutTrivia.Services;
 
@@ -346,13 +347,20 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                 // Give a short 1s grace before auto-revealing on UI thread
                 Task.Delay(1000).ContinueWith(_ =>
                 {
-                    RunOnUI(() =>
+                    try
                     {
-                        if (Phase == GameStatePhase.QuestionActive && !IsAnswerRevealed)
+                        RunOnUI(() =>
                         {
-                            RevealAnswer();
-                        }
-                    });
+                            if (Phase == GameStatePhase.QuestionActive && !IsAnswerRevealed)
+                            {
+                                RevealAnswer();
+                            }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Globals.LogError("KnockoutTrivia", "GameStateService.AutoRevealGrace", ex);
+                    }
                 });
             }
         });
@@ -407,22 +415,29 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
 
     private void OnTimerTick(object? state)
     {
-        // Runs on the Timer's own ThreadPool thread. SecondsRemaining is bound directly in XAML
-        // (e.g. MainView's countdown), so mutating it and raising TimerTicked must happen on the
-        // UI thread like every other state change in this class - not just the RevealAnswer call.
-        RunOnUI(() =>
+        try
         {
-            if (!IsTimerRunning) return;
-
-            SecondsRemaining--;
-            TimerTicked?.Invoke(this, SecondsRemaining);
-
-            if (SecondsRemaining <= 0)
+            // Runs on the Timer's own ThreadPool thread. SecondsRemaining is bound directly in XAML
+            // (e.g. MainView's countdown), so mutating it and raising TimerTicked must happen on the
+            // UI thread like every other state change in this class - not just the RevealAnswer call.
+            RunOnUI(() =>
             {
-                StopTimer();
-                RevealAnswer();
-            }
-        });
+                if (!IsTimerRunning) return;
+
+                SecondsRemaining--;
+                TimerTicked?.Invoke(this, SecondsRemaining);
+
+                if (SecondsRemaining <= 0)
+                {
+                    StopTimer();
+                    RevealAnswer();
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Globals.LogError("KnockoutTrivia", "GameStateService.OnTimerTick", ex);
+        }
     }
 
     public void PauseTimer()
@@ -486,7 +501,14 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
             _autoAdvanceTimer?.Dispose();
             _autoAdvanceTimer = new System.Threading.Timer(_ =>
             {
-                RunOnUI(NextQuestion);
+                try
+                {
+                    RunOnUI(NextQuestion);
+                }
+                catch (Exception ex)
+                {
+                    Globals.LogError("KnockoutTrivia", "GameStateService.AutoAdvance", ex);
+                }
             }, null, delayMs, Timeout.Infinite);
         }
     }

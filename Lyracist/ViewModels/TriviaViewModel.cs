@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:15:00 -> Pass isAutoRestart to StartGame on Trivia intermission completed
+// Edited on Oct 1, 2026 @ 07:51:00 -> Guard pre-game timer tick with try/catch and offload SQLite pack seeding to background task
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -432,7 +432,6 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         bool isFirst = true;
         foreach (var p in packs)
         {
-            _dbService.SeedPackIntoDatabase(p);
             var selectable = new SelectableTriviaPack(p, isChecked: isFirst);
             selectable.PropertyChanged += (s, e) =>
             {
@@ -444,6 +443,22 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
             SelectablePacks.Add(selectable);
             isFirst = false;
         }
+
+        // Asynchronously seed SQLite database in background so UI thread startup remains instantaneous
+        Task.Run(() =>
+        {
+            try
+            {
+                foreach (var p in packs)
+                {
+                    _dbService.SeedPackIntoDatabase(p);
+                }
+            }
+            catch (Exception ex)
+            {
+                Globals.LogError("Trivia", "SeedPackIntoDatabase", ex);
+            }
+        });
 
         if (SelectablePacks.Count == 0)
         {
@@ -500,23 +515,30 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
     private void OnPreGameTimerTick(object? sender, EventArgs e)
     {
-        if (IsPreGameCountdownRunning && PreGameSecondsRemaining > 0)
+        try
         {
-            PreGameSecondsRemaining--;
-            int mins = PreGameSecondsRemaining / 60;
-            int secs = PreGameSecondsRemaining % 60;
-            PreGameCountdownText = $"{mins:D2}:{secs:D2}";
-            _displayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
-
-            if (PreGameSecondsRemaining == 0)
+            if (IsPreGameCountdownRunning && PreGameSecondsRemaining > 0)
             {
-                _preGameTimer.Stop();
-                IsPreGameCountdownRunning = false;
-                if (AutoStartAfterCountdown)
+                PreGameSecondsRemaining--;
+                int mins = PreGameSecondsRemaining / 60;
+                int secs = PreGameSecondsRemaining % 60;
+                PreGameCountdownText = $"{mins:D2}:{secs:D2}";
+                _displayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
+
+                if (PreGameSecondsRemaining == 0)
                 {
-                    StartGame();
+                    _preGameTimer.Stop();
+                    IsPreGameCountdownRunning = false;
+                    if (AutoStartAfterCountdown)
+                    {
+                        StartGame();
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Globals.LogError("Lyracist", "TriviaViewModel.OnPreGameTimerTick", ex);
         }
     }
 

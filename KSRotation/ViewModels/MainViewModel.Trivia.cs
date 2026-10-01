@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:15:00 -> Pass isAutoRestart to StartGame on Trivia intermission completed
+// Edited on Oct 1, 2026 @ 07:51:30 -> Guard OnTriviaPreGameTimerTick with try/catch exception protection
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -541,24 +541,31 @@ namespace KSRotation.ViewModels
 
         private void OnTriviaPreGameTimerTick(object? sender, EventArgs e)
         {
-            if (TriviaIsPreGameCountdownRunning && TriviaPreGameSecondsRemaining > 0)
+            try
             {
-                TriviaPreGameSecondsRemaining--;
-                int mins = TriviaPreGameSecondsRemaining / 60;
-                int secs = TriviaPreGameSecondsRemaining % 60;
-                TriviaPreGameCountdownText = $"{mins:D2}:{secs:D2}";
-#if !MAUI
-                _triviaDisplayVm?.UpdatePreGameCountdown(TriviaPreGameSecondsRemaining);
-#endif
-                if (TriviaPreGameSecondsRemaining == 0)
+                if (TriviaIsPreGameCountdownRunning && TriviaPreGameSecondsRemaining > 0)
                 {
-                    _triviaPreGameTimer.Stop();
-                    TriviaIsPreGameCountdownRunning = false;
-                    if (TriviaAutoStartAfterCountdown)
+                    TriviaPreGameSecondsRemaining--;
+                    int mins = TriviaPreGameSecondsRemaining / 60;
+                    int secs = TriviaPreGameSecondsRemaining % 60;
+                    TriviaPreGameCountdownText = $"{mins:D2}:{secs:D2}";
+#if !MAUI
+                    _triviaDisplayVm?.UpdatePreGameCountdown(TriviaPreGameSecondsRemaining);
+#endif
+                    if (TriviaPreGameSecondsRemaining == 0)
                     {
-                        StartTrivia();
+                        _triviaPreGameTimer.Stop();
+                        TriviaIsPreGameCountdownRunning = false;
+                        if (TriviaAutoStartAfterCountdown)
+                        {
+                            StartTrivia();
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Lyracist.Shared.Globals.LogError("KSRotation", "MainViewModel.OnTriviaPreGameTimerTick", ex);
             }
         }
 
