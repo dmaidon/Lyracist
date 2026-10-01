@@ -728,7 +728,7 @@ public partial class MainViewModel : ObservableObject
                     }
 
                     string tempPath = destFile + ".tmp";
-                    File.WriteAllText(tempPath, json);
+                    File.WriteAllText(tempPath, JsonSerializer.Serialize(pack, JsonOptions));
                     File.Move(tempPath, destFile, overwrite: true);
 
                     LoadPacks();

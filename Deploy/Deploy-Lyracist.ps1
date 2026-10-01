@@ -1,4 +1,4 @@
-# Created on Aug 30, 2026 @ 10:56:00 -> Tracked Lyracist deployment script for laptop show synchronization
+# Edited on Oct 1, 2026 @ 09:25:00 -> Add network reachability and authentication diagnostics, auto-create target directory, and console error reporting
 $Target = "\\LUCY\C_Lucy\Lyracist"
 $Source = "C:\VB26\Release\Lyracist\Debug\net10.0-windows"
 $LogFile = "C:\Temp\Deploy-Lyracist.log"
@@ -16,7 +16,9 @@ $LogFile = "C:\Temp\Deploy-Lyracist.log"
 $Folders = @("TabletClient", "Banners", "Data", "Packs", "Settings", "Assets", "libvlc", "runtimes", "Licenses")
 
 function Log($msg) {
-    Add-Content -Path $LogFile -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $msg"
+    $formatted = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $msg"
+    Add-Content -Path $LogFile -Value $formatted
+    Write-Host $msg
 }
 
 function Run-RoboCopy {
@@ -51,8 +53,46 @@ function Run-RoboCopy {
 
 Log "================ RUN START ================"
 
-if (!(Test-Path $Target)) { Log "ERROR: Target missing: $Target"; exit }
-if (!(Test-Path $Source)) { Log "ERROR: Source missing: $Source"; exit }
+if (!(Test-Path $Source)) {
+    Log "ERROR: Source missing: $Source. Please build the solution first."
+    exit 1
+}
+
+# Check network connectivity to destination host
+$Server = "LUCY"
+$ShareRoot = "\\LUCY\C_Lucy"
+
+if (!(Test-Connection -ComputerName $Server -Count 1 -Quiet)) {
+    # Advisory only: many Windows laptops drop ICMP while the SMB share is perfectly reachable.
+    Log "WARN: Host '$Server' did not answer ping; checking the share directly."
+}
+
+# Check share root access and provide actionable diagnostics on failure
+$ShareAccessible = $false
+try {
+    $ShareAccessible = Test-Path $ShareRoot -ErrorAction Stop
+}
+catch {
+    Log "ERROR: Cannot access share '$ShareRoot': $($_.Exception.Message)"
+}
+
+if (!$ShareAccessible) {
+    Log "ERROR: Cannot access '$ShareRoot'. Authentication failed or share not found on '$Server'."
+    Log "HINT: Check if credentials expired in Windows Credential Manager: 'cmdkey /delete:LUCY' then 'net use \\$Server\C_Lucy /user:<user> <password>'."
+    exit 1
+}
+
+# Ensure target subdirectory exists
+if (!(Test-Path $Target)) {
+    try {
+        Log "Target directory '$Target' does not exist. Creating it..."
+        New-Item -ItemType Directory -Path $Target -Force | Out-Null
+    }
+    catch {
+        Log "ERROR: Failed to create target directory '$Target': $($_.Exception.Message)"
+        exit 1
+    }
+}
 
 # Loose files — ALWAYS overwrite
 Run-RoboCopy -Src $Source -Dst $Target -Label "Loose Files" -Files "*.*" -ForceCopy $true

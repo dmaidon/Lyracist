@@ -559,7 +559,8 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         {
             foreach (var player in Players)
             {
-                if (player.IsEliminated || !player.IsConnected) continue;
+                // A phone that answered and then went quiet (screen lock) still gets that answer scored.
+                if (player.IsEliminated || (!player.IsConnected && !player.HasAnsweredCurrentQuestion)) continue;
 
                 bool isCorrect = player.HasAnsweredCurrentQuestion && player.LastAnswerIndex == correctIndex;
 

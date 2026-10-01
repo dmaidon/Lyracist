@@ -18,6 +18,11 @@ public class TriviaGameEngine : IDisposable
     private int _leaderboardCountdownSeconds;
     private bool _wasTimerRunningBeforePause;
 
+    // Keyed by position as well as id: a small pack can repeat the same question within one game,
+    // and the repeat must not inherit the first occurrence's recorded answers.
+    private string AnswerKey(TriviaQuestion q) =>
+        $"{CurrentSession.CurrentRoundIndex}|{CurrentSession.CurrentQuestionIndex}|{q.Id}";
+
     private sealed record PlayerQuestionAnswer(
         int OptionIndex,
         double ResponseTimeMs,
@@ -249,6 +254,9 @@ public class TriviaGameEngine : IDisposable
 
     public void StartGame(List<TriviaRound> rounds, string? title = null, bool isAutoRestart = false)
     {
+        // Drop players who left long ago so an unattended multi-game night doesn't accumulate them.
+        PruneDisconnectedPlayers();
+
         lock (_stateLock)
         {
             _tickTimer.Stop();
@@ -300,7 +308,7 @@ public class TriviaGameEngine : IDisposable
             var q = CurrentSession.CurrentQuestion;
             if (q == null) return;
 
-            bool hasSavedAnswers = _questionAnswers.TryGetValue(q.Id, out var savedAnswers);
+            bool hasSavedAnswers = _questionAnswers.TryGetValue(AnswerKey(q), out var savedAnswers);
 
             // Reset or restore player per-question states
             foreach (var p in _players.Values)
@@ -384,7 +392,7 @@ public class TriviaGameEngine : IDisposable
                 return false; // Already submitted
             }
 
-            if (_questionAnswers.TryGetValue(q.Id, out var savedMap) && savedMap.ContainsKey(player.Name))
+            if (_questionAnswers.TryGetValue(AnswerKey(q), out var savedMap) && savedMap.ContainsKey(player.Name))
             {
                 return false; // Already recorded for this question
             }
@@ -398,10 +406,10 @@ public class TriviaGameEngine : IDisposable
 
             ScoreAnswer(player, q);
 
-            if (!_questionAnswers.TryGetValue(q.Id, out var answerDict))
+            if (!_questionAnswers.TryGetValue(AnswerKey(q), out var answerDict))
             {
                 answerDict = new Dictionary<string, PlayerQuestionAnswer>(StringComparer.OrdinalIgnoreCase);
-                _questionAnswers[q.Id] = answerDict;
+                _questionAnswers[AnswerKey(q)] = answerDict;
             }
             answerDict[player.Name] = new PlayerQuestionAnswer(
                 player.LastAnswerIndex,
@@ -731,7 +739,7 @@ public class TriviaGameEngine : IDisposable
             if (q == null) return;
 
             _tickTimer.Stop();
-            _questionAnswers.Remove(q.Id);
+            _questionAnswers.Remove(AnswerKey(q));
 
             // Reverse score adjustments and stats for players who answered this question
             foreach (var p in _players.Values)

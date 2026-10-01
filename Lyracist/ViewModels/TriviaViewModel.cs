@@ -915,7 +915,10 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     public void Dispose()
     {
         _preGameTimer.Stop();
+        // Flush a settings change still waiting out its debounce so closing right after an edit keeps it.
+        bool savePending = _saveSettingsDebounceTimer.Enabled;
         _saveSettingsDebounceTimer.Dispose();
+        if (savePending) TriviaStorageHelper.SaveSettings(Settings);
         CloseTriviaDisplay();
         _displayVm?.Dispose();
         _webServer?.Dispose();
