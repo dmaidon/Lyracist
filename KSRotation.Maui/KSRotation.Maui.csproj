@@ -1,4 +1,4 @@
-<!-- Edited on Sep 22, 2026 @ 13:43:00 -> Fix XARDF7024 by bypassing RemoveDirFixed on _AndroidLibrayProjectIntermediatePath during Clean -->
+<!-- Edited on Oct 1, 2026 @ 09:05:00 -> Update ApplicationDisplayVersion to 1.0.1 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -23,8 +23,8 @@
 		<ApplicationId>psft.ksrotation.maui</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationDisplayVersion>1.0.1</ApplicationDisplayVersion>
+		<ApplicationVersion>2</ApplicationVersion>
 
 		<!-- To develop on Windows with unpackaged, change to None -->
 		<WindowsPackageType>None</WindowsPackageType>

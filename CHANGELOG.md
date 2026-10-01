@@ -1,11 +1,16 @@
-<!-- Edited on Oct 1, 2026 @ 08:58:00 -> Update CHANGELOG with complete trivia bug fixes, hardening, and performance items -->
-Last Edit: Oct 1, 2026 - Comprehensive Trivia Fixes (Knockout, Core Engine, TV Display Leaks, Re-answering, Standby Timer, SQLite Cleanup)
+<!-- Edited on Oct 1, 2026 @ 09:09:00 -> Update CHANGELOG for Package Version 1.0.1 bump across all apps -->
+Last Edit: Oct 1, 2026 - Package Version 1.0.1 Increment Across All Solution Projects
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [26.10.1.0] - 2026-10-01
+
+### Changed
+- **Package Version Increment to 1.0.1 (`Directory.Build.props`, `KSRotation.Maui.csproj`)**:
+  - Configured `<Version>1.0.1</Version>` and `<PackageVersion>1.0.1</PackageVersion>` globally in `Directory.Build.props` across all solution projects and assemblies.
+  - Updated `<ApplicationDisplayVersion>` to `1.0.1` and incremented `<ApplicationVersion>` to `2` in `KSRotation.Maui.csproj`.
 
 ### Fixed & Hardened Across Applications
 - **Knockout Trivia Core Bug Fixes & Game Flow (`ScoreboardViewModel.cs`, `IGameStateService.cs`, `KnockoutWebServer.cs`, `knockout.html`, `WheelViewModel.cs`)**:

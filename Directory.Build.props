@@ -1,6 +1,8 @@
-<!-- Edited on Aug 13, 2026 @ 07:33:00 -> Suppress warnings CS0436, CA1416, and CA1422 globally for cross-platform API compatibility -->
+<!-- Edited on Oct 1, 2026 @ 09:05:00 -> Set Version and PackageVersion to 1.0.1 across all solution projects -->
 <Project>
   <PropertyGroup>
+    <Version>1.0.1</Version>
+    <PackageVersion>1.0.1</PackageVersion>
     <Company>PAROLE Software</Company>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <Copyright>© $([System.DateTime]::UtcNow.ToString('yyyy')) PAROLE Software</Copyright>
