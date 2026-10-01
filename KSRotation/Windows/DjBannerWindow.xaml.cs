@@ -11,6 +11,7 @@ namespace KSRotation.Windows
         public DjBannerWindow()
         {
             InitializeComponent();
+            Lyracist.Shared.WelcomeOverlayHost.Attach(this);
         }
 
         public void UpdateBanner(string? path)

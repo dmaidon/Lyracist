@@ -68,6 +68,7 @@ namespace KSRotation.Windows
         public SingerDisplayWindow()
         {
             InitializeComponent();
+            Lyracist.Shared.WelcomeOverlayHost.Attach(this);
 
             _marqueeBulbChase = new MarqueeBulbChase(MarqueeBulbCanvas);
             _discoBeams = new RotatingBeamsEffect(DiscoBeamCanvas);

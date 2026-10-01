@@ -82,6 +82,61 @@ public partial class SettingsViewModel
         }
     }
 
+    public bool WelcomeScreenEnabled
+    {
+        get => AppSettings.WelcomeScreenEnabled;
+        set
+        {
+            if (AppSettings.WelcomeScreenEnabled != value)
+            {
+                AppSettings.WelcomeScreenEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    /// <summary>How long the "Welcome to our new performer" screen stays up, in seconds (3-120).</summary>
+    public int WelcomeScreenSeconds
+    {
+        get => WelcomeScreenService.ClampSeconds(AppSettings.WelcomeScreenSeconds);
+        set
+        {
+            int clamped = WelcomeScreenService.ClampSeconds(value);
+            if (AppSettings.WelcomeScreenSeconds != clamped)
+            {
+                AppSettings.WelcomeScreenSeconds = clamped;
+            }
+            // Always notify so a TextBox holding an out-of-range entry snaps back to the clamped value.
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>Screens the welcome can be shown on: the default (rotation & DJ banner screens) or one monitor.</summary>
+    public List<WelcomeScreenChoice> WelcomeScreenChoices { get; } = WelcomeScreenService.GetScreenChoices();
+
+    /// <summary>Device name of the monitor for the welcome; empty means the rotation & DJ banner screens.</summary>
+    public string WelcomeScreenMonitor
+    {
+        get => AppSettings.WelcomeScreenMonitor;
+        set
+        {
+            string monitor = value ?? string.Empty;
+            if (AppSettings.WelcomeScreenMonitor != monitor)
+            {
+                AppSettings.WelcomeScreenMonitor = monitor;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void PreviewWelcomeScreen()
+    {
+        WelcomeScreenService.Instance.Seconds = WelcomeScreenSeconds;
+        WelcomeScreenService.Instance.TargetMonitorDevice = WelcomeScreenMonitor;
+        WelcomeScreenService.Instance.Preview();
+    }
+
     public bool ShowQrCodeOnRotationScreen
     {
         get => AppSettings.ShowQrCodeOnRotationScreen;

@@ -2333,6 +2333,34 @@
                                         Style="{StaticResource ModernCheckBoxStyle}"
                                         Margin="0,8,0,4" />
 
+                                    <CheckBox
+                                        Content="Show 'Welcome to our new performer' screen when a new singer joins"
+                                        IsChecked="{Binding WelcomeScreenEnabled, UpdateSourceTrigger=PropertyChanged}"
+                                        ToolTip="Covers the rotation and DJ Banner screens with a randomly designed welcome for each singer who is new to tonight's rotation."
+                                        Style="{StaticResource ModernCheckBoxStyle}"
+                                        Margin="0,4,0,4" />
+                                    <TextBlock Text="Welcome screen display" Margin="0,0,0,4" />
+                                    <ComboBox
+                                        ItemsSource="{Binding WelcomeScreenChoices}"
+                                        SelectedValue="{Binding WelcomeScreenMonitor, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValuePath="DeviceName"
+                                        DisplayMemberPath="Label"
+                                        Style="{StaticResource ModernComboBoxStyle}"
+                                        ToolTip="Default overlays the rotation and DJ Banner screens where they already are. Pick a monitor to show the welcome there instead; the rotation and DJ Banner are not changed and come back when it ends."
+                                        Margin="0,0,0,8" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4" VerticalAlignment="Center">
+                                        <TextBlock Text="Show welcome for:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                        <TextBox Text="{Binding WelcomeScreenSeconds, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                 Width="50" Height="28" Padding="4,2" TextAlignment="Center" VerticalContentAlignment="Center"
+                                                 ToolTip="3 to 120 seconds." />
+                                        <TextBlock Text="sec" VerticalAlignment="Center" Margin="6,0,12,0" />
+                                        <Button Content="Preview"
+                                                Command="{Binding PreviewWelcomeScreenCommand}"
+                                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                Padding="10,4" Height="28"
+                                                ToolTip="Shows a sample welcome on the rotation and DJ Banner screens." />
+                                    </StackPanel>
+
                                     <TextBlock Text="Stadium Jumbotron Sponsor Banner" FontWeight="SemiBold" Margin="0,12,0,4" Foreground="{DynamicResource AppHeaderBrush}" />
                                     <ComboBox
                                             ItemsSource="{Binding JumbotronBannerOptions}"

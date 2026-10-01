@@ -412,3 +412,6 @@ Scaryoke.Unity/*.dll
 !Scaryoke.Unity/Scaryoke/Packages/packages-lock.json
 # Inno Setup installer scripts: never committed
 *.iss
+
+# Personal deploy script for the show laptop: never committed
+Deploy/Deploy-Lyracist.ps1

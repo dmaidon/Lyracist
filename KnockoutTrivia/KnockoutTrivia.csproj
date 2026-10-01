@@ -12,8 +12,8 @@
     <Copyright>Copyright © 2026 PAROLE Software</Copyright>
     <Title>Knockout Trivia</Title>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <AssemblyVersion>26.10.1.61</AssemblyVersion>
-    <FileVersion>26.10.1.61</FileVersion>
+    <AssemblyVersion>26.10.1.62</AssemblyVersion>
+    <FileVersion>26.10.1.62</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <ApplicationIcon>glove.ico</ApplicationIcon>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>

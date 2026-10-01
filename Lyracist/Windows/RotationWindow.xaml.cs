@@ -73,6 +73,7 @@ public partial class RotationWindow : Window, ICaptureSource
     public RotationWindow(RotationWindowViewModel viewModel)
     {
         InitializeComponent();
+        Lyracist.Shared.WelcomeOverlayHost.Attach(this);
 
         _marqueeBulbChase = new MarqueeBulbChase(MarqueeBulbCanvas);
         _discoBeams = new RotatingBeamsEffect(DiscoBeamCanvas);

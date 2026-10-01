@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.10.1.701</AssemblyVersion>
-    <FileVersion>26.10.1.701</FileVersion>
+    <AssemblyVersion>26.10.1.702</AssemblyVersion>
+    <FileVersion>26.10.1.702</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -114,6 +114,7 @@
     <Compile Include="..\Shared\IRotationSinger.cs" Link="IRotationSinger.cs" />
     <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
     <Compile Include="..\Shared\ProjectionEffects.cs" Link="ProjectionEffects.cs" />
+    <Compile Include="..\Shared\WelcomeScreen.cs" Link="WelcomeScreen.cs" />
     <Compile Include="..\Shared\ChromecastDiscoveryService.cs" Link="ChromecastDiscoveryService.cs" />
     <Compile Include="..\Shared\ChromecastSender.cs" Link="ChromecastSender.cs" />
     <Compile Include="..\Shared\BrowserCastDiscoveryService.cs" Link="BrowserCastDiscoveryService.cs" />

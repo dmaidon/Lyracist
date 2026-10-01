@@ -1331,6 +1331,9 @@ namespace KSRotation.ViewModels
                 : settings.ConnectInstructionsScreen;
             IsDjBannerEnabled = !System.Diagnostics.Debugger.IsAttached && settings.IsDjBannerEnabled;
             IsDjBannerQrCodeEnabled = settings.IsDjBannerQrCodeEnabled;
+#if !MAUI
+            LoadWelcomeSettings(settings);
+#endif
             ShowQrCodeOnRotationScreen = settings.ShowQrCodeOnRotationScreen;
             _displayWindowService.SetShowQrCode(ShowQrCodeOnRotationScreen);
             string? currentSsid = WifiHelper.GetConnectedSsid();
@@ -1587,6 +1590,9 @@ namespace KSRotation.ViewModels
             // Linked-adjacency enforcement runs off Singers.CollectionChanged (see
             // OnSingersCollectionChanged) - InsertNewSinger's own Insert() already triggers it.
             RotationHelpers.InsertNewSinger(Singers, newSinger);
+#if !MAUI
+            OnSingerAddedForWelcome(newSinger);
+#endif
 
             if (newSinger.IsSpecial)
             {
@@ -1765,6 +1771,9 @@ namespace KSRotation.ViewModels
             if (confirmed)
             {
                 Singers.Clear();
+#if !MAUI
+                WelcomeScreenService.Instance.ResetTonight();
+#endif
                 if (IsDisplayEnabled)
                 {
                     _displayWindowService.Update(Singers);
@@ -2531,6 +2540,9 @@ namespace KSRotation.ViewModels
 
             if (e.PropertyName == nameof(SingerEntry.Name))
             {
+#if !MAUI
+                OnPlaceholderSingerRenamed(entry);
+#endif
                 if (_lastSingerNames.TryGetValue(entry, out string? oldName) && oldName != entry.Name)
                 {
                     lock (_performanceHistoryLock)
@@ -3102,6 +3114,11 @@ namespace KSRotation.ViewModels
                 SelectedJumbotronBannerPath = SelectedJumbotronBannerPath,
                 IsDjBannerEnabled = IsDjBannerEnabled,
                 IsDjBannerQrCodeEnabled = IsDjBannerQrCodeEnabled,
+#if !MAUI
+                WelcomeScreenEnabled = WelcomeScreenEnabled,
+                WelcomeScreenSeconds = WelcomeScreenSeconds,
+                WelcomeScreenMonitor = WelcomeScreenMonitor,
+#endif
                 ShowQrCodeOnRotationScreen = ShowQrCodeOnRotationScreen,
                 WifiPassword = WifiPassword,
                 ActiveSpecialEvent = ActiveSpecialEvent,
@@ -3238,6 +3255,7 @@ namespace KSRotation.ViewModels
         private void RefreshAvailableMonitors()
         {
 #if WPF
+            RefreshWelcomeScreenChoices();
             var monitors = MonitorEnumerator.GetMonitors();
             string currentSelection = SelectedMonitorDevice;
 

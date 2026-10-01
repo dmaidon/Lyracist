@@ -15,6 +15,7 @@ public partial class DjBannerWindow : Window
     public DjBannerWindow(DjBannerWindowViewModel vm)
     {
         InitializeComponent();
+        Lyracist.Shared.WelcomeOverlayHost.Attach(this);
         _vm = vm;
         DataContext = vm;
         _vm.PropertyChanged += Vm_PropertyChanged;

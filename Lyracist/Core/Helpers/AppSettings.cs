@@ -894,6 +894,24 @@ public static class AppSettings
         set { _data.IsDjBannerQrCodeEnabled = value; Save(); }
     }
 
+    public static bool WelcomeScreenEnabled
+    {
+        get => _data.WelcomeScreenEnabled;
+        set { _data.WelcomeScreenEnabled = value; Save(); }
+    }
+
+    public static string WelcomeScreenMonitor
+    {
+        get => _data.WelcomeScreenMonitor;
+        set { _data.WelcomeScreenMonitor = value ?? string.Empty; Save(); }
+    }
+
+    public static int WelcomeScreenSeconds
+    {
+        get => _data.WelcomeScreenSeconds;
+        set { _data.WelcomeScreenSeconds = value; Save(); }
+    }
+
     public static string WifiPassword
     {
         get => _data.WifiPassword;
@@ -1098,6 +1116,9 @@ public static class AppSettings
         public string WifiPassword { get; set; } = string.Empty;
         public string ConnectInstructionsScreen { get; set; } = "All Screens / Monitors";
         public bool IsDjBannerQrCodeEnabled { get; set; } = true;
+        public bool WelcomeScreenEnabled { get; set; } = true;
+        public int WelcomeScreenSeconds { get; set; } = 15;
+        public string WelcomeScreenMonitor { get; set; } = string.Empty;
         public bool EnableKillVocal { get; set; } = false;
         public bool FloatCurrentSingerToTop { get; set; } = true;
         public double DefaultSongLengthMinutes { get; set; } = 4.75;

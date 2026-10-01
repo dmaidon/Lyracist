@@ -7,6 +7,19 @@ All notable changes to the Lyracist project are documented here. The format is b
 
 ## [26.10.1.0] - 2026-10-01
 
+### Added
+- **"Welcome to our new performer" screen (`Shared/WelcomeScreen.cs`, `Lyracist`, `KSRotation`)**:
+  - A full-screen welcome with six random designs (Spotlight, Neon Night, Sunset Stage, Confetti Party, Disco Rays, Red Curtain) is shown when a singer new to tonight's rotation is added; the same design never repeats back to back and long names shrink to fit.
+  - Several names entered in succession are shown one after another, in order, each for the configured time. Returning singers, special guests, music requests and placeholders are skipped; clearing the rotation resets who counts as new.
+  - Settings in both apps: on/off, display time (default 15 s, 3-120), screen (default overlays the rotation and DJ Banner windows where they are; or pick a monitor for a dedicated window that never takes focus and can be clicked away), and a Preview button.
+  - The welcome only covers the banners and never changes them, so the rotation, DJ Banner, Special Event banners and last-performer banner return untouched. KSRotation waits 2.5 s after the DJ stops typing a new name before welcoming. KSRotation.Maui is unchanged.
+  - Tests: `Lyracist.Tests/WelcomeScreenTests.cs`.
+
+### Fixed (review pass)
+- `TriviaGameEngine` keys saved answers by round/position/id so a repeated question in one game no longer shows players as already answered; disconnected players are pruned on game start.
+- `TriviaDbCreator` import now writes the validated pack; Knockout Trivia still scores a disconnected player who already answered; `TriviaViewModel` flushes a pending debounced settings save on dispose.
+- `Deploy-Lyracist.ps1` is now personal-only: gitignored and untracked.
+
 ### Changed
 - **Package Version Increment to 1.0.1 (`Directory.Build.props`, `KSRotation.Maui.csproj`)**:
   - Configured `<Version>1.0.1</Version>` and `<PackageVersion>1.0.1</PackageVersion>` globally in `Directory.Build.props` across all solution projects and assemblies.

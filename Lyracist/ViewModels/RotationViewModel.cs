@@ -420,6 +420,7 @@ public partial class RotationViewModel : BaseViewModel
     public void ClearRotationQueue()
     {
         Rotation.Clear();
+        WelcomeScreenService.Instance.ResetTonight();
         _display.UpdateRotation([.. Rotation]);
     }
 
@@ -695,6 +696,16 @@ public partial class RotationViewModel : BaseViewModel
 
         RotationStateChanged?.Invoke();
         _display.UpdateRotation([.. Rotation]);
+
+        // Existing and reinstated singers returned above, so reaching here means a name that is new to
+        // tonight's rotation (the service also skips anyone it already welcomed earlier tonight).
+        if (!isMusic && !isSpecial)
+        {
+            WelcomeScreenService.Instance.Enabled = AppSettings.WelcomeScreenEnabled;
+            WelcomeScreenService.Instance.Seconds = AppSettings.WelcomeScreenSeconds;
+            WelcomeScreenService.Instance.TargetMonitorDevice = AppSettings.WelcomeScreenMonitor;
+            WelcomeScreenService.Instance.TryWelcome(name);
+        }
     }
 
     [RelayCommand]
@@ -888,6 +899,7 @@ public partial class RotationViewModel : BaseViewModel
     private void ClearRotation()
     {
         Rotation.Clear();
+        WelcomeScreenService.Instance.ResetTonight();
         SelectedSinger = null;
 
         RotationStateChanged?.Invoke();

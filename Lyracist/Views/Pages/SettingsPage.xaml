@@ -593,6 +593,24 @@
                                     </Border>
                                     <CheckBox Content="Show request QR Code overlay on DJ Banner" IsChecked="{Binding IsDjBannerQrCodeEnabled, Mode=TwoWay}" Margin="0,4,0,12" ToolTip="Displays the patron request portal QR code overlay directly on the active DJ Banner." />
 
+                                    <CheckBox Content="Show 'Welcome to our new performer' screen when a new singer joins"
+                                              IsChecked="{Binding WelcomeScreenEnabled, Mode=TwoWay}"
+                                              Margin="0,0,0,6"
+                                              ToolTip="Covers the rotation and DJ Banner screens with a randomly designed welcome for each singer who is new to tonight's rotation." />
+                                    <TextBlock Text="Welcome screen display" FontSize="12" Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding WelcomeScreenChoices}" SelectedValue="{Binding WelcomeScreenMonitor, Mode=TwoWay}"
+                                              SelectedValuePath="DeviceName" DisplayMemberPath="Label" Margin="0,0,0,8"
+                                              ToolTip="Default overlays the rotation and DJ Banner screens where they already are. Pick a monitor to show the welcome there instead; the rotation and DJ Banner are not changed and come back when it ends." />
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12" VerticalAlignment="Center">
+                                        <TextBlock Text="Show welcome for:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12" />
+                                        <TextBox Text="{Binding WelcomeScreenSeconds, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                 Width="50" Height="26" Padding="4,1" TextAlignment="Center" VerticalAlignment="Center"
+                                                 ToolTip="3 to 120 seconds." />
+                                        <TextBlock Text="sec" VerticalAlignment="Center" Margin="6,0,12,0" FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <Button Content="Preview" Command="{Binding PreviewWelcomeScreenCommand}" Padding="10,3" FontSize="11"
+                                                ToolTip="Shows a sample welcome on the rotation and DJ Banner screens." />
+                                    </StackPanel>
+
                                     <TextBlock Text="Stadium Jumbotron Sponsor Banner" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
                                     <ComboBox ItemsSource="{Binding JumbotronBanners}" SelectedItem="{Binding SelectedJumbotronBanner, Mode=TwoWay}" DisplayMemberPath="FileName" HorizontalAlignment="Stretch" Margin="0,0,0,12"
                                               ToolTip="Optional banner shown in the bottom sponsor box of the Stadium Jumbotron projection view. When 'None' is selected, a tip-your-bartenders-and-DJ reminder shows instead." />

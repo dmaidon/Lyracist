@@ -7,6 +7,11 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
     
 ## Key Features
 
+### 👋 New Performer Welcome Screen (`Shared/WelcomeScreen.cs`, `Lyracist`, `KSRotation`)
+- **Automatic welcome**: when a singer new to tonight's rotation is added, a full-screen "Welcome to our new performer: <name>" screen appears in one of six random designs. Several new singers in a row are welcomed in order.
+- **DJ settings**: on/off, display time (default 15 seconds), which screen to use (the rotation and DJ Banner screens by default, or a specific monitor), and a Preview button.
+- **Banners are never overwritten**: the rotation, DJ Banner, Special Event and last-performer banners return exactly as they were when the welcome ends.
+
 ### 🥊 Knockout Trivia Core Fixes & Enhancements (`KnockoutTrivia`, `KnockoutWebServer.cs`, `knockout.html`)
 - **Real-Player Seeding & Disconnect Handling**: Removed hardcoded fake player initialization on launch; added a 20-second inactivity disconnect timeout in `IGameStateService.cs` so disconnected players do not block early reveal in Automatic mode, and rejoining players reconnect smoothly without duplicate roster entries.
 - **Snapshot Isolation & Socket Stability**: Replaced live collection reads with immutable thread-safe snapshots (`_snapshotLock`, `_cachedSnapshot`) for HTTP socket threads, eliminating 500 internal errors and cross-thread mutation exceptions.
