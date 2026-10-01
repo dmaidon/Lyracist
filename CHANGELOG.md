@@ -1,5 +1,5 @@
-<!-- Edited on Oct 1, 2026 @ 07:15:00 -> Update CHANGELOG for Trivia fixes #3, #4, #5, and #6 -->
-Last Edit: Oct 1, 2026 - Trivia Engine Leaderboard Auto-Advance, Games Played Counter, Question ID Submit Validation & Option Un-fade
+<!-- Edited on Oct 1, 2026 @ 07:26:00 -> Update CHANGELOG for Trivia fixes #7, #8, #9, and #11 -->
+Last Edit: Oct 1, 2026 - Trivia Engine Leaderboard Auto-Advance, Games Played Counter, Question ID Submit Validation, Option Un-fade, Client Errors, Dynamic Marquee, Rate Limiting & Timer Guards
 
 # Changelog
 
@@ -20,6 +20,18 @@ All notable changes to the Lyracist project are documented here. The format is b
 - **Restoration of Faded Options on Question Timer Reset (`DisplayViewModel.cs`, `TriviaDisplayViewModel.cs`, `trivia.html`, Fix #6)**:
   - Fixed TV display view models (`DisplayViewModel.cs` and `TriviaDisplayViewModel.cs`) `HandleAnswersEliminated` to restore opacity to `1.0` for all options when uneliminated (e.g. when `ResetQuestionTimer()` fires with an empty list `[]`).
   - Updated phone buzzer client (`trivia.html`) `handleStateUpdate` to properly remove the `.eliminated` CSS class and re-enable choices when options are un-eliminated following a timer reset.
+- **Mobile Client Join and Submission Error Handling (`trivia.html`, Fix #7)**:
+  - Updated `registerWithServer()` to explicitly handle HTTP 429 (rate-limited) and 500+ server errors with descriptive feedback banners instead of failing silently.
+  - Validated that `data.success !== false && data.playerId` before persisting player session state.
+  - In `submitAnswer()`, inspected JSON response payloads so responses with `{ success: false, error: ... }` display an error banner, re-enable answer buttons, and reset submission locks rather than falsely indicating successful acceptance.
+- **Dynamic Score Ticker Marquee Sizing (`TriviaDisplayWindow.xaml` and `.xaml.cs` in `Lyracist.Trivia`, `Lyracist`, and `KSRotation`, Fix #8)**:
+  - Replaced hard-coded animation bounds (`From="1280" To="-3000"`) with code-behind dynamic measurement of container width and rendered text width at a constant 65 px/sec velocity.
+  - Dynamic recalculation on window resizing, display resolution changes, and player leaderboard updates ensures the ticker enters smoothly off-screen right and fully exits off-screen left without popping or truncating on high player counts.
+- **Venue Registration Rate Limiting & Table Pruning (`TriviaWebServer.cs`, Fix #9)**:
+  - Increased `MaxRegistrationsPerWindow` from 5 to 60 per 5-minute window to accommodate packed pub rooms sharing the same venue Wi-Fi NAT or mobile hotspot.
+  - Implemented automatic pruning of expired IP rate-limit records (`PruneExpiredRegistrations()`) to prevent unbounded memory growth in long-running trivia sessions.
+- **Guarded Timer Callbacks for Process Stability (`MainViewModel.cs`, `TriviaGameEngine.cs`, Fix #11)**:
+  - Protected `OnPreGameTimerTick` in `MainViewModel.cs` with `try / catch` and trace logging, preventing unhandled exceptions on thread pool timer threads from terminating .NET Core / .NET 10 processes during unattended pre-game countdown loops.
 
 ## [26.9.25.1] - 2026-09-27
 

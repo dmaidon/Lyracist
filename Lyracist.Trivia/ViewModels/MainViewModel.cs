@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:10:00 -> Fix #4 games-played counter and progress text on new runs, and fix CS8602 warning
+// Edited on Oct 1, 2026 @ 07:25:00 -> Fix #11 guard PreGameTimer tick with try/catch to protect unattended shows
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -922,32 +922,39 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     private void OnPreGameTimerTick(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        // This handler fires on the Timer's threadpool thread. Every property touched below is
-        // bound to WPF UI (the game master panel and/or the projection window), so it must be
-        // marshaled onto the UI thread like every other engine/timer callback in this class -
-        // otherwise a cross-thread binding exception can crash the whole app during the
-        // unattended pre-game wait, before anyone is at the keyboard to notice.
-        Application.Current?.Dispatcher.Invoke(() =>
+        // System.Timers.Timer fires on a thread pool thread where unhandled exceptions terminate
+        // the process (.NET Core / .NET 10). Guard with try/catch so unattended pre-game loops
+        // never crash the app.
+        try
         {
-            if (IsPreGameCountdownRunning && PreGameSecondsRemaining > 0)
+            // Every property touched below is bound to WPF UI (the game master panel and/or
+            // the projection window), so marshal onto the UI thread dispatcher.
+            Application.Current?.Dispatcher.Invoke(() =>
             {
-                PreGameSecondsRemaining--;
-                int mins = PreGameSecondsRemaining / 60;
-                int secs = PreGameSecondsRemaining % 60;
-                PreGameCountdownText = $"{mins:D2}:{secs:D2}";
-                _activeDisplayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
-
-                if (PreGameSecondsRemaining == 0)
+                if (IsPreGameCountdownRunning && PreGameSecondsRemaining > 0)
                 {
-                    _preGameTimer.Stop();
-                    IsPreGameCountdownRunning = false;
-                    if (AutoStartAfterCountdown)
+                    PreGameSecondsRemaining--;
+                    int mins = PreGameSecondsRemaining / 60;
+                    int secs = PreGameSecondsRemaining % 60;
+                    PreGameCountdownText = $"{mins:D2}:{secs:D2}";
+                    _activeDisplayVm?.UpdatePreGameCountdown(PreGameSecondsRemaining);
+
+                    if (PreGameSecondsRemaining == 0)
                     {
-                        StartGameWithSelectedPack();
+                        _preGameTimer.Stop();
+                        IsPreGameCountdownRunning = false;
+                        if (AutoStartAfterCountdown)
+                        {
+                            StartGameWithSelectedPack();
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError($"[PreGameTimer] Tick failed: {ex}");
+        }
     }
 
     [RelayCommand]

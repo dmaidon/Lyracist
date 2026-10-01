@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:10:00 -> Add questionId to SubmitRequest and validate question ID before scoring to prevent late answers scoring on next question
+// Edited on Oct 1, 2026 @ 07:22:00 -> Fix #9 increase registration rate limit for venue NAT/hotspots and prune expired IP table entries
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,12 +24,13 @@ public class TriviaWebServer : IDisposable
     // Caps how many brand-new players a single IP can register (via /api/trivia/join with a name
     // TriviaGameEngine.RegisterPlayer has never seen - see RouteRequestAsync). Without this, an
     // unauthenticated script on the venue WiFi can insert an unbounded number of entries into the
-    // live leaderboard in a few minutes. A legitimate phone joins once per session, so 5 per 10
-    // minutes comfortably covers a handful of real players sharing an IP while still blocking a
-    // scripted flood.
-    private const int MaxRegistrationsPerWindow = 5;
-    private static readonly TimeSpan RegistrationWindow = TimeSpan.FromMinutes(10);
+    // live leaderboard in a few minutes. Set to 60 per 5-minute window to comfortably cover an
+    // entire room or venue joining simultaneously through a shared NAT router or mobile hotspot
+    // while still preventing malicious unbounded bot floods.
+    private const int MaxRegistrationsPerWindow = 60;
+    private static readonly TimeSpan RegistrationWindow = TimeSpan.FromMinutes(5);
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string, RegistrationRateState> _registrationsByIp = new();
+    private DateTime _lastPruneUtc = DateTime.UtcNow;
 
     private sealed class RegistrationRateState
     {
@@ -37,15 +38,32 @@ public class TriviaWebServer : IDisposable
         public DateTime WindowStartUtc;
     }
 
+    private void PruneExpiredRegistrations(DateTime now)
+    {
+        if (now - _lastPruneUtc < TimeSpan.FromMinutes(2)) return;
+        _lastPruneUtc = now;
+
+        foreach (var kvp in _registrationsByIp)
+        {
+            if (now - kvp.Value.WindowStartUtc > RegistrationWindow * 2)
+            {
+                _registrationsByIp.TryRemove(kvp.Key, out _);
+            }
+        }
+    }
+
     private bool TryAllowRegistration(string clientIp)
     {
-        var state = _registrationsByIp.GetOrAdd(clientIp, _ => new RegistrationRateState { WindowStartUtc = DateTime.UtcNow });
+        var now = DateTime.UtcNow;
+        PruneExpiredRegistrations(now);
+
+        var state = _registrationsByIp.GetOrAdd(clientIp, _ => new RegistrationRateState { WindowStartUtc = now });
 
         lock (state)
         {
-            if (DateTime.UtcNow - state.WindowStartUtc > RegistrationWindow)
+            if (now - state.WindowStartUtc > RegistrationWindow)
             {
-                state.WindowStartUtc = DateTime.UtcNow;
+                state.WindowStartUtc = now;
                 state.Count = 0;
             }
 

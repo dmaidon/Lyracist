@@ -1,4 +1,4 @@
-<!-- Edited on Oct 1, 2026 @ 07:10:00 -> Fix #5 send questionId in submit payload, and #6 restore uneliminated choices on timer reset -->
+<!-- Edited on Oct 1, 2026 @ 07:22:00 -> Fix #7 handle join error codes 429/500 and validate submit success in mobile client -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -623,11 +623,12 @@
 
                 if (res.ok) {
                     const data = await res.json().catch(() => ({}));
-                    if (data.playerId) {
+                    if (data.success !== false && data.playerId) {
                         playerId = data.playerId;
                         localStorage.setItem('lyracist_trivia_playerid', playerId);
+                        return { status: 'ok' };
                     }
-                    return { status: 'ok' };
+                    return { status: 'error', message: data.error || 'Could not join the game. Please try again.' };
                 }
 
                 if (res.status === 403) return { status: 'kicked' };
@@ -637,7 +638,10 @@
                     return { status: 'conflict', message: err.error || 'That name is already in use this game. Please choose a different name.' };
                 }
                 if (res.status === 429) {
-                    return { status: 'error', message: err.error || 'Too many join attempts. Please try again later.' };
+                    return { status: 'rate_limited', message: err.error || 'Too many join attempts. Please try again in a few moments.' };
+                }
+                if (res.status >= 500) {
+                    return { status: 'server_error', message: err.error || 'Server error while joining. Please notify the host and try again.' };
                 }
                 return { status: 'error', message: err.error || 'Could not join the game. Please try again.' };
             } catch (err) {
@@ -728,7 +732,21 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: payload
                     });
-                    if (res.ok) return;
+                    if (res.ok) {
+                        const data = await res.json().catch(() => ({}));
+                        if (data.success) {
+                            return;
+                        }
+                        // Engine rejected the answer (e.g. paused, answering closed, or already answered)
+                        errorBanner.textContent = data.error || '⚠️ Answer could not be accepted for this question.';
+                        errorBanner.style.display = 'block';
+                        hasSubmitted = false;
+                        document.querySelectorAll('.btn-buzzer').forEach((btn, idx) => {
+                            btn.disabled = false;
+                            if (idx === optionIndex) btn.classList.remove('selected');
+                        });
+                        return;
+                    }
                     if (res.status === 403) { handleKicked(); return; }
                     if (res.status === 409) { needsRejoin = true; break; }
                 } catch (err) {
