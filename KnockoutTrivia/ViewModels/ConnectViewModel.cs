@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:46:30 -> Escape Wi-Fi QR payload via WifiHelper and accurately track active connected players count
+// Edited on Oct 1, 2026 @ 08:41:00 -> Fix thread safety in UpdatePlayerCount by dispatching to UI thread and reading thread-safe snapshot
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -113,7 +113,13 @@ public partial class ConnectViewModel : ViewModelBase
 
     private void UpdatePlayerCount()
     {
-        ConnectedPlayersCount = _gameStateService.Players.Count(p => p.IsConnected);
+        if (Application.Current?.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
+        {
+            Application.Current.Dispatcher.InvokeAsync(UpdatePlayerCount);
+            return;
+        }
+
+        ConnectedPlayersCount = _gameStateService.GetPlayersSnapshot().Count(p => p.IsConnected);
     }
 
     public void UpdateWifiCredentials(string ssid, string password)

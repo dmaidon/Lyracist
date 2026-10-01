@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:10:00 -> Fix #3 auto-advance after leaderboard, #4 games-played counter reset, #5 question ID validation on submit, and #6 un-fade on timer reset
+// Edited on Oct 1, 2026 @ 08:48:00 -> Fix #11 answered state on revisit, #12 timer standby resume drift, #37 tick guard, #45 tie breakers and player pruning
 using Lyracist.Trivia.Core.Models;
 using System.Collections.Concurrent;
 using System.Timers;
@@ -9,12 +9,24 @@ public class TriviaGameEngine : IDisposable
 {
     private readonly System.Timers.Timer _tickTimer;
     private readonly ConcurrentDictionary<string, TriviaPlayer> _players = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Dictionary<string, PlayerQuestionAnswer>> _questionAnswers = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _stateLock = new();
 
     private readonly List<int> _pendingWrongIndices = [];
     private int _eliminationCountdownSeconds;
     private int _postRevealCountdownSeconds;
     private int _leaderboardCountdownSeconds;
+    private bool _wasTimerRunningBeforePause;
+
+    private sealed record PlayerQuestionAnswer(
+        int OptionIndex,
+        double ResponseTimeMs,
+        int PointsEarned,
+        int VisibleOptionsAtSubmission,
+        int RemainingSecondsAtSubmission,
+        int StreakBeforeAnswer,
+        int MaxStreakBeforeAnswer,
+        bool IsCorrect);
 
     public TriviaSettings Settings { get; set; }
     public TriviaGameSession CurrentSession { get; private set; }
@@ -84,7 +96,46 @@ public class TriviaGameEngine : IDisposable
             }
         }
 
-        return _players.Values.OrderByDescending(p => p.TotalScore).ToList();
+        return _players.Values
+            .OrderByDescending(p => p.TotalScore)
+            .ThenByDescending(p => p.TotalCorrect)
+            .ThenBy(p => p.LastResponseTimeMs)
+            .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Removes players who have been disconnected longer than <paramref name="maxDisconnectedDuration"/>.
+    /// </summary>
+    public int PruneDisconnectedPlayers(TimeSpan? maxDisconnectedDuration = null)
+    {
+        var maxDuration = maxDisconnectedDuration ?? TimeSpan.FromMinutes(10);
+        var cutoff = DateTime.UtcNow - maxDuration;
+        int pruned = 0;
+        foreach (var p in _players.Values)
+        {
+            if (!p.IsConnected && p.LastSeenAt < cutoff)
+            {
+                if (_players.TryRemove(p.Name, out _))
+                {
+                    pruned++;
+                }
+            }
+        }
+        if (pruned > 0)
+        {
+            LeaderboardUpdated?.Invoke(this, GetPlayers());
+        }
+        return pruned;
+    }
+
+    /// <summary>
+    /// Clears all players from the session (e.g. host clicks Clear Roster or resets game).
+    /// </summary>
+    public void ClearAllPlayers()
+    {
+        _players.Clear();
+        LeaderboardUpdated?.Invoke(this, GetPlayers());
     }
 
     /// Matches the mobile join form's maxlength="24" on both the name and team inputs - that
@@ -231,6 +282,7 @@ public class TriviaGameEngine : IDisposable
 
             EliminatedAnswerIndices.Clear();
             _pendingWrongIndices.Clear();
+            _questionAnswers.Clear();
 
             SetState(TriviaGameState.Lobby);
         }
@@ -248,14 +300,27 @@ public class TriviaGameEngine : IDisposable
             var q = CurrentSession.CurrentQuestion;
             if (q == null) return;
 
-            // Reset player per-question states
+            bool hasSavedAnswers = _questionAnswers.TryGetValue(q.Id, out var savedAnswers);
+
+            // Reset or restore player per-question states
             foreach (var p in _players.Values)
             {
-                p.LastAnswerIndex = -1;
-                p.HasAnsweredCurrentQuestion = false;
-                p.LastPointsEarned = 0;
-                p.VisibleOptionsAtSubmission = 4;
-                p.RemainingSecondsAtSubmission = 0;
+                if (hasSavedAnswers && savedAnswers!.TryGetValue(p.Name, out var ans))
+                {
+                    p.LastAnswerIndex = ans.OptionIndex;
+                    p.HasAnsweredCurrentQuestion = true;
+                    p.LastPointsEarned = ans.PointsEarned;
+                    p.VisibleOptionsAtSubmission = ans.VisibleOptionsAtSubmission;
+                    p.RemainingSecondsAtSubmission = ans.RemainingSecondsAtSubmission;
+                }
+                else
+                {
+                    p.LastAnswerIndex = -1;
+                    p.HasAnsweredCurrentQuestion = false;
+                    p.LastPointsEarned = 0;
+                    p.VisibleOptionsAtSubmission = 4;
+                    p.RemainingSecondsAtSubmission = 0;
+                }
             }
 
             EliminatedAnswerIndices.Clear();
@@ -319,6 +384,11 @@ public class TriviaGameEngine : IDisposable
                 return false; // Already submitted
             }
 
+            if (_questionAnswers.TryGetValue(q.Id, out var savedMap) && savedMap.ContainsKey(player.Name))
+            {
+                return false; // Already recorded for this question
+            }
+
             player.LastAnswerIndex = optionIndex;
             player.LastResponseTimeMs = responseTimeMs;
             player.HasAnsweredCurrentQuestion = true;
@@ -327,6 +397,21 @@ public class TriviaGameEngine : IDisposable
             player.LastSeenAt = DateTime.UtcNow;
 
             ScoreAnswer(player, q);
+
+            if (!_questionAnswers.TryGetValue(q.Id, out var answerDict))
+            {
+                answerDict = new Dictionary<string, PlayerQuestionAnswer>(StringComparer.OrdinalIgnoreCase);
+                _questionAnswers[q.Id] = answerDict;
+            }
+            answerDict[player.Name] = new PlayerQuestionAnswer(
+                player.LastAnswerIndex,
+                player.LastResponseTimeMs,
+                player.LastPointsEarned,
+                player.VisibleOptionsAtSubmission,
+                player.RemainingSecondsAtSubmission,
+                player.StreakBeforeAnswer,
+                player.MaxStreakBeforeAnswer,
+                player.LastAnswerIndex == q.CorrectAnswerIndex);
 
             // If everyone connected has now answered, skip straight ahead instead of waiting
             // out the remaining clock/fade.
@@ -646,6 +731,7 @@ public class TriviaGameEngine : IDisposable
             if (q == null) return;
 
             _tickTimer.Stop();
+            _questionAnswers.Remove(q.Id);
 
             // Reverse score adjustments and stats for players who answered this question
             foreach (var p in _players.Values)
@@ -875,6 +961,8 @@ public class TriviaGameEngine : IDisposable
     {
         lock (_stateLock)
         {
+            if (IsPaused || !_tickTimer.Enabled) return;
+
             switch (State)
             {
                 case TriviaGameState.QuestionActive:
@@ -965,6 +1053,7 @@ public class TriviaGameEngine : IDisposable
             if (IsPaused) return;
             IsPaused = true;
             PauseReason = reason ?? "Paused by Host";
+            _wasTimerRunningBeforePause = _tickTimer.Enabled;
             PauseTimer();
             GamePaused?.Invoke(this, PauseReason);
         }
@@ -977,7 +1066,10 @@ public class TriviaGameEngine : IDisposable
             if (!IsPaused) return;
             IsPaused = false;
             PauseReason = null;
-            ResumeTimer();
+            if (_wasTimerRunningBeforePause)
+            {
+                ResumeTimer();
+            }
             GameResumed?.Invoke(this, EventArgs.Empty);
         }
     }

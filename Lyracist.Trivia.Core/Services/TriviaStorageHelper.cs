@@ -1,4 +1,4 @@
-// Edited on Aug 30, 2026 @ 10:58:00 -> Resolve consolidated paths using AppDomain.CurrentDomain.BaseDirectory for MAUI cross-platform compatibility
+// Edited on Oct 1, 2026 @ 08:51:00 -> Atomic settings write and corrupted settings backup protection
 using System;
 using System.IO;
 
@@ -95,9 +95,17 @@ public static class TriviaStorageHelper
         }
         catch (Exception ex)
         {
-            // No per-app logger available here (this library is shared across several host apps
-            // with different names) - Trace.TraceError still isn't Debug-only, unlike Debug.WriteLine.
             System.Diagnostics.Trace.TraceError($"Error loading trivia settings: {ex}");
+            try
+            {
+                string path = GetSettingsPath();
+                if (File.Exists(path))
+                {
+                    string backup = path + $".corrupt.{DateTime.UtcNow:yyyyMMddHHmmss}.bak";
+                    File.Copy(path, backup, true);
+                }
+            }
+            catch { }
         }
 
         return new Models.TriviaSettings();
@@ -108,11 +116,13 @@ public static class TriviaStorageHelper
         try
         {
             string path = GetSettingsPath();
+            string tempPath = path + ".tmp";
             string json = System.Text.Json.JsonSerializer.Serialize(settings, new System.Text.Json.JsonSerializerOptions
             {
                 WriteIndented = true
             });
-            File.WriteAllText(path, json);
+            File.WriteAllText(tempPath, json);
+            File.Move(tempPath, path, overwrite: true);
         }
         catch (Exception ex)
         {

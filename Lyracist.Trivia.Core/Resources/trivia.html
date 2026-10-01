@@ -1,4 +1,4 @@
-<!-- Edited on Oct 1, 2026 @ 07:34:00 -> Performance: add in-flight guard to pollGameState to prevent slow network request pileup -->
+<!-- Edited on Oct 1, 2026 @ 08:50:00 -> Performance: non-blocking Google Fonts preload, reset currentQuestionId on Lobby/Complete -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +7,9 @@
     <title>Lyracist Live Trivia Mobile Buzzer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Outfit:wght@600;800;900&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Outfit:wght@600;800;900&display=swap"></noscript>
     <style>
         :root {
             --bg-dark: #0B0F19;
@@ -841,6 +843,7 @@
 
             if (state === 'Lobby') {
                 showScreen('screen-lobby');
+                currentQuestionId = '';
                 document.getElementById('lobby-score').textContent = data.playerScore || 0;
                 document.getElementById('lobby-streak').textContent = `🔥 ${data.playerStreak || 0}`;
                 hasSubmitted = false;
@@ -959,10 +962,12 @@
                 document.getElementById('reveal-streak').textContent = `🔥 ${data.playerStreak || 0}`;
             } else if (state === 'RoundLeaderboard') {
                 showScreen('screen-lobby');
+                currentQuestionId = '';
                 document.getElementById('lobby-score').textContent = data.playerScore || 0;
                 document.getElementById('lobby-streak').textContent = `🔥 ${data.playerStreak || 0}`;
             } else if (state === 'GameComplete') {
                 showScreen('screen-complete');
+                currentQuestionId = '';
                 document.getElementById('complete-winner-title').textContent = data.winnerTitle || '🏆 GAME COMPLETE';
 
                 const rosterEl = document.getElementById('complete-team-roster');

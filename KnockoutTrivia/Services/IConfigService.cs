@@ -1,4 +1,4 @@
-// Edited on Aug 30, 2026 @ 08:26:00 -> Update ConfigFile to Settings/knockout_trivia_settings.json with legacy game_settings.json migration
+// Edited on Oct 1, 2026 @ 08:46:00 -> Use AtomicJsonFile and back up corrupted settings file before defaulting
 using System;
 using System.IO;
 using System.Text.Json;
@@ -55,9 +55,18 @@ public class ConfigService : IConfigService
                 return JsonSerializer.Deserialize<KnockoutSettings>(json, JsonOptions) ?? new KnockoutSettings();
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Fallback to default
+            Globals.LogError("KnockoutTrivia", "ConfigService.LoadSettings", ex);
+            try
+            {
+                if (File.Exists(ConfigFile))
+                {
+                    string backupPath = $"{ConfigFile}.corrupt.{DateTime.UtcNow:yyyyMMddHHmmss}.bak";
+                    File.Copy(ConfigFile, backupPath, true);
+                }
+            }
+            catch { }
         }
 
         var defaults = new KnockoutSettings();
@@ -69,9 +78,7 @@ public class ConfigService : IConfigService
     {
         try
         {
-            Directory.CreateDirectory(ConfigDir);
-            string json = JsonSerializer.Serialize(settings, JsonOptions);
-            File.WriteAllText(ConfigFile, json);
+            AtomicJsonFile.Serialize(ConfigFile, settings, JsonOptions);
             return true;
         }
         catch (Exception ex)

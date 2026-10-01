@@ -1,4 +1,4 @@
-<!-- Edited on Oct 1, 2026 @ 07:52:30 -> Document KnockoutTrivia, Lyracist, and KSRotation cross-app trivia enhancements -->
+<!-- Edited on Oct 1, 2026 @ 08:59:00 -> Document complete trivia bug fixes, hardening, TV display leaks, and performance items -->
 # Lyracist Pro Suite - System Manual & Architecture Guide
     
 Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application designed for professional KJs and home entertainment. Built using WPF and .NET 10, it offers a safe, DJ-friendly Auto-Advance system with grace period timer and fill-in music ducking, advanced multi-monitor projection, rich audio customization, high-speed in-memory library scanning and metadata probing (TagLibSharp), local and streaming library search, an integrated mobile tablet server for performer lyrics, active rotation management with current performer top-floating, smart new singer round insertion, inactive singer filtering, intelligent name and artist proper-casing with mixed-case and apostrophe prefix support, spacious high-DPI singer cards with full button border visibility on 1080p laptops, global auto-highlighting/select-all on focus across all text and numeric inputs, responsive portrait/landscape tablet layouts and Android launch stability in `KSRotation.Maui`, dedicated cross-app landscape tablet kiosk request station (`kiosk.html`) with Attractor/Welcome screen and PWA fullscreen support, remote DJ web control with checkmark-first action buttons and popup modal performer addition (`dj.html`), integrated interactive pub/bar trivia with dedicated separate settings, manual DJ game flow controls with question jumping, timer adjustments, and keyboard shortcuts, multi-monitor auto-casting, randomized answer elimination, non-overlapping score and intermission screens, automated projection pause synchronization, dynamic tiered option value scoring (100% / 70% / 40%), Knockout Trivia standalone game-show module with phone/tablet QR connect, session security, testing module & DJ bot simulator, and automatic internal scoring (`KnockoutTrivia.exe`), a dedicated Trivia Database Creator (`TriviaDbCreator.exe`), and a unified, consolidated directory architecture across all apps (`Settings/`, `Data/`, `Banners/`, `Packs/`, `Logs/`).
@@ -7,7 +7,27 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
     
 ## Key Features
 
-### 🥊 Knockout Trivia & Cross-App Hardening (`KnockoutTrivia`, `Lyracist`, `KSRotation`)
+### 🥊 Knockout Trivia Core Fixes & Enhancements (`KnockoutTrivia`, `KnockoutWebServer.cs`, `knockout.html`)
+- **Real-Player Seeding & Disconnect Handling**: Removed hardcoded fake player initialization on launch; added a 20-second inactivity disconnect timeout in `IGameStateService.cs` so disconnected players do not block early reveal in Automatic mode, and rejoining players reconnect smoothly without duplicate roster entries.
+- **Snapshot Isolation & Socket Stability**: Replaced live collection reads with immutable thread-safe snapshots (`_snapshotLock`, `_cachedSnapshot`) for HTTP socket threads, eliminating 500 internal errors and cross-thread mutation exceptions.
+- **Super Streak Phone Screen & Asynchronous Fonts**: Added dedicated `screen-superstreak` UI to `knockout.html`, preloaded Google Fonts asynchronously with noscript fallback for offline venue Wi-Fi, added auto-rejoin recovery, and unlocked submit buttons on failure.
+- **Wheel Single-Spin & Token Deduction**: Added single-spin guards to `WheelViewModel.cs` preventing repeat spins, and applied `SuperStreakTokensRemovedPerHit` deduction to targets.
+- **Bot Simulator & Config Protection**: Guarded bot simulator loop against stale questions, switched `IConfigService` to atomic JSON writes with `.corrupt.bak` backups, and cached pack question counts by file timestamp.
+
+### 📺 TV Display Window Leak Fix & Engine Rebinding (`Shared/TriviaDisplayViewModel.cs`)
+- **Disposable Event Subscriptions**: Implemented `IDisposable` with named delegate unsubscriptions in `TriviaDisplayViewModel.cs`, eliminating 9 anonymous lambda memory leaks on TV window close/reopen.
+- **Live Host Engine Rebinding**: Added `RebindEngine(TriviaGameEngine)` allowing open TV displays to instantly re-synchronize when a host resets a trivia session in `Lyracist` or `KSRotation`.
+
+### 🎯 Interactive Pub & Bar Trivia Pro Enhancements (`Lyracist.Trivia`, `Lyracist.Trivia.Core`)
+- **Question Revisit Protection (#11)**: Tracked answered question history (`_questionAnswers`) per player in `TriviaGameEngine.cs`. Navigating back via Previous Question, Go To Question, or dropdown preserves answered state, prevents re-answering and duplicate scoring, and protects answer streaks.
+- **Standby Timer Preservation on Pause/Resume (#12)**: Tracked `_wasTimerRunningBeforePause` in `PauseGame()` and `ResumeGame()`, preventing standby reading mode timers from auto-starting when DJ banners resume.
+- **Timer Drift Guard (#37)**: Added tick processing guard (`if (IsPaused || !_tickTimer.Enabled) return;`) in `ProcessTick()`.
+- **Leaderboard Tie-Breakers & Pruning (#45)**: Deterministic player ordering by `TotalScore` -> `TotalCorrect` -> `LastResponseTimeMs` -> `Name`, plus `PruneDisconnectedPlayers()` and `ClearAllPlayers()`.
+- **Answer Leak Protection**: Plugged state payload answer leak in `TriviaWebServer.cs` by gating `isCorrect` and `pointsEarned` on `isRevealed`.
+- **Atomic File Operations & Database Cleanup**: Added atomic settings write with corrupt backup in `TriviaStorageHelper.cs`, `SearchOption.TopDirectoryOnly` and wraparound de-duplication in `TriviaPackManager.cs`, and `DeleteQuestion`/`DeleteQuestionsByIds` in `TriviaDatabaseService.cs`.
+- **TriviaDbCreator Authoring Polish**: Cleaned up old pack files on ID rename, deleted questions from SQLite `trivia.db` on deletion, used collision-free question ID generation, and prompted before overwriting existing packs on import.
+- **Safe Pregame Question Validation**: Validated question sets before stopping countdown timers or dismissing screens in `Lyracist.Trivia/ViewModels/MainViewModel.cs`.
+- **Leaderboard Auto-Advance Fix (#3)**: Round leaderboard interstitial display automatically advances to the subsequent question (`AdvanceToNextQuestion()`) upon the 8-second countdown expiration when `AutoAdvanceQuestions` is enabled, rather than restarting the previously answered question.
 - **Knockout Web Server & Companion Security/Performance**:
   - Request body buffer capped at 8 KB to prevent slow-body memory exhaustion.
   - Registration rate limiter raised from 5 to 60 registrations per 5-minute window with automated expired-IP pruning to support packed venue Wi-Fi NAT environments.

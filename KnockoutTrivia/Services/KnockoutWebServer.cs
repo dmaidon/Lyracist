@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:48:00 -> Reduce body cap to 8KB, optimize rate limiter (60/5m with pruning), cache HTML bytes, static JsonOptions, and add QuestionId validation
+// Edited on Oct 1, 2026 @ 08:42:00 -> Fix answer state leak, enforce strict session tokens, and cap player name length
 using System;
 using System.IO;
 using System.Linq;
@@ -296,6 +296,7 @@ public class KnockoutWebServer : IKnockoutWebServer
                     // playerId, or a disconnected player rejoining by name) is never blocked,
                     // mirroring exactly the lookup RegisterOrGetPlayer itself uses below.
                     string trimmedName = joinReq.Name.Trim();
+                    if (trimmedName.Length > 24) trimmedName = trimmedName[..24];
                     var snapshot = _gameStateService.GetPlayersSnapshot();
                     bool isReconnect = (!string.IsNullOrEmpty(joinReq.PlayerId) && snapshot.Any(p => string.Equals(p.Id, joinReq.PlayerId, StringComparison.OrdinalIgnoreCase)))
                         || snapshot.Any(p => string.Equals(p.Name, trimmedName, StringComparison.OrdinalIgnoreCase) && !p.IsConnected);
@@ -380,20 +381,21 @@ public class KnockoutWebServer : IKnockoutWebServer
 
             if (player != null)
             {
-                // Verify session token if provided
-                if (string.IsNullOrEmpty(sessionToken) || string.Equals(player.SessionToken, sessionToken, StringComparison.Ordinal))
+                // Verify session token strictly if player has one
+                if (!string.IsNullOrEmpty(player.SessionToken) &&
+                    (string.IsNullOrEmpty(sessionToken) || !string.Equals(player.SessionToken, sessionToken, StringComparison.Ordinal)))
+                {
+                    player = null;
+                }
+                else
                 {
                     player.IsConnected = true;
                     player.LastSeenAt = DateTime.Now;
                 }
-                else
-                {
-                    player = null;
-                }
             }
 
             var q = _gameStateService.CurrentQuestion;
-            bool isCorrect = player != null && q != null && player.HasAnsweredCurrentQuestion && player.LastAnswerIndex == q.CorrectAnswerIndex;
+            bool isCorrect = _gameStateService.IsAnswerRevealed && player != null && q != null && player.HasAnsweredCurrentQuestion && player.LastAnswerIndex == q.CorrectAnswerIndex;
 
             var statePayload = new
             {

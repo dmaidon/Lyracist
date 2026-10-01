@@ -1,5 +1,5 @@
-<!-- Edited on Oct 1, 2026 @ 07:52:00 -> Update CHANGELOG for KnockoutTrivia, Lyracist, and KSRotation cross-app trivia enhancements -->
-Last Edit: Oct 1, 2026 - KnockoutTrivia & Cross-App Trivia Hardening (Wi-Fi QR Escaping, Timer Guards, Rate Limiting, Allocations, In-Flight Guards)
+<!-- Edited on Oct 1, 2026 @ 08:58:00 -> Update CHANGELOG with complete trivia bug fixes, hardening, and performance items -->
+Last Edit: Oct 1, 2026 - Comprehensive Trivia Fixes (Knockout, Core Engine, TV Display Leaks, Re-answering, Standby Timer, SQLite Cleanup)
 
 # Changelog
 
@@ -8,6 +8,34 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.10.1.0] - 2026-10-01
 
 ### Fixed & Hardened Across Applications
+- **Knockout Trivia Core Bug Fixes & Game Flow (`ScoreboardViewModel.cs`, `IGameStateService.cs`, `KnockoutWebServer.cs`, `knockout.html`, `WheelViewModel.cs`)**:
+  - Removed startup seeding of 4 fake players in `ScoreboardViewModel.cs`.
+  - Added 20-second disconnect timeout in `IGameStateService.cs`, marking inactive players `IsConnected = false` so disconnected patrons do not block early reveal in Automatic mode, and returning patrons reconnect smoothly without duplicate entries.
+  - Implemented thread-safe immutable snapshots (`_snapshotLock`, `_cachedSnapshot`) for socket endpoints in `IGameStateService.cs`, eliminating 500 socket errors and collection modification crashes.
+  - Added double-click reveal guard and strict answering phase check (`Phase == GameStatePhase.QuestionActive && !IsAnswerRevealed`) to eliminate race conditions.
+  - Updated `ResetGame()` to set phase to `Lobby` and `IsGameActive = false`. Handled mutual elimination in `CheckGameWinner()` to cleanly transition to `GameOver` and trigger `GameWon`.
+  - Fixed `TotalQuestions` to report the configured per-game cap (`Settings.NumberOfQuestionsPerGame`) rather than raw pack question counts.
+  - Added Super Streak phone UI (`screen-superstreak`) to `knockout.html`, preloaded Google Fonts asynchronously with noscript fallback for offline venue Wi-Fi, added automatic session recovery via `tryRejoin()`, and unlocked submit buttons on failure.
+  - Added single-spin guard to `WheelViewModel.cs` and applied `SuperStreakTokensRemovedPerHit`.
+  - Added bot simulator question ID guard in `ISimulatorService.cs`.
+  - Added atomic settings writes and corrupt JSON backup in `IConfigService.cs`.
+  - Added pack question count caching by file timestamp in `TriviaDataService.cs`.
+- **TV Display Window ViewModel Leak & Reset Synchronization (`Shared/TriviaDisplayViewModel.cs`, `Lyracist`, `KSRotation`)**:
+  - Implemented `IDisposable` with named delegate unsubscriptions in `TriviaDisplayViewModel.cs`, eliminating memory leaks from 9 anonymous lambda subscriptions on window open/close.
+  - Added `RebindEngine(TriviaGameEngine)` and wired host resets in `Lyracist/ViewModels/TriviaViewModel.cs` and `KSRotation/ViewModels/MainViewModel.Trivia.cs` to rebind open display windows and reset rosters.
+  - Added debounced settings saving (500ms) and in-place player roster updates across host trivia view models.
+- **Core Trivia Game Engine & Web Server (`TriviaGameEngine.cs`, `TriviaWebServer.cs`, `trivia.html`)**:
+  - Tracked answered question history (`_questionAnswers`) per player in `TriviaGameEngine.cs` so revisiting questions (`PreviousQuestion`, `GoToQuestion`, dropdown) restores answered status, blocks re-answering, prevents double-scoring, and preserves answer streaks on reveal.
+  - Tracked pre-pause timer running state (`_wasTimerRunningBeforePause`) in `PauseGame()` and `ResumeGame()`, preventing standby/reading mode timers from auto-starting when DJ banners resume.
+  - Guarded against timer tick processing while paused or disabled in `ProcessTick()`.
+  - Implemented deterministic leaderboard tie-breaking (`TotalScore` -> `TotalCorrect` -> `LastResponseTimeMs` -> `Name`), and added `PruneDisconnectedPlayers()` and `ClearAllPlayers()`.
+  - Plugged answer leak on `/api/trivia/state` by gating `isCorrect` and `pointsEarned` on `isRevealed`.
+  - Added non-blocking Google Fonts preload with noscript fallback in `trivia.html` and reset `currentQuestionId` on Lobby/Complete states.
+  - Added atomic settings writing with corrupt file backup in `TriviaStorageHelper.cs`.
+  - Restricted pack directory scanning to `SearchOption.TopDirectoryOnly`, added atomic pack saves, and avoided adjacent duplicate questions across wraparound boundaries in `TriviaPackManager.cs`.
+  - Added `DeleteQuestion` and `DeleteQuestionsByIds` to `TriviaDatabaseService.cs`.
+  - In `TriviaDbCreator`, added cleanup of old pack files on ID rename, SQLite question cleanup on delete, safe question ID generation preventing collisions, and import overwrite confirmation.
+  - In `Lyracist.Trivia/ViewModels/MainViewModel.cs`, validated question set before stopping pregame timers and dismissing screens in `StartGameWithSelectedPack`.
 - **KnockoutTrivia Web Server & Companion Security/Performance (`KnockoutWebServer.cs`, `knockout.html`, `GameStateService.cs`, `ConnectViewModel.cs`)**:
   - Reduced `MaxRequestBodyBytes` from 2 MB down to 8 KB to eliminate slow body memory exhaustion vectors.
   - Increased `MaxRegistrationsPerWindow` from 5 to 60 per 5-minute window and added `PruneExpiredRegistrations()` to support packed venue Wi-Fi NAT environments while preventing unbounded dictionary growth.

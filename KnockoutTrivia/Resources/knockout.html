@@ -1,4 +1,4 @@
-<!-- Edited on Oct 1, 2026 @ 07:47:30 -> Add polling in-flight guard, questionId submit payload validation, and robust join error handling -->
+<!-- Edited on Oct 1, 2026 @ 08:48:00 -> Add SuperStreak screen, non-blocking font preload, auto-rejoin for stale player, submit failure retry, and question tracking -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +7,8 @@
     <title>Knockout Trivia • Live Mobile Player</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Outfit:wght@600;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Outfit:wght@600;800;900&display=swap"></noscript>
     <style>
         :root {
             --bg-dark: #07060A;
@@ -604,6 +605,18 @@
             </div>
         </div>
 
+        <!-- SCREEN 6: SUPER STREAK WHEEL -->
+        <div class="screen" id="screen-superstreak">
+            <div class="card" style="border-color: #F59E0B;">
+                <div style="font-size: 3.5rem; margin-bottom: 6px;">🎡</div>
+                <h1 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 900; color: #F59E0B;">SUPER STREAK!</h1>
+                <p style="color: #FDE68A; font-size: 1rem; margin-top: 4px; font-weight: 700;">A player unlocked the Super Streak Wheel!</p>
+                <div style="margin-top: 18px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); padding: 14px; border-radius: 12px; width: 100%;">
+                    <p style="font-size: 0.9rem; color: #FFF;">👀 <strong>Watch the Main Screen</strong> to see whose shield gets targeted!</p>
+                </div>
+            </div>
+        </div>
+
         <!-- SCREEN 6: GAME OVER / WINNER -->
         <div class="screen" id="screen-gameover">
             <div class="card" style="border-color: #F59E0B;">
@@ -629,6 +642,7 @@
         let sessionToken = localStorage.getItem('knockout_sessionToken') || '';
         let playerName = localStorage.getItem('knockout_playerName') || '';
         let currentQuestionId = '';
+        let currentQuestionNumber = -1;
         let questionStartTime = 0;
         let hasSubmitted = false;
         let selectedOption = -1;
@@ -806,8 +820,41 @@
                     if (data && data.success === false && lockedBadge) {
                         lockedBadge.innerHTML = '<span>⏱️</span> TIME EXPIRED • NOT ACCEPTED';
                     }
+                } else {
+                    throw new Error('Submit response not ok');
                 }
-            } catch(e) {}
+            } catch(e) {
+                // Network glitch: unlock options so player can tap to submit again
+                hasSubmitted = false;
+                document.querySelectorAll('.option-btn').forEach((btn, idx) => {
+                    btn.classList.remove('selected', 'disabled');
+                });
+                if (lockedBadge) {
+                    lockedBadge.innerHTML = '<span>⚠️</span> CONNECTION ERROR • TAP TO RETRY';
+                    lockedBadge.classList.add('show');
+                }
+            }
+        }
+
+        async function tryRejoin() {
+            if (!playerName) return false;
+            try {
+                const res = await fetch('/api/knockout/join', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: playerName })
+                });
+                if (!res.ok) return false;
+                const data = await res.json();
+                if (data && data.success) {
+                    playerId = data.playerId;
+                    sessionToken = data.sessionToken;
+                    localStorage.setItem('knockout_playerId', playerId);
+                    localStorage.setItem('knockout_sessionToken', sessionToken);
+                    return true;
+                }
+            } catch (err) {}
+            return false;
         }
 
         let isPolling = false;
@@ -819,6 +866,21 @@
                 const res = await fetch(`/api/knockout/state?playerId=${encodeURIComponent(playerId)}&sessionToken=${encodeURIComponent(sessionToken)}`);
                 if (!res.ok) return;
                 const state = await res.json();
+
+                if (playerId && !state.player) {
+                    // Stale playerId / host restarted / cleared
+                    const rejoined = await tryRejoin();
+                    if (!rejoined) {
+                        playerId = '';
+                        sessionToken = '';
+                        localStorage.removeItem('knockout_playerId');
+                        localStorage.removeItem('knockout_sessionToken');
+                        showScreen('screen-join');
+                        return;
+                    }
+                    return;
+                }
+
                 renderState(state);
             } catch (e) {
             } finally {
@@ -860,12 +922,14 @@
 
             // Phase State Machine
             if (state.phase === 'Lobby') {
+                currentQuestionId = '';
                 showScreen('screen-lobby');
             } else if (state.phase === 'QuestionActive') {
                 const q = state.question;
                 if (q) {
-                    if (q.id !== currentQuestionId) {
+                    if (q.id !== currentQuestionId || state.questionNumber !== currentQuestionNumber) {
                         currentQuestionId = q.id;
+                        currentQuestionNumber = state.questionNumber;
                         questionStartTime = Date.now();
                         hasSubmitted = false;
                         selectedOption = -1;
@@ -904,6 +968,7 @@
                     }
                 }
             } else if (state.phase === 'AnswerRevealed') {
+                currentQuestionId = '';
                 const q = state.question;
                 const splash = document.getElementById('result-splash');
                 const title = document.getElementById('result-title');
@@ -935,7 +1000,10 @@
                     }
                 }
                 showScreen('screen-reveal');
+            } else if (state.phase === 'SuperStreak') {
+                showScreen('screen-superstreak');
             } else if (state.phase === 'GameOver') {
+                currentQuestionId = '';
                 showScreen('screen-gameover');
                 renderFinalLeaderboard(state.leaderboard);
             }

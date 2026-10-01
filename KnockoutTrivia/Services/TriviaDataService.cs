@@ -1,4 +1,4 @@
-// Edited on Aug 30, 2026 @ 08:26:00 -> Update BaseDataDir and BasePacksDir to point to shared Data and Packs directories
+// Edited on Oct 1, 2026 @ 08:47:00 -> Add robust question validation, DB null safety, and cached pack counts
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -89,17 +89,23 @@ public class TriviaDataService : ITriviaDataService
         }
     }
 
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, (DateTime LastWrite, int Count)> _packCountCache = new(StringComparer.OrdinalIgnoreCase);
+
     private static async Task<int> GetQuestionCountFromPackAsync(string packPath)
     {
         try
         {
             if (!File.Exists(packPath)) return 0;
-            string json = await File.ReadAllTextAsync(packPath);
-            var parsed = JsonSerializer.Deserialize<List<KnockoutQuestion>>(json, new JsonSerializerOptions
+            var lastWrite = File.GetLastWriteTimeUtc(packPath);
+            if (_packCountCache.TryGetValue(packPath, out var cached) && cached.LastWrite == lastWrite)
             {
-                PropertyNameCaseInsensitive = true
-            });
-            return parsed?.Count ?? 0;
+                return cached.Count;
+            }
+
+            var questions = await LoadQuestionsFromPackFileAsync(packPath);
+            int count = questions.Count;
+            _packCountCache[packPath] = (lastWrite, count);
+            return count;
         }
         catch
         {
@@ -166,36 +172,55 @@ public class TriviaDataService : ITriviaDataService
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            var q = new KnockoutQuestion
-            {
-                Id = reader.GetString(0),
-                Category = reader.GetString(1),
-                Difficulty = (TriviaDifficulty)reader.GetInt32(2),
-                QuestionType = (TriviaQuestionType)reader.GetInt32(3),
-                Prompt = reader.GetString(4),
-                CorrectAnswerIndex = reader.GetInt32(6),
-                Explanation = reader.IsDBNull(7) ? string.Empty : reader.GetString(7),
-                AudioSnippetPath = reader.IsDBNull(8) ? null : reader.GetString(8),
-                TimeLimitSeconds = reader.IsDBNull(9) ? 15 : reader.GetInt32(9)
-            };
+            string id = reader.IsDBNull(0) ? Guid.NewGuid().ToString("N")[..8] : reader.GetString(0);
+            string category = reader.IsDBNull(1) ? "General" : reader.GetString(1);
+            var difficulty = reader.IsDBNull(2) ? TriviaDifficulty.Medium : (TriviaDifficulty)reader.GetInt32(2);
+            var questionType = reader.IsDBNull(3) ? TriviaQuestionType.MultipleChoice : (TriviaQuestionType)reader.GetInt32(3);
+            string prompt = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
+            int correctIndex = reader.IsDBNull(6) ? -1 : reader.GetInt32(6);
+            string explanation = reader.IsDBNull(7) ? string.Empty : reader.GetString(7);
+            string? audioPath = reader.IsDBNull(8) ? null : reader.GetString(8);
+            int timeLimit = reader.IsDBNull(9) ? 15 : reader.GetInt32(9);
 
-            string optionsJson = reader.GetString(5);
-            try
+            List<string> options = [];
+            if (!reader.IsDBNull(5))
             {
-                q.Options = JsonSerializer.Deserialize<List<string>>(optionsJson) ?? [];
-            }
-            catch
-            {
-                q.Options = [];
+                try
+                {
+                    options = JsonSerializer.Deserialize<List<string>>(reader.GetString(5)) ?? [];
+                }
+                catch { }
             }
 
-            questions.Add(q);
+            if (string.IsNullOrWhiteSpace(prompt) || options.Count < 2 || options.Count > 4 || correctIndex < 0 || correctIndex >= options.Count)
+            {
+                continue;
+            }
+
+            questions.Add(new KnockoutQuestion
+            {
+                Id = id,
+                Category = category,
+                Difficulty = difficulty,
+                QuestionType = questionType,
+                Prompt = prompt,
+                Options = options,
+                CorrectAnswerIndex = correctIndex,
+                Explanation = explanation,
+                AudioSnippetPath = audioPath,
+                TimeLimitSeconds = timeLimit > 0 ? timeLimit : 15
+            });
         }
 
         return questions;
     }
 
-    public async Task<List<KnockoutQuestion>> LoadQuestionsFromPackAsync(string packFilePath)
+    public Task<List<KnockoutQuestion>> LoadQuestionsFromPackAsync(string packFilePath)
+    {
+        return LoadQuestionsFromPackFileAsync(packFilePath);
+    }
+
+    private static async Task<List<KnockoutQuestion>> LoadQuestionsFromPackFileAsync(string packFilePath)
     {
         if (!File.Exists(packFilePath)) return [];
 
@@ -209,7 +234,10 @@ public class TriviaDataService : ITriviaDataService
 
             if (parsed != null)
             {
-                return parsed;
+                return parsed.Where(q =>
+                    !string.IsNullOrWhiteSpace(q.Prompt) &&
+                    q.Options != null && q.Options.Count >= 2 && q.Options.Count <= 4 &&
+                    q.CorrectAnswerIndex >= 0 && q.CorrectAnswerIndex < q.Options.Count).ToList();
             }
             return [];
         }

@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:45:30 -> Escape Wi-Fi SSID and password in QR payload via WifiHelper.EscapeWifiQrValue
+// Edited on Oct 1, 2026 @ 08:49:00 -> Implement IDisposable and RebindEngine to eliminate event subscriber leak on TV window close/reopen
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,10 +13,21 @@ using Application = System.Windows.Application;
 
 namespace Lyracist.Shared;
 
-public partial class TriviaDisplayViewModel : ObservableObject
+public partial class TriviaDisplayViewModel : ObservableObject, IDisposable
 {
-    private readonly TriviaGameEngine _engine;
+    private TriviaGameEngine _engine;
     private readonly string _brandName;
+    private bool _disposed;
+
+    private readonly EventHandler<TriviaGameState> _onStateChanged;
+    private readonly EventHandler<int> _onTimerTick;
+    private readonly EventHandler<TriviaQuestion> _onQuestionStarted;
+    private readonly EventHandler<List<int>> _onAnswersEliminated;
+    private readonly EventHandler<TriviaQuestion> _onAnswerRevealed;
+    private readonly EventHandler<List<TriviaPlayer>> _onLeaderboardUpdated;
+    private readonly EventHandler<TriviaGameResult> _onGameCompleted;
+    private readonly EventHandler<int> _onIntermissionTick;
+    private readonly EventHandler _onIntermissionCompleted;
 
     public static string Copyright => Lyracist.Shared.Globals.Copyright;
 
@@ -202,17 +213,60 @@ public partial class TriviaDisplayViewModel : ObservableObject
         UpdatePreGameCountdown(preGameSecondsRemaining);
         RefreshWelcomeBannerText();
 
-        _engine.StateChanged += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleStateChanged(e));
-        _engine.TimerTick += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleTimerTick(e));
-        _engine.QuestionStarted += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleQuestionStarted(e));
-        _engine.AnswersEliminated += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswersEliminated(e));
-        _engine.AnswerRevealed += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswerRevealed(e));
-        _engine.LeaderboardUpdated += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => RefreshTopPlayers(e));
-        _engine.GameCompleted += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleGameCompleted(e));
-        _engine.IntermissionTick += (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionTick(e));
-        _engine.IntermissionCompleted += (_, _) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionCompleted());
+        _onStateChanged = (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleStateChanged(e));
+        _onTimerTick = (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleTimerTick(e));
+        _onQuestionStarted = (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleQuestionStarted(e));
+        _onAnswersEliminated = (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswersEliminated(e));
+        _onAnswerRevealed = (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleAnswerRevealed(e));
+        _onLeaderboardUpdated = (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => RefreshTopPlayers(e));
+        _onGameCompleted = (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleGameCompleted(e));
+        _onIntermissionTick = (_, e) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionTick(e));
+        _onIntermissionCompleted = (_, _) => Application.Current?.Dispatcher.InvokeAsync(() => HandleIntermissionCompleted());
 
+        SubscribeEngine();
         SyncWithEngine();
+    }
+
+    private void SubscribeEngine()
+    {
+        _engine.StateChanged += _onStateChanged;
+        _engine.TimerTick += _onTimerTick;
+        _engine.QuestionStarted += _onQuestionStarted;
+        _engine.AnswersEliminated += _onAnswersEliminated;
+        _engine.AnswerRevealed += _onAnswerRevealed;
+        _engine.LeaderboardUpdated += _onLeaderboardUpdated;
+        _engine.GameCompleted += _onGameCompleted;
+        _engine.IntermissionTick += _onIntermissionTick;
+        _engine.IntermissionCompleted += _onIntermissionCompleted;
+    }
+
+    private void UnsubscribeEngine()
+    {
+        _engine.StateChanged -= _onStateChanged;
+        _engine.TimerTick -= _onTimerTick;
+        _engine.QuestionStarted -= _onQuestionStarted;
+        _engine.AnswersEliminated -= _onAnswersEliminated;
+        _engine.AnswerRevealed -= _onAnswerRevealed;
+        _engine.LeaderboardUpdated -= _onLeaderboardUpdated;
+        _engine.GameCompleted -= _onGameCompleted;
+        _engine.IntermissionTick -= _onIntermissionTick;
+        _engine.IntermissionCompleted -= _onIntermissionCompleted;
+    }
+
+    public void RebindEngine(TriviaGameEngine newEngine)
+    {
+        if (ReferenceEquals(_engine, newEngine)) return;
+        UnsubscribeEngine();
+        _engine = newEngine;
+        SubscribeEngine();
+        SyncWithEngine();
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        UnsubscribeEngine();
     }
 
     public static BitmapSource? GenerateQrBitmap(string payload)

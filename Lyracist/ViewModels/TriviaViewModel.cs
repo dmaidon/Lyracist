@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:51:00 -> Guard pre-game timer tick with try/catch and offload SQLite pack seeding to background task
+// Edited on Oct 1, 2026 @ 08:50:00 -> Fix TV display VM leak, rebind engine on ResetGame, debounce settings, and update roster in-place
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,6 +29,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     private TriviaDisplayWindow? _displayWindow;
     private TriviaDisplayViewModel? _displayVm;
     private readonly DispatcherTimer _preGameTimer = new();
+    private readonly System.Timers.Timer _saveSettingsDebounceTimer = new(500) { AutoReset = false };
     private bool _isIntermissionAutoRestart;
 
     [ObservableProperty]
@@ -212,10 +213,18 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         _preGameTimer.Interval = TimeSpan.FromSeconds(1);
         _preGameTimer.Tick += OnPreGameTimerTick;
 
+        _saveSettingsDebounceTimer.Elapsed += (_, _) => TriviaStorageHelper.SaveSettings(Settings);
+
         WireEngineEvents();
         LoadPacks();
         RefreshMonitors();
         StartWebServer();
+    }
+
+    private void DebounceSaveSettings()
+    {
+        _saveSettingsDebounceTimer.Stop();
+        _saveSettingsDebounceTimer.Start();
     }
 
     public void RefreshMonitors()
@@ -239,7 +248,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         if (value != null)
         {
             Settings.SelectedMonitorDevice = value.DeviceName;
-            TriviaStorageHelper.SaveSettings(Settings);
+            DebounceSaveSettings();
             PositionDisplayWindow(value.DeviceName);
         }
     }
@@ -248,14 +257,14 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     {
         Settings.AutoAdvanceQuestions = value;
         _engine.Settings.AutoAdvanceQuestions = value;
-        TriviaStorageHelper.SaveSettings(Settings);
+        DebounceSaveSettings();
     }
 
     partial void OnQuestionsPerGameChanged(int value)
     {
         Settings.QuestionsPerGame = value;
         _engine.Settings.QuestionsPerGame = value;
-        TriviaStorageHelper.SaveSettings(Settings);
+        DebounceSaveSettings();
         UpdateSelectedPacksPreview();
     }
 
@@ -320,15 +329,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
         _engine.LeaderboardUpdated += (s, playersList) =>
         {
-            Application.Current?.Dispatcher.InvokeAsync(() =>
-            {
-                Players.Clear();
-                foreach (var p in playersList)
-                {
-                    Players.Add(p);
-                }
-                ConnectedPlayerCount = Players.Count(p => p.IsConnected);
-            });
+            Application.Current?.Dispatcher.InvokeAsync(() => RefreshPlayers(playersList));
         };
 
         _engine.GamePaused += (s, reason) =>
@@ -654,6 +655,7 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
 
             _displayWindow.Closed += (s, e) =>
             {
+                _displayVm?.Dispose();
                 _displayWindow = null;
                 _displayVm = null;
                 IsDisplayOpen = false;
@@ -862,7 +864,9 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         _engine = new TriviaGameEngine(Settings);
         _displayService.SetTriviaGameEngine(_engine);
         WireEngineEvents();
+        _displayVm?.RebindEngine(_engine);
         StartWebServer();
+        Players.Clear();
         GameStateText = "Lobby";
         IsGameRunning = false;
         CurrentQuestionPrompt = "Game reset. Click 'Start Game' to begin.";
@@ -874,6 +878,34 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
         AnswerDistribution.Clear();
     }
 
+    private void RefreshPlayers(List<TriviaPlayer> playerList)
+    {
+        var targetIds = new HashSet<string>(playerList.Select(p => p.PlayerId));
+
+        for (int i = Players.Count - 1; i >= 0; i--)
+        {
+            if (!targetIds.Contains(Players[i].PlayerId))
+            {
+                Players.RemoveAt(i);
+            }
+        }
+
+        for (int i = 0; i < playerList.Count; i++)
+        {
+            var p = playerList[i];
+            int currentIdx = Players.IndexOf(p);
+            if (currentIdx < 0)
+            {
+                Players.Insert(i, p);
+            }
+            else if (currentIdx != i)
+            {
+                Players.Move(currentIdx, i);
+            }
+        }
+        ConnectedPlayerCount = Players.Count(p => p.IsConnected);
+    }
+
     [RelayCommand]
     private void RefreshPacks()
     {
@@ -883,7 +915,9 @@ public partial class TriviaViewModel : BaseViewModel, IDisposable
     public void Dispose()
     {
         _preGameTimer.Stop();
+        _saveSettingsDebounceTimer.Dispose();
         CloseTriviaDisplay();
+        _displayVm?.Dispose();
         _webServer?.Dispose();
         _engine.Dispose();
         _dbService.Dispose();

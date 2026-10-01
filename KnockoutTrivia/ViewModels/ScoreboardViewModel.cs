@@ -1,4 +1,4 @@
-// Created on Aug 27, 2026 @ 14:36:30 -> ScoreboardViewModel for horizontal player status bars, tokens, and streak meters
+// Edited on Oct 1, 2026 @ 08:38:00 -> Remove fake player seeding on launch to eliminate ghost players
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -24,15 +24,6 @@ public partial class ScoreboardViewModel : ViewModelBase
     {
         _gameStateService = gameStateService;
         _tokenService = tokenService;
-
-        // Seed with standard sample bar players if empty
-        if (Players.Count == 0)
-        {
-            _gameStateService.AddPlayer("Sarah M.");
-            _gameStateService.AddPlayer("Big Dave");
-            _gameStateService.AddPlayer("Trivia Titans");
-            _gameStateService.AddPlayer("The Quizards");
-        }
     }
 
     [RelayCommand]

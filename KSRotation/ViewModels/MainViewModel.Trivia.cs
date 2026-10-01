@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:51:30 -> Guard OnTriviaPreGameTimerTick with try/catch exception protection
+// Edited on Oct 1, 2026 @ 08:52:00 -> Fix TV display VM leak, rebind engine on reset, debounce settings save, and update roster in-place
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,6 +18,7 @@ namespace KSRotation.ViewModels
         private TriviaWebServer? _triviaWebServer;
         private DispatcherTimer? _triviaSettingsStatusTimer;
         private readonly DispatcherTimer _triviaPreGameTimer = new();
+        private readonly System.Timers.Timer _saveTriviaSettingsDebounceTimer = new(500) { AutoReset = false };
 #if !MAUI
         private KSRotation.Windows.TriviaDisplayWindow? _triviaDisplayWindow;
         private TriviaDisplayViewModel? _triviaDisplayVm;
@@ -383,7 +384,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.WifiSsid = value;
             if (_triviaEngine != null) _triviaEngine.Settings.WifiSsid = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
         }
 
         [ObservableProperty]
@@ -393,7 +394,7 @@ namespace KSRotation.ViewModels
         {
             TriviaSettings.WifiPassword = value;
             if (_triviaEngine != null) _triviaEngine.Settings.WifiPassword = value;
-            TriviaStorageHelper.SaveSettings(TriviaSettings);
+            DebouncedSaveTriviaSettings();
             if (!string.IsNullOrWhiteSpace(TriviaWifiSsid) && !string.IsNullOrWhiteSpace(value))
             {
                 WifiPasswordStore.SetPasswordForSsid(TriviaWifiSsid, value);
@@ -422,6 +423,8 @@ namespace KSRotation.ViewModels
                 LoadTriviaPacks();
                 StartTriviaWebServer();
 
+                _saveTriviaSettingsDebounceTimer.Elapsed += (_, _) => TriviaStorageHelper.SaveSettings(TriviaSettings);
+
                 _triviaPreGameTimer.Interval = TimeSpan.FromSeconds(1);
                 _triviaPreGameTimer.Tick += OnTriviaPreGameTimerTick;
             }
@@ -429,6 +432,12 @@ namespace KSRotation.ViewModels
             {
                 KSRotation.Services.LoggerService.LogError("Error initializing trivia", ex);
             }
+        }
+
+        private void DebouncedSaveTriviaSettings()
+        {
+            _saveTriviaSettingsDebounceTimer.Stop();
+            _saveTriviaSettingsDebounceTimer.Start();
         }
 
         private void WireTriviaEngineEvents()
@@ -491,15 +500,7 @@ namespace KSRotation.ViewModels
 
             _triviaEngine.LeaderboardUpdated += (_, playersList) =>
             {
-                System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
-                {
-                    TriviaPlayers.Clear();
-                    foreach (var p in playersList)
-                    {
-                        TriviaPlayers.Add(p);
-                    }
-                    TriviaConnectedPlayerCount = TriviaPlayers.Count(p => p.IsConnected);
-                });
+                System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => RefreshTriviaPlayers(playersList));
             };
 
             _triviaEngine.GamePaused += (_, reason) =>
@@ -880,6 +881,7 @@ namespace KSRotation.ViewModels
 
                 _triviaDisplayWindow.Closed += (s, e) =>
                 {
+                    _triviaDisplayVm?.Dispose();
                     _triviaDisplayWindow = null;
                     _triviaDisplayVm = null;
                     IsTriviaDisplayOpen = false;
@@ -1110,7 +1112,11 @@ namespace KSRotation.ViewModels
             _triviaEngine.Dispose();
             _triviaEngine = new TriviaGameEngine(TriviaSettings);
             WireTriviaEngineEvents();
+#if !MAUI
+            _triviaDisplayVm?.RebindEngine(_triviaEngine);
+#endif
             StartTriviaWebServer();
+            TriviaPlayers.Clear();
             TriviaGameStateText = "Lobby";
             IsTriviaGameRunning = false;
             TriviaCurrentQuestionPrompt = "Game reset. Click 'Start Game' to begin.";
@@ -1119,6 +1125,34 @@ namespace KSRotation.ViewModels
             TriviaCurrentQuestionNumber = 1;
             TriviaAvailableQuestionNumbers.Clear();
             TriviaAnswerDistribution.Clear();
+        }
+
+        private void RefreshTriviaPlayers(List<TriviaPlayer> playerList)
+        {
+            var targetIds = new HashSet<string>(playerList.Select(p => p.PlayerId));
+
+            for (int i = TriviaPlayers.Count - 1; i >= 0; i--)
+            {
+                if (!targetIds.Contains(TriviaPlayers[i].PlayerId))
+                {
+                    TriviaPlayers.RemoveAt(i);
+                }
+            }
+
+            for (int i = 0; i < playerList.Count; i++)
+            {
+                var p = playerList[i];
+                int currentIdx = TriviaPlayers.IndexOf(p);
+                if (currentIdx < 0)
+                {
+                    TriviaPlayers.Insert(i, p);
+                }
+                else if (currentIdx != i)
+                {
+                    TriviaPlayers.Move(currentIdx, i);
+                }
+            }
+            TriviaConnectedPlayerCount = TriviaPlayers.Count(p => p.IsConnected);
         }
 
         [RelayCommand]

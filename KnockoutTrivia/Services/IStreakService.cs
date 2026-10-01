@@ -1,4 +1,4 @@
-// Edited on Aug 29, 2026 @ 10:33:00 -> Fixed Super Streak threshold milestone check without resetting StreakCount on token awards
+// Edited on Oct 1, 2026 @ 08:39:00 -> Wire SuperStreakEnabled setting to gate super streak threshold triggers
 using System;
 using KnockoutTrivia.Models;
 
@@ -9,7 +9,7 @@ public interface IStreakService
     event EventHandler<KnockoutPlayer>? TokenRewardEarned;
     event EventHandler<KnockoutPlayer>? SuperStreakReached;
 
-    void RecordAnswer(KnockoutPlayer player, bool isCorrect, int streakRequirement = 5, int superStreakThreshold = 20, int maxTokens = 3);
+    void RecordAnswer(KnockoutPlayer player, bool isCorrect, int streakRequirement = 5, int superStreakThreshold = 20, int maxTokens = 3, bool superStreakEnabled = true);
     void ResetStreak(KnockoutPlayer player);
 }
 
@@ -25,14 +25,14 @@ public class StreakService : IStreakService
         _tokenService = tokenService;
     }
 
-    public void RecordAnswer(KnockoutPlayer player, bool isCorrect, int streakRequirement = 5, int superStreakThreshold = 20, int maxTokens = 3)
+    public void RecordAnswer(KnockoutPlayer player, bool isCorrect, int streakRequirement = 5, int superStreakThreshold = 20, int maxTokens = 3, bool superStreakEnabled = true)
     {
         if (isCorrect)
         {
             player.StreakCount++;
 
             // Check Super Streak milestone (e.g. 20 consecutive)
-            if (player.StreakCount == superStreakThreshold)
+            if (superStreakEnabled && player.StreakCount == superStreakThreshold)
             {
                 SuperStreakReached?.Invoke(this, player);
             }

@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1146 conditional access
+// Edited on Oct 1, 2026 @ 08:52:00 -> Use TopDirectoryOnly for pack loading, atomic SavePack write, and prevent adjacent duplicates on wraparound
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,7 +40,7 @@ public static class TriviaPackManager
             return packs;
         }
 
-        foreach (string file in Directory.GetFiles(dir, "*.json", SearchOption.AllDirectories))
+        foreach (string file in Directory.GetFiles(dir, "*.json", SearchOption.TopDirectoryOnly))
         {
             try
             {
@@ -77,7 +77,9 @@ public static class TriviaPackManager
         }
 
         string json = JsonSerializer.Serialize(pack, JsonOptions);
-        File.WriteAllText(filePath, json);
+        string tempPath = filePath + ".tmp";
+        File.WriteAllText(tempPath, json);
+        File.Move(tempPath, filePath, overwrite: true);
     }
 
     /// <summary>
@@ -120,7 +122,12 @@ public static class TriviaPackManager
         var drawn = new List<TriviaQuestion>();
         while (drawn.Count < totalNeeded)
         {
-            drawn.AddRange(pool.OrderBy(_ => Random.Shared.Next()));
+            var nextBatch = pool.OrderBy(_ => Random.Shared.Next()).ToList();
+            if (drawn.Count > 0 && nextBatch.Count > 1 && nextBatch[0].Id == drawn[^1].Id)
+            {
+                (nextBatch[0], nextBatch[1]) = (nextBatch[1], nextBatch[0]);
+            }
+            drawn.AddRange(nextBatch);
         }
 
         for (int i = 0; i < gameCount; i++)

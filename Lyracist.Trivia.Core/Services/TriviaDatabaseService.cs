@@ -1,4 +1,4 @@
-// Created on Aug 17, 2026 @ 13:02:00 -> SQLite TriviaDatabaseService for persistence
+// Edited on Oct 1, 2026 @ 08:53:00 -> Add DeleteQuestion and DeleteQuestionsByIds methods for database cleanup
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -248,6 +248,46 @@ public class TriviaDatabaseService : IDisposable
             }
 
             transaction.Commit();
+        }
+    }
+
+    public bool DeleteQuestion(string id)
+    {
+        lock (_lock)
+        {
+            using var conn = new SqliteConnection(_connectionString);
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "DELETE FROM Questions WHERE Id = $id;";
+            cmd.Parameters.AddWithValue("$id", id);
+            return cmd.ExecuteNonQuery() > 0;
+        }
+    }
+
+    public int DeleteQuestionsByIds(IEnumerable<string> ids)
+    {
+        var idList = ids.ToList();
+        if (idList.Count == 0) return 0;
+
+        lock (_lock)
+        {
+            using var conn = new SqliteConnection(_connectionString);
+            conn.Open();
+            using var transaction = conn.BeginTransaction();
+            using var cmd = conn.CreateCommand();
+            cmd.Transaction = transaction;
+            cmd.CommandText = "DELETE FROM Questions WHERE Id = $id;";
+            var pId = cmd.Parameters.Add("$id", SqliteType.Text);
+            cmd.Prepare();
+
+            int deleted = 0;
+            foreach (var id in idList)
+            {
+                pId.Value = id;
+                deleted += cmd.ExecuteNonQuery();
+            }
+            transaction.Commit();
+            return deleted;
         }
     }
 

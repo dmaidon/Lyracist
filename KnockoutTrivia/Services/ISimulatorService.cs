@@ -1,4 +1,4 @@
-// Created on Aug 29, 2026 @ 10:44:30 -> ISimulatorService and SimulatorService for in-app DJ bot simulation, stress testing, and diagnostics
+// Edited on Oct 1, 2026 @ 08:45:00 -> Guard bot simulation loop against carrying over into subsequent questions
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -126,9 +126,10 @@ public class SimulatorService : ISimulatorService, IDisposable
         // Randomize bot response sequence
         var randomizedBots = activeBots.OrderBy(_ => _random.Next()).ToList();
 
+        string? targetQuestionId = q.Id;
         foreach (var bot in randomizedBots)
         {
-            if (_gameStateService.Phase != GameStatePhase.QuestionActive || _gameStateService.IsAnswerRevealed)
+            if (_gameStateService.Phase != GameStatePhase.QuestionActive || _gameStateService.IsAnswerRevealed || _gameStateService.CurrentQuestion?.Id != targetQuestionId)
             {
                 break;
             }
@@ -136,7 +137,7 @@ public class SimulatorService : ISimulatorService, IDisposable
             int responseDelayMs = _random.Next(400, 2800);
             await Task.Delay(responseDelayMs);
 
-            if (_gameStateService.Phase != GameStatePhase.QuestionActive || _gameStateService.IsAnswerRevealed)
+            if (_gameStateService.Phase != GameStatePhase.QuestionActive || _gameStateService.IsAnswerRevealed || _gameStateService.CurrentQuestion?.Id != targetQuestionId)
             {
                 break;
             }

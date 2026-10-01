@@ -1,4 +1,4 @@
-// Edited on Aug 28, 2026 @ 09:29:00 -> Synchronize real-time timer ticks and automatic answer reveal in QuestionViewModel
+// Edited on Oct 1, 2026 @ 08:44:00 -> Bind TotalQuestions to game cap instead of full pack count
 using System.Collections.ObjectModel;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -94,7 +94,7 @@ public partial class QuestionViewModel : ViewModelBase
             SecondsRemaining = _gameStateService.SecondsRemaining > 0 ? _gameStateService.SecondsRemaining : q.TimeLimitSeconds;
         }
         CurrentQuestionNumber = _gameStateService.CurrentQuestionIndex + 1;
-        TotalQuestions = _gameStateService.TotalQuestions > 0 ? _gameStateService.TotalQuestions : 20;
+        TotalQuestions = _gameStateService.TotalQuestions;
         IsAnswerRevealed = _gameStateService.IsAnswerRevealed;
     }
 

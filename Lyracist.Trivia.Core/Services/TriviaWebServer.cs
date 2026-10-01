@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:34:00 -> Performance: reuse static JsonSerializerOptions, pre-encode cached HTML bytes, cap request body at 8KB
+// Edited on Oct 1, 2026 @ 08:49:00 -> Plug answer leak during question countdown by gating isCorrect and pointsEarned on isRevealed
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -424,7 +424,8 @@ public class TriviaWebServer : IDisposable
             // the tick timer updates it on another thread while this request is being built.
             var snap = _engine.GetSnapshot();
             var q = snap.Question;
-            bool isCorrect = player != null && q != null && player.LastAnswerIndex == q.CorrectAnswerIndex;
+            bool isRevealed = snap.State == TriviaGameState.RevealAnswer || snap.State == TriviaGameState.RoundLeaderboard || snap.State == TriviaGameState.GameComplete;
+            bool isCorrect = isRevealed && player != null && q != null && player.LastAnswerIndex == q.CorrectAnswerIndex;
             var gameResult = _engine.GetGameResult(allPlayers);
 
             int visibleCount = Math.Max(1, (q?.Options.Count ?? 4) - snap.EliminatedIndices.Length);
@@ -453,7 +454,7 @@ public class TriviaWebServer : IDisposable
                 correctIndex = (snap.State == TriviaGameState.RevealAnswer || snap.State == TriviaGameState.RoundLeaderboard) ? q?.CorrectAnswerIndex : -1,
                 explanation = (snap.State == TriviaGameState.RevealAnswer) ? q?.Explanation : "",
                 isCorrect = isCorrect,
-                pointsEarned = player?.LastPointsEarned ?? 0,
+                pointsEarned = isRevealed ? (player?.LastPointsEarned ?? 0) : 0,
                 playerScore = player?.TotalScore ?? 0,
                 playerStreak = player?.CurrentStreak ?? 0,
                 hasAnswered = player?.HasAnsweredCurrentQuestion ?? false,

@@ -1,4 +1,4 @@
-// Created on Aug 27, 2026 @ 14:36:40 -> WheelViewModel for Super Streak Scaryoke-style target wheel interaction
+// Edited on Oct 1, 2026 @ 08:43:00 -> Prevent re-spinning wheel and apply SuperStreakTokensRemovedPerHit setting
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -28,6 +28,12 @@ public partial class WheelViewModel : ViewModelBase
     private bool _isSpinning;
 
     [ObservableProperty]
+    private bool _hasSpun;
+
+    [ObservableProperty]
+    private bool _canSpin = true;
+
+    [ObservableProperty]
     private string _resultText = "READY TO SPIN";
 
     [ObservableProperty]
@@ -51,6 +57,8 @@ public partial class WheelViewModel : ViewModelBase
     {
         SuperStreakPlayer = player;
         StatusHeader = $"⚡ {player.Name.ToUpperInvariant()} HIT SUPER STREAK! ⚡";
+        HasSpun = false;
+        CanSpin = true;
         RefreshSegments();
     }
 
@@ -72,9 +80,11 @@ public partial class WheelViewModel : ViewModelBase
     [RelayCommand]
     public async Task SpinWheelAsync()
     {
-        if (IsSpinning || Segments.Count == 0) return;
+        if (IsSpinning || HasSpun || Segments.Count == 0) return;
 
         IsSpinning = true;
+        HasSpun = true;
+        CanSpin = false;
         ResultText = "SPINNING...";
 
         var target = _wheelService.SelectRandomTarget(Segments);
@@ -103,8 +113,17 @@ public partial class WheelViewModel : ViewModelBase
 
         if (target?.Player != null)
         {
-            ResultText = $"TARGET HIT: {target.Player.Name}! Shield Removed!";
-            _tokenService.DeductToken(target.Player);
+            int tokensToRemove = _gameStateService.Settings.SuperStreakTokensRemovedPerHit > 0
+                ? _gameStateService.Settings.SuperStreakTokensRemovedPerHit
+                : 1;
+
+            for (int i = 0; i < tokensToRemove; i++)
+            {
+                _tokenService.DeductToken(target.Player);
+            }
+
+            string tokenStr = tokensToRemove > 1 ? $"{tokensToRemove} Shields" : "Shield";
+            ResultText = $"TARGET HIT: {target.Player.Name}! {tokenStr} Removed!";
         }
         else
         {

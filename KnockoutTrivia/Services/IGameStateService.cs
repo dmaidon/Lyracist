@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:50:00 -> Add try/catch exception guards to timer callbacks to protect unattended shows
+// Edited on Oct 1, 2026 @ 08:40:00 -> Fix items 2-5, 8: disconnect detection, double-reveal guard, phase guards, mutual knockout winner check, per-game question cap
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -43,7 +43,7 @@ public interface IGameStateService
     event EventHandler<int>? TimerTicked;
     event EventHandler<KnockoutPlayer>? SuperStreakTriggered;
     event EventHandler<KnockoutPlayer>? PlayerEliminated;
-    event EventHandler<KnockoutPlayer>? GameWon;
+    event EventHandler<KnockoutPlayer?>? GameWon;
     event EventHandler? AnswersEvaluated;
 
     void InitializeGame(KnockoutSettings settings);
@@ -87,17 +87,40 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
     private System.Threading.Timer? _autoAdvanceTimer;
     private bool _disposed;
 
+    private readonly object _snapshotLock = new();
+    private List<KnockoutPlayer> _cachedSnapshot = [];
+    private static readonly TimeSpan PlayerDisconnectTimeout = TimeSpan.FromSeconds(20);
+    public const int MaxPlayerNameLength = 24;
+
     public ObservableCollection<KnockoutPlayer> Players { get; } = [];
 
-    // Players is mutated on the UI thread (via RunOnUI) but is also polled by the web server's
-    // socket-handler threads and the bot simulator's background tasks. Enumerating an
-    // ObservableCollection while another thread mutates it is undefined behavior, so any
-    // non-UI-thread reader must go through this snapshot rather than touching Players directly.
+    // Thread-safe snapshot cached and updated on player changes so polling socket threads never
+    // cause collection modification errors or block the UI thread on high-frequency polls.
     public List<KnockoutPlayer> GetPlayersSnapshot()
     {
-        List<KnockoutPlayer> snapshot = [];
-        RunOnUI(() => snapshot = [.. Players]);
+        var cutoff = DateTime.Now - PlayerDisconnectTimeout;
+        List<KnockoutPlayer> snapshot;
+        lock (_snapshotLock)
+        {
+            snapshot = [.. _cachedSnapshot];
+        }
+
+        foreach (var p in snapshot)
+        {
+            if (p.IsConnected && p.LastSeenAt < cutoff)
+            {
+                p.IsConnected = false;
+            }
+        }
         return snapshot;
+    }
+
+    private void UpdateSnapshotInternal()
+    {
+        lock (_snapshotLock)
+        {
+            _cachedSnapshot = [.. Players];
+        }
     }
 
     public KnockoutQuestion? CurrentQuestion
@@ -112,7 +135,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         private set => SetProperty(ref _currentQuestionIndex, value);
     }
 
-    public int TotalQuestions => _questions.Count;
+    public int TotalQuestions => Settings.UnlimitedQuestions ? _questions.Count : Math.Min(_questions.Count, Settings.NumberOfQuestionsPerGame > 0 ? Settings.NumberOfQuestionsPerGame : _questions.Count);
 
     public bool IsAnswerRevealed
     {
@@ -156,8 +179,8 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         private set => SetProperty(ref _isTimerRunning, value);
     }
 
-    public int AnsweredCount => Players.Count(p => !p.IsEliminated && p.HasAnsweredCurrentQuestion);
-    public int ActivePlayerCount => Players.Count(p => !p.IsEliminated);
+    public int AnsweredCount => Players.Count(p => !p.IsEliminated && p.IsConnected && p.HasAnsweredCurrentQuestion);
+    public int ActivePlayerCount => Players.Count(p => !p.IsEliminated && p.IsConnected);
 
     public KnockoutSettings Settings { get; private set; } = new();
 
@@ -166,7 +189,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
     public event EventHandler<int>? TimerTicked;
     public event EventHandler<KnockoutPlayer>? SuperStreakTriggered;
     public event EventHandler<KnockoutPlayer>? PlayerEliminated;
-    public event EventHandler<KnockoutPlayer>? GameWon;
+    public event EventHandler<KnockoutPlayer?>? GameWon;
     public event EventHandler? AnswersEvaluated;
 
     public GameStateService(
@@ -177,6 +200,8 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         _triviaDataService = triviaDataService;
         _tokenService = tokenService;
         _streakService = streakService;
+
+        Players.CollectionChanged += (_, _) => UpdateSnapshotInternal();
 
         _streakService.SuperStreakReached += (s, p) =>
         {
@@ -242,6 +267,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
     public KnockoutPlayer RegisterOrGetPlayer(string name, string? playerId = null)
     {
         string trimmed = name.Trim();
+        if (trimmed.Length > MaxPlayerNameLength) trimmed = trimmed[..MaxPlayerNameLength];
         KnockoutPlayer? result = null;
 
         RunOnUI(() =>
@@ -263,6 +289,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                 existing.IsConnected = true;
                 existing.LastSeenAt = DateTime.Now;
                 result = existing;
+                UpdateSnapshotInternal();
                 return;
             }
 
@@ -276,6 +303,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
 
             Players.Add(newPlayer);
             result = newPlayer;
+            UpdateSnapshotInternal();
         });
 
         return result!;
@@ -294,6 +322,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
             if (p != null)
             {
                 Players.Remove(p);
+                UpdateSnapshotInternal();
             }
         });
     }
@@ -304,7 +333,11 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         // action, Players only ever grows (RegisterOrGetPlayer reuses disconnected records by
         // name but never deletes them), so a venue that leaves the app running across multiple
         // trivia nights would otherwise accumulate every past player forever.
-        RunOnUI(() => Players.Clear());
+        RunOnUI(() =>
+        {
+            Players.Clear();
+            UpdateSnapshotInternal();
+        });
     }
 
     public bool SubmitPlayerAnswer(string playerId, int answerIndex, int responseTimeMs, string? sessionToken = null)
@@ -315,13 +348,14 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
             var player = Players.FirstOrDefault(p => string.Equals(p.Id, playerId, StringComparison.OrdinalIgnoreCase));
             if (player == null || player.IsEliminated || player.HasAnsweredCurrentQuestion) return;
 
-            // If session token is provided, verify match
-            if (!string.IsNullOrEmpty(sessionToken) && !string.Equals(player.SessionToken, sessionToken, StringComparison.Ordinal))
+            // Session token must match if player has one
+            if (!string.IsNullOrEmpty(player.SessionToken) &&
+                (string.IsNullOrEmpty(sessionToken) || !string.Equals(player.SessionToken, sessionToken, StringComparison.Ordinal)))
             {
                 return;
             }
 
-            if (Phase != GameStatePhase.QuestionActive && (!IsGameActive || IsAnswerRevealed))
+            if (!IsGameActive || Phase != GameStatePhase.QuestionActive || IsAnswerRevealed)
             {
                 return;
             }
@@ -391,12 +425,6 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         int seconds = customSeconds ?? CurrentQuestion?.TimeLimitSeconds ?? Settings.QuestionTimerSeconds;
         if (seconds <= 0) seconds = 15;
 
-        TotalCountdownSeconds = seconds;
-        SecondsRemaining = seconds;
-        IsTimerRunning = true;
-        IsAnswerRevealed = false;
-        Phase = GameStatePhase.QuestionActive;
-
         RunOnUI(() =>
         {
             foreach (var p in Players)
@@ -407,6 +435,12 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                 p.LastPointsEarned = 0;
             }
         });
+
+        TotalCountdownSeconds = seconds;
+        SecondsRemaining = seconds;
+        IsTimerRunning = true;
+        IsAnswerRevealed = false;
+        Phase = GameStatePhase.QuestionActive;
 
         OnPropertyChanged(nameof(AnsweredCount));
 
@@ -481,6 +515,8 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         else
         {
             StopTimer();
+            IsAnswerRevealed = true;
+            IsGameActive = false;
             Phase = GameStatePhase.GameOver;
             CheckGameWinner();
         }
@@ -488,6 +524,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
 
     public void RevealAnswer()
     {
+        if (IsAnswerRevealed) return;
         StopTimer();
         IsAnswerRevealed = true;
         Phase = GameStatePhase.AnswerRevealed;
@@ -522,7 +559,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         {
             foreach (var player in Players)
             {
-                if (player.IsEliminated) continue;
+                if (player.IsEliminated || !player.IsConnected) continue;
 
                 bool isCorrect = player.HasAnsweredCurrentQuestion && player.LastAnswerIndex == correctIndex;
 
@@ -531,7 +568,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                     player.Score += Settings.PointsPerCorrectAnswer;
                     player.LastPointsEarned = Settings.PointsPerCorrectAnswer;
                     player.WasShieldProtected = false;
-                    _streakService.RecordAnswer(player, true, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens);
+                    _streakService.RecordAnswer(player, true, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens, Settings.SuperStreakEnabled);
                 }
                 else
                 {
@@ -550,7 +587,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                             PlayerEliminated?.Invoke(this, player);
                         }
                     }
-                    _streakService.RecordAnswer(player, false, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens);
+                    _streakService.RecordAnswer(player, false, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens, Settings.SuperStreakEnabled);
                 }
             }
         });
@@ -571,7 +608,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                 player.Score += Settings.PointsPerCorrectAnswer;
                 player.LastPointsEarned = Settings.PointsPerCorrectAnswer;
                 player.WasShieldProtected = false;
-                _streakService.RecordAnswer(player, true, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens);
+                _streakService.RecordAnswer(player, true, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens, Settings.SuperStreakEnabled);
             }
             else
             {
@@ -590,7 +627,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                         PlayerEliminated?.Invoke(this, player);
                     }
                 }
-                _streakService.RecordAnswer(player, false, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens);
+                _streakService.RecordAnswer(player, false, Settings.StreakRequirement, Settings.SuperStreakThreshold, Settings.MaxTokens, Settings.SuperStreakEnabled);
             }
         });
 
@@ -603,7 +640,14 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         if (activePlayers.Count == 1 && Players.Count > 1)
         {
             Phase = GameStatePhase.GameOver;
+            IsGameActive = false;
             GameWon?.Invoke(this, activePlayers[0]);
+        }
+        else if (activePlayers.Count == 0 && Players.Count > 0)
+        {
+            Phase = GameStatePhase.GameOver;
+            IsGameActive = false;
+            GameWon?.Invoke(this, null);
         }
     }
 
@@ -616,7 +660,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
         ShuffleQuestions();
         CurrentQuestionIndex = 0;
         IsAnswerRevealed = false;
-        IsGameActive = true;
+        IsGameActive = false;
         Phase = GameStatePhase.Lobby;
 
         RunOnUI(() =>
@@ -632,6 +676,7 @@ public class GameStateService : ObservableObject, IGameStateService, IDisposable
                 p.LastPointsEarned = 0;
                 p.WasShieldProtected = false;
             }
+            UpdateSnapshotInternal();
         });
 
         if (_questions.Count > 0)

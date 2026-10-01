@@ -1,4 +1,4 @@
-// Edited on Aug 30, 2026 @ 08:26:00 -> Update help topic path references to consolidated Packs, Data, Banners, and Settings directories
+// Edited on Oct 1, 2026 @ 08:54:00 -> Fix pack rename orphan files, delete questions from SQLite on delete, safe question ID generation, and import overwrite prompt
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -383,7 +383,18 @@ public partial class MainViewModel : ObservableObject
         try
         {
             string json = JsonSerializer.Serialize(SelectedPack, JsonOptions);
-            File.WriteAllText(filePath, json);
+            string tempPath = filePath + ".tmp";
+            File.WriteAllText(tempPath, json);
+            File.Move(tempPath, filePath, overwrite: true);
+
+            // If the pack file was renamed, clean up the previous file
+            if (!string.IsNullOrEmpty(SelectedPackFilePath) &&
+                File.Exists(SelectedPackFilePath) &&
+                !string.Equals(SelectedPackFilePath, filePath, StringComparison.OrdinalIgnoreCase))
+            {
+                try { File.Delete(SelectedPackFilePath); } catch { }
+            }
+
             SelectedPackFilePath = filePath;
 
             // Sync to database
@@ -413,7 +424,19 @@ public partial class MainViewModel : ObservableObject
                 : PackTitle.Substring(0, Math.Min(3, PackTitle.Length)).ToUpperInvariant();
         }
 
-        int nextNum = PackQuestions.Count + 1;
+        int maxNum = 0;
+        foreach (var q in PackQuestions)
+        {
+            if (q.Id.StartsWith(prefix + "-", StringComparison.OrdinalIgnoreCase))
+            {
+                var suffix = q.Id[(prefix.Length + 1)..];
+                if (int.TryParse(suffix, out int parsed) && parsed > maxNum)
+                {
+                    maxNum = parsed;
+                }
+            }
+        }
+        int nextNum = Math.Max(PackQuestions.Count + 1, maxNum + 1);
         EditorId = $"{prefix}-{nextNum:D3}";
         EditorPrompt = string.Empty;
         EditorOptionA = string.Empty;
@@ -519,6 +542,15 @@ public partial class MainViewModel : ObservableObject
 
         string id = SelectedQuestion.Id;
         PackQuestions.Remove(SelectedQuestion);
+
+        try
+        {
+            string dbPath = TriviaStorageHelper.GetDatabasePath();
+            using var db = new TriviaDatabaseService(dbPath);
+            db.DeleteQuestion(id);
+        }
+        catch { }
+
         FilterQuestions();
         SelectedQuestion = PackQuestions.FirstOrDefault();
         RecalculateDistribution();
@@ -677,9 +709,27 @@ public partial class MainViewModel : ObservableObject
                 var pack = JsonSerializer.Deserialize<TriviaQuestionPack>(json, JsonOptions);
                 if (pack != null && pack.Questions.Count > 0)
                 {
+                    // Validate questions in imported pack
+                    var validQuestions = pack.Questions.Where(q => !string.IsNullOrWhiteSpace(q.Prompt) && q.Options != null && q.Options.Count >= 4).ToList();
+                    if (validQuestions.Count == 0)
+                    {
+                        SetStatus("Pack contains no valid 4-option questions.", isError: true);
+                        return;
+                    }
+                    pack.Questions = validQuestions;
+
                     string packsDir = TriviaStorageHelper.GetPacksDirectory();
                     string destFile = Path.Combine(packsDir, Path.GetFileName(ofd.FileName));
-                    File.WriteAllText(destFile, json);
+
+                    if (File.Exists(destFile))
+                    {
+                        var confirm = MessageBox.Show($"A pack named '{Path.GetFileName(destFile)}' already exists. Overwrite it?", "Confirm Overwrite", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                        if (confirm != MessageBoxResult.Yes) return;
+                    }
+
+                    string tempPath = destFile + ".tmp";
+                    File.WriteAllText(tempPath, json);
+                    File.Move(tempPath, destFile, overwrite: true);
 
                     LoadPacks();
                     SelectedPack = Packs.FirstOrDefault(p => p.Title == pack.Title || p.PackId == pack.PackId);
@@ -738,6 +788,17 @@ public partial class MainViewModel : ObservableObject
             {
                 File.Delete(SelectedPackFilePath);
             }
+
+            try
+            {
+                string dbPath = TriviaStorageHelper.GetDatabasePath();
+                using var db = new TriviaDatabaseService(dbPath);
+                if (SelectedPack.Questions.Count > 0)
+                {
+                    db.DeleteQuestionsByIds(SelectedPack.Questions.Select(q => q.Id));
+                }
+            }
+            catch { }
 
             Packs.Remove(SelectedPack);
             FilterPacks();

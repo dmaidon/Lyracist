@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:36:00 -> Performance: debounce settings save and Wi-Fi QR generation, sync players in place, run SQLite pack seeding in background
+// Edited on Oct 1, 2026 @ 08:55:00 -> Validate question set before stopping pregame timer / switching screens in StartGameWithSelectedPack
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -816,6 +816,35 @@ public partial class MainViewModel : ObservableObject, IDisposable
         var checkedPacks = GetCheckedPacks();
         if (checkedPacks.Count == 0) return;
 
+        List<TriviaQuestion> gameQuestions;
+        if (TotalGamesToPlay > 1)
+        {
+            if (_preloadedGameQuestionSets == null || _preloadedGameQuestionSets.Count != TotalGamesToPlay || _preloadedGameIndex >= _preloadedGameQuestionSets.Count)
+            {
+                _preloadedGameQuestionSets = TriviaPackManager.BuildMultiGameQuestionSets(checkedPacks, QuestionsPerGame, TotalGamesToPlay);
+                _preloadedGameIndex = 0;
+            }
+
+            if (_preloadedGameQuestionSets.Count == 0) return;
+            gameQuestions = _preloadedGameQuestionSets[_preloadedGameIndex];
+        }
+        else
+        {
+            gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, QuestionsPerGame);
+        }
+
+        if (gameQuestions.Count == 0) return;
+
+        if (TotalGamesToPlay > 1)
+        {
+            _preloadedGameIndex++;
+        }
+        else
+        {
+            _preloadedGameQuestionSets = null;
+            _preloadedGameIndex = 0;
+        }
+
         // Cancel any running pre-game countdown and dismiss the announcement/lobby/connect screen
         _preGameTimer.Stop();
         IsPreGameCountdownRunning = false;
@@ -835,40 +864,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         if (!_isIntermissionAutoRestart)
         {
             _engine.ResetGamesPlayedCount();
-            _preloadedGameQuestionSets = null;
-            _preloadedGameIndex = 0;
         }
-
-        List<TriviaQuestion> gameQuestions;
-        if (TotalGamesToPlay > 1)
-        {
-            // Preload every game in this run up front so no question repeats across the whole
-            // session (e.g. 3 games of 20), instead of drawing each game's set independently
-            // right before it starts. Rebuilds whenever the cache is missing, stale (Total
-            // Games changed), or exhausted - naturally covering both "starting a brand new
-            // session" and "starting another one manually after the last capped run finished".
-            if (_preloadedGameQuestionSets == null || _preloadedGameQuestionSets.Count != TotalGamesToPlay || _preloadedGameIndex >= _preloadedGameQuestionSets.Count)
-            {
-                _preloadedGameQuestionSets = TriviaPackManager.BuildMultiGameQuestionSets(checkedPacks, QuestionsPerGame, TotalGamesToPlay);
-                _preloadedGameIndex = 0;
-            }
-
-            if (_preloadedGameQuestionSets.Count == 0) return;
-            gameQuestions = _preloadedGameQuestionSets[_preloadedGameIndex];
-            _preloadedGameIndex++;
-        }
-        else
-        {
-            _preloadedGameQuestionSets = null;
-            _preloadedGameIndex = 0;
-
-            // Pool every checked pack's questions together and draw this game's set fresh - see
-            // TriviaPackManager.BuildMixedQuestionSet for the double-draw-then-rescramble
-            // algorithm. Called again on every unattended auto-restart too, so the question set
-            // is different every game even with the exact same packs checked.
-            gameQuestions = TriviaPackManager.BuildMixedQuestionSet(checkedPacks, QuestionsPerGame);
-        }
-        if (gameQuestions.Count == 0) return;
 
         string title = checkedPacks.Count == 1 ? checkedPacks[0].Title : string.Join(" + ", checkedPacks.Select(p => p.Title));
         string category = checkedPacks.Count == 1 ? checkedPacks[0].Category : "Mixed Trivia";
