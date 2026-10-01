@@ -68,7 +68,7 @@ namespace KSRotation.Windows
         public SingerDisplayWindow()
         {
             InitializeComponent();
-            Lyracist.Shared.WelcomeOverlayHost.Attach(this);
+            _welcomeHost = Lyracist.Shared.WelcomeOverlayHost.Attach(this);
 
             _marqueeBulbChase = new MarqueeBulbChase(MarqueeBulbCanvas);
             _discoBeams = new RotatingBeamsEffect(DiscoBeamCanvas);
@@ -90,6 +90,17 @@ namespace KSRotation.Windows
             PreviewKeyDown += OnPreviewKeyDown;
         }
 
+        private readonly Lyracist.Shared.WelcomeOverlayHost _welcomeHost;
+
+        // An empty rotation shows the "sign up for tonight's karaoke" screen instead - but never over the
+        // Last Song banner, which has to stay visible even when the rotation is empty.
+        private void RefreshSignUpInvite()
+        {
+            bool show = _vm?.IsRotationEmpty == true && LastSongBannerOverlay.Visibility != Visibility.Visible;
+            bool showQr = _vm?.ShowQrCode == true;
+            _welcomeHost.SetSignUpInvite(show, showQr ? _vm?.QrCodeImage : null, showQr ? _vm?.ConnectionUrl : null);
+        }
+
         public void UpdateLastSongBanner(string? bannerPath)
         {
             if (!string.IsNullOrWhiteSpace(bannerPath) && File.Exists(bannerPath))
@@ -105,6 +116,7 @@ namespace KSRotation.Windows
 
                     LastSongBannerImage.Source = bitmap;
                     LastSongBannerOverlay.Visibility = Visibility.Visible;
+                    RefreshSignUpInvite();
                     return;
                 }
                 catch
@@ -115,6 +127,7 @@ namespace KSRotation.Windows
 
             LastSongBannerOverlay.Visibility = Visibility.Collapsed;
             LastSongBannerImage.Source = null;
+            RefreshSignUpInvite();
         }
 
         private void OnClosed(object? sender, EventArgs e)
@@ -201,12 +214,20 @@ namespace KSRotation.Windows
                 _vm.PropertyChanged += Vm_PropertyChanged;
                 _vm.NextSingers.CollectionChanged += NextSingers_CollectionChanged;
             }
+            RefreshSignUpInvite();
         }
 
         private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
+                case nameof(DisplayViewModel.IsRotationEmpty):
+                case nameof(DisplayViewModel.QrCodeImage):
+                case nameof(DisplayViewModel.ConnectionUrl):
+                case nameof(DisplayViewModel.ShowQrCode):
+                    RefreshSignUpInvite();
+                    break;
+
                 case nameof(DisplayViewModel.SelectedProjectionView):
                     ApplyProjectionViewMode();
                     break;

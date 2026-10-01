@@ -17,6 +17,7 @@ using Panel = System.Windows.Controls.Panel;
 using Brushes = System.Windows.Media.Brushes;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using Point = System.Windows.Point;
+using Image = System.Windows.Controls.Image;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using Rectangle = System.Windows.Shapes.Rectangle;
 
@@ -240,8 +241,13 @@ public sealed class WelcomeOverlayHost
 {
     private readonly Window _window;
     private readonly Grid _layer = new() { Visibility = Visibility.Collapsed };
+    private readonly Grid _inviteLayer = new() { Visibility = Visibility.Collapsed };
     private WelcomeVisual? _visual;
+    private WelcomeVisual? _inviteVisual;
+    private ImageSource? _inviteQr;
+    private string? _inviteUrl;
     private int _generation;
+    private int _inviteGeneration;
 
     private WelcomeOverlayHost(Window window) => _window = window;
 
@@ -256,6 +262,9 @@ public sealed class WelcomeOverlayHost
             window.Content = null;
             root.Children.Add(original);
         }
+        // The sign-up invite sits below the welcome so a welcome can still pop over it.
+        Panel.SetZIndex(host._inviteLayer, 900);
+        root.Children.Add(host._inviteLayer);
         Panel.SetZIndex(host._layer, 1000);
         root.Children.Add(host._layer);
         window.Content = root;
@@ -265,11 +274,69 @@ public sealed class WelcomeOverlayHost
         {
             WelcomeScreenService.Instance.CurrentChanged -= host.OnCurrentChanged;
             host.Clear();
+            host.ClearInvite();
         };
 
         // A window created (or re-created) mid-welcome joins the one already on screen.
         if (WelcomeScreenService.Instance.Current is { MonitorDevice: null } active) host.Show(active);
         return host;
+    }
+
+    /// <summary>
+    /// Covers this window's (empty) rotation with the "sign up for tonight's karaoke" screen while
+    /// <paramref name="show"/> is true, and fades back to the untouched content when it turns false.
+    /// Safe to call repeatedly; it only rebuilds when the QR code or address changes.
+    /// </summary>
+    public void SetSignUpInvite(bool show, ImageSource? qr, string? url)
+    {
+        if (!_window.Dispatcher.CheckAccess())
+        {
+            _window.Dispatcher.InvokeAsync(() => SetSignUpInvite(show, qr, url));
+            return;
+        }
+
+        if (!show)
+        {
+            if (_inviteLayer.Visibility != Visibility.Visible) return;
+            int generation = ++_inviteGeneration;
+            var fade = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(500));
+            fade.Completed += (_, _) =>
+            {
+                if (generation == _inviteGeneration) ClearInvite();
+            };
+            _inviteLayer.BeginAnimation(UIElement.OpacityProperty, fade);
+            return;
+        }
+
+        bool alreadyShown = _inviteVisual != null && _inviteLayer.Visibility == Visibility.Visible;
+        if (alreadyShown && ReferenceEquals(qr, _inviteQr) && url == _inviteUrl)
+        {
+            // Same content: just make sure a fade-out that was starting is cancelled.
+            _inviteGeneration++;
+            _inviteLayer.BeginAnimation(UIElement.OpacityProperty, null);
+            _inviteLayer.Opacity = 1;
+            return;
+        }
+
+        _inviteGeneration++;
+        ClearInvite();
+        _inviteQr = qr;
+        _inviteUrl = url;
+        _inviteVisual = WelcomeScreenDesigns.BuildSignUpInvite(qr, url);
+        _inviteLayer.Children.Add(_inviteVisual.Root);
+        _inviteLayer.Visibility = Visibility.Visible;
+        _inviteLayer.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(500)));
+    }
+
+    private void ClearInvite()
+    {
+        _inviteLayer.BeginAnimation(UIElement.OpacityProperty, null);
+        _inviteLayer.Children.Clear();
+        _inviteLayer.Visibility = Visibility.Collapsed;
+        _inviteVisual?.Dispose();
+        _inviteVisual = null;
+        _inviteQr = null;
+        _inviteUrl = null;
     }
 
     private void OnCurrentChanged(object? sender, WelcomeRequest? request)
@@ -639,6 +706,128 @@ public static class WelcomeScreenDesigns
     }
 
     #endregion
+
+    /// <summary>
+    /// Shown instead of an empty rotation: invites everyone to sign up for tonight's karaoke. Built fresh
+    /// each time so the date is current; includes the sign-up QR code when one is available.
+    /// </summary>
+    public static WelcomeVisual BuildSignUpInvite(ImageSource? qr, string? url)
+    {
+        var canvas = new Grid { Width = W, Height = H, ClipToBounds = true };
+        canvas.Background = new LinearGradientBrush(
+            [new GradientStop(Rgb("#1B0B3A"), 0), new GradientStop(Rgb("#5A1470"), 0.55), new GradientStop(Rgb("#B02A6B"), 1)],
+            90);
+        var host = new Grid { Background = Brushes.Black };
+        host.Children.Add(new Viewbox { Stretch = Stretch.Uniform, Child = canvas });
+        var visual = new WelcomeVisual(host);
+
+        // Music notes drifting up the screen.
+        var notes = new Canvas { Width = W, Height = H, IsHitTestVisible = false };
+        canvas.Children.Add(notes);
+        string[] glyphs = ["♪", "♫", "♩", "♬"];
+        var rng = new Random();
+        for (int i = 0; i < 16; i++)
+        {
+            var move = new TranslateTransform();
+            var note = new TextBlock
+            {
+                Text = glyphs[rng.Next(glyphs.Length)],
+                FontFamily = new FontFamily("Segoe UI Symbol"),
+                FontSize = rng.Next(60, 150),
+                Foreground = Solid(i % 2 == 0 ? "#FFD76A" : "#FF8AD8"),
+                Opacity = 0.28,
+                RenderTransform = move,
+            };
+            Canvas.SetLeft(note, rng.Next(0, (int)W - 100));
+            Canvas.SetTop(note, H);
+            notes.Children.Add(note);
+            double seconds = 9 + rng.NextDouble() * 8;
+            visual.Animate(move, TranslateTransform.YProperty, new DoubleAnimation(0, -(H + 220), TimeSpan.FromSeconds(seconds))
+            {
+                RepeatBehavior = RepeatBehavior.Forever,
+                BeginTime = TimeSpan.FromSeconds(-rng.NextDouble() * seconds), // already mid-flight when shown
+            });
+        }
+
+        var layout = new Grid { Margin = new Thickness(110, 80, 110, 80) };
+        layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        bool hasQr = qr != null;
+        if (hasQr) layout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        canvas.Children.Add(layout);
+
+        // Left-aligned beside the QR card; centred across the whole screen when there is no QR code.
+        var align = hasQr ? HorizontalAlignment.Left : HorizontalAlignment.Center;
+        double bigSize = hasQr ? 185 : 260;
+        var text = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = align };
+        text.Children.Add(new TextBlock
+        {
+            Text = $"TONIGHT  •  {DateTime.Now:dddd, MMMM d}".ToUpperInvariant(),
+            FontFamily = BodyFont, FontSize = 54, Foreground = Solid("#FFD76A"), HorizontalAlignment = align,
+            Effect = Glow(Rgb("#FFB400"), 18, 0.7),
+        });
+        text.Children.Add(new TextBlock
+        {
+            Text = "KARAOKE", FontFamily = DisplayFont, FontSize = bigSize, HorizontalAlignment = align, Foreground = Brushes.White,
+            Margin = new Thickness(0, 10, 0, -40), Effect = Glow(Rgb("#FF3CAC"), 40, 0.95),
+        });
+        text.Children.Add(new TextBlock
+        {
+            Text = "TONIGHT!", FontFamily = DisplayFont, FontSize = bigSize, HorizontalAlignment = align, Foreground = Solid("#FFD76A"),
+            Effect = Glow(Rgb("#FF8A00"), 40, 0.95),
+        });
+        text.Children.Add(new TextBlock
+        {
+            Text = "Sign up now and take the stage!",
+            FontFamily = BodyFont, FontSize = 70, Foreground = Brushes.White, HorizontalAlignment = align,
+            Margin = new Thickness(0, 30, 0, 0), TextWrapping = TextWrapping.Wrap,
+            Effect = Glow(Rgb("#FF3CAC"), 22, 0.8),
+        });
+        text.Children.Add(new TextBlock
+        {
+            Text = hasQr ? "Scan the QR code or ask the DJ" : "Ask the DJ to put you on the list",
+            FontFamily = BodyFont, FontSize = 48, Foreground = Solid("#FFD9F2"), HorizontalAlignment = align,
+            Margin = new Thickness(0, 14, 0, 0), TextWrapping = TextWrapping.Wrap,
+        });
+        layout.Children.Add(text);
+
+        if (hasQr)
+        {
+            var card = new StackPanel
+            {
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(60, 0, 0, 0),
+                RenderTransformOrigin = new Point(0.5, 0.5),
+                RenderTransform = new ScaleTransform(1, 1),
+            };
+            card.Children.Add(new Border
+            {
+                Width = 520, Height = 520, Background = Brushes.White, CornerRadius = new CornerRadius(30), Padding = new Thickness(26),
+                Effect = Glow(Rgb("#FF3CAC"), 50, 0.9),
+                Child = new Image { Source = qr, Stretch = Stretch.Uniform },
+            });
+            card.Children.Add(new TextBlock
+            {
+                Text = "SCAN TO SIGN UP", FontFamily = DisplayFont, FontSize = 46, Foreground = Brushes.White,
+                HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 22, 0, 0),
+            });
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                card.Children.Add(new TextBlock
+                {
+                    Text = url, FontFamily = BodyFont, FontSize = 30, Foreground = Solid("#FFD9F2"),
+                    HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 6, 0, 0),
+                });
+            }
+            Grid.SetColumn(card, 1);
+            layout.Children.Add(card);
+
+            var scale = (ScaleTransform)card.RenderTransform;
+            visual.Animate(scale, ScaleTransform.ScaleXProperty, Pulse(1.0, 1.04, 1.6));
+            visual.Animate(scale, ScaleTransform.ScaleYProperty, Pulse(1.0, 1.04, 1.6));
+        }
+
+        return visual;
+    }
 
     #region Shared pieces
 

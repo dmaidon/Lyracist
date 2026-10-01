@@ -53,6 +53,10 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial bool ShowQrCode { get; set; } = true;
 
+        /// <summary>True while nobody is in the rotation, so the window shows the sign-up invite instead of an empty list.</summary>
+        [ObservableProperty]
+        public partial bool IsRotationEmpty { get; set; } = true;
+
         [ObservableProperty]
         public partial bool ShowCrawl { get; set; }
 
@@ -276,6 +280,8 @@ namespace KSRotation.ViewModels
 
         public void UpdateFromRotation(ObservableCollection<SingerEntry> rotation)
         {
+            IsRotationEmpty = rotation == null || rotation.Count == 0;
+
             if (rotation == null || rotation.Count == 0)
             {
                 CurrentSinger = "No singer";

@@ -115,6 +115,55 @@ public class WelcomeScreenTests
         Assert.Equal(new string?[] { "Order One", "Order Two", "Order Three", null }, seen);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SignUpInvite_BuildsAndRenders_WithAndWithoutQr(bool withQr)
+    {
+        Exception? failure = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                BitmapSource? qr = null;
+                if (withQr)
+                {
+                    var pixels = new byte[64 * 64 * 4];
+                    for (int i = 0; i < pixels.Length; i += 4) { byte v = (byte)(((i / 4) / 8 + (i / 4) / 64 / 8) % 2 == 0 ? 0 : 255); pixels[i] = pixels[i + 1] = pixels[i + 2] = v; pixels[i + 3] = 255; }
+                    qr = BitmapSource.Create(64, 64, 96, 96, PixelFormats.Bgra32, null, pixels, 64 * 4);
+                    qr.Freeze();
+                }
+
+                using var visual = WelcomeScreenDesigns.BuildSignUpInvite(qr, withQr ? "http://192.168.1.50:8080" : null);
+                var root = visual.Root;
+                root.Measure(new Size(1920, 1080));
+                root.Arrange(new Rect(0, 0, 1920, 1080));
+                root.UpdateLayout();
+                var bitmap = new RenderTargetBitmap(1920, 1080, 96, 96, PixelFormats.Pbgra32);
+                bitmap.Render(root);
+
+                string? previewDir = Environment.GetEnvironmentVariable("WELCOME_PREVIEW_DIR");
+                if (!string.IsNullOrEmpty(previewDir))
+                {
+                    Directory.CreateDirectory(previewDir);
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                    using var stream = File.Create(Path.Combine(previewDir, $"invite_{(withQr ? "qr" : "noqr")}.png"));
+                    encoder.Save(stream);
+                }
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        Assert.Null(failure);
+    }
+
     [Fact]
     public void Designs_AllBuildAndRender()
     {

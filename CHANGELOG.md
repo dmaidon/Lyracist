@@ -15,6 +15,8 @@ All notable changes to the Lyracist project are documented here. The format is b
   - The welcome only covers the banners and never changes them, so the rotation, DJ Banner, Special Event banners and last-performer banner return untouched. KSRotation waits 2.5 s after the DJ stops typing a new name before welcoming. KSRotation.Maui is unchanged.
   - Tests: `Lyracist.Tests/WelcomeScreenTests.cs`.
 
+- **Sign-up invite instead of an empty rotation (`Shared/WelcomeScreen.cs`, `RotationWindow`, `SingerDisplayWindow`)**: when the display window is enabled but nobody is in the rotation, it shows a generated "KARAOKE TONIGHT! Sign up now" screen (today's date, drifting music notes, and the sign-up QR code and address when the QR option is on) rather than an empty list. It fades away as soon as the first singer is added and never covers the Last Song banner.
+
 ### Fixed (review pass)
 - `TriviaGameEngine` keys saved answers by round/position/id so a repeated question in one game no longer shows players as already answered; disconnected players are pruned on game start.
 - `TriviaDbCreator` import now writes the validated pack; Knockout Trivia still scores a disconnected player who already answered; `TriviaViewModel` flushes a pending debounced settings save on dispose.

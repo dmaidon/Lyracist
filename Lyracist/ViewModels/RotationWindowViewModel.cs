@@ -347,8 +347,14 @@ public partial class RotationWindowViewModel : BaseViewModel
         return (type, source);
     }
 
+    /// <summary>True while nobody is in the rotation, so the window shows the sign-up invite instead of an empty list.</summary>
+    [ObservableProperty]
+    private bool _isRotationEmpty = true;
+
     public void UpdateRotation(List<Singer> singers)
     {
+        IsRotationEmpty = singers.Count == 0;
+
         var visibleSingers = IsLastRound ? singers.Where(s => !s.HasSungInLastRound).ToList() : singers;
 
         Rotation.Clear();

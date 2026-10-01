@@ -73,7 +73,7 @@ public partial class RotationWindow : Window, ICaptureSource
     public RotationWindow(RotationWindowViewModel viewModel)
     {
         InitializeComponent();
-        Lyracist.Shared.WelcomeOverlayHost.Attach(this);
+        _welcomeHost = Lyracist.Shared.WelcomeOverlayHost.Attach(this);
 
         _marqueeBulbChase = new MarqueeBulbChase(MarqueeBulbCanvas);
         _discoBeams = new RotatingBeamsEffect(DiscoBeamCanvas);
@@ -100,6 +100,17 @@ public partial class RotationWindow : Window, ICaptureSource
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived += OnReactionReceived;
     }
 
+    private readonly Lyracist.Shared.WelcomeOverlayHost _welcomeHost;
+
+    // An empty rotation shows the "sign up for tonight's karaoke" screen instead - but never over the
+    // Last Song banner, which has to stay visible even when the last singer has left the queue.
+    private void RefreshSignUpInvite()
+    {
+        bool show = _vm?.IsRotationEmpty == true && LastSongBannerOverlay.Visibility != Visibility.Visible;
+        bool showQr = _vm?.ShowQrCodeOnRotationScreen == true;
+        _welcomeHost.SetSignUpInvite(show, showQr ? _vm?.QrCodeImage : null, showQr ? _vm?.JoinUrl : null);
+    }
+
     public void UpdateLastSongBanner(string? bannerPath)
     {
         if (!string.IsNullOrWhiteSpace(bannerPath) && File.Exists(bannerPath))
@@ -115,6 +126,7 @@ public partial class RotationWindow : Window, ICaptureSource
 
                 LastSongBannerImage.Source = bitmap;
                 LastSongBannerOverlay.Visibility = Visibility.Visible;
+                RefreshSignUpInvite();
                 return;
             }
             catch
@@ -125,6 +137,7 @@ public partial class RotationWindow : Window, ICaptureSource
 
         LastSongBannerOverlay.Visibility = Visibility.Collapsed;
         LastSongBannerImage.Source = null;
+        RefreshSignUpInvite();
     }
 
     private void OnClosed(object? sender, EventArgs e)
@@ -241,12 +254,20 @@ public partial class RotationWindow : Window, ICaptureSource
             _vm.PropertyChanged += Vm_PropertyChanged;
             _vm.FullRotation.CollectionChanged += Rotation_CollectionChanged;
         }
+        RefreshSignUpInvite();
     }
 
     private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
         {
+            case nameof(RotationWindowViewModel.IsRotationEmpty):
+            case nameof(RotationWindowViewModel.QrCodeImage):
+            case nameof(RotationWindowViewModel.JoinUrl):
+            case nameof(RotationWindowViewModel.ShowQrCodeOnRotationScreen):
+                RefreshSignUpInvite();
+                break;
+
             case nameof(RotationWindowViewModel.SelectedProjectionView):
                 ApplyProjectionViewMode();
                 break;

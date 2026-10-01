@@ -10,6 +10,7 @@ Lyracist Pro is a premium, modern Windows WPF Karaoke hosting application design
 ### 👋 New Performer Welcome Screen (`Shared/WelcomeScreen.cs`, `Lyracist`, `KSRotation`)
 - **Automatic welcome**: when a singer new to tonight's rotation is added, a full-screen "Welcome to our new performer: <name>" screen appears in one of six random designs. Several new singers in a row are welcomed in order.
 - **DJ settings**: on/off, display time (default 15 seconds), which screen to use (the rotation and DJ Banner screens by default, or a specific monitor), and a Preview button.
+- **Empty rotation invite**: with the display window enabled and nobody in the rotation, the rotation screen shows a "Karaoke tonight - sign up now" invitation (with the sign-up QR code) instead of an empty list.
 - **Banners are never overwritten**: the rotation, DJ Banner, Special Event and last-performer banners return exactly as they were when the welcome ends.
 
 ### 🥊 Knockout Trivia Core Fixes & Enhancements (`KnockoutTrivia`, `KnockoutWebServer.cs`, `knockout.html`)
