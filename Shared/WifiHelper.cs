@@ -1,4 +1,4 @@
-// Edited on Aug 25, 2026 @ 06:15:00 -> Fix RCS1118 const and CA1806 discarded return value in WifiHelper.cs
+// Edited on Oct 1, 2026 @ 07:36:00 -> Performance: add asynchronous read with 1s timeout to netsh fallback to prevent UI thread freezing
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -47,24 +47,30 @@ public static class WifiHelper
             using var process = Process.Start(psi);
             if (process == null) return null;
 
-            string output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit(1000);
-
-            foreach (var line in output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+            var readTask = process.StandardOutput.ReadToEndAsync();
+            if (readTask.Wait(1000) && process.WaitForExit(500))
             {
-                int colonIndex = line.IndexOf(':');
-                if (colonIndex > 0)
+                string output = readTask.Result;
+                foreach (var line in output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
                 {
-                    string key = line[..colonIndex].Trim();
-                    if (key.Equals("SSID", StringComparison.OrdinalIgnoreCase))
+                    int colonIndex = line.IndexOf(':');
+                    if (colonIndex > 0)
                     {
-                        string value = line[(colonIndex + 1)..].Trim();
-                        if (!string.IsNullOrWhiteSpace(value) && !value.Equals("BSSID", StringComparison.OrdinalIgnoreCase))
+                        string key = line[..colonIndex].Trim();
+                        if (key.Equals("SSID", StringComparison.OrdinalIgnoreCase))
                         {
-                            return value;
+                            string value = line[(colonIndex + 1)..].Trim();
+                            if (!string.IsNullOrWhiteSpace(value) && !value.Equals("BSSID", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return value;
+                            }
                         }
                     }
                 }
+            }
+            else
+            {
+                try { process.Kill(); } catch { }
             }
         }
         catch

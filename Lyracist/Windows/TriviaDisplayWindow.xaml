@@ -1,4 +1,4 @@
-<!-- Edited on Oct 1, 2026 @ 07:22:00 -> Fix #8 dynamic full-width marquee score ticker to prevent pop-in and truncation -->
+<!-- Edited on Oct 1, 2026 @ 07:37:00 -> Performance: wrap 1920x1080 canvas in uniform Viewbox to prevent scaling truncation on high-DPI TVs -->
 <Window x:Class="Lyracist.Windows.TriviaDisplayWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -54,8 +54,9 @@
             </Button.Template>
         </Button>
 
-        <!-- Main Content Area -->
-        <Grid Margin="24,14">
+        <!-- Main Content Area with Uniform Viewbox Scaling for TV/DPI Resilience -->
+        <Viewbox Stretch="Uniform">
+            <Grid Width="1920" Height="1080" Margin="24,14" ClipToBounds="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -645,5 +646,6 @@
                 </Grid>
             </Border>
         </Grid>
+        </Viewbox>
     </Grid>
 </Window>

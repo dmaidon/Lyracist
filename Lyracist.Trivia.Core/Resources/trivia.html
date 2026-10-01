@@ -1,4 +1,4 @@
-<!-- Edited on Oct 1, 2026 @ 07:22:00 -> Fix #7 handle join error codes 429/500 and validate submit success in mobile client -->
+<!-- Edited on Oct 1, 2026 @ 07:34:00 -> Performance: add in-flight guard to pollGameState to prevent slow network request pileup -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -785,8 +785,10 @@
             pollGameState();
         }
 
+        let isPolling = false;
         async function pollGameState() {
-            if (!playerName) return;
+            if (!playerName || isPolling) return;
+            isPolling = true;
 
             try {
                 const res = await fetch(`/api/trivia/state?player=${encodeURIComponent(playerName)}&playerId=${encodeURIComponent(playerId)}`);
@@ -798,6 +800,8 @@
                 handleStateUpdate(data);
             } catch (err) {
                 // Ignore transient network errors
+            } finally {
+                isPolling = false;
             }
         }
 

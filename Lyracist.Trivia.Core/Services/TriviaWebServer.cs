@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:22:00 -> Fix #9 increase registration rate limit for venue NAT/hotspots and prune expired IP table entries
+// Edited on Oct 1, 2026 @ 07:34:00 -> Performance: reuse static JsonSerializerOptions, pre-encode cached HTML bytes, cap request body at 8KB
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,9 +17,10 @@ namespace Lyracist.Trivia.Core.Services;
 
 public class TriviaWebServer : IDisposable
 {
-    private const int MaxRequestBodyBytes = 2_097_152; // 2 MB
+    private const int MaxRequestBodyBytes = 8_192; // 8 KB
     private const int MaxConcurrentConnections = 64;
     private static readonly TimeSpan RequestReadTimeout = TimeSpan.FromSeconds(15);
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     // Caps how many brand-new players a single IP can register (via /api/trivia/join with a name
     // TriviaGameEngine.RegisterPlayer has never seen - see RouteRequestAsync). Without this, an
@@ -82,7 +83,7 @@ public class TriviaWebServer : IDisposable
 
     private TcpListener? _listener;
     private CancellationTokenSource? _cts;
-    private string? _cachedHtml;
+    private byte[]? _cachedHtmlBytes;
     private bool _disposed;
 
     public bool IsRunning { get; private set; }
@@ -269,7 +270,7 @@ public class TriviaWebServer : IDisposable
         {
             try
             {
-                var joinReq = JsonSerializer.Deserialize<JoinRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var joinReq = JsonSerializer.Deserialize<JoinRequest>(body, JsonOptions);
                 if (joinReq != null && !string.IsNullOrWhiteSpace(joinReq.Name))
                 {
                     string trimmedName = TriviaGameEngine.NormalizePlayerName(joinReq.Name);
@@ -326,7 +327,7 @@ public class TriviaWebServer : IDisposable
         {
             try
             {
-                var subReq = JsonSerializer.Deserialize<SubmitRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var subReq = JsonSerializer.Deserialize<SubmitRequest>(body, JsonOptions);
                 if (subReq != null && !string.IsNullOrWhiteSpace(subReq.PlayerName))
                 {
                     string trimmedName = TriviaGameEngine.NormalizePlayerName(subReq.PlayerName);
@@ -483,29 +484,31 @@ public class TriviaWebServer : IDisposable
 
     private async Task<byte[]> GetHtmlBytesAsync()
     {
-        if (_cachedHtml == null)
+        if (_cachedHtmlBytes == null)
         {
+            string html;
             var asm = Assembly.GetExecutingAssembly();
             await using var stream = asm.GetManifestResourceStream("Lyracist.Trivia.Core.Resources.trivia.html");
             if (stream != null)
             {
                 using var reader = new StreamReader(stream);
-                _cachedHtml = await reader.ReadToEndAsync();
+                html = await reader.ReadToEndAsync();
             }
             else
             {
                 string diskPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "trivia.html");
                 if (File.Exists(diskPath))
                 {
-                    _cachedHtml = await File.ReadAllTextAsync(diskPath);
+                    html = await File.ReadAllTextAsync(diskPath);
                 }
                 else
                 {
-                    _cachedHtml = "<html><body><h1>Lyracist Live Trivia</h1><p>trivia.html resource not found.</p></body></html>";
+                    html = "<html><body><h1>Lyracist Live Trivia</h1><p>trivia.html resource not found.</p></body></html>";
                 }
             }
+            _cachedHtmlBytes = Encoding.UTF8.GetBytes(html);
         }
-        return Encoding.UTF8.GetBytes(_cachedHtml);
+        return _cachedHtmlBytes;
     }
 
     private static async Task SendCorsPreflightResponseAsync(NetworkStream stream)

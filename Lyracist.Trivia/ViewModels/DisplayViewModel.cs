@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:10:00 -> Fix #6 restore option opacities when answers are uneliminated on timer reset
+// Edited on Oct 1, 2026 @ 07:35:00 -> Performance: in-place TopPlayers updates and conditional MarqueeSummaryText updates to avoid animation restarts
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -564,35 +564,39 @@ public partial class DisplayViewModel : ObservableObject, IDisposable
 
     private void RefreshTopPlayers(List<TriviaPlayer> list)
     {
-        ConnectedPlayersCount = list.Count;
-        TopPlayers.Clear();
-        MarqueeScores.Clear();
+        ConnectedPlayersCount = list.Count(p => p.IsConnected);
+
         var ranked = list.OrderByDescending(p => p.TotalScore).ToList();
-        for (int i = 0; i < ranked.Count; i++)
+        var top10 = ranked.Take(10).ToList();
+
+        for (int i = TopPlayers.Count - 1; i >= 0; i--)
         {
-            var p = ranked[i];
-            if (i < 10)
+            if (!top10.Contains(TopPlayers[i]))
             {
-                TopPlayers.Add(p);
+                TopPlayers.RemoveAt(i);
             }
-
-            MarqueeScores.Add(new MarqueeScoreItem
+        }
+        for (int i = 0; i < top10.Count; i++)
+        {
+            var p = top10[i];
+            int currentIdx = TopPlayers.IndexOf(p);
+            if (currentIdx < 0)
             {
-                Rank = i + 1,
-                Name = p.Name,
-                TeamName = p.TeamName,
-                Score = p.TotalScore,
-                IsTopScorer = (i == 0 && p.TotalScore > 0)
-            });
+                TopPlayers.Insert(i, p);
+            }
+            else if (currentIdx != i)
+            {
+                TopPlayers.Move(currentIdx, i);
+            }
         }
 
-        if (MarqueeScores.Count > 0)
+        string newMarquee = ranked.Count > 0
+            ? string.Join("      ★      ", ranked.Select((p, idx) => $"#{idx + 1} {p.DisplayName} • {p.TotalScore:N0} pts"))
+            : "🎯 LYRACIST LIVE TRIVIA • Scan the QR code on your phone to join the show!";
+
+        if (MarqueeSummaryText != newMarquee)
         {
-            MarqueeSummaryText = string.Join("      ★      ", MarqueeScores.Select(m => m.FormattedText));
-        }
-        else
-        {
-            MarqueeSummaryText = "🎯 LYRACIST LIVE TRIVIA • Scan the QR code on your phone to join the show!";
+            MarqueeSummaryText = newMarquee;
         }
     }
 

@@ -1,5 +1,5 @@
-<!-- Edited on Oct 1, 2026 @ 07:26:00 -> Update CHANGELOG for Trivia fixes #7, #8, #9, and #11 -->
-Last Edit: Oct 1, 2026 - Trivia Engine Leaderboard Auto-Advance, Games Played Counter, Question ID Submit Validation, Option Un-fade, Client Errors, Dynamic Marquee, Rate Limiting & Timer Guards
+<!-- Edited on Oct 1, 2026 @ 07:38:00 -> Update CHANGELOG for Trivia performance & bottleneck optimizations -->
+Last Edit: Oct 1, 2026 - Trivia Engine Performance & Bottleneck Optimizations (Debounce, Caching, Allocations, In-Place UI, Background Seeding, Viewbox)
 
 # Changelog
 
@@ -32,6 +32,26 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Implemented automatic pruning of expired IP rate-limit records (`PruneExpiredRegistrations()`) to prevent unbounded memory growth in long-running trivia sessions.
 - **Guarded Timer Callbacks for Process Stability (`MainViewModel.cs`, `TriviaGameEngine.cs`, Fix #11)**:
   - Protected `OnPreGameTimerTick` in `MainViewModel.cs` with `try / catch` and trace logging, preventing unhandled exceptions on thread pool timer threads from terminating .NET Core / .NET 10 processes during unattended pre-game countdown loops.
+
+### Performance & Optimization
+- **Trivia Web Server Request Limits & Serialization Allocations (`TriviaWebServer.cs`)**:
+  - Reused static `JsonSerializerOptions` instance across `/api/trivia/join` and `/api/trivia/submit` requests to eliminate repeated option allocations during bursts of concurrent answers.
+  - Reduced `MaxRequestBodyBytes` from 2 MB down to 8 KB to prevent slow client body uploads from exhausting server memory and connection limits.
+  - Cached pre-encoded UTF-8 bytes for `trivia.html` (`_cachedHtmlBytes`), avoiding redundant string-to-byte encoding on every web portal hit.
+- **Mobile Client Polling In-Flight Guard (`trivia.html`)**:
+  - Added an in-flight execution guard (`isPolling`) to `pollGameState()`, preventing slow Wi-Fi poll requests from stacking up concurrent network calls.
+- **TriviaPlayer INotifyPropertyChanged & In-Place UI Updates (`TriviaPlayer.cs`, `MainViewModel.cs`, `DisplayViewModel.cs`, `TriviaDisplayViewModel.cs`)**:
+  - Implemented `INotifyPropertyChanged` on `TriviaPlayer` and updated properties to raise change notifications.
+  - Synchronized player collections in place without clearing and re-adding entire collections on every poll, eliminating visual tree churn and garbage generation.
+  - Updated marquee score summary assignment to only assign when the formatted string has changed, preventing unnecessary ticker animation restarts when player joins occur during pre-game.
+- **Debounced Settings Persistence & Wi-Fi QR Regeneration (`MainViewModel.cs`)**:
+  - Added a 400ms debounce timer to `SaveSettings()` and a 300ms debounce timer to `UpdateWifiCredentials()`, eliminating UI thread synchronous disk writes and QR bitmap generation on every keystroke when typing venue names or Wi-Fi passwords.
+- **Asynchronous SQLite Database Seeding (`MainViewModel.cs`)**:
+  - Offloaded `_dbService.SeedPackIntoDatabase(p)` to a background task in `LoadQuestionPacks()`, removing the blocking UI stall during startup from 2,500 synchronous database inserts.
+- **Asynchronous Netsh Fallback with Timeout (`WifiHelper.cs`)**:
+  - Replaced blocking `process.StandardOutput.ReadToEnd()` with asynchronous read and a 1-second timeout, falling back to process termination if `netsh` hangs on network adapter queries to avoid freezing host UIs.
+- **Uniform Viewbox TV Scaling Resilience (`TriviaDisplayWindow.xaml` across all apps)**:
+  - Wrapped the 1920x1080 canvas in `<Viewbox Stretch="Uniform">` with clipping in `Lyracist.Trivia`, `Lyracist`, and `KSRotation`, ensuring distortion-free uniform scaling across 125%, 150%, and 4K TV scaling configurations without clipping.
 
 ## [26.9.25.1] - 2026-09-27
 

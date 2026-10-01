@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:25:00 -> Fix #11 guard PreGameTimer tick with try/catch to protect unattended shows
+// Edited on Oct 1, 2026 @ 07:36:00 -> Performance: debounce settings save and Wi-Fi QR generation, sync players in place, run SQLite pack seeding in background
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -285,7 +285,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         Settings.WifiSsid = value;
         if (_engine != null) _engine.Settings.WifiSsid = value;
-        _activeDisplayVm?.UpdateWifiCredentials(WifiSsid, WifiPassword);
+        DebounceWifiUpdate();
         SaveSettings();
     }
 
@@ -293,7 +293,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         Settings.WifiPassword = value;
         if (_engine != null) _engine.Settings.WifiPassword = value;
-        _activeDisplayVm?.UpdateWifiCredentials(WifiSsid, WifiPassword);
+        DebounceWifiUpdate();
         SaveSettings();
     }
 
@@ -449,6 +449,9 @@ public partial class MainViewModel : ObservableObject, IDisposable
     public event EventHandler? RequestOpenProjectionWindow;
 
     private readonly System.Timers.Timer _preGameTimer = new(1000);
+    private readonly System.Timers.Timer _saveSettingsDebounceTimer = new(400) { AutoReset = false };
+    private readonly System.Timers.Timer _wifiDebounceTimer = new(300) { AutoReset = false };
+    private readonly object _settingsFileLock = new();
     private DisplayViewModel? _activeDisplayVm;
 
     public MainViewModel()
@@ -516,6 +519,14 @@ public partial class MainViewModel : ObservableObject, IDisposable
         // Setup Pre-Game ticker (started when screen is cast or manually started)
         _isPreGameCountdownRunning = false;
         _preGameTimer.Elapsed += OnPreGameTimerTick;
+        _saveSettingsDebounceTimer.Elapsed += (_, _) => PersistSettingsToFile();
+        _wifiDebounceTimer.Elapsed += (_, _) =>
+        {
+            Application.Current?.Dispatcher.InvokeAsync(() =>
+            {
+                _activeDisplayVm?.UpdateWifiCredentials(WifiSsid, WifiPassword);
+            });
+        };
 
         // Start WebServer, populate monitors & load packs
         _webServer.Start();
@@ -625,15 +636,30 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     private void SaveSettings()
     {
-        try
+        _saveSettingsDebounceTimer.Stop();
+        _saveSettingsDebounceTimer.Start();
+    }
+
+    private void DebounceWifiUpdate()
+    {
+        _wifiDebounceTimer.Stop();
+        _wifiDebounceTimer.Start();
+    }
+
+    private void PersistSettingsToFile()
+    {
+        lock (_settingsFileLock)
         {
-            string path = TriviaStorageHelper.GetSettingsPath();
-            string json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(path, json);
-        }
-        catch (Exception)
-        {
-            // Settings persistence error ignored
+            try
+            {
+                string path = TriviaStorageHelper.GetSettingsPath();
+                string json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(path, json);
+            }
+            catch (Exception)
+            {
+                // Settings persistence error ignored
+            }
         }
     }
 
@@ -677,7 +703,6 @@ public partial class MainViewModel : ObservableObject, IDisposable
         foreach (var p in packs)
         {
             AvailablePacks.Add(p);
-            _dbService.SeedPackIntoDatabase(p);
 
             var selectable = new SelectableTriviaPack(p, isChecked: isFirst);
             selectable.PropertyChanged += (s, e) =>
@@ -690,6 +715,22 @@ public partial class MainViewModel : ObservableObject, IDisposable
             SelectablePacks.Add(selectable);
             isFirst = false;
         }
+
+        // Asynchronously seed SQLite database in background so UI thread startup remains instantaneous
+        Task.Run(() =>
+        {
+            foreach (var p in packs)
+            {
+                try
+                {
+                    _dbService.SeedPackIntoDatabase(p);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceError($"SQLite seeding error for pack '{p.PackId}': {ex.Message}");
+                }
+            }
+        });
 
         if (AvailablePacks.Count == 0)
         {
@@ -1238,10 +1279,30 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     private void RefreshPlayers(List<TriviaPlayer> playerList)
     {
-        Players.Clear();
-        foreach (var p in playerList)
+        var targetIds = new HashSet<string>(playerList.Select(p => p.PlayerId));
+
+        // Remove departed players
+        for (int i = Players.Count - 1; i >= 0; i--)
         {
-            Players.Add(p);
+            if (!targetIds.Contains(Players[i].PlayerId))
+            {
+                Players.RemoveAt(i);
+            }
+        }
+
+        // Add new players or adjust positions in place
+        for (int i = 0; i < playerList.Count; i++)
+        {
+            var p = playerList[i];
+            int currentIdx = Players.IndexOf(p);
+            if (currentIdx < 0)
+            {
+                Players.Insert(i, p);
+            }
+            else if (currentIdx != i)
+            {
+                Players.Move(currentIdx, i);
+            }
         }
         ConnectedPlayerCount = Players.Count(p => p.IsConnected);
     }
@@ -1337,6 +1398,11 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         try { _preGameTimer.Stop(); } catch (Exception) { /* Ignored */ }
         try { _preGameTimer.Dispose(); } catch (Exception) { /* Ignored */ }
+        try { _saveSettingsDebounceTimer.Stop(); } catch (Exception) { /* Ignored */ }
+        try { _saveSettingsDebounceTimer.Dispose(); } catch (Exception) { /* Ignored */ }
+        try { _wifiDebounceTimer.Stop(); } catch (Exception) { /* Ignored */ }
+        try { _wifiDebounceTimer.Dispose(); } catch (Exception) { /* Ignored */ }
+        PersistSettingsToFile();
         _webServer.Dispose();
         _engine.Dispose();
         _dbService.Dispose();
