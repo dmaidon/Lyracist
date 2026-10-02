@@ -1,4 +1,24 @@
-// Edited on Oct 2, 2026 @ 11:00:00 -> Document Welcome Screen Style / Model selector on Display tab
+// Edited on Oct 2, 2026 @ 11:30:00 -> Document Dedicated New Performer Welcome Screen GroupBox on Display tab
+
+
+Lyracist Pro Suite & KSRotation: Dedicated "New Performer Welcome Screen" GroupBox (`KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`) - (October 2026)
+
+Section: Lyracist & KSRotation / Settings & Display Configuration / Welcome Screen Settings
+
+[Overview & UI Reorganization]
+To improve layout discoverability and ease of configuration, all Welcome Screen controls have been moved out of the "DJ & Event Banners" group box into a separate, dedicated "New Performer Welcome Screen" GroupBox card.
+
+[Location on Display Tab]
+- KSRotation: Placed in Column 1 directly below the "Screen Rotation" group box, effectively utilizing vertical screen space and keeping display settings well balanced across columns.
+- Lyracist: Placed in Column 2 directly below the "DJ & Event Banners" group box and above the "Session Schedule & Request Cutoff" card.
+
+[Consolidated Controls]
+The dedicated group box houses:
+1. "Show 'Welcome to our new performer' screen when a new singer joins" enable checkbox.
+2. "Welcome Screen Display" target monitor dropdown.
+3. "Welcome Screen Style" visual design model dropdown (Spotlight, Neon Night, Sunset Stage, Confetti Party, Disco Rays, Red Velvet Curtain, or All (Random)).
+4. "Show welcome for: [XX] sec" duration input (3 to 120 seconds).
+5. "Preview" button to immediately test and verify the selected welcome screen design on the audience display.
 
 
 Lyracist Pro Suite & KSRotation: Welcome Screen Style / Model Selection (`Shared/WelcomeScreen.cs`, `KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`) - (October 2026)

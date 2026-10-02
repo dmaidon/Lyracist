@@ -1,11 +1,15 @@
-<!-- Edited on Oct 2, 2026 @ 11:00:00 -> Add Welcome Screen Style selector to CHANGELOG -->
+<!-- Edited on Oct 2, 2026 @ 11:30:00 -> Add Dedicated Welcome Screen GroupBox to KSRotation CHANGELOG -->
 
 # Changelog
 
 ## 2026-10-02
 
+- **Dedicated "New Performer Welcome Screen" GroupBox (`MainWindow.xaml`)**:
+  - Separated the Welcome Screen configuration controls out of the "DJ & Special Event Banners" groupbox into their own dedicated `New Performer Welcome Screen` groupbox card.
+  - Positioned in Column 1 below Screen Rotation, balancing layout density and making welcome screen settings much easier to find.
+
 - **Welcome Screen Style / Model Selector (`MainWindow.xaml`, `MainViewModel.Welcome.cs`, `AppSettings.cs`, `WelcomeScreen.cs`)**:
-  - Added a "Welcome Screen Style" dropdown selection to the Display tab under the DJ & Special Event Banners groupbox.
+  - Added a "Welcome Screen Style" dropdown selection to the Display tab.
   - Allows DJs to choose a specific welcome screen design to always display (`Spotlight`, `Neon Night`, `Sunset Stage`, `Confetti Party`, `Disco Rays`, or `Red Velvet Curtain`), or choose `All (Random)` to automatically rotate through all models.
   - Preview button instantly shows the selected style on the audience display.
   - Settings are persisted across sessions.

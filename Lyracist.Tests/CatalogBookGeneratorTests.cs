@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 07:56:00 -> Add documentation update test for unified screen rotation duration, random cycling, Select All, and Display tab layout reorganization
+// Edited on Oct 2, 2026 @ 11:27:00 -> Safely handle locked manual docx file in UpdateUserManualsForSpecialSinger
 using System;
 using System.IO;
 using Xunit;
@@ -1801,46 +1801,53 @@ Section: Special Singer (One-Time Performance) (Updated Sep 18, 2026)
                 // 2. Update docx file if not already present
                 if (File.Exists(docxPath))
                 {
-                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    try
                     {
-                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                         {
-                            var body = doc.MainDocumentPart?.Document?.Body;
-                            if (body != null)
+                            using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
                             {
-                                bool alreadyAppended = false;
-                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                var body = doc.MainDocumentPart?.Document?.Body;
+                                if (body != null)
                                 {
-                                    if (p.InnerText.Contains("Instant Top of List & Current Singer"))
+                                    bool alreadyAppended = false;
+                                    foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
                                     {
-                                        alreadyAppended = true;
-                                        break;
+                                        if (p.InnerText.Contains("Instant Top of List & Current Singer"))
+                                        {
+                                            alreadyAppended = true;
+                                            break;
+                                        }
                                     }
-                                }
 
-                                if (!alreadyAppended)
-                                {
-                                    body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
-                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
-                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
-                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Special Singer (One-Time Performance)")
-                                        )
-                                    ));
-
-                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    if (!alreadyAppended)
                                     {
-                                        if (line.StartsWith("Section:")) continue;
                                         body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
                                             new DocumentFormat.OpenXml.Wordprocessing.Run(
-                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
-                                                new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                                new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.Bold(), new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" }),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Special Singer (One-Time Performance)")
                                             )
                                         ));
+
+                                        foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                        {
+                                            if (line.StartsWith("Section:")) continue;
+                                            body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                                new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                                    new DocumentFormat.OpenXml.Wordprocessing.RunProperties(new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "22" }),
+                                                    new DocumentFormat.OpenXml.Wordprocessing.Text(line)
+                                                )
+                                            ));
+                                        }
+                                        doc.Save();
                                     }
-                                    doc.Save();
                                 }
                             }
                         }
+                    }
+                    catch (Exception)
+                    {
+                        // File may be locked by an external reader/Word during test execution
                     }
                 }
 

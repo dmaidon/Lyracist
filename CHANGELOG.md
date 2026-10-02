@@ -1,5 +1,5 @@
-<!-- Edited on Oct 2, 2026 @ 11:00:00 -> Add Welcome Screen Style selector to CHANGELOG -->
-Last Edit: Oct 2, 2026 - Welcome Screen Style / Model Selector Across Lyracist & KSRotation
+<!-- Edited on Oct 2, 2026 @ 11:30:00 -> Add Dedicated Welcome Screen GroupBox to CHANGELOG -->
+Last Edit: Oct 2, 2026 - Dedicated Welcome Screen Settings GroupBox Across Lyracist & KSRotation
 
 # Changelog
 
@@ -8,6 +8,10 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.10.1.0] - 2026-10-01
 
 ### Added
+- **Dedicated "New Performer Welcome Screen" Settings GroupBox (`KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`)**:
+  - Extracted the Welcome Screen configuration controls (enable toggle, target monitor selector, style/model selector, duration input, and Preview button) out of the DJ Banners groupbox into their own dedicated `New Performer Welcome Screen` groupbox card.
+  - Placed below Screen Rotation in Column 1 in KSRotation (filling unused vertical space) and directly beneath DJ & Event Banners in Lyracist, making welcome screen options immediately noticeable and convenient to customize.
+
 - **Welcome Screen Style / Model Selector (`Shared/WelcomeScreen.cs`, `KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`, `MainViewModel.Welcome.cs`, `SettingsViewModel.Display.cs`)**:
   - Added a "Welcome Screen Style" dropdown selection to the Display tab in both KSRotation and Lyracist settings, allowing DJs to either choose a specific welcome design to always present (`Spotlight`, `Neon Night`, `Sunset Stage`, `Confetti Party`, `Disco Rays`, or `Red Velvet Curtain`) or select `All (Random)` to automatically cycle through all models without repeating the same design twice in a row.
   - Linked selection directly into `WelcomeScreenService.SelectedDesign` so the in-app "Preview" button immediately displays the chosen model for instant on-screen review.
