@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 10:55:00 -> Save WelcomeScreenDesign in settings
+// Edited on Oct 2, 2026 @ 12:22:00 -> Add SelectedMainTabIndex to reload Users on tab activation
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -75,6 +75,17 @@ namespace KSRotation.ViewModels
             ("I Wanna Dance with Somebody", "Whitney Houston"),
             ("I'll Leave This World Loving You","Ricky Van Shelton")
         ];
+
+        [ObservableProperty]
+        public partial int SelectedMainTabIndex { get; set; }
+
+        partial void OnSelectedMainTabIndexChanged(int value)
+        {
+            if (value == 3)
+            {
+                _ = LoadAllUsersAsync();
+            }
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsDjBannerAvailable))]

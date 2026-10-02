@@ -1,4 +1,4 @@
-<!-- Edited on Sep 17, 2026 @ 14:33:00 -> Bump version to 26.9.17 across solution -->
+<!-- Edited on Oct 2, 2026 @ 12:20:00 -> Include Shared/AvatarImageHelper.cs in Lyracist project -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.10.2.545</AssemblyVersion>
-    <FileVersion>26.10.2.545</FileVersion>
+    <AssemblyVersion>26.10.2.548</AssemblyVersion>
+    <FileVersion>26.10.2.548</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -97,6 +97,7 @@
     <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
     <Compile Include="..\Shared\ProjectionEffects.cs" Link="ProjectionEffects.cs" />
     <Compile Include="..\Shared\WelcomeScreen.cs" Link="WelcomeScreen.cs" />
+    <Compile Include="..\Shared\AvatarImageHelper.cs" Link="AvatarImageHelper.cs" />
     <Compile Include="..\Shared\ChromecastDiscoveryService.cs" Link="ChromecastDiscoveryService.cs" />
     <Compile Include="..\Shared\ChromecastSender.cs" Link="ChromecastSender.cs" />
     <Compile Include="..\Shared\BrowserCastDiscoveryService.cs" Link="BrowserCastDiscoveryService.cs" />

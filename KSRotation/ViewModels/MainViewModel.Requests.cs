@@ -1,4 +1,4 @@
-// Edited on Oct 1, 2026 @ 07:46:00 -> Escape Wi-Fi SSID and password in QR payload via WifiHelper.EscapeWifiQrValue
+// Edited on Oct 2, 2026 @ 12:28:00 -> Pass OnSingerProfileChangedFromPatron to PatronRequestServer
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -230,7 +230,8 @@ namespace KSRotation.ViewModels
                         ExportSessionHandoffPayload,
                         payload => ImportSessionHandoffPayloadAsync(payload),
                         GetDiscoveredPeerInfo,
-                        OnSessionExportedToPeer);
+                        OnSessionExportedToPeer,
+                        OnSingerProfileChangedFromPatron);
                     _requestServer.Start();
                     activePort = p;
                     started = true;
@@ -291,6 +292,15 @@ namespace KSRotation.ViewModels
             WifiQrCodeImage = started && !string.IsNullOrWhiteSpace(startSsid) ? GenerateQRCode(startWifiPayload) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             RefreshConnectInstructionsBanner();
+        }
+
+        private void OnSingerProfileChangedFromPatron(string singerName)
+        {
+            System.Windows.Application.Current?.Dispatcher.BeginInvoke(() =>
+            {
+                AddKnownSinger(singerName);
+                _ = LoadAllUsersAsync();
+            });
         }
 
         private void RefreshConnectionInfo()

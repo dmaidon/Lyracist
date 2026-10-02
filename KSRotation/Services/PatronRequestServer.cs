@@ -1,4 +1,4 @@
-// Edited on Sep 20, 2026 @ 07:11:00 -> Fix Content-Length byte count in SendUnauthorizedAsync and add FlushAsync to all HTTP responses
+// Edited on Oct 2, 2026 @ 12:26:00 -> Add onSingerProfileChanged callback and normalize uploaded avatar orientation
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +34,8 @@ namespace KSRotation.Services
         Func<SessionHandoffPayload>? onExportSession = null,
         Func<SessionHandoffPayload, Task<string?>>? onImportSession = null,
         Func<DiscoveredPeer>? onGetProbeInfo = null,
-        Action<string, int, string>? onSessionExportedToPeer = null)
+        Action<string, int, string>? onSessionExportedToPeer = null,
+        Action<string>? onSingerProfileChanged = null)
     {
         private const int MaxRequestBodyBytes = 4_194_304; // 4 MB
         private const int MaxAvatarImageBytes = 2_097_152; // 2 MB - a profile avatar has no business being larger
@@ -64,6 +65,7 @@ namespace KSRotation.Services
         private readonly Func<SessionHandoffPayload, Task<string?>>? _onImportSession = onImportSession;
         private readonly Func<DiscoveredPeer>? _onGetProbeInfo = onGetProbeInfo;
         private readonly Action<string, int, string>? _onSessionExportedToPeer = onSessionExportedToPeer;
+        private readonly Action<string>? _onSingerProfileChanged = onSingerProfileChanged;
         private readonly SemaphoreSlim _connectionLimiter = new(MaxConcurrentConnections, MaxConcurrentConnections);
 
         // Serializes the /api/singer/login check-then-write sequence (find-by-name, then insert or
@@ -748,6 +750,7 @@ namespace KSRotation.Services
                                     context.Singers.Add(dbSinger);
                                     await context.SaveChangesAsync();
                                     wasRegistered = true;
+                                    _onSingerProfileChanged?.Invoke(name);
                                 }
                             }
                             else if (string.IsNullOrEmpty(dbSinger.PinCode))
@@ -755,6 +758,7 @@ namespace KSRotation.Services
                                 dbSinger.PinCode = singerPin;
                                 await context.SaveChangesAsync();
                                 wasClaimed = true;
+                                _onSingerProfileChanged?.Invoke(name);
                             }
                         }
                         finally
@@ -853,6 +857,7 @@ namespace KSRotation.Services
                         }
 
                         await context.SaveChangesAsync();
+                        _onSingerProfileChanged?.Invoke(name);
                         await SendJsonResponseAsync(stream, "{\"success\":true}");
 #else
                         await SendBadRequestAsync(stream, "{\"error\":\"Performer profiles not supported on mobile rotation view controller.\"}");
@@ -926,12 +931,14 @@ namespace KSRotation.Services
                                 }
                             }
 
-                            await File.WriteAllBytesAsync(fullPath, imgBytes);
+                            byte[] normalizedBytes = Lyracist.Shared.AvatarImageHelper.NormalizeImageBytes(imgBytes);
+                            await File.WriteAllBytesAsync(fullPath, normalizedBytes);
 
                             dbSinger.AvatarType = "Uploaded";
                             dbSinger.AvatarSource = filename;
                             await context.SaveChangesAsync();
 
+                            _onSingerProfileChanged?.Invoke(name);
                             await SendJsonResponseAsync(stream, JsonSerializer.Serialize(new { success = true, avatarSource = filename }));
                         }
                         else

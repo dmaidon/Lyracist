@@ -1,4 +1,4 @@
-<!-- Edited on Oct 2, 2026 @ 11:25:00 -> Move Welcome Screen settings to dedicated GroupBox -->
+<!-- Edited on Oct 2, 2026 @ 12:56:00 -> Add Center Face button to Users avatar actions -->
 <Window x:Name="FrmMain"
     UseLayoutRounding="True"
     SnapsToDevicePixels="True"
@@ -167,6 +167,10 @@
                         <Separator />
                         <MenuItem Header="Remove Singer Permanently"
                                   Command="{Binding Path=PlacementTarget.Tag.RemoveSingerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <Separator />
+                        <MenuItem Header="👤 Edit Performer Profile"
+                                  Command="{Binding Path=PlacementTarget.Tag.EditSingerProfileFromRotationCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                   CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                     </ContextMenu>
                 </Setter.Value>
@@ -636,7 +640,7 @@
     </Window.Resources>
 
     <Grid Margin="16">
-        <TabControl x:Name="Tc" Background="Transparent" BorderThickness="2" BorderBrush="{DynamicResource AppHeaderBrush}" Style="{StaticResource BorderedTabControlStyle}">
+        <TabControl x:Name="Tc" SelectedIndex="{Binding SelectedMainTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="2" BorderBrush="{DynamicResource AppHeaderBrush}" Style="{StaticResource BorderedTabControlStyle}">
             <TabControl.Resources>
                 <!-- Align the tab headers panel to the left so they sit next to each other without stretching -->
                 <Style TargetType="TabPanel">
@@ -2468,6 +2472,11 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Content="🔄 Refresh"
+                                        Command="{Binding RefreshUsersCommand}"
+                                        Style="{StaticResource ModernButtonStyle}"
+                                        Height="34" Padding="14,0" Margin="0,0,8,0"
+                                        ToolTip="Reload singer profiles and user accounts from database" />
                                 <Button Content="New Singer"
                                         Command="{Binding AddNewUserCommand}"
                                         Style="{StaticResource ModernButtonStyle}"
@@ -2666,6 +2675,16 @@
                                                             Style="{StaticResource ModernSecondaryButtonStyle}"
                                                             Height="28" Padding="8,0" Margin="0,0,0,4"
                                                             ToolTip="Select a custom photo from your computer" />
+                                                    <Button Content="Center Face"
+                                                            Command="{Binding AdjustUserAvatarCommand}"
+                                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                            Height="28" Padding="8,0" Margin="0,0,0,4"
+                                                            ToolTip="Reposition and zoom the photo to center the performer's face" />
+                                                    <Button Content="Rotate ↻"
+                                                            Command="{Binding RotateUserAvatarCommand}"
+                                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                                            Height="28" Padding="8,0" Margin="0,0,0,4"
+                                                            ToolTip="Rotate the uploaded photo 90 degrees clockwise" />
                                                     <Button Content="Clear Photo"
                                                             Command="{Binding ClearUserAvatarCommand}"
                                                             Style="{StaticResource ModernSecondaryButtonStyle}"

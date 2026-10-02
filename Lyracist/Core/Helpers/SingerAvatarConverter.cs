@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 08:37:30 -> Add static ResolveAvatarImage and ResolveSingerAvatar helpers
+// Edited on Oct 2, 2026 @ 12:32:00 -> Use AvatarImageHelper for upright image decoding with EXIF orientation
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -58,19 +58,19 @@ public class SingerAvatarConverter : IValueConverter
     // row used to re-read and re-decode the file, or start a fresh Gravatar download. Only used on
     // the UI thread: Gravatar bitmaps load asynchronously and can't be frozen, so they can't be
     // shared across threads.
-    private static readonly Dictionary<string, BitmapImage> _imageCache = new(StringComparer.Ordinal);
+    private static readonly Dictionary<string, BitmapSource> _imageCache = new(StringComparer.Ordinal);
     private const int MaxCachedImages = 256;
 
     private static bool OnUiThread => System.Windows.Application.Current?.Dispatcher.CheckAccess() == true;
 
-    private static void CacheImage(string key, BitmapImage bitmap)
+    private static void CacheImage(string key, BitmapSource bitmap)
     {
         if (!OnUiThread) return;
         if (_imageCache.Count >= MaxCachedImages) _imageCache.Clear();
         _imageCache[key] = bitmap;
     }
 
-    public static BitmapImage? ResolveAvatarImage(string? avatarType, string? avatarSource, bool fallbackToDefault = false)
+    public static BitmapSource? ResolveAvatarImage(string? avatarType, string? avatarSource, bool fallbackToDefault = false)
     {
         if (avatarType == "Gravatar" && !string.IsNullOrEmpty(avatarSource))
         {
@@ -104,14 +104,12 @@ public class SingerAvatarConverter : IValueConverter
                     string key = "U\u0001" + avatarSource + "\u0001" + File.GetLastWriteTimeUtc(fullPath).Ticks;
                     if (OnUiThread && _imageCache.TryGetValue(key, out var cached)) return cached;
 
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.StreamSource = new MemoryStream(File.ReadAllBytes(fullPath));
-                    bitmap.EndInit();
-                    bitmap.Freeze();
-                    CacheImage(key, bitmap);
-                    return bitmap;
+                    var bitmap = AvatarImageHelper.LoadOrientedBitmapFromFile(fullPath);
+                    if (bitmap != null)
+                    {
+                        CacheImage(key, bitmap);
+                        return bitmap;
+                    }
                 }
             }
             catch
@@ -123,7 +121,7 @@ public class SingerAvatarConverter : IValueConverter
         return fallbackToDefault ? DefaultAvatar : null;
     }
 
-    public static BitmapImage? ResolveSingerAvatar(Singer? singer, bool fallbackToDefault = false)
+    public static BitmapSource? ResolveSingerAvatar(Singer? singer, bool fallbackToDefault = false)
     {
         if (singer == null) return fallbackToDefault ? DefaultAvatar : null;
         return ResolveAvatarImage(singer.AvatarType, singer.AvatarSource, fallbackToDefault);

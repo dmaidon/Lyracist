@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 08:04:00 -> Add HasUserSearchText and ClearUserSearch command for Users search box
+// Edited on Oct 2, 2026 @ 14:10:00 -> Rotate and clean up raw_ avatar copies
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -182,6 +182,9 @@ namespace KSRotation.ViewModels
         {
             try
             {
+                int? previousSingerId = SelectedUser?.SingerId;
+                string? previousSingerName = SelectedUser?.Name;
+
                 await using var context = new LyracistDbContext();
                 var dbSingers = await context.Singers
                     .Include(s => s.AudioSettings)
@@ -211,10 +214,18 @@ namespace KSRotation.ViewModels
 
                 ApplyUserFilter();
 
-                if (SelectedUser == null && FilteredUsers.Count > 0)
+                // Preserve existing selection if still available
+                SingerUserItem? match = null;
+                if (previousSingerId.HasValue)
                 {
-                    SelectedUser = FilteredUsers[0];
+                    match = FilteredUsers.FirstOrDefault(u => u.SingerId == previousSingerId.Value);
                 }
+                if (match == null && !string.IsNullOrWhiteSpace(previousSingerName))
+                {
+                    match = FilteredUsers.FirstOrDefault(u => string.Equals(u.Name, previousSingerName, StringComparison.OrdinalIgnoreCase));
+                }
+
+                SelectedUser = match ?? FilteredUsers.FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -560,17 +571,39 @@ namespace KSRotation.ViewModels
             try
             {
                 Directory.CreateDirectory(Globals.AvatarsDir);
-                string ext = Path.GetExtension(dlg.FileName);
-                string newFileName = $"{Guid.NewGuid():N}{ext}";
+                AvatarImageHelper.DeleteRawCopy(Globals.AvatarsDir, EditUserAvatarSource);
+                AvatarImageHelper.PurgeStaleRawCopies(Globals.AvatarsDir, TimeSpan.FromDays(7));
+                string newFileName = $"{Guid.NewGuid():N}.jpg";
                 string destPath = Path.Combine(Globals.AvatarsDir, newFileName);
+                string rawPath = Path.Combine(Globals.AvatarsDir, $"raw_{newFileName}");
 
-                File.Copy(dlg.FileName, destPath, overwrite: true);
+                byte[] rawBytes = File.ReadAllBytes(dlg.FileName);
+                byte[] normalizedBytes = AvatarImageHelper.NormalizeImageBytes(rawBytes);
+                File.WriteAllBytes(rawPath, normalizedBytes);
+                File.WriteAllBytes(destPath, normalizedBytes);
 
                 EditUserAvatarType = "Uploaded";
                 EditUserAvatarSource = newFileName;
-                EditUserAvatarImage = ResolveUserAvatarImage("Uploaded", newFileName);
+                EditUserAvatarImage = AvatarImageHelper.LoadOrientedBitmap(normalizedBytes);
 
-                ShowUserStatus("Photo uploaded. Click 'Save Changes' to apply.", true);
+                // Open the interactive cropper immediately so the DJ can center the face
+                var adjustWin = new Windows.AdjustAvatarWindow(rawPath, destPath, SelectedUser.Name)
+                {
+                    Owner = System.Windows.Application.Current?.MainWindow
+                };
+                if (adjustWin.ShowDialog() == true)
+                {
+                    EditUserAvatarImage = AvatarImageHelper.LoadOrientedBitmapFromFile(destPath);
+                    if (SelectedUser != null)
+                    {
+                        SelectedUser.AvatarImage = EditUserAvatarImage;
+                    }
+                    ShowUserStatus("Photo uploaded, centered, and saved. Click 'Save Changes' to apply.", true);
+                }
+                else
+                {
+                    ShowUserStatus("Photo uploaded. Click 'Center Face' anytime to reposition, or 'Save Changes' to apply.", true);
+                }
             }
             catch (Exception ex)
             {
@@ -580,10 +613,145 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
+        private void AdjustUserAvatar()
+        {
+            if (SelectedUser == null) return;
+            if (EditUserAvatarType != "Uploaded" || string.IsNullOrWhiteSpace(EditUserAvatarSource))
+            {
+                ShowUserStatus("Can only center uploaded photos.", false);
+                return;
+            }
+
+            string avatarPath = Path.Combine(Globals.AvatarsDir, EditUserAvatarSource);
+            string rawPath = Path.Combine(Globals.AvatarsDir, $"raw_{EditUserAvatarSource}");
+            string sourcePath = File.Exists(rawPath) ? rawPath : avatarPath;
+
+            if (!File.Exists(sourcePath))
+            {
+                ShowUserStatus("Photo file not found on disk.", false);
+                return;
+            }
+
+            try
+            {
+                var adjustWin = new Windows.AdjustAvatarWindow(sourcePath, avatarPath, SelectedUser.Name)
+                {
+                    Owner = System.Windows.Application.Current?.MainWindow
+                };
+
+                if (adjustWin.ShowDialog() == true)
+                {
+                    EditUserAvatarImage = AvatarImageHelper.LoadOrientedBitmapFromFile(avatarPath);
+                    if (SelectedUser != null)
+                    {
+                        SelectedUser.AvatarImage = EditUserAvatarImage;
+                    }
+                    ShowUserStatus("Photo centered and saved. Click 'Save Changes' to apply.", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogError("MainViewModel.AdjustUserAvatar", ex);
+                ShowUserStatus("Failed to open photo centering tool.", false);
+            }
+        }
+
+        [RelayCommand]
+        private void RotateUserAvatar()
+        {
+            if (SelectedUser == null) return;
+            if (EditUserAvatarType != "Uploaded" || string.IsNullOrWhiteSpace(EditUserAvatarSource))
+            {
+                ShowUserStatus("Can only rotate uploaded photos.", false);
+                return;
+            }
+
+            string fullPath = Path.Combine(Globals.AvatarsDir, EditUserAvatarSource);
+            if (!File.Exists(fullPath))
+            {
+                ShowUserStatus("Uploaded photo file not found on disk.", false);
+                return;
+            }
+
+            try
+            {
+                byte[] rawBytes = File.ReadAllBytes(fullPath);
+                byte[] rotated = AvatarImageHelper.RotateImage90Degrees(rawBytes);
+                File.WriteAllBytes(fullPath, rotated);
+                AvatarImageHelper.RotateRawCopy(Globals.AvatarsDir, EditUserAvatarSource);
+
+                EditUserAvatarImage = AvatarImageHelper.LoadOrientedBitmap(rotated);
+                if (SelectedUser != null)
+                {
+                    SelectedUser.AvatarImage = EditUserAvatarImage;
+                }
+
+                ShowUserStatus("Photo rotated 90°. Click 'Save Changes' to apply.", true);
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogError("MainViewModel.RotateUserAvatar", ex);
+                ShowUserStatus("Failed to rotate photo.", false);
+            }
+        }
+
+        [RelayCommand]
+        private async Task RefreshUsersAsync()
+        {
+            await LoadAllUsersAsync();
+            ShowUserStatus("Performer list refreshed.", true);
+        }
+
+        [RelayCommand]
+        private async Task EditSingerProfileFromRotationAsync(SingerEntry? entry)
+        {
+            if (entry == null || string.IsNullOrWhiteSpace(entry.Name)) return;
+
+            string singerName = entry.Name.Trim();
+            await LoadAllUsersAsync();
+
+            var existing = AllUsers.FirstOrDefault(u => string.Equals(u.Name, singerName, StringComparison.OrdinalIgnoreCase));
+            if (existing == null)
+            {
+                try
+                {
+                    await using var context = new LyracistDbContext();
+                    var newSinger = new Singer
+                    {
+                        Name = singerName,
+                        Email = string.Empty,
+                        PinCode = string.Empty,
+                        VocalRange = "Any / Unspecified",
+                        AvatarType = "None",
+                        AvatarSource = string.Empty
+                    };
+                    context.Singers.Add(newSinger);
+                    await context.SaveChangesAsync();
+
+                    await LoadAllUsersAsync();
+                    existing = AllUsers.FirstOrDefault(u => u.SingerId == newSinger.SingerId || string.Equals(u.Name, singerName, StringComparison.OrdinalIgnoreCase));
+                }
+                catch (Exception ex)
+                {
+                    LoggerService.LogError("MainViewModel.EditSingerProfileFromRotation", ex);
+                }
+            }
+
+            UserSearchText = string.Empty;
+            if (existing != null)
+            {
+                SelectedUser = existing;
+            }
+
+            SelectedMainTabIndex = 3;
+        }
+
+        [RelayCommand]
         private void ClearUserAvatar()
         {
             if (SelectedUser == null) return;
 
+            AvatarImageHelper.DeleteRawCopy(Globals.AvatarsDir, EditUserAvatarSource);
             EditUserAvatarType = "None";
             EditUserAvatarSource = string.Empty;
             EditUserAvatarImage = null;
@@ -673,6 +841,7 @@ namespace KSRotation.ViewModels
                 if (result.HasValue)
                 {
                     EditUserAvatarType = "Uploaded";
+                    AvatarImageHelper.DeleteRawCopy(Globals.AvatarsDir, EditUserAvatarSource);
                     EditUserAvatarSource = result.Value.fileName;
                     EditUserAvatarImage = result.Value.squareBitmap;
 
@@ -819,13 +988,7 @@ namespace KSRotation.ViewModels
                     string fullPath = Path.Combine(Globals.AvatarsDir, avatarSource);
                     if (File.Exists(fullPath))
                     {
-                        var bitmap = new BitmapImage();
-                        bitmap.BeginInit();
-                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmap.StreamSource = new MemoryStream(File.ReadAllBytes(fullPath));
-                        bitmap.EndInit();
-                        bitmap.Freeze();
-                        return bitmap;
+                        return AvatarImageHelper.LoadOrientedBitmapFromFile(fullPath);
                     }
                 }
                 else if (avatarType == "Gravatar")

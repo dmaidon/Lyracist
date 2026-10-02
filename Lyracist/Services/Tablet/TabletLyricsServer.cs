@@ -1,4 +1,4 @@
-// Edited on Sep 18, 2026 @ 08:46:00 -> Include isSpecial in queue payload
+// Edited on Oct 2, 2026 @ 12:36:00 -> Normalize avatar image bytes and EXIF orientation on tablet upload
 using System;
 using System.IO;
 using System.Linq;
@@ -886,7 +886,8 @@ public class TabletLyricsServer(
             Directory.CreateDirectory(avatarsDir);
             string fileName = $"avatar_{Guid.NewGuid():N}.jpg";
             string filePath = Path.Combine(avatarsDir, fileName);
-            await File.WriteAllBytesAsync(filePath, imgBytes);
+            byte[] normalizedBytes = Lyracist.Shared.AvatarImageHelper.NormalizeImageBytes(imgBytes);
+            await File.WriteAllBytesAsync(filePath, normalizedBytes);
 
             dbSinger.AvatarType = "Uploaded";
             dbSinger.AvatarSource = fileName;

@@ -1,4 +1,4 @@
-﻿<!-- Edited on Oct 2, 2026 @ 10:00:00 -> Update Purple Velvet Curtain panel to full-screen velvet curtain matching WelcomeScreen RedCurtain -->
+<!-- Edited on Oct 2, 2026 @ 13:16:00 -> Use Ellipse ImageBrush for circular performer avatars to prevent square edge bleed -->
 <Window
     x:Class="KSRotation.Windows.SingerDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -261,9 +261,11 @@
                             <Border.Effect>
                                 <DropShadowEffect Color="#FFB9822A" BlurRadius="24" ShadowDepth="0" Opacity="0.85" />
                             </Border.Effect>
-                            <Border CornerRadius="65" ClipToBounds="True">
-                                <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
-                            </Border>
+                            <Ellipse>
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                                </Ellipse.Fill>
+                            </Ellipse>
                         </Border>
 
                         <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
@@ -423,9 +425,11 @@
                         <Border.Effect>
                             <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="0" Opacity="0.95" />
                         </Border.Effect>
-                        <Border CornerRadius="70" ClipToBounds="True">
-                            <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
-                        </Border>
+                        <Ellipse>
+                            <Ellipse.Fill>
+                                <ImageBrush ImageSource="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                            </Ellipse.Fill>
+                        </Ellipse>
                     </Border>
 
                     <!-- Anchor / Special Badges -->
@@ -689,9 +693,11 @@
                         <Border.Effect>
                             <DropShadowEffect Color="#FFE0A93B" BlurRadius="18" ShadowDepth="0" Opacity="0.75" />
                         </Border.Effect>
-                        <Border CornerRadius="55" ClipToBounds="True">
-                            <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
-                        </Border>
+                        <Ellipse>
+                            <Ellipse.Fill>
+                                <ImageBrush ImageSource="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                            </Ellipse.Fill>
+                        </Ellipse>
                     </Border>
 
                     <Border Background="#DC2626" CornerRadius="6" Padding="8,3" Margin="0,0,0,8" HorizontalAlignment="Left"
@@ -862,9 +868,11 @@
                             <Border.Effect>
                                 <DropShadowEffect Color="#FFE86BFF" BlurRadius="30" ShadowDepth="0" Opacity="0.85" />
                             </Border.Effect>
-                            <Border CornerRadius="65" ClipToBounds="True">
-                                <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
-                            </Border>
+                            <Ellipse>
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                                </Ellipse.Fill>
+                            </Ellipse>
                         </Border>
 
                         <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
@@ -1007,9 +1015,11 @@
                         <Border.Effect>
                             <DropShadowEffect Color="#FFFF6BE0" BlurRadius="30" ShadowDepth="0" Opacity="0.85" />
                         </Border.Effect>
-                        <Border CornerRadius="65" ClipToBounds="True">
-                            <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
-                        </Border>
+                        <Ellipse>
+                            <Ellipse.Fill>
+                                <ImageBrush ImageSource="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                            </Ellipse.Fill>
+                        </Ellipse>
                     </Border>
 
                     <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
@@ -1109,9 +1119,11 @@
                     <Border.Effect>
                         <DropShadowEffect Color="#FFFFC24A" BlurRadius="28" ShadowDepth="0" Opacity="0.85" />
                     </Border.Effect>
-                    <Border CornerRadius="60" ClipToBounds="True">
-                        <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
-                    </Border>
+                    <Ellipse>
+                        <Ellipse.Fill>
+                            <ImageBrush ImageSource="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                        </Ellipse.Fill>
+                    </Ellipse>
                 </Border>
 
                 <Border Background="#DC2626" CornerRadius="8" Padding="10,4" Margin="0,0,0,10" HorizontalAlignment="Center"
@@ -1413,9 +1425,11 @@
                                 <Border.Effect>
                                     <DropShadowEffect Color="#FFFFD700" BlurRadius="22" ShadowDepth="0" Opacity="0.85" />
                                 </Border.Effect>
-                                <Border CornerRadius="44" ClipToBounds="True">
-                                    <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
-                                </Border>
+                                <Ellipse>
+                                    <Ellipse.Fill>
+                                        <ImageBrush ImageSource="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
@@ -1650,10 +1664,11 @@
                                             <GradientStop Color="#FF00E5FF" Offset="1.0" />
                                         </LinearGradientBrush>
                                     </Border.BorderBrush>
-                                    <Border CornerRadius="44" ClipToBounds="True" Background="#FF2A1038">
-                                        <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill"
-                                               Visibility="{Binding HasCurrentSingerAvatar, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                    </Border>
+                                    <Ellipse>
+                                        <Ellipse.Fill>
+                                            <ImageBrush ImageSource="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                                        </Ellipse.Fill>
+                                    </Ellipse>
                                 </Border>
                                 <Ellipse Width="10" Height="10" Fill="#FFFFD269" />
                             </Grid>
@@ -1839,9 +1854,11 @@
                                         <Border.Effect>
                                             <DropShadowEffect Color="#FFFFB000" BlurRadius="20" ShadowDepth="0" Opacity="0.85" />
                                         </Border.Effect>
-                                        <Border CornerRadius="48" ClipToBounds="True">
-                                            <Image Source="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
-                                        </Border>
+                                        <Ellipse>
+                                            <Ellipse.Fill>
+                                                <ImageBrush ImageSource="{Binding CurrentSingerAvatar}" Stretch="UniformToFill" />
+                                            </Ellipse.Fill>
+                                        </Ellipse>
                                     </Border>
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">

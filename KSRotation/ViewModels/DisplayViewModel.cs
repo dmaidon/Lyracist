@@ -1,4 +1,4 @@
-// Edited on Sep 24, 2026 @ 09:05:00 -> Add SingerName, Song, and WaitTime properties to NextSingerDisplay for Jukebox banner split-line layout
+// Edited on Oct 2, 2026 @ 12:20:00 -> Load upright avatar images using AvatarImageHelper with EXIF orientation handling
 using CommunityToolkit.Mvvm.ComponentModel;
 using KSRotation.Models;
 using System;
@@ -136,28 +136,31 @@ namespace KSRotation.ViewModels
         // avatar file under the same name is picked up). Every rotation update used to re-read and
         // re-decode the file, or start a brand-new Gravatar download, and handed the view a new image
         // object each time. UI thread only: Gravatar bitmaps load asynchronously and can't be frozen.
-        private readonly Dictionary<string, System.Windows.Media.Imaging.BitmapImage> _avatarImages = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, System.Windows.Media.Imaging.BitmapSource> _avatarImages = new(StringComparer.Ordinal);
 
-        private System.Windows.Media.Imaging.BitmapImage? ResolveAvatarImage(string? avType, string? avSource)
+        private System.Windows.Media.Imaging.BitmapSource? ResolveAvatarImage(string? avType, string? avSource)
         {
             if (string.IsNullOrEmpty(avSource)) return null;
 
             try
             {
                 string key;
-                System.Windows.Media.Imaging.BitmapImage bitmap;
                 if (avType == "Gravatar")
                 {
                     key = "G\u0001" + avSource;
                     if (_avatarImages.TryGetValue(key, out var cached)) return cached;
 
-                    bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                    var bitmap = new System.Windows.Media.Imaging.BitmapImage();
                     bitmap.BeginInit();
                     bitmap.UriSource = new Uri($"https://www.gravatar.com/avatar/{avSource}?d=identicon&s=150", UriKind.Absolute);
                     bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
                     bitmap.EndInit();
                     // A failed download must not stay cached, or the singer would show a blank avatar until restart.
                     bitmap.DownloadFailed += (_, _) => _avatarImages.Remove(key);
+
+                    if (_avatarImages.Count >= 256) _avatarImages.Clear();
+                    _avatarImages[key] = bitmap;
+                    return bitmap;
                 }
                 else if (avType == "Uploaded")
                 {
@@ -167,21 +170,17 @@ namespace KSRotation.ViewModels
                     key = "U\u0001" + avSource + "\u0001" + File.GetLastWriteTimeUtc(fullPath).Ticks;
                     if (_avatarImages.TryGetValue(key, out var cached)) return cached;
 
-                    bitmap = new System.Windows.Media.Imaging.BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-                    bitmap.StreamSource = new MemoryStream(File.ReadAllBytes(fullPath));
-                    bitmap.EndInit();
-                    bitmap.Freeze();
+                    var bitmap = Lyracist.Shared.AvatarImageHelper.LoadOrientedBitmapFromFile(fullPath);
+                    if (bitmap == null) return null;
+
+                    if (_avatarImages.Count >= 256) _avatarImages.Clear();
+                    _avatarImages[key] = bitmap;
+                    return bitmap;
                 }
                 else
                 {
                     return null;
                 }
-
-                if (_avatarImages.Count >= 256) _avatarImages.Clear();
-                _avatarImages[key] = bitmap;
-                return bitmap;
             }
             catch
             {

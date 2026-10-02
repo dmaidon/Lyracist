@@ -1,4 +1,4 @@
-<!-- Edited on Sep 24, 2026 @ 12:28:00 -> Remove erroneous KnockoutTrivia project reference causing CS0433 duplicate types -->
+<!-- Edited on Oct 2, 2026 @ 12:20:00 -> Include Shared/AvatarImageHelper.cs in KSRotation project -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -10,8 +10,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>$(DefineConstants);WPF</DefineConstants>
-    <AssemblyVersion>26.10.2.710</AssemblyVersion>
-    <FileVersion>26.10.2.710</FileVersion>
+    <AssemblyVersion>26.10.2.713</AssemblyVersion>
+    <FileVersion>26.10.2.713</FileVersion>
     <Title>Karaoke Singer Rotation</Title>
     <AssemblyTitle>Karaoke Singer Rotation</AssemblyTitle>
     <Product>Karaoke Singer Rotation</Product>
@@ -115,6 +115,7 @@
     <Compile Include="..\Shared\RotationHelpers.cs" Link="RotationHelpers.cs" />
     <Compile Include="..\Shared\ProjectionEffects.cs" Link="ProjectionEffects.cs" />
     <Compile Include="..\Shared\WelcomeScreen.cs" Link="WelcomeScreen.cs" />
+    <Compile Include="..\Shared\AvatarImageHelper.cs" Link="AvatarImageHelper.cs" />
     <Compile Include="..\Shared\ChromecastDiscoveryService.cs" Link="ChromecastDiscoveryService.cs" />
     <Compile Include="..\Shared\ChromecastSender.cs" Link="ChromecastSender.cs" />
     <Compile Include="..\Shared\BrowserCastDiscoveryService.cs" Link="BrowserCastDiscoveryService.cs" />

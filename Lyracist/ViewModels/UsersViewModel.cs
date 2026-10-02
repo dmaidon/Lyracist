@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 10:06:00 -> Add defensive setters to LevelText and SongsText for XAML two-way binding safety
+// Edited on Oct 2, 2026 @ 14:10:00 -> Rotate and clean up raw_ avatar copies
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -305,6 +305,7 @@ namespace Lyracist.ViewModels
             EditNotes = string.Empty;
             EditScore = 0;
             EditTotalSongsSung = 0;
+            AvatarImageHelper.DeleteRawCopy(Globals.AvatarsDir, EditAvatarSource);
             EditAvatarType = "None";
             EditAvatarSource = string.Empty;
             EditAvatarImage = null;
@@ -536,18 +537,35 @@ namespace Lyracist.ViewModels
                 {
                     string avatarsDir = Globals.AvatarsDir;
                     Directory.CreateDirectory(avatarsDir);
-                    string ext = Path.GetExtension(dlg.FileName);
-                    if (string.IsNullOrEmpty(ext)) ext = ".jpg";
-                    string targetFileName = $"avatar_{Guid.NewGuid():N}{ext}";
+                    AvatarImageHelper.DeleteRawCopy(avatarsDir, EditAvatarSource);
+                    AvatarImageHelper.PurgeStaleRawCopies(avatarsDir, TimeSpan.FromDays(7));
+                    string targetFileName = $"avatar_{Guid.NewGuid():N}.jpg";
                     string targetPath = Path.Combine(avatarsDir, targetFileName);
+                    string rawPath = Path.Combine(avatarsDir, $"raw_{targetFileName}");
 
-                    File.Copy(dlg.FileName, targetPath, overwrite: true);
+                    byte[] rawBytes = File.ReadAllBytes(dlg.FileName);
+                    byte[] normalizedBytes = AvatarImageHelper.NormalizeImageBytes(rawBytes);
+                    File.WriteAllBytes(rawPath, normalizedBytes);
+                    File.WriteAllBytes(targetPath, normalizedBytes);
 
                     EditAvatarType = "Uploaded";
                     EditAvatarSource = targetFileName;
-                    EditAvatarImage = ResolveAvatarImage("Uploaded", targetFileName);
+                    EditAvatarImage = AvatarImageHelper.LoadOrientedBitmap(normalizedBytes);
 
-                    ShowStatus("Avatar selected. Click 'Save Changes' to apply.", true);
+                    var adjustWin = new Windows.AdjustAvatarWindow(rawPath, targetPath, SelectedSinger.Name)
+                    {
+                        Owner = System.Windows.Application.Current?.MainWindow
+                    };
+                    if (adjustWin.ShowDialog() == true)
+                    {
+                        EditAvatarImage = AvatarImageHelper.LoadOrientedBitmapFromFile(targetPath);
+                        SelectedSinger.AvatarImage = EditAvatarImage;
+                        ShowStatus("Avatar selected, centered, and saved. Click 'Save Changes' to apply.", true);
+                    }
+                    else
+                    {
+                        ShowStatus("Avatar selected. Click 'Center Face' anytime to reposition, or 'Save Changes' to apply.", true);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -558,8 +576,75 @@ namespace Lyracist.ViewModels
         }
 
         [RelayCommand]
+        private void AdjustAvatar()
+        {
+            if (SelectedSinger == null || EditAvatarType != "Uploaded" || string.IsNullOrWhiteSpace(EditAvatarSource))
+            {
+                ShowStatus("Can only center uploaded photos.", false);
+                return;
+            }
+
+            string avatarPath = Path.Combine(Globals.AvatarsDir, EditAvatarSource);
+            string rawPath = Path.Combine(Globals.AvatarsDir, $"raw_{EditAvatarSource}");
+            string sourcePath = File.Exists(rawPath) ? rawPath : avatarPath;
+
+            if (!File.Exists(sourcePath))
+            {
+                ShowStatus("Photo file not found on disk.", false);
+                return;
+            }
+
+            try
+            {
+                var adjustWin = new Windows.AdjustAvatarWindow(sourcePath, avatarPath, SelectedSinger.Name)
+                {
+                    Owner = System.Windows.Application.Current?.MainWindow
+                };
+
+                if (adjustWin.ShowDialog() == true)
+                {
+                    EditAvatarImage = AvatarImageHelper.LoadOrientedBitmapFromFile(avatarPath);
+                    SelectedSinger.AvatarImage = EditAvatarImage;
+                    ShowStatus("Avatar repositioned and centered. Click 'Save Changes' to apply.", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "UsersViewModel.AdjustAvatar");
+                ShowStatus("Failed to open photo centering tool.", false);
+            }
+        }
+
+        [RelayCommand]
+        private void RotateAvatar()
+        {
+            if (SelectedSinger == null || EditAvatarType != "Uploaded" || string.IsNullOrWhiteSpace(EditAvatarSource)) return;
+
+            string fullPath = Path.Combine(Globals.AvatarsDir, EditAvatarSource);
+            if (!File.Exists(fullPath)) return;
+
+            try
+            {
+                byte[] rawBytes = File.ReadAllBytes(fullPath);
+                byte[] rotated = AvatarImageHelper.RotateImage90Degrees(rawBytes);
+                File.WriteAllBytes(fullPath, rotated);
+                AvatarImageHelper.RotateRawCopy(Globals.AvatarsDir, EditAvatarSource);
+
+                EditAvatarImage = AvatarImageHelper.LoadOrientedBitmap(rotated);
+                SelectedSinger.AvatarImage = EditAvatarImage;
+                ShowStatus("Avatar rotated 90°. Click 'Save Changes' to apply.", true);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError(ex, "UsersViewModel.RotateAvatar");
+                ShowStatus("Failed to rotate avatar.", false);
+            }
+        }
+
+        [RelayCommand]
         private void ClearAvatar()
         {
+            AvatarImageHelper.DeleteRawCopy(Globals.AvatarsDir, EditAvatarSource);
             EditAvatarType = "None";
             EditAvatarSource = string.Empty;
             EditAvatarImage = null;
@@ -648,6 +733,7 @@ namespace Lyracist.ViewModels
                 var result = WebcamCaptureService.SaveSquarePhoto(source, Globals.AvatarsDir);
                 if (result.HasValue)
                 {
+                    AvatarImageHelper.DeleteRawCopy(Globals.AvatarsDir, EditAvatarSource);
                     EditAvatarType = "Uploaded";
                     EditAvatarSource = result.Value.fileName;
                     EditAvatarImage = result.Value.squareBitmap;
@@ -797,13 +883,7 @@ namespace Lyracist.ViewModels
                     string fullPath = Path.Combine(Globals.AvatarsDir, avatarSource);
                     if (File.Exists(fullPath))
                     {
-                        var bitmap = new BitmapImage();
-                        bitmap.BeginInit();
-                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmap.StreamSource = new MemoryStream(File.ReadAllBytes(fullPath));
-                        bitmap.EndInit();
-                        bitmap.Freeze();
-                        return bitmap;
+                        return AvatarImageHelper.LoadOrientedBitmapFromFile(fullPath);
                     }
                 }
                 else if (avatarType == "Gravatar")
