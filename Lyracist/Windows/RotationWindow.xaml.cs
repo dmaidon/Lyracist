@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 10:00:00 -> Wire up Purple Velvet Curtain projection view with bulb chase and velvet folds
+// Edited on Oct 2, 2026 @ 12:05:00 -> Stop all projection animations on close (parity with KSRotation)
 using Lyracist.Models;
 using Lyracist.Services.Display;
 using Lyracist.Shared;
@@ -151,7 +151,8 @@ public partial class RotationWindow : Window, ICaptureSource
         SizeChanged -= OnSizeChanged;
         PreviewKeyDown -= OnPreviewKeyDown;
         HookViewModel(null);
-        StopSpaceshipTimer();
+        _projectionTransitionGen++; // cancels a crossfade that's still mid-fade
+        StopAllProjectionAnimations();
 
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived -= OnReactionReceived;
 

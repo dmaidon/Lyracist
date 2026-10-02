@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 10:00:00 -> Update CurtainMarqueeBulbChase and VelvetCurtainEffect to match WelcomeScreen RedCurtain marquee bulbs and velvet folds
+// Edited on Oct 2, 2026 @ 12:00:00 -> Replace per-bulb DropShadowEffect in CurtainMarqueeBulbChase with a shared frozen glow brush
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -667,8 +667,29 @@ internal sealed class MarqueeBulbChase(Canvas canvas)
 // ── Purple Velvet Curtain effects ────────────────────────────────────────────────────────────────
 internal sealed class CurtainMarqueeBulbChase(Canvas canvas)
 {
-    private static readonly SolidColorBrush BulbBrush = ProjectionFx.Frozen(new SolidColorBrush(Color.FromRgb(0xFF, 0xE0, 0x8A)));
-    private static readonly Color GlowColor = Color.FromRgb(0xFF, 0xC4, 0x00);
+    private const double GlowScale = 1.8;
+
+    // Bulb core + amber halo in one frozen brush (same technique as MarqueeBulbChase): a per-bulb
+    // DropShadowEffect would run ~50 blur shaders that re-render on every opacity animation frame.
+    private static readonly RadialGradientBrush BulbBrush = CreateBulbBrush();
+
+    private static RadialGradientBrush CreateBulbBrush()
+    {
+        var glow = Color.FromRgb(0xFF, 0xC4, 0x00);
+        const double core = 1.0 / GlowScale;
+        return ProjectionFx.Frozen(new RadialGradientBrush
+        {
+            GradientStops =
+            {
+                new GradientStop(Color.FromRgb(0xFF, 0xF4, 0xD0), 0.0),
+                new GradientStop(Color.FromRgb(0xFF, 0xE0, 0x8A), core * 0.7),
+                new GradientStop(Color.FromRgb(0xFF, 0xE0, 0x8A), core),
+                new GradientStop(ProjectionFx.Argb(0xB0, glow), core + 0.02),
+                new GradientStop(ProjectionFx.Argb(0x40, glow), core + ((1 - core) * 0.4)),
+                new GradientStop(ProjectionFx.Argb(0x00, glow), 1.0)
+            }
+        });
+    }
 
     /// <summary>Lays marquee bulbs around the outer display perimeter, pulsing in two alternating 700ms groups (matching WelcomeScreen RedCurtain).</summary>
     public void Build()
@@ -681,7 +702,8 @@ internal sealed class CurtainMarqueeBulbChase(Canvas canvas)
 
         const double edge = 50;
         const double step = 80;
-        const double radius = 13;
+        const double size = 26 * GlowScale;
+        const double radius = size / 2;
 
         var points = new List<Point>();
         for (double x = 60; x <= w - 60; x += step)
@@ -699,10 +721,9 @@ internal sealed class CurtainMarqueeBulbChase(Canvas canvas)
         {
             var bulb = new Ellipse
             {
-                Width = 26,
-                Height = 26,
+                Width = size,
+                Height = size,
                 Fill = BulbBrush,
-                Effect = new DropShadowEffect { Color = GlowColor, BlurRadius = 18, ShadowDepth = 0 },
                 IsHitTestVisible = false
             };
             Canvas.SetLeft(bulb, points[i].X - radius);
