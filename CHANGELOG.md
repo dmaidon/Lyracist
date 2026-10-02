@@ -1,5 +1,5 @@
-<!-- Edited on Oct 1, 2026 @ 09:09:00 -> Update CHANGELOG for Package Version 1.0.1 bump across all apps -->
-Last Edit: Oct 1, 2026 - Package Version 1.0.1 Increment Across All Solution Projects
+<!-- Edited on Oct 2, 2026 @ 11:00:00 -> Add Welcome Screen Style selector to CHANGELOG -->
+Last Edit: Oct 2, 2026 - Welcome Screen Style / Model Selector Across Lyracist & KSRotation
 
 # Changelog
 
@@ -8,6 +8,17 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.10.1.0] - 2026-10-01
 
 ### Added
+- **Welcome Screen Style / Model Selector (`Shared/WelcomeScreen.cs`, `KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`, `MainViewModel.Welcome.cs`, `SettingsViewModel.Display.cs`)**:
+  - Added a "Welcome Screen Style" dropdown selection to the Display tab in both KSRotation and Lyracist settings, allowing DJs to either choose a specific welcome design to always present (`Spotlight`, `Neon Night`, `Sunset Stage`, `Confetti Party`, `Disco Rays`, or `Red Velvet Curtain`) or select `All (Random)` to automatically cycle through all models without repeating the same design twice in a row.
+  - Linked selection directly into `WelcomeScreenService.SelectedDesign` so the in-app "Preview" button immediately displays the chosen model for instant on-screen review.
+  - Added full settings persistence across application restarts and unit tests in `WelcomeScreenTests.cs`.
+
+- **"Purple Velvet Curtain" Projection View Mode (`Shared/ProjectionEffects.cs`, `RotationWindow.xaml/.cs`, `SingerDisplayWindow.xaml/.cs`, `SettingsViewModel.Display.cs`, `MainViewModel.cs`)**:
+  - Added a 12th audience rotation projection view mode faithfully inspired by the "Welcome to our new performer" `RedCurtain` design, featuring an opulent full-screen royal purple velvet theater backdrop (`#26073E` &rarr; `#8A21AC` &rarr; `#26073E`) with vertical procedural drapery folds and soft specular nap sheen (`VelvetCurtainEffect`).
+  - Warm champagne-gold outer perimeter marquee bulbs (`#FFE08A`) with glowing amber halo (`#FFC400`) pulsing in a classic 700ms 2-phase theatrical alternation framing the entire display (`CurtainMarqueeBulbChase`).
+  - Floating theatrical stage typography directly on the velvet with deep dark drop shadows (no opaque inner card or border box obscuring the curtain folds), featuring large auto-fitting performer name (`Viewbox`), song title in italic champagne gold, prominent performer selfie/avatar with gold rim, `⭐ SPECIAL` and `⚓ ANCHOR` badges, and translucent Up Next pill queue.
+  - Integrated into settings view mode dropdowns, help documentation, and auto-rotate projection sequence across both `Lyracist` and `KSRotation`.
+
 - **"Welcome to our new performer" screen (`Shared/WelcomeScreen.cs`, `Lyracist`, `KSRotation`)**:
   - A full-screen welcome with six random designs (Spotlight, Neon Night, Sunset Stage, Confetti Party, Disco Rays, Red Curtain) is shown when a singer new to tonight's rotation is added; the same design never repeats back to back and long names shrink to fit.
   - Several names entered in succession are shown one after another, in order, each for the configured time. Returning singers, special guests, music requests and placeholders are skipped; clearing the rotation resets who counts as new.

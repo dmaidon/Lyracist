@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 08:49:00 -> Auto-toggle between DJ Banner and Rotation when on the same screen
+// Edited on Oct 2, 2026 @ 10:55:00 -> Add WelcomeDesignChoices and WelcomeScreenDesign property
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -129,11 +129,30 @@ public partial class SettingsViewModel
         }
     }
 
+    /// <summary>Welcome screen model/style choices, including "All (Random)".</summary>
+    public IReadOnlyList<WelcomeDesignChoice> WelcomeDesignChoices { get; } = WelcomeScreenDesigns.Choices;
+
+    /// <summary>Index of the chosen welcome screen design, or -1 for All (Random).</summary>
+    public int WelcomeScreenDesign
+    {
+        get => AppSettings.WelcomeScreenDesign;
+        set
+        {
+            if (AppSettings.WelcomeScreenDesign != value)
+            {
+                AppSettings.WelcomeScreenDesign = value;
+                WelcomeScreenService.Instance.SelectedDesign = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     [RelayCommand]
     private void PreviewWelcomeScreen()
     {
         WelcomeScreenService.Instance.Seconds = WelcomeScreenSeconds;
         WelcomeScreenService.Instance.TargetMonitorDevice = WelcomeScreenMonitor;
+        WelcomeScreenService.Instance.SelectedDesign = WelcomeScreenDesign;
         WelcomeScreenService.Instance.Preview();
     }
 
@@ -254,7 +273,8 @@ public partial class SettingsViewModel
         "Casino Slot Reels",
         "Jukebox",
         "Stadium Jumbotron",
-        "Movie Theater 'Now Showing'"
+        "Movie Theater 'Now Showing'",
+        "Purple Velvet Curtain"
     ];
 
     public List<string> ProjectionViews { get; } = [.. AllProjectionViews];

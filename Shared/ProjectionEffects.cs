@@ -1,4 +1,4 @@
-// Created on Sep 24, 2026 @ 11:30:00 -> Shared canvas effects for the Lyracist and KSRotation projection views
+// Edited on Oct 2, 2026 @ 10:00:00 -> Update CurtainMarqueeBulbChase and VelvetCurtainEffect to match WelcomeScreen RedCurtain marquee bulbs and velvet folds
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -663,6 +663,120 @@ internal sealed class MarqueeBulbChase(Canvas canvas)
         }
     }
 }
+
+// ── Purple Velvet Curtain effects ────────────────────────────────────────────────────────────────
+internal sealed class CurtainMarqueeBulbChase(Canvas canvas)
+{
+    private static readonly SolidColorBrush BulbBrush = ProjectionFx.Frozen(new SolidColorBrush(Color.FromRgb(0xFF, 0xE0, 0x8A)));
+    private static readonly Color GlowColor = Color.FromRgb(0xFF, 0xC4, 0x00);
+
+    /// <summary>Lays marquee bulbs around the outer display perimeter, pulsing in two alternating 700ms groups (matching WelcomeScreen RedCurtain).</summary>
+    public void Build()
+    {
+        Stop();
+
+        double w = canvas.ActualWidth;
+        double h = canvas.ActualHeight;
+        if (w <= 0 || h <= 0) return;
+
+        const double edge = 50;
+        const double step = 80;
+        const double radius = 13;
+
+        var points = new List<Point>();
+        for (double x = 60; x <= w - 60; x += step)
+        {
+            points.Add(new Point(x, edge));
+            points.Add(new Point(x, h - edge));
+        }
+        for (double y = 130; y <= h - 130; y += step)
+        {
+            points.Add(new Point(edge, y));
+            points.Add(new Point(w - edge, y));
+        }
+
+        for (int i = 0; i < points.Count; i++)
+        {
+            var bulb = new Ellipse
+            {
+                Width = 26,
+                Height = 26,
+                Fill = BulbBrush,
+                Effect = new DropShadowEffect { Color = GlowColor, BlurRadius = 18, ShadowDepth = 0 },
+                IsHitTestVisible = false
+            };
+            Canvas.SetLeft(bulb, points[i].X - radius);
+            Canvas.SetTop(bulb, points[i].Y - radius);
+            canvas.Children.Add(bulb);
+
+            var blink = new DoubleAnimation(
+                i % 2 == 0 ? 1.0 : 0.25,
+                i % 2 == 0 ? 0.25 : 1.0,
+                TimeSpan.FromMilliseconds(700))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+            bulb.BeginAnimation(UIElement.OpacityProperty, blink);
+        }
+    }
+
+    public void Stop()
+    {
+        foreach (UIElement child in canvas.Children)
+        {
+            child.BeginAnimation(UIElement.OpacityProperty, null);
+        }
+        canvas.Children.Clear();
+    }
+}
+
+internal static class VelvetCurtainEffect
+{
+    private static readonly LinearGradientBrush FoldShadowBrush = ProjectionFx.Frozen(new LinearGradientBrush(
+        Color.FromArgb(0x00, 0, 0, 0),
+        Color.FromArgb(0x66, 0, 0, 0),
+        0.0));
+
+    private static readonly LinearGradientBrush CrestSheenBrush = ProjectionFx.Frozen(new LinearGradientBrush(
+        Color.FromArgb(0x18, 255, 255, 255),
+        Color.FromArgb(0x00, 255, 255, 255),
+        0.0));
+
+    /// <summary>Renders full-height vertical procedural velvet drapery folds matching the WelcomeScreen RedCurtain technique.</summary>
+    public static void BuildFolds(Canvas canvas, double width = 1920, double height = 1080)
+    {
+        canvas.Children.Clear();
+        if (width <= 0 || height <= 0) return;
+
+        const double foldSpacing = 160;
+        for (double x = 0; x < width + foldSpacing; x += foldSpacing)
+        {
+            // Vertical drape shadow in fold trough
+            var fold = new Rectangle
+            {
+                Width = 70,
+                Height = height,
+                Fill = FoldShadowBrush,
+                IsHitTestVisible = false
+            };
+            Canvas.SetLeft(fold, x);
+            canvas.Children.Add(fold);
+
+            // Subtle sheen highlight along crest
+            var sheen = new Rectangle
+            {
+                Width = 40,
+                Height = height,
+                Fill = CrestSheenBrush,
+                IsHitTestVisible = false
+            };
+            Canvas.SetLeft(sheen, x + 70);
+            canvas.Children.Add(sheen);
+        }
+    }
+}
+
 
 // ── Casino Slot Reels ────────────────────────────────────────────────────────────────────────────
 internal sealed class SlotMachineEffect

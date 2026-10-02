@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 00:04:00 -> Implement 4 new projection views (Casino Slot Reels, Jukebox, Stadium Jumbotron, Movie Theater 'Now Showing')
+// Edited on Oct 2, 2026 @ 10:00:00 -> Wire up Purple Velvet Curtain projection view with bulb chase and velvet folds
 using KSRotation.Models;
 using KSRotation.ViewModels;
 using Lyracist.Shared;
@@ -48,6 +48,7 @@ namespace KSRotation.Windows
         // Canvas effects shared with Lyracist's RotationWindow (see Shared/ProjectionEffects.cs).
         // Created after InitializeComponent, since each one drives this window's named canvases.
         private readonly MarqueeBulbChase _marqueeBulbChase;
+        private readonly CurtainMarqueeBulbChase _curtainBulbChase;
         private readonly RotatingBeamsEffect _discoBeams;
         private readonly TwinklingDotsEffect _discoLightSpots;
         private readonly SynthwaveGridEffect _synthGrid;
@@ -71,6 +72,7 @@ namespace KSRotation.Windows
             _welcomeHost = Lyracist.Shared.WelcomeOverlayHost.Attach(this);
 
             _marqueeBulbChase = new MarqueeBulbChase(MarqueeBulbCanvas);
+            _curtainBulbChase = new CurtainMarqueeBulbChase(CurtainBulbCanvas);
             _discoBeams = new RotatingBeamsEffect(DiscoBeamCanvas);
             _discoLightSpots = new TwinklingDotsEffect(DiscoLightCanvas);
             _synthGrid = new SynthwaveGridEffect(SynthGridCanvas,
@@ -457,7 +459,7 @@ namespace KSRotation.Windows
 
         private FrameworkElement[] ProjectionPanels =>
         [
-            NormalPanel, CrawlPanel, MarqueePanel, VinylPanel, DiscoPanel, SynthwavePanel,
+            NormalPanel, CrawlPanel, MarqueePanel, CurtainPanel, VinylPanel, DiscoPanel, SynthwavePanel,
             FestivalPanel, SlotReelsPanel, JukeboxPanel, JumbotronPanel, TheaterPanel
         ];
 
@@ -465,6 +467,7 @@ namespace KSRotation.Windows
         {
             "Star Wars Crawl" => CrawlPanel,
             "Vegas Marquee" => MarqueePanel,
+            "Purple Velvet Curtain" => CurtainPanel,
             "Vinyl Turntable" => VinylPanel,
             "Disco Ball" => DiscoPanel,
             "Synthwave Grid" => SynthwavePanel,
@@ -502,6 +505,7 @@ namespace KSRotation.Windows
             StopJumbotronSpotlights();
             StopTheater();
             StopTheaterProjectorBeam();
+            StopCurtainChase();
         }
 
         private void ShowProjectionView(string view, bool fadeIn)
@@ -576,6 +580,12 @@ namespace KSRotation.Windows
                     StartTheater();
                     Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildTheaterProjectorBeam);
                     Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildTheaterFilmStrip);
+                    break;
+
+                case "Purple Velvet Curtain":
+                    CurtainPanel.Visibility = Visibility.Visible;
+                    Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildCurtainFolds);
+                    Dispatcher.BeginInvoke(DispatcherPriority.Render, (Action)BuildCurtainBulbs);
                     break;
 
                 default:
@@ -666,6 +676,15 @@ namespace KSRotation.Windows
             if (_vm?.SelectedProjectionView == "Vegas Marquee" && MarqueePanel.Visibility == Visibility.Visible)
             {
                 BuildMarqueeBulbs();
+            }
+        }
+
+        private void CurtainBulbCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (_vm?.SelectedProjectionView == "Purple Velvet Curtain" && CurtainPanel.Visibility == Visibility.Visible)
+            {
+                BuildCurtainBulbs();
+                BuildCurtainFolds();
             }
         }
 
@@ -911,6 +930,9 @@ namespace KSRotation.Windows
 
         private void BuildMarqueeBulbs() => _marqueeBulbChase.Build();
         private void StopMarqueeChase() => _marqueeBulbChase.Stop();
+        private void BuildCurtainBulbs() => _curtainBulbChase.Build();
+        private void StopCurtainChase() => _curtainBulbChase.Stop();
+        private void BuildCurtainFolds() => VelvetCurtainEffect.BuildFolds(CurtainFoldsCanvas, CurtainPanel.ActualWidth > 0 ? CurtainPanel.ActualWidth : 1920, CurtainPanel.ActualHeight > 0 ? CurtainPanel.ActualHeight : 1080);
 
         // The disco ball sits 14% of the way down this window's beam canvas.
         private void BuildDiscoBeams() => _discoBeams.BuildDisco(0.14);

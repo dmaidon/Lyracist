@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 12:10:00 -> Integrate VenueLocationStore and AutoDetectVenueLocationAsync
+// Edited on Oct 2, 2026 @ 10:55:00 -> Add WelcomeScreenDesign to AppSettings
 using System;
 using System.IO;
 using System.Text.Json;
@@ -912,6 +912,12 @@ public static class AppSettings
         set { _data.WelcomeScreenSeconds = value; Save(); }
     }
 
+    public static int WelcomeScreenDesign
+    {
+        get => _data.WelcomeScreenDesign;
+        set { _data.WelcomeScreenDesign = value; Save(); }
+    }
+
     public static string WifiPassword
     {
         get => _data.WifiPassword;
@@ -1119,6 +1125,7 @@ public static class AppSettings
         public bool WelcomeScreenEnabled { get; set; } = true;
         public int WelcomeScreenSeconds { get; set; } = 15;
         public string WelcomeScreenMonitor { get; set; } = string.Empty;
+        public int WelcomeScreenDesign { get; set; } = -1;
         public bool EnableKillVocal { get; set; } = false;
         public bool FloatCurrentSingerToTop { get; set; } = true;
         public double DefaultSongLengthMinutes { get; set; } = 4.75;

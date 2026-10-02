@@ -1,4 +1,4 @@
-// Created on Oct 1, 2026 @ 11:20:00 -> Tests for the shared "Welcome to our new performer" service and designs
+// Edited on Oct 2, 2026 @ 10:55:00 -> Add unit tests for WelcomeDesignChoices and SelectedDesign
 using System.IO;
 using System.Windows.Threading;
 using System.Windows;
@@ -51,6 +51,68 @@ public class WelcomeScreenTests
     public void Seconds_DefaultsToFifteen()
     {
         Assert.Equal(15, new WelcomeScreenService().Seconds);
+    }
+
+    [Fact]
+    public void WelcomeDesignChoices_ContainsAllAndEveryDesign()
+    {
+        var choices = WelcomeScreenDesigns.Choices;
+        Assert.Equal(WelcomeScreenDesigns.Count + 1, choices.Count);
+        Assert.Equal(-1, choices[0].Id);
+        Assert.Equal("All (Random)", choices[0].Name);
+        for (int i = 0; i < WelcomeScreenDesigns.Count; i++)
+        {
+            Assert.Equal(i, choices[i + 1].Id);
+            Assert.False(string.IsNullOrWhiteSpace(choices[i + 1].Name));
+        }
+    }
+
+    [Fact]
+    public void SelectedDesign_WhenFixed_AlwaysUsesSelectedDesign()
+    {
+        Exception? failure = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                var service = new WelcomeScreenService { SelectedDesign = 2, Dispatcher = Dispatcher.CurrentDispatcher };
+                service.Preview("Singer One");
+                Assert.NotNull(service.Current);
+                Assert.Equal(2, service.Current.Design);
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        Assert.Null(failure);
+    }
+
+    [Fact]
+    public void SelectedDesign_WhenNegativeOne_PicksInRange()
+    {
+        Exception? failure = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                var service = new WelcomeScreenService { SelectedDesign = -1, Dispatcher = Dispatcher.CurrentDispatcher };
+                service.Preview("Singer Two");
+                Assert.NotNull(service.Current);
+                Assert.InRange(service.Current.Design, 0, WelcomeScreenDesigns.Count - 1);
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        Assert.Null(failure);
     }
 
     [Fact]

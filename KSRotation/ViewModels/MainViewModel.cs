@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 07:53:00 -> Add AutoRotateDurationSeconds, random projection view advance, and SelectAll/ClearAll commands
+// Edited on Oct 2, 2026 @ 10:55:00 -> Save WelcomeScreenDesign in settings
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KSRotation.Models;
@@ -553,7 +553,8 @@ namespace KSRotation.ViewModels
             "Casino Slot Reels",
             "Jukebox",
             "Stadium Jumbotron",
-            "Movie Theater 'Now Showing'"
+            "Movie Theater 'Now Showing'",
+            "Purple Velvet Curtain"
             // TODO (future): "Neon Bar Sign" — dark brick-wall backdrop with a glowing neon-tube
             //                sign rendering the singer name in flickering neon colors.
         ];
@@ -3118,6 +3119,7 @@ namespace KSRotation.ViewModels
                 WelcomeScreenEnabled = WelcomeScreenEnabled,
                 WelcomeScreenSeconds = WelcomeScreenSeconds,
                 WelcomeScreenMonitor = WelcomeScreenMonitor,
+                WelcomeScreenDesign = WelcomeScreenDesign,
 #endif
                 ShowQrCodeOnRotationScreen = ShowQrCodeOnRotationScreen,
                 WifiPassword = WifiPassword,

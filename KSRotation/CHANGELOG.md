@@ -1,6 +1,20 @@
-<!-- Edited on Sep 27, 2026 @ 10:05:00 -> Add DJ banner monitor overscan warning tooltip and reference cleanup -->
+<!-- Edited on Oct 2, 2026 @ 11:00:00 -> Add Welcome Screen Style selector to CHANGELOG -->
 
 # Changelog
+
+## 2026-10-02
+
+- **Welcome Screen Style / Model Selector (`MainWindow.xaml`, `MainViewModel.Welcome.cs`, `AppSettings.cs`, `WelcomeScreen.cs`)**:
+  - Added a "Welcome Screen Style" dropdown selection to the Display tab under the DJ & Special Event Banners groupbox.
+  - Allows DJs to choose a specific welcome screen design to always display (`Spotlight`, `Neon Night`, `Sunset Stage`, `Confetti Party`, `Disco Rays`, or `Red Velvet Curtain`), or choose `All (Random)` to automatically rotate through all models.
+  - Preview button instantly shows the selected style on the audience display.
+  - Settings are persisted across sessions.
+
+- **Purple Velvet Curtain Projection View Mode (`SingerDisplayWindow.xaml(.cs)`, `MainViewModel.cs`, `MainWindow.xaml`)**:
+  - Added a 12th projection view mode inspired by the "Welcome to our new performer" `RedCurtain` design, featuring a full-screen royal purple velvet theater curtain with procedural drapery folds and soft specular highlights (`VelvetCurtainEffect`).
+  - Screen perimeter lined with warm champagne-gold bulbs (`#FFE08A`) and amber halo (`#FFC400`) pulsing in a 700ms 2-phase theatrical alternation (`CurtainMarqueeBulbChase`).
+  - Floating theatrical stage typography with deep drop shadows directly on the velvet without framing boxes.
+  - Integrated into settings view mode dropdowns, help documentation, and auto-rotate projection sequence.
 
 ## 2026-09-29
 

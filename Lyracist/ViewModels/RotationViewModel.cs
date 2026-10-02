@@ -1,4 +1,4 @@
-// Edited on Sep 21, 2026 @ 11:59:45 -> Add RoundEstimateNoticeText and RecalculateRoundEstimation for real-time round duration and ETA tracking
+// Edited on Oct 2, 2026 @ 10:55:00 -> Set SelectedDesign from AppSettings in WelcomeScreenService
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -704,6 +704,7 @@ public partial class RotationViewModel : BaseViewModel
             WelcomeScreenService.Instance.Enabled = AppSettings.WelcomeScreenEnabled;
             WelcomeScreenService.Instance.Seconds = AppSettings.WelcomeScreenSeconds;
             WelcomeScreenService.Instance.TargetMonitorDevice = AppSettings.WelcomeScreenMonitor;
+            WelcomeScreenService.Instance.SelectedDesign = AppSettings.WelcomeScreenDesign;
             WelcomeScreenService.Instance.TryWelcome(name);
         }
     }

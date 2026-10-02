@@ -1,4 +1,4 @@
-// Created on Oct 1, 2026 @ 11:00:00 -> "Welcome to our new performer" screen: settings, preview, and new-singer triggers
+// Edited on Oct 2, 2026 @ 10:55:00 -> Add WelcomeScreenDesign selection and persistence
 // Windows-only (not linked into KSRotation.Maui): the welcome overlay is WPF.
 using System;
 using System.Collections.Generic;
@@ -33,12 +33,24 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial string WelcomeScreenMonitor { get; set; } = string.Empty;
 
+        /// <summary>Chosen welcome design index (0-5), or -1 for All (Random).</summary>
+        [ObservableProperty]
+        public partial int WelcomeScreenDesign { get; set; } = -1;
+
         public ObservableCollection<WelcomeScreenChoice> WelcomeScreenChoices { get; } = [];
+
+        public IReadOnlyList<WelcomeDesignChoice> WelcomeDesignChoices { get; } = WelcomeScreenDesigns.Choices;
 
         partial void OnWelcomeScreenMonitorChanged(string value)
         {
             // ComboBox rebuilds can momentarily push null; treat that as the default and let the saved value stand.
             WelcomeScreenService.Instance.TargetMonitorDevice = value ?? string.Empty;
+            QueueSaveSettings();
+        }
+
+        partial void OnWelcomeScreenDesignChanged(int value)
+        {
+            WelcomeScreenService.Instance.SelectedDesign = value;
             QueueSaveSettings();
         }
 
@@ -67,8 +79,10 @@ namespace KSRotation.ViewModels
             WelcomeScreenSeconds = settings.WelcomeScreenSeconds;
             RefreshWelcomeScreenChoices();
             WelcomeScreenMonitor = settings.WelcomeScreenMonitor ?? string.Empty;
+            WelcomeScreenDesign = settings.WelcomeScreenDesign;
             WelcomeScreenService.Instance.Enabled = WelcomeScreenEnabled;
             WelcomeScreenService.Instance.Seconds = WelcomeScreenSeconds;
+            WelcomeScreenService.Instance.SelectedDesign = WelcomeScreenDesign;
         }
 
         /// <summary>Rebuilds the monitor list (call when monitors change) without losing the saved choice.</summary>
@@ -81,7 +95,11 @@ namespace KSRotation.ViewModels
         }
 
         [RelayCommand]
-        private void PreviewWelcomeScreen() => WelcomeScreenService.Instance.Preview();
+        private void PreviewWelcomeScreen()
+        {
+            WelcomeScreenService.Instance.SelectedDesign = WelcomeScreenDesign;
+            WelcomeScreenService.Instance.Preview();
+        }
 
         /// <summary>
         /// Called for every singer added to the rotation. Named singers (patron requests, user history,

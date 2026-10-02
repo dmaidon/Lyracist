@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 07:51:00 -> Add AutoRotateDurationSeconds to AppSettings
+// Edited on Oct 2, 2026 @ 10:55:00 -> Add WelcomeScreenDesign to AppSettings
 using Lyracist.Shared;
 
 namespace KSRotation.Models
@@ -69,6 +69,7 @@ namespace KSRotation.Models
         public int WelcomeScreenSeconds { get; init; } = 15;
 
         public string WelcomeScreenMonitor { get; init; } = string.Empty;
+        public int WelcomeScreenDesign { get; init; } = -1;
 
         public bool ShowQrCodeOnRotationScreen { get; init; } = true;
 

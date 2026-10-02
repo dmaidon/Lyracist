@@ -1,4 +1,45 @@
-// Edited on Sep 27, 2026 @ 10:05:00 -> Document TV overscan picture settings guidance for DJ Banner target monitors
+// Edited on Oct 2, 2026 @ 11:00:00 -> Document Welcome Screen Style / Model selector on Display tab
+
+
+Lyracist Pro Suite & KSRotation: Welcome Screen Style / Model Selection (`Shared/WelcomeScreen.cs`, `KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`) - (October 2026)
+
+Section: Lyracist & KSRotation / Settings & Display Configuration / Welcome Screen Settings
+
+[Overview & Purpose]
+When a singer joins tonight's rotation for the first time, a full-screen "Welcome to our new performer: <name>" screen is automatically displayed. Previously, the system strictly randomized across six built-in design models. A new "Welcome Screen Style" dropdown selection has been added to the Display settings in both Lyracist and KSRotation, allowing DJs to either lock in a specific preferred visual theme or select "All (Random)" to cycle through all designs dynamically without repeating back-to-back.
+
+[Available Models & Options]
+1. All (Random) [Default]: Automatically rotates between all six design templates, guaranteeing that the same design is never chosen twice consecutively.
+2. Spotlight: Dramatic deep-navy radial stage background with pulsing center spotlight and warm golden typography.
+3. Neon Night: Sleek midnight-black stage framed with an animated pulsing hot-pink neon glow border and cyan text.
+4. Sunset Stage: Rich purple-to-peach twilight sky with a gently breathing stylized rising sun and burgundy drop shadow typography.
+5. Confetti Party: Festive celebration backdrop with 70 colorful multi-hued confetti ribbons floating and twirling downwards.
+6. Disco Rays: Rotating multi-colored retro dance floor wedges radiating outward with a high-contrast darkened center reading area.
+7. Red Velvet Curtain: Luxurious theatrical crimson velvet drapes with procedural fabric folds framed by alternating perimeter marquee chase bulbs.
+
+[Preview & Instant Verification]
+- DJs can test and preview any selected style instantly on the audience display by clicking the "Preview" button beside the duration controls. If a specific model is selected, Preview immediately renders that design; if "All (Random)" is selected, Preview showcases a random design.
+
+
+Lyracist Pro Suite & KSRotation: Purple Velvet Curtain Billboard Projection View Mode (`RotationWindow.xaml`, `SingerDisplayWindow.xaml`, `ProjectionEffects.cs`) - (October 2026)
+
+Section: Lyracist & KSRotation / Settings & Display Configuration / Rotation Projection View Modes
+
+[Overview & Purpose]
+A 12th projection view mode, "Purple Velvet Curtain", has been added to the audience rotation billboard displays in both Lyracist and KSRotation. Inspired by the theatrical velvet curtain aesthetic of the performer welcome screen, this theme presents an opulent full-screen royal purple velvet theater backdrop with vertical procedural fabric folds and nap sheen, framed on the outer screen perimeter by warm champagne-gold marquee bulbs pulsing in an alternating 700ms dual-phase glow.
+
+[Visual Features & Stage Design]
+1. Full-Screen Royal Purple Velvet Curtain:
+   - Deep horizontal gradient backdrop (#26073E to glowing vibrant #8A21AC in the center) overlaid with procedural vertical fabric folds and subtle specular crest sheen (VelvetCurtainEffect).
+   - Designed as a full-screen open stage curtain without dark framing boxes or borders covering the fabric.
+2. Theatrical Perimeter Marquee Bulbs:
+   - 26px warm champagne-gold bulbs (#FFE08A) with radiant amber halos (#FFC400) placed 50px from all four display edges.
+   - Animated natively in two alternating groups on a 700ms repeating cycle (CurtainMarqueeBulbChase).
+3. Theatrical Stage Content:
+   - Header: "🎭 NOW ON STAGE" / Performer Header in theater gold (#FFD76A) with black glow drop shadow.
+   - Performer Name: Rendered in extra-bold white with deep black drop shadows, dynamically auto-scaled via Viewbox to prevent wrapping or truncation.
+   - Song & Details: Champagne-gold italic typography (#FFFFE9B0) with ambient drop shadow.
+   - Queue (Up Next): Floating translucent pill badges (#44000000 backing with gold borders) allowing the velvet drape folds to show through while maintaining high contrast.
 
 
 Lyracist Pro Suite & KSRotation: DJ Banner Target Monitor TV Overscan Guidance (`KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`, `HelpViewModel.cs`) - (September 2026)
@@ -2166,4 +2207,25 @@ The Display configuration experience in KSRotation and Lyracist Pro has been str
    - When multiple screens are enabled, the random picker automatically avoids immediately repeating the current screen, delivering dynamic and fresh visual variety to the audience.
 4. One-Click 'Select All' & 'Clear All' Controls:
    - Added instant '✓ Select All' and '✗ Clear All' action buttons above the screen list.
-   - Hosts can enable all 11 billboard views with a single click or clear the selection instantly to focus on just their favorites.
+   - Hosts can enable all 12 billboard views with a single click or clear the selection instantly to focus on just their favorites.
+
+================================================================================
+NEW PROJECTION VIEW: PURPLE VELVET CURTAIN
+Date: October 2, 2026
+================================================================================
+1. Theatrical Purple Velvet Stage Aesthetic:
+   - Added a brand-new 12th audience rotation projection view mode: "Purple Velvet Curtain".
+   - Features an illuminated royal purple velvet backdrop (#19042B -> #54128C -> #19042B) enhanced with procedural vertical drapery folds and soft specular lavender crest highlights.
+   - An overhead stage wash spotlight bloom casts soft ambient light down the fabric crests.
+2. Warm Champagne-Gold Marquee Lighting:
+   - The royal stage frame is encircled by chasing incandescent marquee bulbs rendered in warm champagne gold (#FFE08A) with radiant amber glow halos (#FFC107).
+   - Driven by a dedicated, zero-GPU-overhead 2-phase perimeter bulb chase animation.
+3. Performer Staging & Queue Placards:
+   - Gilded polished brass/gold royal stage placard framing the current performer.
+   - Prominently displays the performer's avatar/selfie, '⭐ SPECIAL' one-time performer badge, '⚓ ANCHOR' round-start badge, crisp white performer name with warm gold drop shadow, and song request in italicized champagne gold.
+   - An active rotation counter pill ("🎤 {N} Singers in Rotation") indicates current queue volume.
+   - "UP NEXT" strip at the base highlights upcoming performers in gilded frosted velvet pill badges.
+4. Seamless System Integration:
+   - Fully integrated across both Lyracist and KSRotation desktop applications.
+   - Available via the Billboard View Mode dropdown in Settings, the automated random screen rotation sequence, and the in-app help system.
+

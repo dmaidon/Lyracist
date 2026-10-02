@@ -1,4 +1,4 @@
-// Created on Oct 1, 2026 @ 10:30:00 -> Shared "Welcome to our new performer" full-screen overlay (service, window host, random designs)
+// Edited on Oct 2, 2026 @ 10:55:00 -> Add WelcomeDesignChoice model and selectable welcome screen style support
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +31,9 @@ public sealed record WelcomeRequest(string Name, int Design, int Seconds, string
 /// <summary>One entry of the "which screen shows the welcome" list; an empty DeviceName means the default.</summary>
 public sealed record WelcomeScreenChoice(string DeviceName, string Label);
 
+/// <summary>One model choice for the welcome screen (e.g. "All (Random)" or a specific design).</summary>
+public sealed record WelcomeDesignChoice(int Id, string Name);
+
 /// <summary>
 /// Decides when a "Welcome to our new performer" screen is shown and for how long. Both apps call
 /// <see cref="TryWelcome"/> when a singer is added; every projection window that hosts a
@@ -57,6 +60,11 @@ public sealed class WelcomeScreenService
     private int _seconds = DefaultSeconds;
 
     public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// Index of the chosen welcome screen design, or -1 for "All (Random)".
+    /// </summary>
+    public int SelectedDesign { get; set; } = -1;
 
     /// <summary>
     /// Device name of the monitor that shows the welcome in its own window. Empty (the default) overlays
@@ -175,14 +183,15 @@ public sealed class WelcomeScreenService
     {
         int design = PickDesign();
         int seconds = Seconds;
-        if (_timer == null)
+        var d = Dispatcher ?? Application.Current?.Dispatcher;
+        if (_timer == null && d != null)
         {
-            _timer = new DispatcherTimer(DispatcherPriority.Normal, Dispatcher ?? Application.Current.Dispatcher);
+            _timer = new DispatcherTimer(DispatcherPriority.Normal, d);
             _timer.Tick += OnTimerTick;
         }
-        _timer.Stop();
-        _timer.Interval = seconds * SecondsUnit;
-        _timer.Start();
+        _timer?.Stop();
+        if (_timer != null) _timer.Interval = seconds * SecondsUnit;
+        _timer?.Start();
 
         string? monitor = string.IsNullOrEmpty(TargetMonitorDevice) || WelcomeMonitorWindowHost.FindScreen(TargetMonitorDevice) == null
             ? null
@@ -214,9 +223,14 @@ public sealed class WelcomeScreenService
         CurrentChanged?.Invoke(this, request);
     }
 
-    // Random, but never the same design twice in a row.
+    // Random (unless a specific design is selected), but never the same design twice in a row when random.
     private int PickDesign()
     {
+        if (SelectedDesign >= 0 && SelectedDesign < WelcomeScreenDesigns.Count)
+        {
+            return SelectedDesign;
+        }
+
         int count = WelcomeScreenDesigns.Count;
         int design = Random.Shared.Next(count);
         if (count > 1 && design == _lastDesign) design = (design + 1 + Random.Shared.Next(count - 1)) % count;
@@ -227,7 +241,7 @@ public sealed class WelcomeScreenService
     private void RunOnUi(Action action)
     {
         var dispatcher = Dispatcher ?? Application.Current?.Dispatcher;
-        if (dispatcher == null) return;
+        if (dispatcher == null) { action(); return; }
         if (dispatcher.CheckAccess()) action();
         else dispatcher.InvokeAsync(action);
     }
@@ -496,6 +510,19 @@ public sealed class WelcomeVisual(FrameworkElement root) : IDisposable
 public static class WelcomeScreenDesigns
 {
     public const int Count = 6;
+
+    public static readonly IReadOnlyList<WelcomeDesignChoice> Choices =
+    [
+        new(-1, "All (Random)"),
+        new(0, "Spotlight"),
+        new(1, "Neon Night"),
+        new(2, "Sunset Stage"),
+        new(3, "Confetti Party"),
+        new(4, "Disco Rays"),
+        new(5, "Red Velvet Curtain"),
+    ];
+
+    public static IReadOnlyList<WelcomeDesignChoice> GetDesignChoices() => Choices;
 
     private const double W = 1920;
     private const double H = 1080;

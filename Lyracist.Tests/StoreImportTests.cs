@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 12:14:00 -> Add unit tests for companion CDG karaoke detection and standard audio classification
+// Edited on Oct 2, 2026 @ 09:30:00 -> Add retry in InspectZipForProvider cleanup to prevent transient file lock issues on Windows
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -249,7 +249,18 @@ public class StoreImportTests
         }
         finally
         {
-            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+            if (Directory.Exists(tempDir))
+            {
+                try
+                {
+                    Directory.Delete(tempDir, true);
+                }
+                catch (IOException)
+                {
+                    System.Threading.Thread.Sleep(50);
+                    if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+                }
+            }
         }
     }
 
