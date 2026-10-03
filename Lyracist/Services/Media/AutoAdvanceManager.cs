@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Exclude IsSkipped performers from auto-advance active singers list
+// Edited on Oct 3, 2026 @ 08:30:00 -> On song completion return projection to Rotation screen and wait in ReadyToStart for DJ manual start
 using System;
 using System.IO;
 using System.Linq;
@@ -175,8 +175,75 @@ public class AutoAdvanceManager
     {
         System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
         {
-            BeginGracePeriod();
+            HandleSongEnded();
         }));
+    }
+
+    /// <summary>
+    /// Lifecycle handler when a performance finishes: advances the rotation to the next singer,
+    /// returns the audience projection display to the rotation billboard, unducks fill-in music,
+    /// announces the upcoming performer, and enters ReadyToStart without automatically starting
+    /// the next song so the DJ can get the next singer ready on stage.
+    /// </summary>
+    public void HandleSongEnded()
+    {
+        lock (_stateLock)
+        {
+            if (CurrentState == AutoAdvanceState.StartingSong)
+            {
+                return;
+            }
+        }
+
+        StopGraceTimer();
+
+        // 1. Advance the finished singer in rotation
+        var finishedSinger = _rotation.GetCurrentSinger();
+        if (finishedSinger != null)
+        {
+            _rotation.DoneSingerCommand.Execute(finishedSinger);
+        }
+
+        // 2. Return projection display from lyrics back to rotation billboard
+        _displayService.IsLyricsActive = false;
+        _displayService.ShowRotationWindow();
+
+        // 3. Start / unduck fill-in background music
+        _showFlow.PlayFillIn();
+        _showFlow.UnduckFillIn();
+
+        var newCurrent = _rotation.GetCurrentSinger();
+        if (newCurrent != null)
+        {
+            string singerName = newCurrent.Name;
+            if (!string.IsNullOrWhiteSpace(newCurrent.DuetPartnerName))
+            {
+                singerName += $" & {newCurrent.DuetPartnerName}";
+            }
+            _displayService.SetRotationAnnouncement($"Next singer: {singerName} — please come to the stage", true);
+        }
+        else
+        {
+            _displayService.SetRotationAnnouncement(string.Empty, false);
+        }
+
+        _displayService.UpdateRotation([.. _rotation.Rotation]);
+
+        lock (_stateLock)
+        {
+            if (newCurrent == null)
+            {
+                CurrentState = AutoAdvanceState.Idle;
+            }
+            else if (string.IsNullOrWhiteSpace(newCurrent.SongTitle) && string.IsNullOrWhiteSpace(newCurrent.ExternalLink))
+            {
+                CurrentState = AutoAdvanceState.WaitingForSongSelection;
+            }
+            else
+            {
+                CurrentState = AutoAdvanceState.ReadyToStart;
+            }
+        }
     }
 
     /// <summary>
@@ -345,6 +412,7 @@ public class AutoAdvanceManager
             _tabletServer.LoadSong(currentSinger);
             _displayService.SetRotationAnnouncement(string.Empty, false);
             _displayService.UpdateRotation([.. _rotation.Rotation]);
+            _displayService.ShowLyricsWindow();
 
             // Start playback
             await _mediaEngine.Play();

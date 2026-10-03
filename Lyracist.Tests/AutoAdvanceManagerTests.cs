@@ -1,4 +1,4 @@
-// Created on Aug 20, 2026 @ 10:00:00 -> Add unit tests for AutoAdvanceManager state machine, rotation helpers, and safety rules
+// Edited on Oct 3, 2026 @ 08:38:00 -> Add unit test verifying song end advances rotation without starting next song
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -293,5 +293,30 @@ public class AutoAdvanceManagerTests
 
         Assert.True(bob.IsCurrent);
         Assert.False(alice.IsCurrent);
+    }
+
+    [Fact]
+    public void HandleSongEnded_AdvancesRotation_ShowsBillboard_AndDoesNotAutoPlayNextSong()
+    {
+        var (manager, rotation, mediaEngine, library) = CreateManager();
+
+        var alice = new Singer { Name = "Alice", SongTitle = "Song A", IsCurrent = true };
+        var bob = new Singer { Name = "Bob", SongTitle = "Song B" };
+        rotation.Rotation.Add(alice);
+        rotation.Rotation.Add(bob);
+
+        // When a song naturally finishes
+        manager.HandleSongEnded();
+
+        // 1. Finished singer is marked done and moved; next singer is current
+        Assert.True(bob.IsCurrent);
+        Assert.False(alice.IsCurrent);
+        Assert.Equal(1, alice.CompletedCount);
+
+        // 2. Playback is NOT started automatically - waits for DJ
+        mediaEngine.Verify(m => m.Play(), Times.Never);
+
+        // 3. State is ready to start
+        Assert.Equal(AutoAdvanceState.ReadyToStart, manager.CurrentState);
     }
 }

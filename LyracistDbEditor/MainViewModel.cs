@@ -1,4 +1,4 @@
-// Edited on Aug 27, 2026 @ 07:07:00 -> Apply Lyracist.Shared.NameFormatting.ProperCase when saving song artist and title
+// Edited on Oct 3, 2026 @ 08:24:00 -> Guard dispatcher progress updates against TaskCanceledException during metadata probe
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -775,41 +775,63 @@ public partial class MainViewModel : ObservableObject
             {
                 var probeProgress = new Progress<ScanProgress>(p =>
                 {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    try
                     {
-                        LibraryScanProgressPercent = p.Percentage;
-                        LibraryScanStatusText = $"Filling in song details… {p.FilesProcessed:N0} / {p.TotalFilesFound:N0}";
-                    });
+                        if (System.Windows.Application.Current?.Dispatcher is { HasShutdownStarted: false } disp)
+                        {
+                            disp.Invoke(() =>
+                            {
+                                LibraryScanProgressPercent = p.Percentage;
+                                LibraryScanStatusText = $"Filling in song details… {p.FilesProcessed:N0} / {p.TotalFilesFound:N0}";
+                            });
+                        }
+                    }
+                    catch (OperationCanceledException) { }
                 });
 
                 await scanner.ProbeMissingMetadataAsync(probeProgress);
 
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                try
                 {
-                    LibraryScanStatusText = "Metadata fill-in complete.";
-                    RefreshStats();
-                    Search();
-                    AppendLog("Metadata fill-in complete.");
-
-                    // Chain into the Slow Metadata Extractor automatically now that the folder
-                    // scan and duration/genre fill-in are both done — but only if the app is
-                    // actually idle (not already scanning or mid-rename), so this never steals
-                    // a run the user started themselves.
-                    if (!IsScanning && !IsRenaming)
+                    if (System.Windows.Application.Current?.Dispatcher is { HasShutdownStarted: false } disp)
                     {
-                        AppendLog("Starting slow metadata scan for songs with an unknown artist...");
-                        StartScan();
+                        disp.Invoke(() =>
+                        {
+                            LibraryScanStatusText = "Metadata fill-in complete.";
+                            RefreshStats();
+                            Search();
+                            AppendLog("Metadata fill-in complete.");
+
+                            // Chain into the Slow Metadata Extractor automatically now that the folder
+                            // scan and duration/genre fill-in are both done — but only if the app is
+                            // actually idle (not already scanning or mid-rename), so this never steals
+                            // a run the user started themselves.
+                            if (!IsScanning && !IsRenaming)
+                            {
+                                AppendLog("Starting slow metadata scan for songs with an unknown artist...");
+                                StartScan();
+                            }
+                        });
                     }
-                });
+                }
+                catch (OperationCanceledException) { }
             }
+            catch (OperationCanceledException) { }
             catch (Exception ex)
             {
                 Lyracist.Shared.Globals.LogError("Lyracist", "LyracistDbEditor metadata probe failed", ex);
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                try
                 {
-                    LibraryScanStatusText = $"Metadata fill-in error: {ex.Message}";
-                    AppendLog($"Metadata fill-in error: {ex.Message}");
-                });
+                    if (System.Windows.Application.Current?.Dispatcher is { HasShutdownStarted: false } disp)
+                    {
+                        disp.Invoke(() =>
+                        {
+                            LibraryScanStatusText = $"Metadata fill-in error: {ex.Message}";
+                            AppendLog($"Metadata fill-in error: {ex.Message}");
+                        });
+                    }
+                }
+                catch (OperationCanceledException) { }
             }
         });
     }

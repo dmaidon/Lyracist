@@ -1,4 +1,4 @@
-// Edited on Sep 17, 2026 @ 23:31:00 -> Support IsSkipped in rotation sync and current/next promotion
+// Edited on Oct 3, 2026 @ 08:35:00 -> Return to KaraokePage on song end, reset playback state, and show lyrics display on playback
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -168,6 +168,34 @@ public partial class KaraokeViewModel : BaseViewModel
         SeekPosition = _mediaEngine.Position;
         Duration = _mediaEngine.Duration;
         _suppressSeekPositionCallback = false;
+    }
+
+    private void OnSongEnded()
+    {
+        System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            IsPlaying = false;
+            _suppressSeekPositionCallback = true;
+            SeekPosition = 0;
+            Duration = 0;
+            _suppressSeekPositionCallback = false;
+
+            // Return host view to Karaoke screen
+            _navigation.Navigate(typeof(Views.Pages.KaraokePage));
+
+            UpdateNowNext();
+            var current = Rotation.GetCurrentSinger();
+            if (current != null && (!string.IsNullOrWhiteSpace(current.SongTitle) || !string.IsNullOrWhiteSpace(current.ExternalLink)))
+            {
+                CurrentSongName = !string.IsNullOrWhiteSpace(current.Artist)
+                    ? $"{current.Artist} - {current.SongTitle}"
+                    : (current.SongTitle ?? "Ready");
+            }
+            else
+            {
+                CurrentSongName = "No Song Loaded";
+            }
+        }));
     }
 
     [ObservableProperty]
@@ -603,6 +631,7 @@ public partial class KaraokeViewModel : BaseViewModel
 
         _mediaEngine.FrameReady += OnFrameReady;
         _mediaEngine.PositionChanged += OnMediaPositionChanged;
+        _mediaEngine.SongEnded += OnSongEnded;
         _libraryService.LibraryUpdated += OnLibraryUpdated;
         LoadSingerNames();
         RefreshQrCode();
@@ -1018,6 +1047,7 @@ public partial class KaraokeViewModel : BaseViewModel
         ExternalPerformanceUrl = string.Empty;
 
         await _mediaEngine.LoadSong(song.AudioPath);
+        _displayService.ShowLyricsWindow();
         await _mediaEngine.Play();
         IsPlaying = true;
 
@@ -1507,6 +1537,7 @@ public partial class KaraokeViewModel : BaseViewModel
 
             SelectedSongPath = localPath;
             await _mediaEngine.LoadSong(localPath);
+            _displayService.ShowLyricsWindow();
             await _mediaEngine.Play();
             IsPlaying = true;
             NotifyAudioPropertiesChanged();

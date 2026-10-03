@@ -1,4 +1,4 @@
-// Edited on Sep 22, 2026 @ 07:58:00 -> Initialize _autoRotateDurationSeconds from DisplayPreferences in SettingsViewModel
+// Edited on Oct 3, 2026 @ 08:22:00 -> Guard library update dispatches against TaskCanceledException during shutdown
 using System;
 using System.Collections.Generic;
 using Lyracist.Shared;
@@ -192,40 +192,75 @@ public partial class SettingsViewModel : BaseViewModel
 
         _library.LibraryUpdated += (_, _) =>
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                IsScanning = false;
-                RefreshLibraryStatus();
-            });
+                if (System.Windows.Application.Current?.Dispatcher is { HasShutdownStarted: false } disp)
+                {
+                    disp.Invoke(() =>
+                    {
+                        IsScanning = false;
+                        RefreshLibraryStatus();
+                    });
+                }
+            }
+            catch (OperationCanceledException) { }
         };
 
         _library.ScanProgressChanged += (_, progress) =>
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                LibraryStatus = $"Scanning… {progress.FilesProcessed:N0} / {progress.TotalFilesFound:N0} files ({progress.Percentage:F0}%)";
-            });
+                if (System.Windows.Application.Current?.Dispatcher is { HasShutdownStarted: false } disp)
+                {
+                    disp.Invoke(() =>
+                    {
+                        LibraryStatus = $"Scanning… {progress.FilesProcessed:N0} / {progress.TotalFilesFound:N0} files ({progress.Percentage:F0}%)";
+                    });
+                }
+            }
+            catch (OperationCanceledException) { }
         };
 
         _library.ScanFailed += (_, message) =>
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                LibraryStatus = $"Scan failed: {message}";
-            });
+                if (System.Windows.Application.Current?.Dispatcher is { HasShutdownStarted: false } disp)
+                {
+                    disp.Invoke(() =>
+                    {
+                        LibraryStatus = $"Scan failed: {message}";
+                    });
+                }
+            }
+            catch (OperationCanceledException) { }
         };
 
         _library.MetadataProbeProgressChanged += (_, progress) =>
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                LibraryStatus = $"Filling in song details… {progress.FilesProcessed:N0} / {progress.TotalFilesFound:N0} ({progress.Percentage:F0}%)";
-            });
+                if (System.Windows.Application.Current?.Dispatcher is { HasShutdownStarted: false } disp)
+                {
+                    disp.Invoke(() =>
+                    {
+                        LibraryStatus = $"Filling in song details… {progress.FilesProcessed:N0} / {progress.TotalFilesFound:N0} ({progress.Percentage:F0}%)";
+                    });
+                }
+            }
+            catch (OperationCanceledException) { }
         };
 
         _library.MetadataProbeCompleted += (_, _) =>
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(RefreshLibraryStatus);
+            try
+            {
+                if (System.Windows.Application.Current?.Dispatcher is { HasShutdownStarted: false } disp)
+                {
+                    disp.Invoke(RefreshLibraryStatus);
+                }
+            }
+            catch (OperationCanceledException) { }
         };
 
         _display.ScreenAssignmentsChanged += OnScreenAssignmentsChanged;

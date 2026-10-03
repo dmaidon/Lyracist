@@ -1,11 +1,23 @@
-<!-- Edited on Oct 2, 2026 @ 11:30:00 -> Add Dedicated Welcome Screen GroupBox to CHANGELOG -->
-Last Edit: Oct 2, 2026 - Dedicated Welcome Screen Settings GroupBox Across Lyracist & KSRotation
+<!-- Edited on Oct 3, 2026 @ 08:48:00 -> Add Song End Return to Karaoke Screen and TaskCanceledException fix to CHANGELOG -->
+Last Edit: Oct 3, 2026 - Song End Return to Karaoke Screen & Library TaskCanceledException Fix
 
 # Changelog
 
 All notable changes to the Lyracist project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [26.10.1.0] - 2026-10-01
+## [26.10.1.0] - 2026-10-03
+
+### Fixed & Enhanced
+- **Song End Automatic Return to Karaoke Screen & DJ Manual Start (`AutoAdvanceManager.cs`, `KaraokeViewModel.cs`, `AppSettings.cs`)**:
+  - Automatically navigates the main hosting window back to the primary Karaoke screen (`KaraokePage`) upon song completion (`_mediaEngine.SongEnded`), giving the DJ instant visibility of the singer queue, search, and playback controls.
+  - Returns the audience display projection from the lyrics window back to the full-screen Rotation Billboard (`ShowRotationWindow()`, `IsLyricsActive = false`), updating upcoming rotation order and announcing the next performer to approach the stage.
+  - Prevents automated advancement into playing the next song over an empty stage; advances the rotation, unducks fill-in background music, and waits safely in `ReadyToStart` until the DJ initiates playback with "▶ Start Song" once the singer is situated.
+  - Changed default `EnableAutoAdvance` from `true` to `false` in `AppSettings.cs` to ensure manual DJ starting is standard across performances.
+  - Added unit test coverage in `AutoAdvanceManagerTests.cs` verifying rotation advancement, billboard restoration, and zero auto-play on song completion.
+
+- **Dispatcher Shutdown & Cancellation Guarding in Library Probing (`LibraryService.cs`, `SettingsViewModel.cs`, `MainViewModel.cs`)**:
+  - Resolved `System.Threading.Tasks.TaskCanceledException` crashes occurring when background library metadata probes or directory scans dispatch UI updates while the WPF dispatcher is shutting down or canceled.
+  - Added safe dispatch guards checking `HasShutdownStarted: false` and catching `OperationCanceledException` across `SettingsViewModel.cs`, `LibraryService.cs`, and `LyracistDbEditor/MainViewModel.cs`.
 
 ### Added
 - **Dedicated "New Performer Welcome Screen" Settings GroupBox (`KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`)**:

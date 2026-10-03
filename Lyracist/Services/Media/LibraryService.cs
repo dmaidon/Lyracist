@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 12:13:00 -> Pass isKaraoke flag to SearchService queries to prevent search limit starvation
+// Edited on Oct 3, 2026 @ 08:20:00 -> Guard against TaskCanceledException when Dispatcher is canceled or shutting down during library scan and probing
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -52,8 +52,19 @@ public class LibraryService : ILibraryService
 
             try
             {
-                var scanProgress = new Progress<ScanProgress>(p => ScanProgressChanged?.Invoke(this, p));
+                var scanProgress = new Progress<ScanProgress>(p =>
+                {
+                    try
+                    {
+                        ScanProgressChanged?.Invoke(this, p);
+                    }
+                    catch (OperationCanceledException) { }
+                });
                 await scanningService.ScanDirectories(dirs, scanProgress);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
             }
             catch (Exception ex)
             {
@@ -73,9 +84,20 @@ public class LibraryService : ILibraryService
             // with whatever songs are still missing metadata next time a scan runs.
             try
             {
-                var probeProgress = new Progress<ScanProgress>(p => MetadataProbeProgressChanged?.Invoke(this, p));
+                var probeProgress = new Progress<ScanProgress>(p =>
+                {
+                    try
+                    {
+                        MetadataProbeProgressChanged?.Invoke(this, p);
+                    }
+                    catch (OperationCanceledException) { }
+                });
                 await scanningService.ProbeMissingMetadataAsync(probeProgress);
                 MetadataProbeCompleted?.Invoke(this, EventArgs.Empty);
+            }
+            catch (OperationCanceledException)
+            {
+                // App or dispatcher shutting down / canceled — exit cleanly
             }
             catch (Exception ex)
             {

@@ -2249,3 +2249,17 @@ Date: October 2, 2026
    - Fully integrated across both Lyracist and KSRotation desktop applications.
    - Available via the Billboard View Mode dropdown in Settings, the automated random screen rotation sequence, and the in-app help system.
 
+
+Section: Song End Return to Karaoke Screen & DJ Manual Start Workflow (Updated Oct 3, 2026)
+
+[Overview & Operational Flow]
+To ensure smooth hosting transitions during live shows, Lyracist Pro provides an optimized workflow when a singer completes their performance:
+1. Automatic Return to Karaoke Control Screen:
+   - When the currently playing song finishes, the main host window immediately navigates back to the primary Karaoke screen (KaraokePage).
+   - This provides the DJ with instant access to the singer queue, search bar, and playback controls without requiring manual tab clicks.
+2. Audience Display Reset to Rotation Billboard:
+   - The secondary projection window seamlessly closes the lyrics view and restores the full-screen Rotation Billboard.
+   - The billboard displays the upcoming singer queue and automatically flashes an announcement welcoming the next singer to the stage.
+3. DJ-Controlled Performance Start (No Automatic Song Progression):
+   - Rather than automatically launching the next song over an empty stage, Lyracist marks the completed singer done, queues the next performer, starts fill-in background music, and waits safely in 'Ready to Start'.
+   - The DJ initiates playback with the '▶ Start Song' button once the next singer is stationed on stage with their microphone.

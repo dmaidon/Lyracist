@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 11:27:00 -> Safely handle locked manual docx file in UpdateUserManualsForSpecialSinger
+// Edited on Oct 3, 2026 @ 08:52:00 -> Add User Manual update test for Song End Return to Karaoke Screen and DJ Manual Start
 using System;
 using System.IO;
 using Xunit;
@@ -2946,6 +2946,154 @@ The Display configuration experience in KSRotation and Lyracist Pro has been str
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " UnifiedScreenRotationNotice";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManual_SongEndReturnKaraokeScreen_Oct2026()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Song End Return to Karaoke Screen & DJ Manual Start Workflow (Updated Oct 3, 2026)
+
+[Overview & Operational Flow]
+To ensure smooth hosting transitions during live shows, Lyracist Pro provides an optimized workflow when a singer completes their performance:
+1. Automatic Return to Karaoke Control Screen:
+   - When the currently playing song finishes, the main host window immediately navigates back to the primary Karaoke screen (KaraokePage).
+   - This provides the DJ with instant access to the singer queue, search bar, and playback controls without requiring manual tab clicks.
+2. Audience Display Reset to Rotation Billboard:
+   - The secondary projection window seamlessly closes the lyrics view and restores the full-screen Rotation Billboard.
+   - The billboard displays the upcoming singer queue and automatically flashes an announcement welcoming the next singer to the stage.
+3. DJ-Controlled Performance Start (No Automatic Song Progression):
+   - Rather than automatically launching the next song over an empty stage, Lyracist marks the completed singer done, queues the next performer, starts fill-in background music, and waits safely in 'Ready to Start'.
+   - The DJ initiates playback with the '▶ Start Song' button once the next singer is stationed on stage with their microphone.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Song End Return to Karaoke Screen & DJ Manual Start Workflow"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Song End Return to Karaoke Screen & DJ Manual Start Workflow"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    var headingPara = body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.ParagraphStyleId { Val = "Heading2" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                                new DocumentFormat.OpenXml.Wordprocessing.Bold(),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "1F497D" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Song End Return to Karaoke Screen & DJ Manual Start Workflow"))));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        bool isSubHead = line.StartsWith("[");
+                                        var p = body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph());
+                                        var r = p.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Run());
+                                        if (isSubHead)
+                                        {
+                                            r.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                                new DocumentFormat.OpenXml.Wordprocessing.Bold(),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "1F497D" }));
+                                        }
+                                        r.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Text(line));
+                                    }
+                                    doc.MainDocumentPart?.Document?.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("SongEndReturnKaraokeNotice"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Song End Return to Karaoke Screen & DJ Manual Start Workflow", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
+
+                                double yPos = 60;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    bool isSection = line.StartsWith("[");
+                                    var font = isSection ? sectionFont : bodyFont;
+                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
+                                    double lineHeight = isSection ? 15 : 12.0;
+
+                                    if (yPos + lineHeight > 750)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.Letter;
+                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                        yPos = 36;
+                                    }
+
+                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
+                                    yPos += lineHeight;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " SongEndReturnKaraokeNotice";
                                 doc.Save(pdfPath);
                             }
                         }

@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 10:55:00 -> Add WelcomeScreenDesign to AppSettings
+// Edited on Oct 3, 2026 @ 08:26:00 -> Set default EnableAutoAdvance to false so song completion does not automatically proceed to the next song
 using System;
 using System.IO;
 using System.Text.Json;
@@ -1242,7 +1242,7 @@ public static class AppSettings
         public string CdgBackdropMode { get; set; } = "Original Color";
         public int FillInDelaySeconds { get; set; } = 5;
         public Dictionary<string, List<string>> VenueGraphics { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-        public bool EnableAutoAdvance { get; set; } = true;
+        public bool EnableAutoAdvance { get; set; } = false;
         public int AutoAdvanceCountdownSeconds { get; set; } = 10;
         public string SelectedKaraokeAudioDevice { get; set; } = string.Empty;
         public string SelectedBgmAudioDevice { get; set; } = string.Empty;
