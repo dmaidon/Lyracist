@@ -1,4 +1,4 @@
-<!-- Edited on Oct 2, 2026 @ 11:25:00 -> Move Welcome Screen settings to dedicated GroupBox -->
+<!-- Edited on Oct 3, 2026 @ 12:36:00 -> Provide checkable RadioButtons for Visualizer Mode in SettingsPage -->
 <Page x:Class="Lyracist.Views.Pages.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -523,6 +523,35 @@
                                         </Grid.ColumnDefinitions>
                                         <Slider Grid.Column="0" Minimum="2" Maximum="8" TickFrequency="0.25" Value="{Binding DefaultSongLengthMinutes, Mode=TwoWay}" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{Binding DefaultSongLengthMinutes, StringFormat='{}{0:0.00} min'}" FontSize="12" FontWeight="Bold" Width="60" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0" />
+                                    </Grid>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <!-- Lyrics Screen Audio Visualizer -->
+                            <GroupBox Header="Lyrics Screen Audio Visualizer" Style="{StaticResource BlueSettingsGroupBoxStyle}">
+                                <StackPanel>
+                                    <CheckBox Content="Enable Audio Visualizer" IsChecked="{Binding EnableLyricsVisualizer, Mode=TwoWay}" Margin="0,0,0,8" ToolTip="Renders an animated audio spectrum visualizer along the bottom of the active Lyrics projection screen." />
+
+                                    <TextBlock Text="Visualizer Mode" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <RadioButton Content="Audio Spectrum (Live FFT)" IsChecked="{Binding IsVisualizerModeFft, Mode=TwoWay}" Margin="0,0,16,0" GroupName="VisualizerModeGroup" />
+                                        <RadioButton Content="Simulated / Ambient" IsChecked="{Binding IsVisualizerModeSimulated, Mode=TwoWay}" GroupName="VisualizerModeGroup" />
+                                    </StackPanel>
+
+                                    <TextBlock Text="Visualizer Color Style" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding VisualizerStyles}" SelectedItem="{Binding LyricsVisualizerStyle, Mode=TwoWay}" Margin="0,0,0,10" />
+
+                                    <TextBlock Text="Bar Width" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding VisualizerBarWidths}" SelectedItem="{Binding LyricsVisualizerBarWidth, Mode=TwoWay}" Margin="0,0,0,10" />
+
+                                    <TextBlock Text="Visualizer Opacity" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Slider Grid.Column="0" Minimum="0.1" Maximum="1.0" TickFrequency="0.05" Value="{Binding LyricsVisualizerOpacity, Mode=TwoWay}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding LyricsVisualizerOpacity, StringFormat='{}{0:P0}'}" FontSize="12" FontWeight="Bold" Width="45" TextAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0" />
                                     </Grid>
                                 </StackPanel>
                             </GroupBox>

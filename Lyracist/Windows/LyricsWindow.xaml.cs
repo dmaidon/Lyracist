@@ -1,10 +1,12 @@
-// Edited on Aug 20, 2026 @ 09:54:00 -> Add LoadSong methods to LyricsWindow for ProjectionWindow synchronization
+// Edited on Oct 3, 2026 @ 12:44:00 -> Make GetBarBrush internal static for AdjustSynthDisplayWindow dialog preview
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Lyracist.Models;
 using Lyracist.Services.Display;
+using Lyracist.Services.Media;
 using Lyracist.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,18 +15,30 @@ namespace Lyracist.Windows;
 public partial class LyricsWindow : Window
 {
     private readonly LyricsWindowViewModel _vm;
+    private readonly IAudioSpectrumService? _spectrumService;
     private readonly System.Random _rng = new();
-    private double[] _barHeights = new double[40];
-    private double[] _targetHeights = new double[40];
+    private double[] _barHeights = [];
+    private double[] _targetHeights = [];
+    private string _currentStyle = string.Empty;
+    private string _currentBarWidth = string.Empty;
 
-    public LyricsWindow(LyricsWindowViewModel vm)
+    public LyricsWindow(LyricsWindowViewModel vm, IAudioSpectrumService? spectrumService = null)
     {
         InitializeComponent();
         _vm = vm;
         DataContext = vm;
+        _spectrumService = spectrumService ?? App.AppHost.Services.GetService<IAudioSpectrumService>();
 
         Lyracist.Services.Tablet.LyricsHub.ReactionReceived += OnReactionReceived;
         System.Windows.Media.CompositionTarget.Rendering += OnCompositionTargetRendering;
+        Closed += OnWindowClosed;
+    }
+
+    private void OnWindowClosed(object? sender, EventArgs e)
+    {
+        System.Windows.Media.CompositionTarget.Rendering -= OnCompositionTargetRendering;
+        Lyracist.Services.Tablet.LyricsHub.ReactionReceived -= OnReactionReceived;
+        _spectrumService?.Stop();
     }
 
     public void LoadSong(string songTitle, string artist)
@@ -124,6 +138,22 @@ public partial class LyricsWindow : Window
     {
         if (!IsVisible || VisualizerCanvas == null) return;
 
+        bool isVisualizerEnabled = Lyracist.Core.Helpers.AppSettings.EnableLyricsVisualizer;
+        if (!isVisualizerEnabled)
+        {
+            if (VisualizerCanvas.Visibility != Visibility.Collapsed)
+            {
+                VisualizerCanvas.Visibility = Visibility.Collapsed;
+            }
+            _spectrumService?.Stop();
+            return;
+        }
+
+        if (VisualizerCanvas.Visibility != Visibility.Visible)
+        {
+            VisualizerCanvas.Visibility = Visibility.Visible;
+        }
+
         double width = VisualizerCanvas.ActualWidth;
         double height = VisualizerCanvas.ActualHeight;
         if (width <= 0 || height <= 0) return;
@@ -131,41 +161,96 @@ public partial class LyricsWindow : Window
         var karaoke = App.AppHost.Services.GetService<KaraokeViewModel>();
         bool isPlaying = karaoke != null && karaoke.IsPlaying;
 
-        int numBars = 40;
-        double barWidth = width / numBars;
-        double decay = 0.15;
-        double rise = 0.4;
+        string currentStyle = Lyracist.Core.Helpers.AppSettings.LyricsVisualizerStyle;
+        string currentBarWidth = Lyracist.Core.Helpers.AppSettings.LyricsVisualizerBarWidth;
+        string currentMode = Lyracist.Core.Helpers.AppSettings.LyricsVisualizerMode;
 
-        // Populate visualizer rectangles once and reuse them to prevent constant layout recalculations
-        if (VisualizerCanvas.Children.Count != numBars)
+        // Determine bar spacing and target width
+        double barWidthPx = currentBarWidth switch
+        {
+            "Slim" => 10,
+            "Wide" => 28,
+            "Extra Wide" => 42,
+            _ => 18 // "Normal"
+        };
+        double barSpacing = currentBarWidth switch
+        {
+            "Slim" => 2,
+            "Wide" => 4,
+            "Extra Wide" => 6,
+            _ => 3
+        };
+
+        int numBars = Math.Clamp((int)(width / (barWidthPx + barSpacing)), 8, 80);
+        double slotWidth = width / numBars;
+        double actualBarWidth = Math.Max(2.0, slotWidth - barSpacing);
+
+        // Recreate rectangles if count, style, or width mode changed
+        if (VisualizerCanvas.Children.Count != numBars || _currentStyle != currentStyle || _currentBarWidth != currentBarWidth)
         {
             VisualizerCanvas.Children.Clear();
+            _currentStyle = currentStyle;
+            _currentBarWidth = currentBarWidth;
+            _barHeights = new double[numBars];
+            _targetHeights = new double[numBars];
+
             for (int i = 0; i < numBars; i++)
             {
+                var brush = GetBarBrush(currentStyle, i, numBars);
+                brush.Freeze();
                 var rect = new System.Windows.Shapes.Rectangle
                 {
                     RadiusX = 3,
                     RadiusY = 3,
-                    Fill = new System.Windows.Media.LinearGradientBrush
-                    {
-                        StartPoint = new System.Windows.Point(0, 1),
-                        EndPoint = new System.Windows.Point(0, 0),
-                        GradientStops =
-                        {
-                            new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(37, 99, 235), 0.0), // Blue
-                            new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(168, 85, 247), 0.5), // Purple
-                            new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(236, 72, 153), 1.0) // Pink
-                        }
-                    }
+                    Fill = brush
                 };
                 VisualizerCanvas.Children.Add(rect);
             }
         }
 
+        bool isLiveFft = currentMode == "Audio Spectrum (Live FFT)";
+        float[]? fftBands = null;
+
+        if (isLiveFft && _spectrumService != null)
+        {
+            if (!_spectrumService.IsCapturing)
+            {
+                _spectrumService.Start();
+            }
+            fftBands = _spectrumService.GetFrequencyBands(numBars);
+        }
+        else
+        {
+            _spectrumService?.Stop();
+        }
+
+        double decay = 0.16;
+        double rise = isLiveFft ? 0.85 : 0.55; // live FFT is already smoothed in the service
+        double time = System.DateTime.Now.TimeOfDay.TotalSeconds;
+
         for (int i = 0; i < numBars; i++)
         {
-            if (isPlaying)
+            if (isLiveFft && fftBands != null && fftBands.Length > i)
             {
+                float bandEnergy = fftBands[i];
+                if (bandEnergy > 0.005f)
+                {
+                    _targetHeights[i] = bandEnergy * height * 0.92;
+                }
+                else if (isPlaying)
+                {
+                    // Gentle baseline when song is playing during quiet passages
+                    _targetHeights[i] = (Math.Sin(time * 2.5 + i * 0.4) + 1.0) * 0.5 * height * 0.08;
+                }
+                else
+                {
+                    // Ambient ripple when idle / paused
+                    _targetHeights[i] = (Math.Sin(time * 1.5 + i * 0.25) + 1.0) * 0.5 * height * 0.10;
+                }
+            }
+            else if (isPlaying)
+            {
+                // Simulated mode when playing
                 if (_rng.Next(10) > 7)
                 {
                     double volFactor = karaoke != null ? (karaoke.Volume / 100.0) : 1.0;
@@ -174,22 +259,136 @@ public partial class LyricsWindow : Window
             }
             else
             {
-                double time = System.DateTime.Now.TimeOfDay.TotalSeconds;
-                _targetHeights[i] = (System.Math.Sin(time * 2.0 + i * 0.3) + 1.0) * 0.5 * height * 0.15;
+                // Simulated mode when paused
+                _targetHeights[i] = (Math.Sin(time * 2.0 + i * 0.3) + 1.0) * 0.5 * height * 0.15;
             }
 
             _barHeights[i] += (_targetHeights[i] - _barHeights[i]) * (isPlaying ? rise : decay);
 
             if (VisualizerCanvas.Children[i] is System.Windows.Shapes.Rectangle rect)
             {
-                rect.Width = System.Math.Max(1.0, barWidth - 2);
-                rect.Height = System.Math.Max(4, _barHeights[i]);
-                rect.Opacity = isPlaying ? 0.65 : 0.25;
+                rect.Width = actualBarWidth;
+                rect.Height = Math.Max(3, _barHeights[i]);
+                rect.Opacity = isPlaying ? 0.95 : 0.40;
 
-                Canvas.SetLeft(rect, i * barWidth + 1);
+                Canvas.SetLeft(rect, i * slotWidth + barSpacing / 2);
                 Canvas.SetBottom(rect, 0);
             }
         }
+    }
+
+    internal static System.Windows.Media.Brush GetBarBrush(string style, int barIndex, int totalBars)
+    {
+        switch (style)
+        {
+            case "Cyberpunk":
+                return new System.Windows.Media.LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 1),
+                    EndPoint = new System.Windows.Point(0, 0),
+                    GradientStops =
+                    {
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(0, 240, 255), 0.0), // Cyan
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(121, 40, 202), 0.5), // Violet
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(255, 0, 127), 1.0)  // Fuchsia
+                    }
+                };
+            case "Emerald Pulse":
+                return new System.Windows.Media.LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 1),
+                    EndPoint = new System.Windows.Point(0, 0),
+                    GradientStops =
+                    {
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(6, 95, 70), 0.0),    // Dark Emerald
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(16, 185, 129), 0.5), // Vibrant Jade
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(132, 204, 22), 1.0)  // Neon Lime
+                    }
+                };
+            case "Solar Flare":
+                return new System.Windows.Media.LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 1),
+                    EndPoint = new System.Windows.Point(0, 0),
+                    GradientStops =
+                    {
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(220, 38, 38), 0.0),  // Crimson
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(245, 158, 11), 0.5), // Vivid Amber
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(253, 224, 71), 1.0)  // Electric Gold
+                    }
+                };
+            case "Electric Blue":
+                return new System.Windows.Media.LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 1),
+                    EndPoint = new System.Windows.Point(0, 0),
+                    GradientStops =
+                    {
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(30, 58, 138), 0.0),  // Deep Navy
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(2, 132, 199), 0.5),  // Azure
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(103, 232, 249), 1.0) // Ice Cyan
+                    }
+                };
+            case "Rainbow Spectrum":
+                double hue = totalBars > 1 ? (barIndex / (double)(totalBars - 1)) * 300.0 : 0;
+                var baseColor = HsvToRgb(hue, 0.9, 0.9);
+                var topColor = HsvToRgb(hue, 0.4, 1.0);
+                return new System.Windows.Media.LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 1),
+                    EndPoint = new System.Windows.Point(0, 0),
+                    GradientStops =
+                    {
+                        new System.Windows.Media.GradientStop(baseColor, 0.0),
+                        new System.Windows.Media.GradientStop(topColor, 1.0)
+                    }
+                };
+            case "Monochrome Glow":
+                return new System.Windows.Media.LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 1),
+                    EndPoint = new System.Windows.Point(0, 0),
+                    GradientStops =
+                    {
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(51, 65, 85), 0.0),    // Slate
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(148, 163, 184), 0.5), // Silver
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(255, 255, 255), 1.0)  // Pure White
+                    }
+                };
+            case "Neon Sunset":
+            default:
+                return new System.Windows.Media.LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 1),
+                    EndPoint = new System.Windows.Point(0, 0),
+                    GradientStops =
+                    {
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(37, 99, 235), 0.0),  // Blue
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(168, 85, 247), 0.5), // Purple
+                        new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromRgb(236, 72, 153), 1.0)  // Pink
+                    }
+                };
+        }
+    }
+
+    private static System.Windows.Media.Color HsvToRgb(double h, double s, double v)
+    {
+        int hi = (int)(Math.Floor(h / 60.0)) % 6;
+        double f = h / 60.0 - Math.Floor(h / 60.0);
+        byte vByte = (byte)(v * 255);
+        byte p = (byte)(v * (1 - s) * 255);
+        byte q = (byte)(v * (1 - f * s) * 255);
+        byte t = (byte)(v * (1 - (1 - f) * s) * 255);
+
+        return hi switch
+        {
+            0 => System.Windows.Media.Color.FromRgb(vByte, t, p),
+            1 => System.Windows.Media.Color.FromRgb(q, vByte, p),
+            2 => System.Windows.Media.Color.FromRgb(p, vByte, t),
+            3 => System.Windows.Media.Color.FromRgb(p, q, vByte),
+            4 => System.Windows.Media.Color.FromRgb(t, p, vByte),
+            _ => System.Windows.Media.Color.FromRgb(vByte, p, q)
+        };
     }
 
     private void OnReactionReceived(string emoji)

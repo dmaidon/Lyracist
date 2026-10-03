@@ -1,4 +1,4 @@
-<!-- Edited on Sep 22, 2026 @ 08:50:30 -> Add live DJ banner preview card under DJ Banner selector -->
+<!-- Edited on Oct 3, 2026 @ 12:46:00 -> Add Adjust Synth Display buttons to KaraokePage for DJ visualizer settings modal -->
 <Page x:Class="Lyracist.Views.Pages.KaraokePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -268,6 +268,17 @@
                                FontSize="11"
                                FontWeight="Bold"
                                ToolTip="Skip current singer in rotation" />
+
+                    <ui:Button x:Name="AdjustSynthDisplayButton"
+                               Content="🎛 Adjust Synth Display"
+                               Command="{Binding OpenAdjustSynthDisplayCommand}"
+                               Appearance="Secondary"
+                               Height="28"
+                               Padding="10,2"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Margin="8,0,0,0"
+                               ToolTip="Configure the audio spectrum visualizer (mode, theme, bar width, and opacity) on the Lyrics projection screen" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -1129,7 +1140,19 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="Lyrics Preview Monitor (Click to Toggle Theater Mode)" FontSize="14" FontWeight="SemiBold" Foreground="#888888" HorizontalAlignment="Center" Margin="0,0,0,10" />
+                            <Grid Grid.Row="0" Margin="0,0,0,10">
+                                <TextBlock Text="Lyrics Preview Monitor (Click to Toggle Theater Mode)" FontSize="13" FontWeight="SemiBold" Foreground="#888888" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                <ui:Button Content="🎛 Adjust Synth Display"
+                                           Command="{Binding OpenAdjustSynthDisplayCommand}"
+                                           Appearance="Secondary"
+                                           Padding="8,2"
+                                           Height="24"
+                                           FontSize="10.5"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           ToolTip="Configure audio spectrum visualizer on the Lyrics projection screen" />
+                            </Grid>
 
                             <Border Grid.Row="1" MinHeight="220" CornerRadius="6" Background="Black" ClipToBounds="True" BorderBrush="#333" BorderThickness="1">
                                 <ui:Button Command="{Binding TogglePreviewExpandCommand}"
@@ -1358,6 +1381,14 @@
                                                     <TextBlock Text="Lyrics Projection" VerticalAlignment="Center" />
                                                 </StackPanel>
                                             </wpf:ToggleButton>
+                                            <ui:Button Content="🎛 Adjust Synth Display"
+                                                       Command="{Binding OpenAdjustSynthDisplayCommand}"
+                                                       Appearance="Secondary"
+                                                       HorizontalAlignment="Stretch"
+                                                       Height="26"
+                                                       FontSize="10.5"
+                                                       Margin="0,4,0,0"
+                                                       ToolTip="Configure visualizer mode, theme, and opacity" />
                                         </StackPanel>
 
                                         <!-- Rotation Monitor -->

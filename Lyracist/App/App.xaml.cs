@@ -1,4 +1,4 @@
-// Edited on Sep 6, 2026 @ 18:13:00 -> Add ClearAbandonedMigrationLocks and migration retry logic to prevent SQLite Error 11
+// Edited on Oct 3, 2026 @ 12:14:00 -> Register IAudioSpectrumService in DI container
 using System;
 using System.Linq;
 using System.Windows;
@@ -128,6 +128,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<ICdgFrameScheduler, CdgFrameScheduler>();
                 services.AddSingleton<IVideoBackend, LibVlcVideoBackend>();
                 services.AddSingleton<IMediaEngine, MediaEngine>();
+                services.AddSingleton<IAudioSpectrumService, AudioSpectrumService>();
                 services.AddSingleton<ICastingService, CastingService>();
                 services.AddSingleton<MiracastController>();
                 services.AddSingleton<ChromecastSender>();

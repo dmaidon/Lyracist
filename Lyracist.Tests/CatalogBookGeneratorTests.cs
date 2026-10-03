@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 08:52:00 -> Add User Manual update test for Song End Return to Karaoke Screen and DJ Manual Start
+// Edited on Oct 3, 2026 @ 12:49:00 -> Add User Manual update test for Adjust Synth Display DJ modal dialog
 using System;
 using System.IO;
 using Xunit;
@@ -3094,6 +3094,327 @@ To ensure smooth hosting transitions during live shows, Lyracist Pro provides an
                                 }
 
                                 doc.Info.Keywords = (keywords ?? string.Empty) + " SongEndReturnKaraokeNotice";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManual_LyricsAudioVisualizer_Oct2026()
+        {
+            lock (_manualLock)
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+
+                if (!Directory.Exists(docDir))
+                {
+                    return;
+                }
+
+                string updateText = @"
+Section: Lyrics Screen Audio Visualizer & Spectrum Customization (Updated Oct 3, 2026)
+
+[Overview & Operational Capabilities]
+Lyracist Pro includes a configurable, real-time audio spectrum visualizer displayed across the bottom of the active Lyrics projection screen:
+1. Live Audio Spectrum Analysis (Real-Time WASAPI Loopback FFT):
+   - Rather than simple simulated animation, Lyracist features a hardware-accelerated Windows Core Audio (WASAPI mmdevice) loopback engine that captures the live audio output directly.
+   - A 1024-point Radix-2 Fast Fourier Transform (FFT) with Hann windowing decomposes music into logarithmic frequency bands (from 32 Hz sub-bass to 16 kHz brilliance).
+   - Frequency pre-emphasis tilt ensures high-frequency percussive elements (hi-hats, cymbals) dance vigorously alongside bass kicks and vocal transients with smooth attack/decay physics.
+2. Simulated & Ambient Motion Mode:
+   - For hosts preferring purely decorative motion without audio loopback capture, hosts can switch to 'Simulated / Ambient' mode which animates rhythmic volume-scaled bars during playback and gentle ambient sine waves when idle.
+3. Visual Themes & Color Schemes:
+   - Choose between 7 stylized gradient themes:
+     * Neon Sunset: Blue (#2563EB) to Purple (#A855F7) to Hot Pink (#EC4899).
+     * Cyberpunk: Electric Cyan (#00F0FF) to Deep Violet (#7928CA) to Neon Fuchsia (#FF007F).
+     * Emerald Pulse: Forest Green (#065F46) to Vibrant Jade (#10B981) to Neon Lime (#84CC16).
+     * Solar Flare: Crimson Red (#DC2626) to Vivid Amber (#F59E0B) to Electric Gold (#FDE047).
+     * Electric Blue: Deep Navy (#1E3A8A) to Azure (#0284C7) to Ice Cyan (#67E8F9).
+     * Rainbow Spectrum: 360-degree full-spectrum rainbow hue mapping across every individual frequency bar.
+     * Monochrome Glow: Deep Slate (#334155) to Silver (#94A3B8) to Crisp White (#FFFFFF).
+4. Bar Width, Density & Spacing Adjustments:
+   - Slim: 10px bars (high density, up to 80 bars).
+   - Normal: 18px bars (standard balanced presentation, ~40 bars).
+   - Wide: 28px bars (bold, chunky retro aesthetic, ~25 bars).
+   - Extra Wide: 42px bars (classic broadcast DJ equalizer look, ~16 bars).
+5. Opacity Control & Instant Context Menu Access:
+   - Adjust visualizer opacity from 10% to 100% via Settings or quick-select (25%, 50%, 80%, 100%).
+   - All visualizer settings (Toggle, Mode, Style, Bar Width, Opacity) can be adjusted in real-time from the Settings Page (Display Tab) or by right-clicking directly anywhere on the active Lyrics window.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("Lyrics Screen Audio Visualizer & Spectrum Customization"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                bool alreadyAppended = false;
+                                foreach (var p in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                                {
+                                    if (p.InnerText.Contains("Lyrics Screen Audio Visualizer & Spectrum Customization"))
+                                    {
+                                        alreadyAppended = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!alreadyAppended)
+                                {
+                                    var headingPara = body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.ParagraphStyleId { Val = "Heading2" }),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                                new DocumentFormat.OpenXml.Wordprocessing.Bold(),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "1F497D" }),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: Lyrics Screen Audio Visualizer & Spectrum Customization"))));
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+                                        bool isSubHead = line.StartsWith("[");
+                                        var p = body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph());
+                                        var r = p.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Run());
+                                        if (isSubHead)
+                                        {
+                                            r.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                                new DocumentFormat.OpenXml.Wordprocessing.Bold(),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "1F497D" }));
+                                        }
+                                        r.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Text(line));
+                                    }
+                                    doc.MainDocumentPart?.Document?.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file by appending a page using PDFsharp
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("LyricsVisualizerNotice"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: Lyrics Screen Audio Visualizer & Spectrum Customization", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
+
+                                double yPos = 60;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    bool isSection = line.StartsWith("[");
+                                    var font = isSection ? sectionFont : bodyFont;
+                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
+                                    double lineHeight = isSection ? 15 : 12.0;
+
+                                    if (yPos + lineHeight > 750)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.Letter;
+                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                        yPos = 36;
+                                    }
+
+                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
+                                    yPos += lineHeight;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " LyricsVisualizerNotice";
+                                doc.Save(pdfPath);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error updating PDF manual at {pdfPath}: {ex.Message}", ex);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public void UpdateUserManual_AdjustSynthDisplayModal_Oct2026()
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string docDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "Documentation"));
+
+            if (Directory.Exists(docDir))
+            {
+                string updatesTxtPath = Path.Combine(docDir, "Lyracist_User_Manual_Updates.txt");
+                string docxPath = Path.Combine(docDir, "Lyracist_User_Manual.docx");
+                string pdfPath = Path.Combine(docDir, "Lyracist_User_Manual.pdf");
+
+                string updateText = @"Section: DJ Karaoke Screen / Adjust Synth Display Pop-up Dialog
+
+[Update Details]
+To ensure a completely professional live performance experience without audience distraction, DJs and KJs no longer need to interact with or right-click the audience-facing Lyrics projection screen to configure the audio visualizer.
+
+1. Dedicated 'Adjust Synth Display' DJ Controls:
+   - Placed directly on the primary 'Karaoke' operational screen in multiple convenient locations:
+     * Next to the 'Skip Singer' button on the top DJ playback control strip.
+     * Above the live 'Lyrics Preview Monitor' in the right-hand inspection column.
+     * Alongside the 'Lyrics Projection Screen' monitor assignment controls under Multi-Monitor Display controls.
+
+2. Modal Settings Pop-up Dialog ('Adjust Synth Display'):
+   - Clicking 'Adjust Synth Display' opens a dedicated modal dialog centered over the main Lyracist DJ window (completely invisible to the audience on external projection screens).
+   - Allows instant real-time adjustment of:
+     * Visualizer Enable/Disable toggle.
+     * Motion Mode: 'Audio Spectrum (Live FFT)' (reactive loopback frequency bands) vs 'Simulated / Ambient' (procedural sine waves).
+     * Color Themes: Neon Sunset, Cyberpunk, Emerald Pulse, Solar Flare, Electric Blue, Rainbow Spectrum, Monochrome Glow.
+     * Bar Width & Density: Slim, Normal, Wide, Extra Wide.
+     * Opacity Control: Continuous slider (10% to 100%) plus 25%, 50%, 80%, and 100% quick preset buttons.
+     * Real-time Interactive Preview: A live animated preview strip inside the dialog provides immediate visual feedback of color, density, and opacity changes.
+
+3. Persistent Configuration:
+   - All visualizer adjustments made in the dialog apply to the active projection screen immediately and are automatically saved to appsettings.json, ensuring all settings are preserved and recalled on app restart.";
+
+                // 1. Append to updates log text file if not already present
+                if (File.Exists(updatesTxtPath))
+                {
+                    string existingUpdates = File.ReadAllText(updatesTxtPath);
+                    if (!existingUpdates.Contains("DJ Karaoke Screen / Adjust Synth Display Pop-up Dialog"))
+                    {
+                        File.AppendAllText(updatesTxtPath, updateText + Environment.NewLine);
+                    }
+                }
+
+                // 2. Update docx file if not already present
+                if (File.Exists(docxPath))
+                {
+                    using (var fs = new FileStream(docxPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    {
+                        using (var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(fs, true))
+                        {
+                            var body = doc.MainDocumentPart?.Document?.Body;
+                            if (body != null)
+                            {
+                                string docText = body.InnerText;
+                                if (!docText.Contains("Adjust Synth Display Pop-up Dialog"))
+                                {
+                                    var titlePara = new DocumentFormat.OpenXml.Wordprocessing.Paragraph(
+                                        new DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.ParagraphStyleId { Val = "Heading2" },
+                                            new DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines { Before = "360", After = "120" }
+                                        ),
+                                        new DocumentFormat.OpenXml.Wordprocessing.Run(
+                                            new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                                new DocumentFormat.OpenXml.Wordprocessing.Bold(),
+                                                new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "0066CC" },
+                                                new DocumentFormat.OpenXml.Wordprocessing.FontSize { Val = "26" }
+                                            ),
+                                            new DocumentFormat.OpenXml.Wordprocessing.Text("Section: DJ Karaoke Screen / Adjust Synth Display Pop-up Dialog")
+                                        )
+                                    );
+                                    body.AppendChild(titlePara);
+
+                                    foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("Section:")) continue;
+
+                                        bool isHeader = line.StartsWith("[") || line.StartsWith("1.") || line.StartsWith("2.") || line.StartsWith("3.");
+                                        var pPr = new DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines { Before = isHeader ? "140" : "60", After = "60" }
+                                        );
+
+                                        var rPr = new DocumentFormat.OpenXml.Wordprocessing.RunProperties(
+                                            new DocumentFormat.OpenXml.Wordprocessing.FontSize { Val = "21" }
+                                        );
+                                        if (isHeader)
+                                        {
+                                            rPr.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Bold());
+                                            rPr.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Color { Val = "1A365D" });
+                                        }
+
+                                        var run = new DocumentFormat.OpenXml.Wordprocessing.Run(rPr, new DocumentFormat.OpenXml.Wordprocessing.Text(line));
+                                        body.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Paragraph(pPr, run));
+                                    }
+
+                                    doc.MainDocumentPart?.Document?.Save();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 3. Update pdf file if not already present
+                if (File.Exists(pdfPath))
+                {
+                    try
+                    {
+                        using (var doc = PdfSharp.Pdf.IO.PdfReader.Open(pdfPath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
+                        {
+                            string keywords = doc.Info.Keywords;
+                            if (string.IsNullOrEmpty(keywords) || !keywords.Contains("AdjustSynthDisplayNotice"))
+                            {
+                                var page = doc.AddPage();
+                                page.Size = PdfSharp.PageSize.Letter;
+                                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                                PdfSharp.Drawing.XFont titleFont = new PdfSharp.Drawing.XFont("Arial", 13, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XFont bodyFont = new PdfSharp.Drawing.XFont("Arial", 9.0, PdfSharp.Drawing.XFontStyleEx.Regular);
+                                PdfSharp.Drawing.XFont sectionFont = new PdfSharp.Drawing.XFont("Arial", 10.0, PdfSharp.Drawing.XFontStyleEx.Bold);
+                                PdfSharp.Drawing.XStringFormat leftAlign = new PdfSharp.Drawing.XStringFormat { Alignment = PdfSharp.Drawing.XStringAlignment.Near, LineAlignment = PdfSharp.Drawing.XLineAlignment.Near };
+
+                                gfx.DrawString("Section: DJ Karaoke Screen / Adjust Synth Display Pop-up Dialog", titleFont, PdfSharp.Drawing.XBrushes.DarkSlateGray, new PdfSharp.Drawing.XRect(36, 36, 540, 18), leftAlign);
+
+                                double yPos = 60;
+                                foreach (var line in updateText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    if (line.StartsWith("Section:")) continue;
+                                    bool isSection = line.StartsWith("[") || line.StartsWith("1.") || line.StartsWith("2.") || line.StartsWith("3.");
+                                    var font = isSection ? sectionFont : bodyFont;
+                                    var brush = isSection ? PdfSharp.Drawing.XBrushes.Navy : PdfSharp.Drawing.XBrushes.Black;
+                                    double lineHeight = isSection ? 15 : 12.0;
+
+                                    if (yPos + lineHeight > 750)
+                                    {
+                                        page = doc.AddPage();
+                                        page.Size = PdfSharp.PageSize.Letter;
+                                        gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+                                        yPos = 36;
+                                    }
+
+                                    gfx.DrawString(line, font, brush, new PdfSharp.Drawing.XRect(36, yPos, 540, lineHeight), leftAlign);
+                                    yPos += lineHeight;
+                                }
+
+                                doc.Info.Keywords = (keywords ?? string.Empty) + " AdjustSynthDisplayNotice";
                                 doc.Save(pdfPath);
                             }
                         }

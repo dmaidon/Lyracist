@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 08:26:00 -> Set default EnableAutoAdvance to false so song completion does not automatically proceed to the next song
+// Edited on Oct 3, 2026 @ 12:10:00 -> Add Lyrics Screen Audio Visualizer settings for FFT spectrum, style, opacity, and bar width
 using System;
 using System.IO;
 using System.Text.Json;
@@ -710,6 +710,38 @@ public static class AppSettings
 
     public static bool IsCdgChromaKeyEnabled => CdgBackdropMode != "Original Color";
 
+    // ─── Lyrics Screen Audio Visualizer Settings ──────────────────────────────
+
+    public static bool EnableLyricsVisualizer
+    {
+        get => _data.EnableLyricsVisualizer;
+        set { _data.EnableLyricsVisualizer = value; Save(); }
+    }
+
+    public static string LyricsVisualizerMode
+    {
+        get => _data.LyricsVisualizerMode;
+        set { _data.LyricsVisualizerMode = value ?? "Audio Spectrum (Live FFT)"; Save(); }
+    }
+
+    public static string LyricsVisualizerStyle
+    {
+        get => _data.LyricsVisualizerStyle;
+        set { _data.LyricsVisualizerStyle = value ?? "Neon Sunset"; Save(); }
+    }
+
+    public static double LyricsVisualizerOpacity
+    {
+        get => _data.LyricsVisualizerOpacity;
+        set { _data.LyricsVisualizerOpacity = Math.Clamp(value, 0.1, 1.0); Save(); }
+    }
+
+    public static string LyricsVisualizerBarWidth
+    {
+        get => _data.LyricsVisualizerBarWidth;
+        set { _data.LyricsVisualizerBarWidth = value ?? "Normal"; Save(); }
+    }
+
     // ─── Library Scan Directories ──────────────────────────────────────────
 
     public static IReadOnlyList<string> LibraryDirectories
@@ -1240,6 +1272,11 @@ public static class AppSettings
         public string SelectedRatingIcon { get; set; } = "⭐ Star";
         public List<string> AvailableRatingIcons { get; set; } = ["⭐ Star", "❤️ Heart", "🔥 Fire", "🎵 Note", "🏆 Trophy", "👑 Crown", "👍 Like"];
         public string CdgBackdropMode { get; set; } = "Original Color";
+        public bool EnableLyricsVisualizer { get; set; } = true;
+        public string LyricsVisualizerMode { get; set; } = "Audio Spectrum (Live FFT)";
+        public string LyricsVisualizerStyle { get; set; } = "Neon Sunset";
+        public double LyricsVisualizerOpacity { get; set; } = 0.8;
+        public string LyricsVisualizerBarWidth { get; set; } = "Normal";
         public int FillInDelaySeconds { get; set; } = 5;
         public Dictionary<string, List<string>> VenueGraphics { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public bool EnableAutoAdvance { get; set; } = false;

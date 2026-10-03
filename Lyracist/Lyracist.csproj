@@ -1,4 +1,4 @@
-<!-- Edited on Oct 2, 2026 @ 12:20:00 -> Include Shared/AvatarImageHelper.cs in Lyracist project -->
+<!-- Edited on Oct 3, 2026 @ 12:54:00 -> Include mic_64.png and LyracistIcon.ico as compiled WPF resources in Lyracist.csproj -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,8 +11,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyVersion>26.10.3.551</AssemblyVersion>
-    <FileVersion>26.10.3.551</FileVersion>
+    <AssemblyVersion>26.10.3.558</AssemblyVersion>
+    <FileVersion>26.10.3.558</FileVersion>
     <ApplicationIcon>Assets\LyracistIcon.ico</ApplicationIcon>
     <PackageIcon>mic_128.png</PackageIcon>
     <!-- Report each monitor's true physical resolution/DPI on mixed-DPI multi-monitor setups. -->
@@ -48,9 +48,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\mic_64.png" />
     <Resource Include="Assets\mic_128.png" />
     <Resource Include="Assets\lyracist_modern.png" />
     <Resource Include="Assets\LyracistLogo.png" />
+    <Resource Include="Assets\LyracistIcon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -59,6 +61,7 @@
     <PackageReference Include="Emoji.Wpf" Version="0.3.4" />
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
     <PackageReference Include="LibVLCSharp" Version="3.10.1" />
+    <PackageReference Include="NAudio.Wasapi" Version="3.1.0" />
     <PackageReference Include="QRCoder" Version="1.8.0" />
     <PackageReference Include="SkiaSharp" Version="4.151.1" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.23.1" />

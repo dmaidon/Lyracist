@@ -2263,3 +2263,54 @@ To ensure smooth hosting transitions during live shows, Lyracist Pro provides an
 3. DJ-Controlled Performance Start (No Automatic Song Progression):
    - Rather than automatically launching the next song over an empty stage, Lyracist marks the completed singer done, queues the next performer, starts fill-in background music, and waits safely in 'Ready to Start'.
    - The DJ initiates playback with the '▶ Start Song' button once the next singer is stationed on stage with their microphone.
+
+Section: Lyrics Screen Audio Visualizer & Spectrum Customization (Updated Oct 3, 2026)
+
+[Overview & Operational Capabilities]
+Lyracist Pro includes a configurable, real-time audio spectrum visualizer displayed across the bottom of the active Lyrics projection screen:
+1. Live Audio Spectrum Analysis (Real-Time WASAPI Loopback FFT):
+   - Rather than simple simulated animation, Lyracist features a hardware-accelerated Windows Core Audio (WASAPI mmdevice) loopback engine that captures the live audio output directly.
+   - A 1024-point Radix-2 Fast Fourier Transform (FFT) with Hann windowing decomposes music into logarithmic frequency bands (from 32 Hz sub-bass to 16 kHz brilliance).
+   - Frequency pre-emphasis tilt ensures high-frequency percussive elements (hi-hats, cymbals) dance vigorously alongside bass kicks and vocal transients with smooth attack/decay physics.
+2. Simulated & Ambient Motion Mode:
+   - For hosts preferring purely decorative motion without audio loopback capture, hosts can switch to 'Simulated / Ambient' mode which animates rhythmic volume-scaled bars during playback and gentle ambient sine waves when idle.
+3. Visual Themes & Color Schemes:
+   - Choose between 7 stylized gradient themes:
+     * Neon Sunset: Blue (#2563EB) to Purple (#A855F7) to Hot Pink (#EC4899).
+     * Cyberpunk: Electric Cyan (#00F0FF) to Deep Violet (#7928CA) to Neon Fuchsia (#FF007F).
+     * Emerald Pulse: Forest Green (#065F46) to Vibrant Jade (#10B981) to Neon Lime (#84CC16).
+     * Solar Flare: Crimson Red (#DC2626) to Vivid Amber (#F59E0B) to Electric Gold (#FDE047).
+     * Electric Blue: Deep Navy (#1E3A8A) to Azure (#0284C7) to Ice Cyan (#67E8F9).
+     * Rainbow Spectrum: 360-degree full-spectrum rainbow hue mapping across every individual frequency bar.
+     * Monochrome Glow: Deep Slate (#334155) to Silver (#94A3B8) to Crisp White (#FFFFFF).
+4. Bar Width, Density & Spacing Adjustments:
+   - Slim: 10px bars (high density, up to 80 bars).
+   - Normal: 18px bars (standard balanced presentation, ~40 bars).
+   - Wide: 28px bars (bold, chunky retro aesthetic, ~25 bars).
+   - Extra Wide: 42px bars (classic broadcast DJ equalizer look, ~16 bars).
+5. Opacity Control & Instant Context Menu Access:
+   - Adjust visualizer opacity from 10% to 100% via Settings or quick-select (25%, 50%, 80%, 100%).
+   - All visualizer settings (Toggle, Mode, Style, Bar Width, Opacity) can be adjusted in real-time from the Settings Page (Display Tab) or by right-clicking directly anywhere on the active Lyrics window.
+Section: DJ Karaoke Screen / Adjust Synth Display Pop-up Dialog
+
+[Update Details]
+To ensure a completely professional live performance experience without audience distraction, DJs and KJs no longer need to interact with or right-click the audience-facing Lyrics projection screen to configure the audio visualizer.
+
+1. Dedicated 'Adjust Synth Display' DJ Controls:
+   - Placed directly on the primary 'Karaoke' operational screen in multiple convenient locations:
+     * Next to the 'Skip Singer' button on the top DJ playback control strip.
+     * Above the live 'Lyrics Preview Monitor' in the right-hand inspection column.
+     * Alongside the 'Lyrics Projection Screen' monitor assignment controls under Multi-Monitor Display controls.
+
+2. Modal Settings Pop-up Dialog ('Adjust Synth Display'):
+   - Clicking 'Adjust Synth Display' opens a dedicated modal dialog centered over the main Lyracist DJ window (completely invisible to the audience on external projection screens).
+   - Allows instant real-time adjustment of:
+     * Visualizer Enable/Disable toggle.
+     * Motion Mode: 'Audio Spectrum (Live FFT)' (reactive loopback frequency bands) vs 'Simulated / Ambient' (procedural sine waves).
+     * Color Themes: Neon Sunset, Cyberpunk, Emerald Pulse, Solar Flare, Electric Blue, Rainbow Spectrum, Monochrome Glow.
+     * Bar Width & Density: Slim, Normal, Wide, Extra Wide.
+     * Opacity Control: Continuous slider (10% to 100%) plus 25%, 50%, 80%, and 100% quick preset buttons.
+     * Real-time Interactive Preview: A live animated preview strip inside the dialog provides immediate visual feedback of color, density, and opacity changes.
+
+3. Persistent Configuration:
+   - All visualizer adjustments made in the dialog apply to the active projection screen immediately and are automatically saved to appsettings.json, ensuring all settings are preserved and recalled on app restart.

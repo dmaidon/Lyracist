@@ -1,0 +1,228 @@
+<!-- Created on Oct 3, 2026 @ 12:42:00 -> Modal dialog for adjusting Lyrics screen audio visualizer settings from the DJ Karaoke screen -->
+<Window x:Class="Lyracist.Windows.AdjustSynthDisplayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="Adjust Synth Display"
+        Width="500"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="#0E0E14"
+        Foreground="White"
+        Icon="pack://application:,,,/Assets/mic_64.png">
+
+    <Window.Resources>
+        <Style x:Key="DialogGroupBoxStyle" TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,14" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="#334155"
+                                Background="#14141E">
+                            <StackPanel>
+                                <Border Background="#1E2235"
+                                        CornerRadius="7,7,0,0"
+                                        Padding="14,8">
+                                    <TextBlock Text="{TemplateBinding Header}"
+                                               Foreground="#93C5FD"
+                                               FontWeight="SemiBold"
+                                               FontSize="12.5" />
+                                </Border>
+                                <Border Padding="14">
+                                    <ContentPresenter />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PresetBtnStyle" TargetType="Button">
+            <Setter Property="Height" Value="28" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="#252A40" />
+            <Setter Property="BorderBrush" Value="#3B82F6" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                Padding="8,2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#3B82F6" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1D4ED8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="Auto" /> <!-- Settings content -->
+            <RowDefinition Height="Auto" /> <!-- Live Preview -->
+            <RowDefinition Height="Auto" /> <!-- Close button -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="0,0,0,14" Padding="0,0,0,10" BorderThickness="0,0,0,1" BorderBrush="#22283A">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Width="40" Height="40" CornerRadius="8" Background="#1D2A4A" BorderBrush="#3B82F6" BorderThickness="1" Margin="0,0,12,0">
+                    <ui:SymbolIcon Symbol="MusicNote224" FontSize="20" Foreground="#60A5FA" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Adjust Synth Display" FontSize="16" FontWeight="Bold" Foreground="White" />
+                    <TextBlock Text="Configure audio spectrum visualizer on the Lyrics projection screen" FontSize="11" Foreground="#94A3B8" Margin="0,2,0,0" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Settings Cards -->
+        <StackPanel Grid.Row="1">
+            <!-- Mode & State -->
+            <GroupBox Header="Visualizer State &amp; Mode" Style="{StaticResource DialogGroupBoxStyle}">
+                <StackPanel>
+                    <CheckBox x:Name="EnableVisualizerCheckBox"
+                              Content="Enable Lyrics Screen Audio Visualizer"
+                              FontWeight="SemiBold"
+                              FontSize="12"
+                              Margin="0,0,0,10"
+                              Checked="OnSettingChanged"
+                              Unchecked="OnSettingChanged" />
+
+                    <TextBlock Text="Motion Mode" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,6" />
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="ModeFftRadio"
+                                     Content="Audio Spectrum (Live FFT)"
+                                     GroupName="SynthModeGroup"
+                                     FontSize="11.5"
+                                     Margin="0,0,18,0"
+                                     Checked="OnSettingChanged" />
+                        <RadioButton x:Name="ModeSimulatedRadio"
+                                     Content="Simulated / Ambient"
+                                     GroupName="SynthModeGroup"
+                                     FontSize="11.5"
+                                     Checked="OnSettingChanged" />
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Theme Style & Bar Width -->
+            <GroupBox Header="Color Theme &amp; Bar Density" Style="{StaticResource DialogGroupBoxStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Style Picker -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Color Theme" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,4" />
+                        <ComboBox x:Name="StyleComboBox"
+                                  SelectionChanged="OnSettingChanged"
+                                  FontSize="11.5"
+                                  Height="32" />
+                    </StackPanel>
+
+                    <!-- Bar Width Picker -->
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Bar Width" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,4" />
+                        <ComboBox x:Name="BarWidthComboBox"
+                                  SelectionChanged="OnSettingChanged"
+                                  FontSize="11.5"
+                                  Height="32" />
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+
+            <!-- Opacity -->
+            <GroupBox Header="Visualizer Opacity" Style="{StaticResource DialogGroupBoxStyle}">
+                <StackPanel>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Slider x:Name="OpacitySlider"
+                                Grid.Column="0"
+                                Minimum="0.10"
+                                Maximum="1.00"
+                                TickFrequency="0.05"
+                                ValueChanged="OnOpacitySliderChanged"
+                                VerticalAlignment="Center" />
+                        <TextBlock x:Name="OpacityValueText"
+                                   Grid.Column="1"
+                                   Text="80%"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Foreground="#60A5FA"
+                                   Width="45"
+                                   TextAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Margin="10,0,0,0" />
+                    </Grid>
+
+                    <!-- Quick Preset Buttons -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                        <Button Content="25% Subtle" Style="{StaticResource PresetBtnStyle}" Margin="0,0,8,0" Click="OnPreset25Click" />
+                        <Button Content="50% Medium" Style="{StaticResource PresetBtnStyle}" Margin="0,0,8,0" Click="OnPreset50Click" />
+                        <Button Content="80% Standard" Style="{StaticResource PresetBtnStyle}" Margin="0,0,8,0" Click="OnPreset80Click" />
+                        <Button Content="100% Full" Style="{StaticResource PresetBtnStyle}" Click="OnPreset100Click" />
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+
+        <!-- Live Preview Strip -->
+        <Border Grid.Row="2" Height="50" Background="#06060A" CornerRadius="6" BorderBrush="#1E293B" BorderThickness="1" Margin="0,0,0,16" Padding="8,4" ClipToBounds="True">
+            <Canvas x:Name="PreviewCanvas" Height="42" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+        </Border>
+
+        <!-- Close Button -->
+        <Grid Grid.Row="3">
+            <TextBlock Text="Changes apply immediately and persist on restart."
+                       FontSize="11"
+                       Foreground="#64748B"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Left" />
+
+            <ui:Button Content="Done"
+                       Appearance="Primary"
+                       Background="#2563EB"
+                       Foreground="White"
+                       FontWeight="SemiBold"
+                       FontSize="12"
+                       Width="90"
+                       Height="34"
+                       HorizontalAlignment="Right"
+                       Click="OnDoneClick" />
+        </Grid>
+    </Grid>
+</Window>

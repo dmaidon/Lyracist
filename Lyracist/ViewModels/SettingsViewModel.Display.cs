@@ -1,4 +1,4 @@
-// Edited on Oct 2, 2026 @ 10:55:00 -> Add WelcomeDesignChoices and WelcomeScreenDesign property
+// Edited on Oct 3, 2026 @ 12:35:00 -> Add IsVisualizerModeFft and IsVisualizerModeSimulated properties to SettingsViewModel
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -183,6 +183,127 @@ public partial class SettingsViewModel
             }
         }
     }
+
+    public bool EnableLyricsVisualizer
+    {
+        get => AppSettings.EnableLyricsVisualizer;
+        set
+        {
+            if (AppSettings.EnableLyricsVisualizer != value)
+            {
+                AppSettings.EnableLyricsVisualizer = value;
+                OnPropertyChanged();
+                _lyricsWindowVm?.NotifyVisualizerChanged();
+            }
+        }
+    }
+
+    public string LyricsVisualizerMode
+    {
+        get => AppSettings.LyricsVisualizerMode;
+        set
+        {
+            if (AppSettings.LyricsVisualizerMode != value)
+            {
+                AppSettings.LyricsVisualizerMode = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsVisualizerModeFft));
+                OnPropertyChanged(nameof(IsVisualizerModeSimulated));
+                _lyricsWindowVm?.NotifyVisualizerChanged();
+            }
+        }
+    }
+
+    public bool IsVisualizerModeFft
+    {
+        get => LyricsVisualizerMode == "Audio Spectrum (Live FFT)";
+        set
+        {
+            if (value)
+            {
+                LyricsVisualizerMode = "Audio Spectrum (Live FFT)";
+            }
+        }
+    }
+
+    public bool IsVisualizerModeSimulated
+    {
+        get => LyricsVisualizerMode == "Simulated / Ambient";
+        set
+        {
+            if (value)
+            {
+                LyricsVisualizerMode = "Simulated / Ambient";
+            }
+        }
+    }
+
+    public string LyricsVisualizerStyle
+    {
+        get => AppSettings.LyricsVisualizerStyle;
+        set
+        {
+            if (AppSettings.LyricsVisualizerStyle != value)
+            {
+                AppSettings.LyricsVisualizerStyle = value;
+                OnPropertyChanged();
+                _lyricsWindowVm?.NotifyVisualizerChanged();
+            }
+        }
+    }
+
+    public string LyricsVisualizerBarWidth
+    {
+        get => AppSettings.LyricsVisualizerBarWidth;
+        set
+        {
+            if (AppSettings.LyricsVisualizerBarWidth != value)
+            {
+                AppSettings.LyricsVisualizerBarWidth = value;
+                OnPropertyChanged();
+                _lyricsWindowVm?.NotifyVisualizerChanged();
+            }
+        }
+    }
+
+    public double LyricsVisualizerOpacity
+    {
+        get => AppSettings.LyricsVisualizerOpacity;
+        set
+        {
+            if (Math.Abs(AppSettings.LyricsVisualizerOpacity - value) > 0.01)
+            {
+                AppSettings.LyricsVisualizerOpacity = value;
+                OnPropertyChanged();
+                _lyricsWindowVm?.NotifyVisualizerChanged();
+            }
+        }
+    }
+
+    public IReadOnlyList<string> VisualizerModes { get; } =
+    [
+        "Audio Spectrum (Live FFT)",
+        "Simulated / Ambient"
+    ];
+
+    public IReadOnlyList<string> VisualizerStyles { get; } =
+    [
+        "Neon Sunset",
+        "Cyberpunk",
+        "Emerald Pulse",
+        "Solar Flare",
+        "Electric Blue",
+        "Rainbow Spectrum",
+        "Monochrome Glow"
+    ];
+
+    public IReadOnlyList<string> VisualizerBarWidths { get; } =
+    [
+        "Slim",
+        "Normal",
+        "Wide",
+        "Extra Wide"
+    ];
 
     private void OnScreenAssignmentsChanged()
     {

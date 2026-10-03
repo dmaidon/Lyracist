@@ -43,7 +43,12 @@ public class DisplayService : IDisplayService
         _mediaEngine = mediaEngine;
         _casting = casting;
         _preferences = DisplayPreferencesStore.Load();
-        RestartProjectionRotationTimer();
+        // Deferred: RestartProjectionRotationTimer resolves RotationWindowViewModel, which depends
+        // back on DisplayService - doing that inside this constructor is a DI cycle that deadlocks
+        // startup whenever auto-rotate is enabled in the saved preferences.
+        System.Windows.Application.Current.Dispatcher.BeginInvoke(
+            new Action(RestartProjectionRotationTimer),
+            System.Windows.Threading.DispatcherPriority.Background);
 
         // Auto-subscribe to the MediaEngine's frame tick events to sync with the LyricsWindow VM
         _mediaEngine.FrameReady += OnMediaFrameReady;

@@ -1,4 +1,4 @@
-// Edited on Sep 8, 2026 @ 08:49:00 -> Add ShowQrCodeOnLyricsScreen property and inherit BaseViewModel in LyricsWindowViewModel
+// Edited on Oct 3, 2026 @ 12:47:00 -> Make SlideshowImagePath nullable to prevent ImageSourceConverter conversion warning
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
@@ -93,7 +93,7 @@ public partial class LyricsWindowViewModel : BaseViewModel
     private bool _isMirrored;
 
     [ObservableProperty]
-    private string _slideshowImagePath = string.Empty;
+    private string? _slideshowImagePath;
 
     [ObservableProperty]
     private bool _isSlideshowVisible;
@@ -111,7 +111,7 @@ public partial class LyricsWindowViewModel : BaseViewModel
         if (graphics == null || graphics.Count == 0)
         {
             IsSlideshowVisible = false;
-            SlideshowImagePath = string.Empty;
+            SlideshowImagePath = null;
             return;
         }
 
@@ -143,7 +143,7 @@ public partial class LyricsWindowViewModel : BaseViewModel
         _slideshowTimer?.Stop();
         _slideshowTimer = null;
         IsSlideshowVisible = false;
-        SlideshowImagePath = string.Empty;
+        SlideshowImagePath = null;
     }
 
     [ObservableProperty]
@@ -262,6 +262,231 @@ public partial class LyricsWindowViewModel : BaseViewModel
     public bool IsSynthwaveVisible => CdgBackdropMode == "Retro Synthwave";
     public bool IsSpaceVisible => CdgBackdropMode == "Space Starfield";
 
+    public bool EnableLyricsVisualizer
+    {
+        get => Lyracist.Core.Helpers.AppSettings.EnableLyricsVisualizer;
+        set
+        {
+            if (Lyracist.Core.Helpers.AppSettings.EnableLyricsVisualizer != value)
+            {
+                Lyracist.Core.Helpers.AppSettings.EnableLyricsVisualizer = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsVisualizerVisible));
+            }
+        }
+    }
+
+    public bool IsVisualizerVisible => EnableLyricsVisualizer;
+
+    public double VisualizerOpacity
+    {
+        get => Lyracist.Core.Helpers.AppSettings.LyricsVisualizerOpacity;
+        set
+        {
+            Lyracist.Core.Helpers.AppSettings.LyricsVisualizerOpacity = value;
+            OnPropertyChanged();
+            NotifyOpacityFlagsChanged();
+        }
+    }
+
+    public string VisualizerStyle
+    {
+        get => Lyracist.Core.Helpers.AppSettings.LyricsVisualizerStyle;
+        set
+        {
+            Lyracist.Core.Helpers.AppSettings.LyricsVisualizerStyle = value;
+            OnPropertyChanged();
+            NotifyStyleFlagsChanged();
+        }
+    }
+
+    public string VisualizerBarWidth
+    {
+        get => Lyracist.Core.Helpers.AppSettings.LyricsVisualizerBarWidth;
+        set
+        {
+            Lyracist.Core.Helpers.AppSettings.LyricsVisualizerBarWidth = value;
+            OnPropertyChanged();
+            NotifyBarWidthFlagsChanged();
+        }
+    }
+
+    public string VisualizerMode
+    {
+        get => Lyracist.Core.Helpers.AppSettings.LyricsVisualizerMode;
+        set
+        {
+            Lyracist.Core.Helpers.AppSettings.LyricsVisualizerMode = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsModeLiveFft));
+            OnPropertyChanged(nameof(IsModeSimulated));
+        }
+    }
+
+    public bool IsModeLiveFft
+    {
+        get => VisualizerMode == "Audio Spectrum (Live FFT)";
+        set
+        {
+            if (value)
+            {
+                VisualizerMode = "Audio Spectrum (Live FFT)";
+            }
+            else
+            {
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool IsModeSimulated
+    {
+        get => VisualizerMode == "Simulated / Ambient";
+        set
+        {
+            if (value)
+            {
+                VisualizerMode = "Simulated / Ambient";
+            }
+            else
+            {
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool IsStyleNeonSunset
+    {
+        get => VisualizerStyle == "Neon Sunset";
+        set { if (value) VisualizerStyle = "Neon Sunset"; else OnPropertyChanged(); }
+    }
+    public bool IsStyleCyberpunk
+    {
+        get => VisualizerStyle == "Cyberpunk";
+        set { if (value) VisualizerStyle = "Cyberpunk"; else OnPropertyChanged(); }
+    }
+    public bool IsStyleEmeraldPulse
+    {
+        get => VisualizerStyle == "Emerald Pulse";
+        set { if (value) VisualizerStyle = "Emerald Pulse"; else OnPropertyChanged(); }
+    }
+    public bool IsStyleSolarFlare
+    {
+        get => VisualizerStyle == "Solar Flare";
+        set { if (value) VisualizerStyle = "Solar Flare"; else OnPropertyChanged(); }
+    }
+    public bool IsStyleElectricBlue
+    {
+        get => VisualizerStyle == "Electric Blue";
+        set { if (value) VisualizerStyle = "Electric Blue"; else OnPropertyChanged(); }
+    }
+    public bool IsStyleRainbowSpectrum
+    {
+        get => VisualizerStyle == "Rainbow Spectrum";
+        set { if (value) VisualizerStyle = "Rainbow Spectrum"; else OnPropertyChanged(); }
+    }
+    public bool IsStyleMonochromeGlow
+    {
+        get => VisualizerStyle == "Monochrome Glow";
+        set { if (value) VisualizerStyle = "Monochrome Glow"; else OnPropertyChanged(); }
+    }
+
+    public bool IsBarWidthSlim
+    {
+        get => VisualizerBarWidth == "Slim";
+        set { if (value) VisualizerBarWidth = "Slim"; else OnPropertyChanged(); }
+    }
+    public bool IsBarWidthNormal
+    {
+        get => VisualizerBarWidth == "Normal";
+        set { if (value) VisualizerBarWidth = "Normal"; else OnPropertyChanged(); }
+    }
+    public bool IsBarWidthWide
+    {
+        get => VisualizerBarWidth == "Wide";
+        set { if (value) VisualizerBarWidth = "Wide"; else OnPropertyChanged(); }
+    }
+    public bool IsBarWidthExtraWide
+    {
+        get => VisualizerBarWidth == "Extra Wide";
+        set { if (value) VisualizerBarWidth = "Extra Wide"; else OnPropertyChanged(); }
+    }
+
+    public bool IsOpacity25
+    {
+        get => Math.Abs(VisualizerOpacity - 0.25) < 0.05;
+        set { if (value) VisualizerOpacity = 0.25; else OnPropertyChanged(); }
+    }
+    public bool IsOpacity50
+    {
+        get => Math.Abs(VisualizerOpacity - 0.50) < 0.05;
+        set { if (value) VisualizerOpacity = 0.50; else OnPropertyChanged(); }
+    }
+    public bool IsOpacity80
+    {
+        get => Math.Abs(VisualizerOpacity - 0.80) < 0.05;
+        set { if (value) VisualizerOpacity = 0.80; else OnPropertyChanged(); }
+    }
+    public bool IsOpacity100
+    {
+        get => Math.Abs(VisualizerOpacity - 1.00) < 0.05;
+        set { if (value) VisualizerOpacity = 1.00; else OnPropertyChanged(); }
+    }
+
+    private void NotifyStyleFlagsChanged()
+    {
+        OnPropertyChanged(nameof(IsStyleNeonSunset));
+        OnPropertyChanged(nameof(IsStyleCyberpunk));
+        OnPropertyChanged(nameof(IsStyleEmeraldPulse));
+        OnPropertyChanged(nameof(IsStyleSolarFlare));
+        OnPropertyChanged(nameof(IsStyleElectricBlue));
+        OnPropertyChanged(nameof(IsStyleRainbowSpectrum));
+        OnPropertyChanged(nameof(IsStyleMonochromeGlow));
+    }
+
+    private void NotifyBarWidthFlagsChanged()
+    {
+        OnPropertyChanged(nameof(IsBarWidthSlim));
+        OnPropertyChanged(nameof(IsBarWidthNormal));
+        OnPropertyChanged(nameof(IsBarWidthWide));
+        OnPropertyChanged(nameof(IsBarWidthExtraWide));
+    }
+
+    private void NotifyOpacityFlagsChanged()
+    {
+        OnPropertyChanged(nameof(IsOpacity25));
+        OnPropertyChanged(nameof(IsOpacity50));
+        OnPropertyChanged(nameof(IsOpacity80));
+        OnPropertyChanged(nameof(IsOpacity100));
+    }
+
+    [RelayCommand]
+    public void SetVisualizerMode(string mode)
+    {
+        VisualizerMode = mode;
+    }
+
+    [RelayCommand]
+    public void SetVisualizerStyle(string style)
+    {
+        VisualizerStyle = style;
+    }
+
+    [RelayCommand]
+    public void SetVisualizerBarWidth(string width)
+    {
+        VisualizerBarWidth = width;
+    }
+
+    [RelayCommand]
+    public void SetVisualizerOpacity(string opacityStr)
+    {
+        if (double.TryParse(opacityStr, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double val))
+        {
+            VisualizerOpacity = val;
+        }
+    }
+
     public void NotifyBackdropChanged()
     {
         OnPropertyChanged(nameof(CdgBackdropMode));
@@ -269,5 +494,20 @@ public partial class LyricsWindowViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsWaveformVisible));
         OnPropertyChanged(nameof(IsSynthwaveVisible));
         OnPropertyChanged(nameof(IsSpaceVisible));
+    }
+
+    public void NotifyVisualizerChanged()
+    {
+        OnPropertyChanged(nameof(EnableLyricsVisualizer));
+        OnPropertyChanged(nameof(IsVisualizerVisible));
+        OnPropertyChanged(nameof(VisualizerOpacity));
+        OnPropertyChanged(nameof(VisualizerStyle));
+        OnPropertyChanged(nameof(VisualizerBarWidth));
+        OnPropertyChanged(nameof(VisualizerMode));
+        OnPropertyChanged(nameof(IsModeLiveFft));
+        OnPropertyChanged(nameof(IsModeSimulated));
+        NotifyStyleFlagsChanged();
+        NotifyBarWidthFlagsChanged();
+        NotifyOpacityFlagsChanged();
     }
 }

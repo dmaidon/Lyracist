@@ -1,4 +1,4 @@
-// Edited on Oct 3, 2026 @ 08:35:00 -> Return to KaraokePage on song end, reset playback state, and show lyrics display on playback
+// Edited on Oct 3, 2026 @ 12:45:00 -> Add OpenAdjustSynthDisplay command to open synth display modal from KaraokePage
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -1570,4 +1570,11 @@ public partial class KaraokeViewModel : BaseViewModel
         await PlayPerformerRequest(targetSinger);
     }
 
+    [RelayCommand]
+    private void OpenAdjustSynthDisplay()
+    {
+        var window = new Windows.AdjustSynthDisplayWindow();
+        window.Owner = System.Windows.Application.Current.MainWindow;
+        window.ShowDialog();
+    }
 }

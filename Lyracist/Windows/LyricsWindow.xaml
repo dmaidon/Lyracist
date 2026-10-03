@@ -1,4 +1,4 @@
-<!-- Edited on Sep 8, 2026 @ 08:49:00 -> Add Visibility binding to Floating QR Code Badge and add Show QR Code toggle to ContextMenu -->
+<!-- Edited on Oct 3, 2026 @ 12:48:00 -> Add FallbackValue to SlideshowImagePath and fix visualizer menu bindings -->
 <Window x:Class="Lyracist.Windows.LyricsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -35,6 +35,36 @@
             <MenuItem Header="Show QR Code"
                       IsCheckable="True"
                       IsChecked="{Binding ShowQrCodeOnLyricsScreen}" />
+            <Separator />
+            <MenuItem Header="Audio Visualizer">
+                <MenuItem Header="Enable Visualizer" IsCheckable="True" IsChecked="{Binding EnableLyricsVisualizer}" />
+                <Separator />
+                <MenuItem Header="Mode">
+                    <MenuItem Header="Audio Spectrum (Live FFT)" IsCheckable="True" IsChecked="{Binding IsModeLiveFft}" />
+                    <MenuItem Header="Simulated / Ambient" IsCheckable="True" IsChecked="{Binding IsModeSimulated}" />
+                </MenuItem>
+                <MenuItem Header="Visualizer Style">
+                    <MenuItem Header="Neon Sunset" IsCheckable="True" IsChecked="{Binding IsStyleNeonSunset}" />
+                    <MenuItem Header="Cyberpunk" IsCheckable="True" IsChecked="{Binding IsStyleCyberpunk}" />
+                    <MenuItem Header="Emerald Pulse" IsCheckable="True" IsChecked="{Binding IsStyleEmeraldPulse}" />
+                    <MenuItem Header="Solar Flare" IsCheckable="True" IsChecked="{Binding IsStyleSolarFlare}" />
+                    <MenuItem Header="Electric Blue" IsCheckable="True" IsChecked="{Binding IsStyleElectricBlue}" />
+                    <MenuItem Header="Rainbow Spectrum" IsCheckable="True" IsChecked="{Binding IsStyleRainbowSpectrum}" />
+                    <MenuItem Header="Monochrome Glow" IsCheckable="True" IsChecked="{Binding IsStyleMonochromeGlow}" />
+                </MenuItem>
+                <MenuItem Header="Bar Width">
+                    <MenuItem Header="Slim (More Bars)" IsCheckable="True" IsChecked="{Binding IsBarWidthSlim}" />
+                    <MenuItem Header="Normal" IsCheckable="True" IsChecked="{Binding IsBarWidthNormal}" />
+                    <MenuItem Header="Wide" IsCheckable="True" IsChecked="{Binding IsBarWidthWide}" />
+                    <MenuItem Header="Extra Wide" IsCheckable="True" IsChecked="{Binding IsBarWidthExtraWide}" />
+                </MenuItem>
+                <MenuItem Header="Opacity">
+                    <MenuItem Header="25% Subtle" IsCheckable="True" IsChecked="{Binding IsOpacity25}" />
+                    <MenuItem Header="50% Medium" IsCheckable="True" IsChecked="{Binding IsOpacity50}" />
+                    <MenuItem Header="80% Standard" IsCheckable="True" IsChecked="{Binding IsOpacity80}" />
+                    <MenuItem Header="100% Full" IsCheckable="True" IsChecked="{Binding IsOpacity100}" />
+                </MenuItem>
+            </MenuItem>
             <Separator />
             <MenuItem Header="Toggle Fullscreen" Click="OnToggleFullscreen" InputGestureText="F11" />
             <MenuItem Header="Hide Lyrics Screen" Click="OnHide" InputGestureText="Esc" />
@@ -421,7 +451,7 @@
                    VerticalAlignment="Center" />
 
             <!-- Venue Graphics Slideshow Mode -->
-            <Image Source="{Binding SlideshowImagePath, TargetNullValue={x:Null}}"
+            <Image Source="{Binding SlideshowImagePath, TargetNullValue={x:Null}, FallbackValue={x:Null}}"
                    Stretch="Uniform"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
@@ -531,7 +561,9 @@
         </Border>
 
         <!-- Audio Visualizer Canvas -->
-        <Canvas x:Name="VisualizerCanvas" Height="150" VerticalAlignment="Bottom" IsHitTestVisible="False" Background="Transparent" Opacity="0.8"/>
+        <Canvas x:Name="VisualizerCanvas" Height="150" VerticalAlignment="Bottom" IsHitTestVisible="False" Background="Transparent"
+                Opacity="{Binding VisualizerOpacity}"
+                Visibility="{Binding IsVisualizerVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Visible}"/>
 
         <!-- Floating Emoji Reactions Overlay -->
         <Canvas x:Name="ReactionsCanvas" IsHitTestVisible="False" Background="Transparent" />

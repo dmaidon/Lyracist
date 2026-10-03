@@ -1,5 +1,5 @@
-<!-- Edited on Oct 3, 2026 @ 09:28:00 -> Update build version to 26.10.3.551 in CHANGELOG -->
-Last Edit: Oct 3, 2026 - Solution Build Version 26.10.3.551 Sync
+<!-- Edited on Oct 3, 2026 @ 14:10:00 -> Add Release startup deadlock fix and responsive Live FFT synth display to CHANGELOG -->
+Last Edit: Oct 3, 2026 - Adjust Synth Display Modal Dialog & Spectrum Customization
 
 # Changelog
 
@@ -8,6 +8,22 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.10.1.0] - 2026-10-03
 
 ### Fixed & Enhanced
+- **Release Startup Deadlock Fix (`DisplayService.cs`, `Lyracist.csproj`)**:
+  - Fixed Release builds hanging at startup with no window and no logged error: `DisplayService`'s constructor started the projection-rotation timer, which resolved `RotationWindowViewModel`, which depends back on `DisplayService` (a DI cycle) whenever auto-rotate projection views was enabled in saved preferences. The timer start is now deferred to the dispatcher.
+  - Registered `Assets\mic_64.png` and `Assets\LyracistIcon.ico` as compiled WPF resources.
+- **More Responsive Live FFT Synth Display (`AudioSpectrumService.cs`, `LyricsWindow.xaml.cs`)**:
+  - Normalized FFT magnitudes and mapped bands through a dB scale with adaptive auto-gain, replacing a fixed gain that pinned or flattened bars depending on volume.
+  - Per-band peak detection, faster attack/release smoothing, and a faster bar rise in Live FFT mode.
+
+- **Dedicated "Adjust Synth Display" DJ Modal Dialog & Non-Audience Settings (`AdjustSynthDisplayWindow.xaml/.cs`, `KaraokePage.xaml`, `KaraokeViewModel.cs`)**:
+  - Eliminated the need for DJs/KJs to click or open context menus on the audience-facing Lyrics projection screen during a live show.
+  - Added "🎛 Adjust Synth Display" buttons directly on the DJ's primary `KaraokePage` (on the top playback control strip beside "Skip Singer", in the header above the live "Lyrics Preview Monitor", and under Multi-Monitor Display controls).
+  - Clicking the button opens a dedicated modal dialog centered over the main Lyracist window, featuring full controls for visualizer enable state, Live FFT vs Simulated motion mode, 7 color themes, 4 bar widths, opacity slider + preset buttons, and an interactive live animated preview canvas.
+  - All adjustments apply to the active projection screen immediately and persist in `appsettings.json` across app restarts.
+- **Visualizer Checkable MenuItems & Two-Way Binding Fix (`LyricsWindowViewModel.cs`, `LyricsWindow.xaml`, `SettingsPage.xaml`, `SettingsViewModel.Display.cs`)**:
+  - Resolved `System.ArgumentException: Property set method not found` occurring when clicking "Audio Spectrum (Live FFT)" by adding full two-way getters and setters with radio-button selection logic for all visualizer mode, style, bar width, and opacity properties.
+  - Replaced ComboBox on the Settings Page with native RadioButtons for "Audio Spectrum (Live FFT)" and "Simulated / Ambient".
+  - Made `SlideshowImagePath` nullable (`string?`) with `FallbackValue={x:Null}` in `LyricsWindow.xaml` and `LyricsWindowViewModel.cs`, eliminating `NotSupportedException` conversion warnings on empty image paths.
 - **Song End Automatic Return to Karaoke Screen & DJ Manual Start (`AutoAdvanceManager.cs`, `KaraokeViewModel.cs`, `AppSettings.cs`)**:
   - Automatically navigates the main hosting window back to the primary Karaoke screen (`KaraokePage`) upon song completion (`_mediaEngine.SongEnded`), giving the DJ instant visibility of the singer queue, search, and playback controls.
   - Returns the audience display projection from the lyrics window back to the full-screen Rotation Billboard (`ShowRotationWindow()`, `IsLyricsActive = false`), updating upcoming rotation order and announcing the next performer to approach the stage.
@@ -20,6 +36,14 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Added safe dispatch guards checking `HasShutdownStarted: false` and catching `OperationCanceledException` across `SettingsViewModel.cs`, `LibraryService.cs`, and `LyracistDbEditor/MainViewModel.cs`.
 
 ### Added
+- **Lyrics Screen Real-Time Audio Spectrum Visualizer (`AudioSpectrumService.cs`, `LyricsWindow.xaml`, `LyricsWindow.xaml.cs`, `SettingsPage.xaml`, `SettingsViewModel.Display.cs`, `AdjustSynthDisplayWindow.xaml/.cs`)**:
+  - Replaced procedural simulated jitter with true real-time audio spectrum analysis powered by Windows Core Audio (WASAPI mmdevice) loopback capture and 1024-point Radix-2 FFT decomposition.
+  - Added logarithmic frequency binning from 32 Hz to 16 kHz with acoustic tilt pre-emphasis and asymmetric attack/decay smoothing, reacting physically to bass kicks, vocal transients, and hi-hats.
+  - Added choice between "Audio Spectrum (Live FFT)" and "Simulated / Ambient" motion modes.
+  - Added 7 visual themes: Neon Sunset, Cyberpunk, Emerald Pulse, Solar Flare, Electric Blue, Rainbow Spectrum (360° per-bar hue mapping), and Monochrome Glow.
+  - Added bar width density selector: Slim (10px, high density), Normal (18px, balanced), Wide (28px, bold chunky bars), and Extra Wide (42px, retro broadcast equalizer).
+  - Added opacity slider (10% to 100%) and complete right-click Context Menu controls on the active Lyrics window.
+  - Added comprehensive settings card in Display Settings and unit tests in `AudioSpectrumServiceTests.cs`.
 - **Dedicated "New Performer Welcome Screen" Settings GroupBox (`KSRotation/MainWindow.xaml`, `Lyracist/Views/Pages/SettingsPage.xaml`)**:
   - Extracted the Welcome Screen configuration controls (enable toggle, target monitor selector, style/model selector, duration input, and Preview button) out of the DJ Banners groupbox into their own dedicated `New Performer Welcome Screen` groupbox card.
   - Placed below Screen Rotation in Column 1 in KSRotation (filling unused vertical space) and directly beneath DJ & Event Banners in Lyracist, making welcome screen options immediately noticeable and convenient to customize.
@@ -1251,12 +1275,26 @@ All notable changes to the Lyracist project are documented here. The format is b
   - Fully integrated `LegendOverlay` with dynamic orientation handling (`UpdateOrientationLayout`) for seamless portrait and landscape scaling.
 
 ### Fixed & Enhanced
+- **Release Startup Deadlock Fix (`DisplayService.cs`, `Lyracist.csproj`)**:
+  - Fixed Release builds hanging at startup with no window and no logged error: `DisplayService`'s constructor started the projection-rotation timer, which resolved `RotationWindowViewModel`, which depends back on `DisplayService` (a DI cycle) whenever auto-rotate projection views was enabled in saved preferences. The timer start is now deferred to the dispatcher.
+  - Registered `Assets\mic_64.png` and `Assets\LyracistIcon.ico` as compiled WPF resources.
+- **More Responsive Live FFT Synth Display (`AudioSpectrumService.cs`, `LyricsWindow.xaml.cs`)**:
+  - Normalized FFT magnitudes and mapped bands through a dB scale with adaptive auto-gain, replacing a fixed gain that pinned or flattened bars depending on volume.
+  - Per-band peak detection, faster attack/release smoothing, and a faster bar rise in Live FFT mode.
+
 - **KSRotation.Maui (Android Build & Fast Deployment Stability)**:
   - Enhanced the MSBuild pre-build target workaround for `XARLP7024` / `XARLP7000` to safely rename and move locked `.stamp` and `.flata` intermediate files when Visual Studio background design-time builds hold file locks during package extraction.
 
 ## [26.9.1.1] - 2026-09-01
 
 ### Fixed & Enhanced
+- **Release Startup Deadlock Fix (`DisplayService.cs`, `Lyracist.csproj`)**:
+  - Fixed Release builds hanging at startup with no window and no logged error: `DisplayService`'s constructor started the projection-rotation timer, which resolved `RotationWindowViewModel`, which depends back on `DisplayService` (a DI cycle) whenever auto-rotate projection views was enabled in saved preferences. The timer start is now deferred to the dispatcher.
+  - Registered `Assets\mic_64.png` and `Assets\LyracistIcon.ico` as compiled WPF resources.
+- **More Responsive Live FFT Synth Display (`AudioSpectrumService.cs`, `LyricsWindow.xaml.cs`)**:
+  - Normalized FFT magnitudes and mapped bands through a dB scale with adaptive auto-gain, replacing a fixed gain that pinned or flattened bars depending on volume.
+  - Per-band peak detection, faster attack/release smoothing, and a faster bar rise in Live FFT mode.
+
 
 - **Test Infrastructure (`global.json`)**:
   - Added a `test` runner block so `dotnet test` works again under the .NET 10 SDK (xUnit v3's Microsoft.Testing.Platform had silently stopped running via the legacy VSTest entry point). All 283 tests across the four test projects verified passing.
@@ -1297,6 +1335,13 @@ All notable changes to the Lyracist project are documented here. The format is b
 ## [26.8.30.4] - 2026-08-30
 
 ### Fixed & Enhanced
+- **Release Startup Deadlock Fix (`DisplayService.cs`, `Lyracist.csproj`)**:
+  - Fixed Release builds hanging at startup with no window and no logged error: `DisplayService`'s constructor started the projection-rotation timer, which resolved `RotationWindowViewModel`, which depends back on `DisplayService` (a DI cycle) whenever auto-rotate projection views was enabled in saved preferences. The timer start is now deferred to the dispatcher.
+  - Registered `Assets\mic_64.png` and `Assets\LyracistIcon.ico` as compiled WPF resources.
+- **More Responsive Live FFT Synth Display (`AudioSpectrumService.cs`, `LyricsWindow.xaml.cs`)**:
+  - Normalized FFT magnitudes and mapped bands through a dB scale with adaptive auto-gain, replacing a fixed gain that pinned or flattened bars depending on volume.
+  - Per-band peak detection, faster attack/release smoothing, and a faster bar rise in Live FFT mode.
+
 
 - **Git Repository Size Optimization (`.gitignore`)**:
   - Untracked and excluded runtime binary assets (`Banners/`, `Logs/`, and live databases `lyracist.db`, `ksrotation_night_db.json`, `wifi_passwords.json`, `keygen.db`), removing 336 MB of binary assets from the git index while keeping the master seed database (`Data/trivia.db`) and question packs (`Packs/`) tracked.
@@ -1365,6 +1410,13 @@ All notable changes to the Lyracist project are documented here. The format is b
     - Rehearsal controls for instant Super Streak wheel triggering (setting bot streak to 20), phase stepping, and live activity log inspection.
 
 ### Fixed & Enhanced
+- **Release Startup Deadlock Fix (`DisplayService.cs`, `Lyracist.csproj`)**:
+  - Fixed Release builds hanging at startup with no window and no logged error: `DisplayService`'s constructor started the projection-rotation timer, which resolved `RotationWindowViewModel`, which depends back on `DisplayService` (a DI cycle) whenever auto-rotate projection views was enabled in saved preferences. The timer start is now deferred to the dispatcher.
+  - Registered `Assets\mic_64.png` and `Assets\LyracistIcon.ico` as compiled WPF resources.
+- **More Responsive Live FFT Synth Display (`AudioSpectrumService.cs`, `LyricsWindow.xaml.cs`)**:
+  - Normalized FFT magnitudes and mapped bands through a dB scale with adaptive auto-gain, replacing a fixed gain that pinned or flattened bars depending on volume.
+  - Per-band peak detection, faster attack/release smoothing, and a faster bar rise in Live FFT mode.
+
 
 - **Knockout Trivia Bug Fixes & Resilience Hardening (`KnockoutTrivia`)**:
   - **Super Streak Milestone Fix (`StreakService.cs`)**: Fixed bug where resetting `StreakCount = 0` on token rewards prevented `StreakCount` from reaching the `SuperStreakThreshold` (20). Tokens are now awarded on multiples of `StreakRequirement` (5, 10, 15, 20) without wiping the streak progression, allowing the Super Streak Wheel to trigger as designed.
