@@ -28,6 +28,7 @@ namespace KSRotation.ViewModels
         private readonly DispatcherTimer _jsonCacheDebounceTimer;
         private readonly DispatcherTimer _requestsJsonCacheDebounceTimer;
         private readonly DispatcherTimer _connectBannerDebounceTimer;
+        private readonly DispatcherTimer _wifiPasswordDebounceTimer;
         private readonly List<SongPerformance> _performanceHistory = [];
         private readonly Lock _performanceHistoryLock = new();
         private readonly Dictionary<SingerEntry, string> _lastSingerNames = [];
@@ -836,6 +837,11 @@ namespace KSRotation.ViewModels
         [ObservableProperty]
         public partial string WifiPassword { get; set; } = string.Empty;
 
+        [ObservableProperty]
+        public partial bool ShowWifiPasswordOnScreen { get; set; } = true;
+
+        partial void OnShowWifiPasswordOnScreenChanged(bool value) => Lyracist.Shared.WelcomeScreenService.Instance.ShowWifiPassword = value;
+
         partial void OnWifiPasswordChanged(string value)
         {
             // Skip during startup load — ConnectionUrl isn't set until StartRequestServer() runs
@@ -843,7 +849,16 @@ namespace KSRotation.ViewModels
             // here too would just write a "localhost" placeholder that gets overwritten a moment later.
             if (_isInitializing) return;
 
-            string? detectedSsid = WifiHelper.GetConnectedSsid();
+            // Fires per keystroke: show the cheap display text now; the SSID lookup, disk write, QR render
+            // and banner rebuild run once typing pauses.
+            OnPropertyChanged(nameof(WifiPasswordDisplay));
+            _wifiPasswordDebounceTimer.Stop();
+            _wifiPasswordDebounceTimer.Start();
+        }
+
+        private void ApplyWifiPassword(string value)
+        {
+            string? detectedSsid = WifiHelper.GetConnectedSsid() ?? WifiHelper.LastKnownSsid;
             string activeSsid = !string.IsNullOrWhiteSpace(detectedSsid) ? detectedSsid : WifiSsidDisplay;
             if (!string.IsNullOrWhiteSpace(activeSsid))
             {
@@ -853,7 +868,7 @@ namespace KSRotation.ViewModels
 
             // Regenerate Wi-Fi QR code and update audience rotation / pre-show screen immediately
             string pass = value;
-            string wifiPayload = $"WIFI:S:{WifiHelper.EscapeWifiQrValue(activeSsid)};T:{(string.IsNullOrWhiteSpace(pass) ? "nopass" : "WPA")};P:{WifiHelper.EscapeWifiQrValue(pass)};;";
+            string wifiPayload = WifiHelper.BuildWifiQrPayload(activeSsid, pass);
             WifiQrCodeImage = !string.IsNullOrWhiteSpace(activeSsid) ? GenerateQRCode(wifiPayload) : null;
             _displayWindowService?.SetWifiInfo(activeSsid, string.IsNullOrWhiteSpace(pass) ? "No Password Required" : pass, WifiQrCodeImage);
 
@@ -1269,6 +1284,7 @@ namespace KSRotation.ViewModels
             _jsonCacheDebounceTimer = new DispatcherTimer();
             _requestsJsonCacheDebounceTimer = new DispatcherTimer();
             _connectBannerDebounceTimer = new DispatcherTimer();
+            _wifiPasswordDebounceTimer = new DispatcherTimer();
             _roundEstimateTimer = new DispatcherTimer();
 
             if (IsInDesignMode)
@@ -1316,6 +1332,14 @@ namespace KSRotation.ViewModels
             {
                 _requestsJsonCacheDebounceTimer.Stop();
                 RebuildRequestsJsonCacheNow();
+            };
+
+            _displayWindowService.PreShowReset += () => IsPreShowModeActive = false;
+            _wifiPasswordDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+            _wifiPasswordDebounceTimer.Tick += (s, e) =>
+            {
+                _wifiPasswordDebounceTimer.Stop();
+                ApplyWifiPassword(WifiPassword);
             };
 
             _connectBannerDebounceTimer = new DispatcherTimer
@@ -1461,6 +1485,7 @@ namespace KSRotation.ViewModels
             string? currentSsid = WifiHelper.GetConnectedSsid();
             string savedWifiPassword = !string.IsNullOrWhiteSpace(currentSsid) ? WifiPasswordStore.GetPasswordForSsid(currentSsid) : string.Empty;
             WifiPassword = System.Diagnostics.Debugger.IsAttached ? string.Empty : (!string.IsNullOrEmpty(savedWifiPassword) ? savedWifiPassword : (settings.WifiPassword ?? string.Empty));
+            ShowWifiPasswordOnScreen = settings.ShowWifiPasswordOnScreen;
             ActiveSpecialEvent = string.IsNullOrEmpty(settings.ActiveSpecialEvent) ? "None" : settings.ActiveSpecialEvent;
             // Not calling RefreshConnectInstructionsBanner() here — ConnectionUrl isn't set until
             // StartRequestServer() runs at the end of this constructor, which refreshes the banner
@@ -3244,6 +3269,7 @@ namespace KSRotation.ViewModels
 #endif
                 ShowQrCodeOnRotationScreen = ShowQrCodeOnRotationScreen,
                 WifiPassword = WifiPassword,
+                ShowWifiPasswordOnScreen = ShowWifiPasswordOnScreen,
                 ActiveSpecialEvent = ActiveSpecialEvent,
                 SpecialEvents = SpecialEvents.ToList(),
                 RotationTarget = RotationTarget,

@@ -15,8 +15,8 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <BaseOutputPath>C:\VB26\Release\Lyracist</BaseOutputPath>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
-    <AssemblyVersion>26.10.4.156</AssemblyVersion>
-    <FileVersion>26.10.4.156</FileVersion>
+    <AssemblyVersion>26.10.4.157</AssemblyVersion>
+    <FileVersion>26.10.4.157</FileVersion>
     <Authors>Dennis N. Maidon</Authors>
     <PackageIcon>LyracistTrivia_128.png</PackageIcon>
     <ApplicationIcon>LyracistTrivia.ico</ApplicationIcon>

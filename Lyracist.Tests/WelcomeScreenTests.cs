@@ -147,7 +147,7 @@ public class WelcomeScreenTests
     public void SeveralNames_AreShownOneAfterAnother_ThenClear()
     {
         var seen = new List<string?>();
-        var service = new WelcomeScreenService { SecondsUnit = TimeSpan.FromMilliseconds(40) };
+        var service = new WelcomeScreenService { MaxGroupSize = 1, SecondsUnit = TimeSpan.FromMilliseconds(40) };
         Dispatcher? dispatcher = null;
         using var ready = new ManualResetEventSlim();
         var thread = new Thread(() =>
@@ -178,10 +178,44 @@ public class WelcomeScreenTests
     }
 
     [Fact]
+    public void QueuedNames_AreCombinedOntoOneScreen_UpToMaxGroupSize()
+    {
+        var seen = new List<string?>();
+        var service = new WelcomeScreenService { MaxGroupSize = 2, SecondsUnit = TimeSpan.FromMilliseconds(40) };
+        Dispatcher? dispatcher = null;
+        using var ready = new ManualResetEventSlim();
+        var thread = new Thread(() =>
+        {
+            dispatcher = Dispatcher.CurrentDispatcher;
+            service.Dispatcher = dispatcher;
+            service.Seconds = 3;
+            service.CurrentChanged += (_, r) => { lock (seen) seen.Add(r?.Name); };
+            ready.Set();
+            Dispatcher.Run();
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.IsBackground = true;
+        thread.Start();
+        ready.Wait(TestContext.Current.CancellationToken);
+
+        service.IsPreShowActive = true;
+        service.TryWelcome("Ann");
+        service.TryWelcome("Ben");
+        service.TryWelcome("Cy");
+        service.IsPreShowActive = false;
+
+        SpinWait.SpinUntil(() => { lock (seen) return seen.Count >= 3; }, TimeSpan.FromSeconds(5));
+        dispatcher!.InvokeShutdown();
+        thread.Join();
+
+        Assert.Equal(new string?[] { "Ann\nBen", "Cy", null }, seen);
+    }
+
+    [Fact]
     public void PreShowMode_SuppressesWelcomeScreensUntilPreShowCloses_ThenShowsInSequence()
     {
         var seen = new List<string?>();
-        var service = new WelcomeScreenService { SecondsUnit = TimeSpan.FromMilliseconds(40) };
+        var service = new WelcomeScreenService { MaxGroupSize = 1, SecondsUnit = TimeSpan.FromMilliseconds(40) };
         Dispatcher? dispatcher = null;
         using var ready = new ManualResetEventSlim();
         var thread = new Thread(() =>
@@ -237,7 +271,7 @@ public class WelcomeScreenTests
     public void PreShowMode_InterruptsActiveWelcome_AndResumesOnClose()
     {
         var seen = new List<string?>();
-        var service = new WelcomeScreenService { SecondsUnit = TimeSpan.FromMilliseconds(80) };
+        var service = new WelcomeScreenService { MaxGroupSize = 1, SecondsUnit = TimeSpan.FromMilliseconds(80) };
         Dispatcher? dispatcher = null;
         using var ready = new ManualResetEventSlim();
         var thread = new Thread(() =>

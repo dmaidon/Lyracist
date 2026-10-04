@@ -380,8 +380,17 @@ namespace KSRotation.Services
             _viewModel.CrawlBannerText = resolved;
         }
 
+        /// <summary>Raised when the singer display closes while pre-show was on, so the host can clear its toggle.</summary>
+        public event Action? PreShowReset;
+
         private void OnWindowClosed(object? sender, EventArgs e)
         {
+            // Pre-show lives on this window; leaving it on would keep welcome screens suppressed and queued forever.
+            if (_viewModel.IsPreShowModeActive)
+            {
+                SetPreShowMode(false);
+                PreShowReset?.Invoke();
+            }
             _window?.Closed -= OnWindowClosed;
             _window = null;
         }

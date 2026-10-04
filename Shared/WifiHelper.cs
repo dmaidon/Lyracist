@@ -8,7 +8,34 @@ namespace Lyracist.Shared;
 
 public static class WifiHelper
 {
+    private static readonly object SsidCacheLock = new();
+    private static string? _cachedSsid;
+    private static DateTime _cachedSsidAt = DateTime.MinValue;
+    private static string? _lastKnownSsid;
+
+    /// <summary>Most recent SSID that was actually detected; lets screens keep their Wi-Fi QR when detection briefly fails.</summary>
+    public static string? LastKnownSsid { get { lock (SsidCacheLock) return _lastKnownSsid; } }
+    private static readonly TimeSpan SsidCacheTtl = TimeSpan.FromSeconds(5);
+
+    /// <summary>Connected Wi-Fi SSID, cached briefly: callers hit this per keystroke and the netsh fallback can block up to ~1.5s.</summary>
     public static string? GetConnectedSsid()
+    {
+        lock (SsidCacheLock)
+        {
+            if (DateTime.UtcNow - _cachedSsidAt < SsidCacheTtl) return _cachedSsid;
+        }
+
+        string? ssid = QueryConnectedSsid();
+        lock (SsidCacheLock)
+        {
+            _cachedSsid = ssid;
+            _cachedSsidAt = DateTime.UtcNow;
+            if (!string.IsNullOrWhiteSpace(ssid)) _lastKnownSsid = ssid;
+        }
+        return ssid;
+    }
+
+    private static string? QueryConnectedSsid()
     {
         if (!OperatingSystem.IsWindows())
         {
@@ -240,6 +267,15 @@ public static class WifiHelper
     /// Escapes WIFI-QR reserved characters (\, ;, ,, ", :) per the ZXing/MECARD Wi-Fi spec
     /// so an SSID or password containing them does not truncate or corrupt the QR payload.
     /// </summary>
+    /// <summary>Builds the standard "join this Wi-Fi" QR payload; an empty password produces an open-network code.</summary>
+    public static string BuildWifiQrPayload(string? ssid, string? password)
+    {
+        string escapedSsid = EscapeWifiQrValue(ssid ?? string.Empty);
+        return string.IsNullOrWhiteSpace(password)
+            ? $"WIFI:S:{escapedSsid};T:nopass;;"
+            : $"WIFI:S:{escapedSsid};T:WPA;P:{EscapeWifiQrValue(password)};;";
+    }
+
     public static string EscapeWifiQrValue(string value)
     {
         if (string.IsNullOrEmpty(value)) return string.Empty;

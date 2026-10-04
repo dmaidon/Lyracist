@@ -97,9 +97,7 @@ public static class DjBannerFileManager
             // encode a fake/placeholder network name that fails for anyone who scans it.
             if (hasKnownSsid)
             {
-                string wifiPayload = string.IsNullOrWhiteSpace(wifiPassword)
-                    ? $"WIFI:S:{EscapeWifiQrValue(activeSsid)};T:nopass;;;"
-                    : $"WIFI:S:{EscapeWifiQrValue(activeSsid)};T:WPA;P:{EscapeWifiQrValue(wifiPassword)};;";
+                string wifiPayload = WifiHelper.BuildWifiQrPayload(activeSsid, wifiPassword);
                 wifiQrSource = GenerateQrBitmap(wifiPayload, System.Windows.Media.Colors.Black, qrModuleSize);
             }
 

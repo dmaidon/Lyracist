@@ -166,9 +166,7 @@ public partial class ConnectViewModel : ViewModelBase
         // 2. Generate Wi-Fi QR Code (Dark Purple modules on White)
         try
         {
-            string payload = string.IsNullOrWhiteSpace(WifiPassword)
-                ? $"WIFI:S:{WifiHelper.EscapeWifiQrValue(WifiSsid)};T:nopass;;;"
-                : $"WIFI:S:{WifiHelper.EscapeWifiQrValue(WifiSsid)};T:WPA;P:{WifiHelper.EscapeWifiQrValue(WifiPassword)};;";
+            string payload = WifiHelper.BuildWifiQrPayload(WifiSsid, WifiPassword);
 
             using var generator = new QRCoder.QRCodeGenerator();
             using var data = generator.CreateQrCode(payload, QRCoder.QRCodeGenerator.ECCLevel.Q);

@@ -75,6 +75,9 @@ namespace KSRotation.Models
 
         public string WifiPassword { get; init; } = string.Empty;
 
+        /// <summary>Print the Wi-Fi password on the pre-show / sign-up screen (the QR code always carries it).</summary>
+        public bool ShowWifiPasswordOnScreen { get; init; } = true;
+
         public string ActiveSpecialEvent { get; init; } = "None";
 
         public System.Collections.Generic.List<SpecialEventConfig> SpecialEvents { get; init; } =

@@ -288,7 +288,7 @@ namespace KSRotation.ViewModels
             HandoffQrCodeImage = started ? GenerateQRCode(HandoffConnectionUrl) : null;
             string startSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
             string startPass = !string.IsNullOrWhiteSpace(startSsid) ? WifiPasswordStore.GetPasswordForSsid(startSsid) : string.Empty;
-            string startWifiPayload = $"WIFI:S:{WifiHelper.EscapeWifiQrValue(startSsid)};T:{(string.IsNullOrWhiteSpace(startPass) ? "nopass" : "WPA")};P:{WifiHelper.EscapeWifiQrValue(startPass)};;";
+            string startWifiPayload = WifiHelper.BuildWifiQrPayload(startSsid, startPass);
             WifiQrCodeImage = started && !string.IsNullOrWhiteSpace(startSsid) ? GenerateQRCode(startWifiPayload) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             _displayWindowService.SetWifiInfo(startSsid, string.IsNullOrWhiteSpace(startPass) ? "No Password Required" : startPass, WifiQrCodeImage);
@@ -324,7 +324,7 @@ namespace KSRotation.ViewModels
             HandoffQrCodeImage = GenerateQRCode(HandoffConnectionUrl);
             string refreshSsid = WifiHelper.GetConnectedSsid() ?? string.Empty;
             string refreshPass = !string.IsNullOrWhiteSpace(refreshSsid) ? WifiPasswordStore.GetPasswordForSsid(refreshSsid) : string.Empty;
-            string refreshWifiPayload = $"WIFI:S:{WifiHelper.EscapeWifiQrValue(refreshSsid)};T:{(string.IsNullOrWhiteSpace(refreshPass) ? "nopass" : "WPA")};P:{WifiHelper.EscapeWifiQrValue(refreshPass)};;";
+            string refreshWifiPayload = WifiHelper.BuildWifiQrPayload(refreshSsid, refreshPass);
             WifiQrCodeImage = !string.IsNullOrWhiteSpace(refreshSsid) ? GenerateQRCode(refreshWifiPayload) : null;
             _displayWindowService.SetConnectionInfo(ConnectionUrl, QrCodeImage);
             _displayWindowService.SetWifiInfo(refreshSsid, string.IsNullOrWhiteSpace(refreshPass) ? "No Password Required" : refreshPass, WifiQrCodeImage);

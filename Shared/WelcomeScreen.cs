@@ -62,6 +62,22 @@ public sealed class WelcomeScreenService
 
     public bool Enabled { get; set; } = true;
 
+    private bool _showWifiPassword = true;
+
+    /// <summary>Whether the Wi-Fi password is printed on the pre-show / sign-up screen (the QR code always carries it).</summary>
+    public bool ShowWifiPassword
+    {
+        get => _showWifiPassword;
+        set
+        {
+            if (_showWifiPassword == value) return;
+            _showWifiPassword = value;
+            WifiPasswordVisibilityChanged?.Invoke();
+        }
+    }
+
+    public event Action? WifiPasswordVisibilityChanged;
+
     /// <summary>
     /// When true (Pre-Show Screen mode is active), singer welcome screens are not shown on projection
     /// displays. Newly welcomed singers stay queued in sequence and automatically begin displaying one by one
@@ -88,12 +104,12 @@ public sealed class WelcomeScreenService
                     // Pre-show screen engaged: hide any active welcome screen immediately and re-queue it at the front
                     if (Current != null)
                     {
-                        string currentName = Current.Name;
+                        var currentNames = Current.Name.Split('\n');
                         _timer?.Stop();
                         SetCurrent(null);
                         var remaining = _queue.ToList();
                         _queue.Clear();
-                        _queue.Enqueue(currentName);
+                        foreach (var n in currentNames) _queue.Enqueue(n);
                         foreach (var item in remaining)
                         {
                             _queue.Enqueue(item);
@@ -105,7 +121,7 @@ public sealed class WelcomeScreenService
                     // Pre-show screen closed: play any queued welcome screens in sequence
                     if (Current == null && _queue.Count > 0)
                     {
-                        Start(_queue.Dequeue());
+                        StartNextFromQueue();
                     }
                 }
             });
@@ -234,10 +250,22 @@ public sealed class WelcomeScreenService
         Start(name);
     }
 
-    private void Start(string name)
+    /// <summary>Most singers shown together on one welcome screen when several are waiting (1 = always one at a time).</summary>
+    public int MaxGroupSize { get; set; } = 4;
+
+    // Everyone who piled up in the queue (e.g. during pre-show) is greeted together, a few per screen, so
+    // a long backlog clears quickly instead of one screen per singer.
+    private void StartNextFromQueue()
+    {
+        var group = new List<string>();
+        while (_queue.Count > 0 && group.Count < Math.Max(1, MaxGroupSize)) group.Add(_queue.Dequeue());
+        Start(string.Join('\n', group), group.Count);
+    }
+
+    private void Start(string name, int count = 1)
     {
         int design = PickDesign();
-        int seconds = Seconds;
+        int seconds = ClampSeconds(Seconds + 3 * (count - 1));
         var d = Dispatcher ?? Application.Current?.Dispatcher;
         if (_timer == null && d != null)
         {
@@ -262,7 +290,7 @@ public sealed class WelcomeScreenService
 
         if (!preShow && _queue.Count > 0)
         {
-            Start(_queue.Dequeue());
+            StartNextFromQueue();
             return;
         }
         SetCurrent(null);
@@ -321,6 +349,8 @@ public sealed class WelcomeOverlayHost
     private ImageSource? _inviteWifiQr;
     private string? _inviteWifiSsid;
     private string? _inviteWifiPassword;
+    private bool _inviteShowPassword = true;
+    private Action? _lastInviteCall;
     private int _generation;
     private int _inviteGeneration;
 
@@ -345,9 +375,11 @@ public sealed class WelcomeOverlayHost
         window.Content = root;
 
         WelcomeScreenService.Instance.CurrentChanged += host.OnCurrentChanged;
+        WelcomeScreenService.Instance.WifiPasswordVisibilityChanged += host.OnPasswordVisibilityChanged;
         window.Closed += (_, _) =>
         {
             WelcomeScreenService.Instance.CurrentChanged -= host.OnCurrentChanged;
+            WelcomeScreenService.Instance.WifiPasswordVisibilityChanged -= host.OnPasswordVisibilityChanged;
             host.Clear();
             host.ClearInvite();
         };
@@ -376,6 +408,8 @@ public sealed class WelcomeOverlayHost
             return;
         }
 
+        _lastInviteCall = () => SetSignUpInvite(show, qr, url, wifiQr, wifiSsid, wifiPassword);
+
         if (!show)
         {
             if (_inviteLayer.Visibility != Visibility.Visible) return;
@@ -395,7 +429,8 @@ public sealed class WelcomeOverlayHost
             url == _inviteUrl &&
             ReferenceEquals(wifiQr, _inviteWifiQr) &&
             wifiSsid == _inviteWifiSsid &&
-            wifiPassword == _inviteWifiPassword)
+            wifiPassword == _inviteWifiPassword &&
+            _inviteShowPassword == WelcomeScreenService.Instance.ShowWifiPassword)
         {
             // Same content: just make sure a fade-out that was starting is cancelled.
             _inviteGeneration++;
@@ -411,10 +446,17 @@ public sealed class WelcomeOverlayHost
         _inviteWifiQr = wifiQr;
         _inviteWifiSsid = wifiSsid;
         _inviteWifiPassword = wifiPassword;
+        _inviteShowPassword = WelcomeScreenService.Instance.ShowWifiPassword;
         _inviteVisual = WelcomeScreenDesigns.BuildSignUpInvite(qr, url, wifiQr, wifiSsid, wifiPassword);
         _inviteLayer.Children.Add(_inviteVisual.Root);
         _inviteLayer.Visibility = Visibility.Visible;
         _inviteLayer.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(500)));
+    }
+
+    private void OnPasswordVisibilityChanged()
+    {
+        if (!_window.Dispatcher.CheckAccess()) { _window.Dispatcher.InvokeAsync(OnPasswordVisibilityChanged); return; }
+        _lastInviteCall?.Invoke();
     }
 
     private void ClearInvite()
@@ -816,6 +858,13 @@ public static class WelcomeScreenDesigns
     /// Shown instead of an empty rotation: invites everyone to sign up for tonight's karaoke. Built fresh
     /// each time so the date is current; includes the sign-up QR code when one is available.
     /// </summary>
+    /// <summary>Password line for the Wi-Fi card; hidden (guests use the QR code) when the DJ turned password display off.</summary>
+    private static string WifiPasswordText(string? password)
+    {
+        if (string.IsNullOrWhiteSpace(password)) return "No Password Required";
+        return WelcomeScreenService.Instance.ShowWifiPassword ? password : "Scan the Wi-Fi code to join";
+    }
+
     public static WelcomeVisual BuildSignUpInvite(
         ImageSource? qr,
         string? url,
@@ -976,11 +1025,11 @@ public static class WelcomeScreenDesigns
                     Foreground = Brushes.White,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     Margin = new Thickness(0, 6, 0, 2),
-                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center,
                     MaxWidth = qrColumnWidth,
                 });
 
-                string displayPwd = !string.IsNullOrWhiteSpace(wifiPassword) ? wifiPassword : "No Password Required";
+                string displayPwd = WifiPasswordText(wifiPassword);
                 rightContainer.Children.Add(new TextBlock
                 {
                     Text = $"Password: {displayPwd}",
@@ -989,7 +1038,7 @@ public static class WelcomeScreenDesigns
                     Foreground = Solid("#FFD76A"),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     Margin = new Thickness(0, 0, 0, 20),
-                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center,
                     MaxWidth = qrColumnWidth,
                 });
 
@@ -1076,7 +1125,7 @@ public static class WelcomeScreenDesigns
                 else if (hasWifi)
                 {
                     string displaySsid = !string.IsNullOrWhiteSpace(wifiSsid) ? wifiSsid : "Venue Wi-Fi";
-                    string displayPwd = !string.IsNullOrWhiteSpace(wifiPassword) ? wifiPassword : "No Password Required";
+                    string displayPwd = WifiPasswordText(wifiPassword);
                     rightContainer.Children.Add(new TextBlock
                     {
                         Text = $"Network: {displaySsid}  •  Password: {displayPwd}",
@@ -1113,9 +1162,12 @@ public static class WelcomeScreenDesigns
             MaxWidth = 1740,
         };
 
+        string[] names = name.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        bool group = names.Length > 1;
+
         stack.Children.Add(new TextBlock
         {
-            Text = "WELCOME TO OUR NEW PERFORMER",
+            Text = group ? "WELCOME TO OUR NEW PERFORMERS" : "WELCOME TO OUR NEW PERFORMER",
             FontFamily = BodyFont, FontSize = 66, Foreground = titleBrush,
             HorizontalAlignment = HorizontalAlignment.Center,
             Effect = Glow(glow, 22, 0.8),
@@ -1124,15 +1176,15 @@ public static class WelcomeScreenDesigns
         // The Viewbox shrinks long names to fit on one line instead of clipping or wrapping.
         var nameText = new TextBlock
         {
-            Text = name,
-            FontFamily = DisplayFont, FontSize = 210, Foreground = nameBrush,
+            Text = group ? string.Join('\n', names) : name,
+            FontFamily = DisplayFont, FontSize = (group ? 120 : 210), Foreground = nameBrush,
             TextAlignment = TextAlignment.Center,
             Effect = Glow(glow, 40, 0.95),
         };
         var nameBox = new Viewbox
         {
             Stretch = Stretch.Uniform, StretchDirection = StretchDirection.DownOnly,
-            MaxWidth = 1740, MaxHeight = 330,
+            MaxWidth = 1740, MaxHeight = group ? 520 : 330,
             Margin = new Thickness(0, 24, 0, 24),
             Child = nameText,
             RenderTransformOrigin = new Point(0.5, 0.5),
@@ -1142,7 +1194,7 @@ public static class WelcomeScreenDesigns
 
         stack.Children.Add(new TextBlock
         {
-            Text = "Give them a big round of applause!",
+            Text = group ? "Give them all a big round of applause!" : "Give them a big round of applause!",
             FontFamily = BodyFont, FontSize = 56, Foreground = taglineBrush,
             HorizontalAlignment = HorizontalAlignment.Center,
             Effect = Glow(glow, 18, 0.7),

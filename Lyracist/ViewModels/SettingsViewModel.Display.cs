@@ -608,6 +608,36 @@ public partial class SettingsViewModel
     }
 
 // Edited on Aug 11, 2026 -> Suppress Wi-Fi password auto-population when Debugger.IsAttached in VS IDE, but retain in the field
+    private System.Windows.Threading.DispatcherTimer? _wifiRefreshTimerInstance;
+
+    private System.Windows.Threading.DispatcherTimer _wifiRefreshTimer => _wifiRefreshTimerInstance ??= CreateWifiRefreshTimer();
+
+    private System.Windows.Threading.DispatcherTimer CreateWifiRefreshTimer()
+    {
+        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            RefreshConnectInstructionsBanner();
+            _display.RefreshActiveBanner();
+            _rotationWindowVm?.RefreshQrCode();
+        };
+        return timer;
+    }
+
+    public bool ShowWifiPasswordOnScreen
+    {
+        get => AppSettings.ShowWifiPasswordOnScreen;
+        set
+        {
+            if (AppSettings.ShowWifiPasswordOnScreen != value)
+            {
+                AppSettings.ShowWifiPasswordOnScreen = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public string WifiPassword
     {
         get
@@ -631,9 +661,9 @@ public partial class SettingsViewModel
                     WifiPasswordStore.SetPasswordForSsid(ssid, value);
                 }
                 OnPropertyChanged();
-                RefreshConnectInstructionsBanner();
-                _display.RefreshActiveBanner();
-                _rotationWindowVm?.RefreshQrCode();
+                // Fires per keystroke: the banner PNG render and QR rebuilds run once typing pauses.
+                _wifiRefreshTimer.Stop();
+                _wifiRefreshTimer.Start();
             }
         }
     }

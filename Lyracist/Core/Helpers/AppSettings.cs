@@ -965,6 +965,12 @@ public static class AppSettings
         set { _data.WelcomeScreenDesign = value; Save(); }
     }
 
+    public static bool ShowWifiPasswordOnScreen
+    {
+        get => _data.ShowWifiPasswordOnScreen;
+        set { _data.ShowWifiPasswordOnScreen = value; Save(); Lyracist.Shared.WelcomeScreenService.Instance.ShowWifiPassword = value; }
+    }
+
     public static string WifiPassword
     {
         get => _data.WifiPassword;
@@ -1167,6 +1173,7 @@ public static class AppSettings
     {
         public Dictionary<string, string> Hotkeys { get; set; } = [];
         public string WifiPassword { get; set; } = string.Empty;
+        public bool ShowWifiPasswordOnScreen { get; set; } = true;
         public string ConnectInstructionsScreen { get; set; } = "All Screens / Monitors";
         public bool IsDjBannerQrCodeEnabled { get; set; } = true;
         public bool WelcomeScreenEnabled { get; set; } = true;

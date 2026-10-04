@@ -100,6 +100,9 @@ public class DisplayService : IDisplayService
             if (_preferences.IsRotationActive != value)
             {
                 _preferences.IsRotationActive = value;
+                // Pre-show lives on the rotation screen; leaving it on after the screen is hidden would
+                // keep welcome screens suppressed and queued indefinitely.
+                if (!value && IsPreShowModeActive) IsPreShowModeActive = false;
                 DisplayPreferencesStore.Save(_preferences);
                 UpdateWindowVisibilities();
                 ScreenAssignmentsChanged?.Invoke();

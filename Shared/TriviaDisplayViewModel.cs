@@ -321,9 +321,7 @@ public partial class TriviaDisplayViewModel : ObservableObject, IDisposable
 
         try
         {
-            string payload = string.IsNullOrWhiteSpace(password)
-                ? $"WIFI:S:{WifiHelper.EscapeWifiQrValue(WifiSsid)};T:nopass;;;"
-                : $"WIFI:S:{WifiHelper.EscapeWifiQrValue(WifiSsid)};T:WPA;P:{WifiHelper.EscapeWifiQrValue(password)};;";
+            string payload = WifiHelper.BuildWifiQrPayload(WifiSsid, password);
 
             using var qrGenerator = new QRCoder.QRCodeGenerator();
             using var qrCodeData = qrGenerator.CreateQrCode(payload, QRCoder.QRCodeGenerator.ECCLevel.Q);

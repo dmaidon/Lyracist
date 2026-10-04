@@ -2081,6 +2081,12 @@
                                         Style="{StaticResource ModernCheckBoxStyle}"
                                         Margin="0,4,0,4"
                                         ToolTip="Hold the Pre-Show / Sign-Up &amp; Wi-Fi screen on the rotation display until turned off, even with singers in rotation." />
+                                    <CheckBox
+                                        Content="Show Wi-Fi password text on the pre-show screen"
+                                        IsChecked="{Binding ShowWifiPasswordOnScreen, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource ModernCheckBoxStyle}"
+                                        Margin="0,4,0,4"
+                                        ToolTip="Off: guests join with the Wi-Fi QR code only; the password is not printed on the projector." />
                                 </StackPanel>
                             </GroupBox>
 

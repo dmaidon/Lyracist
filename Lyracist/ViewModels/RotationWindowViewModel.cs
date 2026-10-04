@@ -93,6 +93,7 @@ public partial class RotationWindowViewModel : BaseViewModel
 
     public RotationWindowViewModel()
     {
+        WelcomeScreenService.Instance.ShowWifiPassword = AppSettings.ShowWifiPasswordOnScreen;
         Lyracist.Core.Helpers.AppSettings.VisualizerScreensChanged += () =>
             System.Windows.Application.Current?.Dispatcher.BeginInvoke(() => OnPropertyChanged(nameof(ShowSpectrumOnRotation)));
         RefreshQrCode();
@@ -204,7 +205,7 @@ public partial class RotationWindowViewModel : BaseViewModel
 
         try
         {
-            string? ssid = WifiHelper.GetConnectedSsid();
+            string? ssid = WifiHelper.GetConnectedSsid() ?? WifiHelper.LastKnownSsid;
             string savedPwd = !string.IsNullOrWhiteSpace(ssid) ? WifiPasswordStore.GetPasswordForSsid(ssid) : string.Empty;
             string pwd = !string.IsNullOrEmpty(savedPwd) ? savedPwd : AppSettings.WifiPassword;
 
@@ -213,9 +214,7 @@ public partial class RotationWindowViewModel : BaseViewModel
 
             if (!string.IsNullOrWhiteSpace(ssid))
             {
-                string wifiPayload = string.IsNullOrWhiteSpace(pwd)
-                    ? $"WIFI:S:{WifiHelper.EscapeWifiQrValue(ssid)};T:nopass;;;"
-                    : $"WIFI:S:{WifiHelper.EscapeWifiQrValue(ssid)};T:WPA;P:{WifiHelper.EscapeWifiQrValue(pwd)};;";
+                string wifiPayload = WifiHelper.BuildWifiQrPayload(ssid, pwd);
 
                 using var wifiGenerator = new QRCoder.QRCodeGenerator();
                 using var wifiData = wifiGenerator.CreateQrCode(wifiPayload, QRCoder.QRCodeGenerator.ECCLevel.Q);
